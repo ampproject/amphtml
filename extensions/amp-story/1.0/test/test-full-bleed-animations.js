@@ -224,17 +224,17 @@ describes.realWin(
       const dimensions = setDimensions(380, 580, 360, 580);
       expect(targetFitsWithinPage(dimensions)).to.be.true;
 
-      const factorThatWillMakeTargetFitPage = 380 / 360;
+      const factorThatWillMakeTargetFitPage =
+        dimensions.pageWidth / dimensions.targetWidth;
       const factor = factorThatWillMakeTargetFitPage * 1.25;
       expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
-      const calculatedKeyframes = presets['pan-up'];
-      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(
+      const calculatedKeyframes = presets['pan-up'].keyframes(
         dimensions,
         /* options */ {}
       );
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       const expectedKeyframes = [
@@ -248,7 +248,46 @@ describes.realWin(
         },
       ];
 
-      expect(calculatedKeyframes.keyframes).to.deep.equal(expectedKeyframes);
+      expect(calculatedKeyframes).to.deep.equal(expectedKeyframes);
+    });
+
+    ['pan-up', 'pan-down', 'pan-right', 'pan-left'].forEach((panAnimation) => {
+      it(`Should scale the target for ${panAnimation}.`, () => {
+        const dimensions = setDimensions(380, 580, 360, 580);
+        expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+        const factorThatWillMakeTargetFitPage =
+          dimensions.pageWidth / dimensions.targetWidth;
+        const factor = factorThatWillMakeTargetFitPage * 1.25;
+        expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
+
+        const calculatedKeyframes = presets[panAnimation].keyframes(
+          dimensions,
+          /* options */ {}
+        );
+
+        const expectedScaleFactorStr = `scale(${factor})`;
+        calculatedKeyframes.forEach((keyframe) => {
+          expect(keyframe.transform).to.contain(expectedScaleFactorStr);
+        });
+      });
+
+      it(`Should not scale the target if scaling factor is set for ${panAnimation}.`, () => {
+        const scalingFactor = 2;
+
+        const dimensions = setDimensions(380, 580, 360, 580);
+        expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+        const calculatedKeyframes = presets[panAnimation].keyframes(
+          dimensions,
+          /* options */ {'pan-scaling-factor': scalingFactor}
+        );
+
+        const expectedScaleFactorStr = `scale(${scalingFactor})`;
+        calculatedKeyframes.forEach((keyframe) => {
+          expect(keyframe.transform).to.contain(expectedScaleFactorStr);
+        });
+      });
     });
   }
 );

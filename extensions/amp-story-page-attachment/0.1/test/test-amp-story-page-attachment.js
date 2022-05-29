@@ -1,12 +1,19 @@
+import {expect} from 'chai';
+
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
-import {AmpStoryStoreService} from 'extensions/amp-story/1.0/amp-story-store-service';
+import {
+  Action,
+  AmpStoryStoreService,
+  UIType_Enum,
+} from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
@@ -15,6 +22,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachment;
   let outlinkEl;
   let outlink;
+  let storeService;
 
   beforeEach(() => {
     const {win} = env;
@@ -29,8 +37,11 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
-    const storeService = new AmpStoryStoreService(win);
+    storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
@@ -65,6 +76,10 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     outlinkEl.getAmpDoc = () => new AmpDocSingle(win);
     pageEl.appendChild(outlinkEl);
     outlink = new AmpStoryPageAttachment(outlinkEl);
+
+    env.sandbox
+      .stub(outlink, 'mutateElement')
+      .callsFake((fn) => Promise.resolve(fn()));
   });
 
   afterEach(() => {
@@ -117,5 +132,19 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     );
 
     expect(closeButtonEl.hasAttribute('tabindex')).to.be.false;
+  });
+
+  it('should click on anchor when outlink open method is called', async () => {
+    storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_ONE_PANEL);
+    const anchorEl = outlinkEl.querySelector('amp-story-page-outlink a');
+
+    const clickSpy = env.sandbox.spy(anchorEl, 'click');
+
+    await outlink.buildCallback();
+    await outlink.layoutCallback();
+
+    outlink.open();
+
+    expect(clickSpy).to.be.calledOnce;
   });
 });

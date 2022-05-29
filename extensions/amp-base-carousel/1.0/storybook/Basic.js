@@ -1,8 +1,8 @@
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
+
 import * as Preact from '#preact';
 
-import {BentoBaseCarousel} from '../component';
-
-import '../component.jss';
+import '#bento/components/bento-base-carousel/1.0/component.jss';
 
 export default {
   title: 'BaseCarousel',
@@ -65,9 +65,15 @@ function CarouselWithActions(props) {
     <section>
       <BentoBaseCarousel ref={ref} {...props} />
       <div style={{marginTop: 8}}>
-        <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
-        <button onClick={() => ref.current.next()}>next</button>
-        <button onClick={() => ref.current.prev()}>prev</button>
+        <button data-testid="goto" onClick={() => ref.current.goToSlide(3)}>
+          goToSlide(3)
+        </button>
+        <button data-testid="next" onClick={() => ref.current.next()}>
+          next
+        </button>
+        <button data-testid="prev" onClick={() => ref.current.prev()}>
+          prev
+        </button>
       </div>
     </section>
   );

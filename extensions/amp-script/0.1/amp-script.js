@@ -22,7 +22,7 @@ import {dev, user, userAssert} from '#utils/log';
 import {UserActivationTracker} from './user-activation-tracker';
 
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {cancellation} from '../../../src/error-reporting';
 import {getMode} from '../../../src/mode';
@@ -42,10 +42,16 @@ const TAG = 'amp-script';
 let WorkerDOMWorkerDef;
 
 /**
- * Max cumulative size of author scripts from all amp-script elements on page.
+ * Max cumulative size of author scripts from all amp-script elements on page that are not using sandboxed mode.
  * @const {number}
  */
-const MAX_TOTAL_SCRIPT_SIZE = 150000;
+const MAX_TOTAL_NONSANDBOXED_SCRIPT_SIZE = 150000;
+
+/**
+ * Max cumulative size of author scripts from all amp-script elements on page that are using sandboxed mode.
+ * @const {number}
+ */
+const MAX_TOTAL_SANDBOXED_SCRIPT_SIZE = 300000;
 
 /**
  * See src/transfer/Phase.ts in worker-dom.
@@ -226,6 +232,14 @@ export class AmpScript extends AMP.BaseElement {
    */
   callFunction(unusedFnId, unusedFnArgs) {
     return this.initialize_.promise.then(() => {
+      if (!this.workerDom_) {
+        return Promise.reject(
+          new Error(
+            'Attempted to call a function on an amp-script which failed initialization.'
+          )
+        );
+      }
+
       return this.workerDom_.callFunction.apply(this.workerDom_, arguments);
     });
   }
@@ -273,13 +287,15 @@ export class AmpScript extends AMP.BaseElement {
 
       if (
         !this.development_ &&
-        this.service_.sizeLimitExceeded(authorScript.length)
+        this.service_.sizeLimitExceeded(authorScript.length, this.sandboxed_)
       ) {
         user().error(
           TAG,
           'Maximum total script size exceeded (%s). %s is disabled. ' +
             'See https://amp.dev/documentation/components/amp-script/#size-of-javascript-code.',
-          MAX_TOTAL_SCRIPT_SIZE,
+          this.sandboxed_
+            ? MAX_TOTAL_SANDBOXED_SCRIPT_SIZE
+            : MAX_TOTAL_NONSANDBOXED_SCRIPT_SIZE,
           this.debugId_
         );
         this.element.classList.add('i-amphtml-broken');
@@ -576,7 +592,10 @@ export class AmpScriptService {
     this.ampdoc_ = ampdoc;
 
     /** @private {number} */
-    this.cumulativeSize_ = 0;
+    this.cumulativeNonSandboxedSize_ = 0;
+
+    /** @private {number} */
+    this.cumulativeSandboxedSize_ = 0;
 
     /** @private {!Array<string>} */
     this.sources_ = [];
@@ -617,14 +636,19 @@ export class AmpScriptService {
   }
 
   /**
-   * Adds `size` to current total. Returns true iff new total is <= size cap.
+   * Adds `size` to current total. Returns true if new total is <= size cap.
    *
    * @param {number} size
+   * @param {boolean} isSandboxed
    * @return {boolean}
    */
-  sizeLimitExceeded(size) {
-    this.cumulativeSize_ += size;
-    return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
+  sizeLimitExceeded(size, isSandboxed) {
+    isSandboxed
+      ? (this.cumulativeSandboxedSize_ += size)
+      : (this.cumulativeNonSandboxedSize_ += size);
+    return isSandboxed
+      ? this.cumulativeSandboxedSize_ > MAX_TOTAL_SANDBOXED_SCRIPT_SIZE
+      : this.cumulativeNonSandboxedSize_ > MAX_TOTAL_NONSANDBOXED_SCRIPT_SIZE;
   }
 
   /**

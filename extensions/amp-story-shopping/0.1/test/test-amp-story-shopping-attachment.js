@@ -2,6 +2,9 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 
+import {HistoryState} from 'extensions/amp-story/1.0/history';
+import * as history from 'extensions/amp-story/1.0/history';
+
 import '../../../amp-story/1.0/amp-story';
 import '../../../amp-story/1.0/amp-story-page';
 import '../amp-story-shopping';
@@ -12,8 +15,10 @@ import {
   StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
-
+import {
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from '../../../amp-story/1.0/story-analytics';
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
   {
@@ -33,6 +38,7 @@ describes.realWin(
     let storeService;
     let attachmentChildEl;
     let attachmentChildImpl;
+    let analytics;
 
     const shoppingData = {
       items: [
@@ -96,7 +102,7 @@ describes.realWin(
         return storeService;
       });
       env.sandbox.stub(win.history, 'replaceState');
-      const analytics = new StoryAnalyticsService(win, win.document.body);
+      analytics = getAnalyticsService(win, win.document.body);
       registerServiceBuilder(win, 'story-analytics', function () {
         return analytics;
       });
@@ -112,7 +118,7 @@ describes.realWin(
           <amp-story-page id="page1">
             <amp-story-shopping-tag data-product-id="lamp"></amp-story-shopping-tag>
             <amp-story-shopping-tag data-product-id="art"></amp-story-shopping-tag>
-            <amp-story-shopping-attachment>
+            <amp-story-shopping-attachment cta-text="Shop Now!">
               <script type="application/json">
                 {JSON.stringify(shoppingData)}
               </script>
@@ -156,8 +162,8 @@ describes.realWin(
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
     });
 
-    it('should build CTA with i18n shopping label text', () => {
-      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now');
+    it('should build CTA with custom i18n shopping label text', () => {
+      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now!');
     });
 
     it('should build PLP on attachment state open if no active product data', async () => {
@@ -221,6 +227,72 @@ describes.realWin(
       attachmentChildEl.dispatchEvent(new Event('transitionend'));
       const {activeProductData} = storeService.get(StateProperty.SHOPPING_DATA);
       expect(activeProductData).to.be.null;
+    });
+
+    async function setupPDP() {
+      await layoutShoppingImplAndAttachmentChildImpl();
+      // Override to simulate data for one product on the page.
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
+        page1: {
+          [shoppingData.productId]: shoppingData.items[0],
+        },
+      });
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+    }
+
+    it('should call PDP view analytics event on PLP card click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await layoutShoppingImplAndAttachmentChildImpl();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      const plpCard = attachmentChildEl.querySelector(
+        '.i-amphtml-amp-story-shopping-plp-card'
+      );
+      plpCard.dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_PDP_VIEW
+      );
+    });
+
+    it('should call analytics service on buy now button click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await setupPDP();
+
+      attachmentChildEl
+        .querySelector('.i-amphtml-amp-story-shopping-pdp-cta')
+        .dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK
+      );
+    });
+
+    it('should call analytics service on attachment state update', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await setupPDP();
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_PDP_VIEW
+      );
+    });
+
+    it('should call history service on Product Listing Page card click', async () => {
+      const historyStub = env.sandbox.stub(history, 'setHistoryState');
+
+      await layoutShoppingImplAndAttachmentChildImpl();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      const plpCard = attachmentChildEl.querySelector(
+        '.i-amphtml-amp-story-shopping-plp-card'
+      );
+      plpCard.dispatchEvent(new Event('click'));
+      expect(historyStub).to.have.been.called.calledWith(
+        win,
+        HistoryState.SHOPPING_DATA,
+        shoppingData.items[0]
+      );
     });
   }
 );

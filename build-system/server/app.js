@@ -1400,6 +1400,19 @@ app.get(
   }
 );
 
+/**
+ * Handle amp-story translation file requests with an rtv path.
+ * We need to make sure we only handle the amp-story requests since this
+ * can affect other tests with json requests.
+ */
+app.get('/dist/rtv/*/v0/amp-story*.json', async (req, _res, next) => {
+  const fileName = path.basename(req.path);
+  let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+  filePath = replaceUrls(SERVE_MODE, filePath);
+  req.url = filePath;
+  next();
+});
+
 if (argv.coverage === 'live') {
   app.get('/dist/amp.js', async (req, res) => {
     const ampJs = await fs.promises.readFile(`${pc.cwd()}${req.path}`);

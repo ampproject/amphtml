@@ -1,16 +1,19 @@
 // To do: how to add CSS
 //import '!style-loader!css-loader!./Basic-styles.css';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-sidebar-0_1',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-sidebar', version: 0.1}],
+  },
+
+  args: {
+    minWidth: 500,
   },
 };
 
@@ -40,14 +43,13 @@ export const BasicSidebar = () => {
   );
 };
 
-export const Toolbar = () => {
+export const Toolbar = (minWidth) => {
   /*
    * The toolbar feature allows elements within the amp-sidebar to be
    * displayed within the main body of the article. In this example two
    * Navigational Elements from the sidebar will be displayed under the
    * Toolbar Target when the width of the page is 500px or more.
    */
-  const minWidth = 500;
   const mediaQuery = `(min-width: ${minWidth}px)`;
   return (
     <div>

@@ -64,6 +64,11 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     return isPrerenderActivePage(element.parentElement);
   }
 
+  /** @override  */
+  static previewAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -103,7 +108,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
     );
 
-    Array.prototype.forEach.call(elementsToUpgradeStyles, (element) => {
+    elementsToUpgradeStyles.forEach((element) => {
       this.setCssGridStyles_(element);
     });
   }

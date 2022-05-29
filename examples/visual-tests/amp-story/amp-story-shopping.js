@@ -68,7 +68,9 @@ module.exports = {
     await page.tap(
       `amp-story-page#${pageID} .i-amphtml-amp-story-shopping-plp-card`
     );
-    await page.waitForSelector('.i-amphtml-amp-story-shopping-pdp');
+    await page.waitForSelector('.i-amphtml-amp-story-shopping-pdp', {
+      visible: true,
+    });
   },
   'displays shopping PDP (product description page) without carousel': async (
     page,
@@ -89,6 +91,26 @@ module.exports = {
     await page.tap(
       `amp-story-page#${pageID} .i-amphtml-amp-story-shopping-plp-card:nth-child(2)`
     );
-    await page.waitForSelector('.i-amphtml-amp-story-shopping-pdp');
+    await page.waitForSelector('.i-amphtml-amp-story-shopping-pdp', {
+      visible: true,
+    });
   },
+  'displays shopping PDP (product description page) by default when one product is on the page':
+    async (page, name) => {
+      const pageID = 'remote-with-product';
+      const url = await page.url();
+      await page.goto(`${url}#page=${pageID}`);
+      await page.waitForSelector(
+        `amp-story-page#${pageID}[active][distance="0"]`
+      );
+      await page.tap(
+        `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
+      );
+      await verifySelectorsVisible(page, name, [
+        '.i-amphtml-story-draggable-drawer-open',
+      ]);
+      await page.waitForSelector('.i-amphtml-amp-story-shopping-pdp', {
+        visible: true,
+      });
+    },
 };

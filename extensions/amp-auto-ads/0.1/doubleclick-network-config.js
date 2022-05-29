@@ -48,6 +48,11 @@ export class DoubleclickNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     const attributes = {
       'type': 'doubleclick',

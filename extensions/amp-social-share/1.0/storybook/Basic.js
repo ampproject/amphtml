@@ -1,8 +1,8 @@
+import {BentoSocialShare} from '#bento/components/bento-social-share/1.0/component';
+
 import * as Preact from '#preact';
 
-import {BentoSocialShare} from '../component';
-
-import '../component.jss';
+import '#bento/components/bento-social-share/1.0/component.jss';
 
 const types = [
   'email',

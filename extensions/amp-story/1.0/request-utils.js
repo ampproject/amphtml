@@ -9,8 +9,6 @@ import {Services} from '#service';
 
 import {user, userAssert} from '#utils/log';
 
-import {isProtocolValid} from '../../../src/url';
-
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
 
@@ -26,7 +24,7 @@ const TAG = 'request-utils';
  * @return {(!Promise<!JsonObject>|!Promise<null>)}
  */
 export function executeRequest(el, rawUrl, opts = {}) {
-  if (!isProtocolValid(rawUrl)) {
+  if (!Services.urlForDoc(el).isProtocolValid(rawUrl)) {
     user().error(TAG, 'Invalid config url.');
     return Promise.resolve(null);
   }

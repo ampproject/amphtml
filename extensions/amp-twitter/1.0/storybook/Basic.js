@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
+import {BentoTwitter} from '#bento/components/bento-twitter/1.0/component';
 
-import {BentoTwitter} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'Twitter',

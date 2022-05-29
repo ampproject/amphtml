@@ -103,9 +103,14 @@ when the video has autoplay.
 
 [filter formats="stories"]
 
+On stories, this attribute will effectively mute the video.
+
 ### volume
 
-Sets the current volume of the video, where the value must be in the range [0.1, 1]. The default value is 1.
+Sets the current volume of the video, where the value must be in the range [0, 1]. The default value is 1.
+
+When using the volume attribute, it's possible that other videos in the story fail to play correctly if they don't have the `crossorigin` attribute (if the source is CORS).
+
 [/filter]<!-- formats="stories" -->
 
 ### rotate-to-fullscreen

@@ -6,7 +6,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {devAssert} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -18,44 +18,47 @@ import {AdvancementMode} from './story-analytics';
 /** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */
 let PaginationButtonStateDef;
 
-/** @const {!Object<string, !PaginationButtonStateDef>} */
-const ButtonStates = {
-  PREVIOUS_PAGE: {
-    className: 'i-amphtml-story-back-prev',
-    triggers: EventType.PREVIOUS_PAGE,
-    label: LocalizedStringId_Enum.AMP_STORY_PREVIOUS_PAGE,
-  },
-  NEXT_PAGE: {
-    className: 'i-amphtml-story-fwd-next',
-    triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId_Enum.AMP_STORY_NEXT_PAGE,
-  },
-  NEXT_STORY: {
-    className: 'i-amphtml-story-fwd-next',
-    triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId_Enum.AMP_STORY_NEXT_STORY,
-  },
-  REPLAY: {
-    className: 'i-amphtml-story-fwd-replay',
-    triggers: EventType.REPLAY,
-    label: LocalizedStringId_Enum.AMP_STORY_REPLAY,
-  },
+/** @const {PaginationButtonStateDef} */
+const BUTTON_STATE_PREVIOUS_PAGE = {
+  className: 'i-amphtml-story-back-prev',
+  triggers: EventType.PREVIOUS_PAGE,
+  label: LocalizedStringId_Enum.AMP_STORY_PREVIOUS_PAGE,
+};
+
+/** @const {PaginationButtonStateDef} */
+const BUTTON_STATE_NEXT_PAGE = {
+  className: 'i-amphtml-story-fwd-next',
+  triggers: EventType.NEXT_PAGE,
+  label: LocalizedStringId_Enum.AMP_STORY_NEXT_PAGE,
+};
+
+/** @const {PaginationButtonStateDef} */
+const BUTTON_STATE_NEXT_STORY = {
+  className: 'i-amphtml-story-fwd-next',
+  triggers: EventType.NEXT_PAGE,
+  label: LocalizedStringId_Enum.AMP_STORY_NEXT_STORY,
+};
+
+/** @const {PaginationButtonStateDef} */
+const BUTTON_STATE_REPLAY = {
+  className: 'i-amphtml-story-fwd-replay',
+  triggers: EventType.REPLAY,
+  label: LocalizedStringId_Enum.AMP_STORY_REPLAY,
 };
 
 /**
- * @param {!Node} context
  * @param {PaginationButtonStateDef} initialState
  * @param {function(Event)} onClick
  * @return {!Element}
  */
-const renderPaginationButton = (context, initialState, onClick) => (
+const renderPaginationButton = (initialState, onClick) => (
   <div
     onClick={onClick}
     class={`i-amphtml-story-button-container ${initialState.className}`}
   >
     <button
       class="i-amphtml-story-button-move"
-      aria-label={initialState.label && localize(context, initialState.label)}
+      i-amphtml-i18n-aria-label={initialState.label}
     ></button>
   </div>
 );
@@ -74,10 +77,14 @@ class PaginationButton {
     /** @private {!PaginationButtonStateDef} */
     this.state_ = initialState;
 
+    /** @const {!Document} */
+    this.doc_ = doc;
+
     /** @const {!Element} */
-    this.element = renderPaginationButton(doc, initialState, (e) =>
+    this.element = renderPaginationButton(initialState, (e) =>
       this.onClick_(e)
     );
+    localizeTemplate(this.element, doc);
 
     /** @private @const {!Element} */
     this.buttonElement_ = devAssert(this.element.firstElementChild);
@@ -101,12 +108,11 @@ class PaginationButton {
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
-      this.buttonElement_.setAttribute(
-        'aria-label',
-        localize(this.win_.document, state.label)
-      );
       this.state_ = state;
     });
+    Services.localizationForDoc(this.doc_)
+      .getLocalizedStringAsync(state.label)
+      .then((str) => this.buttonElement_.setAttribute('aria-label', str));
   }
 
   /**
@@ -172,7 +178,7 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.forwardButton_ = new PaginationButton(
       doc,
-      ButtonStates.NEXT_PAGE,
+      BUTTON_STATE_NEXT_PAGE,
       this.storeService_,
       win
     );
@@ -180,7 +186,7 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.backButton_ = new PaginationButton(
       doc,
-      ButtonStates.PREVIOUS_PAGE,
+      BUTTON_STATE_PREVIOUS_PAGE,
       this.storeService_,
       win
     );
@@ -231,13 +237,13 @@ export class PaginationButtons {
     this.backButton_.setEnabled(pageIndex > 0);
 
     if (pageIndex < totalPages - 1) {
-      this.forwardButton_.updateState(ButtonStates.NEXT_PAGE);
+      this.forwardButton_.updateState(BUTTON_STATE_NEXT_PAGE);
     } else {
       const viewer = Services.viewerForDoc(this.ampStory_.element);
       if (viewer.hasCapability('swipe')) {
-        this.forwardButton_.updateState(ButtonStates.NEXT_STORY);
+        this.forwardButton_.updateState(BUTTON_STATE_NEXT_STORY);
       } else {
-        this.forwardButton_.updateState(ButtonStates.REPLAY);
+        this.forwardButton_.updateState(BUTTON_STATE_REPLAY);
       }
     }
   }

@@ -72,7 +72,7 @@ module.exports = ({config}) => {
     plugins: [new ReactBuildImportResolver()],
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
-      ...getRelativeAliasMap(rootDir),
+      ...getRelativeAliasMap(rootDir, 'react'),
       // Alias preact to react
       'preact/dom': 'react-dom',
       'preact/hooks': 'react',

@@ -1,4 +1,4 @@
-import {createElementWithAttributes, iterateCursor} from '#core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {map} from '#core/types/object';
 import {getWin} from '#core/window';
 
@@ -78,7 +78,7 @@ export function getStoryAdMetaTags(doc) {
  */
 export function getStoryAdMetadataFromDoc(metaTags) {
   const vars = map();
-  iterateCursor(metaTags, (tag) => {
+  metaTags.forEach((tag) => {
     const {content, name} = tag;
     if (name.startsWith(CTA_META_PREFIX)) {
       const key = name.split('amp-')[1];
@@ -99,7 +99,7 @@ export function getStoryAdMetadataFromDoc(metaTags) {
  */
 export function getStoryAdMacroTags(metaTags) {
   const result = map();
-  iterateCursor(metaTags, (tag) => {
+  metaTags.forEach((tag) => {
     const {content, name} = tag;
     // If the meta tag name is not alphanumerical, we would ignore it.
     if (/^[a-zA-Z0-9\-_]+$/.test(name)) {
@@ -314,10 +314,10 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       doc.defaultView,
       StoryAdSegmentExp.ID
     );
-
     if (
-      storyAdSegmentBranch &&
-      storyAdSegmentBranch !== StoryAdSegmentExp.CONTROL
+      storyAdSegmentBranch == StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA ||
+      storyAdSegmentBranch ==
+        StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA_NOT_ANIMATED
     ) {
       return createPageOutlink_(doc, uiMetadata, container);
     } else {

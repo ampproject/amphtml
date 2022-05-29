@@ -172,7 +172,7 @@ function ciJobId() {
  */
 function ciJobUrl() {
   return isGithubActions
-    ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
+    ? // TODO(wg-infra): Try to reverse engineer the GH Actions job URL from the build URL.
       `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
     ? env('CIRCLE_BUILD_URL')

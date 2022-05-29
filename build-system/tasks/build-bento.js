@@ -12,7 +12,7 @@ const {
 const {bentoBundles, verifyBentoBundles} = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {log} = require('../common/logging');
-const {mkdirSync} = require('fs');
+const {mkdir} = require('fs-extra');
 const {red} = require('kleur/colors');
 const {watch} = require('chokidar');
 
@@ -125,29 +125,29 @@ async function watchBentoComponent(
  * @return {!Promise<void|void[]>}
  */
 async function buildBentoComponent(name, version, hasCss, options = {}) {
-  options.npm = true;
   options.bento = true;
 
   if (options.compileOnlyCss && !hasCss) {
     return;
   }
   const componentsDir = `src/bento/components/${name}/${version}`;
-  mkdirSync(`${componentsDir}/dist`, {recursive: true});
+  await mkdir(`${componentsDir}/dist`, {recursive: true});
   if (options.watch) {
-    await watchBentoComponent(componentsDir, name, version, hasCss, options);
+    watchBentoComponent(componentsDir, name, version, hasCss, options);
   }
 
   /** @type {Promise<void>[]} */
   const promises = [];
   if (hasCss) {
-    mkdirSync('build/css', {recursive: true});
     promises.push(buildExtensionCss(componentsDir, name, version, options));
     if (options.compileOnlyCss) {
       return Promise.all(promises);
     }
   }
-  promises.push(buildNpmBinaries(componentsDir, name, options));
-  promises.push(buildNpmCss(componentsDir, options));
+  if (options.npm) {
+    promises.push(buildNpmBinaries(componentsDir, name, options));
+    promises.push(buildNpmCss(componentsDir, options));
+  }
   if (options.binaries) {
     promises.push(buildBinaries(componentsDir, options.binaries, options));
   }

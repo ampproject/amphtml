@@ -146,7 +146,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(service.checkSha384).not.to.be.called;
   });
 
-  it('callFunction waits for initialization to complete before returning', async () => {
+  it('should wait for initialization to complete before proxying callFunction', async () => {
     element.setAttribute('script', 'local-script');
     script.workerDom_ = {callFunction: env.sandbox.spy()};
 
@@ -155,6 +155,15 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
     await script.initialize_.resolve();
     expect(script.workerDom_.callFunction).calledWithExactly('fetchData', true);
+  });
+
+  it('should reject when callFunction on amp-script which failed to initialize', async () => {
+    element.setAttribute('script', 'local-script');
+    script.workerDom_ = null;
+    script.initialize_.resolve();
+
+    const result = script.callFunction('fetchData', true);
+    await expect(result).eventually.rejectedWith('failed initialization.');
   });
 
   describe('Initialization skipped warning due to zero size', () => {
