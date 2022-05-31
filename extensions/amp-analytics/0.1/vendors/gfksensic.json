@@ -24,7 +24,7 @@
     "sp": "-1",
     "st": "${ut}",
     "environment": "",
-    "optin": ""
+    "optin": "undefined"
   },
   "transport": {
     "beacon": false,
