@@ -1,21 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
-module.exports = function(context) {
+const cssWhat = require('css-what');
+
+module.exports = function (context) {
+  /**
+   * @param {CompilerNode} node
+   */
   function callQuerySelector(node) {
     const {callee} = node;
 
@@ -28,16 +18,23 @@ module.exports = function(context) {
       return;
     }
 
-    if (property.leadingComments) {
-      const ok = property.leadingComments.some(comment => {
-        return comment.value === 'OK';
-      });
-      if (ok) {
-        return;
-      }
+    const leadingComments = context.getCommentsBefore(property);
+    const ok = leadingComments.some((comment) => {
+      return comment.value === 'OK';
+    });
+    if (ok) {
+      return;
     }
 
     const selector = getSelector(node, 0);
+
+    if (!isValidSelector(selector)) {
+      context.report({
+        node,
+        message: 'Failed to parse CSS Selector `' + selector + '`',
+      });
+      return;
+    }
 
     // What are we calling querySelector on?
     let obj = callee.object;
@@ -66,26 +63,36 @@ module.exports = function(context) {
         'globally and filtered to just the elements inside the element. ' +
         'This leads to obscure bugs if you attempt to match a descendant ' +
         'of a descendant (ie querySelector("div div")). Instead, use the ' +
-        'scopedQuerySelector in src/dom.js',
+        'scopedQuerySelector in src/core/dom/query.js',
     });
   }
 
+  /**
+   * @param {CompilerNode} node
+   */
   function callScopedQuerySelector(node) {
     const {callee} = node;
     if (!callee.name.startsWith('scopedQuerySelector')) {
       return;
     }
 
-    if (node.leadingComments) {
-      const ok = node.leadingComments.some(comment => {
-        return comment.value === 'OK';
-      });
-      if (ok) {
-        return;
-      }
+    const leadingComments = context.getCommentsBefore(node);
+    const ok = leadingComments.some((comment) => {
+      return comment.value === 'OK';
+    });
+    if (ok) {
+      return;
     }
 
     const selector = getSelector(node, 1);
+
+    if (!isValidSelector(selector)) {
+      context.report({
+        node,
+        message: 'Failed to parse CSS Selector `' + selector + '`',
+      });
+      return;
+    }
 
     if (selectorNeedsScope(selector)) {
       return;
@@ -99,6 +106,11 @@ module.exports = function(context) {
     });
   }
 
+  /**
+   * @param {CompilerNode} node
+   * @param {number} argIndex
+   * @return {string}
+   */
   function getSelector(node, argIndex) {
     const arg = node.arguments[argIndex];
     let selector;
@@ -111,7 +123,7 @@ module.exports = function(context) {
     } else if (arg.type === 'TemplateLiteral') {
       // Ensure all template variables are properly escaped.
       let accumulator = '';
-      const quasis = arg.quasis.map(v => v.value.raw);
+      const quasis = arg.quasis.map((v) => v.value.raw);
       for (let i = 0; i < arg.expressions.length; i++) {
         const expression = arg.expressions[i];
         accumulator += quasis[i];
@@ -124,6 +136,8 @@ module.exports = function(context) {
             );
 
             if (callee.name === 'escapeCssSelectorIdent') {
+              // Add in a basic identifier to represent the call.
+              accumulator += 'foo';
               if (inNthChild) {
                 context.report({
                   node: expression,
@@ -135,6 +149,8 @@ module.exports = function(context) {
               }
               continue;
             } else if (callee.name === 'escapeCssSelectorNth') {
+              // Add in a basic nth-selector to represent the call.
+              accumulator += '1';
               if (!inNthChild) {
                 context.report({
                   node: expression,
@@ -153,11 +169,11 @@ module.exports = function(context) {
           node: expression,
           message:
             'Each selector value must be escaped by ' +
-            'escapeCssSelectorIdent in src/css.js',
+            'escapeCssSelectorIdent in core/dom/css-selectors.js',
         });
       }
 
-      selector = quasis.join('');
+      selector = accumulator + quasis[quasis.length - 1];
     } else {
       if (arg.type === 'BinaryExpression') {
         context.report({node: arg, message: 'Use a template literal string'});
@@ -165,18 +181,35 @@ module.exports = function(context) {
       selector = 'dynamic value';
     }
 
-    // strip out things that can't affect children selection
-    selector = selector.replace(/\(.*\)|\[.*\]/, function(match) {
-      return match[0] + match[match.length - 1];
-    });
-
     return selector;
   }
 
-  // Checks if the selector is using grandchild selector semantics
-  // `node.querySelector('child grandchild')` or `'child>grandchild'` But,
-  // specifically allow multi-selectors `'div, span'`.
+  /**
+   * @param {string} selector
+   * @return {boolean}
+   */
+  function isValidSelector(selector) {
+    try {
+      cssWhat.parse(selector);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * Checks if the selector is using grandchild selector semantics
+   * `node.querySelector('child grandchild')` or `'child>grandchild'` But,
+   * specifically allow multi-selectors `'div, span'`.
+   * @param {string} selector
+   * @return {boolean}
+   */
   function selectorNeedsScope(selector) {
+    // strip out things that can't affect children selection
+    selector = selector.replace(/\(.*\)|\[.*\]/, function (match) {
+      return match[0] + match[match.length - 1];
+    });
+
     // This regex actually verifies there is no whitespace (implicit child
     // semantics) or `>` chars (direct child semantics). The one exception is
     // for `,` multi-selectors, which can have whitespace.

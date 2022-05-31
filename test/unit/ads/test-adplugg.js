@@ -1,23 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {adplugg} from '#ads/vendors/adplugg';
 
-import {adplugg} from '../../../ads/adplugg';
-import {createIframePromise} from '../../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 
-describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
+describes.fakeWin('amp-ad-adplugg-impl', {}, (env) => {
   let win;
   let testData;
 
@@ -26,7 +11,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
    */
   beforeEach(() => {
     // Set up our test sandbox.
-    return createIframePromise(true).then(iframe => {
+    return createIframePromise(true).then((iframe) => {
       // Simulate the iframe that adplugg will be called inside.
       win = iframe.win;
       win.context = {
@@ -36,8 +21,6 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
           },
         },
         requestResize() {},
-        onResizeSuccess() {},
-        onResizeDenied() {},
         renderStart() {},
         noContentAvailable() {},
         referrer: null,
@@ -104,8 +87,8 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
       // Set up mocks, spys, etc.
       const renderStartSpy = env.sandbox.stub(win.context, 'renderStart');
       win.AdPlugg = {
-        push: function() {},
-        on: function() {},
+        push: function () {},
+        on: function () {},
       };
       const AdPluggPushSpy = env.sandbox.spy(win.AdPlugg, 'push');
       const AdPluggOnSpy = env.sandbox.spy(win.AdPlugg, 'on');
@@ -154,8 +137,8 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
         'noContentAvailable'
       );
       win.AdPlugg = {
-        push: function() {},
-        on: function() {},
+        push: function () {},
+        on: function () {},
       };
       const AdPluggPushSpy = env.sandbox.spy(win.AdPlugg, 'push');
       const AdPluggOnSpy = env.sandbox.spy(win.AdPlugg, 'on');

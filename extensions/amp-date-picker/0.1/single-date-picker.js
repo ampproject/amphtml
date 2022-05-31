@@ -1,51 +1,35 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {DayPickerPhrases} from './defaultPhrases';
-import {dict} from '../../../src/utils/object';
-import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
+import {DayPickerPhrases} from './defaultPhrases';
+
+import {requireExternal} from '../../../src/module';
 
 /**
  * Create a SingleDatePicker React component
- * @return {function(new:React.Component, !JsonObject)} A single date picker component class
+ * @return {typeof React.Component} A single date picker component class
  */
 function createSingleDatePickerBase() {
-  const constants = /** @type {!JsonObject} */ (requireExternal(
-    'react-dates/constants'
-  ));
+  const constants = /** @type {!JsonObject} */ (
+    requireExternal('react-dates/constants')
+  );
 
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerSingleDateController = /** @type {function(new: React.Component, !JsonObject)} */ (requireExternal(
-    'react-dates'
-  )['DayPickerSingleDateController']);
+  const DayPickerSingleDateController = /** @type {typeof  React.Component} */ (
+    requireExternal('react-dates')['DayPickerSingleDateController']
+  );
 
-  const defaultProps = dict({
+  const defaultProps = {
     'date': null,
-    'onDateChange': function() {},
+    'onDateChange': function () {},
 
     'focused': false,
-    'onFocusChange': function() {},
-    'onClose': function() {},
+    'onFocusChange': function () {},
+    'onClose': function () {},
 
     'keepOpenOnDateSelect': false,
-    'isOutsideRange': function() {},
-    'isDayBlocked': function() {},
-    'isDayHighlighted': function() {},
+    'isOutsideRange': function () {},
+    'isDayBlocked': function () {},
+    'isDayHighlighted': function () {},
 
     // DayPicker props
     'renderMonth': null,
@@ -64,15 +48,15 @@ function createSingleDatePickerBase() {
     'navPrev': null,
     'navNext': null,
 
-    'onPrevMonthClick': function() {},
-    'onNextMonthClick': function() {},
+    'onPrevMonthClick': function () {},
+    'onNextMonthClick': function () {},
     'onOutsideClick': null,
 
     'renderDay': null,
     'renderCalendarInfo': null,
 
     // accessibility
-    'onBlur': function() {},
+    'onBlur': function () {},
     'isFocused': false,
     'showKeyboardShortcuts': false,
 
@@ -82,7 +66,7 @@ function createSingleDatePickerBase() {
     'phrases': DayPickerPhrases,
 
     'isRTL': false,
-  });
+  };
 
   const WrappedDayPickerSingleDateController = withFocusedTrueHack(
     withDatePickerCommon(DayPickerSingleDateController)
@@ -96,8 +80,8 @@ function createSingleDatePickerBase() {
  * Fixes bug where overlay single date pickers do not open to
  * the month containing the selected date.
  * https://github.com/airbnb/react-dates/issues/931
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)} A class with a preset focused prop
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component} A class with a preset focused prop
  */
 function withFocusedTrueHack(WrappedComponent) {
   const react = requireExternal('react');
@@ -117,20 +101,20 @@ function withFocusedTrueHack(WrappedComponent) {
   FocusedTrueHack.prototype.constructor = FocusedTrueHack;
 
   /** @override */
-  FocusedTrueHack.prototype.render = function() {
-    const props = {...this.props, ...dict({'focused': true})};
+  FocusedTrueHack.prototype.render = function () {
+    const props = {...this.props, 'focused': true};
     return react.createElement(WrappedComponent, props);
   };
 
   return FocusedTrueHack;
 }
 
-/** @private {?function(new:React.Component, !JsonObject)} */
+/** @private {?typeof React.Component} */
 let SingleDatePicker_ = null;
 
 /**
  * Creates a single date picker, injecting its dependencies
- * @return {function(new:React.Component, !JsonObject)} A date picker component class
+ * @return {typeof React.Component} A date picker component class
  */
 export function createSingleDatePicker() {
   if (!SingleDatePicker_) {

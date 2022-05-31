@@ -1,18 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const app = require('express').Router();
@@ -21,10 +6,9 @@ const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
 const path = require('path');
 const upload = require('multer')();
+const {getServeMode, replaceUrls} = require('./app-utils');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls, getServeMode} = require('./app-utils');
 
-const KARMA_SERVER_PORT = 9876;
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const SERVE_MODE = getServeMode();
 
@@ -38,13 +22,13 @@ function log(...messages) {
   }
 }
 
-app.use('/compose-doc', function(req, res) {
+app.use('/compose-doc', function (req, res) {
   res.setHeader('X-XSS-Protection', '0');
 
   const {body, css, experiments, extensions, spec} = req.query;
 
   const frameHtml =
-    SERVE_MODE == 'compiled'
+    SERVE_MODE == 'minified'
       ? 'dist.3p/current-min/frame.html'
       : 'dist.3p/current/frame.max.html';
 
@@ -75,7 +59,7 @@ app.use('/compose-doc', function(req, res) {
   res.send(doc);
 });
 
-app.use('/compose-html', function(req, res) {
+app.use('/compose-html', function (req, res) {
   res.setHeader('X-XSS-Protection', '0');
   res.send(`
 <!doctype html>
@@ -91,11 +75,10 @@ ${req.query.body}
   `);
 });
 
-app.use('/compose-shadow', function(req, res) {
+app.use('/compose-shadow', function (req, res) {
   const {docUrl} = req.query;
   const viewerHtml = renderShadowViewer({
     src: docUrl.replace(/^\//, ''),
-    port: KARMA_SERVER_PORT,
     baseHref: path.dirname(req.url),
   });
   res.send(replaceUrls(SERVE_MODE, viewerHtml));
@@ -144,7 +127,7 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
       .status(500)
       .send(`another client is withdrawing this ID [${key}]`);
   }
-  const callback = function(result) {
+  const callback = function (result) {
     if (result === undefined) {
       // This happens when tearDown is called but no request
       // of given ID has been received yet.
@@ -189,7 +172,7 @@ app.get('/a4a/:bid', (req, res) => {
   cors.enableCors(req, res);
   const {bid} = req.params;
   const body = `
-  <a href=https://ampbyexample.com target=_blank>
+  <a href=https://amp.dev target=_blank>
     <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
   </a>
   <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
@@ -233,15 +216,15 @@ app.get('/a4a/:bid', (req, res) => {
 });
 
 /**
- * @param {{body: string, css: string|undefined, extensions: Array<string>|undefined, head: string|undefined, spec: string|undefined}} config
+ * @param {{body: string, css?: string|undefined, extensions: Array<string>|undefined, head?: string|undefined, spec?: string|undefined, mode?: string|undefined}} config
  * @return {string}
  */
 function composeDocument(config) {
-  const {body, css, extensions, head, spec, mode} = config;
+  const {body, css, extensions, head, mode, spec} = config;
 
   const m = mode || SERVE_MODE;
   const cdn = m === 'cdn';
-  const compiled = m === 'compiled';
+  const minified = m === 'minified';
 
   const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
@@ -256,7 +239,7 @@ function composeDocument(config) {
         '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
       runtime = cdn
         ? 'https://cdn.ampproject.org/v0.js'
-        : `/dist/${compiled ? 'v0' : 'amp'}.js`;
+        : `/dist/${minified ? 'v0' : 'amp'}.js`;
       break;
     case 'amp4ads':
       canonical = '';
@@ -264,7 +247,7 @@ function composeDocument(config) {
         '<style amp4ads-boilerplate>body{visibility:hidden}</style>';
       runtime = cdn
         ? 'https://cdn.ampproject.org/amp4ads-v0.js'
-        : `/dist/${compiled ? 'amp4ads-v0' : 'amp-inabox'}.js`;
+        : `/dist/${minified ? 'amp4ads-v0' : 'amp-inabox'}.js`;
       break;
     case 'amp4email':
       canonical = '';
@@ -272,7 +255,7 @@ function composeDocument(config) {
         '<style amp4email-boilerplate>body{visibility:hidden}</style>';
       runtime = cdn
         ? 'https://cdn.ampproject.org/v0.js'
-        : `/dist/${compiled ? 'v0' : 'amp'}.js`;
+        : `/dist/${minified ? 'v0' : 'amp'}.js`;
       break;
     default:
       throw new Error('Unrecognized AMP spec: ' + spec);
@@ -283,13 +266,13 @@ function composeDocument(config) {
   let extensionScripts = '';
   if (extensions) {
     extensionScripts = extensions
-      .map(extension => {
+      .map((extension) => {
         const tuple = extension.split(':');
         const name = tuple[0];
         const version = tuple[1] || '0.1';
         const src = cdn
           ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
-          : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
+          : `/dist/v0/${name}-${version}.${minified ? '' : 'max.'}js`;
         const type = CUSTOM_TEMPLATES.includes(name)
           ? 'custom-template'
           : 'custom-element';
@@ -325,8 +308,8 @@ function composeDocument(config) {
     if (extensions) {
       end = topHalfOfHtml.indexOf(extensionScripts) + extensionScripts.length;
       // Filter out extensions that are not custom elements, e.g. amp-mustache.
-      customElements = extensions.filter(e => !CUSTOM_TEMPLATES.includes(e));
-      extensionsMap = customElements.map(ce => {
+      customElements = extensions.filter((e) => !CUSTOM_TEMPLATES.includes(e));
+      extensionsMap = customElements.map((ce) => {
         return {
           'custom-element': ce,
           // TODO: Should this be a local URL i.e. /dist/v0/...?

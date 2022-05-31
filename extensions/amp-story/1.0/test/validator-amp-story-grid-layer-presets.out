@@ -1,0 +1,40 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the AMP Story grid layer templates.
+|  -->
+|  <!doctype html>
+|  <html amp lang="en">
+|    <head>
+|      <meta charset="utf-8">
+|      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|      <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|      <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+|      <title>Presets story</title>
+|      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|      <link rel="canonical" href="index.html">
+|      <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    </head>
+|
+|    <body>
+|      <amp-story
+|          standalone
+|          publisher="The AMP team"
+|          publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
+|          poster-portrait-src="./img/overview.jpg"
+|          title="Landscape story"
+|          supports-landscape>
+|        <amp-story-page id="cover">
+|          <amp-story-grid-layer preset="2021-background" template="fill">
+|            <amp-img layout="fill" src="./img/example.jpg"></amp-img>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer preset="2021-foreground" anchor="left" template="fill">
+|            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet massa felis. Integer consequat accumsan velit, in condimentum quam sodales eu. Aliquam ac elit malesuada, iaculis massa egestas, malesuada dui. Suspendisse molestie ultricies mauris, vel tincidunt libero dignissim vel. Vivamus lacinia elit sit amet risus sagittis, sit amet imperdiet leo congue. Quisque finibus at est non commodo. Pellentesque ullamcorper feugiat metus sed ultrices. Vestibulum iaculis egestas ultricies.</p>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer preset="2021-foreground" anchor="bottom right" template="fill">
+|            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sit amet massa felis. Integer consequat accumsan velit, in condimentum quam sodales eu. Aliquam ac elit malesuada, iaculis massa egestas, malesuada dui. Suspendisse molestie ultricies mauris, vel tincidunt libero dignissim vel. Vivamus lacinia elit sit amet risus sagittis, sit amet imperdiet leo congue. Quisque finibus at est non commodo. Pellentesque ullamcorper feugiat metus sed ultrices. Vestibulum iaculis egestas ultricies.</p>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|      </amp-story>
+|    </body>
+|  </html>

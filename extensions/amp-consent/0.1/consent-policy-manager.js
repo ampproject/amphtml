@@ -1,33 +1,23 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {isFiniteNumber, isObject} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
 
-import {CONSENT_ITEM_STATE, ConsentInfoDef} from './consent-info';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber, isObject} from '../../../src/types';
-import {map} from '../../../src/utils/object';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
+
+import {
+  CONSENT_ITEM_STATE,
+  ConsentInfoDef,
+  PURPOSE_CONSENT_STATE,
+} from './consent-info';
+
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
-const WHITELIST_POLICY = {
+const ALLOWLIST_POLICY = {
   'default': true,
   '_till_responded': true,
   '_till_accepted': true,
@@ -77,16 +67,15 @@ export class ConsentPolicyManager {
 
     /** @private {?string} */
     this.consentString_ = null;
-  }
 
-  /**
-   * Is Multi-consent experiment enabled?
-   *
-   * @param {!Window} win
-   * @return {boolean}
-   */
-  static isMultiSupported(win) {
-    return isExperimentOn(win, 'multi-consent');
+    /** @private {?Object|undefined} */
+    this.consentMetadata_ = null;
+
+    /** @private {?Object|undefined} */
+    this.purposeConsents_ = null;
+
+    /** @private {?function()} */
+    this.tcfConsentChangeHandler_ = null;
   }
 
   /**
@@ -147,7 +136,7 @@ export class ConsentPolicyManager {
         // Has initial consent state value. Evaluate immediately
         instance.evaluate(this.consentState_);
       }
-      this.consentStateChangeObservables_.add(state => {
+      this.consentStateChangeObservables_.add((state) => {
         instance.evaluate(state);
       });
       this.consentPromptInitiated_.promise.then(() => {
@@ -162,9 +151,9 @@ export class ConsentPolicyManager {
    */
   init_() {
     // Set up handler to listen to consent instance value change.
-    this.ConsentStateManagerPromise_.then(manager => {
+    this.ConsentStateManagerPromise_.then((manager) => {
       manager.whenConsentReady().then(() => {
-        manager.onConsentStateChange(info => {
+        manager.onConsentStateChange((info) => {
           this.consentStateChangeHandler_(info);
           if (this.consentValueInitiatedResolver_) {
             this.consentValueInitiatedResolver_();
@@ -190,8 +179,17 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    const prevConsentStr = this.consentString_;
+    const consentMetadata = info['consentMetadata'];
+    const purposeConsents = info['purposeConsents'];
+    const {
+      consentMetadata_: prevConsentMetadata,
+      consentString_: prevConsentStr,
+      purposeConsents_: prevPurposeConsents,
+    } = this;
+
     this.consentString_ = consentStr;
+    this.consentMetadata_ = consentMetadata;
+    this.purposeConsents_ = purposeConsents;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
@@ -210,12 +208,28 @@ export class ConsentPolicyManager {
       if (this.consentState_ === null) {
         this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
       }
-      // consentString doesn't change with dismiss action
+      // None of the supplementary consent data changes with dismiss action
       this.consentString_ = prevConsentStr;
+      this.consentMetadata_ = prevConsentMetadata;
+      this.purposeConsents_ = prevPurposeConsents;
     } else {
       this.consentState_ = state;
     }
     this.consentStateChangeObservables_.fire(this.consentState_);
+    if (this.tcfConsentChangeHandler_) {
+      this.tcfConsentChangeHandler_();
+    }
+  }
+
+  /**
+   * Sets the handler that will be called when a consent change
+   * has been fired.
+   * @param {function()} callback
+   */
+  setOnPolicyChange(callback) {
+    if (!this.tcfConsentChangeHandler_) {
+      this.tcfConsentChangeHandler_ = callback;
+    }
   }
 
   /**
@@ -225,7 +239,7 @@ export class ConsentPolicyManager {
    */
   whenPolicyResolved(policyId) {
     // If customized policy is not supported
-    if (!WHITELIST_POLICY[policyId]) {
+    if (!ALLOWLIST_POLICY[policyId]) {
       user().error(
         TAG,
         'can not find policy %s, only predefined policies are supported',
@@ -247,7 +261,7 @@ export class ConsentPolicyManager {
    */
   whenPolicyUnblock(policyId) {
     // If customized policy is not supported
-    if (!WHITELIST_POLICY[policyId]) {
+    if (!ALLOWLIST_POLICY[policyId]) {
       user().error(
         TAG,
         'can not find policy %s, only predefined policies are supported',
@@ -274,7 +288,7 @@ export class ConsentPolicyManager {
   getMergedSharedData(policyId) {
     return this.whenPolicyResolved(policyId)
       .then(() => this.ConsentStateManagerPromise_)
-      .then(manager => {
+      .then((manager) => {
         return manager.getConsentInstanceSharedData();
       });
   }
@@ -292,6 +306,42 @@ export class ConsentPolicyManager {
   }
 
   /**
+   * Get the consent metadata value of a policy. Return a promise that resolves
+   * when the policy resolves.
+   * @param {string} policyId
+   * @return {!Promise<?Object|undefined>}
+   */
+  getConsentMetadataInfo(policyId) {
+    return this.whenPolicyResolved(policyId).then(() => {
+      return this.consentMetadata_;
+    });
+  }
+
+  /**
+   * Wait for initial consent information to be transmitted,
+   * then get consent state for this purpose.
+   *
+   * Note: Even if we have some intiial consent info, wait until all
+   * purposes have been potentially collected, then check.
+   * @param {!Array<string>} purposes
+   * @return {!Promise<boolean>}
+   */
+  whenPurposesUnblock(purposes) {
+    return this.ConsentStateManagerPromise_.then((manager) => {
+      // Wait for all purpose consents (collected through UI or update)
+      return manager.whenHasAllPurposeConsents();
+    }).then(() => {
+      if (!this.purposeConsents_) {
+        return false;
+      }
+      const shouldUnblock = (purpose) =>
+        hasOwn(this.purposeConsents_, purpose) &&
+        this.purposeConsents_[purpose] === PURPOSE_CONSENT_STATE.ACCEPTED;
+      return purposes.every(shouldUnblock);
+    });
+  }
+
+  /**
    * Wait for policy instance to be registered.
    * @param {string} policyId
    * @return {!Promise}
@@ -303,8 +353,9 @@ export class ConsentPolicyManager {
     if (!this.policyInstancesDeferred_[policyId]) {
       this.policyInstancesDeferred_[policyId] = new Deferred();
     }
-    return /** @type {!Promise} */ (this.policyInstancesDeferred_[policyId]
-      .promise);
+    return /** @type {!Promise} */ (
+      this.policyInstancesDeferred_[policyId].promise
+    );
   }
 }
 

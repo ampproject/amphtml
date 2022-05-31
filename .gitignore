@@ -1,32 +1,40 @@
+# OS level files
 .DS_Store
 .g4ignore
-build/
-.amp-build
-c
-/dist
-dist.3p
-dist.tools
-examples.min
-node_modules
-npm-debug.log
-.idea
-.tm_properties
-.settings
-typings
-typings.json
-build-system/runner/dist
-/test/manual/amp-ad.adtech.html
-test/coverage
-./package-lock.json
 *.swp
 *.swo
-yarn-error.log
-sc-*-linux*
-sc-*-osx*
-sauce_connect_*
-EXTENSIONS_CSS_MAP
-deps.txt
-firebase
+
+# Development environment files
+**/node_modules
+npm-debug.log
+
+# Firebase directories
 .firebaserc
+.firebase
+firebase
 firebase.json
-.firebase/
+
+# User configuration files
+# Keep this list in sync with clean.js
+/build-system/global-configs/custom-config.json
+/build-system/global-configs/custom-flavors-config.json
+
+# [GLOBALLY IGNORED]
+# (Don't edit or remove the above comment!)
+# The rules below are synced between .gitignore and .prettierignore, and are
+# removed by `amp clean`.
+
+.*cache
+.amp-dep-check
+build
+build-system/tasks/performance/cache
+build-system/tasks/performance/results.json
+dist
+dist.3p
+dist.tools
+export
+examples/storybook
+/release
+result-reports
+test/coverage
+test/coverage-e2e

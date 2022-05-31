@@ -1,25 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {VisibilityModel} from '../visibility-model';
 
 const NO_SPEC = {};
 const NO_CALC = () => 0;
 
-describes.sandboxed('VisibilityModel', {}, env => {
+describes.sandboxed('VisibilityModel', {}, (env) => {
   let startTime;
   let clock;
 
@@ -487,7 +471,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       let reportPromise;
       let promiseResolver;
       beforeEach(() => {
-        reportPromise = new Promise(resolve => {
+        reportPromise = new Promise((resolve) => {
           promiseResolver = resolve;
         });
         vh.setReportReady(() => reportPromise);
@@ -1134,7 +1118,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       );
       const eventSpy = (vh.eventResolver_ = env.sandbox.spy());
       env.sandbox.stub(vh, 'reset_').callsFake(() => {
-        vh.eventPromise_ = new Promise(unused => {
+        vh.eventPromise_ = new Promise((unused) => {
           vh.eventResolver_ = eventSpy;
         });
         vh.eventPromise_.then(() => {
@@ -1182,7 +1166,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       calcVisibility = () => visibility;
     });
 
-    it('should wait for repeat interval', function*() {
+    it('should wait for repeat interval', function* () {
       const vh = new VisibilityModel(
         {
           visiblePercentageMin: 49,
@@ -1207,7 +1191,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       expect(spy).to.be.calledOnce;
     });
 
-    it('should wait for not match to fire again w/o interval', function*() {
+    it('should wait for not match to fire again w/o interval', function* () {
       const vh = new VisibilityModel(
         {
           visiblePercentageMin: 49,

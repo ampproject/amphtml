@@ -1,28 +1,16 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {parseJson} from '#core/types/object/json';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
 
 import {AccessClientAdapter} from './amp-access-client';
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+
 import {fetchDocument} from '../../../src/document-fetcher';
-import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
-import {parseJson} from '../../../src/json';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
@@ -81,14 +69,8 @@ export class AccessServerAdapter {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    const stateElement = ampdoc
-      .getRootNode()
-      .querySelector('meta[name="i-amphtml-access-state"]');
-
     /** @private @const {?string} */
-    this.serverState_ = stateElement
-      ? stateElement.getAttribute('content')
-      : null;
+    this.serverState_ = ampdoc.getMetaByName('i-amphtml-access-state');
 
     const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server');
 
@@ -139,18 +121,18 @@ export class AccessServerAdapter {
       /* useAuthData */ false
     );
     return varsPromise
-      .then(vars => {
+      .then((vars) => {
         const requestVars = {};
         for (const k in vars) {
           if (vars[k] != null) {
             requestVars[k] = String(vars[k]);
           }
         }
-        const request = dict({
+        const request = {
           'url': removeFragment(this.ampdoc.win.location.href),
           'state': this.serverState_,
           'vars': requestVars,
-        });
+        };
         dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
         // Note that `application/x-www-form-urlencoded` is used to avoid
         // CORS preflight request.
@@ -159,13 +141,13 @@ export class AccessServerAdapter {
           fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-            headers: dict({
+            headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
-            }),
+            },
           })
         );
       })
-      .then(responseDoc => {
+      .then((responseDoc) => {
         dev().fine(TAG, 'Authorization response: ', responseDoc);
         const accessDataString = devAssert(
           responseDoc.querySelector('script[id="amp-access-data"]'),

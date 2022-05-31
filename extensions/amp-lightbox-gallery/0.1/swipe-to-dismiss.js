@@ -1,24 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {setStyle, setStyles} from '#core/dom/style';
+
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {delayAfterDeferringToEventLoop} from './utils';
 
 import {SwipeDef} from '../../../src/gesture-recognizers';
-import {delayAfterDeferringToEventLoop} from './utils';
-import {dev} from '../../../src/log';
-import {listen} from '../../../src/event-helper';
-import {setStyle, setStyles} from '../../../src/style';
 
 /**
  * The number of pixels of movement to go from the darkest to lightest overlay
@@ -146,6 +133,11 @@ export class SwipeToDismiss {
      * @private {?function()}
      */
     this.preventScrollUnlistener_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.isSwiping_ = false;
   }
 
   /**
@@ -158,31 +150,16 @@ export class SwipeToDismiss {
    * }} config
    */
   startSwipe(config) {
-    const {swipeElement, hiddenElement, mask, overlay} = config;
+    const {hiddenElement, mask, overlay, swipeElement} = config;
     this.swipeElement_ = swipeElement;
     this.hiddenElement_ = hiddenElement;
     this.mask_ = mask;
     this.overlay_ = overlay;
+    this.isSwiping_ = true;
 
     this.mutateElement_(() => {
       this.startSwipeToDismiss_();
     });
-  }
-
-  /**
-   * Handles a swipe move.
-   * @param {!SwipeDef} data
-   */
-  swipeMove(data) {
-    this.swipeMove_(data, false);
-  }
-
-  /**
-   * Handles the end of a swipe.
-   * @param {!SwipeDef} data
-   */
-  endSwipe(data) {
-    this.swipeMove_(data, true);
   }
 
   /**
@@ -323,7 +300,7 @@ export class SwipeToDismiss {
     this.preventScrollUnlistener_ = listen(
       dev().assertElement(this.swipeElement_),
       'scroll',
-      event => {
+      (event) => {
         event.stopPropagation();
       },
       {
@@ -350,12 +327,15 @@ export class SwipeToDismiss {
   }
 
   /**
-   *
    * @param {!SwipeDef} data The data for the swipe.
-   * @param {boolean} isLast If this move is the last movement for the swipe.
    */
-  swipeMove_(data, isLast) {
-    const {deltaX, deltaY, velocityX, velocityY} = data;
+  swipeMove(data) {
+    const {deltaX, deltaY, last, velocityX, velocityY} = data;
+    const wasSwiping = this.isSwiping_;
+    if (last) {
+      this.isSwiping_ = false;
+    }
+
     // Need to capture these as they will no longer be available after closing.
     const distance = calculateDistance(0, 0, deltaX, deltaY);
     const releasePercentage = Math.min(distance / SWIPE_TO_CLOSE_DISTANCE, 1);
@@ -368,7 +348,7 @@ export class SwipeToDismiss {
     const overlayOpacity = lerp(1, 0, hideOverlayPercentage);
 
     this.mutateElement_(() => {
-      if (isLast) {
+      if (data.last && wasSwiping) {
         this.releaseSwipe_(scale, velocityX, velocityY, deltaX, deltaY).then(
           () => {
             // TODO(sparhami) These should be called in a `mutateElement`,
@@ -381,11 +361,13 @@ export class SwipeToDismiss {
         return;
       }
 
-      this.adjustForSwipePosition_(
-        `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
-        maskOpacity,
-        overlayOpacity
-      );
+      if (this.isSwiping_) {
+        this.adjustForSwipePosition_(
+          `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
+          maskOpacity,
+          overlayOpacity
+        );
+      }
     });
   }
 }

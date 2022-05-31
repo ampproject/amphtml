@@ -1,0 +1,645 @@
+PASS
+|  <!--
+|    Test Description:
+|      Tests various CSS declarations and in what contexts they are valid.
+|      The same list of declarations is present 2x:
+|       - in <style amp-custom>
+|       - inline style <b style=> attribute
+|  -->
+|  <!doctype html>
+|  <html ⚡4email>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:9:0 Tag 'html' marked with attribute 'amp4email' is missing the corresponding attribute 'data-css-strict' for enabling strict CSS validation. This may become an error in the future. (see https://github.com/ampproject/amphtml/issues/32587)
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <style amp-custom>
+|      /* These declarations don't all make sense, this tests their validity, not the CSS itself. */
+|      a {
+|        -moz-appearance: foo;
+|        -webkit-appearance: foo;
+|        -webkit-tap-highlight-color: foo;
+|        align-content: foo;
+|        align-items: foo;
+|        align-self: foo;
+|        alignment-baseline: foo;
+|        all: foo;
+|        animation-delay: foo;
+|        animation-direction: foo;
+|        animation-duration: foo;
+|        animation-fill-mode: foo;
+|        animation-iteration-count: foo;
+|        animation-name: foo;
+|        animation-play-state: foo;
+|        animation-timing-function: foo;
+|        animation: foo;
+|        appearance: foo;
+|        azimuth: foo;
+|        backface-visibility: foo;
+|        background-attachment: foo;
+|        background-blend-mode: foo;
+|        background-clip: foo;
+|        background-color: foo;
+|        background-image: foo;
+|        background-origin: foo;
+|        background-position: foo;
+|        background-repeat: foo;
+|        background-size: foo;
+|        background: foo;
+|        baseline-shift: foo;
+|        border-bottom-color: foo;
+|        border-bottom-left-radius: foo;
+|        border-bottom-right-radius: foo;
+|        border-bottom-style: foo;
+|        border-bottom-width: foo;
+|        border-bottom: foo;
+|        border-collapse: foo;
+|        border-color: foo;
+|        border-image-outset: foo;
+|        border-image-repeat: foo;
+|        border-image-slice: foo;
+|        border-image-source: foo;
+|        border-image-width: foo;
+|        border-image: foo;
+|        border-left-color: foo;
+|        border-left-style: foo;
+|        border-left-width: foo;
+|        border-left: foo;
+|        border-radius: foo;
+|        border-right-color: foo;
+|        border-right-style: foo;
+|        border-right-width: foo;
+|        border-right: foo;
+|        border-spacing: foo;
+|        border-style: foo;
+|        border-top-color: foo;
+|        border-top-left-radius: foo;
+|        border-top-right-radius: foo;
+|        border-top-style: foo;
+|        border-top-width: foo;
+|        border-top: foo;
+|        border-width: foo;
+|        border: foo;
+|        bottom: foo;
+|        box-decoration-break: foo;
+|        box-shadow: foo;
+|        box-sizing: foo;
+|        break-after: foo;
+|        break-before: foo;
+|        break-inside: foo;
+|        caption-side: foo;
+|        caret-color: foo;
+|        clear: foo;
+|        clip-path: foo;
+|        clip-rule: foo;
+|        clip: foo;
+|        color-adjust: foo;
+|        color-interpolation-filters: foo;
+|        color-interpolation: foo;
+|        color-profile: foo;
+|        color-rendering: foo;
+|        color: foo;
+|        column-count: foo;
+|        column-fill: foo;
+|        column-gap: foo;
+|        column-rule-color: foo;
+|        column-rule-style: foo;
+|        column-rule-width: foo;
+|        column-rule: foo;
+|        column-span: foo;
+|        column-width: foo;
+|        columns: foo;
+|        content: foo;
+|        counter-increment: foo;
+|        counter-reset: foo;
+|        cursor: foo;
+|        direction: foo;
+|        display: foo;
+|        dominant-baseline: foo;
+|        elevation: foo;
+|        empty-cells: foo;
+|        enable-background: foo;
+|        fill-opacity: foo;
+|        fill-rule: foo;
+|        fill: foo;
+|        filter: foo;
+|        flex-basis: foo;
+|        flex-direction: foo;
+|        flex-flow: foo;
+|        flex-grow: foo;
+|        flex-shrink: foo;
+|        flex-wrap: foo;
+|        flex: foo;
+|        float: foo;
+|        flood-color: foo;
+|        flood-opacity: foo;
+|        font-family: foo;
+|        font-feature-settings: foo;
+|        font-kerning: foo;
+|        font-language-override: foo;
+|        font-size-adjust: foo;
+|        font-size: foo;
+|        font-stretch: foo;
+|        font-style: foo;
+|        font-synthesis: foo;
+|        font-variant-alternates: foo;
+|        font-variant-caps: foo;
+|        font-variant-east-asian: foo;
+|        font-variant-ligatures: foo;
+|        font-variant-numeric: foo;
+|        font-variant-position: foo;
+|        font-variant: foo;
+|        font-variation-settings: foo;
+|        font-weight: foo;
+|        font: foo;
+|        gap: foo;
+|        glyph-orientation-horizontal: foo;
+|        glyph-orientation-vertical: foo;
+|        grid-area: foo;
+|        grid-auto-columns: foo;
+|        grid-auto-flow: foo;
+|        grid-auto-rows: foo;
+|        grid-column-end: foo;
+|        grid-column-gap: foo;
+|        grid-column-start: foo;
+|        grid-column: foo;
+|        grid-gap: foo;
+|        grid-row-end: foo;
+|        grid-row-gap: foo;
+|        grid-row-start: foo;
+|        grid-row: foo;
+|        grid-template-areas: foo;
+|        grid-template-columns: foo;
+|        grid-template-rows: foo;
+|        grid-template: foo;
+|        grid: foo;
+|        hanging-punctuation: foo;
+|        height: foo;
+|        hyphens: foo;
+|        image-orientation: foo;
+|        image-rendering: foo;
+|        image-resolution: foo;
+|        inline-size: foo;
+|        isolation: foo;
+|        justify-content: foo;
+|        justify-items: foo;
+|        justify-self: foo;
+|        kerning: foo;
+|        left: foo;
+|        letter-spacing: foo;
+|        lighting-color: foo;
+|        line-break: foo;
+|        line-height: foo;
+|        list-style-image: foo;
+|        list-style-position: foo;
+|        list-style-type: foo;
+|        list-style: foo;
+|        margin-bottom: foo;
+|        margin-left: foo;
+|        margin-right: foo;
+|        margin-top: foo;
+|        margin: foo;
+|        marker-end: foo;
+|        marker-mid: foo;
+|        marker-start: foo;
+|        marker: foo;
+|        mask: foo;
+|        max-height: foo;
+|        max-width: foo;
+|        min-height: foo;
+|        min-width: foo;
+|        mix-blend-mode: foo;
+|        object-fit: foo;
+|        object-position: foo;
+|        offset-distance: foo;
+|        opacity: foo;
+|        order: foo;
+|        orphans: foo;
+|        outline-color: foo;
+|        outline-offset: foo;
+|        outline-style: foo;
+|        outline-width: foo;
+|        outline: foo;
+|        overflow-wrap: foo;
+|        overflow-x: foo;
+|        overflow-y: foo;
+|        overflow: foo;
+|        padding-bottom: foo;
+|        padding-left: foo;
+|        padding-right: foo;
+|        padding-top: foo;
+|        padding: foo;
+|        page-break-after: foo;
+|        page-break-before: foo;
+|        page-break-inside: foo;
+|        pause: foo;
+|        pause-after: foo;
+|        pause-before: foo;
+|        perspective-origin: foo;
+|        perspective: foo;
+|        pitch: foo;
+|        pitch-range: foo;
+|        place-items: foo;
+|        pointer-events: foo;
+|        position: foo;
+|        quotes: foo;
+|        resize: foo;
+|        richness: foo;
+|        right: foo;
+|        row-gap: foo;
+|        shape-rendering: foo;
+|        speak-header: foo;
+|        speak-numeral: foo;
+|        speak-punctuation: foo;
+|        speak: foo;
+|        speech-rate: foo;
+|        stop-color: foo;
+|        stop-opacity: foo;
+|        stress: foo;
+|        stroke-dasharray: foo;
+|        stroke-dashoffset: foo;
+|        stroke-linecap: foo;
+|        stroke-linejoin: foo;
+|        stroke-miterlimit: foo;
+|        stroke-opacity: foo;
+|        stroke-width: foo;
+|        stroke: foo;
+|        tab-size: foo;
+|        table-layout: foo;
+|        text-align-last: foo;
+|        text-align: foo;
+|        text-anchor: foo;
+|        text-combine-upright: foo;
+|        text-decoration-color: foo;
+|        text-decoration-line: foo;
+|        text-decoration-skip-ink: foo;
+|        text-decoration-skip: foo;
+|        text-decoration-style: foo;
+|        text-decoration: foo;
+|        text-emphasis-color: foo;
+|        text-emphasis-position: foo;
+|        text-emphasis-style: foo;
+|        text-emphasis: foo;
+|        text-fill-color: foo;
+|        text-indent: foo;
+|        text-justify: foo;
+|        text-orientation: foo;
+|        text-overflow: foo;
+|        text-rendering: foo;
+|        text-shadow: foo;
+|        text-stroke-color: foo;
+|        text-stroke-width: foo;
+|        text-stroke: foo;
+|        text-transform: foo;
+|        text-underline-position: foo;
+|        top: foo;
+|        transform-box: foo;
+|        transform-origin: foo;
+|        transform-style: foo;
+|        transform: foo;
+|        transition-delay: foo;
+|        transition-duration: foo;
+|        transition-property: foo;
+|        transition-timing-function: foo;
+|        transition: foo;
+|        unicode-bidi: foo;
+|        user-select: foo;
+|        vertical-align: foo;
+|        visibility: foo;
+|        voice-family: foo;
+|        white-space: foo;
+|        widows: foo;
+|        width: foo;
+|        word-break: foo;
+|        word-spacing: foo;
+|        word-wrap: foo;
+|        writing-mode: foo;
+|        z-index: foo;
+|        z-index: auto;
+|        z-index: -1;
+|      }
+|      madeupdecls {
+|        amplitude: foo;
+|        barometric-pressure: foo;
+|        degrees-celsius: foo;
+|      }
+|    </style>
+|  </head>
+|  <body>
+|  <!-- Test these declaration's validity inside inline style attributes: -->
+|  <b style="-moz-appearance: foo;"></b>
+|  <b style="-webkit-appearance: foo;"></b>
+|  <b style="-webkit-tap-highlight-color: foo;"></b>
+|  <b style='align-content: foo'></b>
+|  <b style='align-items: foo'></b>
+|  <b style='align-self: foo'></b>
+|  <b style='alignment-baseline: foo'></b>
+|  <b style='all: foo'></b>
+|  <b style='animation-delay: foo'></b>
+|  <b style='animation-direction: foo'></b>
+|  <b style='animation-duration: foo'></b>
+|  <b style='animation-fill-mode: foo'></b>
+|  <b style='animation-iteration-count: foo'></b>
+|  <b style='animation-name: foo'></b>
+|  <b style='animation-play-state: foo'></b>
+|  <b style='animation-timing-function: foo'></b>
+|  <b style='animation: foo'></b>
+|  <b style='appearance: foo'></b>
+|  <b style='azimuth: foo'></b>
+|  <b style='backface-visibility: foo'></b>
+|  <b style='background-attachment: foo'></b>
+|  <b style='background-blend-mode: foo'></b>
+|  <b style='background-clip: foo'></b>
+|  <b style='background-color: foo'></b>
+|  <b style='background-image: foo'></b>
+|  <b style='background-origin: foo'></b>
+|  <b style='background-position: foo'></b>
+|  <b style='background-repeat: foo'></b>
+|  <b style='background-size: foo'></b>
+|  <b style='background: foo'></b>
+|  <b style='baseline-shift: foo'></b>
+|  <b style='border-bottom-color: foo'></b>
+|  <b style='border-bottom-left-radius: foo'></b>
+|  <b style='border-bottom-right-radius: foo'></b>
+|  <b style='border-bottom-style: foo'></b>
+|  <b style='border-bottom-width: foo'></b>
+|  <b style='border-bottom: foo'></b>
+|  <b style='border-collapse: foo'></b>
+|  <b style='border-color: foo'></b>
+|  <b style='border-image-outset: foo'></b>
+|  <b style='border-image-repeat: foo'></b>
+|  <b style='border-image-slice: foo'></b>
+|  <b style='border-image-source: foo'></b>
+|  <b style='border-image-width: foo'></b>
+|  <b style='border-image: foo'></b>
+|  <b style='border-left-color: foo'></b>
+|  <b style='border-left-style: foo'></b>
+|  <b style='border-left-width: foo'></b>
+|  <b style='border-left: foo'></b>
+|  <b style='border-radius: foo'></b>
+|  <b style='border-right-color: foo'></b>
+|  <b style='border-right-style: foo'></b>
+|  <b style='border-right-width: foo'></b>
+|  <b style='border-right: foo'></b>
+|  <b style='border-spacing: foo'></b>
+|  <b style='border-style: foo'></b>
+|  <b style='border-top-color: foo'></b>
+|  <b style='border-top-left-radius: foo'></b>
+|  <b style='border-top-right-radius: foo'></b>
+|  <b style='border-top-style: foo'></b>
+|  <b style='border-top-width: foo'></b>
+|  <b style='border-top: foo'></b>
+|  <b style='border-width: foo'></b>
+|  <b style='border: foo'></b>
+|  <b style='bottom: foo'></b>
+|  <b style='box-decoration-break: foo'></b>
+|  <b style='box-shadow: foo'></b>
+|  <b style='box-sizing: foo'></b>
+|  <b style='break-after: foo'></b>
+|  <b style='break-before: foo'></b>
+|  <b style='break-inside: foo'></b>
+|  <b style='caption-side: foo'></b>
+|  <b style='caret-color: foo'></b>
+|  <b style='clear: foo'></b>
+|  <b style='clip-path: foo'></b>
+|  <b style='clip-rule: foo'></b>
+|  <b style='clip: foo'></b>
+|  <b style='color-adjust: foo'></b>
+|  <b style='color-interpolation-filters: foo'></b>
+|  <b style='color-interpolation: foo'></b>
+|  <b style='color-profile: foo'></b>
+|  <b style='color-rendering: foo'></b>
+|  <b style='color: foo'></b>
+|  <b style='column-count: foo'></b>
+|  <b style='column-fill: foo'></b>
+|  <b style='column-gap: foo'></b>
+|  <b style='column-rule-color: foo'></b>
+|  <b style='column-rule-style: foo'></b>
+|  <b style='column-rule-width: foo'></b>
+|  <b style='column-rule: foo'></b>
+|  <b style='column-span: foo'></b>
+|  <b style='column-width: foo'></b>
+|  <b style='columns: foo'></b>
+|  <b style='content: foo'></b>
+|  <b style='counter-increment: foo'></b>
+|  <b style='counter-reset: foo'></b>
+|  <b style='cursor: initial'></b>
+|  <b style='cursor: foo'></b>
+|  <b style='direction: foo'></b>
+|  <b style='display: foo'></b>
+|  <b style='dominant-baseline: foo'></b>
+|  <b style='elevation: foo'></b>
+|  <b style='empty-cells: foo'></b>
+|  <b style='enable-background: foo'></b>
+|  <b style='fill-opacity: foo'></b>
+|  <b style='fill-rule: foo'></b>
+|  <b style='fill: foo'></b>
+|  <b style='filter: blur(5px)'></b>
+|  <b style='filter: foo'></b>
+|  <b style='flex-basis: foo'></b>
+|  <b style='flex-direction: foo'></b>
+|  <b style='flex-flow: foo'></b>
+|  <b style='flex-grow: foo'></b>
+|  <b style='flex-shrink: foo'></b>
+|  <b style='flex-wrap: foo'></b>
+|  <b style='flex: foo'></b>
+|  <b style='float: foo'></b>
+|  <b style='flood-color: foo'></b>
+|  <b style='flood-opacity: foo'></b>
+|  <b style='font-family: foo'></b>
+|  <b style='font-feature-settings: foo'></b>
+|  <b style='font-kerning: foo'></b>
+|  <b style='font-language-override: foo'></b>
+|  <b style='font-size-adjust: foo'></b>
+|  <b style='font-size: foo'></b>
+|  <b style='font-stretch: foo'></b>
+|  <b style='font-style: foo'></b>
+|  <b style='font-synthesis: foo'></b>
+|  <b style='font-variant-alternates: foo'></b>
+|  <b style='font-variant-caps: foo'></b>
+|  <b style='font-variant-east-asian: foo'></b>
+|  <b style='font-variant-ligatures: foo'></b>
+|  <b style='font-variant-numeric: foo'></b>
+|  <b style='font-variant-position: foo'></b>
+|  <b style='font-variant: foo'></b>
+|  <b style='font-variation-settings: foo'></b>
+|  <b style='font-weight: foo'></b>
+|  <b style='font: foo'></b>
+|  <b style='glyph-orientation-horizontal: foo'></b>
+|  <b style='glyph-orientation-vertical: foo'></b>
+|  <b style='grid-area: foo'></b>
+|  <b style='grid-auto-columns: foo'></b>
+|  <b style='grid-auto-flow: foo'></b>
+|  <b style='grid-auto-rows: foo'></b>
+|  <b style='grid-column-end: foo'></b>
+|  <b style='grid-column-gap: foo'></b>
+|  <b style='grid-column-start: foo'></b>
+|  <b style='grid-column: foo'></b>
+|  <b style='grid-gap: foo'></b>
+|  <b style='grid-row-end: foo'></b>
+|  <b style='grid-row-gap: foo'></b>
+|  <b style='grid-row-start: foo'></b>
+|  <b style='grid-row: foo'></b>
+|  <b style='grid-template-areas: foo'></b>
+|  <b style='grid-template-columns: foo'></b>
+|  <b style='grid-template-rows: foo'></b>
+|  <b style='grid-template: foo'></b>
+|  <b style='grid: foo'></b>
+|  <b style='hanging-punctuation: foo'></b>
+|  <b style='height: foo'></b>
+|  <b style='hyphens: foo'></b>
+|  <b style='image-orientation: foo'></b>
+|  <b style='image-rendering: foo'></b>
+|  <b style='image-resolution: foo'></b>
+|  <b style='inline-size: foo'></b>
+|  <b style='isolation: foo'></b>
+|  <b style='justify-content: foo'></b>
+|  <b style='justify-items: foo'></b>
+|  <b style='justify-self: foo'></b>
+|  <b style='kerning: foo'></b>
+|  <b style='left: foo'></b>
+|  <b style='letter-spacing: foo'></b>
+|  <b style='lighting-color: foo'></b>
+|  <b style='line-break: foo'></b>
+|  <b style='line-height: foo'></b>
+|  <b style='list-style-image: foo'></b>
+|  <b style='list-style-position: foo'></b>
+|  <b style='list-style-type: foo'></b>
+|  <b style='list-style: foo'></b>
+|  <b style='margin-bottom: foo'></b>
+|  <b style='margin-left: foo'></b>
+|  <b style='margin-right: foo'></b>
+|  <b style='margin-top: foo'></b>
+|  <b style='margin: foo'></b>
+|  <b style='marker-end: foo'></b>
+|  <b style='marker-mid: foo'></b>
+|  <b style='marker-start: foo'></b>
+|  <b style='marker: foo'></b>
+|  <b style='mask: foo'></b>
+|  <b style='max-height: foo'></b>
+|  <b style='max-width: foo'></b>
+|  <b style='min-height: foo'></b>
+|  <b style='min-width: foo'></b>
+|  <b style='mix-blend-mode: foo'></b>
+|  <b style='object-fit: foo'></b>
+|  <b style='object-position: foo'></b>
+|  <b style='offset-distance: foo'></b>
+|  <b style='opacity: foo'></b>
+|  <b style='order: foo'></b>
+|  <b style='orphans: foo'></b>
+|  <b style='outline-color: foo'></b>
+|  <b style='outline-offset: foo'></b>
+|  <b style='outline-style: foo'></b>
+|  <b style='outline-width: foo'></b>
+|  <b style='outline: foo'></b>
+|  <b style='overflow-wrap: foo'></b>
+|  <b style='overflow-x: foo'></b>
+|  <b style='overflow-y: foo'></b>
+|  <b style='overflow: foo'></b>
+|  <b style='padding-bottom: foo'></b>
+|  <b style='padding-left: foo'></b>
+|  <b style='padding-right: foo'></b>
+|  <b style='padding-top: foo'></b>
+|  <b style='padding: foo'></b>
+|  <b style='page-break-after: foo'></b>
+|  <b style='page-break-before: foo'></b>
+|  <b style='page-break-inside: foo'></b>
+|  <b style='pause: foo'></b>
+|  <b style='pause-after: foo'></b>
+|  <b style='pause-before: foo'></b>
+|  <b style='perspective-origin: foo'></b>
+|  <b style='perspective: foo'></b>
+|  <b style='pitch: foo'></b>
+|  <b style='pitch-range: foo'></b>
+|  <b style='place-items: foo'></b>
+|  <b style='pointer-events: foo'></b>
+|  <!-- position has special rules. Don't use `foo` -->
+|  <b style='position: initial'></b>
+|  <b style='quotes: foo'></b>
+|  <b style='resize: foo'></b>
+|  <b style='richness: foo'></b>
+|  <b style='right: foo'></b>
+|  <b style='row-gap: foo'></b>
+|  <b style='shape-rendering: foo'></b>
+|  <b style='speak-header: foo'></b>
+|  <b style='speak-numeral: foo'></b>
+|  <b style='speak-punctuation: foo'></b>
+|  <b style='speak: foo'></b>
+|  <b style='speech-rate: foo'></b>
+|  <b style='stop-color: foo'></b>
+|  <b style='stop-opacity: foo'></b>
+|  <b style='stress: foo'></b>
+|  <b style='stroke-dasharray: foo'></b>
+|  <b style='stroke-dashoffset: foo'></b>
+|  <b style='stroke-linecap: foo'></b>
+|  <b style='stroke-linejoin: foo'></b>
+|  <b style='stroke-miterlimit: foo'></b>
+|  <b style='stroke-opacity: foo'></b>
+|  <b style='stroke-width: foo'></b>
+|  <b style='stroke: foo'></b>
+|  <b style='tab-size: foo'></b>
+|  <b style='table-layout: foo'></b>
+|  <b style='text-align-last: foo'></b>
+|  <b style='text-align: foo'></b>
+|  <b style='text-anchor: foo'></b>
+|  <b style='text-combine-upright: foo'></b>
+|  <b style='text-decoration-color: foo'></b>
+|  <b style='text-decoration-line: foo'></b>
+|  <b style='text-decoration-skip-ink: foo'></b>
+|  <b style='text-decoration-skip: foo'></b>
+|  <b style='text-decoration-style: foo'></b>
+|  <b style='text-decoration: foo'></b>
+|  <b style='text-emphasis-color: foo'></b>
+|  <b style='text-emphasis-position: foo'></b>
+|  <b style='text-emphasis-style: foo'></b>
+|  <b style='text-emphasis: foo'></b>
+|  <b style='text-fill-color: foo'></b>
+|  <b style='text-indent: foo'></b>
+|  <b style='text-justify: foo'></b>
+|  <b style='text-orientation: foo'></b>
+|  <b style='text-overflow: foo'></b>
+|  <b style='text-rendering: foo'></b>
+|  <b style='text-shadow: foo'></b>
+|  <b style='text-stroke-color: foo'></b>
+|  <b style='text-stroke-width: foo'></b>
+|  <b style='text-stroke: foo'></b>
+|  <b style='text-transform: foo'></b>
+|  <b style='text-underline-position: foo'></b>
+|  <b style='top: foo'></b>
+|  <b style='transform-box: foo'></b>
+|  <b style='transform-origin: foo'></b>
+|  <b style='transform-style: foo'></b>
+|  <b style='transform: foo'></b>
+|  <b style='transition-delay: foo'></b>
+|  <b style='transition-duration: foo'></b>
+|  <b style='transition-property: foo'></b>
+|  <b style='transition-property: opacity, transform'></b>
+|  <b style='transition-timing-function: foo'></b>
+|  <b style='transition: foo'></b>
+|  <b style='transition: opacity 4s ease-in-out 1s;'></b>
+|  <b style='unicode-bidi: foo'></b>
+|  <b style='user-select: foo'></b>
+|  <b style='vertical-align: foo'></b>
+|  <b style='visibility: foo'></b>
+|  <b style='visibility: hidden'></b>
+|  <b style='voice-family: foo'></b>
+|  <b style='white-space: foo'></b>
+|  <b style='widows: foo'></b>
+|  <b style='width: foo'></b>
+|  <b style='word-break: foo'></b>
+|  <b style='word-spacing: foo'></b>
+|  <b style='word-wrap: foo'></b>
+|  <b style='writing-mode: foo'></b>
+|  <b style='z-index: foo'></b>
+|  <b style='z-index: auto'></b>
+|  <b style='z-index: 0'></b>
+|  <b style='z-index: +1'></b>
+|  <b style='z-index: -10'></b>
+|  <b style='z-index: -1000'></b>
+|  <!-- Made-up decls -->
+|  <b style='amplitude: foo'></b>
+|  <b style='barometric-pressure: foo'></b>
+|  <b style='degrees-celsius: foo'></b>
+|  </body>
+|  </html>

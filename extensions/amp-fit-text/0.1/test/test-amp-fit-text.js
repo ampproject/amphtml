@@ -1,20 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
 
-import {calculateFontSize_, updateOverflow_} from '../amp-fit-text';
+import {createElementWithAttributes} from '#core/dom';
+
+import {
+  getDeterministicOuterHTML,
+  hypenCaseToCamelCase,
+} from '#testing/helpers';
+
+import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
+import {buildDom} from '../build-dom';
 
 describes.realWin(
   'amp-fit-text component',
@@ -23,7 +17,7 @@ describes.realWin(
       extensions: ['amp-fit-text'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -48,23 +42,140 @@ describes.realWin(
       ft.textContent = text;
       doc.body.appendChild(ft);
       return ft
-        .build()
+        .buildInternal()
         .then(() => ft.layoutCallback())
         .then(() => ft);
     }
 
+    it('buildDom and buildCallback should result in the same outerHTML', async () => {
+      const fitText1 = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      const fitText2 = fitText1.cloneNode(/* deep */ true);
+
+      new AmpFitText(fitText1).buildCallback();
+      buildDom(fitText2);
+
+      expect(fitText1.outerHTML).to.equal(fitText2.outerHTML);
+    });
+
+    it('buildDom should behave same in browser and in WorkerDOM', async () => {
+      const browserFitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      const workerFitText = createElementWithAttributes(
+        createWorkerDomDoc(),
+        'amp-fit-text',
+        {
+          width: '111px',
+          height: '222px',
+        }
+      );
+
+      buildDom(browserFitText);
+      buildDom(workerFitText);
+
+      const browserHtml = getDeterministicOuterHTML(browserFitText);
+      const workerHtml = getDeterministicOuterHTML(workerFitText);
+      expect(workerHtml).to.equal(browserHtml);
+    });
+
+    it('buildCallback should assign ivars even when server rendered', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      buildDom(fitText);
+      fitText.setAttribute('i-amphtml-ssr', '');
+      const baseElement = new AmpFitText(fitText);
+      await baseElement.buildCallback();
+
+      expect(baseElement.content_).ok;
+      expect(baseElement.contentWrapper_).ok;
+      expect(baseElement.measurer_).ok;
+    });
+
+    it('buildDom should throw if invalid server rendered dom', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        'i-amphtml-ssr': '',
+      });
+      allowConsoleError(() => {
+        expect(() => buildDom(fitText)).throws(/Invalid server render/);
+      });
+    });
+
+    it('buildDom should not modify dom for server rendered element', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text');
+      buildDom(fitText);
+      fitText.setAttribute('i-amphtml-ssr', '');
+
+      const before = fitText.outerHTML;
+      buildDom(fitText);
+      const after = fitText.outerHTML;
+
+      expect(before).equal(after);
+    });
+
     it('renders', () => {
       const text = 'Lorem ipsum';
-      return getFitText(text).then(ft => {
+      return getFitText(text).then((ft) => {
         const content = ft.querySelector('.i-amphtml-fit-text-content');
         expect(content).to.not.equal(null);
         expect(content.textContent).to.equal(text);
+        expect(ft.textContent).to.equal(text);
       });
+    });
+
+    it('supports update of textContent', async () => {
+      const ft = await getFitText('Lorem ipsum');
+      const impl = await ft.getImpl();
+      const newText = 'updated';
+      ft.textContent = newText;
+      expect(ft.textContent).to.equal(newText);
+      await impl.mutateElement(() => {});
+      const content = ft.querySelector('.i-amphtml-fit-text-content');
+      expect(content.textContent).to.equal(newText);
+    });
+
+    it('re-calculates font size if a resize is detected by the measurer', async () => {
+      const ft = await getFitText(
+        'Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.'
+      );
+      const impl = await ft.getImpl();
+      const updateFontSizeSpy = env.sandbox.spy(impl, 'updateFontSize_');
+
+      // Wait for the resizeObserver recognize the changes
+      // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 90);
+      });
+      // Verify that layoutCallback calls updateFontSize.
+      expect(updateFontSizeSpy).to.be.calledOnce;
+      updateFontSizeSpy.resetHistory();
+      // Modify the size of the fit-text box.
+      ft.setAttribute('width', '50');
+      ft.setAttribute('height', '100');
+      ft.style.width = '50px';
+      ft.style.height = '100px';
+
+      // Wait for the resizeObserver recognize the changes
+      // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 90);
+      });
+      // Verify that the ResizeObserver calls updateFontSize.
+      expect(updateFontSizeSpy).to.be.calledOnce;
     });
   }
 );
 
-describes.realWin('amp-fit-text calculateFontSize', {}, env => {
+describes.realWin('amp-fit-text calculateFontSize', {}, (env) => {
   let win, doc;
   let element;
 
@@ -125,7 +236,7 @@ describes.realWin('amp-fit-text calculateFontSize', {}, env => {
   });
 });
 
-describes.realWin('amp-fit-text updateOverflow', {}, env => {
+describes.realWin('amp-fit-text updateOverflow', {}, (env) => {
   let win, doc;
   let content;
   let classToggles;
@@ -136,7 +247,11 @@ describes.realWin('amp-fit-text updateOverflow', {}, env => {
     doc = win.document;
     classToggles = {};
     content = {
-      style: {},
+      style: {
+        setProperty(name, value) {
+          content.style[hypenCaseToCamelCase(name)] = value;
+        },
+      },
       classList: {
         toggle: (className, on) => {
           classToggles[className] = on;

@@ -1,0 +1,28 @@
+PASS
+|  <!--
+|    Test Description:
+|    This test demonstrates that all LTS scripts having a module and nomodule
+|    pairing are considered valid.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="google;v=1">
+|  <head>
+|    <meta charset=utf-8>
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name=viewport content="width=device-width">
+|
+|    <!-- Valid: module/nomodule pair for AMP runtime LTS script -->
+|    <script async crossorigin=anonymous src=https://cdn.ampproject.org/lts/v0.mjs type=module></script>
+|    <script async nomodule src=https://cdn.ampproject.org/lts/v0.js></script>
+|
+|    <!-- Valid: module/nomodule pair for AMP extension script -->
+|    <script async crossorigin=anonymous custom-element=amp-ad src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs type=module></script>
+|    <script async custom-element=amp-ad nomodule src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js></script>
+|
+|    <link rel=canonical href="./regular-html-version.html">
+|  </head>
+|  <body>
+|    Hello, world.
+|    <amp-ad layout=nodisplay type></amp-ad>
+|  </body>
+|  </html>

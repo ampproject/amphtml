@@ -1,22 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssert} from '#utils/log';
 
+import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {Renderer} from './amp-ad-type-defs';
-import {devAssert} from '../../../src/log';
-import {getAmpAdTemplateHelper} from './template-validator';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
@@ -40,11 +25,22 @@ export class TemplateRenderer extends Renderer {
     super();
   }
 
+  /**
+   * Retrieve the content document depending on browser support
+   *
+   * @param {*} iframe
+   *   The iframe to retrieve the document of
+   * @return {*}
+   */
+  getDocument(iframe) {
+    return iframe.contentDocument || iframe.contentWindow.document;
+  }
+
   /** @override */
   render(context, element, creativeData) {
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const {size, adUrl} = context;
+    const {adUrl, size} = context;
     const {creativeMetadata} = creativeData;
 
     devAssert(size, 'missing creative size');
@@ -55,25 +51,26 @@ export class TemplateRenderer extends Renderer {
       size,
       element,
       creativeMetadata
-    ).then(iframe => {
+    ).then((iframe) => {
       const templateData =
-        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
+        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          creativeData.templateData
+        );
       const {data} = templateData;
       if (!data) {
         return Promise.resolve();
       }
-      const templateHelper = getAmpAdTemplateHelper(context.win);
+      const templateHelper = getAmpAdTemplateHelper(element);
       return templateHelper
-        .render(data, iframe.contentWindow.document.body)
-        .then(renderedElement => {
+        .render(data, this.getDocument(iframe).body)
+        .then((renderedElement) => {
           const {analytics} = templateData;
           if (analytics) {
             templateHelper.insertAnalytics(renderedElement, analytics);
           }
           // This element must exist, or #render() would have thrown.
-          const templateElement = iframe.contentWindow.document.querySelector(
-            'template'
-          );
+          const templateElement =
+            this.getDocument(iframe).querySelector('template');
           templateElement.parentNode.replaceChild(
             renderedElement,
             templateElement

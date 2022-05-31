@@ -1,23 +1,8 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {LastAddedResolver} from '#core/data-structures/promise';
+import {iterateCursor} from '#core/dom';
+import {isFieldDefault} from '#core/dom/form';
 
-import {LastAddedResolver} from '../../../src/utils/promise';
-import {isFieldDefault} from '../../../src/form';
-import {iterateCursor} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
 
@@ -133,7 +118,7 @@ export class FormVerifier {
   clearVerificationErrors_() {
     const {elements} = this.form_;
     if (elements) {
-      iterateCursor(elements, e => {
+      iterateCursor(elements, (e) => {
         e.setCustomValidity('');
       });
     }
@@ -174,12 +159,12 @@ export class AsyncVerifier extends FormVerifier {
       () => {
         return [];
       },
-      error => {
+      (error) => {
         return getResponseErrorData_(/** @type {!Error} */ (error));
       }
     );
 
-    return this.addToResolver_(xhrConsumeErrors).then(errors =>
+    return this.addToResolver_(xhrConsumeErrors).then((errors) =>
       this.applyErrors_(errors)
     );
   }
@@ -243,11 +228,11 @@ export class AsyncVerifier extends FormVerifier {
     }
 
     // Create a list of form elements that had an error, but are now fixed.
-    const isFixed = previousError =>
-      errors.every(error => previousError.name !== error.name);
+    const isFixed = (previousError) =>
+      errors.every((error) => previousError.name !== error.name);
     const fixedElements = previousErrors
       .filter(isFixed)
-      .map(e => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
+      .map((e) => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
 
     return /** @type {!UpdatedErrorsDef} */ ({
       updatedElements: errorElements.concat(fixedElements),
@@ -268,7 +253,7 @@ function getResponseErrorData_(error) {
   }
 
   return response.json().then(
-    json => json.verifyErrors || [],
+    (json) => json.verifyErrors || [],
     () => []
   );
 }

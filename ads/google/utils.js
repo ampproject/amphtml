@@ -1,32 +1,17 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {user} from '#utils/log';
 
 import {
   ExternalCorePubVars,
   MIN_PUB_CONTROL_WIDTH_OF_DESKTOP,
   getAutoConfig,
   getPubControlConfig,
-} from './a4a/shared/content-recommendation.js';
-import {user} from '../../src/log';
+} from './a4a/shared/content-recommendation';
 
 /**
  * Approved height for AdSense full-width responsive ads.
  * @const {number}
  */
-export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
+export const ADSENSE_RSPV_ALLOWED_HEIGHT = 320;
 
 /**
  * The attribute value for AdSense data-auto-format tag.
@@ -86,12 +71,12 @@ export function getMultiSizeDimensions(
       !validateDimensions(
         width,
         height,
-        w => isNaN(w) || w <= 0,
-        h => isNaN(h) || h <= 0,
-        badParams =>
+        (w) => isNaN(w) || w <= 0,
+        (h) => isNaN(h) || h <= 0,
+        (badParams) =>
           badParams
             .map(
-              badParam =>
+              (badParam) =>
                 `Invalid ${badParam.dim} of ${badParam.val} ` +
                 'given for secondary size.'
             )
@@ -107,12 +92,12 @@ export function getMultiSizeDimensions(
       !validateDimensions(
         width,
         height,
-        w => w > primaryWidth,
-        h => h > primaryHeight,
-        badParams =>
+        (w) => w > primaryWidth,
+        (h) => h > primaryHeight,
+        (badParams) =>
           badParams
             .map(
-              badParam =>
+              (badParam) =>
                 `Secondary ${badParam.dim} ${badParam.val} ` +
                 `can't be larger than the primary ${badParam.dim}.`
             )
@@ -134,12 +119,12 @@ export function getMultiSizeDimensions(
         !validateDimensions(
           width,
           height,
-          w => w < minWidth,
-          h => h < minHeight,
-          badParams =>
+          (w) => w < minWidth,
+          (h) => h < minHeight,
+          (badParams) =>
             badParams
               .map(
-                badParam =>
+                (badParam) =>
                   `Secondary ${badParam.dim} ${badParam.val} is ` +
                   `smaller than 2/3rds of the primary ${badParam.dim}.`
               )

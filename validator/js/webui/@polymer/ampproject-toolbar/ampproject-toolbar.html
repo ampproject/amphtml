@@ -1,0 +1,75 @@
+<!-- Toolbar displayed at the top of the page. This doesn't do much but has a
+     lot of styling, so we isolate it to keep the source for other parts of
+     the page easier to read. -->
+<link rel="import" href="../paper-toolbar/paper-toolbar.html">
+<dom-module id="ampproject-toolbar">
+  <style scope="ampproject-toolbar">
+    paper-toolbar {
+      --paper-toolbar-background: #fbfafb;
+      --paper-toolbar-color: #005af0;
+      --paper-toolbar: { font-family: Roboto, verdana, arial, sans-serif; };
+      --width: 100%
+    }
+    .ampproject-left {
+      @apply(--layout-flex);
+      width: auto;
+      text-transform: none;
+      white-space: nowrap;
+      background-repeat: no-repeat;
+      background-size: 40px 40px;
+      background-position: center left;
+    }
+    .ampproject-right {
+      color: #005af0;
+      margin: 10px 0;
+    }
+    .ampproject-link a:link,
+    .ampproject-link a:visited,
+    .ampproject-link a:hover,
+    .ampproject-link a:active {
+      color: #005af0;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+    .flex-horizontal {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      margin-bottom: 10px;
+    }
+  </style>
+  <template>
+    <paper-toolbar>
+      <div class="ampproject-left ampproject-link">
+        <a href="https://www.ampproject.org/"
+           target="_blank"><img style="height: 60px; width: 175px"
+                                src="/logo-blue.svg"></a>
+      </div>
+      <div class="ampproject-right ampproject-link">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp"
+           target="_blank">HOWTO</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://github.com/ampproject/amphtml/blob/main/validator/README.md"
+           target="_blank">GITHUB</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://www.google.com/policies/privacy/"
+           target="_blank">PRIVACY</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
+           target="_blank">CHROME EXTENSION</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://marketplace.visualstudio.com/items?itemName=amphtml.amphtml-validator"
+           target="_blank">VSCODE EXTENSION</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://www.npmjs.com/package/amphtml-validator"
+           target="_blank">NPM</a>
+      </div>
+    </paper-toolbar>
+  </template>
+  <script>
+    Polymer({
+      is: 'ampproject-toolbar',
+    });
+  </script>
+</dom-module>

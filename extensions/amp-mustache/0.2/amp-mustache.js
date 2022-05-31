@@ -1,28 +1,16 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {templateContentClone} from '#core/dom';
 
-import {dict} from '../../../src/utils/object';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
-import mustache from '../../../third_party/mustache/mustache';
+import {Purifier} from '#purifier';
+
+import {user} from '#utils/log';
+
+import mustache from '#third_party/mustache/mustache';
+
+import {BaseTemplate} from '../../../src/base-template';
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
+import {rewriteAttributeValue} from '../../../src/url-rewrite';
 
 const TAG = 'amp-mustache';
-
-const BaseTemplate =
-  /** @type {function(new:../../../src/service/template-impl.BaseTemplate)} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -38,9 +26,15 @@ export class AmpMustache extends BaseTemplate {
   constructor(element, win) {
     super(element, win);
 
+    registerServiceBuilder(win, 'purifier', function () {
+      return new Purifier(win.document, {}, rewriteAttributeValue);
+    });
+    /** @private @const {!Purifier} */
+    this.purifier_ = getService(win, 'purifier');
+
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer(value =>
-      purifyTagsForTripleMustache(value, this.win.document)
+    mustache.setUnescapedSanitizer((value) =>
+      this.purifier_.purifyTagsForTripleMustache(value)
     );
   }
 
@@ -53,12 +47,16 @@ export class AmpMustache extends BaseTemplate {
       return;
     }
     /** @private @const {!JsonObject} */
-    this.nestedTemplates_ = dict();
+    this.nestedTemplates_ = {};
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    try {
+      mustache.parse(this.template_, /* tags */ undefined);
+    } catch (err) {
+      user().error(TAG, err.message, this.element);
+    }
   }
 
   /**
@@ -90,7 +88,7 @@ export class AmpMustache extends BaseTemplate {
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');
-    iterateCursor(templates, (template, index) => {
+    templates.forEach((template, index) => {
       const key = `__AMP_NESTED_TEMPLATE_${index}`;
 
       // Store the nested template markup, keyed by index.
@@ -104,11 +102,27 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    return this.purifyAndSetHtml_(html);
+    const wrapped = `<div>${html}</div>`;
+    const purified = this.tryUnwrap(this.purifyAndSetHtml_(wrapped));
+    return this.unwrapChildren(purified);
   }
 
   /** @override */
   render(data) {
+    return this.tryUnwrap(this.render_(data));
+  }
+
+  /** @override */
+  renderAsString(data) {
+    return this.render_(data)./*OK*/ innerHTML;
+  }
+
+  /**
+   * @param {!JsonObject|string} data
+   * @return {!Element}
+   * @private
+   */
+  render_(data) {
     let mustacheData = data;
     // Also render any nested templates.
     if (typeof data === 'object') {
@@ -123,21 +137,16 @@ export class AmpMustache extends BaseTemplate {
   }
 
   /**
-   *
    * @param {string} html
    * @return {!Element}
    * @private
    */
   purifyAndSetHtml_(html) {
-    const body = purifyHtml(html, this.win.document);
-    // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
-    // https://github.com/cure53/DOMPurify/pull/295
-    const root = this.win.document.createElement('div');
-    root./*OK*/ innerHTML = body./*OK*/ innerHTML;
-    return this.unwrap(root);
+    const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
+    return body.firstElementChild;
   }
 }
 
-AMP.extension(TAG, '0.2', function(AMP) {
+AMP.extension(TAG, '0.2', function (AMP) {
   AMP.registerTemplate(TAG, AmpMustache);
 });

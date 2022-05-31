@@ -24,7 +24,7 @@
       padding-left: 0;
       padding-top: 18px;
       text-transform: uppercase;
-      width: 10%;
+      width: 100%;
       display: inline-block;
       padding: 10px 15px;
       text-decoration: none;
@@ -81,6 +81,21 @@
       min-width: 60px;
     }
 
+    details {
+      border: solid 1px gray;
+      margin-top: 5px;
+      padding: 10px;
+    }
+
+    details summary {
+      color: gray;
+      cursor: pointer;
+    }
+
+    details[open] summary {
+      color: inherit;
+    }
+
     #subdomain {
       color: gray;
       font-family: 'Courier New', Courier, monospace;
@@ -110,6 +125,21 @@
 
     tr[data-on='default'] .default {
       display: block;
+    }
+
+    #rtv {
+      border: solid 1px gray;
+      width: calc(100% - 150px);
+      padding: 10px;
+    }
+
+    #rtv-submit {
+      background: #aaa;
+      margin: 5px;
+    }
+
+    #rtv-submit[disabled] {
+      color: #777;
     }
 
     #redirect > input {
@@ -183,10 +213,7 @@
 <body>
   <header>
     <div class="tab header-title">
-      Accelerated
-      Mobile
-      Pages
-      Project
+      AMP Project
     </div>
   </header>
 
@@ -209,10 +236,29 @@
       These switches control which release channel (prod, RC, or dev) of AMP JS
       will be served through the <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a>.
     </p>
+    <p>
+      <em>Note:</em> These controls set a cookie on the domain name <code>cdn.ampproject.org</code>. If your browser is
+      set to block all third-party cookies, they will not function. Make sure third-party cookies are enabled, or
+      allowlisted on the websites that you are testing.
+    </p>
   </section>
 
   <section class="content">
     <table id="channels-table" border=1></table>
+    <details id="rtv-details">
+      <summary>Advanced</summary>
+      <p>
+        You can manually opt in to a previously released RTV using this form.
+      </p>
+      <p>
+        <em>Warning:</em> This is an advanced setting. It is intended for use while debugging AMP runtime code, and is
+        not meant to be used to publish AMP documents. To opt out of this setting, clear the RTV in the input field.
+      </p>
+      <div>
+        <input id="rtv" placeholder="E.g., 011912312359590" maxlength="15" type="text">
+        <button id="rtv-submit" disabled>opt-in</button>
+      </div>
+    </details>
   </section>
 
   <!-- Only displayed on top-level cdn.ampproject.org. -->

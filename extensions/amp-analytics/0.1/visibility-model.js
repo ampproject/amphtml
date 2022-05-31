@@ -1,23 +1,7 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
 
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {devAssert} from '#utils/log';
 
 /**
  * This class implements visibility calculations based on the
@@ -37,14 +21,14 @@ export class VisibilityModel {
      * Spec parameters.
      * @private {!JsonObject}
      */
-    this.spec_ = dict({
+    this.spec_ = {
       'visiblePercentageMin': Number(spec['visiblePercentageMin']) / 100 || 0,
       'visiblePercentageMax': Number(spec['visiblePercentageMax']) / 100 || 1,
       'totalTimeMin': Number(spec['totalTimeMin']) || 0,
       'totalTimeMax': Number(spec['totalTimeMax']) || Infinity,
       'continuousTimeMin': Number(spec['continuousTimeMin']) || 0,
       'continuousTimeMax': Number(spec['continuousTimeMax']) || Infinity,
-    });
+    };
     // Above, if visiblePercentageMax was not specified, assume 100%.
     // Here, do allow 0% to be the value if that is what was specified.
     if (String(spec['visiblePercentageMax']).trim() === '0') {
@@ -207,7 +191,7 @@ export class VisibilityModel {
       clearTimeout(this.scheduleRepeatId_);
       this.scheduleRepeatId_ = null;
     }
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -284,7 +268,7 @@ export class VisibilityModel {
    * @return {!JsonObject}
    */
   getState(startTime) {
-    return dict({
+    return {
       // Observed times, relative to the `startTime`.
       'firstSeenTime': timeBase(this.firstSeenTime_, startTime),
       'lastSeenTime': timeBase(this.lastSeenTime_, startTime),
@@ -299,7 +283,7 @@ export class VisibilityModel {
       'loadTimeVisibility': this.loadTimeVisibility_ * 100 || 0,
       'minVisiblePercentage': this.minVisiblePercentage_ * 100,
       'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
-    });
+    };
   }
 
   /**
@@ -437,6 +421,7 @@ export class VisibilityModel {
         this.minVisiblePercentage_ > 0
           ? Math.min(this.minVisiblePercentage_, visibility)
           : visibility;
+
       this.maxVisiblePercentage_ = Math.max(
         this.maxVisiblePercentage_,
         visibility

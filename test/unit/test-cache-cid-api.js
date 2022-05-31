@@ -1,25 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as fakeTimers from '@sinonjs/fake-timers';
 
-import * as lolex from 'lolex';
-import {CacheCidApi} from '../../src/service/cache-cid-api';
-import {installTimerService} from '../../src/service/timer-impl';
-import {mockServiceForDoc, stubService} from '../../testing/test-helper';
+import {CacheCidApi} from '#service/cache-cid-api';
+import {installTimerService} from '#service/timer-impl';
 
-describes.realWin('cacheCidApi', {amp: true}, env => {
+import {mockServiceForDoc, stubService} from '#testing/helpers/service';
+
+describes.realWin('cacheCidApi', {amp: true}, (env) => {
   let ampdoc;
   let api;
   let viewerMock;
@@ -35,8 +21,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
       'isProxyOrigin',
     ]);
 
-    clock = lolex.install({
-      target: env.win,
+    clock = fakeTimers.withGlobal(env.win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     installTimerService(env.win);
@@ -66,7 +51,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
     });
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -86,7 +71,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
             },
           })
         );
-        return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(
             'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
               'rvvfkCif_N9oYLdZEB976uJDhYgL'
@@ -116,7 +101,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
             },
           })
         );
-        return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(null);
           expect(fetchJsonStub).to.be.calledWith(
             'https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
@@ -153,7 +138,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
             },
           })
         );
-        return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(
             'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
               'rvvfkCif_N9oYLdZEB976uJDhYgL'
@@ -165,6 +150,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
       });
 
       it('should fail if the request times out', () => {
+        expectAsyncConsoleError(/fetchCidTimeout​​​/);
         fetchJsonStub.callsFake(() => {
           return new Promise((resolve, unused) => {
             clock.setTimeout(resolve, 35000, {
@@ -178,7 +164,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
         });
         const response = api
           .getScopedCid('AMP_ECID_GOOGLE')
-          .then(cid => {
+          .then((cid) => {
             expect(cid).to.equal(null);
             expect(fetchJsonStub).to.be.calledWith(
               'https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',

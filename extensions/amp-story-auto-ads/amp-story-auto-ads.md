@@ -1,41 +1,14 @@
 ---
 $category@: presentation
 formats:
-  - websites
+  - stories
 teaser:
   text: Dynamically inserts ads into a Story.
 ---
 
-<!--
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-story-auto-ads
 
 Dynamically inserts ads into a Story.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-</table>
 
 # Getting Started
 
@@ -60,6 +33,13 @@ right part of the screen.
 
 ## Configuration
 
+There are two ways of configuring an ad:
+**Inline**
+and
+**Remote**
+
+### Inline Ad Config
+
 In the `<amp-story-auto-ads>` element, you specify a JSON configuration object
 that contains the details for how ads should be fetched and displayed, which
 looks like the following:
@@ -69,11 +49,11 @@ looks like the following:
   <amp-story-auto-ads>
     <script type="application/json">
       {
-         "ad-attributes": {
-           "type": "doubleclick",
-           "data-slot": "/30497360/a4a/amp_story_dfp_example"
-         }
-       }
+        "ad-attributes": {
+          "type": "doubleclick",
+          "data-slot": "/30497360/a4a/amp_story_dfp_example"
+        }
+      }
     </script>
   </amp-story-auto-ads>
   ...
@@ -94,6 +74,42 @@ a [ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/am
 Unlike normal `amp-ad`, no `<fallback>` or `<placeholder>` needs to be specified
 here, as ads in stories will only be displayed once fully rendered.
 
+### Remote Ad Config
+
+Instead of adding in the JSON configuration file inside a script tag (as shown in the Inline Ad Config section),
+One may also host the remote URL using a
+
+[Remote JSON ad configuration file](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/ads/remote.json)
+
+```json
+{
+  "ad-attributes": {
+    "type": "doubleclick",
+    "data-slot": "/30497360/a4a/amp_story_dfp_example"
+  }
+}
+
+```
+
+Once you have your JSON configuration file setup, simply use the
+
+[html ad config code to retrive the remote URL:](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/story-ad-remote-config.html)
+
+in the `<amp-story-auto-ads>` element as shown here:
+
+```html
+<amp-story standalone supports-landscape>
+    <!--
+      This is an example of JSON retrieved from a source file.
+    -->
+    <amp-story-auto-ads src="/examples/amp-story/ads/remote.json" ></amp-story-auto-ads>
+    <amp-story-page id="page-1">
+    .
+    .
+    .
+</amp-story>
+```
+
 ### Passing additional attributes (RTC, Targeting, etc.)
 
 If you wish to pass any additional data (e.g. targeting information) as
@@ -112,7 +128,7 @@ A common use case is to pass targeting data or RTC configuration to the underlyi
         "rtc-config": {
           "urls": ["https://rtcEndpoint.biz/"]
         },
-        json: {
+        "json": {
           "targeting": {
             "loc": "usa",
             "animal": "cat"

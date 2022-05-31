@@ -1,35 +1,27 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {isConnectedNode} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {isArray, isObject} from '#core/types';
 
-import {CommonSignals} from './common-signals';
-import {Services} from './services';
-import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode} from './dom';
+import {Services} from '#service';
+import {parseExtensionUrl} from '#service/extension-script';
+
+import {dev, user} from '#utils/log';
+
+import {getMode} from './mode';
+import {
+  disposeServicesForDoc,
+  getServicePromiseOrNullForDoc,
+} from './service-helpers';
 import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
-import {dev, user} from './log';
-import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
-import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './types';
 import {parseUrlDeprecated} from './url';
-import {setStyle} from './style';
 
 /** @const @private {string} */
 const TAG = 'multidoc-manager';
@@ -109,9 +101,9 @@ export class MultidocManager {
 
     /**
      * Sets the document's visibility state.
-     * @param {!VisibilityState} state
+     * @param {!VisibilityState_Enum} state
      */
-    amp['setVisibilityState'] = function(state) {
+    amp['setVisibilityState'] = function (state) {
       ampdoc.overrideVisibilityState(state);
     };
 
@@ -125,15 +117,15 @@ export class MultidocManager {
      */
     amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
-    /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
+    /** @type {?function(string, *, boolean):(!Promise<*>|undefined)|undefined} */
     let onMessage;
 
     /**
      * Provides a message delivery mechanism by which AMP document can send
      * messages to the viewer.
-     * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
+     * @param {?function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
-    amp['onMessage'] = function(callback) {
+    amp['onMessage'] = function (callback) {
       onMessage = callback;
     };
 
@@ -145,9 +137,7 @@ export class MultidocManager {
       }
 
       // All other messages.
-      if (onMessage) {
-        return onMessage(eventType, data, awaitResponse);
-      }
+      return onMessage?.(eventType, data, awaitResponse);
     }, origin);
 
     /**
@@ -169,8 +159,8 @@ export class MultidocManager {
      * @param {string} name - Name of state or deep state
      * @return {Promise<*>} - Resolves to a copy of the value of a state
      */
-    amp['getState'] = name => {
-      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+    amp['getState'] = (name) => {
+      return Services.bindForDocOrNull(shadowRoot).then((bind) => {
         if (!bind) {
           return Promise.reject('amp-bind is not available in this document');
         }
@@ -183,8 +173,8 @@ export class MultidocManager {
      * @param {(!JsonObject|string)} state - State to be set
      * @return {Promise} - Resolves after state and history have been updated
      */
-    amp['setState'] = state => {
-      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+    amp['setState'] = (state) => {
+      return Services.bindForDocOrNull(shadowRoot).then((bind) => {
         if (!bind) {
           return Promise.reject('amp-bind is not available in this document');
         }
@@ -204,7 +194,7 @@ export class MultidocManager {
     builder(amp, shadowRoot, ampdoc).then(() => {
       // Document is ready.
       ampdoc.setReady();
-      ampdoc.signals().signal(CommonSignals.RENDER_START);
+      ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
     });
 
@@ -227,6 +217,7 @@ export class MultidocManager {
    * @return {!./runtime.ShadowDoc}
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
+    user().assertString(url);
     dev().fine(TAG, 'Attach shadow doc:', doc);
     // TODO(dvoytenko, #9490): once stable, port full document case to emulated
     // stream.
@@ -236,8 +227,7 @@ export class MultidocManager {
       opt_initParams,
       (amp, shadowRoot, ampdoc) => {
         // Install extensions.
-        const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-        this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
+        this.mergeShadowHead_(ampdoc, shadowRoot, doc);
 
         // Append body.
         if (doc.body) {
@@ -251,7 +241,7 @@ export class MultidocManager {
         // specifically, we have to wait for stubbing to complete, which may
         // take awhile due to importNode.
         setTimeout(() => {
-          ampdoc.signals().signal(CommonSignals.RENDER_START);
+          ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
           setStyle(hostElement, 'visibility', 'visible');
         }, 50);
 
@@ -269,6 +259,7 @@ export class MultidocManager {
    * @return {!Object}
    */
   attachShadowDocAsStream(hostElement, url, opt_initParams) {
+    user().assertString(url);
     dev().fine(TAG, 'Attach shadow doc as stream');
     return this.attachShadowDoc_(
       hostElement,
@@ -279,11 +270,9 @@ export class MultidocManager {
         let renderStarted = false;
         const writer = createShadowDomWriter(this.win);
         amp['writer'] = writer;
-        writer.onBody(doc => {
+        writer.onBody((doc) => {
           // Install extensions.
-          const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-          // Apply all doc extensions.
-          this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
+          this.mergeShadowHead_(ampdoc, shadowRoot, doc);
 
           // Append shallow body.
           const body = importShadowBody(
@@ -303,12 +292,12 @@ export class MultidocManager {
           if (!renderStarted) {
             renderStarted = true;
             setTimeout(() => {
-              ampdoc.signals().signal(CommonSignals.RENDER_START);
+              ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
               setStyle(hostElement, 'visibility', 'visible');
             }, 50);
           }
         });
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           writer.onEnd(() => {
             resolve();
             amp.writer = null;
@@ -323,11 +312,9 @@ export class MultidocManager {
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!ShadowRoot} shadowRoot
    * @param {!Document} doc
-   * @return {!Array<string>}
    * @private
    */
   mergeShadowHead_(ampdoc, shadowRoot, doc) {
-    const extensionIds = [];
     if (doc.head) {
       shadowRoot.AMP.head = doc.head;
       const parentLinks = {};
@@ -356,6 +343,9 @@ export class MultidocManager {
               // Ignore.
             } else if (name == 'viewport') {
               // Ignore.
+            } else if (name) {
+              // Store meta name/content pairs.
+              ampdoc.setMetaByName(name, n.getAttribute('content') || '');
             } else {
               // TODO(dvoytenko): copy other meta tags.
               dev().warn(TAG, 'meta ignored: ', n);
@@ -371,6 +361,17 @@ export class MultidocManager {
               // Must be a font definition: no other stylesheets are allowed.
               if (parentLinks[href]) {
                 dev().fine(TAG, '- stylesheet already included: ', href);
+                // To accomodate icon fonts whose stylesheets include
+                // the class definitions in addition to the font definition,
+                // we re-import the stylesheet into the shadow document.
+                // Note: <link> in shadow mode is not yet fully supported on
+                // all browsers, so we use <style>@import "url"</style> instead
+                installStylesForDoc(
+                  ampdoc,
+                  `@import "${href}"`,
+                  /* callback */ null,
+                  /* isRuntimeCss */ false
+                );
               } else {
                 parentLinks[href] = true;
                 const el = this.win.document.createElement('link');
@@ -412,34 +413,21 @@ export class MultidocManager {
             if (n.hasAttribute('src')) {
               dev().fine(TAG, '- src script: ', n);
               const src = n.getAttribute('src');
-              const isRuntime =
-                src.indexOf('/amp.js') != -1 || src.indexOf('/v0.js') != -1;
+              const urlParts = parseExtensionUrl(src);
               // Note: Some extensions don't have [custom-element] or
               // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
-              const versionRe = /-(\d+.\d+)(.max)?\.js$/;
-              const match = versionRe.exec(src);
-              const version = match ? match[1] : '0.1';
-              if (isRuntime) {
+              const extensionId = customElement || customTemplate;
+              if (!urlParts) {
                 dev().fine(TAG, '- ignore runtime script: ', src);
-              } else if (customElement || customTemplate) {
+              } else if (extensionId) {
                 // This is an extension.
                 this.extensions_.installExtensionForDoc(
                   ampdoc,
-                  customElement || customTemplate,
-                  version
+                  extensionId,
+                  urlParts.extensionVersion
                 );
-                dev().fine(
-                  TAG,
-                  '- load extension: ',
-                  customElement || customTemplate,
-                  ' ',
-                  version
-                );
-                if (customElement) {
-                  extensionIds.push(customElement);
-                }
               } else if (!n.hasAttribute('data-amp-report-test')) {
                 user().error(TAG, '- unknown script: ', n, src);
               }
@@ -449,7 +437,8 @@ export class MultidocManager {
               if (type.indexOf('javascript') == -1) {
                 shadowRoot.appendChild(this.win.document.importNode(n, true));
                 dev().fine(TAG, '- non-src script: ', n);
-              } else {
+              } else if (!n.hasAttribute('amp-onerror')) {
+                // Don't error on amp-onerror script (https://github.com/ampproject/amphtml/issues/31966)
                 user().error(TAG, '- unallowed inline javascript: ', n);
               }
             }
@@ -463,7 +452,7 @@ export class MultidocManager {
         }
       }
     }
-    return extensionIds;
+    ampdoc.setExtensionsKnown();
   }
 
   /**
@@ -473,7 +462,7 @@ export class MultidocManager {
    */
   broadcast_(data, sender) {
     this.purgeShadowRoots_();
-    this.shadowRoots_.forEach(shadowRoot => {
+    this.shadowRoots_.forEach((shadowRoot) => {
       if (shadowRoot == sender) {
         // Don't broadcast to the sender.
         return;
@@ -500,7 +489,7 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
+    ampdoc.overrideVisibilityState(VisibilityState_Enum.INACTIVE);
     disposeServicesForDoc(ampdoc);
 
     // There is a race between the visibility state change finishing and
@@ -516,18 +505,20 @@ export class MultidocManager {
     return this.timer_
       .timeoutPromise(
         15, // Delay for queued pass after visibility change is 10ms
-        new this.win.Promise(resolve => {
-          getServicePromiseOrNullForDoc(ampdoc, 'resources').then(resources => {
-            if (resources) {
-              resources.onNextPass(resolve);
-            } else {
-              resolve();
+        new this.win.Promise((resolve) => {
+          getServicePromiseOrNullForDoc(ampdoc, 'resources').then(
+            (resources) => {
+              if (resources) {
+                resources.onNextPass(resolve);
+              } else {
+                resolve();
+              }
             }
-          });
+          );
         }),
         'Timeout reached waiting for visibility state change callback'
       )
-      .catch(error => {
+      .catch((error) => {
         user().info(TAG, error);
       });
   }
@@ -555,7 +546,7 @@ export class MultidocManager {
 
   /** @private */
   purgeShadowRoots_() {
-    this.shadowRoots_.forEach(shadowRoot => {
+    this.shadowRoots_.forEach((shadowRoot) => {
       // The shadow root has been disconnected. Force it closed.
       if (!shadowRoot.host || !isConnectedNode(shadowRoot.host)) {
         user().warn(TAG, "Shadow doc wasn't previously closed");

@@ -1,42 +1,29 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import * as utilsStory from '../../../../src/utils/story';
-import {Entitlement, GrantReason} from '../entitlement';
-import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
-import {LocalSubscriptionRemotePlatform} from '../local-subscription-platform-remote';
+import * as utilsStory from '#utils/story';
+
 import {
   PageConfig,
   PageConfigResolver,
-} from '../../../../third_party/subscriptions-project/config';
+} from '#third_party/subscriptions-project/config';
+
+import {SubscriptionService} from '../amp-subscriptions';
+import {SubscriptionAnalyticsEvents} from '../analytics';
+import {Entitlement, GrantReason} from '../entitlement';
+import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
+import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
+import {LocalSubscriptionRemotePlatform} from '../local-subscription-platform-remote';
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/services';
-import {SubscriptionAnalyticsEvents} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
-import {SubscriptionService} from '../amp-subscriptions';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
-import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
-import {setTimeout} from 'timers';
 
-describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
+describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let element;
   let pageConfig;
+  let freePageConfig;
   let subscriptionService;
   let configResolver;
   let analyticsEventStub;
@@ -47,7 +34,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     'scenic-2017.appspot.com:product2',
   ];
 
-  const serviceConfig = {
+  const platformConfig = {
     services: [
       {
         authorizationUrl: 'https://lipsum.com/authorize',
@@ -65,6 +52,15 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       grantReason: GrantReason.SUBSCRIBER,
       granted: true,
     },
+  };
+
+  const freePlatformConfig = {
+    alwaysGrant: true,
+    services: [{'serviceId': 'platform1'}],
+  };
+
+  const meteringPlatformConfig = {
+    services: [{'serviceId': 'platform1', 'enableMetering': true}],
   };
 
   const serviceConfigIframe = {
@@ -88,26 +84,34 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     },
   };
 
+  /** Awaits N times. Allows promises to resolve. */
+  async function flush(n = 100) {
+    for (let i = 0; i < n; i++) {
+      await 'tick';
+    }
+  }
+
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
     element = win.document.createElement('script');
     element.id = 'amp-subscriptions';
     element.setAttribute('type', 'json');
-    element.innerHTML = JSON.stringify(serviceConfig);
+    element.innerHTML = JSON.stringify(platformConfig);
 
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
+    freePageConfig = new PageConfig('scenic-2017.appspot.com:news', false);
     env.sandbox
       .stub(PageConfigResolver.prototype, 'resolveConfig')
-      .callsFake(function() {
+      .callsFake(function () {
         configResolver = this;
         return Promise.resolve(pageConfig);
       });
     env.sandbox
       .stub(subscriptionService, 'getPlatformConfig_')
-      .callsFake(() => Promise.resolve(serviceConfig));
+      .callsFake(() => Promise.resolve(platformConfig));
     analyticsEventStub = env.sandbox.stub(
       subscriptionService.subscriptionAnalytics_,
       'event'
@@ -117,7 +121,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     isStory = false;
     env.sandbox
       .stub(utilsStory, 'isStoryDocument')
-      .returns({then: fn => fn(isStory)});
+      .returns({then: (fn) => fn(isStory)});
   });
 
   it('should call `initialize_` on start', async () => {
@@ -164,7 +168,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         'delegateAuthToViewer_'
       );
       env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
-        subscriptionService.platformConfig_ = serviceConfig;
+        subscriptionService.platformConfig_ = platformConfig;
         subscriptionService.pageConfig_ = pageConfig;
         subscriptionService.doesViewerProvideAuth_ = true;
         return Promise.resolve();
@@ -182,50 +186,31 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         'processGrantState_'
       );
       env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
-        subscriptionService.platformConfig_ = {
-          alwaysGrant: true,
-        };
+        subscriptionService.platformConfig_ = freePlatformConfig;
         subscriptionService.pageConfig_ = pageConfig;
         return Promise.resolve();
       });
       subscriptionService.start();
+      await flush();
 
-      await subscriptionService.initialize_();
-      expect(processStateStub).to.be.calledWith(true);
+      await expect(processStateStub).to.be.calledWith(true);
     });
 
-    it(
-      'should not skip everything and unlock document for alwaysGrant ' +
-        'if viewer provides authorization',
-      async () => {
-        const processStateStub = env.sandbox.stub(
-          subscriptionService,
-          'processGrantState_'
-        );
-        const authFlowStub = env.sandbox.stub(
-          subscriptionService,
-          'startAuthorizationFlow_'
-        );
-        const delegateStub = env.sandbox.stub(
-          subscriptionService,
-          'delegateAuthToViewer_'
-        );
-        env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
-          subscriptionService.platformConfig_ = {
-            alwaysGrant: true,
-          };
-          subscriptionService.pageConfig_ = pageConfig;
-          subscriptionService.doesViewerProvideAuth_ = true;
-          return Promise.resolve();
-        });
-        subscriptionService.start();
+    it('should skip everything and unlock document for unlocked page config', async () => {
+      const processStateStub = env.sandbox.stub(
+        subscriptionService,
+        'processGrantState_'
+      );
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = platformConfig;
+        subscriptionService.pageConfig_ = freePageConfig;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+      await flush();
 
-        await subscriptionService.initialize_();
-        expect(authFlowStub.withArgs(false)).to.be.calledOnce;
-        expect(delegateStub).to.be.calledOnce;
-        expect(processStateStub).to.not.be.called;
-      }
-    );
+      expect(processStateStub).to.be.calledWith(true);
+    });
 
     it('should delay the platform selection and activation if story', async () => {
       isStory = true;
@@ -302,7 +287,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   });
 
   it('should add subscription platform while registering it', async () => {
-    const serviceData = serviceConfig['services'][1];
+    const serviceData = platformConfig['services'][1];
     const platform = new SubscriptionPlatform();
     const entitlementData = {
       source: 'local',
@@ -319,9 +304,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     platform.getEntitlements = env.sandbox
       .stub()
       .callsFake(() => Promise.resolve(entitlement));
-    platform.getServiceId = env.sandbox.stub().callsFake(() => 'local');
+    platform.getPlatformKey = env.sandbox.stub().callsFake(() => 'local');
 
-    subscriptionService.platformConfig_ = serviceConfig;
+    subscriptionService.platformConfig_ = platformConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
 
     await subscriptionService.initialize_();
@@ -348,7 +333,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     it('should return json inside script#amp-subscriptions tag ', async () => {
       subscriptionService.getPlatformConfig_.restore();
       const config = await subscriptionService.getPlatformConfig_();
-      expect(JSON.stringify(config)).to.be.equal(JSON.stringify(serviceConfig));
+      expect(JSON.stringify(config)).to.be.equal(
+        JSON.stringify(platformConfig)
+      );
     });
   });
 
@@ -357,7 +344,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       'should put `LocalSubscriptionRemotePlatform` for every service config' +
         ' with authorization Url',
       () => {
-        const service = serviceConfig.services[0];
+        const service = platformConfig.services[0];
         subscriptionService.serviceAdapter_ = new ServiceAdapter(
           subscriptionService
         );
@@ -410,7 +397,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         ? new Entitlement(grantEntitlementSpec)
         : null;
       const granted = !!grantEntitlementSpec;
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve(granted));
@@ -436,7 +424,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       });
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       const selectPlatformStub =
         subscriptionService.platformStore_.selectPlatform;
       const activateStub = env.sandbox.stub(localPlatform, 'activate');
@@ -481,7 +470,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           grantReason: GrantReason.SUBSCRIBER,
         }
       );
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       const selectPlatformStub =
         subscriptionService.platformStore_.selectPlatform;
       const activateStub = env.sandbox.stub(localPlatform, 'activate');
@@ -534,7 +524,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
       await subscriptionService.initialize_();
       resolveRequiredPromises({granted: false});
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform_();
       env.sandbox.stub(localPlatform, 'activate');
 
       await subscriptionService.selectAndActivatePlatform_();
@@ -557,42 +548,347 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         }
       );
     });
+
+    describe('maybeRenderDialogForSelectedPlatform', () => {
+      beforeEach(() => {
+        isStory = true;
+
+        env.sandbox.stub(subscriptionService, 'fetchEntitlements_');
+        subscriptionService.start();
+        subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      });
+
+      it('should select and activate platform with granted status if not free and not embedded in the viewer', async () => {
+        await subscriptionService.initialize_();
+        await flush();
+        resolveRequiredPromises({
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
+
+        const localPlatform =
+          subscriptionService.platformStore_.getLocalPlatform_();
+        expect(localPlatform).to.be.not.null;
+        const selectPlatformStub =
+          subscriptionService.platformStore_.selectPlatform;
+        const activateStub = env.sandbox.stub(localPlatform, 'activate');
+
+        await subscriptionService.maybeRenderDialogForSelectedPlatform();
+
+        expect(activateStub).to.be.calledOnce;
+        expect(activateStub.firstCall.args[0].source).to.equal('local');
+        expect(activateStub.firstCall.args[1].source).to.equal('local');
+        expect(selectPlatformStub).to.be.called;
+        expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+          {
+            'serviceId': 'local',
+          }
+        );
+        expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.ACCESS_GRANTED,
+          {
+            'serviceId': 'local',
+          }
+        );
+        expect(analyticsEventStub).to.not.be.calledWith(
+          SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED
+        );
+      });
+
+      it('should select and activate platform with non-granted status if not free and not embedded in the viewer', async () => {
+        await subscriptionService.initialize_();
+        await flush();
+        resolveRequiredPromises({
+          granted: false,
+        });
+
+        const localPlatform =
+          subscriptionService.platformStore_.getLocalPlatform_();
+        expect(localPlatform).to.be.not.null;
+        const selectPlatformStub =
+          subscriptionService.platformStore_.selectPlatform;
+        const activateStub = env.sandbox.stub(localPlatform, 'activate');
+
+        await subscriptionService.maybeRenderDialogForSelectedPlatform();
+
+        expect(activateStub).to.be.calledOnce;
+        expect(activateStub.firstCall.args[0].source).to.equal('local');
+        expect(selectPlatformStub).to.be.called;
+        expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+          {
+            'serviceId': 'local',
+          }
+        );
+        expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+          {
+            'serviceId': 'local',
+          }
+        );
+        expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.ACCESS_DENIED,
+          {
+            'serviceId': 'local',
+          }
+        );
+      });
+
+      it('should not select and activate platform if the viewer does provide auth', async () => {
+        env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+          subscriptionService.platformConfig_ = platformConfig;
+          subscriptionService.doesViewerProvideAuth_ = true;
+          return Promise.resolve();
+        });
+
+        await subscriptionService.initialize_();
+        await flush();
+        resolveRequiredPromises({
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
+
+        const localPlatform =
+          subscriptionService.platformStore_.getLocalPlatform_();
+        expect(localPlatform).to.be.not.null;
+        const selectPlatformStub =
+          subscriptionService.platformStore_.selectPlatform;
+        const activateStub = env.sandbox.stub(localPlatform, 'activate');
+
+        await subscriptionService.maybeRenderDialogForSelectedPlatform();
+
+        expect(activateStub).to.not.be.calledOnce;
+        expect(selectPlatformStub).to.not.be.called;
+      });
+
+      it('should not select and activate platform if the platform config is alwaysGrant', async () => {
+        env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+          subscriptionService.platformConfig_ = freePlatformConfig;
+          return Promise.resolve();
+        });
+
+        await subscriptionService.initialize_();
+        await flush();
+        resolveRequiredPromises({
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
+
+        const localPlatform =
+          subscriptionService.platformStore_.getLocalPlatform_();
+        expect(localPlatform).to.be.not.null;
+        const selectPlatformStub =
+          subscriptionService.platformStore_.selectPlatform;
+        const activateStub = env.sandbox.stub(localPlatform, 'activate');
+
+        await subscriptionService.maybeRenderDialogForSelectedPlatform();
+
+        expect(activateStub).to.not.be.calledOnce;
+        expect(selectPlatformStub).to.not.be.called;
+      });
+    });
   });
 
   describe('startAuthorizationFlow_', () => {
-    it('should start grantStatus and platform selection', async () => {
-      subscriptionService.platformStore_ = new PlatformStore(products);
-      const getGrantStatusStub = env.sandbox
-        .stub(subscriptionService.platformStore_, 'getGrantStatus')
-        .callsFake(() => Promise.resolve());
-      const selectAndActivateStub = env.sandbox.stub(
-        subscriptionService,
-        'selectAndActivatePlatform_'
-      );
-      const performPingbackStub = env.sandbox.stub(
-        subscriptionService,
-        'performPingback_'
-      );
-      subscriptionService.startAuthorizationFlow_();
-      expect(getGrantStatusStub).to.be.calledOnce;
-      expect(selectAndActivateStub).to.be.calledOnce;
+    let entitlement;
+    let platform;
+    let platformStore;
+    let renderer;
 
-      await subscriptionService.platformStore_.getGrantStatus();
-      expect(performPingbackStub).to.be.calledOnce;
+    beforeEach(() => {
+      renderer = subscriptionService.renderer_;
+
+      // Setup platform store.
+      const serviceAdapter = new ServiceAdapter(subscriptionService);
+      platformStore = new PlatformStore(products);
+      platform = localSubscriptionPlatformFactory(
+        ampdoc,
+        platformConfig.services[0],
+        serviceAdapter
+      );
+      subscriptionService.platformStore_ = platformStore;
+
+      entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      });
+
+      env.sandbox.stub(platform, 'activate');
+      env.sandbox.stub(platform, 'getEntitlements').callsFake(() => {
+        subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+        return Promise.resolve();
+      });
+      env.sandbox.stub(renderer, 'setGrantState');
+      env.sandbox
+        .stub(platformStore, 'getGrantEntitlement')
+        .resolves(entitlement);
+      env.sandbox.stub(platformStore, 'getGrantStatus').resolves(true);
+      env.sandbox.stub(platformStore, 'getPlatform').returns(platform);
+      env.sandbox.stub(platformStore, 'getResolvedEntitlementFor');
+      env.sandbox.stub(platformStore, 'resetPlatform');
+      env.sandbox.stub(platformStore, 'selectPlatform').resolves(platform);
     });
 
-    it('should not call selectAndActivatePlatform based on param', () => {
-      subscriptionService.platformStore_ = new PlatformStore(products);
-      const getGrantStatusStub = env.sandbox
-        .stub(subscriptionService.platformStore_, 'getGrantStatus')
-        .callsFake(() => Promise.resolve());
-      const selectAndActivateStub = env.sandbox.stub(
-        subscriptionService,
-        'selectAndActivatePlatform_'
-      );
+    it('should set grant state', async () => {
+      subscriptionService.startAuthorizationFlow_();
+      await flush();
+
+      expect(renderer.setGrantState).to.be.called;
+    });
+
+    it('should activate platform, when its requested', async () => {
+      subscriptionService.startAuthorizationFlow_(true);
+      await flush();
+
+      expect(platform.activate).to.be.called;
+    });
+
+    it('should not activate platform, when its not requested', async () => {
       subscriptionService.startAuthorizationFlow_(false);
-      expect(getGrantStatusStub).to.be.calledOnce;
-      expect(selectAndActivateStub).to.not.be.called;
+      await flush();
+
+      expect(platform.activate).to.not.be.called;
+    });
+
+    describe('with metering', () => {
+      beforeEach(async () => {
+        subscriptionService.getPlatformConfig_.resolves(meteringPlatformConfig);
+        await subscriptionService.initialize_();
+      });
+
+      it('handle grant state normally, when a non-metering platform granted', async () => {
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        expect(renderer.setGrantState).to.be.called;
+        expect(platform.activate).to.be.called;
+      });
+
+      it('allow metering platform to consume entitlement before setting grant state, when the metering platform granted', async () => {
+        // Metering platform granted this entitlement.
+        entitlement.grantReason = GrantReason.METERING;
+        entitlement.service = meteringPlatformConfig.services[0].serviceId;
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        // Wait to set grant state.
+        expect(renderer.setGrantState).to.not.be.called;
+        expect(platform.activate).be.called;
+
+        // Set grant state after platform continues flow.
+        const continueCallback = platform.activate.getCall(0).args[2];
+        continueCallback();
+        expect(renderer.setGrantState).to.be.called;
+      });
+
+      it('handle grant state normally, when there is no grant and we already fetched entitlements with the current metering state', async () => {
+        // Nothing granted.
+        platformStore.getGrantStatus.resolves(false);
+
+        // We already fetched entitlements with the current metering state.
+        subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        expect(renderer.setGrantState).to.be.called;
+        expect(platform.activate).to.be.called;
+      });
+
+      it('fetch entitlements, when there is no grant and we have not fetched entitlements with the current metering state yet', async () => {
+        // Nothing granted.
+        platformStore.getGrantStatus.resolves(false);
+
+        // Add metering state.
+        env.sandbox
+          .stub(subscriptionService.metering_, 'loadMeteringState')
+          .resolves({key: 'value'});
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        expect(platformStore.resetPlatform).to.be.called;
+        expect(platform.getEntitlements).to.be.called;
+      });
+
+      it('allow metering platform to generate metering state, before restarting authorization flow, when there is no grant and no metering state', async () => {
+        // Nothing granted.
+        platformStore.getGrantStatus.resolves(false);
+
+        // No metering state...
+        env.sandbox
+          .stub(subscriptionService.metering_, 'loadMeteringState')
+          .resolves(null);
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        // Wait to set grant state.
+        expect(renderer.setGrantState).to.not.be.called;
+        expect(platform.activate).to.be.called;
+
+        // Let platform restart flow.
+        env.sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
+        const restartCallback = platform.activate.getCall(0).args[2];
+        restartCallback();
+        expect(subscriptionService.startAuthorizationFlow_).to.be.called;
+      });
+    });
+  });
+
+  describe('resetPlatform', () => {
+    const platformKey = 'local';
+    let platform;
+
+    beforeEach(async () => {
+      const serviceAdapter = new ServiceAdapter(subscriptionService);
+      platform = localSubscriptionPlatformFactory(
+        ampdoc,
+        platformConfig.services[0],
+        serviceAdapter
+      );
+      env.sandbox.stub(platform, 'reset');
+
+      subscriptionService.getPlatformConfig_.resolves(meteringPlatformConfig);
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformStore_ = new PlatformStore([platformKey]);
+      subscriptionService.platformStore_.resolvePlatform(platformKey, platform);
+
+      await subscriptionService.initialize_();
+    });
+
+    it('resets a specific platform', async () => {
+      expectAsyncConsoleError(/Platform for id platform1 is not resolved/);
+
+      subscriptionService.resetPlatform(platformKey);
+
+      await flush();
+
+      expect(platform.reset).to.be.called;
+    });
+  });
+
+  describe('resetPlatforms', () => {
+    beforeEach(async () => {
+      subscriptionService.getPlatformConfig_.resolves(meteringPlatformConfig);
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      await subscriptionService.initialize_();
+    });
+
+    it('should clear metering flag(s), if metering is enabled', async () => {
+      subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+
+      await subscriptionService.resetPlatforms();
+
+      expect(
+        subscriptionService.metering_
+          .entitlementsWereFetchedWithCurrentMeteringState
+      ).to.be.false;
     });
   });
 
@@ -608,7 +904,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.pageConfig_ = pageConfig;
       platform = localSubscriptionPlatformFactory(
         ampdoc,
-        serviceConfig.services[0],
+        platformConfig.services[0],
         serviceAdapter
       );
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -618,21 +914,24 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(firstVisibleStub).to.be.called;
     });
 
-    it('should report failure if platform timeouts', done => {
+    it('should report failure if platform timeouts', (done) => {
       env.sandbox
         .stub(platform, 'getEntitlements')
-        .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
+        .callsFake(() => new Promise((resolve) => setTimeout(resolve, 8000)));
       const failureStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
       );
-      subscriptionService.fetchEntitlements_(platform).catch(() => {
-        expect(failureStub).to.be.calledOnce;
-        done();
-      });
+      subscriptionService
+        .initialize_()
+        .then(() => subscriptionService.fetchEntitlements_(platform))
+        .catch(() => {
+          expect(failureStub).to.be.calledOnce;
+          done();
+        });
     }).timeout(7000);
 
-    it('should report failure if platform reject promise', done => {
+    it('should report failure if platform reject promise', (done) => {
       env.sandbox
         .stub(platform, 'getEntitlements')
         .callsFake(() => Promise.reject());
@@ -640,13 +939,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
       );
-      const promise = subscriptionService
-        .fetchEntitlements_(platform)
+      subscriptionService
+        .initialize_()
+        .then(() => subscriptionService.fetchEntitlements_(platform))
         .catch(() => {
           expect(failureStub).to.be.calledOnce;
           done();
         });
-      expect(promise).to.throw;
     });
 
     it('should resolve entitlement if platform resolves', async () => {
@@ -663,6 +962,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         subscriptionService.platformStore_,
         'resolveEntitlement'
       );
+      await subscriptionService.initialize_();
 
       await subscriptionService.fetchEntitlements_(platform);
       expect(resolveStub).to.be.calledOnce;
@@ -675,12 +975,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       );
     });
 
-    it('should reset platform on re-authorization', () => {
-      const service = serviceConfig.services[0];
+    it('should reset platform on re-authorization', async () => {
+      const service = platformConfig.services[0];
       subscriptionService.serviceAdapter_ = new ServiceAdapter(
         subscriptionService
       );
-      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.platformConfig_ = platformConfig;
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformStore_ = new PlatformStore(['local']);
       subscriptionService.initializeLocalPlatforms_(service);
@@ -690,10 +990,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         'resetPlatformStore'
       );
       env.sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
-      const origPlatforms = subscriptionService.platformStore_.serviceIds_;
-      subscriptionService.resetPlatforms();
+      const origPlatforms = subscriptionService.platformStore_.platformKeys_;
+      await subscriptionService.resetPlatforms();
       expect(resetSubscriptionPlatformSpy).to.be.calledOnce;
-      expect(subscriptionService.platformStore_.serviceIds_).to.equal(
+      expect(subscriptionService.platformStore_.platformKeys_).to.equal(
         origPlatforms
       );
     });
@@ -711,9 +1011,33 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       env.sandbox
         .stub(subscriptionService.cryptoHandler_, 'isDocumentEncrypted')
         .callsFake(() => true);
+      await subscriptionService.initialize_();
 
       const ent = await subscriptionService.fetchEntitlements_(platform);
       expect(ent).to.be.deep.equal(Entitlement.empty('local'));
+    });
+
+    it('should fetch entitlements on paid pages', async () => {
+      const getEntitlementsStub = env.sandbox
+        .stub(subscriptionService, 'getEntitlements_')
+        .returns(Promise.resolve(new Entitlement.empty('local')));
+      await subscriptionService.initialize_();
+
+      await subscriptionService.fetchEntitlements_(platform);
+      expect(getEntitlementsStub).to.be.called;
+    });
+
+    it('should not fetch entitlements on free pages', async () => {
+      const getEntitlementsStub = env.sandbox.stub(
+        subscriptionService,
+        'getEntitlements_'
+      );
+      await subscriptionService.initialize_();
+      // Mark page as free.
+      subscriptionService.platformConfig_ = freePlatformConfig;
+
+      await subscriptionService.fetchEntitlements_(platform);
+      expect(getEntitlementsStub).to.not.be.called;
     });
   });
 
@@ -723,7 +1047,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.pageConfig_ = pageConfig;
       platform = localSubscriptionPlatformFactory(
         ampdoc,
-        serviceConfig.services[0],
+        platformConfig.services[0],
         new ServiceAdapter(subscriptionService)
       );
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -785,13 +1109,33 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
+  describe('registerPlatform', () => {
+    it('should work on free pages', async () => {
+      const platformFactoryStub = env.sandbox.stub().callsFake(() => ({
+        getPlatformKey: () => 'platform1',
+      }));
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = freePlatformConfig;
+        subscriptionService.pageConfig_ = pageConfig;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+
+      await subscriptionService.registerPlatform(
+        'platform1',
+        platformFactoryStub
+      );
+      expect(platformFactoryStub).to.be.called;
+    });
+  });
+
   describe('viewer authorization', () => {
     let fetchEntitlementsStub;
     let sendMessageAwaitResponsePromise;
 
     beforeEach(() => {
       subscriptionService.pageConfig_ = pageConfig;
-      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.platformConfig_ = platformConfig;
       subscriptionService.doesViewerProvideAuth_ = true;
       env.sandbox
         .stub(subscriptionService, 'initialize_')
@@ -815,7 +1159,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
         await subscriptionService.initialize_();
         expect(
-          subscriptionService.platformStore_.getLocalPlatform()
+          subscriptionService.platformStore_.getLocalPlatform_()
         ).to.be.instanceOf(LocalSubscriptionRemotePlatform);
       }
     );
@@ -828,7 +1172,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
         await subscriptionService.initialize_();
         expect(
-          subscriptionService.platformStore_.getLocalPlatform()
+          subscriptionService.platformStore_.getLocalPlatform_()
         ).to.be.instanceOf(ViewerSubscriptionPlatform);
       }
     );
@@ -860,13 +1204,16 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       }
     );
 
-    it('not unlock page if no entitlments and viewer provides paywall', async () => {
+    it('not unlock page if no entitlements and viewer provides paywall', async () => {
       subscriptionService.doesViewerProvidePaywall_ = true;
       subscriptionService.doesViewerProvideAuth_ = true;
       subscriptionService.platformStore_ = new PlatformStore(products);
       const getGrantStatusStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
-        .callsFake(() => Promise.resolve());
+        .returns(Promise.resolve());
+      const getGrantEntitlementStub = env.sandbox
+        .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+        .returns(Promise.resolve());
       const selectAndActivateStub = env.sandbox.stub(
         subscriptionService,
         'selectAndActivatePlatform_'
@@ -879,11 +1226,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         subscriptionService.renderer_,
         'setGrantState'
       );
-      subscriptionService.startAuthorizationFlow_();
+      await subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
+      expect(getGrantEntitlementStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
-
-      await subscriptionService.platformStore_.getGrantStatus();
       expect(performPingbackStub).to.be.called;
       expect(setGrantStateStub).to.not.be.called;
     });
@@ -923,18 +1269,23 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       };
+      let resolver;
+      subscriptionService.viewTrackerPromise_ = new Promise((resolve) => {
+        resolver = resolve;
+      });
       const entitlement = Entitlement.parseFromJson(entitlementData);
-      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      const platform = new SubscriptionPlatform();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
-      subscriptionService.platformStore_.resolvePlatform(
-        'local',
-        new SubscriptionPlatform()
-      );
+      subscriptionService.platformStore_.resolvePlatform('local', platform);
+      platform.isPingbackEnabled = () => true;
       const entitlementStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
         .callsFake(() => Promise.resolve(entitlement));
 
-      await subscriptionService.performPingback_();
+      const pingBackPromise = subscriptionService.performPingback_();
+      expect(entitlementStub).to.not.be.called;
+      resolver();
+      await pingBackPromise;
       expect(entitlementStub).to.be.called;
     });
 
@@ -957,6 +1308,37 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
       await subscriptionService.performPingback_();
       expect(pingbackStub).to.be.calledWith(entitlement);
+    });
+
+    it('should send pingback with all platforms that are enabled', async () => {
+      const entitlementData = {
+        source: 'local',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      };
+      const entitlement = Entitlement.parseFromJson(entitlementData);
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      const platform1 = new SubscriptionPlatform();
+      platform1.isPingbackEnabled = () => true;
+      const platform2 = new SubscriptionPlatform();
+      platform2.isPingbackEnabled = () => false;
+      const platform3 = new SubscriptionPlatform();
+      platform3.isPingbackEnabled = () => true;
+      subscriptionService.platformStore_.resolvePlatform('local', platform1);
+      subscriptionService.platformStore_.resolvePlatform('p2', platform2);
+      subscriptionService.platformStore_.resolvePlatform('p3', platform3);
+      env.sandbox
+        .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+        .callsFake(() => Promise.resolve(entitlement));
+      const pingbackStub1 = env.sandbox.stub(platform1, 'pingback');
+      const pingbackStub2 = env.sandbox.stub(platform2, 'pingback');
+      const pingbackStub3 = env.sandbox.stub(platform3, 'pingback');
+
+      await subscriptionService.performPingback_();
+      expect(pingbackStub1).to.be.calledWith(entitlement);
+      expect(pingbackStub2).to.be.not.be.called;
+      expect(pingbackStub3).to.be.calledWith(entitlement);
     });
 
     it('should send pingback with all entitlements if "pingbackAllEntitlements" is set', async () => {
@@ -1000,14 +1382,15 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('initializePlatformStore_', () => {
     it('should initialize platform store with the given ids', () => {
-      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformConfig_ = platformConfig;
       const entitlement = Entitlement.parseFromJson(
-        serviceConfig.fallbackEntitlement
+        platformConfig.fallbackEntitlement
       );
       subscriptionService.initializePlatformStore_(['local']);
-      expect(subscriptionService.platformStore_.serviceIds_).to.be.deep.equal([
-        'local',
-      ]);
+      expect(subscriptionService.platformStore_.platformKeys_).to.be.deep.equal(
+        ['local']
+      );
       expect(
         subscriptionService.platformStore_.fallbackEntitlement_.json()
       ).to.be.deep.equal(entitlement.json());
@@ -1015,7 +1398,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   });
 
   describe('action delegation', () => {
-    it('should call delegateActionToService with serviceId local', () => {
+    it('should call delegateActionToService with "local" platformKey', () => {
       const delegateStub = env.sandbox.stub(
         subscriptionService,
         'delegateActionToService'
@@ -1035,7 +1418,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       const executeActionStub = env.sandbox.stub(platform, 'executeAction');
       const getPlatformStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'onPlatformResolves')
-        .callsFake((serviceId, callback) => callback(platform));
+        .callsFake((platformKey, callback) => callback(platform));
       const action = action;
 
       await subscriptionService.delegateActionToService(action, 'local');
@@ -1045,21 +1428,21 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   });
 
   describe('decorateServiceAction', () => {
-    it('should delegate element to platform of given serviceId', () => {
+    it('should delegate element to platform of given platformKey', () => {
       const element = document.createElement('div');
       element.setAttribute('subscriptions-service', 'swg-google');
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'swg-google';
+      platform.getPlatformKey = () => 'swg-google';
       subscriptionService.platformStore_ = new PlatformStore([
         'local',
         'swg-google',
       ]);
       const whenResolveStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'onPlatformResolves')
-        .callsFake((serviceId, callback) => callback(platform));
+        .callsFake((platformKey, callback) => callback(platform));
       const decorateUIStub = env.sandbox.stub(platform, 'decorateUI');
       subscriptionService.decorateServiceAction(element, 'swg-google', 'login');
-      expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
+      expect(whenResolveStub).to.be.calledWith(platform.getPlatformKey());
       expect(decorateUIStub).to.be.calledWith(element);
     });
   });
@@ -1105,7 +1488,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         subscriptionService.cryptoHandler_,
         'tryToDecryptDocument'
       );
-      subscriptionService.resolveEntitlementsToStore_('serviceId', entitlement);
+      subscriptionService.resolveEntitlementsToStore_(
+        'platformKey',
+        entitlement
+      );
       expect(stub).to.be.calledWith(decryptedDocumentKey);
     });
 
@@ -1123,7 +1509,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         subscriptionService.cryptoHandler_,
         'tryToDecryptDocument'
       );
-      subscriptionService.resolveEntitlementsToStore_('serviceId', entitlement);
+      subscriptionService.resolveEntitlementsToStore_(
+        'platformKey',
+        entitlement
+      );
       expect(stub).to.not.be.called;
     });
   });
@@ -1174,6 +1563,22 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       platformStore.resolveEntitlement('local', entitlement);
       await expect(subscriptionService.getAuthdataField('data.other')).to
         .eventually.be.undefined;
+    });
+
+    it('should resolve authdata on free pages', async () => {
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = platformConfig;
+        subscriptionService.pageConfig_ = freePageConfig;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+
+      await expect(
+        subscriptionService.getAuthdataField('grantReason')
+      ).to.eventually.equal(GrantReason.FREE);
+      await expect(
+        subscriptionService.getAuthdataField('data.userAccount')
+      ).to.eventually.equal(undefined);
     });
   });
 });

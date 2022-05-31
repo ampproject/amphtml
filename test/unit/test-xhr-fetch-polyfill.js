@@ -1,34 +1,21 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Response, fetchPolyfill} from '#polyfills/fetch';
 
-import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 
-describes.sandboxed('fetch', {}, env => {
+describes.sandboxed('fetch', {}, (env) => {
   describe('fetch method', () => {
+    const methodErrorRegex = /Only one of\s+GET, POST is currently allowed/;
     let xhrCreated;
 
     function setupMockXhr() {
       const mockXhr = env.sandbox.useFakeXMLHttpRequest();
-      xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
+      xhrCreated = new Promise((resolve) => (mockXhr.onCreate = resolve));
     }
 
     function mockOkResponse() {
-      xhrCreated.then(xhr =>
+      xhrCreated.then((xhr) =>
         xhr.respond(
           200,
           {
@@ -45,7 +32,7 @@ describes.sandboxed('fetch', {}, env => {
 
     it('should allow GET method', () => {
       mockOkResponse();
-      return fetchPolyfill('/get?k=v1').then(response => {
+      return fetchPolyfill('/get?k=v1').then((response) => {
         expect(response.ok).to.be.equal(true);
       });
     });
@@ -57,12 +44,13 @@ describes.sandboxed('fetch', {}, env => {
         body: {
           hello: 'world',
         },
-      }).then(response => {
+      }).then((response) => {
         expect(response.ok).to.be.equal(true);
       });
     });
 
     it('should not allow PUT method', () => {
+      expectAsyncConsoleError(methodErrorRegex);
       mockOkResponse();
       return expect(
         fetchPolyfill('/post', {
@@ -71,10 +59,11 @@ describes.sandboxed('fetch', {}, env => {
             hello: 'world',
           },
         })
-      ).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+      ).to.be.rejectedWith(methodErrorRegex);
     });
 
     it('should not allow PATCH method', () => {
+      expectAsyncConsoleError(methodErrorRegex);
       mockOkResponse();
       return expect(
         fetchPolyfill('/post', {
@@ -83,10 +72,11 @@ describes.sandboxed('fetch', {}, env => {
             hello: 'world',
           },
         })
-      ).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+      ).to.be.rejectedWith(methodErrorRegex);
     });
 
     it('should not allow DELETE method', () => {
+      expectAsyncConsoleError(methodErrorRegex);
       mockOkResponse();
       return expect(
         fetchPolyfill('/post', {
@@ -95,7 +85,7 @@ describes.sandboxed('fetch', {}, env => {
             hello: 'world',
           },
         })
-      ).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+      ).to.be.rejectedWith(methodErrorRegex);
     });
 
     it('should allow FormData as body', () => {
@@ -120,14 +110,14 @@ describes.sandboxed('fetch', {}, env => {
 
     it('should do `GET` as default method', () => {
       fetchPolyfill('/get?k=v1');
-      return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
+      return xhrCreated.then((xhr) => expect(xhr.method).to.equal('GET'));
     });
 
     it('should normalize POST method name to uppercase', () => {
       fetchPolyfill('/get?k=v1', {
         method: 'post',
       });
-      return xhrCreated.then(xhr => expect(xhr.method).to.equal('POST'));
+      return xhrCreated.then((xhr) => expect(xhr.method).to.equal('POST'));
     });
 
     it('should parse and pass the headers', () => {
@@ -139,7 +129,7 @@ describes.sandboxed('fetch', {}, env => {
         method: 'post',
         headers,
       });
-      return xhrCreated.then(xhr => {
+      return xhrCreated.then((xhr) => {
         for (const key in headers) {
           expect(xhr.requestHeaders[key]).to.be.equal(headers[key]);
         }
@@ -155,7 +145,7 @@ describes.sandboxed('fetch', {}, env => {
         method: 'post',
         body: JSON.stringify(bodyData),
       });
-      return xhrCreated.then(xhr => {
+      return xhrCreated.then((xhr) => {
         expect(xhr.requestBody).to.be.equal(JSON.stringify(bodyData));
       });
     });
@@ -164,7 +154,7 @@ describes.sandboxed('fetch', {}, env => {
       fetchPolyfill('/get?k=v1', {
         credentials: 'include',
       });
-      return xhrCreated.then(xhr => {
+      return xhrCreated.then((xhr) => {
         expect(xhr.withCredentials).to.be.equal(true);
       });
     });
@@ -172,6 +162,7 @@ describes.sandboxed('fetch', {}, env => {
 
   describe('Response', () => {
     const TEST_TEXT = 'this is some test text';
+    const bodyUsedErrorRegex = /Body already used/;
 
     it('should keep default status as 200 OK', () => {
       const response = new Response(TEST_TEXT);
@@ -227,18 +218,19 @@ describes.sandboxed('fetch', {}, env => {
 
     it('should provide text', () => {
       const response = new Response(TEST_TEXT);
-      return response.text().then(result => {
+      return response.text().then((result) => {
         expect(result).to.equal(TEST_TEXT);
       });
     });
 
     it('should provide text only once', () => {
+      expectAsyncConsoleError(bodyUsedErrorRegex);
       const response = new Response(TEST_TEXT);
-      return response.text().then(result => {
+      return response.text().then((result) => {
         expect(result).to.equal(TEST_TEXT);
         expect(response.text.bind(response), 'should throw').to.throw(
           Error,
-          /Body already used/
+          bodyUsedErrorRegex
         );
       });
     });
@@ -249,7 +241,7 @@ describes.sandboxed('fetch', {}, env => {
         'key2': 'Value2',
       };
       const response = new Response(JSON.stringify(RESPONSE_JSON));
-      return response.json().then(result => {
+      return response.json().then((result) => {
         expect(result).to.deep.equal(RESPONSE_JSON);
       });
     });
@@ -257,18 +249,19 @@ describes.sandboxed('fetch', {}, env => {
     it('should be cloneable and each instance should provide text', () => {
       const response = new Response(TEST_TEXT);
       const clone = response.clone();
-      return Promise.all([response.text(), clone.text()]).then(results => {
+      return Promise.all([response.text(), clone.text()]).then((results) => {
         expect(results[0]).to.equal(TEST_TEXT);
         expect(results[1]).to.equal(TEST_TEXT);
       });
     });
 
     it('should not be cloneable if body is already accessed', () => {
+      expectAsyncConsoleError(bodyUsedErrorRegex);
       const response = new Response(TEST_TEXT);
       return response.text().then(() => {
         expect(() => response.clone(), 'should throw').to.throw(
           Error,
-          /Body already used/
+          bodyUsedErrorRegex
         );
       });
     });

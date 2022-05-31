@@ -1,18 +1,4 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// @ts-nocheck
 
 /**
  * @fileoverview Indirects log messages through expansion calls with
@@ -51,7 +37,7 @@ const {
   assertAliases,
   singletonFunctions,
   transformableMethods,
-} = require('../log-module-metadata.js');
+} = require('../log-module-metadata');
 
 // Considered default for this transform, configurable only for tests.
 // For other files output from this transform see linked module.
@@ -67,9 +53,9 @@ const roughNestedLength = '["xx"]'.length;
  * @param {string} path
  * @return {string}
  */
-const relativeToRoot = path => `${__dirname}/../../../${path}`;
+const relativeToRoot = (path) => `${__dirname}/../../../${path}`;
 
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   let messages;
   let nextMessageId;
   let messagesPath;
@@ -127,7 +113,7 @@ module.exports = function({types: t}) {
    * @return {../log-module-metadata.LogMethodMetadataDef}
    */
   function getTransformableCalleeMeta({callee}) {
-    if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
+    if (assertAliases.some((name) => t.isIdentifier(callee, {name}))) {
       return transformableMethods.assert;
     }
     // is method().call().
@@ -137,7 +123,9 @@ module.exports = function({types: t}) {
     // is either dev() or user() object.
     const singletonCallee = callee.object.callee;
     if (
-      !singletonFunctions.some(name => t.isIdentifier(singletonCallee, {name}))
+      !singletonFunctions.some((name) =>
+        t.isIdentifier(singletonCallee, {name})
+      )
     ) {
       return;
     }

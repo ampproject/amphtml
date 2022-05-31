@@ -1,26 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {requireExternal} from '../../../src/module';
 
 /**
  * Create a React component that can render Promises.
  * Note: The nested class cannot be named Deferred, since src/promise.js already
  * exports a class with that name.
- * @return {function(new:React.Component, !Object)}
+ * @return {typeof React.Component}
  */
 function createDeferred_() {
   const react = requireExternal('react');
@@ -42,15 +26,15 @@ function createDeferred_() {
   DeferredType.prototype.constructor = DeferredType;
 
   /** @override */
-  DeferredType.prototype.componentWillReceiveProps = function(nextProps) {
+  DeferredType.prototype.componentWillReceiveProps = function (nextProps) {
     const promise = nextProps['promise'];
     if (promise) {
-      promise.then(value => this.setState({value}));
+      promise.then((value) => this.setState({value}));
     }
   };
 
   /** @override */
-  DeferredType.prototype.shouldComponentUpdate = function(props, state) {
+  DeferredType.prototype.shouldComponentUpdate = function (props, state) {
     const self = /** @type {!React.Component} */ (this);
     return Boolean(
       shallowDiffers(this.props, props) || shallowDiffers(self.state, state)
@@ -58,12 +42,12 @@ function createDeferred_() {
   };
 
   /** @override */
-  DeferredType.prototype.componentDidMount = function() {
-    this.props.promise.then(value => this.setState({value}));
+  DeferredType.prototype.componentDidMount = function () {
+    this.props.promise.then((value) => this.setState({value}));
   };
 
   /** @override */
-  DeferredType.prototype.render = function() {
+  DeferredType.prototype.render = function () {
     const self = /** @type {!React.Component} */ (this);
     return this.props.then(self.state.value);
   };
@@ -97,12 +81,12 @@ function shallowDiffers(a, b) {
   return false;
 }
 
-/** @private {?function(new:React.Component, !Object)} */
+/** @private {?typeof React.Component} */
 let DeferredType_ = null;
 
 /**
  * Creates a single date picker.
- * @return {function(new:React.Component, !Object)} A date picker class
+ * @return {typeof React.Component} A date picker class
  */
 export function createDeferred() {
   if (!DeferredType_) {

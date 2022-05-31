@@ -1,43 +1,31 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {
+  dispatchCustomEvent,
+  isRTL,
+  iterateCursor,
+  toggleAttribute,
+} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
 
 import {ActionSource} from './action-source';
-import {ActionTrust} from '../../../src/action-constants';
-import {CSS} from '../../../build/amp-base-carousel-0.1.css';
-import {Carousel} from './carousel.js';
+import {Carousel} from './carousel';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
-import {Keys} from '../../../src/utils/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from './responsive-attributes';
-import {Services} from '../../../src/services';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {
-  isRTL,
-  iterateCursor,
-  scopedQuerySelectorAll,
-  toggleAttribute,
-} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+
+import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 
 /**
  * @enum {number}
@@ -56,7 +44,12 @@ function isSizer(el) {
   return el.tagName === 'I-AMPHTML-SIZER';
 }
 
-class AmpCarousel extends AMP.BaseElement {
+export class AmpCarousel extends AMP.BaseElement {
+  /** @override  */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -106,49 +99,49 @@ class AmpCarousel extends AMP.BaseElement {
    */
   getAttributeConfig_() {
     return new ResponsiveAttributes({
-      'advance-count': newValue => {
+      'advance-count': (newValue) => {
         this.carousel_.updateAdvanceCount(Number(newValue) || 0);
       },
-      'auto-advance': newValue => {
+      'auto-advance': (newValue) => {
         this.carousel_.updateAutoAdvance(newValue === 'true');
       },
-      'auto-advance-count': newValue => {
+      'auto-advance-count': (newValue) => {
         this.carousel_.updateAutoAdvanceCount(Number(newValue) || 0);
       },
-      'auto-advance-interval': newValue => {
+      'auto-advance-interval': (newValue) => {
         this.carousel_.updateAutoAdvanceInterval(Number(newValue) || 0);
       },
-      'auto-advance-loops': newValue => {
+      'auto-advance-loops': (newValue) => {
         this.carousel_.updateAutoAdvanceLoops(Number(newValue) || 0);
       },
-      'controls': newValue => {
+      'controls': (newValue) => {
         this.updateControls_(newValue);
       },
-      'dir': newValue => {
+      'dir': (newValue) => {
         this.carousel_.updateForwards(newValue != 'rtl');
       },
-      'horizontal': newValue => {
+      'horizontal': (newValue) => {
         this.carousel_.updateHorizontal(newValue === 'true');
       },
-      'loop': newValue => {
-        this.carousel_.updateLoop(newValue === 'true');
+      'loop': (newValue) => {
+        this.carousel_.updateLoop(newValue === 'true' || newValue === '');
       },
-      'mixed-length': newValue => {
+      'mixed-length': (newValue) => {
         this.carousel_.updateMixedLength(newValue === 'true');
       },
-      'slide': newValue => {
+      'slide': (newValue) => {
         this.carousel_.goToSlide(Number(newValue));
       },
-      'snap': newValue => {
+      'snap': (newValue) => {
         this.carousel_.updateSnap(newValue === 'true');
       },
-      'snap-align': newValue => {
+      'snap-align': (newValue) => {
         this.carousel_.updateAlignment(newValue);
       },
-      'snap-by': newValue => {
+      'snap-by': (newValue) => {
         this.carousel_.updateSnapBy(Number(newValue) || 0);
       },
-      'visible-count': newValue => {
+      'visible-count': (newValue) => {
         this.carousel_.updateVisibleCount(Number(newValue) || 0);
       },
     });
@@ -170,11 +163,11 @@ class AmpCarousel extends AMP.BaseElement {
       element: this.element,
       scrollContainer: dev().assertElement(this.scrollContainer_),
       initialIndex: this.getInitialIndex_(),
-      runMutate: cb => this.mutateElement(cb),
+      runMutate: (cb) => this.mutateElement(cb),
     });
 
     // Handle the initial set of attributes
-    toArray(this.element.attributes).forEach(attr => {
+    toArray(this.element.attributes).forEach((attr) => {
       this.attributeMutated_(attr.name, attr.value);
     });
 
@@ -233,8 +226,13 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    * Moves the Carousel to a given index.
    * @param {number} index
+   * @param {{
+   *   smoothScroll: (boolean|undefined),
+   *   actionSource: (!ActionSource|undefined),
+   * }=} options
    */
-  goToSlide(index, {smoothScroll = false, actionSource} = {}) {
+  goToSlide(index, options = {}) {
+    const {actionSource, smoothScroll = false} = options;
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 
@@ -263,7 +261,7 @@ class AmpCarousel extends AMP.BaseElement {
     let nextArrow;
 
     // Figure out which "slot" the children go into.
-    children.forEach(c => {
+    children.forEach((c) => {
       const slot = c.getAttribute('slot');
       if (slot === 'prev-arrow') {
         prevArrow = c;
@@ -285,7 +283,7 @@ class AmpCarousel extends AMP.BaseElement {
     );
 
     // Do some manual "slot" distribution
-    this.slides_.forEach(slide => {
+    this.slides_.forEach((slide) => {
       slide.classList.add('i-amphtml-carousel-slotted');
       this.scrollContainer_.appendChild(slide);
     });
@@ -332,7 +330,7 @@ class AmpCarousel extends AMP.BaseElement {
             stroke-width="2px"
             stroke-linejoin="round"
             stroke-linecap="round"
-          />
+          ></path>
         </svg>
       </button>
     `;
@@ -359,19 +357,19 @@ class AmpCarousel extends AMP.BaseElement {
             stroke-width="2px"
             stroke-linejoin="round"
             stroke-linecap="round"
-          />
+          ></path>
         </svg>
       </button>
     `;
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
+   * Gets the ActionSource to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust >= ActionTrust.DEFAULT
+    return trust >= ActionTrust_Enum.DEFAULT
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }
@@ -406,7 +404,7 @@ class AmpCarousel extends AMP.BaseElement {
     // For amp-inline-gallery-slide, we need to actually monitor the content,
     // which is transformed instead of the slide.
     const monitoredDescendants = this.slides_
-      .map(slide => {
+      .map((slide) => {
         return slide.localName === 'amp-inline-gallery-slide'
           ? toArray(scopedQuerySelectorAll(slide, '> :not([slot])'))
           : slide;
@@ -421,29 +419,29 @@ class AmpCarousel extends AMP.BaseElement {
   initializeActions_() {
     this.registerAction(
       'prev',
-      actionInvocation => {
+      (actionInvocation) => {
         const {trust} = actionInvocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'next',
-      actionInvocation => {
+      (actionInvocation) => {
         const {trust} = actionInvocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'goToSlide',
-      actionInvocation => {
+      (actionInvocation) => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] || -1, {
+        this.carousel_.goToSlide(Number(args['index'] ?? -1), {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -451,7 +449,7 @@ class AmpCarousel extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       this.onIndexChanged_(event);
     });
     this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
@@ -463,21 +461,21 @@ class AmpCarousel extends AMP.BaseElement {
         this.onScrollPositionChanged_();
       }
     );
-    this.element.addEventListener('goToSlide', event => {
+    this.element.addEventListener('goToSlide', (event) => {
       const detail = getDetail(event);
       this.carousel_.goToSlide(detail['index']);
     });
-    this.element.addEventListener('keydown', event => {
+    this.element.addEventListener('keydown', (event) => {
       this.onKeydown_(event);
     });
-    this.prevArrowSlot_.addEventListener('click', event => {
+    this.prevArrowSlot_.addEventListener('click', (event) => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
         this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
       }
     });
-    this.nextArrowSlot_.addEventListener('click', event => {
+    this.nextArrowSlot_.addEventListener('click', (event) => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
@@ -528,14 +526,18 @@ class AmpCarousel extends AMP.BaseElement {
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
     const loop = this.carousel_.isLooping();
+    const visibleCount = this.carousel_.getVisibleCount();
+    const isAtEnd = this.carousel_.isAtEnd();
+    const isAtStart = this.carousel_.isAtStart();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
-    iterateCursor(this.prevArrowSlot_.children, child => {
-      const disabled = !loop && index === 0;
+    iterateCursor(this.prevArrowSlot_.children, (child) => {
+      const disabled = (!loop && index === 0) || isAtStart;
       toggleAttribute(child, 'disabled', disabled);
     });
-    iterateCursor(this.nextArrowSlot_.children, child => {
-      const disabled = !loop && index === this.slides_.length - 1;
+    iterateCursor(this.nextArrowSlot_.children, (child) => {
+      const disabled =
+        (!loop && index >= this.slides_.length - visibleCount) || isAtEnd;
       toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(
@@ -572,8 +574,8 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onKeydown_(event) {
-    const isRight = event.key === Keys.RIGHT_ARROW;
-    const isLeft = event.key === Keys.LEFT_ARROW;
+    const isRight = event.key === Keys_Enum.RIGHT_ARROW;
+    const isLeft = event.key === Keys_Enum.LEFT_ARROW;
 
     if (!isRight && !isLeft) {
       return;
@@ -621,14 +623,14 @@ class AmpCarousel extends AMP.BaseElement {
     const detail = getDetail(event);
     const index = detail['index'];
     const actionSource = detail['actionSource'];
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
+    dispatchCustomEvent(this.element, name, data);
     this.hadTouch_ = this.hadTouch_ || actionSource === ActionSource.TOUCH;
     this.updateUi_();
   }
@@ -641,8 +643,23 @@ class AmpCarousel extends AMP.BaseElement {
   attributeMutated_(name, newValue) {
     this.responsiveAttributes_.updateAttribute(name, newValue);
   }
+
+  /**
+   * Used by amp-lightbox-gallery
+   *
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   */
+  goCallback(dir) {
+    if (dir === 1) {
+      this.interactionNext();
+    } else {
+      this.interactionPrev();
+    }
+  }
 }
 
-AMP.extension('amp-base-carousel', '0.1', AMP => {
+AMP.extension('amp-base-carousel', '0.1', (AMP) => {
   AMP.registerElement('amp-base-carousel', AmpCarousel, CSS);
 });

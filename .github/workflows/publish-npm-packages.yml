@@ -1,0 +1,171 @@
+name: Publish Bento Packages on npm
+on:
+  # to be triggered by ampproject/cdn-configuration promote workflows
+  workflow_call:
+    inputs:
+      amp-version:
+        description: 'AMP version'
+        required: true
+        type: string
+      tag:
+        description: 'npm package tag'
+        required: true
+        type: string
+
+  # to be run manually
+  workflow_dispatch:
+    inputs:
+      amp-version:
+        description: 'AMP version'
+        required: true
+      tag:
+        description: 'npm package tag'
+        required: true
+        type: choice
+        options:
+          - latest
+          - nightly
+env:
+  SCRIPTS_REPO: 'https://raw.githubusercontent.com/ampproject/amphtml/main'
+  SCRIPTS_DIR: 'build-system/npm-publish'
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      extensions: ${{ steps.get-extensions.outputs.extensions }}
+    steps:
+      - name: Print inputs
+        run: |
+          echo "AMP version: ${{ github.event.inputs.amp-version }}"
+          echo "npm tag: ${{ github.event.inputs.tag }}"
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - name: Get latest scripts
+        run: wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-extensions.js" -O ${{ env.SCRIPTS_DIR }}/get-extensions.js
+      - name: Get extensions to publish
+        id: get-extensions
+        run: |
+          EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
+          echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
+  publish-core:
+    if: github.repository == 'ampproject/amphtml'
+    environment: bento_publishing
+    needs: setup
+    runs-on: ubuntu-latest
+    outputs:
+      core-version: ${{ steps.build-core.outputs.core-version }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org
+          node-version: lts/*
+      - name: Get latest scripts
+        run: |
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-core-version.js" -O ${{ env.SCRIPTS_DIR }}/get-core-version.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+      - name: Build package
+        id: build-core
+        run: |
+          npm ci
+          node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+          CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
+          cd ./src/bento/core
+          npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
+          echo "::set-output name=core-version::${CORE_VERSION}"
+      - name: Publish package for Nightly releases
+        if: github.event.inputs.tag != 'latest'
+        run: |
+          npm publish ./src/bento/core --access public --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Tag package as latest for Stable releases
+        if: github.event.inputs.tag == 'latest'
+        run: |
+          NPM_PACKAGE=$(jq -r .name ./src/bento/core/package.json)
+          NPM_VERSION=$(jq -r .version ./src/bento/core/package.json)
+          echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
+          if [[ $(npm view ${NPM_PACKAGE}@${NPM_VERSION}) ]]; then
+            npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
+          else
+            npm publish ./src/bento/core --access public --tag latest
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publish:
+    if: github.repository == 'ampproject/amphtml'
+    environment: bento_publishing
+    needs: [setup, publish-core]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org
+          node-version: lts/*
+      - name: Get latest scripts
+        run: |
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-package-dir.js" -O ${{ env.SCRIPTS_DIR }}/get-package-dir.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/write-package-files.js" -O ${{ env.SCRIPTS_DIR }}/write-package-files.js
+      - name: Build package
+        run: |
+          npm ci
+          node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
+          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }} ${{ needs.publish-core.outputs.core-version }}
+      - name: Publish package for Nightly releases
+        if: github.event.inputs.tag != 'latest'
+        run: |
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
+          npm publish --access public --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Tag package as latest for Stable releases
+        if: github.event.inputs.tag == 'latest'
+        run: |
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
+          NPM_PACKAGE=$(jq -r .name package.json)
+          NPM_VERSION=$(jq -r .version package.json)
+          echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
+          if [[ $(npm view ${NPM_PACKAGE}@${NPM_VERSION}) ]]; then
+            npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
+          else
+            npm publish --access public --tag latest
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: publish
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

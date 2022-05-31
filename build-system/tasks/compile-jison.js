@@ -1,26 +1,10 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const glob = require('glob');
 const jison = require('jison');
 const path = require('path');
-const {endBuildStep} = require('./helpers');
-const {jisonPaths} = require('../test-configs/config');
+const {jisonPath} = require('../test-configs/config');
 
 // set imports for each parser from directory build/parsers/.
 const imports = new Map([
@@ -31,7 +15,7 @@ const imports = new Map([
   [
     'bindParser',
     "import {AstNode, AstNodeType} from '../../extensions/amp-bind/0.1/bind-expr-defines';\n" +
-      "import {tryParseJson} from '../../src/json';",
+      "import {tryParseJson} from '../../src/core/types/object/json';",
   ],
 ]);
 
@@ -39,23 +23,21 @@ const imports = new Map([
  * Builds parsers for extensions with *.jison files.
  * Uses jison file path to name the parser to export.
  * For example, css-expr-impl.jison creates `cssParser`.
- * @return {!Promise<void>}
+ *
+ * @param {string} searchDir - directory to compile jison files within.
+ * @return {!Promise}
  */
-async function compileJison() {
-  fs.mkdirSync('build/parsers', {recursive: true});
-  const startTime = Date.now();
-  const promises = [];
-  jisonPaths.forEach(jisonPath => {
-    glob.sync(jisonPath).forEach(jisonFile => {
+async function compileJison(searchDir = jisonPath) {
+  const jisonFiles = await fastGlob(searchDir);
+  await Promise.all(
+    jisonFiles.map((jisonFile) => {
       const jsFile = path.basename(jisonFile, '.jison');
       const extension = jsFile.replace('-expr-impl', '');
       const parser = extension + 'Parser';
       const newFilePath = `build/parsers/${jsFile}.js`;
-      promises.push(compileExpr(jisonFile, parser, newFilePath));
-    });
-  });
-  await Promise.all(promises);
-  endBuildStep('Compiled Jison parsers into', 'build/parsers/', startTime);
+      return compileExpr(jisonFile, parser, newFilePath);
+    })
+  );
 }
 
 /**
@@ -87,11 +69,12 @@ async function compileExpr(jisonFilePath, parserName, newFilePath) {
       // adversely affect lexer performance.
       // See https://github.com/ampproject/amphtml/pull/18574#discussion_r223506153.
       .replace(/[ \t]*_token_stack:[ \t]*/, '') + '\n';
-  return fs.writeFile(newFilePath, out);
+  await fs.outputFile(newFilePath, out);
 }
 
 module.exports = {
   compileJison,
 };
 
-compileJison.description = 'Use jison to create parsers';
+compileJison.description =
+  'Precompile jison parsers for use during the main build';

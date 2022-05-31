@@ -1,25 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
 
-import {ChunkPriority, chunk} from '../../../../src/chunk';
+import {userAssert} from '#utils/log';
+
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
-import {Observable} from '../../../../src/observable';
 import {TwoStepsResponse} from './two-steps-response';
-import {userAssert} from '../../../../src/log';
+
+import {ChunkPriority_Enum, chunk} from '../../../../src/chunk';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;
@@ -148,19 +135,19 @@ export class LinkRewriter {
    * @public
    */
   onDomUpdated() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const task = () => {
         return this.scanLinksOnPage_().then(() => {
           this.events.fire({type: EVENTS.PAGE_SCANNED});
           resolve();
         });
       };
-      const elementOrShadowRoot =
-        /** @type {!Element|!ShadowRoot} */ (this.rootNode_.nodeType ==
-        Node.DOCUMENT_NODE
+      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
+        this.rootNode_.nodeType == Node.DOCUMENT_NODE
           ? this.rootNode_.documentElement
-          : this.rootNode_);
-      chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
+          : this.rootNode_
+      );
+      chunk(elementOrShadowRoot, task, ChunkPriority_Enum.LOW);
     });
   }
 
@@ -191,7 +178,7 @@ export class LinkRewriter {
     // handlers. (Other anchors are assumed to be the ones exluded by
     // linkSelector_)
     this.anchorReplacementCache_.updateReplacementUrls(
-      unknownAnchors.map(anchor => ({anchor, replacementUrl: null}))
+      unknownAnchors.map((anchor) => ({anchor, replacementUrl: null}))
     );
     const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
     userAssert(
@@ -207,7 +194,7 @@ export class LinkRewriter {
     }
     // Anchors for which the status needs to be resolved asynchronously
     if (twoStepsResponse.asyncResponse) {
-      return twoStepsResponse.asyncResponse.then(data => {
+      return twoStepsResponse.asyncResponse.then((data) => {
         this.anchorReplacementCache_.updateReplacementUrls(data);
       });
     }
@@ -224,7 +211,7 @@ export class LinkRewriter {
    */
   getUnknownAnchors_(anchorList) {
     const unknownAnchors = [];
-    anchorList.forEach(anchor => {
+    anchorList.forEach((anchor) => {
       // If link is not already in cache
       if (!this.isWatchingLink(anchor)) {
         unknownAnchors.push(anchor);

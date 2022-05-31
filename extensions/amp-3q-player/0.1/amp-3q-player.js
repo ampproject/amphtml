@@ -1,37 +1,26 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {addParamToUrl} from '../../../src/url';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-3q-player';
 
@@ -54,6 +43,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = null;
 
     this.dataId = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -86,15 +78,45 @@ class Amp3QPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(el).register(this);
   }
 
+  /** @private */
+  generateIframeSrc_() {
+    const explicitParamsAttributes = [
+      'key',
+      'timestamp',
+      'controls',
+      'userToken',
+      'userGroup',
+      'player',
+    ];
+
+    let iframeSrc = 'https://playout.3qsdn.com/';
+    if (this.element.getAttribute(`data-datasource`)) {
+      iframeSrc +=
+        'config_by_metadata/' +
+        this.element.getAttribute(`data-project`) +
+        '/' +
+        this.element.getAttribute(`data-datafield`) +
+        '/';
+    }
+
+    iframeSrc +=
+      dev().assertString(this.dataId) +
+      // Autoplay is handled by VideoManager
+      '?autoplay=false&amp=true';
+
+    explicitParamsAttributes.forEach((explicitParam) => {
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
+    });
+
+    return iframeSrc;
+  }
+
   /** @override */
   layoutCallback() {
-    const iframe = createFrameFor(
-      this,
-      'https://playout.3qsdn.com/' +
-        encodeURIComponent(dev().assertString(this.dataId)) +
-        // Autoplay is handled by VideoManager
-        '?autoplay=false&amp=true'
-    );
+    const iframe = createFrameFor(this, this.generateIframeSrc_());
 
     this.iframe_ = iframe;
 
@@ -121,6 +143,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
@@ -130,15 +154,8 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   pauseCallback() {
-    if (this.iframe_) {
-      this.pause();
-    }
+    this.pause();
   }
 
   /**
@@ -154,22 +171,32 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(getData(event));
-    if (data === undefined) {
-      return;
+    if (data == null) {
+      return; // we only process valid json
     }
 
     const eventType = data['data'];
 
-    if (eventType == 'ready') {
-      this.playerReadyResolver_();
+    switch (eventType) {
+      case 'ready':
+        this.playerReadyResolver_();
+        break;
+      case 'playing':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'paused':
+      case 'complete':
+        this.pauseHelper_.updatePlaying(false);
+        break;
     }
 
     redispatch(this.element, eventType, {
-      'ready': VideoEvents.LOAD,
-      'playing': VideoEvents.PLAYING,
-      'paused': VideoEvents.PAUSE,
-      'muted': VideoEvents.MUTED,
-      'unmuted': VideoEvents.UNMUTED,
+      'ready': VideoEvents_Enum.LOAD,
+      'playing': VideoEvents_Enum.PLAYING,
+      'paused': VideoEvents_Enum.PAUSE,
+      'complete': VideoEvents_Enum.ENDED,
+      'muted': VideoEvents_Enum.MUTED,
+      'unmuted': VideoEvents_Enum.UNMUTED,
     });
   }
 
@@ -194,6 +221,9 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   pause() {
+    if (!this.iframe_) {
+      return;
+    }
     this.sdnPostMessage_('pause');
   }
 
@@ -294,6 +324,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3QPlayer);
 });

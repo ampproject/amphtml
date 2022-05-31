@@ -1,22 +1,9 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
+import {isElement} from '#core/types';
 
-import {Observable} from './observable';
-import {Services} from './services';
-import {dev} from './log';
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
 
 /**
  * FocusHistory keeps track of recent focused elements. This history can be
@@ -44,9 +31,9 @@ export class FocusHistory {
      * @private
      * @param {!Event} e
      */
-    this.captureFocus_ = e => {
+    this.captureFocus_ = (e) => {
       // Hack (#15079) due to Firefox firing focus events on the entire page
-      if (e.target && e.target.nodeType == 1) {
+      if (isElement(e.target)) {
         this.pushFocus_(dev().assertElement(e.target));
       }
     };
@@ -55,12 +42,14 @@ export class FocusHistory {
      * @private
      * @param {*} unusedE
      */
-    this.captureBlur_ = unusedE => {
+    this.captureBlur_ = (unusedE) => {
       // IFrame elements do not receive `focus` event. An alternative way is
       // implemented here. We wait for a blur to arrive on the main window
       // and after a short time check which element is active.
       Services.timerFor(win).delay(() => {
-        this.pushFocus_(dev().assertElement(this.win.document.activeElement));
+        if (this.win.document.activeElement) {
+          this.pushFocus_(this.win.document.activeElement);
+        }
       }, 500);
     };
     this.win.document.addEventListener('focus', this.captureFocus_, true);

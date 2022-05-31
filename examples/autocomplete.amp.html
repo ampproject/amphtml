@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     <meta charset="utf-8" />
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -62,20 +62,20 @@
         padding: 0.5rem; /* default-ui-space-large */
         border: 1px solid rgba(0, 0, 0, 0.33); /* default-ui-med-gray */
         font-size: 1rem; /* default-ui-font-size */
-        line-height: 1.5rem; /* default-ui-space-large */        
+        line-height: 1.5rem; /* default-ui-space-large */
       }
     </style>
   </head>
   <body>
     <h1>Autocomplete</h1>
     <h2>Inline</h2>
-    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete
         inline="@"
         min-characters="0"
         suggest-first
         filter="none"
         src="/form/mention/query"
+        [src]="colorsEndpoint"
         query="q"
         on="select:AMP.setState({inlineInputSelect: event.value})"
       >
@@ -92,6 +92,11 @@
           </div>
         </template>
       </amp-autocomplete>
+      <p>
+        <button on="tap:AMP.setState({colorsEndpoint: '/form/autocomplete/query'})">
+          mutate [src]
+        </button>
+      </p>
       <amp-autocomplete
         inline="+"
         min-characters="0"
@@ -161,18 +166,10 @@
           }
         </script>
       </amp-autocomplete>
-      <input name="submit-button" type="submit" value="Submit" />
-      <div submit-success>
-        <template type="amp-mustache">
-          Success! {{inlineInput2}}
-        </template>
-      </div>
-    </form>
     <p [text]="'Hello ' + inlineInputSelect">Hello World</p>
 
     <h2>Select Event</h2>
     <p>min-characters = 0, partial red underline</p>
-    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete
         id="select-example"
         filter="substring"
@@ -183,14 +180,36 @@
       >
         <input name="input2" required />
       </amp-autocomplete>
-      <input name="submit-button" type="submit" value="Submit" />
-      <div submit-success>
-        <template type="amp-mustache">
-          Success! {{input2}}
-        </template>
-      </div>
-    </form>
     <p [text]="'Hello ' + inputSelect">Hello World</p>
+
+    <h2>Select event with object value</h2>
+    <amp-autocomplete filter="token-prefix"
+        filter-value="city"
+        min-characters=0
+        on="select:AMP.setState({chosenPlace: event.valueAsObject})">
+      <input type="search" name="city">
+      <script type="application/json">
+        {
+          "items": [
+            {
+              "city": "Albany",
+              "state": "New York"
+            }, {
+              "city": "Annapolis",
+              "state": "Maryland"
+            }
+          ]
+        }
+      </script>
+      <template type="amp-mustache" id="amp-template-custom">
+        <div class="city-item" data-value="{{city}}" data-json="{{objToJson}}">
+          <div>{{city}}, {{state}}</div>
+        </div>
+      </template>
+    </amp-autocomplete>
+    <p [text]="'Your choice: ' + chosenPlace.city + ', ' + chosenPlace.state">
+      Select a place
+    </p>
 
     <h2>Disable browser autofill</h2>
     <p>form has no autocomplete attr</p>

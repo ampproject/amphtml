@@ -1,32 +1,15 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
   'AMP Lightbox Gallery Open/Close',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-lightbox-gallery-launch.amp.html',
+    fixture: 'amp-lightbox/amp-lightbox-gallery-launch.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(sparhami) Get this working in other environments.
     environments: ['single'],
   },
-  async env => {
+  (env) => {
     let controller;
 
     function css(handle, name) {
@@ -37,13 +20,14 @@ describes.endtoend(
       return controller.getElementProperty(el, name);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 
     // TODO(sparhami) Cover swipe to dismiss if possible.
     // TODO(sparhami) Test basic transition to gallery and back.
-    it('should open/close lightbox', async () => {
+    // TODO(#28948) fix this flaky test.
+    it.skip('should open/close lightbox', async () => {
       // First open the gallery.
       const firstAmpImg = await controller.findElement('amp-img');
       await controller.click(firstAmpImg);
@@ -67,6 +51,28 @@ describes.endtoend(
       // Now close the gallery via button click and wait for it to close.
       await controller.click(closeButton);
       await controller.findElement('amp-lightbox-gallery[hidden]');
+    });
+
+    it('should display the image that opened the lightbox', async () => {
+      const clickedImage = await controller.findElement('#basic-2');
+
+      const imageSrc = await controller.getElementAttribute(
+        clickedImage,
+        'src'
+      );
+
+      await controller.click(clickedImage);
+
+      const slideImage = await controller.findElement(
+        // pick the img element with the same src as the clickedImage,
+        // inside the non hidden slide (this is the active slide),
+        // that is inside the amp-light-box with the default group id
+        `[amp-lightbox-group="default"] .amp-carousel-slide[aria-hidden="false"] img[src="${imageSrc}"]`
+      );
+
+      const activeImageRect = await controller.getElementRect(slideImage);
+      // If x is negative, it means this is the previous active slide, if positive it is the next slide. But if 0, it is the active slide
+      await expect(activeImageRect.x).to.equal(0);
     });
   }
 );

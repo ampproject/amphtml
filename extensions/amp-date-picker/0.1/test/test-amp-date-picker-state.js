@@ -1,23 +1,10 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import '../../../../third_party/react-dates/bundle';
-import * as lolex from 'lolex';
-import {AmpDatePicker, DatePickerState} from '../amp-date-picker';
-import {createElementWithAttributes} from '../../../../src/dom.js';
+import '#third_party/react-dates/bundle';
+import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {createElementWithAttributes} from '#core/dom';
+
 import {requireExternal} from '../../../../src/module';
+import {AmpDatePicker, DatePickerState} from '../amp-date-picker';
 
 describes.realWin(
   'amp-date-picker',
@@ -27,7 +14,7 @@ describes.realWin(
       extensions: ['amp-date-picker'],
     },
   },
-  env => {
+  (env) => {
     const moment = requireExternal('moment');
     let clock;
     let document;
@@ -91,10 +78,9 @@ describes.realWin(
 
     beforeEach(() => {
       document = env.win.document;
-      clock = lolex.install({
-        // Use the global window and not env.win. There is no way to inject the
-        // env.win into moment right now.
-        target: window,
+      // Use the global window and not env.win. There is no way to inject the
+      // env.win into moment right now.
+      clock = fakeTimers.withGlobal(window).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
     });
@@ -112,7 +98,7 @@ describes.realWin(
       (name, variant) => {
         describe('static states', () => {
           it('should start in the static state', async () => {
-            const {picker, layoutCallback} = createDatePicker({
+            const {layoutCallback, picker} = createDatePicker({
               'layout': 'fixed-height',
               'height': '360',
               'type': variant.type,
@@ -125,7 +111,7 @@ describes.realWin(
           });
 
           it('should remain in the static state after a transition', async () => {
-            const {element, picker, layoutCallback} = createDatePicker({
+            const {element, layoutCallback, picker} = createDatePicker({
               'layout': 'fixed-height',
               'height': '360',
               'type': variant.type,
@@ -155,7 +141,7 @@ describes.realWin(
 
         describe('overlay states', () => {
           it('should start in the unopened state', async () => {
-            const {picker, layoutCallback} = createDatePicker({
+            const {layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -167,7 +153,7 @@ describes.realWin(
           });
 
           it('should transition to the opened state on focus', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -181,7 +167,7 @@ describes.realWin(
           });
 
           it('should transition to the closed state on blur', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -201,7 +187,7 @@ describes.realWin(
           });
 
           it('should transition to the closed state on esc', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -225,7 +211,7 @@ describes.realWin(
           });
 
           it('should transition to picker state on arrow', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -249,7 +235,7 @@ describes.realWin(
           });
 
           it('should transition directly to picker state on arrow from closed', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -271,7 +257,7 @@ describes.realWin(
           });
 
           it('should transition to closed state from picker on esc', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -304,7 +290,7 @@ describes.realWin(
           });
 
           it('should transition to closed state from picker on document click', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -336,7 +322,7 @@ describes.realWin(
           });
 
           it('should remain in picker state on click in picker', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -368,7 +354,7 @@ describes.realWin(
           });
 
           it('should transition to input state from picker on focus', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -397,7 +383,7 @@ describes.realWin(
           });
 
           it('should remain in open picker on clear', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -426,7 +412,7 @@ describes.realWin(
           });
 
           it('should transition from open picker to open input on clear with open-after-clear', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -455,7 +441,7 @@ describes.realWin(
           });
 
           it('should transition to closed after date change', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -474,7 +460,7 @@ describes.realWin(
           });
 
           it('should not transition to closed with open-after-select', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'open-after-select': '',
               'type': variant.type,
@@ -494,7 +480,7 @@ describes.realWin(
           });
 
           it('should transition from closed to open input in on clear with open-after-clear', async () => {
-            const {picker, layoutCallback} = createDatePicker({
+            const {layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
               'open-after-clear': '',

@@ -1,3 +1,0 @@
-{
-  "plugins": ["../../../../../babel-plugin-is_minified-constant-transformer"]
-}

@@ -1,29 +1,16 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/* eslint-disable import/no-deprecated */
 
-import {dict} from '../../src/utils/object';
-import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
-import {loadScript} from '../3p';
-import {parseJson} from '../../src/json';
-import {user} from '../../src/log';
+import {loadScript} from '#3p/3p';
+import {listenParent, nonSensitiveDataPostMessage} from '#3p/messaging';
+
+import {parseJson} from '#core/types/object/json';
+
+import {user} from '#utils/log';
 
 import GltfViewer from './viewer';
 
-const seq = (taskA, taskB) => cb => taskA(() => taskB(cb));
-const parallel = (taskA, taskB) => cb => {
+const seq = (taskA, taskB) => (cb) => taskA(() => taskB(cb));
+const parallel = (taskA, taskB) => (cb) => {
   let n = 0;
   const finish = () => {
     n++;
@@ -36,8 +23,8 @@ const parallel = (taskA, taskB) => cb => {
 };
 
 const loadThree = (global, cb) => {
-  const loadScriptCb = url => cb => loadScript(global, url, cb);
-  const loadThreeExample = examplePath =>
+  const loadScriptCb = (url) => (cb) => loadScript(global, url, cb);
+  const loadThreeExample = (examplePath) =>
     loadScriptCb(
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/' + examplePath
     );
@@ -62,29 +49,23 @@ export function gltfViewer(global) {
       onload: () => {
         nonSensitiveDataPostMessage('loaded');
       },
-      onprogress: e => {
+      onprogress: (e) => {
         if (!e.lengthComputable) {
           return;
         }
-        nonSensitiveDataPostMessage(
-          'progress',
-          dict({
-            'total': e.total,
-            'loaded': e.loaded,
-          })
-        );
+        nonSensitiveDataPostMessage('progress', {
+          'total': e.total,
+          'loaded': e.loaded,
+        });
       },
-      onerror: err => {
+      onerror: (err) => {
         user().error('3DGLTF', err);
-        nonSensitiveDataPostMessage(
-          'error',
-          dict({
-            'error': (err || '').toString(),
-          })
-        );
+        nonSensitiveDataPostMessage('error', {
+          'error': (err || '').toString(),
+        });
       },
     });
-    listenParent(global, 'action', msg => {
+    listenParent(global, 'action', (msg) => {
       viewer.actions[msg['action']](msg['args']);
     });
     nonSensitiveDataPostMessage('ready');

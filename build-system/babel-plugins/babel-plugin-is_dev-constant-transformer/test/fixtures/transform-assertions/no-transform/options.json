@@ -1,3 +1,0 @@
-{
-  "plugins": ["../../../../../babel-plugin-is_dev-constant-transformer"]
-}

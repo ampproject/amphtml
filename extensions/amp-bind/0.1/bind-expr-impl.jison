@@ -7,8 +7,8 @@
 "false"                   return 'FALSE'
 [0-9]+("."[0-9]+)?\b      return 'NUMBER'
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
-\'[^\']*\'                return 'STRING'
-\"[^\"]*\"                return 'STRING'
+\'([^\'\\]|\\.)*\'        return 'STRING'
+\"([^\"\\]|\\.)*\"        return 'STRING'
 '=>'                      return '=>'
 "+"                       return '+'
 "-"                       return '-'
@@ -279,12 +279,16 @@ literal:
 primitive:
     STRING
       %{
+        const raw = yytext.substr(1, yyleng - 2);
+        // Since we accept escaped quotation marks, unescape them here.
+        // Note: We can't use $1 directly because of https://github.com/zaach/jison/issues/380.
+        const unescaped = raw.replace(/\\('|")/g, "$" + "1");
+
         // Use JSON.parse() to process special chars e.g. '\n'.
         // JSON doesn't recognize single-quotes, so use double-quote in
         // leading/trailing chars and escape double-quote in the string.
-        const string = yytext.substr(1, yyleng - 2);
-        const parsed = tryParseJson(`"${string.replace(/"/g, '\\"')}"`);
-        this.$ = new AstNode(AstNodeType.LITERAL, null, parsed || string);
+        const parsed = tryParseJson(`"${unescaped.replace(/"/g, '\\"')}"`);
+        this.$ = new AstNode(AstNodeType.LITERAL, null, parsed || unescaped);
       %}
   | NUMBER
       %{

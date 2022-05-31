@@ -1,29 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getChildJsonConfig} from '#core/dom';
 
-import {getChildJsonConfig} from '../../../src/json';
-import {getNormalizedHostnameFromUrl} from './utils';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 import {
   DEFAULT_CONFIG,
-  GLOBAL_DOMAIN_BLACKLIST,
+  GLOBAL_DOMAIN_DENYLIST,
   OPTIONS_ERRORS,
   WAYPOINT_BASE_URL,
 } from './constants';
+import {getNormalizedHostnameFromUrl} from './utils';
 
 /**
  *
@@ -61,7 +46,7 @@ export function getAmpSkimlinksOptions(element, docInfo) {
 function getExcludedDomains_(element, internalDomains) {
   let excludedDomains = []
     .concat(internalDomains)
-    .concat(GLOBAL_DOMAIN_BLACKLIST);
+    .concat(GLOBAL_DOMAIN_DENYLIST);
 
   const excludedDomainsAttr = element.getAttribute('excluded-domains');
   if (excludedDomainsAttr) {
@@ -69,7 +54,7 @@ function getExcludedDomains_(element, internalDomains) {
       excludedDomainsAttr
         .trim()
         .split(/\s+/)
-        .map(domain => domain.replace(/^www\./, ''))
+        .map((domain) => domain.replace(/^www\./, ''))
     );
   }
 

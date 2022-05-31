@@ -1,29 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../src/sanitizer';
 
 let sanitize;
 let html;
+let documentEl;
 
-describe('Caja-based', () => {
+describes.sandboxed('Caja-based', {}, () => {
   beforeEach(() => {
     html = document.createElement('html');
-    const documentEl = {documentElement: html};
-    sanitize = html => sanitizeHtml(html, documentEl);
+    documentEl = {documentElement: html};
+    sanitize = (html) => sanitizeHtml(html, documentEl);
   });
 
   runSanitizerTests();
@@ -293,7 +278,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should NOT output blacklisted values for class attributes', () => {
+    it('should NOT output denylisted values for class attributes', () => {
       allowConsoleError(() => {
         expect(sanitize('<p class="i-amphtml-">hello</p>')).to.be.equal(
           '<p>hello</p>'
@@ -331,10 +316,7 @@ function runSanitizerTests() {
       );
     });
 
-    // TODO(choumx): HTTPS-only URI attributes are not enforced consistently
-    // in the sanitizer yet. E.g. amp-video requires HTTPS, amp-img does not.
-    // Unskip when this is fixed.
-    it.skip('should not allow source::src with invalid protocol', () => {
+    it('should not allow source::src with invalid protocol', () => {
       expect(sanitize('<source src="http://www.foo.com">')).to.equal(
         '<source src="">'
       );
@@ -396,13 +378,10 @@ function runSanitizerTests() {
     });
 
     it('should allow for input type file and password', () => {
-      // Given that the doc is not provided.
-      allowConsoleError(() => {
-        expect(sanitize('<input type="file">')).to.equal('<input type="file">');
-        expect(sanitize('<input type="password">')).to.equal(
-          '<input type="password">'
-        );
-      });
+      expect(sanitize('<input type="file">')).to.equal('<input type="file">');
+      expect(sanitize('<input type="password">')).to.equal(
+        '<input type="password">'
+      );
     });
 
     it('should disallow certain attributes on form for AMP4Email', () => {
@@ -419,17 +398,15 @@ function runSanitizerTests() {
       });
     });
 
-    it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+    it('should only allow allowlisted AMP elements in AMP4EMAIL', () => {
       html.setAttribute('amp4email', '');
-      allowConsoleError(() => {
-        expect(sanitize('<amp-analytics>')).to.equal('');
-        expect(sanitize('<amp-iframe>')).to.equal('');
-        expect(sanitize('<amp-list>')).to.equal('');
-        expect(sanitize('<amp-pixel>')).to.equal('');
-        expect(sanitize('<amp-twitter>')).to.equal('');
-        expect(sanitize('<amp-video>')).to.equal('');
-        expect(sanitize('<amp-youtube>')).to.equal('');
-      });
+      expect(sanitize('<amp-analytics>')).to.equal('');
+      expect(sanitize('<amp-iframe>')).to.equal('');
+      expect(sanitize('<amp-list>')).to.equal('');
+      expect(sanitize('<amp-pixel>')).to.equal('');
+      expect(sanitize('<amp-twitter>')).to.equal('');
+      expect(sanitize('<amp-video>')).to.equal('');
+      expect(sanitize('<amp-youtube>')).to.equal('');
 
       expect(sanitize('<amp-accordion>')).to.equal('<amp-accordion>');
       expect(sanitize('<amp-anim>')).to.equal('<amp-anim>');
@@ -446,43 +423,54 @@ function runSanitizerTests() {
 
   describe('sanitizeTagsForTripleMustache', () => {
     it('should output basic text', () => {
-      expect(sanitizeTagsForTripleMustache('abc')).to.be.equal('abc');
+      expect(sanitizeTagsForTripleMustache('abc', documentEl)).to.be.equal(
+        'abc'
+      );
     });
 
     it('should output valid markup', () => {
-      expect(sanitizeTagsForTripleMustache('<b>abc</b>')).to.be.equal(
-        '<b>abc</b>'
-      );
-      expect(sanitizeTagsForTripleMustache('<b>ab<br>c</b>')).to.be.equal(
-        '<b>ab<br>c</b>'
-      );
-      expect(sanitizeTagsForTripleMustache('<b>a<i>b</i>c</b>')).to.be.equal(
-        '<b>a<i>b</i>c</b>'
-      );
+      expect(
+        sanitizeTagsForTripleMustache('<b>abc</b>', documentEl)
+      ).to.be.equal('<b>abc</b>');
+      expect(
+        sanitizeTagsForTripleMustache('<b>ab<br>c</b>', documentEl)
+      ).to.be.equal('<b>ab<br>c</b>');
+      expect(
+        sanitizeTagsForTripleMustache('<b>a<i>b</i>c</b>', documentEl)
+      ).to.be.equal('<b>a<i>b</i>c</b>');
       const markupWithClassAttribute = '<p class="some-class">heading</p>';
       expect(
-        sanitizeTagsForTripleMustache(markupWithClassAttribute)
+        sanitizeTagsForTripleMustache(markupWithClassAttribute, documentEl)
       ).to.be.equal(markupWithClassAttribute);
       const markupWithClassesAttribute =
         '<div class="some-class another"><span>heading</span></div>';
       expect(
-        sanitizeTagsForTripleMustache(markupWithClassesAttribute)
+        sanitizeTagsForTripleMustache(markupWithClassesAttribute, documentEl)
       ).to.be.equal(markupWithClassesAttribute);
       const markupParagraph = '<p class="valid-class">paragraph</p>';
-      expect(sanitizeTagsForTripleMustache(markupParagraph)).to.be.equal(
-        markupParagraph
+      expect(
+        sanitizeTagsForTripleMustache(markupParagraph, documentEl)
+      ).to.be.equal(markupParagraph);
+    });
+
+    it('should NOT output non-allowlisted markup', () => {
+      expect(
+        sanitizeTagsForTripleMustache('a<style>b</style>c', documentEl)
+      ).to.be.equal('ac');
+      expect(sanitizeTagsForTripleMustache('a<img>c', documentEl)).to.be.equal(
+        'ac'
       );
     });
 
-    it('should NOT output non-whitelisted markup', () => {
-      expect(sanitizeTagsForTripleMustache('a<style>b</style>c')).to.be.equal(
-        'ac'
-      );
-      expect(sanitizeTagsForTripleMustache('a<img>c')).to.be.equal('ac');
+    it('should not allowlist amp-img element for AMP4Email', () => {
+      html.setAttribute('amp4email', '');
+      expect(
+        sanitizeTagsForTripleMustache('a<amp-img></amp-img>c', documentEl)
+      ).to.be.equal('ac');
     });
 
     it('should compensate for broken markup', () => {
-      expect(sanitizeTagsForTripleMustache('<b>a<i>b')).to.be.equal(
+      expect(sanitizeTagsForTripleMustache('<b>a<i>b', documentEl)).to.be.equal(
         '<b>a<i>b</i></b>'
       );
     });

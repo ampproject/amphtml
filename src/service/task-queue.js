@@ -1,20 +1,4 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {devAssert} from '../log';
+import {devAssert} from '#utils/log';
 
 /**
  * The internal structure for the task.
@@ -30,11 +14,6 @@ import {devAssert} from '../log';
  * }}
  */
 export let TaskDef;
-
-/**
- * @typedef {Object<string, *>}
- */
-let PeekStateDef;
 
 /**
  * A scheduling queue for Resources.
@@ -123,16 +102,15 @@ export class TaskQueue {
   /**
    * Returns the task with the minimal score based on the provided scoring
    * callback.
-   * @param {function(!TaskDef, !PeekStateDef):number} scorer
-   * @param {!PeekStateDef} state
+   * @param {function(!TaskDef):number} scorer
    * @return {?TaskDef}
    */
-  peek(scorer, state) {
+  peek(scorer) {
     let minScore = 1e6;
     let minTask = null;
     for (let i = 0; i < this.tasks_.length; i++) {
       const task = this.tasks_[i];
-      const score = scorer(task, state);
+      const score = scorer(task);
       if (score < minScore) {
         minScore = score;
         minTask = task;

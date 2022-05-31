@@ -1,27 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {AmpDocService} from '#service/ampdoc-impl';
 
-import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpList} from '../amp-list';
-import {Services} from '../../../../src/services';
 import {
   measureElementStub,
   measureMutateElementStub,
   mutateElementStub,
-} from '../../../../testing/test-helper';
+} from '#testing/helpers/service';
+
+import {AmpList} from '../amp-list';
 
 describes.realWin(
   'amp-list layout container',
@@ -31,12 +17,13 @@ describes.realWin(
       extensions: ['amp-list'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
     let element, list;
     let templates;
+    let lockHeightSpy, unlockHeightSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -48,7 +35,7 @@ describes.realWin(
         findAndRenderTemplate: env.sandbox.stub(),
         findAndRenderTemplateArray: env.sandbox.stub(),
       };
-      env.sandbox.stub(Services, 'templatesFor').returns(templates);
+      env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
       env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
 
       element = doc.createElement('amp-list');
@@ -70,8 +57,16 @@ describes.realWin(
 
       env.sandbox.stub(list, 'getOverflowElement').returns(null);
       env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
-      list.element.changeSize = () => {};
+      list.element.applySize = () => {};
       list.buildCallback();
+
+      lockHeightSpy = env.sandbox.spy(list, 'lockHeightAndMutate_');
+      unlockHeightSpy = env.sandbox.spy(list, 'unlockHeightInsideMutate_');
+    });
+
+    afterEach(() => {
+      expect(lockHeightSpy).not.called;
+      expect(unlockHeightSpy).not.called;
     });
 
     it('should change to layout container', async () => {

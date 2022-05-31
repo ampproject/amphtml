@@ -1,25 +1,12 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggle} from '#core/dom/style';
 
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
+
 import {handleAutoscroll} from './autoscroll';
-import {toggle} from '../../../src/style';
 
 /**
  * Class representing toolbar behavior in sidebar
+ * @throws User error if element with id [toolbar-target] isn't found in DOM.
  */
 export class Toolbar {
   /**
@@ -59,8 +46,9 @@ export class Toolbar {
    */
   onLayoutChange() {
     // Get if we match the current toolbar media
-    const matchesMedia = this.ampdoc_.win.matchMedia(this.toolbarMedia_)
-      .matches;
+    const matchesMedia = this.ampdoc_.win.matchMedia(
+      this.toolbarMedia_
+    ).matches;
 
     // Remove and add the toolbar dynamically
     if (matchesMedia) {
@@ -82,21 +70,18 @@ export class Toolbar {
       this.toolbarDomElement_
     );
     // Set the target element to the toolbar clone if it exists.
-    this.ampdoc_.whenReady().then(() => {
-      const targetElement = this.ampdoc_.getElementById(targetId);
-      if (targetElement) {
-        this.toolbarTarget_ = targetElement;
-        this.toolbarClone_.classList.add('i-amphtml-toolbar');
-        toggle(this.toolbarTarget_, false);
-      } else {
-        // This error will be later rethrown as a user error and
-        // the side bar will continue to function w/o toolbar feature
-        throw new Error(
-          'Could not find the ' +
-            `toolbar-target element with an id: ${targetId}`
-        );
-      }
-    });
+    const targetElement = this.ampdoc_.getElementById(targetId);
+    if (targetElement) {
+      this.toolbarTarget_ = targetElement;
+      this.toolbarClone_.classList.add('i-amphtml-toolbar');
+      toggle(this.toolbarTarget_, false);
+    } else {
+      // This error will be caught and the side bar will continue to function
+      // without the toolbar feature.
+      throw user().createError(
+        `Could not find the toolbar-target element with an id: ${targetId}`
+      );
+    }
   }
 
   /**

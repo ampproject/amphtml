@@ -1,31 +1,19 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
+import {PageConfig} from '#third_party/subscriptions-project/config';
+
+import {getWinOrigin} from '../../../../src/url';
 import {Action, SubscriptionAnalytics} from '../analytics';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/services';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
-import {dict} from '../../../../src/utils/object';
-import {getWinOrigin} from '../../../../src/url';
 
-describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
-  let ampdoc, win;
+describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
+  let ampdoc;
+  let win;
+  let clock;
   let viewerPlatform;
   let serviceAdapter, sendAuthTokenStub;
   let resetPlatformsStub, messageCallback;
@@ -65,6 +53,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     win = env.win;
+    clock = env.sandbox.useFakeTimers();
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
@@ -121,12 +110,34 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         .stub(viewerPlatform, 'verifyAuthToken_')
         .callsFake(() => Promise.reject(new Error(reason)));
 
-      try {
-        await viewerPlatform.getEntitlements();
-        throw new Error('must have failed');
-      } catch (e) {
-        expect(sendAuthTokenStub).to.be.calledWith(reason);
-      }
+      await expect(
+        viewerPlatform.getEntitlements()
+      ).to.eventually.be.rejectedWith(reason);
+      expect(sendAuthTokenStub).to.be.calledWith(reason);
+    });
+
+    it('should throw error if one is included with entitlements object', async () => {
+      const reason = 'RPC error';
+
+      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
+      env.sandbox
+        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
+        .callsFake(() => Promise.resolve({error: {message: reason}}));
+
+      await expect(
+        viewerPlatform.getEntitlements()
+      ).to.eventually.be.rejectedWith(reason);
+    });
+
+    it('should throw error if entitlements request times out', async () => {
+      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
+      env.sandbox
+        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
+        .callsFake(() => new Promise(() => {}));
+
+      const entitlementsPromise = viewerPlatform.getEntitlements();
+      clock.tick(ENTITLEMENTS_REQUEST_TIMEOUT + 1000);
+      await expect(entitlementsPromise).to.be.rejectedWith('timeout');
     });
 
     it('should use domain in cryptokeys param to get encrypted doc key', async () => {
@@ -148,15 +159,12 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         .callsFake(() => Promise.resolve({}));
 
       await viewerPlatform.getEntitlements();
-      expect(sendMessageStub).to.be.calledWith(
-        'auth',
-        dict({
-          'publicationId': 'example.org',
-          'productId': 'example.org:basic',
-          'origin': 'origin',
-          'encryptedDocumentKey': 'encryptedDocKey',
-        })
-      );
+      expect(sendMessageStub).to.be.calledWith('auth', {
+        'publicationId': 'example.org',
+        'productId': 'example.org:basic',
+        'origin': 'origin',
+        'encryptedDocumentKey': 'encryptedDocKey',
+      });
     });
   });
 
@@ -182,12 +190,9 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         'entitlements': [entitlementData],
       }));
 
-      try {
-        await viewerPlatform.verifyAuthToken_('faketoken');
-        throw new Error('must have failed');
-      } catch (reason) {
-        expect(reason.message).to.be.equal('Payload is expired​​​');
-      }
+      await expect(
+        viewerPlatform.verifyAuthToken_('faketoken')
+      ).to.eventually.be.rejectedWith('Payload is expired​​​');
     });
 
     it('should reject promise for audience mismatch', async () => {
@@ -197,14 +202,11 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         'entitlements': [entitlementData],
       }));
 
-      try {
-        await viewerPlatform.verifyAuthToken_('faketoken');
-        throw new Error('must have failed');
-      } catch (reason) {
-        expect(reason.message).to.be.equals(
-          'The mismatching "aud" field: random origin​​​'
-        );
-      }
+      await expect(
+        viewerPlatform.verifyAuthToken_('faketoken')
+      ).to.eventually.be.rejectedWith(
+        /The mismatching "aud" field: random origin/
+      );
     });
 
     it('should resolve promise with entitlement (single entitlement)', async () => {
@@ -334,12 +336,12 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   });
 
   describe('proxy methods', () => {
-    it('should delegate getServiceId', () => {
+    it('should delegate getPlatformKey', () => {
       const proxyStub = env.sandbox.stub(
         viewerPlatform.platform_,
-        'getServiceId'
+        'getPlatformKey'
       );
-      viewerPlatform.getServiceId();
+      viewerPlatform.getPlatformKey();
       expect(proxyStub).to.be.called;
     });
 

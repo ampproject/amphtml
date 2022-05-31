@@ -1,0 +1,26 @@
+
+
+[amp-stream-gallery-outset-arrows] > .i-amphtml-stream-gallery-arrow-prev-slot > [disabled],
+[amp-stream-gallery-outset-arrows] > .i-amphtml-stream-gallery-arrow-next-slot > [disabled] {
+  opacity: 0.4;
+}
+
+[amp-stream-gallery-outset-arrows] > .i-amphtml-stream-gallery-arrow-prev-slot > .i-amphtml-stream-gallery-prev,
+[amp-stream-gallery-outset-arrows] > .i-amphtml-stream-gallery-arrow-next-slot > .i-amphtml-stream-gallery-next {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-size: 24px 24px;
+}
+
+[amp-stream-gallery-outset-arrows] > .i-amphtml-stream-gallery-arrow-prev-slot > .i-amphtml-stream-gallery-prev {
+  margin-inline-start: 6px;
+  margin-inline-end: 12px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+}
+
+[amp-stream-gallery-outset-arrows] > .i-amphtml-stream-gallery-arrow-next-slot > .i-amphtml-stream-gallery-next {
+  margin-inline-start: 12px;
+  margin-inline-end: 6px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+}

@@ -1,27 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {PageConfig} from '#third_party/subscriptions-project/config';
 
 import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../service-adapter';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
+import {ServiceAdapter} from '../service-adapter';
 
-describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
+describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;
@@ -69,7 +54,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    serviceAdapter = new ServiceAdapter(null);
+    serviceAdapter = new ServiceAdapter({});
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     env.sandbox
@@ -96,6 +81,17 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
     const domStub = env.sandbox.stub(
+      localSubscriptionPlatform.rootNode_,
+      'addEventListener'
+    );
+
+    localSubscriptionPlatform.initializeListeners_();
+    expect(domStub).calledOnce;
+    expect(domStub.getCall(0).args[0]).to.be.equals('click');
+  });
+
+  it('initializeListeners_ should listen to clicks on rootNode body', () => {
+    const domStub = env.sandbox.stub(
       localSubscriptionPlatform.rootNode_.body,
       'addEventListener'
     );
@@ -103,6 +99,17 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     localSubscriptionPlatform.initializeListeners_();
     expect(domStub).calledOnce;
     expect(domStub.getCall(0).args[0]).to.be.equals('click');
+  });
+
+  it('initializeListeners_ should handle clicks once per event', () => {
+    const handleClickStub = env.sandbox.stub(
+      localSubscriptionPlatform,
+      'handleClick_'
+    );
+
+    localSubscriptionPlatform.initializeListeners_();
+    localSubscriptionPlatform.rootNode_.body.click();
+    expect(handleClickStub).calledOnce;
   });
 
   it('should return baseScore', () => {
@@ -189,6 +196,39 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     );
   });
 
+  it('should add metering params to url, if metering state is available', async () => {
+    env.sandbox
+      .stub(localSubscriptionPlatform.serviceAdapter_, 'loadMeteringState')
+      .returns({key: 'value'});
+    const fetchStub = env.sandbox
+      .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+      .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(fetchStub).to.be.calledWith(
+      'https://lipsum.com/login/authorize?rid=reader1&meteringState=eyJrZXkiOiJ2YWx1ZSJ9'
+    );
+  });
+
+  it('should save metering state from response', async () => {
+    const meteringState = {key: 'value'};
+    const responseWithMeteringState = {
+      ...json,
+      metering: {state: meteringState},
+    };
+    env.sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson').returns(
+      Promise.resolve({
+        json: () => Promise.resolve(responseWithMeteringState),
+      })
+    );
+    const saveMeteringStateStub = env.sandbox
+      .stub(localSubscriptionPlatform.serviceAdapter_, 'saveMeteringState')
+      .returns(Promise.resolve());
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(saveMeteringStateStub).to.be.calledWith(meteringState);
+  });
+
   describe('validateActionMap', () => {
     let actionMap;
     beforeEach(() => {
@@ -201,21 +241,24 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
     it('should check that login action is present', () => {
       delete actionMap[Action.LOGIN];
-      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+      expect(() =>
+        localSubscriptionPlatform.validateActionMap(actionMap)
+      ).to.throw();
     });
 
     it('should check that subscribe action is present', () => {
       delete actionMap[Action.SUBSCRIBE];
-      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+      expect(() =>
+        localSubscriptionPlatform.validateActionMap(actionMap)
+      ).to.throw();
     });
 
     it(
       'should return actionMap as is if login and subscribe actions' +
         ' are present',
       () => {
-        const returnedMap = localSubscriptionPlatform.validateActionMap(
-          actionMap
-        );
+        const returnedMap =
+          localSubscriptionPlatform.validateActionMap(actionMap);
         expect(JSON.stringify(returnedMap)).to.be.equal(
           JSON.stringify(actionMap)
         );
@@ -281,8 +324,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         element.setAttribute('subscriptions-action', Action.LOGIN);
         element.removeAttribute('subscriptions-service');
         const platform = {};
-        const serviceId = 'serviceId';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+        const platformKey = 'platformKey';
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         const loginStub = env.sandbox
           .stub(
             localSubscriptionPlatform.serviceAdapter_,
@@ -295,7 +340,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         );
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
       }
     );
 
@@ -316,11 +361,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
           'delegateActionToService'
         );
         const platform = {};
-        const serviceId = 'serviceId';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+        const platformKey = 'platformKey';
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
       }
     );
 
@@ -340,8 +387,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'delegateActionToService'
       );
       const platform = {};
-      const serviceId = 'serviceId';
-      platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+      const platformKey = 'platformKey';
+      platform.getPlatformKey = env.sandbox.stub().callsFake(() => platformKey);
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.not.be.called;
       expect(delegateStub).to.not.be.called;

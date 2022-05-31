@@ -1,23 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseQueryString} from '#core/types/string/url';
+
+import {dev, userAssert} from '#utils/log';
 
 import {ActionStatus} from './analytics';
-import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+
+import {assertHttpsUrl} from '../../../src/url';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
 
 const TAG = 'amp-subscriptions';
@@ -41,7 +28,7 @@ export class Actions {
     /** @private @const {!Object<string, string>} */
     this.actionsConfig_ = actionMap;
     /** @private @const {!Object<string, string>} */
-    this.builtActionUrlMap_ = dict();
+    this.builtActionUrlMap_ = {};
     /** @private @const {!./url-builder.UrlBuilder} */
     this.urlBuilder_ = urlBuilder;
     /** @private @const {!./analytics.SubscriptionAnalytics} */
@@ -69,7 +56,7 @@ export class Actions {
       promises.push(
         this.urlBuilder_
           .buildUrl(this.actionsConfig_[k], /* useAuthData */ true)
-          .then(url => {
+          .then((url) => {
             this.builtActionUrlMap_[k] = url;
           })
       );
@@ -120,7 +107,7 @@ export class Actions {
     this.analytics_.actionEvent(LOCAL, action, ActionStatus.STARTED);
     const dialogPromise = this.openPopup_(url);
     const actionPromise = dialogPromise
-      .then(result => {
+      .then((result) => {
         dev().fine(TAG, 'Action completed: ', action, result);
         this.actionPromise_ = null;
         const query = parseQueryString(result);
@@ -133,7 +120,7 @@ export class Actions {
         }
         return success || !s;
       })
-      .catch(reason => {
+      .catch((reason) => {
         dev().fine(TAG, 'Action failed: ', action, reason);
         this.analytics_.actionEvent(LOCAL, action, ActionStatus.FAILED);
         if (this.actionPromise_ == actionPromise) {

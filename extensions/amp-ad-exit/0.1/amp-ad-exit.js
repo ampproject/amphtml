@@ -1,39 +1,30 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {FilterType} from './filters/filter';
-import {HostServices} from '../../../src/inabox/host-services';
 import {
-  MessageType,
+  MessageType_Enum,
   deserializeMessage,
   listen,
-} from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
+} from '#core/3p-frame-messaging';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {isJsonScriptTag} from '#core/dom';
+import {isObject} from '#core/types';
+import {parseJson} from '#core/types/object/json';
+
+import {HostServices} from '#inabox/host-services';
+
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {TransportMode, assertConfig, assertVendor} from './config';
-import {createFilter} from './filters/factory';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getData} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
-import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
+import {createFilter} from './filters/factory';
+import {FilterType} from './filters/filter';
 import {makeInactiveElementSpec} from './filters/inactive-element';
-import {parseJson} from '../../../src/json';
+
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getMode} from '../../../src/mode';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {getTopWindow} from '../../../src/service-helpers';
 import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-exit';
@@ -48,6 +39,16 @@ const TAG = 'amp-ad-exit';
  */
 let NavigationTargetDef;
 
+/**
+ * Indicates the status of the `attribution-reporting` API.
+ * @enum
+ */
+const AttributionReportingStatus = {
+  ATTRIBUTION_MACRO_PRESENT: 1,
+  ATTRIBUTION_DATA_PRESENT: 2,
+  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 3,
+};
+
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -57,6 +58,12 @@ export class AmpAdExit extends AMP.BaseElement {
      * @private @const {!Object<string, !NavigationTargetDef>}
      */
     this.targets_ = {};
+
+    /**
+     * Maps variable target name to an actual target name.
+     * @private @const {!Object<string, string>}
+     */
+    this.variableTargets_ = {};
 
     /**
      * Filters to apply to every target.
@@ -73,6 +80,11 @@ export class AmpAdExit extends AMP.BaseElement {
     this.userFilters_ = {};
 
     this.registerAction('exit', this.exit.bind(this));
+    this.registerAction(
+      'setVariable',
+      this.setVariable.bind(this),
+      ActionTrust_Enum.LOW
+    );
 
     /** @private @const {!Object<string, !Object<string, string>>} */
     this.vendorResponses_ = {};
@@ -85,6 +97,10 @@ export class AmpAdExit extends AMP.BaseElement {
 
     /** @private @const {!Object<string,string>} */
     this.expectedOriginToVendor_ = {};
+
+    /** @private @const {boolean} */
+    this.isAttributionReportingSupported_ =
+      this.detectAttributionReportingSupport();
   }
 
   /**
@@ -93,10 +109,30 @@ export class AmpAdExit extends AMP.BaseElement {
   exit(invocation) {
     const {args} = invocation;
     let {event} = invocation;
-    const target = this.targets_[args['target']];
-    userAssert(target, `Exit target not found: '${args['target']}'`);
+    userAssert(
+      'variable' in args != 'target' in args,
+      `One and only one of 'target' and 'variable' must be specified`
+    );
+    let targetName;
+    if ('variable' in args) {
+      targetName = this.variableTargets_[args['variable']];
+      if (!targetName) {
+        targetName = args['default'];
+      }
+      userAssert(
+        targetName,
+        `Variable target not found, variable:'${args['variable']}', default:'${args['default']}'`
+      );
+      delete args['default'];
+    } else {
+      targetName = args['target'];
+    }
+    const target = this.targets_[targetName];
+    userAssert(target, `Exit target not found: '${targetName}'`);
     userAssert(event, 'Unexpected null event');
-    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */ (event);
+    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */ (
+      event
+    );
 
     event.preventDefault();
     if (
@@ -113,13 +149,14 @@ export class AmpAdExit extends AMP.BaseElement {
     if (target.trackingUrls) {
       target.trackingUrls
         .map(substituteVariables)
-        .forEach(url => this.pingTrackingUrl_(url));
+        .forEach((url) => this.pingTrackingUrl_(url));
     }
     const finalUrl = substituteVariables(target.finalUrl);
+    // TODO(wg-monetization): clean up unused HostServices.
     if (HostServices.isAvailable(this.getAmpDoc())) {
       HostServices.exitForDoc(this.getAmpDoc())
-        .then(exitService => exitService.openUrl(finalUrl))
-        .catch(error => {
+        .then((exitService) => exitService.openUrl(finalUrl))
+        .catch((error) => {
           // TODO: reporting on errors
           dev().fine(TAG, 'ExitServiceError - fallback=' + error.fallback);
           if (error.fallback) {
@@ -133,8 +170,18 @@ export class AmpAdExit extends AMP.BaseElement {
         target.behaviors.clickTarget == '_top'
           ? '_top'
           : '_blank';
-      openWindowDialog(this.win, finalUrl, clickTarget);
+      openWindowDialog(this.win, finalUrl, clickTarget, target.windowFeatures);
     }
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  setVariable(invocation) {
+    const {args} = invocation;
+    const pointToTarget = this.targets_[args['target']];
+    userAssert(pointToTarget, `Exit target not found: '${args['target']}'`);
+    this.variableTargets_[args['name']] = args['target'];
   }
 
   /**
@@ -145,22 +192,30 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   getUrlVariableRewriter_(args, event, target) {
     const substitutionFunctions = {
+      'ATTRIBUTION_REPORTING_STATUS': () =>
+        getAttributionReportingStatus(
+          this.isAttributionReportingSupported_,
+          target
+        ),
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
     const replacements = Services.urlReplacementsForDoc(this.element);
-    const whitelist = {
-      'RANDOM': true,
+    const allowlist = {
+      'ATTRIBUTION_REPORTING_STATUS': true,
       'CLICK_X': true,
       'CLICK_Y': true,
+      'RANDOM': true,
+      'UACH': true,
     };
     if (target['vars']) {
       for (const customVarName in target['vars']) {
         if (customVarName[0] != '_') {
           continue;
         }
-        const customVar =
-          /** @type {!./config.VariableDef} */ (target['vars'][customVarName]);
+        const customVar = /** @type {!./config.VariableDef} */ (
+          target['vars'][customVarName]
+        );
         if (!customVar) {
           continue;
         }
@@ -225,16 +280,11 @@ export class AmpAdExit extends AMP.BaseElement {
             ? args[customVarName]
             : customVar.defaultValue;
         };
-        whitelist[customVarName] = true;
+        allowlist[customVarName] = true;
       }
     }
-    return url =>
-      replacements.expandUrlSync(
-        url,
-        substitutionFunctions,
-        undefined /* opt_collectVars */,
-        whitelist
-      );
+    return (url) =>
+      replacements.expandUrlSync(url, substitutionFunctions, allowlist);
   }
 
   /**
@@ -269,7 +319,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   filter_(filters, event) {
-    return filters.every(filter => {
+    return filters.every((filter) => {
       const result = filter.filter(event);
       user().info(TAG, `Filter '${filter.name}': ${result ? 'pass' : 'fail'}`);
       return result;
@@ -338,10 +388,18 @@ export class AmpAdExit extends AMP.BaseElement {
           trackingUrls: target['trackingUrls'] || [],
           vars: target['vars'] || {},
           filters: (target['filters'] || [])
-            .map(f => this.userFilters_[f])
-            .filter(f => f),
+            .map((f) => this.userFilters_[f])
+            .filter(Boolean),
           behaviors: target['behaviors'] || {},
         };
+
+        if (this.isAttributionReportingSupported_) {
+          this.targets_[name]['windowFeatures'] =
+            this.getAttributionReportingValues_(
+              target?.behaviors?.browserAdConversion
+            );
+        }
+
         // Build a map of {vendor, origin} for 3p custom variables in the config
         for (const customVar in target['vars']) {
           if (!target['vars'][customVar].iframeTransportSignal) {
@@ -372,6 +430,38 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 
   /**
+   * Determine if `attribution-reporting` is supported by user-agent. Should only return
+   * true for Chrome 92+.
+   * @visibleForTesting
+   * @return {boolean}
+   */
+  detectAttributionReportingSupport() {
+    return this.win.document.featurePolicy?.allowsFeature(
+      'attribution-reporting'
+    );
+  }
+
+  /**
+   * Extracts the keys from the `browserAdConversion` data creates a
+   * string to be used as the `features` param for the `window.open()` call.
+   * @param {JsonObject} adConversionData
+   * @return {?string}
+   */
+  getAttributionReportingValues_(adConversionData) {
+    if (!adConversionData || !Object.keys(adConversionData)) {
+      return;
+    }
+
+    // `noopener` is probably redundant here but left as defense in depth.
+    // https://groups.google.com/a/chromium.org/g/blink-dev/c/FFX6VkvladY/m/QgaWHK6ZBAAJ
+    const parts = ['noopener'];
+    for (const key of Object.keys(adConversionData)) {
+      parts.push(`${key.toLowerCase()}=${adConversionData[key]}`);
+    }
+    return parts.join(',');
+  }
+
+  /**
    * Gets the resource ID of the amp-ad element containing this amp-ad-exit tag.
    * This is a pass-through for the version in service.js, solely because
    * the one in service.js isn't stubbable for testing, since only object
@@ -399,7 +489,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
   /**
    * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * extensions/amp-analytics/0.1/vendors/* who have transport/iframe defined.
    * This is limited to MRC-accreddited vendors. The frame is removed in
    * amp-analytics, and the listener is destroyed here, if the user
    * navigates/swipes away from the page. Both are recreated if the user
@@ -421,7 +511,7 @@ export class AmpAdExit extends AMP.BaseElement {
       return;
     }
     devAssert(!this.unlisten_, 'Unlistener should not already exist.');
-    this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message', (event) => {
       // We shouldn't deserialize just any message...it would be too
       // expensive to parse ones that aren't for amp-ad-exit.
       if (!this.expectedOriginToVendor_[event.origin]) {
@@ -430,7 +520,7 @@ export class AmpAdExit extends AMP.BaseElement {
       const responseMsg = deserializeMessage(getData(event));
       if (
         !responseMsg ||
-        responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE
+        responseMsg['type'] != MessageType_Enum.IFRAME_TRANSPORT_RESPONSE
       ) {
         return;
       }
@@ -487,6 +577,29 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdExit);
 });
+
+/**
+ * Resolves the ATTRIBUTION_REPORTING_STATUS macro to the appropriate value
+ * based on the given config and browser support.
+ * @param {boolean} isAttributionReportingSupported
+ * @param {!NavigationTargetDef} target
+ * @return {AttributionReportingStatus}
+ * @visibleForTesting
+ */
+export function getAttributionReportingStatus(
+  isAttributionReportingSupported,
+  target
+) {
+  if (
+    target?.behaviors?.browserAdConversion &&
+    isAttributionReportingSupported
+  ) {
+    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
+  } else if (target?.behaviors?.browserAdConversion) {
+    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
+  }
+  return AttributionReportingStatus.ATTRIBUTION_MACRO_PRESENT;
+}

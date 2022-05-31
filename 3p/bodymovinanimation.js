@@ -1,24 +1,19 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {setStyles} from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
+import {parseJson} from '#core/types/object/json';
 
-import {dict} from '../src/utils/object';
-import {getData} from '../src/event-helper';
+import {getData} from '#utils/event-helper';
+
 import {loadScript} from './3p';
-import {parseJson} from '../src/json';
-import {setStyles} from '../src/style';
+
+const libSourceUrl = {
+  'canvas':
+    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_canvas.min.js',
+  'html':
+    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_html.min.js',
+  'svg':
+    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_svg.min.js',
+};
 
 /**
  * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.
@@ -34,11 +29,8 @@ let animationHandler;
  * @param {!Function} cb
  */
 function getBodymovinAnimationSdk(global, renderer, cb) {
-  const scriptToLoad =
-    renderer === 'svg'
-      ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
-      : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
-  loadScript(global, scriptToLoad, function() {
+  const scriptToLoad = libSourceUrl[renderer] ?? libSourceUrl['svg'];
+  loadScript(global, scriptToLoad, function () {
     cb(global.bodymovin);
   });
 }
@@ -50,7 +42,7 @@ function parseMessage(event) {
   const eventMessage = parseJson(getData(event));
   const action = eventMessage['action'];
   if (action == 'play') {
-    animationHandler.play();
+    tryPlay(animationHandler);
   } else if (action == 'pause') {
     animationHandler.pause();
   } else if (action == 'stop') {
@@ -83,7 +75,7 @@ export function bodymovinanimation(global) {
   const shouldLoop = dataLoop != 'false';
   const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
   const renderer = dataReceived['renderer'];
-  getBodymovinAnimationSdk(global, renderer, function(bodymovin) {
+  getBodymovinAnimationSdk(global, renderer, function (bodymovin) {
     animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
       renderer,
@@ -91,11 +83,9 @@ export function bodymovinanimation(global) {
       autoplay: dataReceived['autoplay'],
       animationData: dataReceived['animationData'],
     });
-    const message = JSON.stringify(
-      dict({
-        'action': 'ready',
-      })
-    );
+    const message = JSON.stringify({
+      'action': 'ready',
+    });
     global.addEventListener('message', parseMessage, false);
     global.parent./*OK*/ postMessage(message, '*');
   });

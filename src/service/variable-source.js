@@ -1,23 +1,11 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from '../services';
-import {devAssert} from '../log';
-import {isFiniteNumber} from '../types';
-import {loadPromise} from '../event-helper';
-import {whenDocumentComplete} from '../document-ready';
+import {isAmp4Email} from '#core/document/format';
+import {whenDocumentComplete} from '#core/document/ready';
+import {isFiniteNumber} from '#core/types';
+
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;
@@ -36,7 +24,7 @@ let ReplacementDef;
  * Sort event in order
  * @enum {number}
  */
-const WAITFOR_EVENTS = {
+const WAITFOR_EVENTS_ENUM = {
   VIEWER_FIRST_VISIBLE: 1,
   DOCUMENT_COMPLETE: 2,
   LOAD: 3,
@@ -45,31 +33,31 @@ const WAITFOR_EVENTS = {
 
 /**
  * A list of events on which event they should wait
- * @const {!Object<string, WAITFOR_EVENTS>}
+ * @const {!Object<string, WAITFOR_EVENTS_ENUM>}
  */
 const NAV_TIMING_WAITFOR_EVENTS = {
   // ready on viewer first visible
-  'navigationStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'redirectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'redirectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'fetchStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'domainLookupStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'domainLookupEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'connectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'secureConnectionStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'connectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'requestStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'responseStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'responseEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'navigationStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'redirectStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'redirectEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'fetchStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'domainLookupStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'domainLookupEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'connectStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'secureConnectionStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'connectEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'requestStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'responseStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'responseEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
   // ready on document complte
-  'domLoading': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
-  'domInteractive': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
-  'domContentLoaded': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
-  'domComplete': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domLoading': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
+  'domInteractive': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
+  'domContentLoaded': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
+  'domComplete': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
   // ready on load
-  'loadEventStart': WAITFOR_EVENTS.LOAD,
+  'loadEventStart': WAITFOR_EVENTS_ENUM.LOAD,
   // ready on load complete
-  'loadEventEnd': WAITFOR_EVENTS.LOAD_END,
+  'loadEventEnd': WAITFOR_EVENTS_ENUM.LOAD_END,
 };
 
 /**
@@ -86,22 +74,22 @@ const NAV_TIMING_WAITFOR_EVENTS = {
 export function getTimingDataAsync(win, startEvent, endEvent) {
   // Fallback to load event if we don't know what to wait for
   const startWaitForEvent =
-    NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS.LOAD;
+    NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS_ENUM.LOAD;
   const endWaitForEvent = endEvent
-    ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS.LOAD
+    ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS_ENUM.LOAD
     : startWaitForEvent;
 
   const waitForEvent = Math.max(startWaitForEvent, endWaitForEvent);
 
   // set wait for onload to be default
   let readyPromise;
-  if (waitForEvent === WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE) {
+  if (waitForEvent === WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE) {
     readyPromise = Promise.resolve();
-  } else if (waitForEvent === WAITFOR_EVENTS.DOCUMENT_COMPLETE) {
+  } else if (waitForEvent === WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE) {
     readyPromise = whenDocumentComplete(win.document);
-  } else if (waitForEvent === WAITFOR_EVENTS.LOAD) {
+  } else if (waitForEvent === WAITFOR_EVENTS_ENUM.LOAD) {
     readyPromise = loadPromise(win);
-  } else if (waitForEvent === WAITFOR_EVENTS.LOAD_END) {
+  } else if (waitForEvent === WAITFOR_EVENTS_ENUM.LOAD_END) {
     // performance.timing.loadEventEnd returns 0 before the load event handler
     // has terminated, that's when the load event is completed.
     // To wait for the event handler to terminate, wait 1ms and defer to the
@@ -154,7 +142,6 @@ export function getTimingDataSync(win, startEvent, endEvent) {
  * @param {!Window} win
  * @param {string} attribute
  * @return {ResolverReturnDef}
- * @private
  */
 export function getNavigationData(win, attribute) {
   const navigationInfo = win['performance'] && win['performance']['navigation'];
@@ -184,7 +171,7 @@ export class VariableSource {
     /** @private {boolean} */
     this.initialized_ = false;
 
-    this.getUrlMacroWhitelist_();
+    this.getUrlMacroAllowlist_();
   }
 
   /**
@@ -271,36 +258,36 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    */
-  getExpr(opt_bindings, opt_whiteList) {
+  getExpr(opt_bindings, opt_allowlist) {
     if (!this.initialized_) {
       this.initialize_();
     }
     const all = {...this.replacements_, ...opt_bindings};
-    return this.buildExpr_(Object.keys(all), opt_whiteList);
+    return this.buildExpr_(Object.keys(all), opt_allowlist);
   }
 
   /**
    * @param {!Array<string>} keys
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys, opt_whiteList) {
-    // If a whitelist is present, the keys must belong to the whitelist.
-    // We filter the keys one last time to ensure no unwhitelisted key is
+  buildExpr_(keys, opt_allowlist) {
+    // If a allowlist is present, the keys must belong to the allowlist.
+    // We filter the keys one last time to ensure no unallowlisted key is
     // allowed.
-    if (this.getUrlMacroWhitelist_()) {
-      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
+    if (this.getUrlMacroAllowlist_()) {
+      keys = keys.filter((key) => this.getUrlMacroAllowlist_().includes(key));
     }
-    // If a whitelist is passed into the call to GlobalVariableSource.expand_
-    // then we only resolve values contained in the whitelist.
-    if (opt_whiteList) {
-      keys = keys.filter(key => opt_whiteList[key]);
+    // If a allowlist is passed into the call to GlobalVariableSource.expand_
+    // then we only resolve values contained in the allowlist.
+    if (opt_allowlist) {
+      keys = keys.filter((key) => opt_allowlist[key]);
     }
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
@@ -311,7 +298,7 @@ export class VariableSource {
     keys.sort((s1, s2) => s2.length - s1.length);
     // Keys that start with a `$` need to be escaped so that they do not
     // interfere with the regex that is constructed.
-    const escaped = keys.map(key => {
+    const escaped = keys.map((key) => {
       if (key[0] === '$') {
         return '\\' + key;
       }
@@ -331,35 +318,26 @@ export class VariableSource {
   }
 
   /**
-   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
-   *     a meta tag).
+   * For email documents, all URL macros are disallowed by default.
+   * @return {Array<string>|undefined} The allowlist of substitutable AMP variables
    * @private
    */
-  getUrlMacroWhitelist_() {
-    if (this.variableWhitelist_) {
-      return this.variableWhitelist_;
+  getUrlMacroAllowlist_() {
+    if (this.variableAllowlist_) {
+      return this.variableAllowlist_;
     }
 
-    const {head} = this.ampdoc.getRootNode();
-    if (!head) {
-      return null;
+    // Disallow all URL macros for AMP4Email format documents.
+    if (this.ampdoc.isSingleDoc()) {
+      const doc = /** @type {!Document} */ (this.ampdoc.getRootNode());
+      if (isAmp4Email(doc)) {
+        /**
+         * The allowlist of variables allowed for variable substitution.
+         * @private {?Array<string>}
+         */
+        this.variableAllowlist_ = [''];
+        return this.variableAllowlist_;
+      }
     }
-
-    // A meta[name="amp-allowed-url-macros"] tag, if present,
-    // contains, in its content attribute, a whitelist of variable substitution.
-    const meta = head.querySelector('meta[name="amp-allowed-url-macros"]');
-    if (!meta) {
-      return null;
-    }
-
-    /**
-     * The whitelist of variables allowed for variable substitution.
-     * @private {?Array<string>}
-     */
-    this.variableWhitelist_ = meta
-      .getAttribute('content')
-      .split(',')
-      .map(variable => variable.trim());
-    return this.variableWhitelist_;
   }
 }

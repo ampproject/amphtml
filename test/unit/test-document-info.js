@@ -1,36 +1,21 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import * as CID from '#service/cid-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
-import * as CID from '../../src/service/cid-impl';
+import {FakePerformance} from '#testing/fake-dom';
+import {createIframePromise} from '#testing/iframe';
 
-import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('document-info', () => {
+  .run('document-info', {}, (env) => {
     beforeEach(() => {
-      window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
+      env.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     function getWin(links, metas) {
-      return createIframePromise().then(iframe => {
+      return createIframePromise().then((iframe) => {
         if (links) {
           for (const rel in links) {
             const hrefs = links[rel];
@@ -55,7 +40,7 @@ describe
         }
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
-        window.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        env.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
         win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(win.document);
         return iframe.win;
@@ -63,7 +48,7 @@ describe
     }
 
     it('should provide the canonicalUrl', () => {
-      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+      return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
         expect(Services.documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'https://twitter.com/'
         );
@@ -74,6 +59,15 @@ describe
       const win = {
         document: {
           nodeType: /* DOCUMENT */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -89,6 +83,7 @@ describe
         location: {
           href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -102,6 +97,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -117,6 +121,7 @@ describe
         location: {
           href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -132,7 +137,7 @@ describe
     });
 
     it('should provide the pageViewId', () => {
-      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+      return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
         expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal(
           '1234'
         );
@@ -143,7 +148,7 @@ describe
     });
 
     it('should provide the pageViewId64', () => {
-      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+      return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
         expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
           'abcdef'
         );
@@ -154,7 +159,7 @@ describe
     });
 
     it('should provide the relative canonicalUrl as absolute', () => {
-      return getWin({'canonical': ['./foo.html']}).then(win => {
+      return getWin({'canonical': ['./foo.html']}).then((win) => {
         expect(Services.documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'http://localhost:' + location.port + '/foo.html'
         );
@@ -165,7 +170,7 @@ describe
       return getWin({
         'canonical': ['https://twitter.com/'],
         'icon': ['https://foo.html/bar.gif'],
-      }).then(win => {
+      }).then((win) => {
         expect(
           Services.documentInfoForDoc(win.document).linkRels['canonical']
         ).to.equal('https://twitter.com/');
@@ -176,7 +181,7 @@ describe
     });
 
     it('should provide empty linkRels if there are no link tags', () => {
-      return getWin().then(win => {
+      return getWin().then((win) => {
         expect(Services.documentInfoForDoc(win.document).linkRels).to.be.empty;
       });
     });
@@ -185,7 +190,7 @@ describe
       return getWin({
         'canonical': ['./foo.html'],
         'icon': ['./bar.gif'],
-      }).then(win => {
+      }).then((win) => {
         expect(
           Services.documentInfoForDoc(win.document).linkRels['canonical']
         ).to.equal('http://localhost:' + location.port + '/foo.html');
@@ -202,7 +207,7 @@ describe
         return getWin({
           'sharelink canonical': ['https://twitter.com/'],
           'icon': ['https://foo.html/bar.gif'],
-        }).then(win => {
+        }).then((win) => {
           expect(
             Services.documentInfoForDoc(win.document).linkRels['sharelink']
           ).to.equal('https://twitter.com/');
@@ -227,7 +232,7 @@ describe
             'https://foo.html/style1.css',
             'https://foo.html/style2.css',
           ],
-        }).then(win => {
+        }).then((win) => {
           const documentInfo = Services.documentInfoForDoc(win.document);
           expect(documentInfo.linkRels['canonical']).to.equal(
             'https://twitter.com/'
@@ -256,7 +261,7 @@ describe
           'prefetch': ['https://foo1.com'],
           'preload': ['https://foo2.com'],
           'preconnect': ['https://foo3.com'],
-        }).then(win => {
+        }).then((win) => {
           expect(
             Services.documentInfoForDoc(win.document).linkRels['canonical']
           ).to.equal('https://twitter.com/');
@@ -274,22 +279,16 @@ describe
       }
     );
 
-    it('should provide the metaTags', () => {
+    it('should provide the viewport', () => {
       return getWin(
         {},
         {
-          'theme-color': ['#123456'],
+          'viewport': ['width=device-width'],
         }
-      ).then(win => {
-        expect(
-          Services.documentInfoForDoc(win.document).metaTags['theme-color']
-        ).to.equal('#123456');
-      });
-    });
-
-    it('should provide empty metaTags if there are no meta tags', () => {
-      return getWin().then(win => {
-        expect(Services.documentInfoForDoc(win.document).metaTags).to.be.empty;
+      ).then((win) => {
+        expect(Services.documentInfoForDoc(win.document).viewport).to.equal(
+          'width=device-width'
+        );
       });
     });
 
@@ -298,6 +297,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -313,6 +321,7 @@ describe
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -327,6 +336,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -342,6 +360,7 @@ describe
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -355,6 +374,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -370,6 +398,7 @@ describe
         location: {
           href: base + '?f=0&amp_r=%3Dinvalid',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);

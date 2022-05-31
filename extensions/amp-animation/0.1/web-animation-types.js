@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // WARNING
 // WARNING
 // WARNING
@@ -150,6 +134,24 @@ export let WebAnimationSelectorDef;
 export let WebAnimationSubtargetDef;
 
 /**
+ * @typedef {{
+ *   scope: (!Element|undefined),
+ *   scaleByScope: (boolean|undefined),
+ * }}
+ *
+ * - scope delimits selectors.
+ * - scaleByScope determines that CSS resolution should treat the scope
+ *   element as a virtual viewport, so that:
+ *   1. vw/vh units are relative to the scope's size
+ *   2. element's x() and y() coords are relative to the scope's top-left corner
+ *   3. element's size and position (width()/height()/x()/y()) are inversely
+ *      relative to the scope's transformed scale, e.g. if the scope is scaled
+ *      to 90%, the element's dimensions will be returned as if it was unscaled
+ *      to 100%.
+ */
+export let WebAnimationBuilderOptionsDef;
+
+/**
  * See https://developer.mozilla.org/en-US/docs/Web/API/Animation/playState
  * @enum {string}
  */
@@ -185,19 +187,21 @@ export const WebAnimationTimingFill = {
 };
 
 /** @const {!Object<string, boolean>} */
-const WHITELISTED_RPOPS = {
+const ALLOWLISTED_PROPS = {
   'opacity': true,
   'transform': true,
   'transform-origin': true,
   'visibility': true,
   'offset-distance': true,
   'offsetDistance': true,
+  'clip-path': true,
+  'clipPath': true,
 };
 
 /**
  * @param {string} prop
  * @return {boolean}
  */
-export function isWhitelistedProp(prop) {
-  return WHITELISTED_RPOPS[prop] || false;
+export function isAllowlistedProp(prop) {
+  return ALLOWLISTED_PROPS[prop] || false;
 }

@@ -1,22 +1,6 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-web-push';
-import {CONFIG_TAG, TAG} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
+import {CONFIG_TAG, TAG} from '../vars';
 
 describes.realWin(
   'web-push-config',
@@ -25,7 +9,7 @@ describes.realWin(
       extensions: ['amp-web-push'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let webPushConfig = {};
 
@@ -48,6 +32,7 @@ describes.realWin(
 
     function createConfigElementWithAttributes(attributes) {
       const element = env.win.document.createElement(CONFIG_TAG);
+      element.setAttribute('layout', 'nodisplay');
       element.setAttribute(
         WebPushConfigAttributes.HELPER_FRAME_URL,
         attributes[WebPushConfigAttributes.HELPER_FRAME_URL]
@@ -71,25 +56,27 @@ describes.realWin(
 
     function removeAllWebPushConfigElements() {
       const elements = win.document.querySelectorAll(CONFIG_TAG);
-      elements.forEach(element => element.remove());
+      elements.forEach((element) => element.remove());
     }
 
     it('should fail if element does not have correct ID', () => {
-      return env.ampdoc.whenReady().then(() => {
+      return env.ampdoc.whenReady().then(async () => {
         const element = createConfigElementWithAttributes(webPushConfig);
+        const impl = await element.getImpl(false);
         element.removeAttribute('id');
         expect(() => {
-          element.implementation_.validate();
+          impl.validate();
         }).to.throw(/must have an id attribute with value/);
       });
     });
 
     it('should fail if page contains duplicate element id', () => {
-      return env.ampdoc.whenReady().then(() => {
+      return env.ampdoc.whenReady().then(async () => {
         createConfigElementWithAttributes(webPushConfig);
         const element = createConfigElementWithAttributes(webPushConfig);
+        const impl = await element.getImpl(false);
         expect(() => {
-          element.implementation_.validate();
+          impl.validate();
         }).to.throw(/only one .* element may exist on a page/i);
       });
     });
@@ -99,13 +86,14 @@ describes.realWin(
       for (const attribute in WebPushConfigAttributes) {
         const configName = WebPushConfigAttributes[attribute];
         if (configName !== WebPushConfigAttributes.SERVICE_WORKER_SCOPE) {
-          const promise = env.ampdoc.whenReady().then(() => {
+          const promise = env.ampdoc.whenReady().then(async () => {
             removeAllWebPushConfigElements();
             webPushConfig = setDefaultWebPushConfig();
             delete webPushConfig[configName];
             const element = createConfigElementWithAttributes(webPushConfig);
+            const impl = await element.getImpl(false);
             expect(() => {
-              element.implementation_.validate();
+              impl.validate();
             }).to.throw(
               new RegExp('must have a valid ' + configName + ' attribute')
             );
@@ -120,12 +108,13 @@ describes.realWin(
       const promises = [];
       for (const attribute in WebPushConfigAttributes) {
         const configName = WebPushConfigAttributes[attribute];
-        const promise = env.ampdoc.whenReady().then(() => {
+        const promise = env.ampdoc.whenReady().then(async () => {
           removeAllWebPushConfigElements();
           webPushConfig[configName] = 'http://example.com/test';
           const element = createConfigElementWithAttributes(webPushConfig);
+          const impl = await element.getImpl(false);
           expect(() => {
-            element.implementation_.validate();
+            impl.validate();
           }).to.throw(/should begin with the https:\/\/ protocol/);
         });
         promises.push(promise);
@@ -137,12 +126,13 @@ describes.realWin(
       const promises = [];
       for (const attribute in WebPushConfigAttributes) {
         const configName = WebPushConfigAttributes[attribute];
-        const promise = env.ampdoc.whenReady().then(() => {
+        const promise = env.ampdoc.whenReady().then(async () => {
           removeAllWebPushConfigElements();
           webPushConfig[configName] = 'http://example.com/';
           const element = createConfigElementWithAttributes(webPushConfig);
+          const impl = await element.getImpl(false);
           expect(() => {
-            element.implementation_.validate();
+            impl.validate();
           }).to.throw(/and point to the/);
         });
         promises.push(promise);
@@ -154,12 +144,13 @@ describes.realWin(
       const promises = [];
       for (const attribute in WebPushConfigAttributes) {
         const configName = WebPushConfigAttributes[attribute];
-        const promise = env.ampdoc.whenReady().then(() => {
+        const promise = env.ampdoc.whenReady().then(async () => {
           removeAllWebPushConfigElements();
           webPushConfig[configName] = 'www.example.com/test';
           const element = createConfigElementWithAttributes(webPushConfig);
+          const impl = await element.getImpl(false);
           expect(() => {
-            element.implementation_.validate();
+            impl.validate();
           }).to.throw(/should begin with the https:\/\/ protocol/);
         });
         promises.push(promise);
@@ -170,18 +161,20 @@ describes.realWin(
     it('should fail if attribute origins differ', () => {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] =
         'https://another-origin.com/test';
-      return env.ampdoc.whenReady().then(() => {
+      return env.ampdoc.whenReady().then(async () => {
         const element = createConfigElementWithAttributes(webPushConfig);
+        const impl = await element.getImpl(false);
         expect(() => {
-          element.implementation_.validate();
+          impl.validate();
         }).to.throw(/must all share the same origin/);
       });
     });
 
     it('should succeed for valid config', () => {
-      return env.ampdoc.whenReady().then(() => {
+      return env.ampdoc.whenReady().then(async () => {
         const element = createConfigElementWithAttributes(webPushConfig);
-        element.implementation_.validate();
+        const impl = await element.getImpl(false);
+        impl.validate();
       });
     });
   }

@@ -1,19 +1,3 @@
-<!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Video analytics
 
 ## Support
@@ -55,6 +39,8 @@ The `video-play` trigger is fired when the video begins playing from a user clic
   },
 }
 ```
+
+_Note:_ This event was initially mapped to the `playing` event emitted by video elements instead of the `play` event. This may lead to overcounting as those events are also emitted when playing was interrupted by network issues. While this bug has been fixed in general, individual video players may continue to use the `playing` event internally instead of the `play` event.
 
 ### Video pause trigger (`"on": "video-pause"`)
 
@@ -207,9 +193,27 @@ All video analytics triggers expose the following variables. These variables are
 | `width`            | Number  | Specifies the width of video (in px).                                                                          |
 | `playedRangesJson` | String  | Represents segments of time the user has watched the video (in JSON format). For example, `[[1, 10], [5, 20]]` |
 
+## Click-to-play Events
+
+Click events set directly on video component elements (like `amp-video`) will not be captured consistently due to implementation details of the browser's native video player or the player component itself.
+
+You can capture independent `play`/`pause` events by using the [`video-play`](#video-play-trigger-on-video-play) and [`video-pause`](#video-pause-trigger-on-video-pause) triggers.
+
+If you'd like to capture the initial `play` event (e.g. click-to-play), you can [place an overlay on the video player](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/) and configure a `click` analytics request that refers to the overlay element (`#myOverlay`):
+
+```javascript
+"triggers": {
+  "video-clicked": {
+    "on": "click",
+    "request": "event",
+    "selector": "#myOverlay"
+  },
+}
+```
+
 ## Video analytics variables
 
-Video analytics contributes the following variables to [AMP URL Variable Substitutions](../../spec/amp-var-substitutions.md).
+Video analytics contributes the following variables to [AMP URL Variable Substitutions](../../docs/spec/amp-var-substitutions.md).
 
 ### VIDEO_STATE
 

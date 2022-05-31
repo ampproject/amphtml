@@ -1,20 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-o2-player';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+
+import * as iframeHelper from '../../../../src/iframe-helper';
 
 describes.realWin(
   'amp-o2-player',
@@ -23,7 +11,7 @@ describes.realWin(
       extensions: ['amp-o2-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -31,7 +19,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getO2player(attributes, opt_responsive) {
+    async function getO2player(attributes, opt_responsive, implExtends) {
       const o2 = doc.createElement('amp-o2-player');
       for (const key in attributes) {
         o2.setAttribute(key, attributes[key]);
@@ -42,7 +30,13 @@ describes.realWin(
         o2.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(o2);
-      await o2.build();
+
+      const impl = await o2.getImpl(false);
+
+      if (implExtends) {
+        implExtends(o2, impl);
+      }
+      await o2.buildInternal();
       await o2.layoutCallback();
       return o2;
     }
@@ -142,6 +136,166 @@ describes.realWin(
       expect(iframe.src).to.equal(
         'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html'
       );
+    });
+
+    it('unlayout and relayout', async () => {
+      const o2 = await getO2player({
+        'data-pid': '123',
+        'data-bcid': '456',
+        'data-env': 'stage',
+      });
+      expect(o2.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = o2.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(o2.querySelector('iframe')).to.not.exist;
+
+      await o2.layoutCallback();
+      expect(o2.querySelector('iframe')).to.exist;
+    });
+
+    describe('sends a consent-data', () => {
+      let sendConsentDataToIframe;
+      const resSource = 'my source';
+      const resOrigin = 'my origin';
+      const resConsentString = 'consent string';
+      let consentData = {
+        'gdprApplies': true,
+        'user_consent': 1,
+        'gdprString': resConsentString,
+      };
+      const resData = {
+        sentinel: 'amp',
+        type: MessageType_Enum.CONSENT_DATA,
+      };
+
+      it('sends a consent-data CONSENT_POLICY_STATE.SUFFICIENT message', async function () {
+        resData.consentData = consentData;
+
+        const implExtends = function (o2, impl) {
+          env.sandbox
+            .stub(impl, 'getConsentString_')
+            .resolves(resConsentString);
+
+          env.sandbox
+            .stub(impl, 'getConsentPolicyState_')
+            .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
+
+          sendConsentDataToIframe = env.sandbox.spy(
+            impl,
+            'sendConsentDataToIframe_'
+          );
+        };
+
+        env.sandbox
+          .stub(iframeHelper, 'listenFor')
+          .callsFake((iframe, message, callback) => {
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
+            callback('', resSource, resOrigin);
+          });
+
+        await getO2player(
+          {
+            'data-pid': '123',
+            'data-bcid': '456',
+          },
+          null,
+          implExtends
+        );
+
+        expect(sendConsentDataToIframe).to.have.been.calledWith(
+          resSource,
+          resOrigin,
+          resData
+        );
+      });
+
+      it('sends a consent-data INSUFFICIENT or UNKNOWN message', async function () {
+        consentData['user_consent'] = 0;
+        resData.consentData = consentData;
+
+        const implExtends = function (o2, impl) {
+          env.sandbox
+            .stub(impl, 'getConsentString_')
+            .resolves(resConsentString);
+
+          env.sandbox
+            .stub(impl, 'getConsentPolicyState_')
+            .resolves(CONSENT_POLICY_STATE.INSUFFICIENT);
+
+          sendConsentDataToIframe = env.sandbox.spy(
+            impl,
+            'sendConsentDataToIframe_'
+          );
+        };
+
+        env.sandbox
+          .stub(iframeHelper, 'listenFor')
+          .callsFake((iframe, message, callback) => {
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
+            callback('', resSource, resOrigin);
+          });
+
+        await getO2player(
+          {
+            'data-pid': '123',
+            'data-bcid': '456',
+          },
+          null,
+          implExtends
+        );
+
+        expect(sendConsentDataToIframe).to.have.been.calledWith(
+          resSource,
+          resOrigin,
+          resData
+        );
+      });
+
+      it('sends a consent-data UNKNOWN_NOT_REQUIRED or default message', async function () {
+        consentData = {
+          'gdprApplies': false,
+        };
+
+        resData.consentData = consentData;
+
+        const implExtends = function (o2, impl) {
+          env.sandbox
+            .stub(impl, 'getConsentString_')
+            .resolves(resConsentString);
+
+          env.sandbox
+            .stub(impl, 'getConsentPolicyState_')
+            .resolves(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+
+          sendConsentDataToIframe = env.sandbox.spy(
+            impl,
+            'sendConsentDataToIframe_'
+          );
+        };
+
+        env.sandbox
+          .stub(iframeHelper, 'listenFor')
+          .callsFake((iframe, message, callback) => {
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
+            callback('', resSource, resOrigin);
+          });
+
+        await getO2player(
+          {
+            'data-pid': '123',
+            'data-bcid': '456',
+          },
+          null,
+          implExtends
+        );
+
+        expect(sendConsentDataToIframe).to.have.been.calledWith(
+          resSource,
+          resOrigin,
+          resData
+        );
+      });
     });
   }
 );

@@ -1,85 +1,125 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-@import './amp-story-share.css';
-
-
 .i-amphtml-story-system-layer {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent) !important;
+  background: linear-gradient(
+    180deg,
+    #0004,
+    #0002 33%,
+    #0001 67%,
+    #0000
+  ) !important;
   position: absolute !important;
+  display: flex !important;
+  justify-content: space-between !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  height: 56px !important; /* 6px progress bar + 48px icons + 2px margin */
-  opacity: 1 !important;
+  height: 140px !important;
   z-index: 100000 !important;
-  box-sizing: border-box !important;
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0, 0, 0.2, 1) !important;
   pointer-events: none !important;
   font-family: 'Roboto', sans-serif !important;
 }
 
-.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
-  opacity: 0.3 !important;
-  z-index: 1 !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
-}
-
 .i-amphtml-story-hidden.i-amphtml-story-system-layer {
   opacity: 0 !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
 }
 
 .i-amphtml-story-hidden.i-amphtml-story-system-layer * {
   pointer-events: none !important;
 }
 
-.i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
-  opacity: 0 !important;
+.i-amphtml-story-attribution {
+  top: 0 !important;
+  border: none !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  padding: 6px 8px 0 !important;
+  height: 48px !important;
+  place-items: center !important;
+  display: flex !important;
+  text-decoration: none !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
 }
 
-.i-amphtml-story-system-layer-buttons {
-  margin-top: 8px; /* 6px progress bar + 2px margin */
+.i-amphtml-story-attribution-visible {
+  visibility: visible !important;
+}
+
+[desktop] .i-amphtml-story-attribution {
+  padding: 6px 6px 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+.i-amphtml-story-attribution > * {
+  margin: 0px 4px !important;
+}
+
+.i-amphtml-story-attribution-logo-container {
+  display: grid !important;
+  place-items: center !important;
+}
+
+.i-amphtml-story-attribution-logo {
+  border-radius: 100% !important;
+  border: 1px solid #d4d4d4 !important;
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: cover !important;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.i-amphtml-story-attribution-text {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16) !important;
+  color: #ffff !important;
+}
+
+.i-amphtml-story-system-layer-buttons,
+.i-amphtml-story-system-layer-buttons-start-position {
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;
+  padding: 8px 4px !important;
+  box-sizing: border-box !important;
+  flex: 1 !important;
+}
+
+.i-amphtml-story-system-layer-buttons-start-position {
+  position: absolute !important;
+  top: 0 !important;
+  justify-content: flex-start !important;
+}
+
+[desktop] .i-amphtml-story-system-layer-buttons {
+  padding: 8px 4px 0 !important;
+}
+
+.i-amphtml-story-system-layer-buttons
+  .i-amphtml-story-ui-hide-button.i-amphtml-story-button {
+  display: none !important;
 }
 
 .i-amphtml-story-button {
-  background-repeat: no-repeat !important;
-  background-position: center center !important;
   height: 48px !important;
   width: 48px !important;
   cursor: pointer !important;
-  border-radius: 50% !important;
-  box-sizing: border-box !important;
-  position: relative !important;
+  border: none !important;
   pointer-events: auto !important;
+  background: none !important;
+}
 
-  /* for svg backgrounds: */
-  background: center center no-repeat !important;
+[desktop] .i-amphtml-story-button {
+  margin: 0 4px !important;
 }
 
 .i-amphtml-story-button:active {
-  /* TODO(alanorozco): do we want material ripple effect? */
   background-color: rgba(0, 0, 0, 0.2) !important;
-}
-
-.i-amphtml-story-system-layer .i-amphtml-story-button {
-  float: left !important;
 }
 
 .i-amphtml-story-progress-bar {
@@ -87,16 +127,32 @@
   display: flex !important;
   height: 2px !important;
   left: 0 !important;
-  margin: 4px 0 0 !important;
-  padding: 0 2px !important;
-  position: absolute !important;
   right: 0 !important;
   top: 0 !important;
+  margin: 6px 10px 0 10px !important;
+  padding: 0 2px !important;
+  position: absolute !important;
   visibility: visible !important;
   z-index: 100001 !important;
+  overflow: hidden !important;
 }
 
-[ad-showing] .i-amphtml-story-progress-bar {
+[ad-showing] .i-amphtml-story-progress-bar-exp-disabled.i-amphtml-story-progress-bar {
+  display: none !important;
+}
+
+[ad-showing] .i-amphtml-story-attribution {
+  visibility: hidden !important;
+}
+
+[ad-showing] .i-amphtml-story-share-control {
+  display: none !important;
+}
+
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+  .i-amphtml-story-mute-audio-control,
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+  .i-amphtml-story-unmute-audio-control {
   visibility: hidden !important;
 }
 
@@ -119,64 +175,26 @@
   transform-origin: left !important;
 }
 
-[dir=rtl] .i-amphtml-story-page-progress-value {
+.i-amphtml-story-ad-progress-value {
+  background-color: #fbc02d !important;
+}
+
+[dir='rtl'] .i-amphtml-story-page-progress-value {
   transform-origin: right !important;
 }
 
-.i-amphtml-first-page-active[info] .i-amphtml-message-container {
-  /* 48px for info button, add width to padding for additional story buttons. */
-  padding-right: 48px !important;
-}
-
-.i-amphtml-first-page-active[info][dir=rtl] .i-amphtml-message-container {
-  /* 48px for info button, add width to padding for additional story buttons. */
-  padding-right: auto !important;
-  padding-left: 48px !important;
-}
-
-.i-amphtml-message-container {
-  display: flex !important;
-  align-items: center !important;
-  width: max-content !important;
-  transition-property: opacity, transform !important;
-  position: absolute !important;
-  top: 0 !important;
-  right: 48px !important;
-  height: 100% !important;
-  color: #fff !important;
-  font-size: 16px !important;
-  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
-}
-
-[dir=rtl] .i-amphtml-message-container {
-  right: auto !important;
-  left: 48px !important;
-}
-
-[i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.0s 0.2s !important;
-  transform: translateX(10px) !important;
+[i-amphtml-story-has-new-page='noshow']
+  .i-amphtml-story-has-new-page-notification-container {
+  transition: opacity 1.5s, visibility 1.5s !important;
   opacity: 0 !important;
+  visibility: hidden !important;
 }
 
-[i-amphtml-story-has-new-page="noshow"] .i-amphtml-story-has-new-page-notification-container {
-  transition: opacity 1.5s !important;
-  opacity: 0 !important;
-}
-
-.i-amphtml-last-page-active[i-amphtml-story-has-new-page="show"] .i-amphtml-story-has-new-page-notification-container {
-  transition: opacity 1.5s !important;
+.i-amphtml-last-page-active[i-amphtml-story-has-new-page='show']
+  .i-amphtml-story-has-new-page-notification-container {
+  transition: opacity 1.5s, visibility 1.5s !important;
   opacity: 1 !important;
-}
-
-[dir=rtl][i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
-  transform: translateX(-10px) !important;
-}
-
-[i-amphtml-story-messagedisplay="show"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-  opacity: 1 !important;
-  transform: translateX(0px) !important;
+  visibility: visible !important;
 }
 
 .i-amphtml-story-mute-text,
@@ -192,28 +210,57 @@
   position: relative !important;
 }
 
-.i-amphtml-story-mute-audio-control,
-.i-amphtml-story-unmute-audio-control,
-.i-amphtml-story-mute-text,
-.i-amphtml-story-unmute-sound-text,
-.i-amphtml-story-unmute-no-sound-text,
-.i-amphtml-story-sidebar-control {
+.i-amphtml-story-no-audio-ui .i-amphtml-story-sound-display {
   display: none !important;
 }
 
-[i-amphtml-story-has-sidebar] .i-amphtml-story-sidebar-control {
+.i-amphtml-story-mute-audio-control,
+.i-amphtml-story-unmute-audio-control,
+.i-amphtml-story-pause-control,
+.i-amphtml-story-play-control,
+.i-amphtml-story-mute-text,
+.i-amphtml-story-unmute-sound-text,
+.i-amphtml-story-unmute-no-sound-text,
+.i-amphtml-story-skip-to-next,
+.i-amphtml-story-captions-control,
+.i-amphtml-story-nocaptions-control {
+  display: none !important;
+}
+
+/*
+  Visible to screen readers only. Screen readers will set :focus on iOS but not android,
+  therefore on android the button remains hidden but interactable.
+*/
+.i-amphtml-story-system-layer:not([desktop]):not(.i-amphtml-story-desktop-one-panel):not(.amp-mode-keyboard-active)
+  .i-amphtml-paused-display
+  button:not(:focus) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 0px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+[i-amphtml-current-page-has-captions]:not([captions-on])
+  .i-amphtml-story-nocaptions-control,
+[i-amphtml-current-page-has-captions][captions-on]
+  .i-amphtml-story-captions-control {
   display: block !important;
 }
 
-.i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
-.i-amphtml-story-has-audio[muted] .i-amphtml-story-unmute-audio-control {
+[i-amphtml-current-page-has-audio]:not([muted])
+  .i-amphtml-story-mute-audio-control,
+[i-amphtml-current-page-has-audio][muted]
+  .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
+.i-amphtml-story-system-layer-buttons button[disabled][disabled] {
+  display: none !important;
+}
 
-.i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
-[i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-sound-text,
-:not([i-amphtml-current-page-has-audio]).i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-no-sound-text {
+.i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
+.i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
   display: block !important;
 }
 
@@ -223,30 +270,51 @@
 }
 
 .i-amphtml-story-unmute-audio-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#fff" fill-rule="evenodd" d="M27.53 16.97a.95.95 0 0 1 1.1-.76c.75.13 2.28.7 3.63 1.9a7.71 7.71 0 0 1 2.62 5.95c0 1.86-.55 3.32-1.33 4.45l-1.38-1.37c.48-.8.8-1.81.8-3.08 0-2.16-.92-3.59-1.97-4.53a6.43 6.43 0 0 0-2.7-1.45.95.95 0 0 1-.77-1.1Z" clip-rule="evenodd"/><path fill="#fff" fill-rule="evenodd" d="M27.54 21.03a.95.95 0 0 1 1.14-.72c.7.16 2.5 1.19 2.5 3.71 0 .7-.15 1.28-.36 1.76l-1.56-1.52c.05-.6-.07-1.25-.48-1.71-.23-.26-.47-.36-.51-.38 0 0-.01 0 0 0a.95.95 0 0 1-.73-1.14Z" clip-rule="evenodd"/><path fill="#fff" d="M23.4 16.79v1.56l1.9 1.9v-4.27c0-.3-.12-.6-.29-.84a1.59 1.59 0 0 0-.7-.57c-.29-.11-.61-.16-.9-.1-.3.06-.61.21-.82.42l-1.31 1.34 1.33 1.34.8-.78Z"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="m20.12 18.73-1.76 1.81h-2.59c-.94 0-1.7.76-1.7 1.7v3.45c0 .93.75 1.68 1.67 1.7l2.6.04 4.9 4.9a.65.65 0 0 0 1.1-.46v-9.1"/><path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m17.13 15.36 17.2 17.19"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="M28.47 30.84A7.2 7.2 0 0 0 31 29.67"/></svg>') !important;
 }
 
 .i-amphtml-story-mute-audio-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="M28.47 17.14c1.15.2 5.46 1.98 5.46 6.92 0 4.95-4.39 6.63-5.46 6.83"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.8" d="M28.47 21.24c.37.08 1.75.79 1.75 2.78 0 1.99-1.4 2.67-1.75 2.74"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="m18.36 27.48 4.88 4.9a.65.65 0 0 0 1.1-.46V16.09c0-.58-.7-.87-1.1-.45l-4.88 4.94h-2.59c-.94 0-1.7.77-1.7 1.7v3.45c0 .93.75 1.69 1.67 1.7l2.62.05Z"/></svg>') !important;
 }
 
-.i-amphtml-story-sidebar-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+.i-amphtml-story-captions-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#fff" d="M28.9 15.4h-9.8a5.4 5.4 0 0 0-5.4 5.3v6.6a5.4 5.4 0 0 0 5.4 5.3h9.8a5.4 5.4 0 0 0 5.4-5.3v-6.6a5.4 5.4 0 0 0-5.4-5.3Zm1 6h-1.7a1.1 1.1 0 0 0-1.1 1.2v2.8a1.1 1.1 0 0 0 1.1 1.1h1.6c.6 0 1 .5 1 1 0 .7-.4 1.2-1 1.2h-1.6a3.3 3.3 0 0 1-3.3-3.3v-2.8a3.3 3.3 0 0 1 3.3-3.3h1.6c.6.1 1 .6 1 1.1 0 .6-.4 1-1 1Zm-8.1 0H20a1.1 1.1 0 0 0-1 1.2v2.8a1.1 1.1 0 0 0 1 1.1h1.6c.6 0 1.1.5 1.1 1 0 .7-.5 1.2-1 1.2h-1.6a3.3 3.3 0 0 1-3.3-3.3v-2.8a3.3 3.3 0 0 1 3.3-3.3h1.6c.5.1 1 .6 1 1.1a1.1 1.1 0 0 1-1 1Z"/></svg>') !important;
+  width: 52px !important;
+}
+
+.i-amphtml-story-nocaptions-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><rect width="18.74" height="15.43" x="14.63" y="16.29" stroke="#fff" stroke-width="1.85" rx="4.42"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.85" d="M22.4 20.38h-1.63a2.2 2.2 0 0 0-2.2 2.2v2.84c0 1.21.98 2.2 2.2 2.2h1.63M29.47 20.38h-1.63a2.2 2.2 0 0 0-2.2 2.2v2.84c0 1.21.98 2.2 2.2 2.2h1.63"/></svg>') !important;
+  width: 52px !important;
+}
+
+.i-amphtml-story-pause-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#fff" stroke-linecap="round" stroke-width="2.1" d="M20.33 16.86v15.4m7.34-15.4v15.4"/></svg>') !important;
+}
+
+.i-amphtml-story-play-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="M17.74 30.34V18.53a1.8 1.8 0 0 1 2.77-1.52l9.23 5.92a1.8 1.8 0 0 1 0 3.03l-9.23 5.9a1.8 1.8 0 0 1-2.77-1.52Z"/></svg>') !important;
 }
 
 .i-amphtml-story-share-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>') !important;
-}
-
-[ios] .i-amphtml-story-share-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/></svg>') !important;
-  /** Visual hack to make the icon looks aligned. */
-  background-position-y: calc(50% - 2px) !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#fff" d="m21.1 25.4 9.87-9.86 1.42 1.42-9.86 9.87z"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="m16.85 19.82 15.33-4.14c.04 0 .07.03.06.06l-4.02 15.34a1.6 1.6 0 0 1-2.97.33l-2.93-5.73-5.77-2.88a1.6 1.6 0 0 1 .3-2.98Z"/></svg>') !important;
 }
 
 .i-amphtml-story-info-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><rect width="2.2" height="6.7" x="22.9" y="22.6" fill="#fff" rx="1.1"/><path stroke="#fff" stroke-width="1.9" d="M31.7 24a7.7 7.7 0 1 1-15.4 0 7.7 7.7 0 0 1 15.4 0Z"/><circle cx="24" cy="20.2" r="1.2" fill="#fff"/></svg>') !important;
   display: none !important;
+  background-size: auto !important;
+}
+
+.i-amphtml-story-close-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><rect width="1.84" height="18.84" x="16.68" y="18" fill="#fff" rx=".92" transform="rotate(-45 16.68 18)"/><rect width="1.84" height="18.84" x="30" y="16.7" fill="#fff" rx=".92" transform="rotate(45 30 16.7)"/></svg>') !important;
+}
+
+.i-amphtml-story-skip-to-next {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="M17 29.2V18.8c0-1.2 1.4-2 2.5-1.3l7.5 5.2c1 .6 1 2 0 2.6l-7.5 5.2c-1 .7-2.5 0-2.5-1.3Z"/><rect width="1.8" height="15.6" x="30.2" y="16.2" fill="#fff" rx=".9"/></svg>') !important;
+}
+
+[desktop] .i-amphtml-story-skip-to-next {
+  display: block !important;
 }
 
 .i-amphtml-story-has-new-page-notification-container {
@@ -269,7 +337,7 @@
   border-radius: 5px !important;
 }
 
-[dir=rtl] .i-amphtml-story-has-new-page-text-wrapper {
+[dir='rtl'] .i-amphtml-story-has-new-page-text-wrapper {
   padding-right: 0 !important;
   padding-left: 10px !important;
 }
@@ -291,10 +359,6 @@
   margin: 0px 10px !important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-has-new-page-notification-container {
-  top: 0 !important;
-}
-
 .i-amphtml-embedded.i-amphtml-first-page-active .i-amphtml-story-info-control {
   display: block !important;
 }
@@ -304,41 +368,12 @@
   display: none !important;
 }
 
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer {
-  background: transparent !important;
-  top: auto !important;
-  bottom: 0 !important;
-  height: 96px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-direction: row-reverse !important;
-}
-
 .i-amphtml-animate-progress li {
-  transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-}
-
-.i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
-  width: calc(100% - 4px) !important;
-  margin: 4px 2px 0 !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-progress-bar {
-  position: relative !important;
-  height: 3px !important;
-  width: calc(100vw / 3) !important;
-  margin: 0 24px !important;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
   height: 3px !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
-  border-radius: 100px !important;
 }
 
 .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
@@ -350,17 +385,21 @@
   transform-origin: left !important;
 }
 
-[dir=rtl].i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+[dir='rtl'].i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
   transform-origin: right !important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar,
-.i-amphtml-story-desktop-fullbleed .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+[desktop] .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
   width: 3px !important;
 }
 
-.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
+.i-amphtml-story-desktop-one-panel.i-amphtml-story-system-layer {
+  width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+  margin: auto !important;
+  margin-top: var(
+    --i-amphtml-story-desktop-one-panel-responsive-margin
+  ) !important;
+  border-radius: var(
+    --i-amphtml-story-desktop-one-panel-border-radius
+  ) !important;
 }

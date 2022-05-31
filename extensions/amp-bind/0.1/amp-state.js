@@ -1,34 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Deferred} from '#core/data-structures/promise';
+import {isJsonScriptTag} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {map} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
-import {ActionTrust} from '../../../src/action-constants';
-import {LayoutPriority} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
-import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
-import {isJsonScriptTag} from '../../../src/dom';
-import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
 
 export class AmpState extends AMP.BaseElement {
   /**
@@ -44,12 +31,15 @@ export class AmpState extends AMP.BaseElement {
      * @private {?JsonObject|undefined}
      */
     this.localData_ = undefined;
+
+    /** @private {!Deferred} */
+    this.loadingDeferred_ = new Deferred();
   }
 
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return LayoutPriority.METADATA;
+    return LayoutPriority_Enum.METADATA;
   }
 
   /** @override */
@@ -69,7 +59,7 @@ export class AmpState extends AMP.BaseElement {
 
     const {element} = this;
     if (element.hasAttribute('overridable')) {
-      Services.bindForDocOrNull(element).then(bind => {
+      Services.bindForDocOrNull(element).then((bind) => {
         devAssert(bind);
         bind.addOverridableKey(element.getAttribute('id'));
       });
@@ -146,7 +136,7 @@ export class AmpState extends AMP.BaseElement {
       );
       return null;
     }
-    return tryParseJson(firstChild.textContent, e => {
+    return tryParseJson(firstChild.textContent, (e) => {
       this.user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
   }
@@ -154,17 +144,15 @@ export class AmpState extends AMP.BaseElement {
   /**
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!UrlReplacementPolicy} policy
+   * @param {!UrlReplacementPolicy_Enum} policy
    * @param {boolean=} opt_refresh
-   * @param {string=} token
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetch_(ampdoc, policy, opt_refresh, token = undefined) {
+  fetch_(ampdoc, policy, opt_refresh) {
     return batchFetchJsonFor(ampdoc, this.element, {
       urlReplacement: policy,
       refresh: opt_refresh,
-      token,
     });
   }
 
@@ -172,7 +160,7 @@ export class AmpState extends AMP.BaseElement {
    * Transforms and prepares the fetch request.
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @return {!Promise<!JsonObject|!Array<JsonObject>|undefined>}
    */
   prepareAndSendFetch_(isInit, opt_refresh) {
     const {element} = this;
@@ -185,37 +173,61 @@ export class AmpState extends AMP.BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     const policy =
       isCorsFetch && !isInit
-        ? UrlReplacementPolicy.OPT_IN
-        : UrlReplacementPolicy.ALL;
+        ? UrlReplacementPolicy_Enum.OPT_IN
+        : UrlReplacementPolicy_Enum.ALL;
 
-    return getViewerAuthTokenIfAvailable(element).then(token =>
-      this.fetch_(ampdoc, policy, opt_refresh, token).catch(error => {
-        const event = error
-          ? createCustomEvent(
-              this.win,
-              'amp-state.error',
-              dict({'response': error.response})
-            )
-          : null;
-        // Trigger "fetch-error" event on fetch failure.
-        const actions = Services.actionServiceForDoc(element);
-        actions.trigger(element, 'fetch-error', event, ActionTrust.LOW);
-      })
-    );
+    return this.fetch_(ampdoc, policy, opt_refresh).catch((error) => {
+      const event = error
+        ? createCustomEvent(this.win, 'amp-state.error', {
+            'response': error.response,
+          })
+        : null;
+      // Trigger "fetch-error" event on fetch failure.
+      const actions = Services.actionServiceForDoc(element);
+      actions.trigger(element, 'fetch-error', event, ActionTrust_Enum.LOW);
+    });
   }
 
   /**
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise<undefined>}
+   * @return {!Promise}
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
+    // On init, we reuse the deferred created in the constructor.
+    if (!isInit) {
+      this.loadingDeferred_ = new Deferred();
+    }
+
+    // Store the deferred locally, in case a new fetch overwrites
+    // it before resolution.
+    const loadingDeferred = this.loadingDeferred_;
+
     // Don't fetch in prerender mode.
     return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
-      .then(json => this.updateState_(json, isInit));
+      .then((json) => this.updateState_(json, isInit))
+      .then(() => loadingDeferred.resolve())
+      .catch((err) => {
+        loadingDeferred.resolve();
+        throw err;
+      });
+  }
+
+  /**
+   * For an "amp-state" with a src attribute, this returns a promise that
+   * resolves after the fetch and update completes. For non-src "amp-state"s,
+   * return a resolved promise.
+   *
+   * @return {!Promise}
+   */
+  getFetchingPromise() {
+    if (!this.element.hasAttribute('src')) {
+      return Promise.resolve();
+    }
+    return this.loadingDeferred_.promise;
   }
 
   /**
@@ -229,14 +241,14 @@ export class AmpState extends AMP.BaseElement {
       return Promise.resolve();
     }
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
-    return Services.bindForDocOrNull(this.element).then(bind => {
+    return Services.bindForDocOrNull(this.element).then((bind) => {
       devAssert(bind);
       const state = /** @type {!JsonObject} */ (map());
       state[id] = json;
       // As a rule, initialization should skip evaluation.
       // If we're not initializing then this must be a mutation, so we must
       // skip <amp-state> evaluation to prevent update cycles.
-      bind.setState(state, /* skipEval */ isInit, /* skipAmpState */ !isInit);
+      bind.setState(state, {skipEval: isInit, skipAmpState: !isInit});
     });
   }
 

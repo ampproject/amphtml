@@ -1,27 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
+import {devAssert, user, userAssert} from '#utils/log';
+
+import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
+
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
-import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
+
+import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {JwtHelper} from '../../amp-access/0.1/jwt';
 
 /**
  * This implements the methods to interact with viewer subscription platform.
@@ -41,7 +29,7 @@ export class ViewerSubscriptionPlatform {
     /** @private @const */
     this.serviceAdapter_ = serviceAdapter;
 
-    /** @private @const {!PageConfig} */
+    /** @private @const {!PageConfigInterface} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @private @const {!./subscription-platform.SubscriptionPlatform} */
@@ -69,6 +57,9 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {string} */
     this.origin_ = origin;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /** @override */
@@ -79,12 +70,14 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   getEntitlements() {
     devAssert(this.currentProductId_, 'Current product is not set');
+
     /** @type {JsonObject} */
-    const messageData = dict({
+    const authRequest = {
       'publicationId': this.publicationId_,
       'productId': this.currentProductId_,
       'origin': this.origin_,
-    });
+    };
+
     // Defaulting to google.com for now.
     // TODO(@elijahsoria): Remove google.com and only rely on what is returned
     // in the cryptokeys param.
@@ -102,25 +95,39 @@ export class ViewerSubscriptionPlatform {
       }
     }
     if (encryptedDocumentKey) {
-      messageData['encryptedDocumentKey'] = encryptedDocumentKey;
+      authRequest['encryptedDocumentKey'] = encryptedDocumentKey;
     }
-    const entitlementPromise = this.viewer_
-      .sendMessageAwaitResponse('auth', messageData)
-      .then(entitlementData => {
-        const authData = (entitlementData || {})['authorization'];
-        const decryptedDocumentKey = (entitlementData || {})[
-          'decryptedDocumentKey'
-        ];
-        if (!authData) {
-          return Entitlement.empty('local');
-        }
-        return this.verifyAuthToken_(authData, decryptedDocumentKey);
-      })
-      .catch(reason => {
-        this.sendAuthTokenErrorToViewer_(reason.message);
-        throw reason;
-      });
-    return /** @type {!Promise<Entitlement>} */ (entitlementPromise);
+
+    return /** @type {!Promise<Entitlement>} */ (
+      this.timer_
+        .timeoutPromise(
+          ENTITLEMENTS_REQUEST_TIMEOUT,
+          this.viewer_.sendMessageAwaitResponse('auth', authRequest)
+        )
+        .then((entitlementData) => {
+          entitlementData = entitlementData || {};
+
+          /** Note to devs: Send error at top level of postMessage instead. */
+          const deprecatedError = entitlementData['error'];
+          const authData = entitlementData['authorization'];
+          const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
+
+          if (deprecatedError) {
+            throw new Error(deprecatedError.message);
+          }
+
+          if (!authData) {
+            return Entitlement.empty('local');
+          }
+
+          return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
+            (reason) => {
+              this.sendAuthTokenErrorToViewer_(reason.message);
+              throw reason;
+            }
+          );
+        })
+    );
   }
 
   /**
@@ -131,14 +138,13 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   verifyAuthToken_(token, decryptedDocumentKey) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
-      const currentProductId = /** @type {string} */ (userAssert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-      ));
+      const currentProductId = /** @type {string} */ (
+        userAssert(this.pageConfig_.getProductId(), 'Product id is null')
+      );
       if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
         throw user().createError(
           `The mismatching "aud" field: ${decodedData['aud']}`
@@ -205,17 +211,14 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   sendAuthTokenErrorToViewer_(errorString) {
-    this.viewer_.sendMessage(
-      'auth-rejected',
-      dict({
-        'reason': errorString,
-      })
-    );
+    this.viewer_.sendMessage('auth-rejected', {
+      'reason': errorString,
+    });
   }
 
   /** @override */
-  getServiceId() {
-    return this.platform_.getServiceId();
+  getPlatformKey() {
+    return this.platform_.getPlatformKey();
   }
 
   /** @override */
@@ -250,8 +253,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  executeAction(action) {
-    return this.platform_.executeAction(action);
+  executeAction(action, sourceId) {
+    return this.platform_.executeAction(action, sourceId);
   }
 
   /** @override */
@@ -267,14 +270,4 @@ export class ViewerSubscriptionPlatform {
   subscriptionChange_() {
     this.serviceAdapter_.resetPlatforms();
   }
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }

@@ -1,37 +1,22 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isArray} from '#core/types';
 
-// TODO(powerivq)
-// Resource.setOwner, Resource.getOwner should be moved here.
-// ResourceState.NOT_BUILT might not be needed here.
+import {Services} from '#service';
+
+import {devAssert} from '#utils/log';
+
 import {OwnersInterface} from './owners-interface';
-import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
-import {devAssert} from '../log';
-import {isArray} from '../types';
-import {registerServiceBuilderForDoc} from '../service';
+import {Resource} from './resource';
+
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element|!Array<!Element>} elements
  * @return {!Array<!Element>}
  */
 function elements(elements) {
-  return /** @type {!Array<!Element>} */ (isArray(elements)
-    ? elements
-    : [elements]);
+  return /** @type {!Array<!Element>} */ (
+    isArray(elements) ? elements : [elements]
+  );
 }
 
 /**
@@ -75,7 +60,7 @@ export class OwnersImpl {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       resource.pause();
     });
   }
@@ -85,7 +70,7 @@ export class OwnersImpl {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       resource.resume();
     });
   }
@@ -95,46 +80,16 @@ export class OwnersImpl {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       resource.unlayout();
     });
   }
 
   /** @override */
-  updateInViewport(parentElement, subElements, inLocalViewport) {
-    this.updateInViewportForSubresources_(
-      this.resources_.getResourceForElement(parentElement),
-      elements(subElements),
-      inLocalViewport
-    );
-  }
-
-  /** @override */
   requireLayout(element, opt_parentPriority) {
     const promises = [];
-    this.discoverResourcesForElement_(element, resource => {
-      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-        return;
-      }
-      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(
-          resource.whenBuilt().then(() => {
-            resource.measure();
-            if (!resource.isDisplayed()) {
-              return;
-            }
-            this.resources_.scheduleLayoutOrPreload(
-              resource,
-              /* layout */ true,
-              opt_parentPriority,
-              /* forceOutsideViewport */ true
-            );
-            return resource.loadedOnce();
-          })
-        );
-      } else if (resource.isDisplayed()) {
-        promises.push(resource.loadedOnce());
-      }
+    this.discoverResourcesForElement_(element, (resource) => {
+      promises.push(resource.element.ensureLoaded());
     });
     return Promise.all(promises);
   }
@@ -147,10 +102,10 @@ export class OwnersImpl {
    * @private
    */
   findResourcesInElements_(parentResource, elements, callback) {
-    elements.forEach(element => {
+    for (const element of elements) {
       devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
-    });
+    }
   }
 
   /**
@@ -195,60 +150,8 @@ export class OwnersImpl {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    this.findResourcesInElements_(parentResource, subElements, resource => {
-      if (resource.getState() === ResourceState.NOT_BUILT) {
-        resource.whenBuilt().then(() => {
-          this.measureAndTryScheduleLayout_(
-            resource,
-            !layout,
-            parentResource.getLayoutPriority()
-          );
-        });
-      } else {
-        this.measureAndTryScheduleLayout_(
-          resource,
-          !layout,
-          parentResource.getLayoutPriority()
-        );
-      }
-    });
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @param {boolean} isPreload
-   * @param {number=} opt_parentPriority
-   * @private
-   */
-  measureAndTryScheduleLayout_(resource, isPreload, opt_parentPriority) {
-    resource.measure();
-    if (
-      resource.getState() === ResourceState.READY_FOR_LAYOUT &&
-      resource.isDisplayed()
-    ) {
-      this.resources_.scheduleLayoutOrPreload(
-        resource,
-        !isPreload,
-        opt_parentPriority
-      );
-    }
-  }
-
-  /**
-   * Updates inViewport state for the specified sub-resources of a resource.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   * @private
-   */
-  updateInViewportForSubresources_(
-    parentResource,
-    subElements,
-    inLocalViewport
-  ) {
-    const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.findResourcesInElements_(parentResource, subElements, resource => {
-      resource.setInViewport(inViewport);
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
+      resource.element.ensureLoaded(parentResource.getLayoutPriority());
     });
   }
 }

@@ -1,36 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getWin} from '#core/window';
 
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {startsWith} from '../../../src/string';
-import {toWin} from '../../../src/types';
+import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
 
 /**
- * Blacklisted properties. Used mainly fot testing.
+ * denylisted properties. Used mainly fot testing.
  * @type {?Array<string>}
  */
-let blacklistedProperties = null;
+let denylistedProperties = null;
 
 /**
  * @param {?Array<string>} properties
  * @visibleForTesting
  */
-export function setBlacklistedPropertiesForTesting(properties) {
-  blacklistedProperties = properties;
+export function setDenylistedPropertiesForTesting(properties) {
+  denylistedProperties = properties;
 }
 
 /**
@@ -47,7 +32,7 @@ export function setBlacklistedPropertiesForTesting(properties) {
  * @return {!Object}
  */
 export function installFormProxy(form) {
-  const constr = getFormProxyConstr(toWin(form.ownerDocument.defaultView));
+  const constr = getFormProxyConstr(getWin(form));
   const proxy = new constr(form);
   if (!('action' in proxy)) {
     setupLegacyProxy(form, proxy);
@@ -102,7 +87,7 @@ function createFormProxyConstr(win) {
     return all;
   }, []);
 
-  inheritance.forEach(proto => {
+  /** @type {!Array} */ (inheritance).forEach((proto) => {
     for (const name in proto) {
       const property = win.Object.getOwnPropertyDescriptor(proto, name);
       if (
@@ -110,18 +95,18 @@ function createFormProxyConstr(win) {
         // Exclude constants.
         name.toUpperCase() == name ||
         // Exclude on-events.
-        startsWith(name, 'on') ||
+        name.startsWith('on') ||
         // Exclude properties that already been created.
         ObjectProto.hasOwnProperty.call(FormProxyProto, name) ||
         // Exclude some properties. Currently only used for testing.
-        (blacklistedProperties && blacklistedProperties.includes(name))
+        (denylistedProperties && denylistedProperties.includes(name))
       ) {
         continue;
       }
       if (typeof property.value == 'function') {
         // A method call. Call the original prototype method via `call`.
         const method = property.value;
-        FormProxyProto[name] = function() {
+        FormProxyProto[name] = function () {
           return method.apply(
             /** @type {!FormProxy} */ (this).form_,
             arguments
@@ -131,12 +116,12 @@ function createFormProxyConstr(win) {
         // A read/write property. Call the original prototype getter/setter.
         const spec = {};
         if (property.get) {
-          spec.get = function() {
+          spec.get = function () {
             return property.get.call(/** @type {!FormProxy} */ (this).form_);
           };
         }
         if (property.set) {
-          spec.set = function(v) {
+          spec.set = function (v) {
             return property.set.call(/** @type {!FormProxy} */ (this).form_, v);
           };
         }
@@ -171,7 +156,7 @@ function setupLegacyProxy(form, proxy) {
       // Exclude constants.
       name.toUpperCase() == name ||
       // Exclude on-events.
-      startsWith(name, 'on')
+      name.startsWith('on')
     ) {
       continue;
     }

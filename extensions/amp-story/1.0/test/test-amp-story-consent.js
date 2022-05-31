@@ -1,26 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
 
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-consent', {amp: true}, env => {
+describes.realWin('amp-story-consent', {amp: true}, (env) => {
   const CONSENT_ID = 'CONSENT_ID';
   let win;
   let consentConfigEl;
@@ -31,14 +17,23 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   let storyConsentEl;
   let storyEl;
 
-  const setConfig = config => {
+  const setConfig = (config) => {
     storyConsentConfigEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     const consentConfig = {
       consents: {ABC: {checkConsentHref: 'https://example.com'}},
@@ -56,9 +51,6 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
 
     // Test DOM structure:
     // <amp-story>
@@ -94,9 +86,19 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     storyConsent = new AmpStoryConsent(storyConsentEl);
   });
 
-  it('should parse the config', () => {
-    storyConsent.buildCallback();
+  it('should parse the config', async () => {
+    await storyConsent.buildCallback();
     expect(storyConsent.storyConsentConfig_).to.deep.equal(defaultConfig);
+  });
+
+  it('should parse and merge legacy consent config', async () => {
+    const newConsentConfig = {
+      'consentInstanceId': 'ABC',
+      'checkConsentHref': 'https://example.com',
+      'promptIfUnknownForGeoGroup': undefined,
+    };
+    await storyConsent.buildCallback();
+    expect(storyConsent.consentConfig_).to.deep.equal(newConsentConfig);
   });
 
   it('should require a story-consent title', () => {
@@ -154,11 +156,11 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     });
   });
 
-  it('should show the decline button by default', () => {
+  it('should show the decline button by default', async () => {
     delete defaultConfig.onlyAccept;
     setConfig(defaultConfig);
 
-    storyConsent.buildCallback();
+    await storyConsent.buildCallback();
 
     const buttonEl = storyConsent.storyConsentEl_.querySelector(
       '.i-amphtml-story-consent-action-reject'
@@ -169,11 +171,11 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(buttonEl).to.have.display('block');
   });
 
-  it('should hide the decline button if onlyAccept is true', () => {
+  it('should hide the decline button if onlyAccept is true', async () => {
     defaultConfig.onlyAccept = true;
     setConfig(defaultConfig);
 
-    storyConsent.buildCallback();
+    await storyConsent.buildCallback();
 
     const buttonEl = storyConsent.storyConsentEl_.querySelector(
       '.i-amphtml-story-consent-action-reject'
@@ -184,8 +186,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(buttonEl).to.have.display('none');
   });
 
-  it('should hide the external link by default', () => {
-    storyConsent.buildCallback();
+  it('should hide the external link by default', async () => {
+    await storyConsent.buildCallback();
 
     const linkEl = storyConsent.storyConsentEl_.querySelector(
       '.i-amphtml-story-consent-external-link'
@@ -228,12 +230,12 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     });
   });
 
-  it('should show the external link', () => {
+  it('should show the external link', async () => {
     defaultConfig.externalLink.title = 'Privacy settings';
     defaultConfig.externalLink.href = 'https://example.com';
     setConfig(defaultConfig);
 
-    storyConsent.buildCallback();
+    await storyConsent.buildCallback();
 
     const linkEl = storyConsent.storyConsentEl_.querySelector(
       '.i-amphtml-story-consent-external-link'
@@ -242,11 +244,11 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(linkEl).not.to.have.display('none');
   });
 
-  it('should whitelist the <amp-consent> actions', () => {
-    storyConsent.buildCallback();
+  it('should allowlist the <amp-consent> actions', async () => {
+    await storyConsent.buildCallback();
 
     const actions = storyConsent.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'AMP-CONSENT',
@@ -262,10 +264,10 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     });
   });
 
-  it('should broadcast the amp actions', () => {
-    env.sandbox.stub(storyConsent.actions_, 'trigger');
+  it('should broadcast the amp actions', async () => {
+    await storyConsent.buildCallback();
 
-    storyConsent.buildCallback();
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     // Builds and appends a fake button directly in the storyConsent Shadow DOM.
     const buttonEl = win.document.createElement('button');
@@ -279,8 +281,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(storyConsent.actions_.trigger).to.have.been.calledWith(buttonEl);
   });
 
-  it('should render an accept button with the proper amp action', () => {
-    storyConsent.buildCallback();
+  it('should render an accept button with the proper amp action', async () => {
+    await storyConsent.buildCallback();
 
     const buttonEl = storyConsent.storyConsentEl_.querySelector(
       `button[on="tap:${CONSENT_ID}.accept"]`
@@ -288,8 +290,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(buttonEl).to.exist;
   });
 
-  it('should set the consent ID in the store', () => {
-    storyConsent.buildCallback();
+  it('should set the consent ID in the store', async () => {
+    await storyConsent.buildCallback();
 
     expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
       CONSENT_ID
@@ -304,7 +306,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['eea']});
 
-    storyConsent.buildCallback();
+    await storyConsent.buildCallback();
 
     await Promise.resolve();
     expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
@@ -320,16 +322,16 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['othergroup']});
 
-    storyConsent.buildCallback();
+    await storyConsent.buildCallback();
 
     await Promise.resolve();
     expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.be.null;
   });
 
-  it('should set the font color to black if background is white', () => {
+  it('should set the font color to black if background is white', async () => {
     const styles = {'background-color': 'rgb(255, 255, 255)'};
     getComputedStyleStub.returns(styles);
-    storyConsent.buildCallback();
+    await storyConsent.buildCallback();
 
     const buttonEl = storyConsent.storyConsentEl_.querySelector(
       '.i-amphtml-story-consent-action-accept'
@@ -339,10 +341,10 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     );
   });
 
-  it('should set the font color to white if background is black', () => {
+  it('should set the font color to white if background is black', async () => {
     const styles = {'background-color': 'rgba(0, 0, 0, 1)'};
     getComputedStyleStub.returns(styles);
-    storyConsent.buildCallback();
+    await storyConsent.buildCallback();
 
     const buttonEl = storyConsent.storyConsentEl_.querySelector(
       '.i-amphtml-story-consent-action-accept'

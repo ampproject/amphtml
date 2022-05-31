@@ -1,38 +1,22 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';
-
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
-import {user} from '../../../../src/log';
 
-describes.realWin('Platform store', {}, env => {
+describes.realWin('Platform store', {}, (env) => {
   let platformStore;
-  const serviceIds = ['service1', 'service2'];
+  const platformKeys = ['platform1', 'platform2'];
   const entitlementsForService1 = new Entitlement({
-    source: serviceIds[0],
+    source: platformKeys[0],
     raw: '',
-    service: serviceIds[0],
+    service: platformKeys[0],
     granted: true,
   });
   const entitlementsForService2 = new Entitlement({
-    source: serviceIds[1],
+    source: platformKeys[1],
     raw: '',
-    service: serviceIds[1],
+    service: platformKeys[1],
     granted: false,
   });
   const fallbackEntitlement = new Entitlement({
@@ -55,7 +39,7 @@ describes.realWin('Platform store', {}, env => {
 
   beforeEach(() => {
     platformStore = new PlatformStore(
-      serviceIds,
+      platformKeys,
       {
         supportsViewer: 9,
         testFactor1: 10,
@@ -65,32 +49,32 @@ describes.realWin('Platform store', {}, env => {
     );
   });
 
-  it('should instantiate with the service ids', () => {
-    expect(platformStore.serviceIds_).to.be.equal(serviceIds);
+  it('should instantiate with the platform keys', () => {
+    expect(platformStore.platformKeys_).to.be.equal(platformKeys);
   });
 
   it('should resolve entitlement', async () => {
     // Request entitlement promise even before it's resolved.
-    const p = platformStore.getEntitlementPromiseFor('service2');
+    const p = platformStore.getEntitlementPromiseFor('platform2');
 
     // Resolve once.
     const ent = new Entitlement({
-      service: 'service2',
+      service: 'platform2',
       granted: false,
     });
-    platformStore.resolveEntitlement('service2', ent);
-    expect(platformStore.getResolvedEntitlementFor('service2')).to.equal(ent);
-    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+    platformStore.resolveEntitlement('platform2', ent);
+    expect(platformStore.getResolvedEntitlementFor('platform2')).to.equal(ent);
+    expect(platformStore.getEntitlementPromiseFor('platform2')).to.equal(p);
 
     // Additional resolution doesn't change anything without reset.
     platformStore.resolveEntitlement(
-      'service2',
+      'platform2',
       new Entitlement({
-        service: 'service2',
+        service: 'platform2',
         granted: true,
       })
     );
-    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+    expect(platformStore.getEntitlementPromiseFor('platform2')).to.equal(p);
     await expect(p).to.eventually.equal(ent);
   });
 
@@ -101,9 +85,9 @@ describes.realWin('Platform store', {}, env => {
     );
     platformStore.onChange(cb);
     platformStore.resolveEntitlement(
-      'service2',
+      'platform2',
       new Entitlement({
-        service: 'service2',
+        service: 'platform2',
         granted: false,
       })
     );
@@ -111,22 +95,28 @@ describes.realWin('Platform store', {}, env => {
   });
 
   describe('getGrantStatus', () => {
-    it('should resolve true on recieving a positive entitlement', done => {
-      platformStore.getGrantStatus().then(entitlements => {
+    it('should resolve true on recieving a positive entitlement', (done) => {
+      platformStore.getGrantStatus().then((entitlements) => {
         if (entitlements === true) {
           done();
         } else {
           throw new Error('Incorrect entitlement resolved');
         }
       });
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
-      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
+      platformStore.resolveEntitlement(
+        platformKeys[0],
+        entitlementsForService1
+      );
     });
 
-    it('should resolve true for existing positive entitlement', done => {
-      platformStore.entitlements_[serviceIds[0]] = entitlementsForService1;
-      platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-      platformStore.getGrantStatus().then(entitlements => {
+    it('should resolve true for existing positive entitlement', (done) => {
+      platformStore.entitlements_[platformKeys[0]] = entitlementsForService1;
+      platformStore.entitlements_[platformKeys[1]] = entitlementsForService2;
+      platformStore.getGrantStatus().then((entitlements) => {
         if (entitlements === true) {
           done();
         } else {
@@ -135,15 +125,15 @@ describes.realWin('Platform store', {}, env => {
       });
     });
 
-    it('should resolve false for negative entitlement', done => {
+    it('should resolve false for negative entitlement', (done) => {
       const negativeEntitlements = new Entitlement({
-        source: serviceIds[0],
+        source: platformKeys[0],
         raw: '',
-        service: serviceIds[0],
+        service: platformKeys[0],
       });
-      platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
-      platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-      platformStore.getGrantStatus().then(entitlements => {
+      platformStore.entitlements_[platformKeys[0]] = negativeEntitlements;
+      platformStore.entitlements_[platformKeys[1]] = entitlementsForService2;
+      platformStore.getGrantStatus().then((entitlements) => {
         if (entitlements === false) {
           done();
         } else {
@@ -152,40 +142,55 @@ describes.realWin('Platform store', {}, env => {
       });
     });
 
-    it('should resolve false if all future entitlement are also negative ', done => {
+    it('should resolve false if all future entitlement are also negative ', (done) => {
       const negativeEntitlements = new Entitlement({
-        source: serviceIds[0],
+        source: platformKeys[0],
         raw: '',
-        service: serviceIds[0],
+        service: platformKeys[0],
       });
-      platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
-      platformStore.getGrantStatus().then(entitlements => {
+      platformStore.entitlements_[platformKeys[0]] = negativeEntitlements;
+      platformStore.getGrantStatus().then((entitlements) => {
         if (entitlements === false) {
           done();
         } else {
           throw new Error('Incorrect entitlement resolved');
         }
       });
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
     });
   });
 
   describe('areAllPlatformsResolved_', () => {
     it('should return true if all entitlements are present', () => {
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
       expect(platformStore.areAllPlatformsResolved_()).to.be.equal(false);
-      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      platformStore.resolveEntitlement(
+        platformKeys[0],
+        entitlementsForService1
+      );
       expect(platformStore.areAllPlatformsResolved_()).to.be.equal(true);
     });
   });
 
   describe('getAvailablePlatformsEntitlements_', () => {
     it('should return all available entitlements', () => {
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
       expect(platformStore.getAvailablePlatformsEntitlements_()).to.deep.equal([
         entitlementsForService2,
       ]);
-      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      platformStore.resolveEntitlement(
+        platformKeys[0],
+        entitlementsForService1
+      );
       expect(platformStore.getAvailablePlatformsEntitlements_()).to.deep.equal([
         entitlementsForService2,
         entitlementsForService1,
@@ -200,13 +205,15 @@ describes.realWin('Platform store', {}, env => {
     const anotherPlatformBaseScore = 0;
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
       env.sandbox
         .stub(localPlatform, 'getBaseScore')
         .callsFake(() => localPlatformBaseScore);
       anotherPlatform = new SubscriptionPlatform();
       env.sandbox
-        .stub(anotherPlatform, 'getServiceId')
+        .stub(anotherPlatform, 'getPlatformKey')
         .callsFake(() => 'another');
       env.sandbox
         .stub(anotherPlatform, 'getBaseScore')
@@ -217,10 +224,10 @@ describes.realWin('Platform store', {}, env => {
     it('should return sorted array of platforms and weights', () => {
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
       env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
 
       platformStore.resolveEntitlement(
         'local',
@@ -272,13 +279,15 @@ describes.realWin('Platform store', {}, env => {
     let anotherPlatformBaseScore = 0;
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
       env.sandbox
         .stub(localPlatform, 'getBaseScore')
         .callsFake(() => localPlatformBaseScore);
       anotherPlatform = new SubscriptionPlatform();
       env.sandbox
-        .stub(anotherPlatform, 'getServiceId')
+        .stub(anotherPlatform, 'getPlatformKey')
         .callsFake(() => 'another');
       env.sandbox
         .stub(anotherPlatform, 'getBaseScore')
@@ -313,9 +322,9 @@ describes.realWin('Platform store', {}, env => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        localPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
       platformStore.resolveEntitlement(
         'local',
         new Entitlement({
@@ -334,18 +343,18 @@ describes.realWin('Platform store', {}, env => {
           grantReason: GrantReason.SUBSCRIBER,
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
 
     it('should choose local platform if all other conditions are same', () => {
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
       env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
 
       platformStore.resolveEntitlement(
         'local',
@@ -363,89 +372,19 @@ describes.realWin('Platform store', {}, env => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        localPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
     });
 
     it('should chose platform based on score weight', () => {
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
       // +9
       env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
-          fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
-        );
-
-      platformStore.resolveEntitlement(
-        'local',
-        new Entitlement({
-          source: 'local',
-          raw: '',
-          service: 'local',
-        })
-      );
-      platformStore.resolveEntitlement(
-        'another',
-        new Entitlement({
-          source: 'another',
-          raw: '',
-          service: 'another',
-        })
-      );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
-      );
-    });
-
-    it('should chose platform based on multiple factors', () => {
-      // +10
-      env.sandbox
-        .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
-          fakeGetSupportedScoreFactor(factor, {'testFactor1': 1})
-        );
-      // +9
-      env.sandbox
-        .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
-          fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
-        );
-
-      platformStore.resolveEntitlement(
-        'local',
-        new Entitlement({
-          source: 'local',
-          raw: '',
-          service: 'local',
-        })
-      );
-      platformStore.resolveEntitlement(
-        'another',
-        new Entitlement({
-          source: 'another',
-          raw: '',
-          service: 'another',
-        })
-      );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        localPlatform.getServiceId()
-      );
-    });
-
-    it('should chose platform specified factors', () => {
-      // +10
-      env.sandbox
-        .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
-          fakeGetSupportedScoreFactor(factor, {'testFactor1': 1})
-        );
-      // +9
-      env.sandbox
-        .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
+        .callsFake((factor) =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
         );
 
@@ -466,21 +405,21 @@ describes.realWin('Platform store', {}, env => {
         })
       );
       expect(
-        platformStore.selectApplicablePlatform_('supporsViewer').getServiceId()
-      ).to.equal(localPlatform.getServiceId());
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
 
-    it('should chose platform handle negative factor values', () => {
-      // +10, -10
+    it('should chose platform based on multiple factors', () => {
+      // +10
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
-          fakeGetSupportedScoreFactor(factor, {testFactor1: 1, testFactor2: -1})
+        .callsFake((factor) =>
+          fakeGetSupportedScoreFactor(factor, {'testFactor1': 1})
         );
       // +9
       env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
+        .callsFake((factor) =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
         );
 
@@ -500,18 +439,90 @@ describes.realWin('Platform store', {}, env => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
+    });
+
+    it('should chose platform specified factors', () => {
+      // +10
+      env.sandbox
+        .stub(localPlatform, 'getSupportedScoreFactor')
+        .callsFake((factor) =>
+          fakeGetSupportedScoreFactor(factor, {'testFactor1': 1})
+        );
+      // +9
+      env.sandbox
+        .stub(anotherPlatform, 'getSupportedScoreFactor')
+        .callsFake((factor) =>
+          fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
+        );
+
+      platformStore.resolveEntitlement(
+        'local',
+        new Entitlement({
+          source: 'local',
+          raw: '',
+          service: 'local',
+        })
       );
+      platformStore.resolveEntitlement(
+        'another',
+        new Entitlement({
+          source: 'another',
+          raw: '',
+          service: 'another',
+        })
+      );
+      expect(
+        platformStore
+          .selectApplicablePlatform_('supporsViewer')
+          .getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
+    });
+
+    it('should chose platform handle negative factor values', () => {
+      // +10, -10
+      env.sandbox
+        .stub(localPlatform, 'getSupportedScoreFactor')
+        .callsFake((factor) =>
+          fakeGetSupportedScoreFactor(factor, {testFactor1: 1, testFactor2: -1})
+        );
+      // +9
+      env.sandbox
+        .stub(anotherPlatform, 'getSupportedScoreFactor')
+        .callsFake((factor) =>
+          fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
+        );
+
+      platformStore.resolveEntitlement(
+        'local',
+        new Entitlement({
+          source: 'local',
+          raw: '',
+          service: 'local',
+        })
+      );
+      platformStore.resolveEntitlement(
+        'another',
+        new Entitlement({
+          source: 'another',
+          raw: '',
+          service: 'another',
+        })
+      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
 
     it('should use baseScore', () => {
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
       env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
       localPlatformBaseScore = 1;
       anotherPlatformBaseScore = 10;
       platformStore.resolveEntitlement(
@@ -530,18 +541,18 @@ describes.realWin('Platform store', {}, env => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
     it('getScoreFactorStates should return promised score', async () => {
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+        .callsFake((factor) => fakeGetSupportedScoreFactor(factor, {}));
       // +9
       env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor =>
+        .callsFake((factor) =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
         );
       env.sandbox
@@ -587,21 +598,23 @@ describes.realWin('Platform store', {}, env => {
     beforeEach(() => {
       localFactors = {};
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
       // Base score does not matter.
       env.sandbox.stub(localPlatform, 'getBaseScore').callsFake(() => 10000);
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => localFactors[factor]);
+        .callsFake((factor) => localFactors[factor]);
       anotherFactors = {};
       anotherPlatform = new SubscriptionPlatform();
       env.sandbox
-        .stub(anotherPlatform, 'getServiceId')
+        .stub(anotherPlatform, 'getPlatformKey')
         .callsFake(() => 'another');
       env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 0);
       env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
-        .callsFake(factor => anotherFactors[factor]);
+        .callsFake((factor) => anotherFactors[factor]);
       // Local is ordered last in this case intentionally.
       platformStore.resolvePlatform('another', anotherPlatform);
       platformStore.resolvePlatform('local', localPlatform);
@@ -631,25 +644,124 @@ describes.realWin('Platform store', {}, env => {
 
   describe('reportPlatformFailureAndFallback', () => {
     let errorSpy;
+
     beforeEach(() => {
       errorSpy = env.sandbox.spy(user(), 'warn');
     });
+
+    it('should report warning and use fallback entitlement, when local platform fails', () => {
+      const platform = new SubscriptionPlatform();
+      env.sandbox.stub(platform, 'getPlatformKey').returns('local');
+      env.sandbox.stub(platformStore, 'getLocalPlatform_').returns(platform);
+
+      platformStore.reportPlatformFailureAndFallback('local');
+      expect(errorSpy).to.be.calledOnce;
+      expect(platformStore.entitlements_['local'].json()).to.deep.equal(
+        fallbackEntitlement.json()
+      );
+    });
+
+    it('should use empty entitlement and call onChange callback, when non-local platform fails', () => {
+      env.sandbox
+        .stub(platformStore, 'getLocalPlatform_')
+        .returns(new SubscriptionPlatform());
+
+      platformStore.reportPlatformFailureAndFallback('service1');
+
+      expect(errorSpy).to.not.be.called;
+      expect(platformStore.entitlements_['service1'].json()).to.deep.equal(
+        Entitlement.empty('service1').json()
+      );
+    });
+
+    it('should only call onChange callback once, when non-local platform fails multiple times in a row', () => {
+      env.sandbox
+        .stub(platformStore, 'getLocalPlatform_')
+        .returns(new SubscriptionPlatform());
+      const onChangeSpy = env.sandbox.spy();
+      platformStore.onChange(onChangeSpy);
+
+      // Report failure for the first time.
+      // The onChange callback should be called.
+      onChangeSpy.resetHistory();
+      platformStore.reportPlatformFailureAndFallback('service1');
+      expect(onChangeSpy).to.be.calledOnce;
+
+      // Report failure for the second time.
+      // The onChange callback should NOT be called.
+      onChangeSpy.resetHistory();
+      platformStore.reportPlatformFailureAndFallback('service1');
+      expect(onChangeSpy).not.to.be.called;
+    });
+
     it(
-      'should report warning if all platforms fail and resolve ' +
-        'local with fallbackEntitlement',
+      'should call onChange callback again, when non-local platform fails multiple times ' +
+        'but with a success in between',
       () => {
-        const platform = new SubscriptionPlatform();
-        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
         env.sandbox
-          .stub(platformStore, 'getLocalPlatform')
-          .callsFake(() => platform);
+          .stub(platformStore, 'getLocalPlatform_')
+          .returns(new SubscriptionPlatform());
+        const onChangeSpy = env.sandbox.spy();
+        platformStore.onChange(onChangeSpy);
+
+        // Report failure for the first time.
+        // The onChange callback should be called.
+        onChangeSpy.resetHistory();
         platformStore.reportPlatformFailureAndFallback('service1');
-        expect(errorSpy).to.not.be.called;
-        platformStore.reportPlatformFailureAndFallback('local');
-        expect(errorSpy).to.be.calledOnce;
-        expect(platformStore.entitlements_['local'].json()).to.deep.equal(
-          fallbackEntitlement.json()
+        expect(onChangeSpy).to.be.calledOnce;
+
+        // Succeed.
+        // This will reset the platform's failed flag.
+        platformStore.resolveEntitlement(
+          'service1',
+          Entitlement.empty('service1')
         );
+
+        // Report failure for the second time.
+        // The onChange callback should be called again.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).to.be.calledOnce;
+
+        // Report failure for the third time.
+        // The onChange callback should NOT be called again.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).not.to.be.called;
+      }
+    );
+
+    it(
+      'should call onChange callback once, when non-local platform fails multiple times ' +
+        "but with a different platform's success in between",
+      () => {
+        env.sandbox
+          .stub(platformStore, 'getLocalPlatform_')
+          .returns(new SubscriptionPlatform());
+        const onChangeSpy = env.sandbox.spy();
+        platformStore.onChange(onChangeSpy);
+
+        // Report the other platform's failure first.
+        platformStore.reportPlatformFailureAndFallback('otherPlatform');
+
+        // Report failure for the first time.
+        // The onChange callback should be called.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).to.be.calledOnce;
+
+        // Succeed with a different platform.
+        // This should not reset the "service1" platform's failed flag.
+        platformStore.resolveEntitlement(
+          'otherPlatform',
+          Entitlement.empty('otherPlatform')
+        );
+
+        // Report failure for the second time.
+        // The onChange callback should be called again.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).to.not.be.called;
       }
     );
 
@@ -659,19 +771,19 @@ describes.realWin('Platform store', {}, env => {
       async () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
-        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox.stub(platform, 'getPlatformKey').callsFake(() => 'local');
         env.sandbox
-          .stub(platformStore, 'getLocalPlatform')
+          .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
         env.sandbox
-          .stub(anotherPlatform, 'getServiceId')
-          .callsFake(() => serviceIds[0]);
+          .stub(anotherPlatform, 'getPlatformKey')
+          .callsFake(() => platformKeys[0]);
         env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
-        platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+        platformStore.resolvePlatform(platformKeys[0], anotherPlatform);
         platformStore.resolvePlatform('local', platform);
         platformStore.reportPlatformFailureAndFallback('local');
         platformStore.resolveEntitlement(
-          serviceIds[0],
+          platformKeys[0],
           entitlementsForService1
         );
 
@@ -680,7 +792,7 @@ describes.realWin('Platform store', {}, env => {
           fallbackEntitlement
         );
         // falbackEntitlement has Reason as SUBSCRIBER so it should win
-        expect(selectedPlatform.getServiceId()).to.equal('local');
+        expect(selectedPlatform.getPlatformKey()).to.equal('local');
       }
     );
 
@@ -690,20 +802,20 @@ describes.realWin('Platform store', {}, env => {
       async () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
-        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox.stub(platform, 'getPlatformKey').callsFake(() => 'local');
         env.sandbox
-          .stub(platformStore, 'getLocalPlatform')
+          .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
         env.sandbox
-          .stub(anotherPlatform, 'getServiceId')
-          .callsFake(() => serviceIds[0]);
+          .stub(anotherPlatform, 'getPlatformKey')
+          .callsFake(() => platformKeys[0]);
         env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
-        platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+        platformStore.resolvePlatform(platformKeys[0], anotherPlatform);
         platformStore.resolvePlatform('local', platform);
         fallbackEntitlement.grantReason = GrantReason.METERING;
         platformStore.reportPlatformFailureAndFallback('local');
         platformStore.resolveEntitlement(
-          serviceIds[0],
+          platformKeys[0],
           entitlementsForService1
         );
 
@@ -712,17 +824,17 @@ describes.realWin('Platform store', {}, env => {
           fallbackEntitlement
         );
         // falbackEntitlement has Reason as SUBSCRIBER so it should win
-        expect(selectedPlatform.getServiceId()).to.equal(serviceIds[0]);
+        expect(selectedPlatform.getPlatformKey()).to.equal(platformKeys[0]);
       }
     );
   });
 
   describe('getPlatform', () => {
-    it('should return the platform for the serviceId', () => {
+    it('should return the platform for a given platform key', () => {
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'test';
+      platform.getPlatformKey = () => 'test';
       platformStore.subscriptionPlatforms_['test'] = platform;
-      expect(platformStore.getPlatform('test').getServiceId()).to.be.equal(
+      expect(platformStore.getPlatform('test').getPlatformKey()).to.be.equal(
         'test'
       );
     });
@@ -754,7 +866,7 @@ describes.realWin('Platform store', {}, env => {
     });
 
     it('should resolve with first entitlement with subscriptions', async () => {
-      platformStore.resolveEntitlement('service1', subscribedEntitlement);
+      platformStore.resolveEntitlement('platform1', subscribedEntitlement);
       const entitlement = await platformStore.getGrantEntitlement();
       expect(entitlement).to.equal(subscribedEntitlement);
     });
@@ -763,23 +875,23 @@ describes.realWin('Platform store', {}, env => {
       'should resolve with metered entitlement when no ' +
         'platform is subscribed',
       async () => {
-        platformStore.resolveEntitlement('service1', noEntitlement);
-        platformStore.resolveEntitlement('service2', meteringEntitlement);
+        platformStore.resolveEntitlement('platform1', noEntitlement);
+        platformStore.resolveEntitlement('platform2', meteringEntitlement);
         const entitlement = await platformStore.getGrantEntitlement();
         expect(entitlement).to.equal(meteringEntitlement);
       }
     );
 
     it('should override metering with subscription', async () => {
-      platformStore.resolveEntitlement('service1', meteringEntitlement);
-      platformStore.resolveEntitlement('service2', subscribedEntitlement);
+      platformStore.resolveEntitlement('platform1', meteringEntitlement);
+      platformStore.resolveEntitlement('platform2', subscribedEntitlement);
       const entitlement = await platformStore.getGrantEntitlement();
       expect(entitlement).to.equal(subscribedEntitlement);
     });
 
     it('should resolve to null if nothing matched', async () => {
-      platformStore.resolveEntitlement('service1', noEntitlement);
-      platformStore.resolveEntitlement('service2', noEntitlement);
+      platformStore.resolveEntitlement('platform1', noEntitlement);
+      platformStore.resolveEntitlement('platform2', noEntitlement);
       const entitlement = await platformStore.getGrantEntitlement();
       expect(entitlement).to.be.null;
     });
@@ -845,21 +957,23 @@ describes.realWin('Platform store', {}, env => {
 
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
     });
 
     it(
       'should return a promise resolving the requested platform ' +
         'if it is already registered',
       () => {
-        let serviceId;
+        let platformKey;
 
         platformStore.resolvePlatform('local', localPlatform);
-        platformStore.onPlatformResolves('local', platform => {
-          serviceId = platform.getServiceId();
+        platformStore.onPlatformResolves('local', (platform) => {
+          platformKey = platform.getPlatformKey();
         });
 
-        expect(serviceId).to.be.equal('local');
+        expect(platformKey).to.be.equal('local');
       }
     );
 
@@ -867,15 +981,49 @@ describes.realWin('Platform store', {}, env => {
       'should return a promise resolving when the requested platform ' +
         'gets registered',
       () => {
-        let serviceId;
+        let platformKey;
 
-        platformStore.onPlatformResolves('local', platform => {
-          serviceId = platform.getServiceId();
+        platformStore.onPlatformResolves('local', (platform) => {
+          platformKey = platform.getPlatformKey();
         });
         platformStore.resolvePlatform('local', localPlatform);
 
-        expect(serviceId).to.be.equal('local');
+        expect(platformKey).to.be.equal('local');
       }
     );
+  });
+
+  describe('resetPlatform', () => {
+    const platformKey = 'local';
+    let platform;
+
+    beforeEach(() => {
+      platform = new SubscriptionPlatform();
+      env.sandbox.stub(platform, 'reset');
+      platformStore.resolvePlatform('local', platform);
+    });
+
+    it('should reset a given platform', () => {
+      platformStore.resetPlatform(platformKey);
+      expect(platform.reset).to.be.calledOnce;
+    });
+  });
+
+  describe('resetPlatformStore', () => {
+    it('the entitlement resolvement callback added through public API should persist even after the platform store gets reset', async () => {
+      const callbackSpy = env.sandbox.spy();
+      platformStore.addOnEntitlementResolvedCallback(callbackSpy);
+
+      const newStore = platformStore.resetPlatformStore();
+      const newEntitlement = new Entitlement({
+        service: 'platform1',
+        granted: false,
+      });
+      newStore.resolveEntitlement('platform1', newEntitlement);
+      expect(callbackSpy).to.have.been.calledOnceWithExactly({
+        platformKey: 'platform1',
+        entitlement: newEntitlement,
+      });
+    });
   });
 });

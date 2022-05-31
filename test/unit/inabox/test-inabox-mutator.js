@@ -1,22 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {InaboxMutator} from '../../../src/inabox/inabox-mutator';
-import {Services} from '../../../src/services';
+import {InaboxMutator} from '#inabox/inabox-mutator';
 
-describes.realWin('inabox-mutator', {amp: true}, env => {
+import {Services} from '#service';
+
+describes.realWin('inabox-mutator', {amp: true}, (env) => {
   let mutator;
   let resource;
   let element;
@@ -26,7 +12,7 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     element = env.win.document.createElement('div');
 
     const resources = Services.resourcesForDoc(env.ampdoc);
-    env.sandbox.stub(resources, 'getResourceForElement').callsFake(el => {
+    env.sandbox.stub(resources, 'getResourceForElement').callsFake((el) => {
       expect(el).to.equal(element);
       return resource;
     });
@@ -42,9 +28,9 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     };
   });
 
-  it('changeSize', async () => {
+  it('forceChangeSize', async () => {
     const callback = env.sandbox.spy();
-    mutator.changeSize(element, 12, 34, callback, {
+    mutator.forceChangeSize(element, 12, 34, callback, {
       top: 4,
       right: 5,
       bottom: 6,
@@ -62,8 +48,8 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     expect(schedulePassStub).to.be.calledOnce;
   });
 
-  it('attemptChangeSize', async () => {
-    const resultPromise = mutator.attemptChangeSize(element, 12, 34, {
+  it('requestChangeSize', async () => {
+    const resultPromise = mutator.requestChangeSize(element, 12, 34, {
       top: 4,
       right: 5,
       bottom: 6,

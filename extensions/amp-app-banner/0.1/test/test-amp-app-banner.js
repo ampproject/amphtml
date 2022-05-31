@@ -1,18 +1,4 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
 import {
   AbstractAppBanner,
@@ -20,7 +6,6 @@ import {
   AmpAppBanner,
   AmpIosAppBanner,
 } from '../amp-app-banner';
-import {Services} from '../../../../src/services';
 
 describes.realWin(
   'amp-app-banner',
@@ -30,7 +15,7 @@ describes.realWin(
       canonicalUrl: 'https://example.com/amps.html',
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
     let vsync;
     let platform;
@@ -69,7 +54,7 @@ describes.realWin(
       }
     }
 
-    function getAppBanner(config = {}) {
+    async function getAppBanner(config = {}) {
       if (config.iosMeta) {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'apple-itunes-app');
@@ -106,31 +91,28 @@ describes.realWin(
 
       banner.id = 'banner0';
       doc.body.appendChild(banner);
-      return banner
-        .build()
-        .then(() => banner.layoutCallback())
-        .then(() => banner);
+      await banner.buildInternal();
+      await banner.layoutCallback();
+      return banner;
     }
 
-    function testSetupAndShowBanner() {
-      return getAppBanner({iosMeta, androidManifest}).then(banner => {
-        return banner.implementation_.isDismissed().then(() => {
-          expect(banner.parentElement).to.not.be.null;
-          expect(banner).to.not.have.display('none');
-          const bannerTop = banner.querySelector(
-            'i-amphtml-app-banner-top-padding'
-          );
-          expect(bannerTop).to.exist;
-          const dismissBtn = banner.querySelector(
-            '.amp-app-banner-dismiss-button'
-          );
-          expect(dismissBtn).to.exist;
-        });
-      });
+    async function testSetupAndShowBanner() {
+      const banner = await getAppBanner({iosMeta, androidManifest});
+      const impl = await banner.getImpl();
+      await impl.isDismissed();
+
+      expect(banner.parentElement).to.not.be.null;
+      expect(banner).to.not.have.display('none');
+      const bannerTop = banner.querySelector(
+        'i-amphtml-app-banner-top-padding'
+      );
+      expect(bannerTop).to.exist;
+      const dismissBtn = banner.querySelector('.amp-app-banner-dismiss-button');
+      expect(dismissBtn).to.exist;
     }
 
     function testRemoveBanner(config = {iosMeta, androidManifest}) {
-      return getAppBanner(config).then(banner => {
+      return getAppBanner(config).then((banner) => {
         expect(banner.parentElement).to.be.null;
       });
     }
@@ -157,19 +139,18 @@ describes.realWin(
     }
 
     function testSuiteIos() {
-      it('should preconnect to app store', () => {
-        return getAppBanner({iosMeta}).then(banner => {
-          const preconnect = Services.preconnectFor(win);
-          env.sandbox.stub(preconnect, 'url');
+      it('should preconnect to app store', async () => {
+        const banner = await getAppBanner({iosMeta});
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.stub(preconnect, 'url');
 
-          const impl = banner.implementation_;
-          impl.preconnectCallback(true);
-          expect(preconnect.url).to.be.calledOnce;
-          expect(preconnect.url).to.have.been.calledWith(
-            env.sandbox.match.object, // AmpDoc
-            'https://itunes.apple.com'
-          );
-        });
+        const impl = await banner.getImpl();
+        impl.preconnectCallback(true);
+        expect(preconnect.url).to.be.calledOnce;
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://itunes.apple.com'
+        );
       });
 
       // TODO(alanorozco, #15844): Unskip.
@@ -192,7 +173,7 @@ describes.realWin(
 
       it('should parse meta content and setup hrefs', () => {
         env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
-        return getAppBanner({iosMeta}).then(el => {
+        return getAppBanner({iosMeta}).then((el) => {
           expect(
             AbstractAppBanner.prototype.setupOpenButton_
           ).to.have.been.calledWith(
@@ -215,7 +196,7 @@ describes.realWin(
           env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
           return getAppBanner({
             iosMeta: {content: 'app-id=828256236'},
-          }).then(el => {
+          }).then((el) => {
             expect(
               AbstractAppBanner.prototype.setupOpenButton_
             ).to.have.been.calledWith(
@@ -242,47 +223,45 @@ describes.realWin(
     }
 
     function testSuiteAndroid() {
-      it('should preconnect to play store and preload manifest', () => {
-        return getAppBanner({androidManifest}).then(banner => {
-          const preconnect = Services.preconnectFor(win);
-          env.sandbox.stub(preconnect, 'url');
-          env.sandbox.stub(preconnect, 'preload');
+      it('should preconnect to play store and preload manifest', async () => {
+        const banner = await getAppBanner({androidManifest});
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.stub(preconnect, 'url');
+        env.sandbox.stub(preconnect, 'preload');
 
-          const impl = banner.implementation_;
-          impl.preconnectCallback(true);
-          expect(preconnect.url).to.have.been.calledOnce;
-          expect(preconnect.url).to.have.been.calledWith(
-            env.sandbox.match.object, // AmpDoc
-            'https://play.google.com'
-          );
+        const impl = await banner.getImpl();
+        impl.preconnectCallback(true);
+        expect(preconnect.url).to.have.been.calledOnce;
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://play.google.com'
+        );
 
-          expect(preconnect.preload).to.be.calledOnce;
-          expect(preconnect.preload).to.have.been.calledWith(
-            env.sandbox.match.object, // AmpDoc
-            'https://example.com/manifest.json'
-          );
-        });
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://example.com/manifest.json'
+        );
       });
 
-      it('should preconnect to play store and preload origin-manifest', () => {
-        return getAppBanner({originManifest: androidManifest}).then(banner => {
-          const preconnect = Services.preconnectFor(win);
-          env.sandbox.stub(preconnect, 'url');
-          env.sandbox.stub(preconnect, 'preload');
+      it('should preconnect to play store and preload origin-manifest', async () => {
+        const banner = await getAppBanner({originManifest: androidManifest});
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.stub(preconnect, 'url');
+        env.sandbox.stub(preconnect, 'preload');
 
-          const impl = banner.implementation_;
-          impl.preconnectCallback(true);
-          expect(preconnect.url).to.have.been.calledOnce;
-          expect(preconnect.url).to.have.been.calledWith(
-            env.sandbox.match.object, // AmpDoc
-            'https://play.google.com'
-          );
-          expect(preconnect.preload).to.be.calledOnce;
-          expect(preconnect.preload).to.have.been.calledWith(
-            env.sandbox.match.object, // AmpDoc
-            'https://example.com/manifest.json'
-          );
-        });
+        const impl = await banner.getImpl();
+        impl.preconnectCallback(true);
+        expect(preconnect.url).to.have.been.calledOnce;
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://play.google.com'
+        );
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          'https://example.com/manifest.json'
+        );
       });
 
       it('should show banner and set up correctly', testSetupAndShowBanner);
@@ -301,7 +280,7 @@ describes.realWin(
 
       it('should parse manifest and set hrefs', () => {
         env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
-        return getAppBanner({androidManifest}).then(el => {
+        return getAppBanner({androidManifest}).then((el) => {
           expect(
             AbstractAppBanner.prototype.setupOpenButton_
           ).to.have.been.calledWith(
@@ -314,7 +293,7 @@ describes.realWin(
 
       it('should parse origin manifest and set hrefs', () => {
         env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
-        return getAppBanner({originManifest: androidManifest}).then(el => {
+        return getAppBanner({originManifest: androidManifest}).then((el) => {
           expect(
             AbstractAppBanner.prototype.setupOpenButton_
           ).to.have.been.calledWith(
@@ -361,32 +340,32 @@ describes.realWin(
     });
 
     describe('Choosing platform', () => {
-      it('should upgrade to AmpIosAppBanner on iOS', () => {
+      it('should upgrade to AmpIosAppBanner on iOS', async () => {
         isIos = true;
-        return getAppBanner({iosMeta, androidManifest}).then(banner => {
-          expect(banner.implementation_).to.be.instanceof(AmpIosAppBanner);
-        });
+        const banner = await getAppBanner({iosMeta, androidManifest});
+        const impl = await banner.getImpl();
+        expect(impl).to.be.instanceof(AmpIosAppBanner);
       });
 
-      it('should upgrade to AmpAndroidAppBanner on Android', () => {
+      it('should upgrade to AmpAndroidAppBanner on Android', async () => {
         isAndroid = true;
-        return getAppBanner({iosMeta, androidManifest}).then(banner => {
-          expect(banner.implementation_).to.be.instanceof(AmpAndroidAppBanner);
-        });
+        const banner = await getAppBanner({iosMeta, androidManifest});
+        const impl = await banner.getImpl();
+        expect(impl).to.be.instanceof(AmpAndroidAppBanner);
       });
 
-      it('should not upgrade if platform not supported', () => {
+      it('should not upgrade if platform not supported', async () => {
         isEdge = true;
-        return getAppBanner({iosMeta, androidManifest}).then(banner => {
-          expect(banner.implementation_).to.be.instanceof(AmpAppBanner);
-          expect(banner.implementation_.upgradeCallback()).to.be.null;
-        });
+        const banner = await getAppBanner({iosMeta, androidManifest});
+        const impl = await banner.getImpl();
+        expect(impl).to.be.instanceof(AmpAppBanner);
+        expect(impl.upgradeCallback()).to.be.null;
       });
     });
 
     describe('non-supported platform', () => {
       it('should remove the banner', () => {
-        return getAppBanner().then(banner => {
+        return getAppBanner().then((banner) => {
           expect(banner.parentElement).to.be.null;
         });
       });
@@ -602,7 +581,7 @@ describes.realWin(
         expect(dismissBtn).to.not.be.null;
         expect(dismissBtn.parentElement).to.be.equal(element);
         dismissBtn.dispatchEvent(new Event('click'));
-        return banner.isDismissed().then(value => {
+        return banner.isDismissed().then((value) => {
           expect(element.parentElement).to.be.null;
           expect(value).to.be.true;
         });

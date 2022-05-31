@@ -1,0 +1,16 @@
+{
+  "requests": {
+    "event": "https://${tenantId}/s/${pixelId}.gif?",
+    "trackingIdentifier": "${event}property=${property}&${property}=${clientId(cid-scope-cookie-fallback-name)}${extraTrackingValues}",
+    "defaultTrackingValues": "${trackingIdentifier}&sourceUrl=${sourceUrl}&canonicalUrl=${canonicalUrl}&referrer=${documentReferrer}&title=${title}&visitDate=${timestamp}&geoLocation=${ampGeo(ISOCountry)}&userAgent=${userAgent}&canonicalHostname=${canonicalHostname}&deviceType=${deviceType}&originType=${originType}",
+    "trackingValuesWithoutGeo": "${trackingIdentifier}&sourceUrl=${sourceUrl}&canonicalUrl=${canonicalUrl}&referrer=${documentReferrer}&title=${title}&visitDate=${timestamp}&userAgent=${userAgent}&canonicalHostname=${canonicalHostname}&deviceType=${deviceType}&originType=${originType}"
+  },
+  "vars": {
+    "extraTrackingValues": ""
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

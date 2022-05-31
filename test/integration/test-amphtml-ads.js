@@ -1,26 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseQueryString} from '#core/types/string/url';
 
-import {RequestBank} from '../../testing/test-helper';
-import {maybeSwitchToCompiledJs} from '../../testing/iframe';
-import {parseQueryString} from '../../src/url';
-import {toggleExperiment} from '../../src/experiments';
-import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
-describe('AMPHTML ad on AMP Page', () => {
+import {RequestBank} from '#testing/helpers/service';
+import {maybeSwitchToMinifiedJs} from '#testing/iframe';
+
+// TODO(wg-monetization, #29112): Unskip on Safari.
+const t = describes.sandboxed.configure().skipSafari();
+
+t.run('AMPHTML ad on AMP Page', {}, () => {
   describes.integration(
     'ATF',
     {
@@ -39,6 +27,10 @@ describe('AMPHTML ad on AMP Page', () => {
       `,
     },
     () => {
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
         return testAmpComponents();
@@ -65,8 +57,12 @@ describe('AMPHTML ad on AMP Page', () => {
   </amp-ad>
       `,
     },
-    env => {
-      // TODO(#24657): Flaky on Travis.
+    (env) => {
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
+      // TODO(#24657): Flaky on CI.
       it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
         return testAmpComponentsBTF(env.win);
@@ -75,7 +71,7 @@ describe('AMPHTML ad on AMP Page', () => {
   );
 });
 
-describe('AMPHTML ad on non-AMP page (inabox)', () => {
+t.run('AMPHTML ad on non-AMP page (inabox)', {}, () => {
   describes.integration(
     'ATF',
     {
@@ -89,7 +85,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponents();
@@ -97,6 +93,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 
       afterEach(() => {
         unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+        return RequestBank.tearDown();
       });
     }
   );
@@ -122,7 +119,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       it.configure()
         .skipEdge()
         .run('should layout amp-img, amp-pixel, amp-analytics', () => {
@@ -131,6 +128,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 
       afterEach(() => {
         unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+        return RequestBank.tearDown();
       });
     }
   );
@@ -150,7 +148,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
@@ -158,6 +156,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 
       afterEach(() => {
         unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+        return RequestBank.tearDown();
       });
     }
   );
@@ -170,12 +169,12 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       let adContent;
       let iframe;
       before(() => {
         // Gets the same ad as the other tests.
-        return fetchAdContent().then(text => {
+        return fetchAdContent().then((text) => {
           adContent = text;
         });
       });
@@ -188,6 +187,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         env.win.document.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
 
       it(
@@ -221,11 +221,11 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       let adContent;
       let iframe;
       before(() => {
-        return fetchAdContent().then(text => {
+        return fetchAdContent().then((text) => {
           adContent = text;
         });
       });
@@ -239,6 +239,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         env.win.document.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
 
       it.skip(
@@ -262,13 +263,14 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 });
 
-describe('A more real AMPHTML image ad', () => {
+// TODO(wg-monetization, #24421): Make this test less flaky.
+t.skip('A more real AMPHTML image ad', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   // The image ad as seen in examples/inabox.gpt.html,
   // with visibility pings being placeholders that's substituted with calls to
   // the request bank.
-  const adBody = maybeSwitchToCompiledJs(
+  const adBody = maybeSwitchToMinifiedJs(
     // eslint-disable-next-line no-undef
     __html__['test/fixtures/amp-cupcake-ad.html']
   )
@@ -307,7 +309,7 @@ describe('A more real AMPHTML image ad', () => {
         <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
         `,
     },
-    env => {
+    (env) => {
       let iframe;
       let doc;
       beforeEach(() => {
@@ -318,12 +320,14 @@ describe('A more real AMPHTML image ad', () => {
         Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
       });
 
-      it('should properly render ad in a friendly iframe with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
 
-      it('should properly render ad in a safe frame with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
@@ -331,6 +335,7 @@ describe('A more real AMPHTML image ad', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         doc.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
     }
   );
@@ -342,7 +347,7 @@ describe('A more real AMPHTML image ad', () => {
       amp: false,
       body: '',
     },
-    env => {
+    (env) => {
       let iframe;
       let doc;
       beforeEach(() => {
@@ -351,7 +356,6 @@ describe('A more real AMPHTML image ad', () => {
       });
 
       it('should properly render ad in a friendly iframe with viewability pings', () => {
-        toggleExperiment(env.win, 'inabox-viewport-friendly', true);
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
@@ -368,6 +372,7 @@ describe('A more real AMPHTML image ad', () => {
 
       afterEach(() => {
         doc.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
     }
   );
@@ -382,7 +387,7 @@ describe('A more real AMPHTML image ad', () => {
         <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
         `,
     },
-    env => {
+    (env) => {
       let iframe;
       let doc;
       beforeEach(() => {
@@ -410,19 +415,20 @@ describe('A more real AMPHTML image ad', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         doc.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
     }
   );
 });
 
 function testAmpComponents() {
-  const imgPromise = RequestBank.withdraw('image').then(req => {
+  const imgPromise = RequestBank.withdraw('image').then((req) => {
     expect(req.url).to.equal('/');
   });
-  const pixelPromise = RequestBank.withdraw('pixel').then(req => {
+  const pixelPromise = RequestBank.withdraw('pixel').then((req) => {
     expect(req.url).to.equal('/foo?cid=');
   });
-  const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
+  const analyticsPromise = RequestBank.withdraw('analytics').then((req) => {
     expect(req.url).to.match(/^\/bar\?/);
     const queries = parseQueryString(req.url.substr('/bar'.length));
     expect(queries['cid']).to.equal('');
@@ -439,15 +445,15 @@ function testAmpComponentsBTF(win) {
   // The iframe starts BTF. "visible" trigger should be after scroll.
   // We will record scrolling time for comparison.
   let scrollTime = Infinity;
-  const imgPromise = RequestBank.withdraw('image').then(req => {
+  const imgPromise = RequestBank.withdraw('image').then((req) => {
     expect(Date.now()).to.be.below(scrollTime);
     expect(req.url).to.equal('/');
   });
-  const pixelPromise = RequestBank.withdraw('pixel').then(req => {
+  const pixelPromise = RequestBank.withdraw('pixel').then((req) => {
     expect(Date.now()).to.be.below(scrollTime);
     expect(req.url).to.equal('/foo?cid=');
   });
-  const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
+  const analyticsPromise = RequestBank.withdraw('analytics').then((req) => {
     expect(req.url).to.match(/^\/bar\?/);
     const queries = parseQueryString(req.url.substr('/bar'.length));
     expect(queries['cid']).to.equal('');
@@ -478,7 +484,7 @@ function fetchAdContent() {
       ampCors: false,
       credentials: 'omit',
     })
-    .then(res => res.text());
+    .then((res) => res.text());
 }
 
 /**

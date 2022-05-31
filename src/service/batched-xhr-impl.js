@@ -1,23 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {map} from '#core/types/object';
 
 import {Xhr} from './xhr-impl';
-import {getService, registerServiceBuilder} from '../service';
-import {map} from '../utils/object';
-import {removeFragment} from '../url';
+
+import {getService, registerServiceBuilder} from '../service-helpers';
+import {getSourceOrigin, removeFragment, resolveRelativeUrl} from '../url';
 
 /**
  * A wrapper around the Xhr service which batches the result of GET requests
@@ -53,18 +39,18 @@ export class BatchedXhr extends Xhr {
     const isBatched = !!this.fetchPromises_[key];
 
     if (isBatchable && isBatched) {
-      return this.fetchPromises_[key].then(response => response.clone());
+      return this.fetchPromises_[key].then((response) => response.clone());
     }
 
     const fetchPromise = super.fetch(input, opt_init);
 
     if (isBatchable) {
       this.fetchPromises_[key] = fetchPromise.then(
-        response => {
+        (response) => {
           delete this.fetchPromises_[key];
           return response.clone();
         },
-        err => {
+        (err) => {
           delete this.fetchPromises_[key];
           throw err;
         }
@@ -83,7 +69,11 @@ export class BatchedXhr extends Xhr {
    * @private
    */
   getMapKey_(input, responseType) {
-    return removeFragment(input) + responseType;
+    const absoluteUrl = resolveRelativeUrl(
+      input,
+      getSourceOrigin(this.win.location)
+    );
+    return removeFragment(absoluteUrl) + responseType;
   }
 }
 

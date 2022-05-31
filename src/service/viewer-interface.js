@@ -1,25 +1,9 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @typedef {function(!JsonObject):(!Promise|undefined)}
  */
 export let RequestResponderDef;
 
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -36,7 +20,6 @@ export class ViewerInterface {
    * exported. Need to make sure it's not used externally.
    * @param {string} name
    * @return {?string}
-   * @export
    */
   getParam(name) {}
 
@@ -102,13 +85,6 @@ export class ViewerInterface {
   isOvertakeHistory() {}
 
   /**
-   * How much the viewer has requested the runtime to prerender the document.
-   * The values are in number of screens.
-   * @return {number}
-   */
-  getPrerenderSize() {}
-
-  /**
    * Returns the resolved viewer URL value. It's by default the current page's
    * URL. The trusted viewers are allowed to override this value.
    * @return {string}
@@ -139,7 +115,7 @@ export class ViewerInterface {
   getReferrerUrl() {}
 
   /**
-   * Whether the viewer has been whitelisted for more sensitive operations
+   * Whether the viewer has been allowlisted for more sensitive operations
    * such as customizing referrer.
    * @return {!Promise<boolean>}
    */
@@ -175,19 +151,21 @@ export class ViewerInterface {
    * @param {!JsonObject} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
-   * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {}
 
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, (?JsonObject|string|undefined), boolean):
-   *     (!Promise<*>|undefined)} deliverer
+   * @param {function(string, (?JsonObject|string|undefined), boolean):(!Promise<*>|undefined)} deliverer
    * @param {string} origin
-   * @export
    */
   setMessageDeliverer(deliverer, origin) {}
+
+  /**
+   * @return {?function(string, (?JsonObject|string|undefined), boolean):(!Promise<*>|undefined)}
+   */
+  maybeGetMessageDeliverer() {}
 
   /**
    * Sends the message to the viewer without waiting for any response.

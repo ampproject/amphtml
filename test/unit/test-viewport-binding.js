@@ -1,29 +1,15 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {whenDocumentReady} from '#core/document/ready';
 
-import {Services} from '../../src/services';
-import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
-import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installVsyncService} from '../../src/service/vsync-impl';
-import {toggleExperiment} from '../../src/experiments';
-import {whenDocumentReady} from '../../src/document-ready';
+import {toggleExperiment} from '#experiments';
 
-describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {ViewportBindingIosEmbedWrapper_} from '#service/viewport/viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from '#service/viewport/viewport-binding-natural';
+import {installVsyncService} from '#service/vsync-impl';
+
+describes.realWin('ViewportBindingNatural', {ampCss: true}, (env) => {
   let binding;
   let win;
   let ampdoc;
@@ -69,8 +55,8 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     binding = new ViewportBindingNatural_(ampdoc);
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
-    expect(bodyStyles.overflowX).to.equal('hidden');
-    expect(bodyStyles.overflowY).to.not.equal('hidden');
+    expect(bodyStyles.overflowX).to.equal('visible');
+    expect(bodyStyles.overflowY).to.equal('visible');
   });
 
   it('should NOT require fixed layer transferring', () => {
@@ -155,14 +141,14 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should fallback scrollTop to pageYOffset', () => {
     win.pageYOffset = 11;
-    delete win.document.scrollingElement.scrollTop;
+    win.document.scrollingElement.scrollTop = 0;
     expect(binding.getScrollTop()).to.equal(11);
   });
 
   it('should offset client rect for layout', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 200;
-    delete win.document.scrollingElement;
+    win.document.scrollingElement.scrollTop = 0;
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
@@ -178,7 +164,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   it('should offset client rect for layout and position passed in', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 2000;
-    delete win.document.scrollingElement;
+    win.document.scrollingElement.scrollTop = 0;
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
@@ -216,7 +202,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 });
 
-describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
+describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, (env) => {
   let binding;
   let win;
   let ampdoc;
@@ -241,21 +227,9 @@ describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
     binding = new ViewportBindingNatural_(ampdoc);
     binding.connect();
   });
-
-  it('should reset overscroll on X-axis', () => {
-    win.scrollTo(1, 0);
-    expect(win.pageXOffset).to.equal(1);
-    return new Promise(resolve => {
-      win.addEventListener('scroll', () => {
-        if (win.pageXOffset == 0) {
-          resolve();
-        }
-      });
-    });
-  });
 });
 
-describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
+describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, (env) => {
   let win;
   let binding;
   let vsync;
@@ -508,7 +482,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   });
 
   it('should call scroll event', () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       binding.onScroll(resolve);
       binding.wrapper_.scrollTop = 11;
     }).then(() => {

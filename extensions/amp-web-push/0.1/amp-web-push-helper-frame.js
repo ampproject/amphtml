@@ -14,11 +14,18 @@
  * the License.
  */
 
+import {parseQueryString} from '#core/types/string/url';
+
+import {initLogConstructor, setReportError, user} from '#utils/log';
+
 import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
+
+import {reportError} from '../../../src/error-reporting';
 import {getMode} from '../../../src/mode';
-import {parseQueryString} from '../../../src/url.js';
-import {user} from '../../../src/log';
+
+initLogConstructor();
+setReportError(reportError);
 
 /**
  * @typedef {{
@@ -236,7 +243,7 @@ export class AmpWebPushHelperFrame {
       .then(() => {
         this.replyToFrameWithPayload_(replyToFrame, true, null, null);
       })
-      .catch(error => {
+      .catch((error) => {
         this.replyToFrameWithPayload_(
           replyToFrame,
           true,
@@ -265,7 +272,7 @@ export class AmpWebPushHelperFrame {
     if (!message || !message.topic) {
       throw new Error('Expected argument topic in message, got:', message);
     }
-    new Promise(resolve => {
+    new Promise((resolve) => {
       // Allow this message through, just for the next time it's received
       this.allowedWorkerMessageTopics_[message.topic] = resolve;
 
@@ -273,7 +280,7 @@ export class AmpWebPushHelperFrame {
       this.waitUntilWorkerControlsPage().then(() => {
         this.messageServiceWorker(message);
       });
-    }).then(workerReplyPayload => {
+    }).then((workerReplyPayload) => {
       delete this.allowedWorkerMessageTopics_[message.topic];
 
       // The service worker's reply is forwarded back to the AMP page
@@ -344,7 +351,7 @@ export class AmpWebPushHelperFrame {
    * @return {Promise}
    */
   waitUntilWorkerControlsPage() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.isWorkerControllingPage_()) {
         resolve();
       } else {
@@ -375,7 +382,7 @@ export class AmpWebPushHelperFrame {
    * Sets up message listeners for messages from the AMP page and service
    * worker.
    *
-   * @param {string|null} allowedOrigin For testing purposes only. Pass in the
+   * @param {?string} allowedOrigin For testing purposes only. Pass in the
    * allowedOrigin since test environments cannot access the parent origin.
    */
   run(allowedOrigin) {

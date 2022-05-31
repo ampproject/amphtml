@@ -1,21 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDetail} from '#utils/event-helper';
 
 import {CarouselEvents} from './carousel-events';
-import {getDetail} from '../../../src/event-helper';
 
 /**
  * @typedef {{
@@ -39,7 +24,7 @@ export class CarouselAccessibility {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, runMutate, stoppable} = config;
+    const {element, runMutate, scrollContainer, stoppable, win} = config;
     /** @protected @const */
     this.win_ = win;
 
@@ -71,7 +56,7 @@ export class CarouselAccessibility {
       },
       true
     );
-    element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       this.onIndexChanged_(event);
     });
   }
@@ -138,13 +123,13 @@ export class CarouselAccessibility {
     if (this.treatAsList_()) {
       this.scrollContainer_.removeAttribute('aria-live');
       this.scrollContainer_.setAttribute('role', 'list');
-      this.slides_.forEach(slide => {
+      this.slides_.forEach((slide) => {
         slide.setAttribute('role', 'listitem');
       });
     } else {
       this.scrollContainer_.setAttribute('aria-live', 'polite');
       this.scrollContainer_.removeAttribute('role');
-      this.slides_.forEach(slide => {
+      this.slides_.forEach((slide) => {
         slide.removeAttribute('role');
       });
     }

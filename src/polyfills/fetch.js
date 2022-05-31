@@ -1,29 +1,10 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {dev, devAssert, user} from '../log';
-import {hasOwn, map} from '../utils/object';
-import {isArray, isObject} from '../types';
-import {parseJson} from '../json';
-import {utf8Encode} from '../utils/bytes';
+import {devAssert} from '#core/assert';
+import {isArray, isObject} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {utf8Encode} from '#core/types/string/bytes';
 
-/** @enum {number} Allowed fetch responses. */
-const allowedFetchTypes = {
-  document: 1,
-  text: 2,
-};
+import {dev, user} from '#utils/log';
 
 /** @const {!Array<string>} */
 const allowedMethods = ['GET', 'POST'];
@@ -54,7 +35,7 @@ let XMLHttpRequestDef;
  * @return {!Promise<!FetchResponse>}
  */
 export function fetchPolyfill(input, init = {}) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const requestMethod = normalizeMethod(init.method || 'GET');
     const xhr = createXhrRequest(requestMethod, input);
 
@@ -62,12 +43,12 @@ export function fetchPolyfill(input, init = {}) {
       xhr.withCredentials = true;
     }
 
-    if (init.responseType in allowedFetchTypes) {
+    if (init.responseType === 'document' || init.responseType === 'text') {
       xhr.responseType = init.responseType;
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
+      Object.keys(init.headers).forEach(function (header) {
         xhr.setRequestHeader(header, init.headers[header]);
       });
     }
@@ -150,7 +131,7 @@ class FetchResponse {
     /** @type {?ReadableStream} */
     this.body = null;
 
-    /** @type {string|null} */
+    /** @type {?string} */
     this.url = xhr.responseURL;
   }
 
@@ -188,9 +169,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
-      parseJson
-    ));
+    return /** @type {!Promise<!JsonObject>} */ (
+      this.drainText_().then(parseJson)
+    );
   }
 
   /**
@@ -199,9 +180,9 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
-      utf8Encode
-    ));
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+      this.drainText_().then(utf8Encode)
+    );
   }
 }
 
@@ -279,12 +260,11 @@ export class Response extends FetchResponse {
     data.status = init.status === undefined ? 200 : parseInt(init.status, 10);
 
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     } else if (isObject(init.headers)) {
       for (const key in init.headers) {
@@ -304,8 +284,6 @@ export class Response extends FetchResponse {
 
 /**
  * Installs fetch and Response polyfill
- *
- * @export
  * @param {Window} win
  */
 export function install(win) {

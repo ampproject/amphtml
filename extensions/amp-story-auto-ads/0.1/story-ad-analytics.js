@@ -1,22 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
-import {dict} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
 export const STORY_AD_ANALYTICS = 'story-ad-analytics';
@@ -27,6 +11,7 @@ export const AnalyticsEvents = {
   AD_LOADED: 'story-ad-load',
   AD_INSERTED: 'story-ad-insert',
   AD_VIEWED: 'story-ad-view',
+  AD_SWIPED: 'story-ad-swipe',
   AD_CLICKED: 'story-ad-click',
   AD_EXITED: 'story-ad-exit',
   AD_DISCARDED: 'story-ad-discard',
@@ -42,6 +27,8 @@ export const AnalyticsVars = {
   AD_INSERTED: 'insertTime',
   // Timestamp when page becomes active page.
   AD_VIEWED: 'viewTime',
+  // Timestamp when ad page detects swipe event.
+  AD_SWIPED: 'swipeTime',
   // Timestamp when ad is clicked.
   AD_CLICKED: 'clickTime',
   // Timestamp when ad page moves from active => inactive.
@@ -104,10 +91,10 @@ export class StoryAdAnalytics {
    */
   ensurePageTrackingInitialized_(adIndex) {
     if (!this.data_[adIndex]) {
-      this.data_[adIndex] = dict({
+      this.data_[adIndex] = {
         [AnalyticsVars.AD_INDEX]: adIndex,
         [AnalyticsVars.AD_UNIQUE_ID]: getUniqueId(this.win_),
-      });
+      };
     }
   }
 }

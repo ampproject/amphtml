@@ -1,27 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   LayoutType,
   getAutoConfig,
   getPubControlConfig,
-} from '../content-recommendation.js';
+} from '#ads/google/a4a/shared/content-recommendation';
 
-describe('getAutoConfig', function() {
-  it('should use image_stacked on wide slots', function() {
+describes.sandboxed('getAutoConfig', {}, function () {
+  it('should use image_stacked on wide slots', function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(
         getAutoConfig(availableWidth, /* isMobile= */ false)
@@ -60,7 +44,7 @@ describe('getAutoConfig', function() {
     );
   });
 
-  it('should use mobile_banner_image_sidebyside on narrow slots on mobile', function() {
+  it('should use mobile_banner_image_sidebyside on narrow slots on mobile', function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(getAutoConfig(availableWidth, /* isMobile= */ true)).to.deep.equal(
         {
@@ -109,7 +93,7 @@ describe('getAutoConfig', function() {
     );
   });
 
-  it('should use image_sidebyside on narrow slots on desktop', function() {
+  it('should use image_sidebyside on narrow slots on desktop', function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(
         getAutoConfig(availableWidth, /* isMobile= */ false)
@@ -164,8 +148,8 @@ describe('getAutoConfig', function() {
   });
 });
 
-describe('getPubControlConfig', function() {
-  it('should use setting when only one provided', function() {
+describes.sandboxed('getPubControlConfig', {}, function () {
+  it('should use setting when only one provided', function () {
     const rawPubControlParams = {
       numberOfColumns: '4',
       numberOfRows: '2',
@@ -209,7 +193,7 @@ describe('getPubControlConfig', function() {
     );
   });
 
-  it('should use different settings for mobile and desktop when two provided', function() {
+  it('should use different settings for mobile and desktop when two provided', function () {
     const rawPubControlParams = {
       numberOfColumns: '1,4',
       numberOfRows: '3,2',
@@ -279,7 +263,7 @@ describe('getPubControlConfig', function() {
     );
   });
 
-  it('should return different sizes for different layouts', function() {
+  it('should return different sizes for different layouts', function () {
     // sanity check that when publisher provides different layouts we use
     // apply different coefficients and get different ad slot sizes.
     const runTest = (layout, expectedHeight) => {
@@ -303,7 +287,7 @@ describe('getPubControlConfig', function() {
     runTest('text_card', /* expectedHeight= */ 184);
   });
 
-  it('should reject invalid pub params', function() {
+  it('should reject invalid pub params', function () {
     const runTest = (pubControlParams, expectedErrorRegex) => {
       const coreConfig = getPubControlConfig(100, pubControlParams);
       expect(coreConfig.validationError).to.match(expectedErrorRegex);
@@ -357,7 +341,7 @@ describe('getPubControlConfig', function() {
     );
   });
 
-  it('limits number of columns if publisher chose too many', function() {
+  it('limits number of columns if publisher chose too many', function () {
     const rawPubControlParams = {
       numberOfColumns: '5', // want 5 columns.
       numberOfRows: '2',

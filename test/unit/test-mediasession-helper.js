@@ -1,27 +1,13 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../../src/services';
-import {isProtocolValid} from '../../src/url';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../../src/mediasession-helper';
+import {isProtocolValid} from '../../src/url';
 
 const schemaTemplate = `
 {
@@ -55,7 +41,7 @@ const schemaTemplate = `
 }
 `;
 
-describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
+describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
   let element;
   let ampdoc;
   let favicon;
@@ -142,9 +128,20 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
       'artwork': ['http://example.com/image.png'],
       'title': 'Some title',
     };
-    setMediaSession(element, ampdoc.win, fakeMetaData);
+    setMediaSession(ampdoc.win, fakeMetaData);
     const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
     expect(newMetaData).to.deep.equal(fakeMetaData);
+  });
+
+  it('validate correct metadata', () => {
+    expect(() =>
+      validateMediaMetadata(element, {
+        'artist': 'Some artist',
+        'album': 'Some album',
+        'artwork': ['http://example.com/image.png'],
+        'title': 'Some title',
+      })
+    ).to.not.throw();
   });
 
   it('should throw if artwork src is invalid - object', () => {
@@ -159,7 +156,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });
@@ -176,7 +173,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });
@@ -190,7 +187,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });

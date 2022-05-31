@@ -1,20 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {setStyle} from '../src/style';
-import {userAssert} from '../src/log';
+import {setStyle} from '#core/dom/style';
+
+import {userAssert} from '#utils/log';
+
 import {writeScript} from './3p';
 
 /**
@@ -29,7 +16,7 @@ import {writeScript} from './3p';
  * @param {function(*)} cb
  */
 function getMathmlJs(global, scriptSource, cb) {
-  writeScript(global, scriptSource, function() {
+  writeScript(global, scriptSource, function () {
     cb(global.MathJax);
   });
 }
@@ -48,7 +35,7 @@ export function mathml(global, data) {
   getMathmlJs(
     global,
     'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML',
-    mathjax => {
+    (mathjax) => {
       // Dimensions are given by the parent frame.
       delete data.width;
       delete data.height;
@@ -59,8 +46,14 @@ export function mathml(global, data) {
       global.document.body.appendChild(div);
       mathjax.Hub.Config({
         showMathMenu: false,
+        // (#26082): From a11y perspective, user should not be able to tab to
+        // the math formula which has no functionality to interact with.  This
+        // configuration removes the formula from the tab-index.
+        menuSettings: {
+          inTabOrder: false,
+        },
       });
-      mathjax.Hub.Queue(function() {
+      mathjax.Hub.Queue(function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
         // Remove built in mathjax margins.
         let display = document.getElementsByClassName('MJXc-display');

@@ -4,25 +4,9 @@ import {
   binarySearch,
 } from '../binary-search';
 
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-describe('binarySearch', () => {
+describes.sandboxed('binarySearch', {}, () => {
   const {NEXT, PREV} = BinarySearchPreference;
-  const {RIGHT, LEFT} = BinarySearchStop;
+  const {LEFT, RIGHT} = BinarySearchStop;
 
   /**
    * @param {!Array<number>} arr
@@ -34,7 +18,7 @@ describe('binarySearch', () => {
     return binarySearch(
       0,
       arr.length,
-      index => {
+      (index) => {
         return target - arr[index];
       },
       stop,
@@ -44,7 +28,7 @@ describe('binarySearch', () => {
 
   it('should find existing items', () => {
     const arr = [1, 15, 17, 42, 99, 201, 401];
-    const results = arr.map(val => arrayBinarySearch(arr, val));
+    const results = arr.map((val) => arrayBinarySearch(arr, val));
 
     expect(results).to.have.ordered.members([0, 1, 2, 3, 4, 5, 6]);
   });
@@ -52,7 +36,7 @@ describe('binarySearch', () => {
   describe('BinarySearchPreference', () => {
     it('should return the greater index for HIGH', () => {
       const arr = [1, 15, 17, 42, 99, 201, 401];
-      const results = arr.map(val => {
+      const results = arr.map((val) => {
         return arrayBinarySearch(arr, val - 1, undefined, NEXT);
       });
 
@@ -61,7 +45,7 @@ describe('binarySearch', () => {
 
     it('should ignore HIGH for existing items', () => {
       const arr = [1, 15, 17, 42, 99, 201, 401];
-      const results = arr.map(val => {
+      const results = arr.map((val) => {
         return arrayBinarySearch(arr, val, undefined, NEXT);
       });
 
@@ -70,7 +54,7 @@ describe('binarySearch', () => {
 
     it('should return the lower index for LOW', () => {
       const arr = [1, 15, 17, 42, 99, 201, 401];
-      const results = arr.map(val => {
+      const results = arr.map((val) => {
         return arrayBinarySearch(arr, val + 1, undefined, PREV);
       });
 
@@ -79,7 +63,7 @@ describe('binarySearch', () => {
 
     it('should ignore LOW for existing items', () => {
       const arr = [1, 15, 17, 42, 99, 201, 401];
-      const results = arr.map(val => {
+      const results = arr.map((val) => {
         return arrayBinarySearch(arr, val, undefined, PREV);
       });
 
@@ -95,7 +79,7 @@ describe('binarySearch', () => {
 
     it('should ignore LEFT for existing items', () => {
       const arr = [1, 15, 17, 42, 99, 201, 401];
-      const results = arr.map(val => arrayBinarySearch(arr, val, LEFT));
+      const results = arr.map((val) => arrayBinarySearch(arr, val, LEFT));
 
       expect(results).to.have.ordered.members([0, 1, 2, 3, 4, 5, 6]);
     });
@@ -112,7 +96,7 @@ describe('binarySearch', () => {
 
     it('should ignore RIGHT for existing items', () => {
       const arr = [1, 15, 17, 42, 99, 201, 401];
-      const results = arr.map(val => arrayBinarySearch(arr, val, RIGHT));
+      const results = arr.map((val) => arrayBinarySearch(arr, val, RIGHT));
 
       expect(results).to.have.ordered.members([0, 1, 2, 3, 4, 5, 6]);
     });
@@ -141,15 +125,19 @@ describe('binarySearch', () => {
 
     describe('low preference', () => {
       it('should return the first index for smaller values', () => {
-        expect(arrayBinarySearch([1, 3], 0, undefined, PREV)).to.satisfy(i => {
-          return Object.is(i, -0);
-        });
+        expect(arrayBinarySearch([1, 3], 0, undefined, PREV)).to.satisfy(
+          (i) => {
+            return Object.is(i, -0);
+          }
+        );
       });
 
       it('should find the lower element', () => {
-        expect(arrayBinarySearch([1, 3], 1, undefined, PREV)).to.satisfy(i => {
-          return Object.is(i, +0);
-        });
+        expect(arrayBinarySearch([1, 3], 1, undefined, PREV)).to.satisfy(
+          (i) => {
+            return Object.is(i, +0);
+          }
+        );
       });
 
       it('should return lower index for the low preference', () => {

@@ -1,27 +1,12 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
-import {openWindowDialog} from '../../../src/dom';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseUrlDeprecated} from '../../../src/url';
-import {urls} from '../../../src/config';
 
 /** @const */
 const TAG = 'amp-access-login';
@@ -91,7 +76,7 @@ class ViewerLoginDialog {
     } else {
       urlPromise = this.urlOrPromise;
     }
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       return buildLoginUrl(url, 'RETURN_URL');
     });
   }
@@ -103,14 +88,11 @@ class ViewerLoginDialog {
    * @return {!Promise<string>}
    */
   open() {
-    return this.getLoginUrl().then(loginUrl => {
+    return this.getLoginUrl().then((loginUrl) => {
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
-      return this.viewer.sendMessageAwaitResponse(
-        'openDialog',
-        dict({
-          'url': loginUrl,
-        })
-      );
+      return this.viewer.sendMessageAwaitResponse('openDialog', {
+        'url': loginUrl,
+      });
     });
   }
 }
@@ -167,11 +149,11 @@ export class WebLoginDialog {
       // Must always be called synchronously.
       this.openInternal_();
     }).then(
-      result => {
+      (result) => {
         this.cleanup_();
         return result;
       },
-      error => {
+      (error) => {
         this.cleanup_();
         throw error;
       }
@@ -213,7 +195,7 @@ export class WebLoginDialog {
     } else {
       urlPromise = this.urlOrPromise;
     }
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       return buildLoginUrl(url, this.getReturnUrl_());
     });
   }
@@ -242,12 +224,12 @@ export class WebLoginDialog {
       this.dialog_ = openWindowDialog(this.win, '', '_blank', options);
       if (this.dialog_) {
         this.dialogReadyPromise_ = this.urlOrPromise.then(
-          url => {
+          (url) => {
             const loginUrl = buildLoginUrl(url, returnUrl);
             dev().fine(TAG, 'Set dialog url: ', loginUrl);
             this.dialog_.location.replace(loginUrl);
           },
-          error => {
+          (error) => {
             throw new Error('failed to resolve url: ' + error);
           }
         );
@@ -259,7 +241,7 @@ export class WebLoginDialog {
         () => {
           this.setupDialog_(returnUrl);
         },
-        error => {
+        (error) => {
           this.loginDone_(/* result */ null, error);
         }
       );
@@ -287,7 +269,7 @@ export class WebLoginDialog {
       }
     }, 500);
 
-    this.messageUnlisten_ = listen(this.win, 'message', e => {
+    this.messageUnlisten_ = listen(this.win, 'message', (e) => {
       dev().fine(TAG, 'MESSAGE:', e);
       if (e.origin != returnOrigin) {
         return;
@@ -299,10 +281,10 @@ export class WebLoginDialog {
       if (getData(e)['type'] == 'result') {
         if (this.dialog_) {
           this.dialog_./*OK*/ postMessage(
-            dict({
+            {
               'sentinel': 'amp',
               'type': 'result-ack',
-            }),
+            },
             returnOrigin
           );
         }

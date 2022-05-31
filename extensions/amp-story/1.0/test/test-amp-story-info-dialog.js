@@ -1,33 +1,20 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
 
-import {
-  Action,
-  AmpStoryStoreService,
-  StateProperty,
-} from '../amp-story-store-service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   DIALOG_VISIBLE_CLASS,
   InfoDialog,
   MOREINFO_VISIBLE_CLASS,
 } from '../amp-story-info-dialog';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 
-describes.realWin('amp-story-share-menu', {amp: true}, env => {
+describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   let moreInfoLinkUrl;
   let embedded;
   let parentEl;
@@ -39,9 +26,19 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
+
     storeService = new AmpStoryStoreService(win);
     embedded = true;
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     // Making sure mutator tasks run synchronously.
     env.sandbox.stub(Services, 'mutatorForDoc').returns({
@@ -51,13 +48,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
       },
     });
 
-    env.sandbox.stub(Services, 'localizationService').returns({
-      getLocalizedString: localizedStringId => `string(${localizedStringId})`,
-    });
-
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => embedded,
-      sendMessageAwaitResponse: eventType => {
+      sendMessageAwaitResponse: (eventType) => {
         if (eventType === 'moreInfoLinkUrl') {
           return Promise.resolve(moreInfoLinkUrl);
         }
@@ -73,7 +66,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
   it('should build the info dialog', async () => {
     await infoDialog.build();
-    expect(infoDialog.isBuilt()).to.be.true;
     expect(infoDialog.element_).to.exist;
   });
 
@@ -127,7 +119,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   it('should not hide the info dialog on click on the inner container', async () => {
     await infoDialog.build();
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-    infoDialog.innerContainerEl_.dispatchEvent(new Event('click'));
+    parentEl
+      .querySelector('.i-amphtml-story-info-dialog-container')
+      .dispatchEvent(new Event('click'));
 
     expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
     expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;

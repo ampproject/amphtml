@@ -1,0 +1,125 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Variable Tester</title>
+    <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-bind/index.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <style amp-boilerplate>
+        body {
+            -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            animation: -amp-start 8s steps(1, end) 0s 1 normal both
+        }
+
+        @-webkit-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-moz-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-ms-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-o-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+    </style>
+    <noscript>
+        <style amp-boilerplate>
+            body {
+                -webkit-animation: none;
+                -moz-animation: none;
+                -ms-animation: none;
+                animation: none
+            }
+        </style>
+    </noscript>
+</head>
+
+<body>
+    <h1>Variable Request Tester</h1>
+    <p>
+        Test what your request will look like after expansion, substitution, and encoding.
+        <br> 1.) If you have variables, enter them into the first input box (a=3&b=[1,abc]). If not skip to step 3.
+        <br> 2.) Click 'Save Variables' button. The JSON representation of the variables should now appear.
+        <br> 3.) Enter in the parameters of the request in the second input box (a=${a}&b=${b}&c=TITLE&d=$IF(true,default,never))
+        <br> 4.) Click 'Send Request' button. The request URL should now appear. (Wait 1 second before step 5. If you get undefined, you probably didn't wait).
+        <br> 5.) Click 'Get Results' button. Both the JSON representation of your parameters and the final request should appear.
+        <br>
+    </p>
+
+    <p><a href="/test/manual/amp-analytics/variable-request-examples.html">Click here for examples</a></p>
+    <br>
+
+    <div>
+        <amp-state id="variables">
+            <script type="application/json"> "?" </script>
+        </amp-state>
+        <input id="variable-input" size="100" placeholder='Enter variables (i.e. a=3&b=c or {"f":123, "b":"hello${title}"})' on="input-throttled:AMP.setState({ variables: event.value })">
+        <br>
+        <amp-iframe id="amp-iframe-variables" title="Variables iframe" width="500" height="250" sandbox="allow-scripts" srcdoc="<p>Variables:</p> N/A" [src]="myVariableUrl">
+            <amp-img layout="fill" src="examples/img/cats-anim-placeholder.gif" placeholder></amp-img>
+        </amp-iframe>
+        <br>
+        <amp-state id="requestParameters">
+            <script type="application/json"> "?" </script>
+        </amp-state>
+        <input id="requestParameters-input" size="100" placeholder="Enter in parameters of a request (i.e. a=CANONICAL_URL&b=TIMEZONE_CODE&c=CLIENT_ID(_ga))" on="input-throttled:AMP.setState({ requestParameters: event.value })">
+    </div>
+    <br>
+    <!-- Count is used to helo create unique urls, so that amp-iframes reload -->
+    <amp-state id="count">
+        <script type="application/json">1</script>
+    </amp-state>
+    <button on="tap:AMP.setState({ myVariableUrl: 'http://ads.localhost:8000/save-variables?' + variables + '&' + count , count: count + 1})">Save variables</button>
+    <button on="tap:AMP.setState({ myRequestUrl: 'http://ads.localhost:8000/run-variable-substitution?' + requestParameters + '&' + count , count: count + 1})">Send request</button>
+    <button on="tap:AMP.setState({ myResultsUrl: 'http://ads.localhost:8000/get-variable-request?' + requestParameters + '&' + count , count: count + 1})">Get results</button>
+    <br>
+
+    <amp-iframe id="amp-iframe-request" title="Request iframe" width="500" height="50" layout="responsive" sandbox="allow-scripts allow-same-origin" src="http://ads.localhost:8000/run-variable-substitution" [src]="myRequestUrl">
+        <amp-img layout="fill" src="examples/img/cats-anim-placeholder.gif" placeholder></amp-img>
+    </amp-iframe>
+    <amp-iframe id="amp-iframe-results" title="Results iframe" width="50" height="50" layout="responsive" sandbox="allow-scripts" srcdoc="<p>Results:</p>" [src]="myResultsUrl">
+        <amp-img layout="fill" src="examples/img/cats-anim-placeholder.gif" placeholder></amp-img>
+    </amp-iframe>
+</body>
+</html>

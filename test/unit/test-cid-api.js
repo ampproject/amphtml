@@ -1,24 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {GoogleCidApi} from '#service/cid-api';
 
-import {GoogleCidApi} from '../../src/service/cid-api';
+import {mockWindowInterface, stubService} from '#testing/helpers/service';
+
 import {getCookie, setCookie} from '../../src/cookies';
-import {mockWindowInterface, stubService} from '../../testing/test-helper';
 
-describes.realWin('test-cid-api', {amp: true}, env => {
+describes.realWin('test-cid-api', {amp: true}, (env) => {
   let win;
   let api;
   let fetchJsonStub;
@@ -56,7 +42,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
           },
         })
       );
-      return api.getScopedCid('api-key', 'scope-a').then(cid => {
+      return api.getScopedCid('api-key', 'scope-a').then((cid) => {
         expect(cid).to.equal('amp-12345');
         expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
         expect(fetchJsonStub).to.be.calledWith(
@@ -86,7 +72,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
           },
         })
       );
-      return api.getScopedCid('api-key', 'scope-a').then(cid => {
+      return api.getScopedCid('api-key', 'scope-a').then((cid) => {
         expect(cid).to.equal('amp-12345');
         expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
         expect(fetchJsonStub).to.be.calledWith(
@@ -117,7 +103,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
         },
       })
     );
-    return api.getScopedCid('api-key', 'scope-a').then(cid => {
+    return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.equal('$OPT_OUT');
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$OPT_OUT');
     });
@@ -131,7 +117,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
         },
       })
     );
-    return api.getScopedCid('api-key', 'scope-a').then(cid => {
+    return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.be.null;
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$NOT_FOUND');
     });
@@ -157,7 +143,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
         },
       })
     );
-    return api.getScopedCid('api-key', 'scope-a').then(cid => {
+    return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.equal('amp-alt-12345');
       expect(fetchJsonStub.getCall(1).args[0]).to.equal(
         'https://ampcid.google.co.uk/v1/publisher:getClientId?key=api-key'
@@ -166,10 +152,11 @@ describes.realWin('test-cid-api', {amp: true}, env => {
   });
 
   it('should return null if API rejects', () => {
-    fetchJsonStub.returns(Promise.reject());
+    expectAsyncConsoleError(/fetch failed/);
+    fetchJsonStub.rejects('fetch failed');
     return api
       .getScopedCid('api-key', 'scope-a')
-      .then(cid => {
+      .then((cid) => {
         expect(cid).to.be.null;
         expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
       })
@@ -178,7 +165,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
 
   it('should return null if AMP_TOKEN=$ERROR', () => {
     persistCookie('AMP_TOKEN', '$ERROR');
-    return api.getScopedCid('api-key', 'scope-a').then(cid => {
+    return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.be.null;
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
     });
@@ -188,7 +175,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
     persistCookie('AMP_TOKEN', '$NOT_FOUND');
     const windowInterface = mockWindowInterface(env.sandbox);
     windowInterface.getDocumentReferrer.returns('https://example.org/');
-    return api.getScopedCid('api-key', 'scope-a').then(cid => {
+    return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.be.null;
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$NOT_FOUND');
     });
@@ -213,7 +200,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
         'https://cdn.ampproject.org/'
       );
       persistCookie('AMP_TOKEN', '$NOT_FOUND');
-      return api.getScopedCid('api-key', 'scope-a').then(cid => {
+      return api.getScopedCid('api-key', 'scope-a').then((cid) => {
         expect(cid).to.equal('amp-12345');
         expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
       });
@@ -222,7 +209,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
 
   it('should return $OPT_OUT if AMP_TOKEN=$OPT_OUT ', () => {
     persistCookie('AMP_TOKEN', '$OPT_OUT');
-    return api.getScopedCid('api-key', 'scope-a').then(cid => {
+    return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.equal('$OPT_OUT');
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$OPT_OUT');
     });
@@ -231,7 +218,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
   it('should not send another request if one is already out', () => {
     let responseResolver;
     fetchJsonStub.returns(
-      new Promise(res => {
+      new Promise((res) => {
         responseResolver = res;
       })
     );
@@ -246,7 +233,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
         };
       },
     });
-    return Promise.all([promise1, promise2]).then(cids => {
+    return Promise.all([promise1, promise2]).then((cids) => {
       expect(cids[0]).to.equal('amp-12345');
       expect(cids[1]).to.equal('amp-12345');
       expect(fetchJsonStub).to.be.calledOnce;
@@ -258,12 +245,12 @@ describes.realWin('test-cid-api', {amp: true}, env => {
     let responseResolverB;
 
     fetchJsonStub.onCall(0).returns(
-      new Promise(res => {
+      new Promise((res) => {
         responseResolverA = res;
       })
     );
     fetchJsonStub.onCall(1).returns(
-      new Promise(res => {
+      new Promise((res) => {
         responseResolverB = res;
       })
     );
@@ -285,7 +272,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
         };
       },
     });
-    return Promise.all([promiseA, promiseB]).then(cids => {
+    return Promise.all([promiseA, promiseB]).then((cids) => {
       expect(cids[0]).to.equal('amp-12345-a');
       expect(cids[1]).to.equal('amp-12345-b');
     });

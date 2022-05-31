@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-reach-player';
 
 describes.realWin(
@@ -23,7 +7,7 @@ describes.realWin(
       extensions: ['amp-reach-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -43,7 +27,7 @@ describes.realWin(
       }
       doc.body.appendChild(reach);
       return reach
-        .build()
+        .buildInternal()
         .then(() => {
           reach.layoutCallback();
         })
@@ -53,7 +37,7 @@ describes.realWin(
     it('renders', () => {
       return getReach({
         'data-embed-id': 'default',
-      }).then(reach => {
+      }).then((reach) => {
         const iframe = reach.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -69,11 +53,25 @@ describes.realWin(
           'data-embed-id': 'default',
         },
         true
-      ).then(reach => {
+      ).then((reach) => {
         const iframe = reach.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const reach = await getReach({
+        'data-embed-id': 'default',
+      });
+      expect(reach.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = reach.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(reach.querySelector('iframe')).to.not.exist;
+
+      await reach.layoutCallback();
+      expect(reach.querySelector('iframe')).to.exist;
     });
   }
 );

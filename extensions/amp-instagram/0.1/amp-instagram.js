@@ -1,20 +1,4 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Embeds an instagram photo. The data-shortcode attribute can be
  * easily copied from a normal instagram URL. Example: <code> <amp-instagram
  * data-shortcode="fBwFP" data-captioned data-default-framing alt="Fastest page
@@ -35,18 +19,20 @@
  * style without changing the layout/size.
  */
 
-import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {Services} from '../../../src/services';
-import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
+import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {setStyle} from '#core/dom/style';
+import {isObject} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
 
-class AmpInstagram extends AMP.BaseElement {
+import {Services} from '#service';
+
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-instagram-0.1.css';
+
+export class AmpInstagram extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -109,48 +95,6 @@ class AmpInstagram extends AMP.BaseElement {
   }
 
   /** @override */
-  createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    const image = this.win.document.createElement('img');
-
-    // This will redirect to the image URL. By experimentation this is
-    // always the same URL that is actually used inside of the embed.
-    this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() => {
-        image.setAttribute(
-          'src',
-          'https://www.instagram.com/p/' +
-            encodeURIComponent(this.shortcode_) +
-            '/media/?size=l'
-        );
-      });
-    image.setAttribute('referrerpolicy', 'origin');
-    setStyles(image, {
-      'overflow': 'hidden',
-      'max-width': '100%',
-    });
-
-    this.propagateAttributes(['alt'], image);
-    /*
-     * Add instagram default styling
-     */
-    if (this.element.hasAttribute('data-default-framing')) {
-      this.element.classList.add('amp-instagram-default-framing');
-    }
-
-    placeholder.appendChild(image);
-    // Must be kept in-sync with the amp-instagram style in ampdoc.css.
-    // This value is the height of the header of the plugin. Makes the
-    // placeholder start at the right spot.
-    setStyles(placeholder, {
-      'marginTop': '54px',
-    });
-    return placeholder;
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
@@ -180,16 +124,12 @@ class AmpInstagram extends AMP.BaseElement {
       '/embed/' +
       this.captioned_ +
       '?cr=1&v=12';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
-    setStyles(iframe, {
-      'opacity': 0,
-    });
+    setStyle(iframe, 'opacity', 0);
     return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
       this.getVsync().mutate(() => {
-        setStyles(iframe, {
-          'opacity': 1,
-        });
+        setStyle(iframe, 'opacity', 1);
       });
     }));
   }
@@ -209,8 +149,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (
       !eventData ||
       !(
-        isObject(eventData) ||
-        startsWith(/** @type {string} */ (eventData), '{')
+        isObject(eventData) || /** @type {string} */ (eventData).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.
@@ -223,7 +162,7 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/ offsetHeight !== height) {
-          this./*OK*/ changeHeight(height);
+          this.forceChangeHeight(height);
         }
       });
     }
@@ -248,6 +187,6 @@ class AmpInstagram extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-instagram', '0.1', AMP => {
+AMP.extension('amp-instagram', '0.1', (AMP) => {
   AMP.registerElement('amp-instagram', AmpInstagram, CSS);
 });

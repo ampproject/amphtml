@@ -1,24 +1,12 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from '../../../src/services';
-import {Util} from './util';
-import {dev, userAssert} from '../../../src/log';
-import {openWindowDialog} from '../../../src/dom';
+import {getWin} from '#core/window';
 
-import {toWin} from '../../../src/types';
+import {Services} from '#service';
+
+import {dev, userAssert} from '#utils/log';
+
+import {Util} from './util';
+
+import {openWindowDialog} from '../../../src/open-window-dialog';
 
 // Popup options
 const POP =
@@ -55,7 +43,7 @@ export class SaveButton {
       'The data-description attribute is required for Save buttons'
     );
     this.element = rootElement;
-    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
+    this.xhr = Services.xhrFor(getWin(rootElement));
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');
@@ -91,7 +79,7 @@ export class SaveButton {
    */
   fetchCount() {
     const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${this.url}`;
-    return this.xhr.fetchJson(url, {}).then(res => res.json());
+    return this.xhr.fetchJson(url, {}).then((res) => res.json());
   }
 
   /**
@@ -158,11 +146,18 @@ export class SaveButton {
       }
     }
 
+    const text = this.lang === 'ja' ? '保存' : 'Save';
+
+    const textContent = this.round ? '' : text;
+
     const saveButton = Util.make(this.element.ownerDocument, {
       'a': {
         class: clazz.join(' '),
         href: this.href,
-        textContent: this.round ? '' : this.lang === 'ja' ? '保存' : 'Save',
+        textContent,
+        ...(!textContent && {
+          'aria-label': text,
+        }),
       },
     });
 
@@ -198,5 +193,14 @@ export class SaveButton {
       promise = Promise.resolve();
     }
     return promise.then(this.renderTemplate.bind(this));
+  }
+
+  /**
+   * Determine the height of the contents to allow resizing after first layout.
+   *
+   * @return {!Promise<?number>}
+   */
+  height() {
+    return Promise.resolve(null);
   }
 }

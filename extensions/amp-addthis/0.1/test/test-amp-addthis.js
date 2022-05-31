@@ -1,37 +1,20 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {toArray} from '#core/types/array';
 
-import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
-import {ConfigManager} from '../config-manager';
-
+import {getKeywordsString} from '../addthis-utils/classify';
 import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../../src/utils/object';
+import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
+import {getDetailsForMeta, getMetaElements} from '../addthis-utils/meta';
 import {
   getAddThisMode,
   isProductCode,
   isPubId,
   isWidgetId,
 } from '../addthis-utils/mode';
-import {getConfigManager} from '../amp-addthis';
-import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
-import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
-import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
-import {toArray} from '../../../../src/types';
+import {getConfigManager} from '../amp-addthis';
+import {ConfigManager} from '../config-manager';
+import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
 
 describes.realWin(
   'amp-addthis',
@@ -40,7 +23,7 @@ describes.realWin(
       extensions: ['amp-addthis'],
     },
   },
-  env => {
+  (env) => {
     const configManager = getConfigManager();
     const pubId = 'ra-5988ef04ee1db125';
     const widgetId = '29nf';
@@ -59,10 +42,10 @@ describes.realWin(
 
     function getAT(configuration, opt_responsive, opt_beforeLayoutCallback) {
       const {shareConfig = {}} = configuration;
-      const elementAttributes = dict({
+      const elementAttributes = {
         'width': '320px',
         'height': '90px',
-      });
+      };
       if (configuration.pubId) {
         elementAttributes['data-pub-id'] = configuration.pubId;
       }
@@ -72,7 +55,7 @@ describes.realWin(
       if (configuration.productCode) {
         elementAttributes['data-product-code'] = configuration.productCode;
       }
-      Object.keys(shareConfig).forEach(key => {
+      Object.keys(shareConfig).forEach((key) => {
         elementAttributes[`data-share-${key}`] = shareConfig[key];
       });
       const at = createElementWithAttributes(
@@ -85,7 +68,7 @@ describes.realWin(
       }
       doc.body.appendChild(at);
       return at
-        .build()
+        .buildInternal()
         .then(() => {
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(at);
@@ -101,9 +84,11 @@ describes.realWin(
 
     function testIframe(iframe) {
       expect(iframe).to.not.equal(null);
-      expect(iframe.getAttribute('src')).to.equal(
-        `${ORIGIN}/dc/amp-addthis.html`
-      );
+      const srcPrefix = `${ORIGIN}/dc/amp-addthis.html?`;
+      expect(
+        iframe.getAttribute('src').startsWith(srcPrefix),
+        `iframe src starts with ${srcPrefix}`
+      ).to.be.true;
       expect(iframe.getAttribute('title')).to.equal(ALT_TEXT);
     }
 
@@ -194,14 +179,13 @@ describes.realWin(
       ).to.not.equal(void 0);
     });
 
-    it('removes the iframe after unlayoutCallback', () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        testIframe(at.querySelector('iframe'));
-        obj.unlayoutCallback();
-        expect(at.querySelector('iframe')).to.equal(null);
-        expect(obj.iframe_).to.equal(null);
-      });
+    it('removes the iframe after unlayoutCallback', async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      testIframe(at.querySelector('iframe'));
+      obj.unlayoutCallback();
+      expect(at.querySelector('iframe')).to.equal(null);
+      expect(obj.iframe_).to.equal(null);
     });
 
     it('registers the frame with the configManager on layout', () => {
@@ -210,13 +194,12 @@ describes.realWin(
       });
     });
 
-    it('unregisters the frame with the configManager on unlayoutCallback', () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        obj.unlayoutCallback();
+    it('unregisters the frame with the configManager on unlayoutCallback', async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      obj.unlayoutCallback();
 
-        expect(unregisterStub.calledOnce).to.equal(true);
-      });
+      expect(unregisterStub.calledOnce).to.equal(true);
     });
 
     it('accepts and stores shareConfig data via custom attributes', () => {
@@ -229,7 +212,7 @@ describes.realWin(
 
       return getAT({pubId, widgetId, shareConfig}).then(({at}) => {
         expect(Object.keys(shareConfig).length).to.equal(4);
-        Object.keys(shareConfig).forEach(key => {
+        Object.keys(shareConfig).forEach((key) => {
           expect(at.getAttribute(`data-share-${key}`)).to.equal(
             shareConfig[key]
           );
@@ -237,16 +220,15 @@ describes.realWin(
       });
     });
 
-    it("defaults to sharing ownerDocument's title and url", () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        const {shareConfig_} = obj;
-        expect(shareConfig_.title).to.equal(doc.title);
-        expect(shareConfig_.url).to.equal(doc.location.href);
-      });
+    it("defaults to sharing ownerDocument's title and url", async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      const {shareConfig_} = obj;
+      expect(shareConfig_.title).to.equal(doc.title);
+      expect(shareConfig_.url).to.equal(doc.location.href);
     });
 
-    it('registers a view at most once per "session"', done => {
+    it('registers a view at most once per "session"', (done) => {
       const testConfigManager = new ConfigManager();
       let numPendingRequests = 0;
       let numViewsRegistered = 0;
@@ -255,7 +237,7 @@ describes.realWin(
         done();
         const mockIframe = {
           contentWindow: {
-            postMessage: json => {
+            postMessage: (json) => {
               let receivedJSON;
 
               numPendingRequests--;
@@ -350,7 +332,7 @@ describes.realWin(
       return new Promise((resolve, reject) => {
         const mockIframe = {
           contentWindow: {
-            postMessage: json => {
+            postMessage: (json) => {
               let receivedJSON;
 
               numPendingRequests--;
@@ -529,7 +511,7 @@ describes.realWin(
         'data-attr-counts': 'none',
         'data-attr-numPreferredServices': 5,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal(result);
     });
@@ -539,7 +521,7 @@ describes.realWin(
         'data-attr-csounts': 'none',
         'data-attr-nsumPreferredServices': 5,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal('');
     });
@@ -552,7 +534,7 @@ describes.realWin(
         'data-attr-countsFontSize': {},
         'data-attr-desktopPosition': new Function(),
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal('');
     });
@@ -585,7 +567,7 @@ describes.realWin(
         'data-attr-titleFontSize': 1,
         'data-attr-__hideOnHomepage': 1,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self).length).to.equal(447);
     });

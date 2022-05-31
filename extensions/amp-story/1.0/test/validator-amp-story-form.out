@@ -1,0 +1,74 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the form tag within page attachments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <title>My Story</title>
+|    <meta name="description" content="Get started with amp-story">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link rel="canonical" href="grid-layer-templates.html">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-custom>
+|      form * {
+|        display: block;
+|        width: 95%;
+|      }
+|    </style>
+|  </head>
+|  <body>
+|    <amp-story standalone title="Title" publisher="AMP" publisher-logo-src="http://example.com/foo.png" poster-portrait-src="http://example.com/foo.png">
+|      <amp-story-page id="story-page-id">
+|        <amp-story-page-attachment layout="nodisplay" title="Page attachment title">
+|          <form
+|            method="POST"
+|            action-xhr="https://www.example.com"
+|            target="_top"
+|          >
+|            <fieldset>
+|              <amp-selector id="selectorId" layout="container">
+|                <div option="1">amp-selector option 1</div>
+|                <div option="2">amp-selector option 2</div>
+|              </amp-selector>
+|
+|              <button on="tap:selectorId.clear">clear</button>
+|
+|              <datalist id="datalist">
+|                <option value="datalist option"></option>
+|              </datalist>
+|
+|              <input list="datalist" id="exampleInput" name="exampleInput" />
+|              <label for="myBrowser">^Choose from this list</label>
+|
+|              <legend>Form Validation</legend>
+|
+|              <meter min="0" max="100" low="25" high="75" optimum="50" value="50"></meter>
+|
+|              <input type="range" id="rangeB" name="rangeB" value="50"> =
+|              <output name="result" for="rangeB">50</output>
+|
+|              <progress id="progressId" value="50" max="100"></progress>
+|
+|              <select id="selectId">
+|                <optgroup label="optgroup label">
+|                  <option value="selectOption">Option</option>
+|                </optgroup>
+|              </select>
+|
+|              <textarea name="review" placeholder="Textarea" rows="2" cols="50"></textarea>
+|
+|              <input type="submit" value="Submit">
+|            </fieldset>
+|          </form>
+|        </amp-story-page-attachment>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>

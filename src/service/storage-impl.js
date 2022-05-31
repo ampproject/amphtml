@@ -1,25 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {recreateNonProtoObject} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
-import {Services} from '../services';
-import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
+import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {getSourceOrigin} from '../url';
-import {parseJson, recreateNonProtoObject} from '../json';
-import {registerServiceBuilderForDoc} from '../service';
 
 /** @const */
 const TAG = 'Storage';
@@ -53,6 +40,9 @@ export class Storage {
     /** @private @const {!StorageBindingDef} */
     this.binding_ = binding;
 
+    /** @private @const {boolean} */
+    this.isViewerStorage_ = binding instanceof ViewerStorageBinding;
+
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.ampdoc.win.location);
 
@@ -73,10 +63,11 @@ export class Storage {
    * Returns the promise that yields the value of the property for the specified
    * key.
    * @param {string} name
+   * @param {number=} opt_duration
    * @return {!Promise<*>}
    */
-  get(name) {
-    return this.getStore_().then(store => store.get(name));
+  get(name, opt_duration) {
+    return this.getStore_().then((store) => store.get(name, opt_duration));
   }
 
   /**
@@ -102,7 +93,7 @@ export class Storage {
    * @return {!Promise}
    */
   setNonBoolean(name, value, opt_isUpdate) {
-    return this.saveStore_(store => store.set(name, value, opt_isUpdate));
+    return this.saveStore_((store) => store.set(name, value, opt_isUpdate));
   }
 
   /**
@@ -112,7 +103,15 @@ export class Storage {
    * @return {!Promise}
    */
   remove(name) {
-    return this.saveStore_(store => store.remove(name));
+    return this.saveStore_((store) => store.remove(name));
+  }
+
+  /**
+   * Returns if this.binding is an instance of ViewerStorageBinding
+   * @return {boolean}
+   */
+  isViewerStorage() {
+    return this.isViewerStorage_;
   }
 
   /**
@@ -123,12 +122,12 @@ export class Storage {
     if (!this.storePromise_) {
       this.storePromise_ = this.binding_
         .loadBlob(this.origin_)
-        .then(blob => (blob ? parseJson(atob(blob)) : {}))
-        .catch(reason => {
+        .then((blob) => (blob ? parseJson(atob(blob)) : {}))
+        .catch((reason) => {
           dev().expectedError(TAG, 'Failed to load store: ', reason);
           return {};
         })
-        .then(obj => new Store(obj));
+        .then((obj) => new Store(obj));
     }
     return this.storePromise_;
   }
@@ -140,7 +139,7 @@ export class Storage {
    */
   saveStore_(mutator) {
     return this.getStore_()
-      .then(store => {
+      .then((store) => {
         mutator(store);
         // Need to encode stored object to avoid plain text,
         // but doesn't need to be base64encode. Can convert to some other
@@ -153,7 +152,7 @@ export class Storage {
 
   /** @private */
   listenToBroadcasts_() {
-    this.viewer_.onBroadcast(message => {
+    this.viewer_.onBroadcast((message) => {
       if (
         message['type'] == 'amp-storage-reset' &&
         message['origin'] == this.origin_
@@ -212,12 +211,19 @@ export class Store {
 
   /**
    * @param {string} name
+   * @param {number|undefined} opt_duration
    * @return {*|undefined}
    */
-  get(name) {
+  get(name, opt_duration) {
     // The structure is {key: {v: *, t: time}}
     const item = this.values_[name];
-    return item ? item['v'] : undefined;
+    const timestamp = item ? item['t'] : undefined;
+    const isNotExpired =
+      opt_duration && timestamp != undefined
+        ? timestamp + opt_duration > Date.now()
+        : true;
+    const value = item && isNotExpired ? item['v'] : undefined;
+    return value;
   }
 
   /**
@@ -245,10 +251,10 @@ export class Store {
       item['v'] = value;
       item['t'] = timestamp;
     } else {
-      this.values_[name] = dict({
+      this.values_[name] = {
         'v': value,
         't': Date.now(),
-      });
+      };
     }
 
     // Purge old values.
@@ -355,7 +361,7 @@ export class LocalStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.isLocalStorageSupported_) {
         resolve(null);
         return;
@@ -366,7 +372,7 @@ export class LocalStorageBinding {
 
   /** @override */
   saveBlob(origin, blob) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.isLocalStorageSupported_) {
         resolve();
         return;
@@ -394,16 +400,17 @@ export class ViewerStorageBinding {
   /** @override */
   loadBlob(origin) {
     return this.viewer_
-      .sendMessageAwaitResponse('loadStore', dict({'origin': origin}))
-      .then(response => response['blob']);
+      .sendMessageAwaitResponse('loadStore', {'origin': origin})
+      .then((response) => response['blob']);
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-      'saveStore',
-      dict({'origin': origin, 'blob': blob})
-    ));
+    return /** @type {!Promise} */ this.viewer_
+      .sendMessageAwaitResponse('saveStore', {'origin': origin, 'blob': blob})
+      .catch((reason) => {
+        throw dev().createExpectedError(TAG, 'Failed to save store: ', reason);
+      });
   }
 }
 
@@ -414,7 +421,7 @@ export function installStorageServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
     ampdoc,
     'storage',
-    function() {
+    function () {
       const viewer = Services.viewerForDoc(ampdoc);
       const overrideStorage = parseInt(viewer.getParam('storage'), 10);
       const binding = overrideStorage

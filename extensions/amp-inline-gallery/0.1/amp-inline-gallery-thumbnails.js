@@ -1,27 +1,14 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {matches, scopedQuerySelector} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+
+import {createCustomEvent} from '#utils/event-helper';
+
+import {InlineGalleryEvents} from './inline-gallery-events';
 
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
-import {InlineGalleryEvents} from './inline-gallery-events';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {matches, scopedQuerySelector} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.
@@ -38,6 +25,11 @@ import {setStyle} from '../../../src/style';
  * the next arrow works properly for that case.
  */
 export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
+  /** @override  */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -68,10 +60,10 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
     // carousel and not the carousel from the thumbnail strip. We stop
     // propagation since the gallery is not interested in slide changes from
     // our carousel.
-    this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, (event) => {
       event.stopPropagation();
     });
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       event.stopPropagation();
     });
   }
@@ -132,15 +124,15 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
         createCustomEvent(
           this.win,
           InlineGalleryEvents.GO_TO_SLIDE,
-          dict({
+          {
             'index': index,
-          }),
+          },
           {
             bubbles: true,
           }
         )
       );
-      this.carousel_.getImpl().then(impl => {
+      this.carousel_.getImpl().then((impl) => {
         impl.goToSlide(index, {smoothScroll: true});
       });
     };
@@ -237,11 +229,13 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       >
       </amp-base-carousel>
     `;
-    thumbnails.forEach(t => this.carousel_.appendChild(t));
+    for (const thumbnail of thumbnails) {
+      this.carousel_.appendChild(thumbnail);
+    }
 
     // We create with loop defaulting to false above, and allow it to be
     // overwriten.
-    this.propagateAttributes(['loop'], this.carousel_);
+    propagateAttributes(['loop'], this.element, this.carousel_);
     this.element.appendChild(this.carousel_);
   }
 }

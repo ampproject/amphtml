@@ -1,18 +1,14 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {isEnumValue, isObject} from '#core/types';
+import {getValueForExpr} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, user, userAssert} from '#utils/log';
 
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessIframeAdapter} from './amp-access-iframe';
@@ -20,16 +16,9 @@ import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
-import {getValueForExpr} from '../../../src/json';
-import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+
+import {assertHttpsUrl} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-access';
@@ -209,9 +198,11 @@ export class AccessSource {
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
-    let type = configJson['type']
-      ? user().assertEnumValue(AccessType, configJson['type'], 'access type')
-      : null;
+    let {'type': type} = configJson;
+    userAssert(
+      !type || isEnumValue(AccessType, type),
+      `Unknown access type: ${type}`
+    );
     if (!type) {
       if (configJson['vendor']) {
         type = AccessType.VENDOR;
@@ -227,13 +218,6 @@ export class AccessSource {
       user().info(TAG, 'Forcing access type: SERVER');
       type = AccessType.SERVER;
     }
-    if (
-      type == AccessType.IFRAME &&
-      !isExperimentOn(this.ampdoc.win, 'amp-access-iframe')
-    ) {
-      user().error(TAG, 'Experiment "amp-access-iframe" is not enabled.');
-      type = AccessType.CLIENT;
-    }
     return type;
   }
 
@@ -244,7 +228,7 @@ export class AccessSource {
    */
   buildConfigLoginMap_(configJson) {
     const loginConfig = configJson['login'];
-    const loginMap = dict();
+    const loginMap = {};
     if (!loginConfig) {
       // Ignore: in some cases login config is not necessary.
     } else if (typeof loginConfig == 'string') {
@@ -278,7 +262,12 @@ export class AccessSource {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -303,7 +292,7 @@ export class AccessSource {
    * @return {!Promise<string>}
    */
   buildUrl(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
+    return this.prepareUrlVars_(useAuthData).then((vars) => {
       return this.urlReplacements_.expandUrlAsync(url, vars);
     });
   }
@@ -314,7 +303,7 @@ export class AccessSource {
    * @return {!Promise<!Object<string, *>>}
    */
   collectUrlVars(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
+    return this.prepareUrlVars_(useAuthData).then((vars) => {
       return this.urlReplacements_.collectVars(url, vars);
     });
   }
@@ -325,13 +314,13 @@ export class AccessSource {
    * @private
    */
   prepareUrlVars_(useAuthData) {
-    return this.getReaderId_().then(readerId => {
+    return this.getReaderId_().then((readerId) => {
       const vars = {
         'READER_ID': readerId,
         'ACCESS_READER_ID': readerId, // A synonym.
       };
       if (useAuthData) {
-        vars['AUTHDATA'] = field => {
+        vars['AUTHDATA'] = (field) => {
           if (this.authResponse_) {
             return getValueForExpr(this.authResponse_, field);
           }
@@ -355,7 +344,7 @@ export class AccessSource {
       return Promise.resolve();
     }
 
-    const responsePromise = this.adapter_.authorize().catch(error => {
+    const responsePromise = this.adapter_.authorize().catch((error) => {
       this.analyticsEvent_('access-authorization-failed');
       if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
         // Use fallback.
@@ -368,13 +357,13 @@ export class AccessSource {
     });
 
     const promise = responsePromise
-      .then(response => {
+      .then((response) => {
         dev().fine(TAG, 'Authorization response: ', response);
         this.setAuthResponse_(response);
         this.buildLoginUrls_();
         return response;
       })
-      .catch(error => {
+      .catch((error) => {
         user().error(TAG, 'Authorization failed: ', error);
         this.firstAuthorizationResolver_();
         throw error;
@@ -402,7 +391,7 @@ export class AccessSource {
         dev().fine(TAG, 'Pingback complete');
         this.analyticsEvent_('access-pingback-sent');
       })
-      .catch(error => {
+      .catch((error) => {
         this.analyticsEvent_('access-pingback-failed');
         throw user().createError('Pingback failed: ', error);
       });
@@ -479,7 +468,7 @@ export class AccessSource {
     this.loginAnalyticsEvent_(eventLabel, 'started');
     const dialogPromise = this.openLoginDialog_(loginUrl);
     const loginPromise = dialogPromise
-      .then(result => {
+      .then((result) => {
         dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
         this.loginPromise_ = null;
         const query = parseQueryString(result);
@@ -505,7 +494,7 @@ export class AccessSource {
           });
         }
       })
-      .catch(reason => {
+      .catch((reason) => {
         dev().fine(TAG, 'Login dialog failed: ', eventLabel, reason);
         this.loginAnalyticsEvent_(eventLabel, 'failed');
         if (this.loginPromise_ == loginPromise) {
@@ -542,7 +531,7 @@ export class AccessSource {
     for (const k in this.loginConfig_) {
       promises.push(
         this.buildUrl(this.loginConfig_[k], /* useAuthData */ true).then(
-          url => {
+          (url) => {
             this.loginUrlMap_[k] = url;
             return {type: k, url};
           }

@@ -1,32 +1,24 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys_Enum} from '#core/constants/key-codes';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {getWin} from '#core/window';
 
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
+import {user, userAssert} from '#utils/log';
+
 import {Util} from './util';
+
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/dom';
-import {toWin} from '../../../src/types';
-import {user, userAssert} from '../../../src/log';
 
 // Popup options
 const POP =
   'status=no,resizable=yes,scrollbars=yes,' +
   'personalbar=no,directories=no,location=no,toolbar=no,' +
   'menubar=no,width=900,height=500,left=0,top=0';
+
+// Matches the height padding caused by .-amp-pinterest-embed-pin
+const EMBED_PIN_PADDING = 10;
 
 /**
  * Pinterest Pin Widget
@@ -40,12 +32,15 @@ export class PinWidget {
       'The data-url attribute is required for Pin widgets'
     );
     this.element = rootElement;
-    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
+    this.xhr = Services.xhrFor(getWin(rootElement));
     this.pinId = '';
     this.alt = '';
     this.pinUrl = '';
     this.width = '';
     this.layout = '';
+
+    /** @private {!Element} */
+    this.heightOwnerElement_ = null;
   }
 
   /**
@@ -53,7 +48,7 @@ export class PinWidget {
    * @param {Event} event
    */
   handleKeyDown(event) {
-    if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
+    if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
       this.handleClick(event);
     }
   }
@@ -86,8 +81,8 @@ export class PinWidget {
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
     return this.xhr
       .fetchJson(baseUrl + query, {})
-      .then(res => res.json())
-      .then(json => {
+      .then((res) => res.json())
+      .then((json) => {
         try {
           return /** @type {JsonObject} */ (json)['data'][0];
         } catch (e) {
@@ -122,7 +117,7 @@ export class PinWidget {
     const structure = Util.make(this.element.ownerDocument, {'span': {}});
     structure.className = className + ' i-amphtml-fill-content';
 
-    const container = Util.make(this.element.ownerDocument, {
+    this.heightOwnerElement_ = Util.make(this.element.ownerDocument, {
       'span': {
         'className': '-amp-pinterest-embed-pin-inner',
         'data-pin-log': 'embed_pin',
@@ -144,7 +139,7 @@ export class PinWidget {
         'alt': this.alt,
       },
     });
-    container.appendChild(img);
+    this.heightOwnerElement_.appendChild(img);
 
     // repin button
     const repin = Util.make(this.element.ownerDocument, {
@@ -165,7 +160,7 @@ export class PinWidget {
         'tabindex': '0',
       },
     });
-    container.appendChild(repin);
+    this.heightOwnerElement_.appendChild(repin);
 
     // text container
     const text = Util.make(this.element.ownerDocument, {
@@ -302,8 +297,8 @@ export class PinWidget {
       text.appendChild(pinner);
     }
 
-    container.appendChild(text);
-    structure.appendChild(container);
+    this.heightOwnerElement_.appendChild(text);
+    structure.appendChild(this.heightOwnerElement_);
 
     // listen for clicks
     structure.addEventListener('click', this.handleClick.bind(this));
@@ -335,5 +330,16 @@ export class PinWidget {
     }
 
     return this.fetchPin().then(this.renderPin.bind(this));
+  }
+
+  /**
+   * Determine the height of the contents to allow resizing after first layout.
+   *
+   * @return {!Promise<?number>}
+   */
+  height() {
+    return measureIntersection(this.heightOwnerElement_).then(
+      (entry) => entry.boundingClientRect.height + EMBED_PIN_PADDING
+    );
   }
 }

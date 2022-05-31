@@ -1,23 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
 
 const TAG = 'amp-call-tracking';
 
@@ -37,7 +24,7 @@ function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
     cachedResponsePromises_[url] = Services.xhrFor(win)
       .fetchJson(url, {credentials: 'include'})
-      .then(res => res.json());
+      .then((res) => res.json());
   }
   return cachedResponsePromises_[url];
 }
@@ -65,7 +52,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == Layout.CONTAINER;
+    return isLayoutSizeDefined(layout) || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -82,8 +69,8 @@ export class AmpCallTracking extends AMP.BaseElement {
   layoutCallback() {
     return Services.urlReplacementsForDoc(this.element)
       .expandUrlAsync(user().assertString(this.configUrl_))
-      .then(url => fetch_(this.win, url))
-      .then(data => {
+      .then((url) => fetch_(this.win, url))
+      .then((data) => {
         if (data['phoneNumber']) {
           this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
           this.hyperlink_.textContent =
@@ -99,6 +86,6 @@ export class AmpCallTracking extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-call-tracking', '0.1', AMP => {
+AMP.extension('amp-call-tracking', '0.1', (AMP) => {
   AMP.registerElement('amp-call-tracking', AmpCallTracking);
 });

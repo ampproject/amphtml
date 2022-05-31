@@ -1,47 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Attributes, getAttributesFromConfigObj} from './attributes';
-import {
-  LayoutMarginsChangeDef,
-  cloneLayoutMarginsChangeDef,
-} from '../../../src/layout-rect';
-import {Services} from '../../../src/services';
-import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   scopedQuerySelectorAll,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getElementLayoutBox} from './utils';
-import {getExperimentBranch} from '../../../src/experiments';
+} from '#core/dom/query';
+
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
+
+import {Attributes, getAttributesFromConfigObj} from './attributes';
+import {measurePageLayoutBox} from './measure-page-layout-box';
+
+/** @typedef {import('#core/dom/layout/rect').LayoutMarginsChangeDef} LayoutMarginsChangeDef */
 
 /** @const */
 const TAG = 'amp-auto-ads';
-
-/** @const {!{branch: string, control: string, experiment: string}}
- */
-export const NO_OP_EXP = {
-  branch: 'amp-auto-ads-no-op-experiment',
-  control: '44710302',
-  experiment: '44710303',
-};
 
 /**
  * @typedef {{
@@ -84,7 +58,7 @@ const Position = {
  * extensions/amp-ad/.../validator-amp-ad.protoascii.
  * @const {!Array<string>}
  */
-const BLACKLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
+const DENYLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
 
 /**
  * @const {!Object<!Position, function(!Element, !Element)>}
@@ -168,9 +142,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
-      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-    });
+    return measurePageLayoutBox(this.anchorElement_).then((layoutBox) =>
+      this.getEstimatedPositionFromAnchorLayout_(layoutBox)
+    );
   }
 
   /**
@@ -178,7 +152,7 @@ export class Placement {
    * @return {number}
    * @private
    */
-  getEstimatedPositionFromAchorLayout_(anchorLayout) {
+  getEstimatedPositionFromAnchorLayout_(anchorLayout) {
     // TODO: This should really take account of margins and padding too.
     switch (this.position_) {
       case Position.BEFORE:
@@ -203,29 +177,31 @@ export class Placement {
    * @return {!Promise<!PlacementState>}
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
-    return this.getEstimatedPosition().then(yPosition => {
-      return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
+    return this.getEstimatedPosition().then((yPosition) => {
+      if (this.ampdoc.win./*OK*/ scrollY > yPosition) {
+        this.state_ = PlacementState.UNUSED;
+        return this.state_;
+      }
+      return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = isResponsiveEnabled
-          ? this.createResponsiveAdElement_(baseAttributes)
+
+        const shouldUseFullWidthResponsive =
+          isResponsiveEnabled &&
+          this.isLayoutViewportNarrow_(this.anchorElement_);
+        this.adElement_ = shouldUseFullWidthResponsive
+          ? this.createFullWidthResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
-        const noOpExpBranch = getExperimentBranch(
-          this.ampdoc.win,
-          NO_OP_EXP.branch
-        );
-        if (noOpExpBranch) {
-          addExperimentIdToElement(noOpExpBranch, this.adElement_);
-        }
+
         this.injector_(this.anchorElement_, this.getAdElement());
 
-        if (isResponsiveEnabled) {
+        if (shouldUseFullWidthResponsive) {
           return (
             whenUpgradedToCustomElement(this.getAdElement())
               // Responsive ads set their own size when built.
-              .then(() => this.getAdElement().whenBuilt())
+              .then(() => this.getAdElement().build())
               .then(() => {
                 const resized = !this.getAdElement().classList.contains(
                   'i-amphtml-layout-awaiting-size'
@@ -238,14 +214,14 @@ export class Placement {
           );
         }
 
-        return this.getPlacementSizing_(sizing).then(placement => {
+        return this.getPlacementSizing_(sizing).then((placement) => {
           // CustomElement polyfill does not call connectedCallback
           // synchronously. So we explicitly wait for CustomElement to be
           // ready.
           return whenUpgradedToCustomElement(this.getAdElement())
-            .then(() => this.getAdElement().whenBuilt())
+            .then(() => this.getAdElement().build())
             .then(() => {
-              return this.mutator_.attemptChangeSize(
+              return this.mutator_.requestChangeSize(
                 this.getAdElement(),
                 placement.height,
                 placement.width,
@@ -290,16 +266,14 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'layout': width ? 'fixed' : 'fixed-height',
-        'height': '0',
-        'width': width ? width : 'auto',
-        'class': 'i-amphtml-layout-awaiting-size',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+    const attributes = /** @type {!JsonObject} */ ({
+      'layout': width ? 'fixed' : 'fixed-height',
+      'height': '0',
+      'width': width ? width : 'auto',
+      'class': 'i-amphtml-layout-awaiting-size',
+      ...baseAttributes,
+      ...this.attributes_,
+    });
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',
@@ -312,24 +286,36 @@ export class Placement {
    * @return {!Element}
    * @private
    */
-  createResponsiveAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'width': '100vw',
-        'height': '0',
-        'layout': 'fixed',
-        'class': 'i-amphtml-layout-awaiting-size',
-        'data-auto-format': 'rspv',
-        'data-full-width': '',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+  createFullWidthResponsiveAdElement_(baseAttributes) {
+    const attributes = /** @type {!JsonObject} */ ({
+      'width': '100vw',
+      'height': '0',
+      'layout': 'fixed',
+      'class': 'i-amphtml-layout-awaiting-size',
+      'data-auto-format': 'rspv',
+      'data-full-width': '',
+      ...baseAttributes,
+      ...this.attributes_,
+    });
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',
       attributes
     );
+  }
+
+  /**
+   * Estimate if the viewport has a narrow layout.
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  isLayoutViewportNarrow_(element) {
+    const viewportSize = Services.viewportForDoc(element).getSize();
+
+    // The threshold aligns with the one for Non-AMP website. Checkout
+    // isLayoutViewportNarrow in responsive_util.js for internal reference.
+    return viewportSize.width < 488;
   }
 }
 
@@ -339,13 +325,13 @@ export class Placement {
  * @return {!Array<!Placement>}
  */
 export function getPlacementsFromConfigObj(ampdoc, configObj) {
-  const placementObjs = configObj['placements'];
+  const placementObjs = /** @type {Array} */ (configObj['placements']);
   if (!placementObjs) {
     user().info(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
-  placementObjs.forEach(placementObj => {
+  placementObjs.forEach((placementObj) => {
     getPlacementsFromObject(ampdoc, placementObj, placements);
   });
   return placements;
@@ -385,7 +371,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
       };
     }
   }
-  anchorElements.forEach(anchorElement => {
+  anchorElements.forEach((anchorElement) => {
     if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
@@ -425,7 +411,7 @@ function getAnchorElements(rootElement, anchorObj) {
 
   const minChars = anchorObj['min_c'] || 0;
   if (minChars > 0) {
-    elements = elements.filter(el => {
+    elements = elements.filter((el) => {
       return el.textContent.length >= minChars;
     });
   }
@@ -441,7 +427,7 @@ function getAnchorElements(rootElement, anchorObj) {
 
   if (anchorObj['sub']) {
     let subElements = [];
-    elements.forEach(el => {
+    elements.forEach((el) => {
       subElements = subElements.concat(getAnchorElements(el, anchorObj['sub']));
     });
     return subElements;
@@ -464,9 +450,9 @@ function isPositionValid(anchorElement, position) {
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
-  return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
+  return !DENYLISTED_ANCESTOR_TAGS.some((tagName) => {
     if (closestAncestorElementBySelector(elementToCheck, tagName)) {
-      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      user().warn(TAG, 'Placement inside denylisted ancestor: ' + tagName);
       return true;
     }
     return false;

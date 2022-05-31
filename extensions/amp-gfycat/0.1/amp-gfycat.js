@@ -1,27 +1,19 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {addParamsToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-gfycat';
 
@@ -83,14 +75,11 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     const videoid = dev().assertString(this.videoid_);
-    this.propagateAttributes(['alt', 'aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    applyFillContent(placeholder);
+    propagateAttributes(['alt', 'aria-label'], this.element, placeholder);
+    placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (this.element.hasAttribute('aria-label')) {
@@ -106,7 +95,10 @@ class AmpGfycat extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading gif');
     }
-    this.applyFillContent(placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
+    );
 
     return placeholder;
   }
@@ -149,7 +141,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', '0');
     iframe.src = src;
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
@@ -160,7 +152,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
     return this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
     });
   }
 
@@ -205,14 +197,16 @@ class AmpGfycat extends AMP.BaseElement {
     }
 
     if (eventData == 'paused') {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.PAUSE);
     } else if (eventData == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.PLAYING);
     }
   }
 
   /** @override */
   pauseCallback() {
+    // gfycat automatically paused in the zero-size case and additional
+    // intervention is not needed. Additionally, gfycat are always muted.
     this.pause();
   }
 
@@ -319,6 +313,6 @@ class AmpGfycat extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpGfycat);
 });

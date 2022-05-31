@@ -1,30 +1,19 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
- * Finds the jsonConfiguration helper function from src/json.js, and performs
- * validation on its input.
+ * Finds the jsonConfiguration helper function from src/core/types/object/json,
+ * and performs validation on its input.
  */
 
-module.exports = function(context) {
+module.exports = function (context) {
   const configurationCalls = ['jsonConfiguration', 'jsonLiteral'].map(
-    name => `CallExpression[callee.name=${name}]`
+    (name) => `CallExpression[callee.name=${name}]`
   );
 
+  /**
+   * @param {*} node
+   * @return {Object}
+   */
   function verifyPath(node) {
     for (let n = node; n; n = n.parent) {
       const {parent} = n;
@@ -53,7 +42,7 @@ module.exports = function(context) {
   }
 
   return {
-    'CallExpression[callee.name=jsonConfiguration]': function(node) {
+    'CallExpression[callee.name=jsonConfiguration]': function (node) {
       const args = node.arguments;
 
       if (
@@ -71,7 +60,7 @@ module.exports = function(context) {
       });
     },
 
-    [`:matches(${configurationCalls}) * Identifier`]: function(node) {
+    [`:matches(${configurationCalls}) * Identifier`]: function (node) {
       const {name, parent} = node;
       if (name === 'undefined') {
         return;
@@ -115,7 +104,7 @@ module.exports = function(context) {
       });
     },
 
-    'CallExpression[callee.name=jsonLiteral]': function(node) {
+    'CallExpression[callee.name=jsonLiteral]': function (node) {
       const args = node.arguments;
 
       if (args.length === 1 && args[0].type !== 'Identifier') {
@@ -129,7 +118,7 @@ module.exports = function(context) {
       });
     },
 
-    'CallExpression[callee.name=includeJsonLiteral]': function(node) {
+    'CallExpression[callee.name=includeJsonLiteral]': function (node) {
       const args = node.arguments;
 
       if (args.length !== 1 || args[0].type !== 'Identifier') {

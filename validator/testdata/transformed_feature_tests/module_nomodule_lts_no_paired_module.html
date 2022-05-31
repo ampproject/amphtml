@@ -1,0 +1,25 @@
+<!--
+  Test Description:
+  This test demonstrates that all LTS scripts must have a module and nomodule
+  pairing when the first script is nomodule.
+-->
+<!doctype html>
+<html ⚡ transformed="google;v=1">
+<head>
+  <meta charset=utf-8>
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name=viewport content="width=device-width">
+
+  <!-- Invalid: missing module pair for AMP runtime LTS script -->
+  <script async nomodule src=https://cdn.ampproject.org/lts/v0.js></script>
+
+  <!-- Invalid: missing module pair for AMP extension LTS script -->
+  <script async custom-element=amp-ad nomodule src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js></script>
+
+  <link rel=canonical href="./regular-html-version.html">
+</head>
+<body>
+  Hello, world.
+  <amp-ad layout=nodisplay type></amp-ad>
+</body>
+</html>

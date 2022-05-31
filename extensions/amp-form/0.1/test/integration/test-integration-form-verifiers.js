@@ -1,29 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 
 const RENDER_TIMEOUT = 15000;
 
-const describeChrome = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass();
+const describeChrome = describes.sandboxed.configure().ifChrome();
 
 // TODO(cvializ, #19647): Broken on SL Chrome 71.
-describeChrome.skip('amp-form verifiers', function() {
+describeChrome.skip('amp-form verifiers', {}, function () {
   const {testServerPort} = window.ampTestRuntimeConfig;
   const baseUrl = `http://localhost:${testServerPort}`;
 
@@ -51,7 +33,7 @@ describeChrome.skip('amp-form verifiers', function() {
 </form>
 `,
     },
-    env => {
+    (env) => {
       let win, doc;
 
       beforeEach(() => {
@@ -59,7 +41,7 @@ describeChrome.skip('amp-form verifiers', function() {
         doc = win.document;
       });
 
-      it('should render when the verifier runs', function() {
+      it('should render when the verifier runs', function () {
         const email = doc.getElementById('email');
         email.value = 'x@x';
 
@@ -96,7 +78,7 @@ describeChrome.skip('amp-form verifiers', function() {
 <span id="message" hidden>Mistakes were triggered</span>
 `,
     },
-    env => {
+    (env) => {
       this.timeout(RENDER_TIMEOUT);
 
       let win, doc;
@@ -106,7 +88,7 @@ describeChrome.skip('amp-form verifiers', function() {
         doc = win.document;
       });
 
-      it('should trigger when the verifier runs', function() {
+      it('should trigger when the verifier runs', function () {
         const email = doc.getElementById('email');
         const message = doc.getElementById('message');
         const waitForMessage = poll(

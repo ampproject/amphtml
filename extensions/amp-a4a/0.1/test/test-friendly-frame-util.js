@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {renderCreativeIntoFriendlyFrame} from '../friendly-frame-util';
 
 const realWinConfig = {
@@ -22,15 +6,21 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
+describes.realWin('FriendlyFrameUtil', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
+  let window, document;
   let containerElement;
   let renderPromise;
 
   beforeEach(() => {
+    window = env.win;
+    document = window.document;
+
     containerElement = document.createElement('div');
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};
@@ -65,7 +55,7 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
   });
 
   it('should append iframe child', () => {
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
       expect(iframe.contentWindow.document.body.innerHTML).to.equal(
         minifiedCreative
@@ -74,19 +64,21 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
   });
 
   it('should set the correct srcdoc on the iframe', () => {
-    const srcdoc =
-      '<base href="http://www.google.com">' +
-      '<meta http-equiv=Content-Security-Policy content="script-src ' +
-      "'none';object-src 'none';child-src 'none'\">" +
-      '<p>Hello, World!</p>';
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
-      expect(iframe.getAttribute('srcdoc')).to.equal(srcdoc);
+      const srcdoc = iframe.getAttribute('srcdoc');
+      expect(srcdoc).to.contain('<base href="http://www.google.com">');
+      expect(srcdoc).to.contain(
+        '<meta http-equiv=Content-Security-Policy content="script-src '
+      );
+      expect(srcdoc).to.contain(
+        ";object-src 'none';child-src 'none'\"><p>Hello, World!</p>"
+      );
     });
   });
 
   it('should set correct attributes on the iframe', () => {
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
@@ -94,11 +86,14 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
       expect(iframe.getAttribute('allowfullscreen')).to.equal('');
       expect(iframe.getAttribute('allowtransparency')).to.equal('');
       expect(iframe.getAttribute('scrolling')).to.equal('no');
+      expect(iframe.getAttribute('role')).to.equal('region');
+      expect(iframe.getAttribute('aria-label')).to.equal('Advertisement');
+      expect(iframe.getAttribute('tabindex')).to.equal('0');
     });
   });
 
   it('should style body of iframe document to be visible', () => {
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
       expect(iframe.contentWindow.document.body.style.visibility).to.equal(
         'visible'

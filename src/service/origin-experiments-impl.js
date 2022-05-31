@@ -1,25 +1,15 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseJson} from '#core/types/object/json';
+import {bytesToString, stringToBytes} from '#core/types/string/bytes';
 
-import {Services} from '../services';
-import {bytesToString, stringToBytes} from '../utils/bytes';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {getSourceOrigin} from '../url';
-import {parseJson} from '../json';
-import {user} from '../log';
 
 /** @const {string} */
 const TAG = 'OriginExperiments';
@@ -31,8 +21,7 @@ const PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
   'ext': true,
   'key_ops': ['verify'],
   'kty': 'RSA',
-  'n':
-    'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ', // eslint-disable-line max-len
+  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
 });
 
 /**
@@ -91,7 +80,7 @@ export class OriginExperiments {
     }
     const {win} = this.ampdoc_;
     const crypto = Services.cryptoFor(win);
-    return crypto.importPkcsKey(publicJwk).then(publicKey => {
+    return crypto.importPkcsKey(publicJwk).then((publicKey) => {
       const promises = [];
       for (let i = 0; i < metas.length; i++) {
         const meta = metas[i];
@@ -99,7 +88,7 @@ export class OriginExperiments {
         if (token) {
           const p = this.tokenMaster_
             .verifyToken(token, win.location, publicKey)
-            .catch(error => {
+            .catch((error) => {
               user().error(TAG, 'Failed to verify experiment token:', error);
             });
           promises.push(p);
@@ -114,7 +103,7 @@ export class OriginExperiments {
 
 /**
  * Handles key generation and token signing/verifying.
- * @protected
+ * @package
  */
 export class TokenMaster {
   /**
@@ -158,7 +147,7 @@ export class TokenMaster {
   generateToken(version, json, privateKey) {
     const config = stringToBytes(JSON.stringify(json));
     const data = this.prepend_(version, config);
-    return this.sign_(data, privateKey).then(signature => {
+    return this.sign_(data, privateKey).then((signature) => {
       return this.append_(data, new Uint8Array(signature));
     });
   }
@@ -173,7 +162,7 @@ export class TokenMaster {
    * @protected
    */
   verifyToken(token, location, publicKey) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let i = 0;
       const bytes = stringToBytes(atob(token));
 
@@ -200,7 +189,7 @@ export class TokenMaster {
       const signature = bytes.subarray(i);
 
       resolve(
-        this.verify_(signature, data, publicKey).then(verified => {
+        this.verify_(signature, data, publicKey).then((verified) => {
           if (!verified) {
             throw new Error('Failed to verify token signature.');
           }
@@ -297,8 +286,7 @@ export function installOriginExperimentsForDoc(ampdoc) {
  * @return {!OriginExperiments}
  */
 export function originExperimentsForDoc(element) {
-  return /** @type {!OriginExperiments} */ (getServiceForDoc(
-    element,
-    'origin-experiments'
-  ));
+  return /** @type {!OriginExperiments} */ (
+    getServiceForDoc(element, 'origin-experiments')
+  );
 }

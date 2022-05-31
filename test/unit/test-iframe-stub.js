@@ -1,28 +1,9 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
 
-import {
-  createIframeWithMessageStub,
-  expectPostMessage,
-} from '../../testing/iframe';
-
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('test-iframe-createIframeWithMessageStub', () => {
+  .run('test-iframe-createIframeWithMessageStub', {}, () => {
     const data1 = {
       foo: 'bar',
       test: true,
@@ -35,7 +16,7 @@ describe
 
     let iframe;
 
-    beforeEach(done => {
+    beforeEach((done) => {
       iframe = createIframeWithMessageStub(window);
       document.body.appendChild(iframe);
       iframe.onload = () => {
@@ -46,14 +27,14 @@ describe
     it('should get message from fragment and post back to parent window', () => {
       iframe.postMessageToParent(data1);
       return expectPostMessage(iframe.contentWindow, window, data1)
-        .then(receivedMessage => {
+        .then((receivedMessage) => {
           expect(receivedMessage).to.jsonEqual(data1);
         })
         .then(() => {
           iframe.postMessageToParent(data2);
           return expectPostMessage(iframe.contentWindow, window, data2);
         })
-        .then(receivedMessage => {
+        .then((receivedMessage) => {
           expect(receivedMessage).to.jsonEqual(data2);
         });
     });

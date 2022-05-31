@@ -1,18 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {registerElement} from '#service/custom-element-registry';
+
+import {macroTask} from '#testing/helpers';
 
 import {BaseElement} from '../../src/base-element';
 import {
@@ -20,21 +9,20 @@ import {
   insertAnalyticsElement,
   useAnalyticsInSandbox,
 } from '../../src/extension-analytics';
-import {Services} from '../../src/services';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../src/service';
-import {macroTask} from '../../testing/yield';
-import {registerElement} from '../../src/service/custom-element-registry';
+} from '../../src/service-helpers';
+
+/* eslint-disable react-hooks/rules-of-hooks */
 
 describes.realWin(
   'extension-analytics',
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let timer;
     let ampdoc;
     let win;
@@ -48,14 +36,14 @@ describes.realWin(
         win = env.win;
       });
 
-      [true, false].forEach(disableImmediate => {
+      [true, false].forEach((disableImmediate) => {
         it(
           'should create analytics element if analytics is installed, ' +
             `disableImmediate ${disableImmediate}`,
           () => {
             const config = {
               'requests': {
-                'pageview': 'https://example.com/analytics',
+                'pageview': 'https://example.test/analytics',
               },
               'triggers': {
                 'trackPageview': {
@@ -84,9 +72,8 @@ describes.realWin(
               )
             ).to.be.ok;
             return timer.promise(50).then(() => {
-              const analyticsEle = baseEle.element.querySelector(
-                'amp-analytics'
-              );
+              const analyticsEle =
+                baseEle.element.querySelector('amp-analytics');
               expect(analyticsEle).to.not.be.null;
               expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
               expect(analyticsEle.getAttribute('trigger')).to.equal(
@@ -112,10 +99,10 @@ describes.realWin(
       });
 
       it('track event with one request', () => {
-        builder.track('test', 'fake.com');
+        builder.track('test', 'fake.test');
         expect(builder.config_).to.jsonEqual({
           'requests': {
-            'test-request-0': 'fake.com',
+            'test-request-0': 'fake.test',
           },
           'triggers': {
             'test': {
@@ -127,11 +114,11 @@ describes.realWin(
       });
 
       it('track event with multiple request', () => {
-        builder.track('test', ['fake.com', 'fake1.com']);
+        builder.track('test', ['fake.test', 'fake1.test']);
         expect(builder.config_).to.jsonEqual({
           'requests': {
-            'test-request-0': 'fake.com',
-            'test-request-1': 'fake1.com',
+            'test-request-0': 'fake.test',
+            'test-request-1': 'fake1.test',
           },
           'triggers': {
             'test': {
@@ -143,11 +130,11 @@ describes.realWin(
       });
 
       it('track multi event', () => {
-        builder.track('test', 'fake.com').track('test1', 'fake1.com');
+        builder.track('test', 'fake.test').track('test1', 'fake1.test');
         expect(builder.config_).to.jsonEqual({
           'requests': {
-            'test-request-0': 'fake.com',
-            'test1-request-0': 'fake1.com',
+            'test-request-0': 'fake.test',
+            'test1-request-0': 'fake1.test',
           },
           'triggers': {
             'test': {
@@ -164,7 +151,7 @@ describes.realWin(
 
       it('should not add already tracked event', () => {
         try {
-          builder.track('test', 'fake.com').track('test', 'example.com');
+          builder.track('test', 'fake.test').track('test', 'example.test');
         } catch (e) {
           expect(e.message).to.equal(
             'customEventReporterBuilder should not track same eventType twice'
@@ -183,7 +170,7 @@ describes.realWin(
             },
           };
         };
-        const reporter = builder.track('test', 'fake.com').build();
+        const reporter = builder.track('test', 'fake.test').build();
         expect(reporter.trigger).to.exist;
       });
 
@@ -263,13 +250,13 @@ describes.realWin(
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        const buildPromise = parentEle.build();
+        const buildPromise = parentEle.buildInternal();
         builder = new CustomEventReporterBuilder(parentEle);
-        reporter = builder.track('test', 'fake.com').build();
+        reporter = builder.track('test', 'fake.test').build();
         return buildPromise;
       });
 
-      it('replace eventType with new name', function*() {
+      it('replace eventType with new name', function* () {
         parentEle.layoutCallback();
         yield macroTask();
         const element = parentEle.querySelector('amp-analytics');
@@ -279,7 +266,7 @@ describes.realWin(
         expect(script.textContent).to.jsonEqual(
           JSON.stringify({
             'requests': {
-              'test-request-0': 'fake.com',
+              'test-request-0': 'fake.test',
             },
             'triggers': {
               'test': {
@@ -291,7 +278,7 @@ describes.realWin(
         );
       });
 
-      it('trigger event with new name', function*() {
+      it('trigger event with new name', function* () {
         const id = parentEle.getResourceId();
         reporter.trigger('test');
         yield macroTask();
@@ -301,7 +288,7 @@ describes.realWin(
         );
       });
 
-      it('should not trigger not added event', function*() {
+      it('should not trigger not added event', function* () {
         try {
           reporter.trigger('fake');
         } catch (e) {
@@ -315,7 +302,7 @@ describes.realWin(
       let resolver;
       const config = {
         'requests': {
-          'pageview': 'https://example.com/analytics',
+          'pageview': 'https://example.test/analytics',
         },
         'triggers': {
           'trackPageview': {
@@ -326,7 +313,7 @@ describes.realWin(
       };
       const config2 = {
         'requests': {
-          'pageview': 'https://example.com/analytics2',
+          'pageview': 'https://example.test/analytics2',
         },
         'triggers': {
           'trackPageview': {
@@ -338,7 +325,7 @@ describes.realWin(
 
       describe('parent does NOT relayout, call in buildCallback', () => {
         beforeEach(() => {
-          const promise = new Promise(resolve => {
+          const promise = new Promise((resolve) => {
             resolver = resolve;
           });
           class TestElement extends BaseElement {
@@ -350,10 +337,10 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
-        it('should insert analytics after LOAD_START', function*() {
+        it('should insert analytics after LOAD_START', function* () {
           resolver(config);
           yield macroTask();
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
@@ -363,7 +350,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
         });
 
-        it('should insert analytics when config arrives late', function*() {
+        it('should insert analytics when config arrives late', function* () {
           parentEle.layoutCallback();
           yield macroTask();
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
@@ -372,7 +359,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
         });
 
-        it('should remove analytics after UNLOAD', function*() {
+        it('should remove analytics after UNLOAD', function* () {
           resolver(config);
           parentEle.layoutCallback();
           yield macroTask();
@@ -382,7 +369,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
         });
 
-        it('should NOT insert analytics after UNLOAD', function*() {
+        it('should NOT insert analytics after UNLOAD', function* () {
           parentEle.layoutCallback();
           yield macroTask();
           parentEle.unlayoutCallback();
@@ -395,7 +382,7 @@ describes.realWin(
 
       describe('parent does NOT relayout, call in layoutCallback', () => {
         beforeEach(() => {
-          const promise = new Promise(resolve => {
+          const promise = new Promise((resolve) => {
             resolver = resolve;
           });
           class TestElement extends BaseElement {
@@ -408,10 +395,10 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
-        it('should insert and remove analytics', function*() {
+        it('should insert and remove analytics', function* () {
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
           parentEle.layoutCallback();
           yield macroTask();
@@ -427,7 +414,7 @@ describes.realWin(
 
       describe('parent relayout, call in buildCallback', () => {
         beforeEach(() => {
-          const promise = new Promise(resolve => {
+          const promise = new Promise((resolve) => {
             resolver = resolve;
           });
           class TestElement extends BaseElement {
@@ -442,10 +429,10 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
-        it('should NOT insert analytics when relayout', function*() {
+        it('should NOT insert analytics when relayout', function* () {
           resolver(config);
           parentEle.layoutCallback();
           yield macroTask();
@@ -458,7 +445,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
         });
 
-        it('should NOT insert when config arrives at relayout', function*() {
+        it('should NOT insert when config arrives at relayout', function* () {
           parentEle.layoutCallback();
           parentEle.unlayoutCallback();
           yield macroTask();
@@ -475,7 +462,7 @@ describes.realWin(
         beforeEach(() => {
           class TestElement extends BaseElement {
             layoutCallback() {
-              const promise = new Promise(resolve => {
+              const promise = new Promise((resolve) => {
                 resolver = resolve;
               });
               useAnalyticsInSandbox(this.element, promise);
@@ -489,10 +476,10 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
-        it('should insert analytics when relayout', function*() {
+        it('should insert analytics when relayout', function* () {
           parentEle.layoutCallback();
           resolver(config);
           yield macroTask();
@@ -515,7 +502,7 @@ describes.realWin(
           expect(script.textContent).to.jsonEqual(JSON.stringify(config2));
         });
 
-        it('should only insert with latest config', function*() {
+        it('should only insert with latest config', function* () {
           parentEle.layoutCallback();
           yield macroTask();
           const resolver1 = resolver;

@@ -1,28 +1,19 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {tryResolve} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isArray} from '#core/types';
 
-import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {Services} from '#service';
+
+import {AutoLightboxEvents_Enum} from '../../../../src/auto-lightbox';
 import {
   Criteria,
   DocMetaAnnotations,
   ENABLED_LD_JSON_TYPES,
   ENABLED_OG_TYPE_ARTICLE,
   LIGHTBOXABLE_ATTR,
-  Mutation,
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
   Scanner,
@@ -33,12 +24,6 @@ import {
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {isArray} from '../../../../src/types';
-import {tryResolve} from '../../../../src/utils/promise';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -50,14 +35,14 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let html;
     let any;
 
     const ldJsonSchemaTypes = Object.keys(ENABLED_LD_JSON_TYPES);
     const ogTypes = [ENABLED_OG_TYPE_ARTICLE];
 
-    const firstElementLeaf = el =>
+    const firstElementLeaf = (el) =>
       el.firstElementChild ? firstElementLeaf(el.firstElementChild) : el;
 
     function wrap(el, wrapper) {
@@ -66,23 +51,23 @@ describes.realWin(
     }
 
     const stubAllCriteriaMet = () => env.sandbox.stub(Criteria, 'meetsAll');
-    const mockAllCriteriaMet = isMet => stubAllCriteriaMet().returns(isMet);
+    const mockAllCriteriaMet = (isMet) => stubAllCriteriaMet().returns(isMet);
 
     function mockCandidates(candidates) {
       env.sandbox.stub(Scanner, 'getCandidates').returns(candidates);
       return candidates;
     }
 
-    const mockLdJsonSchemaTypes = type =>
+    const mockLdJsonSchemaTypes = (type) =>
       env.sandbox
         .stub(DocMetaAnnotations, 'getAllLdJsonTypes')
         .returns(isArray(type) ? type : [type]);
 
-    const mockOgType = type =>
+    const mockOgType = (type) =>
       env.sandbox.stub(DocMetaAnnotations, 'getOgType').returns(type);
 
     const iterProduct = (a, b, callback) =>
-      a.forEach(itemA => b.forEach(itemB => callback(itemA, itemB)));
+      a.forEach((itemA) => b.forEach((itemB) => callback(itemA, itemB)));
 
     const squaredCompare = (set, callback) =>
       iterProduct(set, set, (a, b) => {
@@ -102,27 +87,31 @@ describes.realWin(
     }
 
     // necessary since element matching `withArgs` deep equals and overflows
-    const matchEquals = comparison =>
-      env.sandbox.match(subject => subject == comparison);
+    const matchEquals = (comparison) =>
+      env.sandbox.match((subject) => subject == comparison);
 
     function mockLoadedSignal(element, isLoadedSuccessfully) {
       const signals = new Signals();
       element.signals = () => signals;
       if (isLoadedSuccessfully) {
-        signals.signal(CommonSignals.LOAD_END);
+        signals.signal(CommonSignals_Enum.LOAD_END);
       } else {
-        signals.rejectSignal(CommonSignals.LOAD_END, 'Mocked rejection');
+        signals.rejectSignal(CommonSignals_Enum.LOAD_END, 'Mocked rejection');
       }
       return element;
+    }
+
+    function stubMutatorForDoc() {
+      env.sandbox.stub(Services, 'mutatorForDoc').returns({
+        mutateElement: (_, fn) => tryResolve(fn),
+      });
     }
 
     beforeEach(() => {
       any = env.sandbox.match.any;
       html = htmlFor(env.win.document);
 
-      env.sandbox
-        .stub(Mutation, 'mutate')
-        .callsFake((_, mutator) => tryResolve(mutator));
+      stubMutatorForDoc();
     });
 
     describe('meetsTreeShapeCriteria', () => {
@@ -130,33 +119,82 @@ describes.realWin(
         `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
       function itAcceptsOrRejects(scenarios) {
-        scenarios.forEach(({rejects, accepts, mutate, wrapWith}) => {
-          const maybeWrap = root => (wrapWith ? wrap(root, wrapWith()) : root);
-          const maybeMutate = root => mutate && mutate(root);
+        scenarios.forEach(({accepts, mutate, rejects, wrapWith}) => {
+          const maybeWrap = (root) =>
+            wrapWith ? wrap(root, wrapWith()) : root;
+          const maybeMutate = (root) => mutate && mutate(root);
 
           it(`${accepts ? 'accepts' : 'rejects'} ${accepts || rejects}`, () => {
             [
-              html`
-                <amp-img src="asada.png"></amp-img>
-              `,
-              html`
-                <div><amp-img src="adobada.png"></amp-img></div>
-              `,
-              html`
-                <div>
-                  <div><amp-img src="carnitas.png"></amp-img></div>
-                </div>
-              `,
-            ].forEach(unwrapped => {
-              maybeMutate(unwrapped);
+              {
+                markup: html`
+                  <amp-img src="asada.png" layout="flex-item"></amp-img>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <amp-img src="asada.png" layout="flex-item">
+                      <img src="adada.png" />
+                    </amp-img>
+                  </div>
+                `,
+                tagName: 'AMP-IMG',
+                candidate: 'amp-img',
+              },
+              {
+                markup: html`
+                  <div>
+                    <amp-img src="adobada.png" layout="flex-item"></amp-img>
+                  </div>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <div>
+                      <amp-img src="carnitas.png" layout="flex-item"></amp-img>
+                    </div>
+                  </div>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`<img src="asada.png" layout="flex-item" /> `,
+                tagName: 'IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <img src="adobada.png" layout="flex-item" />
+                  </div>
+                `,
+                tagName: 'IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <div>
+                      <img src="carnitas.png" layout="flex-item" />
+                    </div>
+                  </div>
+                `,
+                tagName: 'IMG',
+              },
+            ].forEach((unwrapped) => {
+              maybeMutate(unwrapped.markup);
 
-              const scenario = maybeWrap(unwrapped);
-              const candidate = firstElementLeaf(scenario);
+              const scenario = maybeWrap(unwrapped.markup);
+              const candidate = unwrapped.candidate
+                ? scenario.querySelector(unwrapped.candidate)
+                : firstElementLeaf(scenario);
 
               env.win.document.body.appendChild(scenario);
 
               expect(candidate).to.be.ok;
-              expect(candidate.tagName).to.equal('AMP-IMG');
+              expect(candidate.tagName).to.equal(unwrapped.tagName);
 
               expect(
                 Criteria.meetsTreeShapeCriteria(candidate),
@@ -184,11 +222,7 @@ describes.realWin(
 
       beforeEach(() => {
         // Insert element for valid tap actions to be resolved.
-        env.win.document.body.appendChild(
-          html`
-            <div id="valid"></div>
-          `
-        );
+        env.win.document.body.appendChild(html` <div id="valid"></div> `);
       });
 
       itAcceptsOrRejects([
@@ -197,88 +231,67 @@ describes.realWin(
         },
         {
           accepts: 'elements with a non-tap action',
-          mutate: el => el.setAttribute('on', 'nottap:valid'),
+          mutate: (el) => el.setAttribute('on', 'nottap:valid'),
         },
         {
           accepts: 'elements with a tap action that does not resolve to a node',
-          mutate: el => el.setAttribute('on', 'tap:i-do-not-exist'),
+          mutate: (el) => el.setAttribute('on', 'tap:i-do-not-exist'),
         },
         {
           accepts: 'elements inside non-clickable anchor',
-          wrapWith: () =>
-            html`
-              <a id="my-anchor"></a>
-            `,
+          wrapWith: () => html` <a id="my-anchor"></a> `,
         },
         {
           rejects: 'explicitly opted-out subnodes',
-          mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
+          mutate: (el) => el.setAttribute('data-amp-auto-lightbox-disable', ''),
         },
         {
           rejects: 'amp-subscriptions subnodes',
-          mutate: el => el.setAttribute('subscriptions-action', ''),
+          mutate: (el) => el.setAttribute('subscriptions-action', ''),
         },
         {
           rejects: 'placeholder subnodes',
-          mutate: el => el.setAttribute('placeholder', ''),
+          mutate: (el) => el.setAttribute('placeholder', ''),
         },
         {
           rejects: 'items actionable by tap with a single action',
-          mutate: el => el.setAttribute('on', 'tap:valid'),
+          mutate: (el) => el.setAttribute('on', 'tap:valid'),
         },
         {
           rejects: 'items actionable by tap with multiple actions',
-          mutate: el => el.setAttribute('on', 'whatever:something;tap:valid'),
+          mutate: (el) => el.setAttribute('on', 'whatever:something;tap:valid'),
         },
         {
           rejects: 'items inside an amp-selector',
-          mutate: el => el.setAttribute('option', ''),
-          wrapWith: () =>
-            html`
-              <amp-selector></amp-selector>
-            `,
+          mutate: (el) => el.setAttribute('option', ''),
+          wrapWith: () => html` <amp-selector></amp-selector> `,
         },
         {
           rejects: 'items inside a button',
-          wrapWith: () =>
-            html`
-              <button></button>
-            `,
+          wrapWith: () => html` <button></button> `,
         },
         {
           rejects: 'items inside amp-script',
-          wrapWith: () =>
-            html`
-              <amp-script></amp-script>
-            `,
+          wrapWith: () => html` <amp-script></amp-script> `,
         },
         {
           rejects: 'items inside amp-story',
-          wrapWith: () =>
-            html`
-              <amp-story></amp-story>
-            `,
+          wrapWith: () => html` <amp-story></amp-story> `,
         },
         {
           rejects: 'items inside amp-lightbox',
-          wrapWith: () =>
-            html`
-              <amp-lightbox></amp-lightbox>
-            `,
+          wrapWith: () => html` <amp-lightbox></amp-lightbox> `,
         },
         {
           rejects: 'items inside a clickable link',
-          wrapWith: () =>
-            html`
-              <a href="http://hamberders.com"></a>
-            `,
+          wrapWith: () => html` <a href="http://hamberders.com"></a> `,
         },
       ]);
     });
 
     describe('meetsSizingCriteria', () => {
       const areaDeltaPerc = RENDER_AREA_RATIO * 100;
-      const {vw, vh} = {vw: 1000, vh: 600};
+      const {vh, vw} = {vw: 1000, vh: 600};
 
       const expectMeetsSizingCriteria = (
         renderWidth,
@@ -376,7 +389,7 @@ describes.realWin(
         const renderWidth = vw;
         const renderHeight = vh;
 
-        [vh + 1, vh + 10, vh + 100].forEach(naturalHeight => {
+        [vh + 1, vh + 10, vh + 100].forEach((naturalHeight) => {
           expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
@@ -390,7 +403,7 @@ describes.realWin(
         const renderWidth = vw;
         const renderHeight = vh;
 
-        [vw + 1, vw + 10, vw + 100].forEach(naturalWidth => {
+        [vw + 1, vw + 10, vw + 100].forEach((naturalWidth) => {
           expectMeetsSizingCriteria(
             renderWidth,
             renderHeight,
@@ -445,9 +458,7 @@ describes.realWin(
 
         mockCandidates([
           mockLoadedSignal(
-            html`
-              <amp-img></amp-img>
-            `,
+            html` <amp-img layout="flex-item"></amp-img> `,
             true
           ),
         ]);
@@ -465,9 +476,7 @@ describes.realWin(
 
         mockCandidates([
           mockLoadedSignal(
-            html`
-              <amp-img></amp-img>
-            `,
+            html` <amp-img layout="flex-item"></amp-img> `,
             true
           ),
         ]);
@@ -482,21 +491,15 @@ describes.realWin(
 
       it('sets attribute only for candidates that meet criteria', async () => {
         const a = mockLoadedSignal(
-          html`
-            <amp-img src="a.png"></amp-img>
-          `,
+          html` <amp-img src="a.png" layout="flex-item"></amp-img> `,
           true
         );
         const b = mockLoadedSignal(
-          html`
-            <amp-img src="b.png"></amp-img>
-          `,
+          html` <amp-img src="b.png" layout="flex-item"></amp-img> `,
           true
         );
         const c = mockLoadedSignal(
-          html`
-            <amp-img src="c.png"></amp-img>
-          `,
+          html` <amp-img src="c.png" layout="flex-item"></amp-img> `,
           true
         );
 
@@ -519,9 +522,7 @@ describes.realWin(
         const candidates = mockCandidates(
           [1, 2, 3].map(() =>
             mockLoadedSignal(
-              html`
-                <amp-img src="a.png"></amp-img>
-              `,
+              html` <amp-img src="a.png" layout="flex-item"></amp-img> `,
               true
             )
           )
@@ -540,18 +541,35 @@ describes.realWin(
     });
 
     describe('runCandidates', () => {
+      it('ignores amp-img load signal after being unlaid out', async () => {
+        const img = html`
+          <amp-img src="bla.png" layout="flex-item"></amp-img>
+        `;
+
+        const signals = new Signals();
+        img.signals = () => signals;
+
+        signals.signal(CommonSignals_Enum.LOAD_END);
+
+        const candidatePromise = Promise.all(runCandidates(env.ampdoc, [img]));
+
+        // Skip microtask and reset LOAD_END to emulate unloading in the middle
+        // of the candidate's measurement.
+        await new Promise((resolve) => resolve());
+        signals.reset(CommonSignals_Enum.LOAD_END);
+
+        const elected = await candidatePromise;
+        expect(elected[0]).to.be.undefined;
+      });
+
       it('filters out candidates that fail to load', async () => {
         const shouldNotLoad = mockLoadedSignal(
-          html`
-            <amp-img src="bla.png"></amp-img>
-          `,
+          html` <amp-img src="bla.png" layout="flex-item"></amp-img> `,
           false
         );
 
         const shouldLoad = mockLoadedSignal(
-          html`
-            <amp-img src="bla.png"></amp-img>
-          `,
+          html` <amp-img src="bla.png" layout="flex-item"></amp-img> `,
           true
         );
 
@@ -570,7 +588,7 @@ describes.realWin(
     });
 
     describe('isEnabledForDoc', () => {
-      const expectIsEnabled = shouldBeEnabled => {
+      const expectIsEnabled = (shouldBeEnabled) => {
         env.sandbox.stub(env.ampdoc, 'getBody').returns({
           // only needs to be truthy since its ref req is mocked
           firstElementChild: true,
@@ -583,11 +601,9 @@ describes.realWin(
       });
 
       describe('DOM selection', () => {
-        const mockRootNodeContent = els => {
-          const fakeRoot = html`
-            <div></div>
-          `;
-          els.forEach(el => {
+        const mockRootNodeContent = (els) => {
+          const fakeRoot = html` <div></div> `;
+          els.forEach((el) => {
             fakeRoot.appendChild(el);
           });
           env.sandbox.stub(env.ampdoc, 'getRootNode').returns(fakeRoot);
@@ -601,20 +617,14 @@ describes.realWin(
           it('returns tag', () => {
             mockRootNodeContent([
               // Expected:
-              html`
-                <meta property="og:type" content="foo" />
-              `,
+              html` <meta property="og:type" content="foo" /> `,
 
               // Filler:
-              html`
-                <meta property="og:something" content="bar" />
-              `,
+              html` <meta property="og:something" content="bar" /> `,
               html`
                 <meta property="vims and emacs are both awful" content="baz" />
               `,
-              html`
-                <meta name="description" content="My Website" />
-              `,
+              html` <meta name="description" content="My Website" /> `,
             ]);
 
             expect(DocMetaAnnotations.getOgType(env.ampdoc)).to.equal('foo');
@@ -622,10 +632,8 @@ describes.realWin(
         });
 
         describe('getAllLdJsonTypes', () => {
-          const createLdJsonTag = content => {
-            const tag = html`
-              <script type="application/ld+json"></script>
-            `;
+          const createLdJsonTag = (content) => {
+            const tag = html` <script type="application/ld+json"></script> `;
             tag.textContent = JSON.stringify(content);
             return tag;
           };
@@ -641,9 +649,7 @@ describes.realWin(
             const expectedC = 'baz';
 
             mockRootNodeContent([
-              html`
-                <script></script>
-              `,
+              html` <script></script> `,
               createLdJsonTag({'@type': expectedA}),
               createLdJsonTag({'tacos': 'sí por favor'}),
               createLdJsonTag({'@type': expectedB}),
@@ -664,7 +670,7 @@ describes.realWin(
           expectIsEnabled(false);
         });
 
-        ldJsonSchemaTypes.forEach(type => {
+        ldJsonSchemaTypes.forEach((type) => {
           const typeSubObj = `{..."@type": "${type}"}`;
 
           it(`accepts docs with ${typeSubObj} schema`, () => {
@@ -681,6 +687,7 @@ describes.realWin(
 
             const lightboxable = createElementWithAttributes(doc, 'amp-img', {
               [LIGHTBOXABLE_ATTR]: '',
+              layout: 'flex-item',
             });
 
             doc.head.appendChild(extensionScript);
@@ -698,7 +705,7 @@ describes.realWin(
           expectIsEnabled(false);
         });
 
-        ogTypes.forEach(type => {
+        ogTypes.forEach((type) => {
           const ogTypeMeta = `<meta property="og:type" content="${type}">`;
 
           it(`accepts docs with ${ogTypeMeta}`, () => {
@@ -715,6 +722,7 @@ describes.realWin(
 
             const lightboxable = createElementWithAttributes(doc, 'amp-img', {
               [LIGHTBOXABLE_ATTR]: '',
+              layout: 'flex-item',
             });
 
             doc.head.appendChild(extensionScript);
@@ -730,7 +738,7 @@ describes.realWin(
     describe('apply', () => {
       it('sets attribute', async () => {
         const element = html`
-          <amp-img src="chabuddy.g"></amp-img>
+          <amp-img src="chabuddy.g" layout="flex-item"></amp-img>
         `;
 
         await apply(env.ampdoc, element);
@@ -740,13 +748,10 @@ describes.realWin(
 
       it('sets unique group for each element', async () => {
         const candidates = [1, 2, 3].map(
-          () =>
-            html`
-              <amp-img></amp-img>
-            `
+          () => html` <amp-img layout="flex-item"></amp-img> `
         );
 
-        await Promise.all(candidates.map(c => apply(env.ampdoc, c)));
+        await Promise.all(candidates.map((c) => apply(env.ampdoc, c)));
 
         squaredCompare(candidates, (a, b) => {
           expect(a.getAttribute(LIGHTBOXABLE_ATTR)).not.to.equal(
@@ -757,16 +762,14 @@ describes.realWin(
 
       it('dispatches event', async () => {
         const element = html`
-          <amp-img src="chabuddy.g"></amp-img>
+          <amp-img src="chabuddy.g" layout="flex-item"></amp-img>
         `;
 
-        element.dispatchCustomEvent = env.sandbox.spy();
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener(AutoLightboxEvents_Enum.NEWLY_SET, eventSpy);
 
         await apply(env.ampdoc, element);
-
-        expect(
-          element.dispatchCustomEvent.withArgs(AutoLightboxEvents.NEWLY_SET)
-        ).to.have.been.calledOnce;
+        expect(eventSpy).to.be.calledOnce;
       });
     });
   }

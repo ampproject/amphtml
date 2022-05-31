@@ -1,22 +1,6 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys_Enum} from '#core/constants/key-codes';
 
-import {Keys} from '../../../src/utils/key-codes';
-import {dict} from '../../../src/utils/object';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 
 /**
  * The list of keyboard event properites to forward to the viewer. This should
@@ -118,7 +102,7 @@ function isHandledByEventTarget(e) {
     // Various AMP components consume keyboard events by preventing the default.
     return true;
   }
-  if (e.key == Keys.ESCAPE) {
+  if (e.key == Keys_Enum.ESCAPE) {
     // ESC is always a valid key for things like keyboard shortcuts, even if the
     // focus is on an input control, for example.
     return false;
@@ -126,7 +110,7 @@ function isHandledByEventTarget(e) {
   switch (e.target.nodeName) {
     case 'INPUT':
       // For checkboxes, only allow swallowing the space key event.
-      return e.target.type != 'checkbox' || e.key == Keys.SPACE;
+      return e.target.type != 'checkbox' || e.key == Keys_Enum.SPACE;
     case 'TEXTAREA':
     case 'BUTTON':
     case 'SELECT':
@@ -144,8 +128,8 @@ function isHandledByEventTarget(e) {
  * @return {!JsonObject}
  */
 function getKeyboardEventInit(e) {
-  const copiedEvent = dict();
-  eventProperties.forEach(eventProperty => {
+  const copiedEvent = {};
+  eventProperties.forEach((eventProperty) => {
     if (e[eventProperty] !== undefined) {
       copiedEvent[eventProperty] = e[eventProperty];
     }

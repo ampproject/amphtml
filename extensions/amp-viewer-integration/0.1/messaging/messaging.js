@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';
@@ -22,7 +6,7 @@ const APP = '__AMPHTML__';
 /**
  * @enum {string}
  */
-const MessageType = {
+const MessageType_Enum = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -30,7 +14,7 @@ const MessageType = {
 /**
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
-let RequestHandler; // eslint-disable-line no-unused-vars
+let RequestHandler; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /**
  * @param {*} message
@@ -45,9 +29,9 @@ export function parseMessage(message) {
   }
 
   try {
-    return /** @type {?AmpViewerMessage} */ (JSON.parse(
-      /** @type {string} */ (message)
-    ));
+    return /** @type {?AmpViewerMessage} */ (
+      JSON.parse(/** @type {string} */ (message))
+    );
   } catch (e) {
     return null;
   }
@@ -78,7 +62,7 @@ export class WindowPortEmulator {
    * @param {function(!Event):*} handler
    */
   addEventListener(eventType, handler) {
-    this.win_.addEventListener('message', event => {
+    this.win_.addEventListener('message', (event) => {
       if (event.origin == this.origin_ && event.source == this.target_) {
         handler(event);
       }
@@ -118,7 +102,7 @@ export class Messaging {
    * @return {!Promise<!Messaging>}
    */
   static initiateHandshakeWithDocument(target, opt_token) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const intervalRef = setInterval(() => {
         const channel = new MessageChannel();
         const pollMessage = /** @type {JsonObject} */ ({
@@ -128,7 +112,7 @@ export class Messaging {
         target./*OK*/ postMessage(pollMessage, '*', [channel.port2]);
 
         const port = channel.port1;
-        const listener = event => {
+        const listener = (event) => {
           const message = parseMessage(event.data);
           if (!message) {
             return;
@@ -161,23 +145,31 @@ export class Messaging {
    * @param {!Window} target - window containing AMP document to perform handshake with (usually contentWindow of iframe)
    * @param {string} origin - origin of target window (use "null" if opaque)
    * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
+   * @param {?RegExp=} opt_cdnProxyRegex
    * @return {!Promise<!Messaging>}
    */
-  static waitForHandshakeFromDocument(source, target, origin, opt_token) {
-    return new Promise(resolve => {
-      const listener = event => {
+  static waitForHandshakeFromDocument(
+    source,
+    target,
+    origin,
+    opt_token,
+    opt_cdnProxyRegex
+  ) {
+    return new Promise((resolve) => {
+      const listener = (event) => {
         const message = parseMessage(event.data);
         if (!message) {
           return;
         }
         if (
-          event.origin == origin &&
+          (event.origin == origin ||
+            (opt_cdnProxyRegex && opt_cdnProxyRegex.test(event.origin))) &&
           (!event.source || event.source == target) &&
           message.app === APP &&
           message.name === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
-          const port = new WindowPortEmulator(source, origin, target);
+          const port = new WindowPortEmulator(source, event.origin, target);
           const messaging = new Messaging(
             null,
             port,
@@ -307,9 +299,9 @@ export class Messaging {
       this.logError_(TAG + ': handleMessage_ error: ', 'invalid token');
       return;
     }
-    if (message.type === MessageType.REQUEST) {
+    if (message.type === MessageType_Enum.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.type === MessageType.RESPONSE) {
+    } else if (message.type === MessageType_Enum.RESPONSE) {
       this.handleResponse_(message);
     }
   }
@@ -333,7 +325,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.REQUEST,
+        type: MessageType_Enum.REQUEST,
         name: messageName,
         data: messageData,
         rsvp: awaitResponse,
@@ -354,7 +346,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MessageType_Enum.RESPONSE,
         name: messageName,
         data: messageData,
       })
@@ -377,7 +369,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MessageType_Enum.RESPONSE,
         name: messageName,
         data: null,
         error: errString,
@@ -433,10 +425,10 @@ export class Messaging {
         throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(
-        data => {
+        (data) => {
           this.sendResponse_(requestId, message.name, data);
         },
-        reason => {
+        (reason) => {
           this.sendResponseError_(requestId, message.name, reason);
         }
       );

@@ -1,18 +1,16 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeFixed,
+} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {realChildNodes} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
 
 import {
   EMPTY_METADATA,
@@ -20,14 +18,11 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../../../src/mediasession-helper';
-import {Layout, isLayoutSizeFixed} from '../../../src/layout';
-import {assertHttpsUrl} from '../../../src/url';
-import {closestAncestorElementBySelector} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {listen} from '../../../src/event-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {assertHttpsUrl} from '../../../src/url';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 const TAG = 'amp-audio';
 
@@ -51,17 +46,19 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeFixed(layout);
+    return isLayoutSizeFixed(layout) || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
   buildCallback() {
     // If layout="nodisplay" force autoplay to off
     const layout = this.getLayout();
-    if (layout === Layout.NODISPLAY) {
+    if (layout === Layout_Enum.NODISPLAY) {
       this.element.removeAttribute('autoplay');
       this.buildAudioElement();
     }
+
+    setIsMediaComponent(this.element);
 
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
@@ -81,7 +78,11 @@ export class AmpAudio extends AMP.BaseElement {
       if (src !== undefined) {
         assertHttpsUrl(src, this.element);
       }
-      this.propagateAttributes(['src', 'loop', 'controlsList'], this.audio_);
+      propagateAttributes(
+        ['src', 'loop', 'controlsList'],
+        this.element,
+        this.audio_
+      );
     }
 
     const artist = mutations['artist'];
@@ -100,23 +101,36 @@ export class AmpAudio extends AMP.BaseElement {
   }
 
   /**
-   * Builds the internal <audio> element
-   * @return {*} TODO(#23582): Specify return type
+   * Builds the internal <audio> element.
    */
   buildAudioElement() {
-    const audio = this.element.ownerDocument.createElement('audio');
+    let audio = this.element.querySelector('audio');
+    if (!audio) {
+      audio = this.element.ownerDocument.createElement('audio');
+      this.element.appendChild(audio);
+    }
+
     if (!audio.play) {
       this.toggleFallback(true);
-      return Promise.resolve();
+      return;
     }
 
     // Force controls otherwise there is no player UI.
     audio.controls = true;
+
+    // TODO(https://go.amp.dev/issue/36303): We explicitly set width 100% to workaround
+    // an issue where `<audio>` does not fill the parent container on iOS
+    // (https://go.amp.dev/issue/36292).
+    // This is required since global styles for `.i-amphtml-fill-content` set width to 0 in
+    // order to address a separate bug. Re-assess whether that workaround is needed, and
+    // remove this style if so.
+    setStyle(audio, 'width', '100%');
+
     const src = this.getElementAttribute_('src');
     if (src) {
       assertHttpsUrl(src, this.element);
     }
-    this.propagateAttributes(
+    propagateAttributes(
       [
         'src',
         'preload',
@@ -128,17 +142,21 @@ export class AmpAudio extends AMP.BaseElement {
         'aria-labelledby',
         'controlsList',
       ],
+      this.element,
       audio
     );
 
-    this.applyFillContent(audio);
-    this.getRealChildNodes().forEach(child => {
+    applyFillContent(audio);
+    realChildNodes(this.element).forEach((child) => {
+      if (child === audio) {
+        return;
+      }
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }
       audio.appendChild(child);
     });
-    this.element.appendChild(audio);
+
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
@@ -154,7 +172,7 @@ export class AmpAudio extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const layout = this.getLayout();
-    if (layout !== Layout.NODISPLAY) {
+    if (layout !== Layout_Enum.NODISPLAY) {
       this.buildAudioElement();
     }
     this.updateMetadata_();
@@ -219,18 +237,8 @@ export class AmpAudio extends AMP.BaseElement {
    * @return {boolean}
    */
   isInvocationValid_() {
-    if (!this.audio_) {
-      return false;
-    }
-    if (this.isStoryDescendant_()) {
-      user().warn(
-        TAG,
-        '<amp-story> elements do not support actions on ' +
-          '<amp-audio> elements'
-      );
-      return false;
-    }
-    return true;
+    // Don't execute actions if too early, or if the audio element was removed.
+    return !!this.audio_;
   }
 
   /**
@@ -251,7 +259,7 @@ export class AmpAudio extends AMP.BaseElement {
     if (!this.isInvocationValid_()) {
       return;
     }
-    this.audio_.play();
+    tryPlay(this.audio_);
     this.setPlayingStateForTesting_(true);
   }
 
@@ -266,19 +274,10 @@ export class AmpAudio extends AMP.BaseElement {
     }
   }
 
-  /**
-   * Returns whether `<amp-audio>` has an `<amp-story>` for an ancestor.
-   * @return {?Element}
-   * @private
-   */
-  isStoryDescendant_() {
-    return closestAncestorElementBySelector(this.element, 'AMP-STORY');
-  }
-
   /** @private */
   audioPlaying_() {
     const playHandler = () => {
-      this.audio_.play();
+      tryPlay(this.audio_);
       this.setPlayingStateForTesting_(true);
     };
     const pauseHandler = () => {
@@ -287,16 +286,11 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     // Update the media session
-    setMediaSession(
-      this.element,
-      this.win,
-      this.metadata_,
-      playHandler,
-      pauseHandler
-    );
+    validateMediaMetadata(this.element, this.metadata_);
+    setMediaSession(this.win, this.metadata_, playHandler, pauseHandler);
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAudio);
 });

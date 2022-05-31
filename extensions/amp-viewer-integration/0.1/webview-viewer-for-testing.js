@@ -1,24 +1,10 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Messaging} from './messaging/messaging';
+
 import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
 
 const APP = '__AMPHTML__';
-const MessageType = {
+/** @enum {string} */
+const MessageType_Enum = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -62,13 +48,13 @@ export class WebviewViewerForTesting {
     this.intervalCtr = 0;
 
     /** @private @const {!Promise} */
-    this.handshakeReceivedPromise_ = new Promise(resolve => {
+    this.handshakeReceivedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.handshakeResponseResolve_ = resolve;
     });
 
     /** @private @const {!Promise} */
-    this.documentLoadedPromise_ = new Promise(resolve => {
+    this.documentLoadedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.documentLoadedResolve_ = resolve;
     });
@@ -125,7 +111,7 @@ export class WebviewViewerForTesting {
         '*',
         [channel.port2]
       );
-      channel.port1.onmessage = function(e) {
+      channel.port1.onmessage = (e) => {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
           const data = JSON.parse(e.data);
@@ -133,7 +119,7 @@ export class WebviewViewerForTesting {
         } else {
           this.handleMessage_(e);
         }
-      }.bind(this);
+      };
     }
   }
 
@@ -156,7 +142,7 @@ export class WebviewViewerForTesting {
     const message = {
       app: APP,
       requestid: requestId,
-      type: MessageType.RESPONSE,
+      type: MessageType_Enum.RESPONSE,
     };
     this.log('############## viewer posting1 Message', message);
     channel.port1./*OK*/ postMessage(JSON.stringify(message));

@@ -1,26 +1,11 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../../src/services';
 import {
   installGlobalSubmitListenerForDoc,
   onDocumentFormSubmit_,
 } from '../../src/document-submit';
 
-describes.sandboxed('test-document-submit', {}, env => {
+describes.sandboxed('test-document-submit', {}, (env) => {
   describe('installGlobalSubmitListenerForDoc', () => {
     let ampdoc;
     let headNode;
@@ -31,25 +16,16 @@ describes.sandboxed('test-document-submit', {}, env => {
       ampdoc = {
         getHeadNode: () => headNode,
         getRootNode: () => rootNode,
-        waitForBodyOpen: () => Promise.resolve({}),
+        whenExtensionsKnown: () => Promise.resolve(),
+        declaresExtension: () => false,
       };
     });
 
-    /**
-     * @param {string} extension
-     */
-    const createScript = extension => {
-      const script = document.createElement('script');
-      script.setAttribute(
-        'src',
-        'https://cdn.ampproject.org/v0/' + extension + '-0.1.js'
-      );
-      script.setAttribute('custom-element', extension);
-      return script;
-    };
-
     it('should not register submit listener if amp-form is not registered.', () => {
-      ampdoc.getHeadNode().appendChild(createScript('amp-list'));
+      env.sandbox
+        .stub(ampdoc, 'declaresExtension')
+        .withArgs('amp-form')
+        .returns(false);
       env.sandbox.spy(rootNode, 'addEventListener');
       return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
         expect(rootNode.addEventListener).not.to.have.been.called;
@@ -57,7 +33,10 @@ describes.sandboxed('test-document-submit', {}, env => {
     });
 
     it('should register submit listener if amp-form extension is registered.', () => {
-      ampdoc.getHeadNode().appendChild(createScript('amp-form'));
+      env.sandbox
+        .stub(ampdoc, 'declaresExtension')
+        .withArgs('amp-form')
+        .returns(true);
       env.sandbox.spy(rootNode, 'addEventListener');
       return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
         expect(rootNode.addEventListener).called;
@@ -65,7 +44,7 @@ describes.sandboxed('test-document-submit', {}, env => {
     });
   });
 
-  describes.realWin('onDocumentFormSubmit_', {amp: true}, env => {
+  describes.realWin('onDocumentFormSubmit_', {amp: true}, (env) => {
     let window, document;
     let evt;
     let tgt;
@@ -131,7 +110,7 @@ describes.sandboxed('test-document-submit', {}, env => {
       tgt.setAttribute('action', 'https://valid.example.com');
       tgt.__AMP_INIT_ACTION__ = undefined;
       tgt.setAttribute('target', '_blank');
-      expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
+      expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
     });
 
     it('should assert none of the inputs named __amp_source_origin', () => {

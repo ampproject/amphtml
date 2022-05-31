@@ -1,22 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {adConfig} from '#ads/_config';
 
-import {Services} from './services';
-import {adConfig} from '../ads/_config';
-import {dev} from '../src/log';
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
 
 /**
  * @param {AMP.BaseElement} adElement
@@ -51,7 +37,7 @@ export function getOrCreateAdCid(
 ) {
   const timeout =
     isNaN(opt_timeout) || opt_timeout == null ? 1000 : opt_timeout;
-  const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
+  const cidPromise = Services.cidForDoc(ampDoc).then((cidService) => {
     if (!cidService) {
       return;
     }
@@ -64,7 +50,7 @@ export function getOrCreateAdCid(
         },
         Promise.resolve(undefined)
       )
-      .catch(error => {
+      .catch((error) => {
         // Not getting a CID is not fatal.
         dev().error('AD-CID', error);
         return undefined;
@@ -74,7 +60,7 @@ export function getOrCreateAdCid(
   // 1 second, assume it will never arrive.
   return Services.timerFor(ampDoc.win)
     .timeoutPromise(timeout, cidPromise, 'cid timeout')
-    .catch(error => {
+    .catch((error) => {
       // Timeout is not fatal.
       dev().warn('AD-CID', error);
       return undefined;

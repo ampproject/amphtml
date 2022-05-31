@@ -1,31 +1,30 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 module.exports = {
   meta: {
     fixable: 'code',
   },
-
   create(context) {
+    /**
+     * @type {{
+     *   used: Set,
+     *   declared: Map,
+     * }[]}
+     * */
     const stack = [];
+    /**
+     * @return {{
+     *   used: Set,
+     *   declared: Map,
+     * }}
+     */
     function current() {
       return stack[stack.length - 1];
     }
 
+    /**
+     * @return {boolean}
+     */
     function shouldIgnoreFile() {
       return /\b(test|examples)\b/.test(context.getFilename());
     }
@@ -37,6 +36,10 @@ module.exports = {
       '@override': uncheckableUse,
     };
 
+    /**
+     * @param {CompilerNode} node
+     * @return {Function(): void|void}
+     */
     function checkerForAnnotation(node) {
       const comments = context.getCommentsBefore(node);
 
@@ -53,7 +56,12 @@ module.exports = {
       return unannotatedUse;
     }
 
-    // Restricteds must be used in the file, but not in the class.
+    /**
+     * Restricteds must be used in the file, but not in the class.
+     * @param {CompilerNode} node
+     * @param {string} name
+     * @param {boolean} used
+     */
     function restrictedUse(node, name, used) {
       if (used) {
         const message = [
@@ -105,7 +113,13 @@ module.exports = {
       context.report({node, message});
     }
 
-    // VisibleForTestings must not be used in the class.
+    /**
+     * VisibleForTestings must not be used in the class.
+     *
+     * @param {CompilerNode} node
+     * @param {string} name
+     * @param {boolean} used
+     */
     function visibleForTestingUse(node, name, used) {
       if (!used) {
         return;
@@ -119,12 +133,20 @@ module.exports = {
       context.report({node, message});
     }
 
-    // Protected and Override are uncheckable. Let Closure handle that.
+    /**
+     * Protected and Override are uncheckable. Let Closure handle that.
+     */
     function uncheckableUse() {
       // Noop.
     }
 
-    // Unannotated fields must be used in the class
+    /**
+     * Unannotated fields must be used in the class
+     *
+     * @param {CompilerNode} node
+     * @param {string} name
+     * @param {boolean} used
+     */
     function unannotatedUse(node, name, used) {
       if (used) {
         return;
@@ -141,6 +163,11 @@ module.exports = {
       context.report({node, message});
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @param {boolean=} needsThis
+     * @return {boolean}
+     */
     function shouldCheckMember(node, needsThis = true) {
       const {computed, object, property} = node;
       if (
@@ -154,6 +181,10 @@ module.exports = {
       return isPrivateName(property);
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @return {boolean}
+     */
     function isAssignment(node) {
       const {parent} = node;
       if (!parent) {
@@ -162,8 +193,12 @@ module.exports = {
       return parent.type === 'AssignmentExpression' && parent.left === node;
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @return {boolean}
+     */
     function isPrivateName(node) {
-      return node.name.endsWith('_');
+      return (node.name || node.value).endsWith('_');
     }
 
     return {
@@ -175,12 +210,12 @@ module.exports = {
         stack.push({used: new Set(), declared: new Map()});
       },
 
-      'ClassBody:exit': function() {
+      'ClassBody:exit': function () {
         if (shouldIgnoreFile()) {
           return;
         }
 
-        const {used, declared} = stack.pop();
+        const {declared, used} = stack.pop();
 
         declared.forEach((node, name) => {
           const checker = checkerForAnnotation(node);
@@ -188,7 +223,7 @@ module.exports = {
         });
       },
 
-      'ClassBody > MethodDefinition': function(node) {
+      'ClassBody > MethodDefinition': function (node) {
         if (shouldIgnoreFile()) {
           return;
         }
@@ -203,7 +238,7 @@ module.exports = {
         declared.set(name, node);
       },
 
-      'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
+      'MethodDefinition[kind="constructor"] MemberExpression': function (node) {
         if (
           shouldIgnoreFile() ||
           !shouldCheckMember(node) ||
@@ -219,7 +254,7 @@ module.exports = {
         }
       },
 
-      'ClassBody MemberExpression': function(node) {
+      'ClassBody MemberExpression': function (node) {
         if (
           shouldIgnoreFile() ||
           !shouldCheckMember(node, false) ||
@@ -233,7 +268,7 @@ module.exports = {
         used.add(name);
       },
 
-      'ClassBody VariableDeclarator > ObjectPattern': function(node) {
+      'ClassBody VariableDeclarator > ObjectPattern': function (node) {
         if (shouldIgnoreFile()) {
           return;
         }

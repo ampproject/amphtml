@@ -4,44 +4,24 @@ formats:
   - websites
 teaser:
   text: Displays a Soundcloud clip.
+experimental: true
+bento: true
 ---
-
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-soundcloud
 
-Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
+## Usage
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
-  </tr>
-</table>
+Display a Soundcloud clip.
 
-[TOC]
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-soundcloud`, see [**`bento-soundcloud`**](./1.0/README.md).
 
 ## Examples
 
@@ -104,4 +84,4 @@ The value for this attribute is the ID of a playlist, an integer.</td>
 
 ## Validation
 
-See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.

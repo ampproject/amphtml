@@ -1,37 +1,26 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {HostServices} from '../../../src/inabox/host-services';
-import {ScrollManager} from './scroll-manager';
-import {Services} from '../../../src/services';
-import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
+import {tryResolve} from '#core/data-structures/promise';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+} from '#core/dom/query';
+import {isArray} from '#core/types';
+import {map} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {ScrollManager} from './scroll-manager';
 import {provideVisibilityManager} from './visibility-manager';
-import {tryResolve} from '../../../src/utils/promise';
+
 import {whenContentIniLoad} from '../../../src/ini-load';
+import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-analytics/analytics-root';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -58,45 +47,6 @@ export class AnalyticsRoot {
 
     /** @private {?./scroll-manager.ScrollManager} */
     this.scrollManager_ = null;
-
-    /** @private {?Promise} */
-    this.usingHostAPIPromise_ = null;
-
-    /** @private {?../../../src/inabox/host-services.VisibilityInterface} */
-    this.hostVisibilityService_ = null;
-  }
-
-  /**
-   * @return {!Promise<boolean>}
-   */
-  isUsingHostAPI() {
-    if (this.usingHostAPIPromise_) {
-      return this.usingHostAPIPromise_;
-    }
-    if (!HostServices.isAvailable(this.ampdoc)) {
-      this.usingHostAPIPromise_ = Promise.resolve(false);
-    } else {
-      // TODO: Using the visibility service and apply it for all tracking types
-      const promise = HostServices.visibilityForDoc(this.ampdoc);
-      this.usingHostAPIPromise_ = promise
-        .then(visibilityService => {
-          this.hostVisibilityService_ = visibilityService;
-          return true;
-        })
-        .catch(error => {
-          dev().fine(
-            TAG,
-            'VisibilityServiceError - fallback=' + error.fallback
-          );
-          if (error.fallback) {
-            // Do not use HostAPI, fallback to original implementation.
-            return false;
-          }
-          // Cannot fallback, service error. Throw user error.
-          throw user().createError('Host Visibility Service Error');
-        });
-    }
-    return this.usingHostAPIPromise_;
   }
 
   /** @override */
@@ -129,21 +79,17 @@ export class AnalyticsRoot {
   getRoot() {}
 
   /**
-   * The viewer of analytics root
-   * @return {!../../../src/service/viewer-interface.ViewerInterface}
-   */
-  getViewer() {
-    return Services.viewerForDoc(this.ampdoc);
-  }
-
-  /**
    * The root element within the analytics root.
    *
    * @return {!Element}
    */
   getRootElement() {
     const root = this.getRoot();
-    return dev().assertElement(root.documentElement || root.body || root);
+    // In the case of a shadow doc, its host will be used as
+    // a refrence point
+    return dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -185,11 +131,11 @@ export class AnalyticsRoot {
    * Returns the tracker for the specified name and list of allowed types.
    *
    * @param {string} name
-   * @param {!Object<string, function(new:./events.EventTracker)>} whitelist
+   * @param {!Object<string, typeof ./events.EventTracker>} allowlist
    * @return {?./events.EventTracker}
    */
-  getTrackerForWhitelist(name, whitelist) {
-    const trackerProfile = whitelist[name];
+  getTrackerForAllowlist(name, allowlist) {
+    const trackerProfile = allowlist[name];
     if (trackerProfile) {
       return this.getTracker(name, trackerProfile);
     }
@@ -201,7 +147,7 @@ export class AnalyticsRoot {
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)|function(new:./events.AmpStoryEventTracker, !AnalyticsRoot)} klass
+   * @param {typeof ./events.CustomEventTracker|typeof ./events.ClickEventTracker|typeof ./events.ScrollEventTracker|typeof ./events.SignalTracker|typeof ./events.IniLoadTracker|typeof ./events.VideoEventTracker|typeof ./events.VideoEventTracker|typeof ./events.VisibilityTracker|typeof ./events.AmpStoryEventTracker} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
@@ -239,7 +185,7 @@ export class AnalyticsRoot {
       return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(
           user().assertElement(
             this.getHostElement(),
@@ -276,6 +222,78 @@ export class AnalyticsRoot {
   }
 
   /**
+   * @param {!Array<string>} selectors Array of DOM query selectors.
+   * @param {boolean} useDataVars Indicator if DataVars restristiction should be applied.
+   * Default set to true.
+   * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
+   */
+  getElementsByQuerySelectorAll_(selectors, useDataVars = true) {
+    // Wait for document-ready to avoid false missed searches
+    return this.ampdoc.whenReady().then(() => {
+      let elements = [];
+      for (let i = 0; i < selectors.length; i++) {
+        let nodeList;
+        let elementArray = [];
+        const selector = selectors[i];
+        try {
+          nodeList = this.getRoot().querySelectorAll(selector);
+        } catch (e) {
+          userAssert(false, `Invalid query selector ${selector}`);
+        }
+        for (let j = 0; j < nodeList.length; j++) {
+          if (this.contains(nodeList[j])) {
+            elementArray.push(nodeList[j]);
+          }
+        }
+        elementArray = useDataVars
+          ? this.getDataVarsElements_(elementArray, selector)
+          : elementArray;
+        userAssert(elementArray.length, `Element "${selector}" not found`);
+        elements = elements.concat(elementArray);
+      }
+      // Return unique
+      return elements.filter(
+        (element, index) => elements.indexOf(element) === index
+      );
+    });
+  }
+
+  /**
+   * Return all elements that have a data-vars attribute.
+   * @param {!Array<!Element>} elementArray
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   */
+  getDataVarsElements_(elementArray, selector) {
+    let removedCount = 0;
+    const dataVarsArray = [];
+    for (let i = 0; i < elementArray.length; i++) {
+      const dataVarKeys = Object.keys(
+        getDataParamsFromAttributes(
+          elementArray[i],
+          /* computeParamNameFunc */ undefined,
+          VARIABLE_DATA_ATTRIBUTE_KEY
+        )
+      );
+      if (dataVarKeys.length) {
+        dataVarsArray.push(elementArray[i]);
+      } else {
+        removedCount++;
+      }
+    }
+    if (removedCount) {
+      user().warn(
+        TAG,
+        '%s element(s) ommited from selector "%s"' +
+          ' because no data-vars-* attribute was found.',
+        removedCount,
+        selector
+      );
+    }
+    return dataVarsArray;
+  }
+
+  /**
    * Searches the AMP element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
    *
@@ -286,14 +304,58 @@ export class AnalyticsRoot {
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
   getAmpElement(context, selector, selectionMethod) {
-    return this.getElement(context, selector, selectionMethod).then(element => {
+    return this.getElement(context, selector, selectionMethod).then(
+      (element) => {
+        this.verifyAmpElements_([element], selector);
+        return element;
+      }
+    );
+  }
+
+  /**
+   * Searches for the element(s) that matches the selector
+   * within the scope of the analytics root in relationship to
+   * the specified context node.
+   *
+   * @param {!Element} context
+   * @param {!Array<string>|string} selectors DOM query selector(s).
+   * @param {?string=} selectionMethod Allowed values are `null`,
+   *   `'closest'` and `'scope'`.
+   * @param {boolean} useDataVars Indicator if DataVars restristiction should be applied.
+   * Default set to true.
+   * @return {!Promise<!Array<!Element>>} Array of elements corresponding to the selector if found.
+   */
+  getElements(context, selectors, selectionMethod, useDataVars = true) {
+    if (isArray(selectors)) {
       userAssert(
-        element.classList.contains('i-amphtml-element'),
+        !selectionMethod,
+        'Cannot have selectionMethod %s defined with an array selector.',
+        selectionMethod
+      );
+      return this.getElementsByQuerySelectorAll_(
+        /** @type {!Array<string>} */ (selectors),
+        useDataVars
+      );
+    }
+    return this.getElement(
+      context,
+      /** @type {string} */ (selectors),
+      selectionMethod
+    ).then((element) => [element]);
+  }
+
+  /**
+   * @param {!Array<Element>} elements
+   * @param {string} selector
+   */
+  verifyAmpElements_(elements, selector) {
+    for (let i = 0; i < elements.length; i++) {
+      userAssert(
+        elements[i].classList.contains('i-amphtml-element'),
         'Element "%s" is required to be an AMP element',
         selector
       );
-      return element;
-    });
+    }
   }
 
   /**
@@ -310,7 +372,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(listener, context, selector, selectionMethod = null) {
-    return event => {
+    return (event) => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
         // cannot be retargeted across the boundary of the embed.
@@ -371,22 +433,11 @@ export class AnalyticsRoot {
    * Returns the visibility root corresponding to this analytics root (ampdoc
    * or embed). The visibility root is created lazily as needed and takes
    * care of all visibility tracking functions.
-   *
-   * The caller needs to make sure to call getVisibilityManager after
-   * usingHostAPIPromise has resolved
    * @return {!./visibility-manager.VisibilityManager}
    */
   getVisibilityManager() {
     if (!this.visibilityManager_) {
-      if (this.hostVisibilityService_) {
-        // If there is hostAPI (hostAPI never exist with the FIE case)
-        this.visibilityManager_ = new VisibilityManagerForMApp(
-          this.ampdoc,
-          this.hostVisibilityService_
-        );
-      } else {
-        this.visibilityManager_ = provideVisibilityManager(this.getRoot());
-      }
+      this.visibilityManager_ = provideVisibilityManager(this.getRoot());
     }
     return this.visibilityManager_;
   }
@@ -400,7 +451,7 @@ export class AnalyticsRoot {
   getScrollManager() {
     // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
-      this.scrollManager_ = new ScrollManager(this.ampdoc);
+      this.scrollManager_ = new ScrollManager(this);
     }
 
     return this.scrollManager_;
@@ -514,7 +565,6 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
  * @param  {!Element} el
  * @param  {string} selector
  * @return {boolean}
- * @noinline
  */
 function tryMatches_(el, selector) {
   try {

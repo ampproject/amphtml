@@ -1,28 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {TickLabel_Enum} from '#core/constants/enums';
+import {lastChildElement, matches} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 
-import {
-  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
-  listen,
-} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {lastChildElement} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {Services} from '#service';
+
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY, listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /**
  * Media status.
@@ -33,6 +18,25 @@ const Status = {
   PAUSED: 1,
   PLAYING: 2,
   WAITING: 3,
+};
+
+/**
+ * Cache serving status.
+ * @enum
+ */
+const CacheState = {
+  ORIGIN: 0, // Served from origin.
+  ORIGIN_CACHE_MISS: 1, // Served from origin even though cache URL was present.
+  CACHE: 2, // Served from cache.
+};
+
+/**
+ * Video is first page status.
+ * @enum
+ */
+const FirstPageState = {
+  NOT_ON_FIRST_PAGE: 0, // Video is not on the first page.
+  ON_FIRST_PAGE: 1, // Video is on the first page.
 };
 
 /**
@@ -66,9 +70,6 @@ let MetricsDef;
  */
 let MediaEntryDef;
 
-/** @type {string} */
-const ID_PROPERTY = '__AMP_MEDIA_PERFORMANCE_METRICS_ID';
-
 /** @type {number} */
 const MINIMUM_TIME_THRESHOLD_MS = 1000;
 
@@ -85,12 +86,14 @@ const TAG = 'media-performance-metrics';
  * @param  {!Window} win
  * @return {!MediaPerformanceMetricsService}
  */
-export const getMediaPerformanceMetricsService = win => {
+export const getMediaPerformanceMetricsService = (win) => {
   let service = Services.mediaPerformanceMetricsService(win);
 
   if (!service) {
     service = new MediaPerformanceMetricsService(win);
-    registerServiceBuilder(win, 'media-performance-metrics', () => service);
+    registerServiceBuilder(win, 'media-performance-metrics', function () {
+      return service;
+    });
   }
 
   return service;
@@ -105,12 +108,8 @@ export class MediaPerformanceMetricsService {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private {number} */
-    this.mediaId_ = 1;
-
-    // TODO(gmajoulet): switch to WeakMap once the AMPHTML project allows them.
-    /** @private @const {!Object<number, !MediaEntryDef>} */
-    this.mediaMap_ = map();
+    /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */
+    this.mediaMap_ = new WeakMap();
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
@@ -142,7 +141,7 @@ export class MediaPerformanceMetricsService {
 
     const unlisteners = this.listen_(media);
     const mediaEntry = this.getNewMediaEntry_(media, unlisteners);
-    this.setMediaEntry_(media, mediaEntry);
+    this.mediaMap_.set(media, mediaEntry);
 
     // Checks if the media already errored (eg: could have failed the source
     // selection).
@@ -162,14 +161,14 @@ export class MediaPerformanceMetricsService {
    * @param {boolean=} sendMetrics
    */
   stopMeasuring(media, sendMetrics = true) {
-    const mediaEntry = this.getMediaEntry_(media);
+    const mediaEntry = this.mediaMap_.get(media);
 
     if (!mediaEntry) {
       return;
     }
 
-    mediaEntry.unlisteners.forEach(unlisten => unlisten());
-    this.deleteMediaEntry_(media);
+    mediaEntry.unlisteners.forEach((unlisten) => unlisten());
+    this.mediaMap_.delete(media);
 
     switch (mediaEntry.status) {
       case Status.PLAYING:
@@ -190,11 +189,25 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   sendMetrics_(mediaEntry) {
-    const {metrics} = mediaEntry;
+    const {media, metrics} = mediaEntry;
+
+    this.performanceService_.tickDelta(
+      TickLabel_Enum.VIDEO_CACHE_STATE,
+      this.getVideoCacheState_(media)
+    );
+    this.performanceService_.tickDelta(
+      TickLabel_Enum.VIDEO_ON_FIRST_PAGE,
+      matches(media, `amp-story-page:first-of-type ${media.tagName}`)
+        ? FirstPageState.ON_FIRST_PAGE
+        : FirstPageState.NOT_ON_FIRST_PAGE
+    );
 
     // If the media errored.
     if (metrics.error !== null) {
-      this.performanceService_.tickDelta('verr', metrics.error || 0);
+      this.performanceService_.tickDelta(
+        TickLabel_Enum.VIDEO_ERROR,
+        metrics.error || 0
+      );
       this.performanceService_.flush();
       return;
     }
@@ -210,7 +223,10 @@ export class MediaPerformanceMetricsService {
 
     // If the playback did not start.
     if (!metrics.jointLatency) {
-      this.performanceService_.tickDelta('verr', 5 /* Custom error code */);
+      this.performanceService_.tickDelta(
+        TickLabel_Enum.VIDEO_ERROR,
+        5 /* Custom error code */
+      );
       this.performanceService_.flush();
       return;
     }
@@ -219,44 +235,29 @@ export class MediaPerformanceMetricsService {
       (metrics.rebufferTime / (metrics.rebufferTime + metrics.watchTime)) * 100
     );
 
-    this.performanceService_.tickDelta('vjl', metrics.jointLatency);
-    this.performanceService_.tickDelta('vwt', metrics.watchTime);
-    this.performanceService_.tickDelta('vrb', metrics.rebuffers);
-    this.performanceService_.tickDelta('vrbr', rebufferRate);
+    this.performanceService_.tickDelta(
+      TickLabel_Enum.VIDEO_JOINT_LATENCY,
+      metrics.jointLatency
+    );
+    this.performanceService_.tickDelta(
+      TickLabel_Enum.VIDEO_WATCH_TIME,
+      metrics.watchTime
+    );
+    this.performanceService_.tickDelta(
+      TickLabel_Enum.VIDEO_REBUFFERS,
+      metrics.rebuffers
+    );
+    this.performanceService_.tickDelta(
+      TickLabel_Enum.VIDEO_REBUFFER_RATE,
+      rebufferRate
+    );
     if (metrics.rebuffers) {
       this.performanceService_.tickDelta(
-        'vmtbrb',
+        TickLabel_Enum.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }
     this.performanceService_.flush();
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @return {!MediaEntryDef}
-   * @private
-   */
-  getMediaEntry_(media) {
-    return this.mediaMap_[media[ID_PROPERTY]];
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @param {!MediaEntryDef} mediaEntry
-   * @private
-   */
-  setMediaEntry_(media, mediaEntry) {
-    media[ID_PROPERTY] = media[ID_PROPERTY] || this.mediaId_++;
-    this.mediaMap_[media[ID_PROPERTY]] = mediaEntry;
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @private
-   */
-  deleteMediaEntry_(media) {
-    delete this.mediaMap_[media[ID_PROPERTY]];
   }
 
   /**
@@ -329,7 +330,7 @@ export class MediaPerformanceMetricsService {
     if (!media.hasAttribute('src')) {
       errorTarget = lastChildElement(
         media,
-        child => child.tagName === 'SOURCE'
+        (child) => child.tagName === 'SOURCE'
       );
     }
     unlisteners.push(
@@ -347,12 +348,9 @@ export class MediaPerformanceMetricsService {
     // Media error target could be either HTMLMediaElement or HTMLSourceElement.
     const media =
       event.target.tagName === 'SOURCE' ? event.target.parent : event.target;
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (media)
-    );
+    const mediaEntry = this.mediaMap_.get(media);
 
     mediaEntry.metrics.error = media.error ? media.error.code : 0;
-
     mediaEntry.status = Status.ERRORED;
   }
 
@@ -361,14 +359,11 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onPauseOrEnded_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
 
     if (mediaEntry.status === Status.PLAYING) {
       this.addWatchTime_(mediaEntry);
     }
-
     mediaEntry.status = Status.PAUSED;
   }
 
@@ -377,10 +372,8 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onPlaying_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
-    const {timeStamps, metrics} = mediaEntry;
+    const mediaEntry = this.mediaMap_.get(event.target);
+    const {metrics, timeStamps} = mediaEntry;
 
     if (!metrics.jointLatency) {
       metrics.jointLatency = Date.now() - timeStamps.start;
@@ -399,9 +392,7 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onWaiting_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
     const {timeStamps} = mediaEntry;
 
     if (mediaEntry.status === Status.PLAYING) {
@@ -410,5 +401,32 @@ export class MediaPerformanceMetricsService {
 
     timeStamps.waiting = Date.now();
     mediaEntry.status = Status.WAITING;
+  }
+
+  /**
+   * @param {!HTMLMediaElement} media
+   * @return {!CacheState}
+   * @private
+   */
+  getVideoCacheState_(media) {
+    let hasCachedSource = false;
+    // All video caching mechanisms rely on HTMLSourceElements and never a src
+    // on the HTMLMediaElement as it does not allow for fallback sources.
+    const sources = toArray(media.querySelectorAll('source'));
+    for (const source of sources) {
+      const isCachedSource = source.hasAttribute(
+        'i-amphtml-video-cached-source'
+      );
+      // Playing source is cached.
+      if (isCachedSource && media.currentSrc === source.src) {
+        return CacheState.CACHE;
+      }
+      // Non playing source but is cached. Used to differentiate a cache miss
+      // (e.g. cache returned a 40x) vs no cached source at all.
+      if (isCachedSource) {
+        hasCachedSource = true;
+      }
+    }
+    return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
   }
 }

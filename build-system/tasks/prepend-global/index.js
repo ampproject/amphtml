@@ -1,31 +1,34 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const childProcess = require('child_process');
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const fs = require('fs');
-const log = require('fancy-log');
 const path = require('path');
 const util = require('util');
+const {log} = require('../../common/logging');
 
 const exec = util.promisify(childProcess.exec);
 
-const {red, cyan} = colors;
+const {cyan, red, yellow} = colors;
+
+/**
+ * List of unminified targets to which AMP_CONFIG should be written
+ */
+const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
+
+/**
+ * List of minified targets to which AMP_CONFIG should be written
+ */
+const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
+
+/**
+ * Path to custom overlay config, see: build-system/global-configs/README.md
+ */
+const CUSTOM_OVERLAY_CONFIG_PATH = path.resolve(
+  __dirname,
+  '../../global-configs/custom-config.json'
+);
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -55,49 +58,29 @@ function sanityCheck(str) {
 
 /**
  * @param {string} filename File containing the config
- * @param {string=} opt_localBranch Whether to use the local branch version
+ * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
- * @return {!Promise}
+ * @return {!Promise<string>}
  */
-function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
+async function fetchConfigFromBranch_(filename, opt_localBranch, opt_branch) {
   if (opt_localBranch) {
-    return Promise.resolve();
+    return fs.promises.readFile(filename, 'utf8');
   }
-  const branch = opt_branch || 'origin/master';
-  // One bad path here will fail the whole operation.
-  return exec(`git checkout ${branch} ${filename}`).catch(function(e) {
-    // This means the files don't exist in master. Assume that it exists
-    // in the current branch.
-    if (/did not match any file/.test(e.message)) {
-      return;
-    }
-    throw e;
-  });
-}
-
-/**
- * @param {string} configString String containing the AMP config
- * @param {string} fileString String containing the AMP runtime
- * @return {string}
- */
-function prependConfig(configString, fileString) {
-  return (
-    `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});` +
-    `/*AMP_CONFIG*/${fileString}`
-  );
+  const branch = opt_branch || 'origin/main';
+  return (await exec(`git show ${branch}:${filename}`)).stdout;
 }
 
 /**
  * @param {string} filename Destination filename
  * @param {string} fileString String to write
  * @param {boolean=} opt_dryrun If true, print the contents without writing them
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
-function writeTarget(filename, fileString, opt_dryrun) {
+async function writeTarget_(filename, fileString, opt_dryrun) {
   if (opt_dryrun) {
     log(cyan(`overwriting: ${filename}`));
     log(fileString);
-    return Promise.resolve();
+    return;
   }
   return fs.promises.writeFile(filename, fileString);
 }
@@ -115,71 +98,136 @@ function valueOrDefault(value, defaultValue) {
 }
 
 /**
- * @param {string} config Prod or canary
+ * @param {string} type Prod or canary
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {string} filename File containing the (prod or canary) config
+ * @return {!Promise<void>}
+ */
+async function applyConfig(type, target, filename) {
+  const config = await getConfig(
+    type,
+    target,
+    filename,
+    argv.local_dev,
+    argv.local_branch,
+    argv.branch,
+    argv.fortesting,
+    argv.derandomize
+  );
+  const targetString = await fs.promises.readFile(target, 'utf8');
+  const fileString = config + targetString;
+  sanityCheck(fileString);
+  await writeTarget_(target, fileString, argv.dryrun);
+}
+
+/**
+ * @param {string} type Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} filename File containing the (prod or canary) config
  * @param {boolean=} opt_localDev Whether to enable local development
  * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
  * @param {boolean=} opt_fortesting Whether to force getMode().test to be true
- * @return {!Promise}
+ * @param {boolean=} opt_derandomize Whether to remove experiment randomization
+ * @return {!Promise<string>}
  */
-function applyConfig(
-  config,
+async function getConfig(
+  type,
   target,
   filename,
   opt_localDev,
   opt_localBranch,
   opt_branch,
-  opt_fortesting
+  opt_fortesting,
+  opt_derandomize
 ) {
-  return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
-    .then(() => {
-      return Promise.all([
-        fs.promises.readFile(filename),
-        fs.promises.readFile(target),
-      ]);
-    })
-    .then(files => {
-      let configJson;
-      try {
-        configJson = JSON.parse(files[0].toString());
-      } catch (e) {
-        log(red(`Error parsing config file: ${filename}`));
-        throw e;
-      }
-      if (opt_localDev) {
-        configJson = enableLocalDev(config, target, configJson);
-      }
-      if (opt_fortesting) {
-        configJson = {test: true, ...configJson};
-      }
-      const targetString = files[1].toString();
-      const configString = JSON.stringify(configJson);
-      return prependConfig(configString, targetString);
-    })
-    .then(fileString => {
-      sanityCheck(fileString);
-      return writeTarget(target, fileString, argv.dryrun);
-    })
-    .then(() => {
-      const details =
-        '(' +
-        cyan(config) +
-        (opt_localDev ? ', ' + cyan('localDev') : '') +
-        (opt_fortesting ? ', ' + cyan('test') : '') +
-        ')';
-      log('Applied AMP config', details, 'to', cyan(path.basename(target)));
-    });
+  const fsConfigString = await fetchConfigFromBranch_(
+    filename,
+    opt_localBranch,
+    opt_branch
+  );
+
+  let configJson;
+  try {
+    configJson = JSON.parse(fsConfigString);
+  } catch (e) {
+    log(red(`Error parsing config file: ${filename}`));
+    throw e;
+  }
+
+  if (fs.existsSync(CUSTOM_OVERLAY_CONFIG_PATH)) {
+    const overlayFilename = path.basename(CUSTOM_OVERLAY_CONFIG_PATH);
+    try {
+      const overlayJson = require(CUSTOM_OVERLAY_CONFIG_PATH);
+      Object.assign(configJson, overlayJson);
+      log(
+        yellow('Notice:'),
+        cyan(type),
+        'config overlaid with',
+        cyan(overlayFilename)
+      );
+    } catch (e) {
+      log(red('Could not apply overlay from'), cyan(overlayFilename));
+    }
+  }
+  if (opt_localDev) {
+    configJson = enableLocalDev_(target, configJson);
+  }
+  if (opt_fortesting) {
+    configJson = {test: true, ...configJson};
+  }
+  if (opt_derandomize) {
+    configJson = derandomize_(target, configJson);
+  }
+
+  const details =
+    '(' +
+    cyan(type) +
+    (opt_localDev ? ', ' + cyan('localDev') : '') +
+    (opt_fortesting ? ', ' + cyan('test') : '') +
+    (opt_derandomize ? ', ' + cyan('derandomized') : '') +
+    ')';
+  log('Generated AMP config', details, 'for', cyan(target));
+
+  const configString = JSON.stringify(configJson);
+  return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});/*AMP_CONFIG*/`;
 }
 
 /**
- * @param {string} config Prod or canary
- * @param {string} target File containing the AMP runtime (amp.js or v0.js)
- * @param {string} configJson The json object in which to enable local dev
- * @return {string}
+ * Given a target, retrieves the appropriate AMP_CONFIG string to prepend.
+ * Returns an empty string if no AMP_CONFIG is necessary.
+ *
+ * @param {string} filename the file being operated on.
+ * @param {Object} options
+ * @return {!Promise<string>}
  */
-function enableLocalDev(config, target, configJson) {
+async function getAmpConfigForFile(filename, options) {
+  const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
+  const target = path.basename(filename, path.extname(filename));
+  if (!!argv.noconfig || !targets.includes(target)) {
+    return '';
+  }
+
+  const type = argv.config === 'canary' ? 'canary' : 'prod';
+  const baseConfigFile = 'build-system/global-configs/' + type + '-config.json';
+
+  return getConfig(
+    type,
+    filename,
+    baseConfigFile,
+    /* opt_localDev */ !!options.localDev,
+    /* opt_localBranch */ true,
+    /* opt_branch */ undefined,
+    /* opt_fortesting */ !!options.fortesting
+  );
+}
+
+/**
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {!JSON} configJson The json object in which to enable local dev
+ * @return {!JSON}
+ */
+function enableLocalDev_(target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
@@ -206,46 +254,57 @@ function enableLocalDev(config, target, configJson) {
 }
 
 /**
- * @param {string} target Target file from which to remove the AMP config
- * @return {!Promise}
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {!JSON} configJson The json object in which to enable local dev
+ * @return {!JSON}
  */
-function removeConfig(target) {
-  return fs.promises.readFile(target).then(file => {
-    let contents = file.toString();
-    if (numConfigs(contents) == 0) {
-      return Promise.resolve();
+function derandomize_(target, configJson) {
+  for (const [key, value] of Object.entries(configJson)) {
+    if (typeof value == 'number') {
+      configJson[key] = Math.round(value);
     }
-    sanityCheck(contents);
-    const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
-    contents = contents.replace(config, '');
-    return writeTarget(target, contents, argv.dryrun).then(() => {
-      log('Removed existing config from', cyan(target));
-    });
-  });
+  }
+  log('Derandomized experiements in', cyan(target));
+  return configJson;
 }
 
-async function prependGlobal() {
-  const TESTING_HOST = process.env.AMP_TESTING_HOST;
-  const target = argv.target || TESTING_HOST;
+/**
+ * @param {string} target Target file from which to remove the AMP config
+ * @return {!Promise<void>}
+ */
+async function removeConfig(target) {
+  const file = await fs.promises.readFile(target);
+  let contents = file.toString();
+  if (numConfigs(contents) == 0) {
+    return;
+  }
+  sanityCheck(contents);
+  const config =
+    /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=(.|\n)*?\/\*AMP_CONFIG\*\//;
+  contents = contents.replace(config, '');
+  await writeTarget_(target, contents, argv.dryrun);
+  log('Removed existing config from', cyan(target));
+}
 
-  if (!target) {
+/**
+ * @return {Promise<void>}
+ */
+async function prependGlobal() {
+  if (!argv.target) {
     log(red('Missing --target.'));
     return;
   }
+  const targets = argv.target.split(',');
 
-  if (argv.remove) {
-    return removeConfig(target);
-  }
-
-  if (!(argv.prod || argv.canary)) {
-    log(red('One of --prod or --canary should be provided.'));
+  if (Boolean(argv.prod) == Boolean(argv.canary)) {
+    log(red('Exactly one of --prod or --canary should be provided.'));
     return;
   }
 
   let filename = '';
 
   // Prod by default.
-  const config = argv.canary ? 'canary' : 'prod';
+  const type = argv.canary ? 'canary' : 'prod';
   if (argv.canary) {
     filename = valueOrDefault(
       argv.canary,
@@ -257,48 +316,35 @@ async function prependGlobal() {
       'build-system/global-configs/prod-config.json'
     );
   }
-  return removeConfig(target).then(() => {
-    return applyConfig(
-      config,
-      target,
-      filename,
-      argv.local_dev,
-      argv.local_branch,
-      argv.branch,
-      argv.fortesting
-    );
-  });
+  await Promise.all([...targets.map(removeConfig)]);
+  await Promise.all(
+    targets.map((target) => applyConfig(type, target, filename))
+  );
 }
 
 module.exports = {
-  applyConfig,
-  checkoutBranchConfigs,
+  getAmpConfigForFile,
   numConfigs,
-  prependConfig,
   prependGlobal,
   removeConfig,
   sanityCheck,
   valueOrDefault,
-  writeTarget,
+  MINIFIED_TARGETS,
 };
 
-prependGlobal.description = 'Prepends a json config to a target file';
+prependGlobal.description = 'Prepend a json config to a target file';
 prependGlobal.flags = {
-  'target': '  The file to prepend the json config to.',
+  'target': 'Comma-separated list of files to prepend the json config to',
   'canary':
-    '  Prepend the default canary config. ' +
-    'Takes in an optional value for a custom canary config source.',
+    'Prepend the default canary config (takes an optional value for a custom config source)',
   'prod':
-    '  Prepend the default prod config. ' +
-    'Takes in an optional value for a custom prod config source.',
-  'local_dev': '  Enables runtime to be used for local development.',
+    'Prepend the default prod config (takes an optional value for a custom config source)',
+  'local_dev': 'Enable the runtime to be used for local development',
   'branch':
-    '  Switch to a git branch to get config source from. ' +
-    'Uses master by default.',
+    'Get config source from the given branch (uses the main branch by default)',
   'local_branch':
-    "  Don't switch branches and use the config from the local branch.",
-  'fortesting': '  Force the config to return true for getMode().test',
-  'remove':
-    '  Removes previously prepended json config from the target ' +
-    'file (if present).',
+    'Use the config from the local branch (does not switch branches)',
+  'fortesting': 'Enable local testing by setting getMode().test to true',
+  'derandomize':
+    'Round all experiment percentages to 0 or 1, whichever is closest',
 };

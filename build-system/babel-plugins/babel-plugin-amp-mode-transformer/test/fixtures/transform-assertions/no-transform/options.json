@@ -1,3 +1,11 @@
 {
-  "plugins": ["../../../../../babel-plugin-amp-mode-transformer"]
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "IS_ESM": false,
+        "INTERNAL_RUNTIME_VERSION": "$internalRuntimeVersion$"
+      }
+    ]
+  ]
 }

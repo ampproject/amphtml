@@ -1,0 +1,72 @@
+
+
+.i-amphtml-story-interactive-img-quiz-answer-choice {
+  position: absolute !important;
+  height: 1.5em !important;
+  width: 1.5em !important;
+  bottom: 0.5em !important;
+  box-shadow: 0 0 0 0.125em var(--i-amphtml-interactive-option-background-color) !important;
+  background-color: var(--interactive-accent-color) !important;
+  border-radius: 50% !important;
+  text-align: center !important;
+  color: var(--i-amphtml-interactive-option-answer-choice-color) !important;
+  font-weight: 700 !important;
+  line-height: 1.5em !important;
+  z-index: 1 !important;
+  /** Prevents 1 pixel layout shifts after post-selection animations */
+  backface-visibility: hidden !important;
+  /** Prevents box-shadow and background color clipping */
+  clip-path: circle(1em) !important;
+  background-clip: content-box !important;
+}
+
+.i-amphtml-story-interactive-img-container:not([dir='rtl'])
+  .i-amphtml-story-interactive-img-quiz-answer-choice {
+  right: 0.5em !important;
+}
+
+.i-amphtml-story-interactive-img-container[dir='rtl']
+  .i-amphtml-story-interactive-img-quiz-answer-choice {
+  left: 0.5em !important;
+}
+
+.i-amphtml-story-interactive-img-quiz-answer-choice::before {
+  content: '' !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  position: absolute !important;
+  left: 0 !important;
+}
+
+.i-amphtml-story-interactive-img-option[correct='correct'] {
+  --i-amphtml-interactive-option-post-color: var(--correct-color) !important;
+  --i-amphtml-interactive-option-post-marker: url("data:image/svg+xml;charset=utf-8,%3csvg width='12' height='10' viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M3.58383 7.49723L1.36237 5.27577C1.11249 5.02588 0.707566 5.02517 0.4568 5.27417C0.204778 5.52442 0.204058 5.93181 0.455194 6.18295L3.58383 9.31159L10.8251 2.0703C11.0748 1.82061 11.0748 1.4158 10.8251 1.16611C10.5755 0.916512 10.1709 0.916416 9.92115 1.1659L3.58383 7.49723Z' fill='white'/%3e%3c/svg%3e") !important;
+}
+
+.i-amphtml-story-interactive-img-option:not([correct='correct']) {
+  --i-amphtml-interactive-option-post-color: var(--incorrect-color) !important;
+  --i-amphtml-interactive-option-post-marker: url("data:image/svg+xml;charset=utf-8, %3csvg width='12' height='12' viewBox='0 0 12 12' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.3957 1.81286C11.7295 1.47912 11.7295 0.938024 11.3957 0.604286C11.062 0.270548 10.5209 0.270548 10.1871 0.604286L6 4.79143L1.81286 0.604286C1.47912 0.270548 0.938024 0.270548 0.604286 0.604286C0.270548 0.938024 0.270548 1.47912 0.604286 1.81286L4.79143 6L0.604286 10.1871C0.270548 10.5209 0.270548 11.062 0.604286 11.3957C0.938024 11.7295 1.47912 11.7295 1.81286 11.3957L6 7.20857L10.1871 11.3957C10.5209 11.7295 11.062 11.7295 11.3957 11.3957C11.7295 11.062 11.7295 10.5209 11.3957 10.1871L7.20857 6L11.3957 1.81286Z' fill='white'/%3e%3c/svg%3e") !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-img-quiz-answer-choice {
+  background-color: var(--i-amphtml-interactive-option-post-color) !important;
+  color: transparent !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-img-quiz-answer-choice::before {
+  display: block !important;
+  background-color: transparent !important;
+  background-image: var(--i-amphtml-interactive-option-post-marker) !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 0.75em !important;
+  filter: var(--i-amphtml-story-interactive-img-quiz-answer-filter) !important;
+}
+
+.i-amphtml-story-interactive-option-selected
+  .i-amphtml-story-interactive-img-quiz-answer-choice {
+  animation: answer-choice-bounce forwards 600ms linear !important;
+}

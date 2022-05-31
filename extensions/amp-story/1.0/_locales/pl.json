@@ -1,0 +1,170 @@
+{
+  "2": {
+    "string": "Dotknij przycisku Dalej"
+  },
+  "3": {
+    "string": "Dotknij przycisku Wstecz"
+  },
+  "4": {
+    "string": "Nie udało się skopiować linku do schowka :("
+  },
+  "5": {
+    "string": "Link skopiowany!"
+  },
+  "6": {
+    "string": "E-mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Uzyskaj link"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Niestety, Twoja przeglądarka nie obsługuje tej funkcji"
+  },
+  "22": {
+    "string": "Zaakceptuj"
+  },
+  "23": {
+    "string": "Odrzuć"
+  },
+  "25": {
+    "string": "Wyświetl w oryginalnej domenie:"
+  },
+  "26": {
+    "string": "Więcej informacji o wynikach AMP"
+  },
+  "27": {
+    "string": "Mimo to kontynuuj"
+  },
+  "34": {
+    "string": "Odtwórz wideo"
+  },
+  "35": {
+    "string": "Przesuń w górę"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Zaktualizowano"
+  },
+  "65": {
+    "string": "Nie udało się odtworzyć wideo"
+  },
+  "66": {
+    "string": "Wycisz relację"
+  },
+  "67": {
+    "string": "Wyłącz wyciszenie relacji"
+  },
+  "68": {
+    "string": "Informacje o relacji"
+  },
+  "69": {
+    "string": "Udostępnij relację"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Wskazówka 1 z 2"
+  },
+  "76": {
+    "string": "Dotknij, aby przejść do następnego ekranu"
+  },
+  "77": {
+    "string": "Dalej"
+  },
+  "78": {
+    "string": "Wskazówka 2 z 2"
+  },
+  "79": {
+    "string": "Przesuń, aby przejść do następnej relacji"
+  },
+  "80": {
+    "string": "Rozumiem"
+  },
+  "81": {
+    "string": "Wskazówka"
+  },
+  "83": {
+    "string": "Aktywuj"
+  },
+  "84": {
+    "string": "WYNIK:"
+  },
+  "85": {
+    "string": "Wstrzymaj relację"
+  },
+  "86": {
+    "string": "Odtwórz relację"
+  },
+  "87": {
+    "string": "Zamknij"
+  },
+  "88": {
+    "string": "Przejdź do następnego"
+  },
+  "89": {
+    "string": "Twoja odpowiedź zostanie wysłana do"
+  },
+  "90": {
+    "string": "Następna relacja"
+  },
+  "91": {
+    "string": "Następna strona"
+  },
+  "92": {
+    "string": "Odtwórz ponownie"
+  },
+  "93": {
+    "string": "Poprzednia strona"
+  },
+  "96": {
+    "string": "Poruszaj urządzeniem, aby eksplorować"
+  },
+  "97": {
+    "string": "Otwieranie"
+  },
+  "98": {
+    "string": "Formularz nie został przesłany, spróbuj ponownie"
+  },
+  "99": {
+    "string": "Formularz został przesłany"
+  },
+  "101": {
+    "string": "Kup teraz"
+  },
+  "110": {
+    "string": "Subskrybuj z Google"
+  }
+}

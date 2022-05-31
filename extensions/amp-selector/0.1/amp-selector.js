@@ -1,35 +1,18 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {isRTL, tryFocus} from '#core/dom';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {mod} from '#core/math';
+import {isEnumValue} from '#core/types';
+import {areEqualOrdered, toArray} from '#core/types/array';
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {areEqualOrdered} from '../../../src/utils/array';
-import {
-  closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {mod} from '../../../src/utils/math';
-import {toArray} from '../../../src/types';
 
 const TAG = 'amp-selector';
 
@@ -45,6 +28,11 @@ const KEYBOARD_SELECT_MODES = {
 };
 
 export class AmpSelector extends AMP.BaseElement {
+  /** @override  */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -101,7 +89,10 @@ export class AmpSelector extends AMP.BaseElement {
     let kbSelectMode = this.element.getAttribute('keyboard-select-mode');
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
-      user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
+      userAssert(
+        isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
+        `Unknown keyboard-select-mode: ${kbSelectMode}`
+      );
       userAssert(
         !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
         '[keyboard-select-mode=select] not supported for multiple ' +
@@ -121,27 +112,27 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction(
       'selectUp',
-      invocation => {
+      (invocation) => {
         const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
         this.select_(delta, trust);
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
 
     this.registerAction(
       'selectDown',
-      invocation => {
+      (invocation) => {
         const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
         this.select_(delta, trust);
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
 
     this.registerAction(
       'toggle',
-      invocation => {
+      (invocation) => {
         const {args, trust} = invocation;
         userAssert(args['index'] >= 0, "'index' must be greater than 0");
         userAssert(
@@ -155,12 +146,20 @@ export class AmpSelector extends AMP.BaseElement {
           return Promise.reject("'index' must be specified");
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
+    );
+
+    /** If the element is in an `email` document, allow its `clear`,
+     * `selectDown`, `selectUp`, and `toggle` actions. */
+    this.action_.addToAllowlist(
+      TAG,
+      ['clear', 'selectDown', 'selectUp', 'toggle'],
+      ['email']
     );
 
     // Triggers on DOM children updates
     this.element.addEventListener(
-      AmpEvents.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       this.maybeRefreshOnUpdate_.bind(this)
     );
   }
@@ -241,7 +240,7 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
 
-    this.elements_.forEach(option => {
+    this.elements_.forEach((option) => {
       option.tabIndex = -1;
     });
 
@@ -282,7 +281,7 @@ export class AmpSelector extends AMP.BaseElement {
     const elements = opt_elements
       ? opt_elements
       : toArray(this.element.querySelectorAll('[option]'));
-    elements.forEach(el => {
+    elements.forEach((el) => {
       if (!el.hasAttribute('role')) {
         el.setAttribute('role', 'option');
       }
@@ -317,13 +316,13 @@ export class AmpSelector extends AMP.BaseElement {
     }
     const formId = this.element.getAttribute('form');
 
-    this.inputs_.forEach(input => {
+    this.inputs_.forEach((input) => {
       this.element.removeChild(input);
     });
     this.inputs_ = [];
     const doc = this.win.document;
     const fragment = doc.createDocumentFragment();
-    this.selectedElements_.forEach(option => {
+    this.selectedElements_.forEach((option) => {
       if (!option.hasAttribute('disabled')) {
         const hidden = doc.createElement('input');
         const value = option.getAttribute('option');
@@ -364,7 +363,7 @@ export class AmpSelector extends AMP.BaseElement {
       // Newly picked option should always have focus.
       this.updateFocus_(el);
       // User gesture trigger is "high" trust.
-      this.fireSelectEvent_(el, ActionTrust.HIGH);
+      this.fireSelectEvent_(el, ActionTrust_Enum.HIGH);
     });
   }
 
@@ -373,7 +372,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   selectedOptions_() {
-    return this.selectedElements_.map(el => el.getAttribute('option'));
+    return this.selectedElements_.map((el) => el.getAttribute('option'));
   }
 
   /**
@@ -401,7 +400,7 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles toggle action.
    * @param {number} index
    * @param {boolean|undefined} value
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -439,34 +438,22 @@ export class AmpSelector extends AMP.BaseElement {
    * 'targetOption' - option value of the selected or deselected element.
    * 'selectedOptions' - array of option values of selected elements.
    * @param {!Element} el The element that was selected or deslected.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   fireSelectEvent_(el, trust) {
     const name = 'select';
-    const selectEvent = createCustomEvent(
-      this.win,
-      `amp-selector.${name}`,
-      dict({
-        'targetOption': el.getAttribute('option'),
-        'selectedOptions': this.selectedOptions_(),
-      })
-    );
-    // TODO(wg-ui-and-a11y): Remove this in Q1 2020.
-    if (trust < ActionTrust.DEFAULT) {
-      user().warn(
-        TAG,
-        '"select" event now has the same trust as the originating action. ' +
-          'See https://github.com/ampproject/amphtml/issues/24443 for details.'
-      );
-    }
+    const selectEvent = createCustomEvent(this.win, `amp-selector.${name}`, {
+      'targetOption': el.getAttribute('option'),
+      'selectedOptions': this.selectedOptions_(),
+    });
     this.action_.trigger(this.element, name, selectEvent, trust);
   }
 
   /**
    * Handles selectUp events.
    * @param {number} delta
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   select_(delta, trust) {
@@ -506,18 +493,18 @@ export class AmpSelector extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.LEFT_ARROW: /* fallthrough */
-      case Keys.UP_ARROW: /* fallthrough */
-      case Keys.RIGHT_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW: /* fallthrough */
-      case Keys.HOME: /* fallthrough */
-      case Keys.END:
+      case Keys_Enum.LEFT_ARROW: /* fallthrough */
+      case Keys_Enum.UP_ARROW: /* fallthrough */
+      case Keys_Enum.RIGHT_ARROW: /* fallthrough */
+      case Keys_Enum.DOWN_ARROW: /* fallthrough */
+      case Keys_Enum.HOME: /* fallthrough */
+      case Keys_Enum.END:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           return this.navigationKeyDownHandler_(event);
         }
         return Promise.resolve();
-      case Keys.ENTER: /* fallthrough */
-      case Keys.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         this.selectionKeyDownHandler_(event);
         return Promise.resolve();
     }
@@ -535,27 +522,27 @@ export class AmpSelector extends AMP.BaseElement {
     const doc = this.win.document;
     let dir = 0;
     switch (event.key) {
-      case Keys.LEFT_ARROW:
+      case Keys_Enum.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isRTL(doc) ? 1 : -1;
         break;
-      case Keys.UP_ARROW:
+      case Keys_Enum.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isRTL(doc) ? -1 : 1;
         break;
-      case Keys.DOWN_ARROW:
+      case Keys_Enum.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
-      case Keys.HOME:
+      case Keys_Enum.HOME:
         // Home looks for first nonhidden element, in 'next' direction.
         dir = 1;
         break;
-      case Keys.END:
+      case Keys_Enum.END:
         // End looks for last nonhidden element, in 'previous' direction.
         dir = -1;
         break;
@@ -567,15 +554,15 @@ export class AmpSelector extends AMP.BaseElement {
     // Make currently selected option unfocusable
     this.elements_[this.focusedIndex_].tabIndex = -1;
 
-    return this.getElementsSizes_().then(sizes => {
+    return this.getElementsSizes_().then((sizes) => {
       const originalIndex = this.focusedIndex_;
 
       // For Home/End keys, start at end/beginning respectively and wrap around
       switch (event.key) {
-        case Keys.HOME:
+        case Keys_Enum.HOME:
           this.focusedIndex_ = this.elements_.length - 1;
           break;
-        case Keys.END:
+        case Keys_Enum.END:
           this.focusedIndex_ = 0;
           break;
       }
@@ -615,7 +602,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   selectionKeyDownHandler_(event) {
     const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
+    if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
       if (this.elements_.includes(dev().assertElement(event.target))) {
         event.preventDefault();
         const el = dev().assertElement(event.target);
@@ -692,7 +679,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   getElementsSizes_() {
     return this.measureElement(() => {
-      return this.elements_.map(element =>
+      return this.elements_.map((element) =>
         element./*OK*/ getBoundingClientRect()
       );
     });
@@ -706,10 +693,10 @@ export class AmpSelector extends AMP.BaseElement {
  * @return {boolean}
  */
 function isElementHidden(element, rect) {
-  const {width, height} = rect;
+  const {height, width} = rect;
   return element.hidden || width == 0 || height == 0;
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpSelector, CSS);
 });

@@ -1,23 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Global typedef map typedefName: typedef comment
 const TYPEDEFS = new Map();
 
-const buildTypedefs = t => {
+const buildTypedefs = (t) => {
   const typedefs = [];
   for (const [typedefName, typedefComment] of TYPEDEFS) {
     const ast = buildVarDeclAndComment(t, typedefName, typedefComment);
@@ -35,7 +19,7 @@ const buildVarDeclAndComment = (t, name, comment) => {
   return decl;
 };
 
-module.exports = function(babel) {
+module.exports = function (babel) {
   const {types: t} = babel;
   // `shouldWriteToFile` should only be true in the production pipeline.
   let shouldWriteToFile;
@@ -43,7 +27,7 @@ module.exports = function(babel) {
   let shouldEmitTypedefs;
   return {
     pre() {
-      const {writeToFile = false, emitTypedefs = false} = this.opts;
+      const {emitTypedefs = false, writeToFile = false} = this.opts;
       shouldWriteToFile = writeToFile;
       shouldEmitTypedefs = emitTypedefs;
     },
@@ -64,7 +48,7 @@ module.exports = function(babel) {
           // extern would look like.
           if (shouldEmitTypedefs) {
             const typedefs = buildTypedefs(t);
-            typedefs.forEach(typedef => {
+            typedefs.forEach((typedef) => {
               path.pushContainer('body', typedef);
             });
             path.stop();
@@ -78,7 +62,7 @@ module.exports = function(babel) {
           return;
         }
 
-        const typedefComment = node.leadingComments.find(comment => {
+        const typedefComment = node.leadingComments.find((comment) => {
           return (
             comment.type === 'CommentBlock' && /@typedef/.test(comment.value)
           );

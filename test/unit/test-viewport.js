@@ -1,48 +1,36 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
-import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
+import {Services} from '#service';
+import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from '#service/viewport/viewport-binding-def';
+import {ViewportBindingIosEmbedWrapper_} from '#service/viewport/viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from '#service/viewport/viewport-binding-natural';
 import {
   ViewportImpl,
   installViewportServiceForDoc,
   parseViewportMeta,
   stringifyViewportMeta,
   updateViewportMetaString,
-} from '../../src/service/viewport/viewport-impl';
+} from '#service/viewport/viewport-impl';
+import {installVsyncService} from '#service/vsync-impl';
 
-import {
-  ViewportBindingDef,
-  marginBottomOfLastChild,
-} from '../../src/service/viewport/viewport-binding-def';
-import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
-import {dev} from '../../src/log';
+import {loadPromise} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {FakePerformance} from '#testing/fake-dom';
+
 import {getMode} from '../../src/mode';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {installVsyncService} from '../../src/service/vsync-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {loadPromise} from '../../src/event-helper';
-import {setParentWindow} from '../../src/service';
+import {setParentWindow} from '../../src/service-helpers';
 
 const NOOP = () => {};
 
-describes.fakeWin('Viewport', {}, env => {
+describes.fakeWin('Viewport', {}, (env) => {
   let clock;
   let viewport;
   let binding;
@@ -63,7 +51,7 @@ describes.fakeWin('Viewport', {}, env => {
     clock = env.sandbox.useFakeTimers();
 
     windowApi = env.win;
-    windowApi.requestAnimationFrame = fn => window.setTimeout(fn, 16);
+    windowApi.requestAnimationFrame = (fn) => window.setTimeout(fn, 16);
     windowApi.scrollY = windowApi.pageYOffset = 17;
 
     viewerViewportHandler = undefined;
@@ -72,7 +60,7 @@ describes.fakeWin('Viewport', {}, env => {
     visibilityState = 'visible';
     viewer = {
       isEmbedded: () => false,
-      getParam: param => {
+      getParam: (param) => {
         if (param == 'paddingTop') {
           return 19;
         }
@@ -104,9 +92,9 @@ describes.fakeWin('Viewport', {}, env => {
       .stub(ampdoc, 'isVisible')
       .callsFake(() => visibilityState == 'visible');
     onVisibilityHandlers = [];
-    env.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+    env.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake((handler) => {
       onVisibilityHandlers.push(handler);
-      return function() {
+      return function () {
         const index = onVisibilityHandlers.indexOf(handler);
         if (index != -1) {
           onVisibilityHandlers.splice(index, 1);
@@ -124,15 +112,16 @@ describes.fakeWin('Viewport', {}, env => {
     binding.connect = env.sandbox.spy();
     binding.disconnect = env.sandbox.spy();
     updatedPaddingTop = undefined;
-    binding.updatePaddingTop = paddingTop => (updatedPaddingTop = paddingTop);
+    binding.updatePaddingTop = (paddingTop) => (updatedPaddingTop = paddingTop);
     viewport = new ViewportImpl(ampdoc, binding, viewer);
     viewport.fixedLayer_ = {
       enterLightbox: () => {},
       leaveLightbox: () => {},
       update: () => {
-        return {then: callback => callback()};
+        return {then: (callback) => callback()};
       },
       updatePaddingTop: () => {},
+      animateFixedElements: () => {},
     };
     viewport.getSize();
 
@@ -142,7 +131,7 @@ describes.fakeWin('Viewport', {}, env => {
     env.sandbox.stub(vsync, 'canAnimate').returns(true);
     env.sandbox
       .stub(vsync, 'createAnimTask')
-      .callsFake((unusedContextNode, task) => {
+      .callsFake((_unusedContextNode, task) => {
         return () => {
           vsyncTasks.push(task);
         };
@@ -156,13 +145,13 @@ describes.fakeWin('Viewport', {}, env => {
 
   function changeVisibilityState(value) {
     visibilityState = value;
-    onVisibilityHandlers.forEach(handler => handler());
+    onVisibilityHandlers.forEach((handler) => handler());
   }
 
   function runVsync() {
     const tasks = vsyncTasks.slice(0);
     vsyncTasks = [];
-    tasks.forEach(function(task) {
+    tasks.forEach(function (task) {
       const state = {};
       if (task.measure) {
         task.measure(state);
@@ -174,7 +163,7 @@ describes.fakeWin('Viewport', {}, env => {
   function stubVsyncMeasure() {
     env.sandbox
       .stub(viewport.vsync_, 'measurePromise')
-      .callsFake(cb => Promise.resolve(cb()));
+      .callsFake((cb) => Promise.resolve(cb()));
   }
 
   describe('top-level classes', () => {
@@ -191,6 +180,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should not set singledoc class', () => {
+      expectAsyncConsoleError(/Expected service/);
       env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
       new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.not.have.class('i-amphtml-singledoc');
@@ -220,13 +210,42 @@ describes.fakeWin('Viewport', {}, env => {
       expect(root).to.have.class('i-amphtml-iframed');
     });
 
+    describe('scroll to in ios-webview', () => {
+      beforeEach(() => {
+        ampdoc.win.scrollTo = env.sandbox.spy();
+        env.sandbox.stub(Services, 'platformFor').returns({
+          isIos: () => {
+            return true;
+          },
+        });
+        // To ensure isIframed() returns true
+        ampdoc.win.parent = {};
+      });
+
+      it('should scroll when in a single doc', async () => {
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(true);
+
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).to.have.been.called;
+      });
+
+      it('should *not* scroll when in a shadow doc', async () => {
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).not.to.have.been.called;
+      });
+    });
+
     describe('ios-webview', () => {
       let webviewParam;
       let isIos;
 
       beforeEach(() => {
         webviewParam = '1';
-        env.sandbox.stub(viewer, 'getParam').callsFake(param => {
+        env.sandbox.stub(viewer, 'getParam').callsFake((param) => {
           if (param == 'webview') {
             return webviewParam;
           }
@@ -395,7 +414,28 @@ describes.fakeWin('Viewport', {}, env => {
     expect(binding.disconnect).to.be.calledOnce;
   });
 
-  it('should resize only after size has been initialed', () => {
+  it('should update scroll position when visibility changes', () => {
+    binding = new ViewportBindingDef();
+    binding.getScrollTop = (() => {
+      const generator = (function* () {
+        yield 25;
+        return 100;
+      })();
+      return () => generator.next().value;
+    })();
+    viewport = new ViewportImpl(ampdoc, binding, viewer);
+
+    // Force scrollTop to be measured
+    viewport.getScrollTop();
+    expect(viewport./*OK*/ scrollTop_).to.equal(25);
+    // Toggle visibility state
+    changeVisibilityState('prerender');
+    changeVisibilityState('visible');
+    // Expect scrollTop to be remeasured
+    expect(viewport./*OK*/ scrollTop_).to.equal(100);
+  });
+
+  it('should resize only after size has been initialized', () => {
     onVisibilityHandlers.length = 0;
     changeVisibilityState('visible');
     binding.connect = env.sandbox.spy();
@@ -421,9 +461,25 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport.size_).to.deep.equal(viewportSize);
   });
 
-  it('should pass through size and scroll', () => {
+  it('should pass through size and scroll when embedded', () => {
+    env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+    new ViewportImpl(ampdoc, binding, viewer);
+    expect(viewer.isEmbedded()).to.be.true;
     expect(viewport.getPaddingTop()).to.equal(19);
     expect(updatedPaddingTop).to.equal(19);
+    expect(viewport.getSize().width).to.equal(111);
+    expect(viewport.getSize().height).to.equal(222);
+    expect(viewport.getScrollTop()).to.equal(17);
+    expect(viewport.getRect().left).to.equal(0);
+    expect(viewport.getRect().top).to.equal(17);
+    expect(viewport.getRect().width).to.equal(111);
+    expect(viewport.getRect().height).to.equal(222);
+  });
+
+  it('should pass through size and scroll when not embedded', () => {
+    expect(viewer.isEmbedded()).to.be.false;
+    expect(viewport.getPaddingTop()).to.equal(19);
+    expect(updatedPaddingTop).to.equal(undefined);
     expect(viewport.getSize().width).to.equal(111);
     expect(viewport.getSize().height).to.equal(222);
     expect(viewport.getScrollTop()).to.equal(17);
@@ -459,7 +515,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should not relayout on height resize', () => {
     let changeEvent = null;
-    viewport.onChanged(event => {
+    viewport.onChanged((event) => {
       changeEvent = event;
     });
     viewportSize.height = 223;
@@ -471,7 +527,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should relayout on width resize', () => {
     let changeEvent = null;
-    viewport.onChanged(event => {
+    viewport.onChanged((event) => {
       changeEvent = event;
     });
     viewportSize.width = 112;
@@ -483,11 +539,11 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should defer change event until fixed layer is complete', () => {
     let changeEvent = null;
-    viewport.onChanged(event => {
+    viewport.onChanged((event) => {
       changeEvent = event;
     });
     let fixedResolver;
-    const fixedPromise = new Promise(resolve => (fixedResolver = resolve));
+    const fixedPromise = new Promise((resolve) => (fixedResolver = resolve));
     viewport.fixedLayer_ = {update: () => fixedPromise};
     viewportSize.width = 112;
     viewport.resize_();
@@ -500,7 +556,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should dispatch onResize on width resize', () => {
     let resizeEvent = null;
-    viewport.onResize(event => {
+    viewport.onResize((event) => {
       resizeEvent = event;
     });
     viewportSize.width = 112;
@@ -514,7 +570,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should dispatch onResize on height resize', () => {
     let resizeEvent = null;
-    viewport.onResize(event => {
+    viewport.onResize((event) => {
       resizeEvent = event;
     });
     viewportSize.height = 223;
@@ -528,7 +584,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should not dispatch onResize if size does not actually change', () => {
     let resizeEvent = null;
-    viewport.onResize(event => {
+    viewport.onResize((event) => {
       resizeEvent = event;
     });
     viewport.size_ = {width: 200, height: 200};
@@ -548,8 +604,14 @@ describes.fakeWin('Viewport', {}, env => {
     const bindingMock = env.sandbox.mock(binding);
     const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock
-      .expects('updatePaddingTop')
-      .withExactArgs(/* paddingTop */ 0, /* transient */ undefined)
+      .expects('animateFixedElements')
+      .withExactArgs(
+        /* paddingTop */ 0,
+        /* lastPaddingTop */ 19,
+        /* duration */ 0,
+        /* curve */ undefined,
+        /* transient */ undefined
+      )
       .once();
     viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
@@ -560,16 +622,19 @@ describes.fakeWin('Viewport', {}, env => {
     const bindingMock = env.sandbox.mock(binding);
     const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock
-      .expects('updatePaddingTop')
-      .withExactArgs(/* paddingTop */ 0, /* transient */ true)
+      .expects('animateFixedElements')
+      .withExactArgs(
+        /* paddingTop */ 0,
+        /* lastPaddingTop */ 19,
+        /* duration */ 300,
+        /* curve */ 'ease-in',
+        /* transient */ true
+      )
       .once();
-    bindingMock
-      .expects('hideViewerHeader')
-      .withArgs(true, 19)
-      .once();
+    bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({
       paddingTop: 0,
-      duation: 300,
+      duration: 300,
       curve: 'ease-in',
       transient: true,
     });
@@ -577,38 +642,15 @@ describes.fakeWin('Viewport', {}, env => {
     fixedLayerMock.verify();
   });
 
-  it(
-    'should update padding for fixed layer when viewer wants to ' +
-      'hide header',
-    () => {
-      viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-      const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
-      fixedLayerMock
-        .expects('updatePaddingTop')
-        .withArgs(0)
-        .once();
-      viewerViewportHandler({
-        paddingTop: 0,
-        duation: 300,
-        curve: 'ease-in',
-        transient: 'true',
-      });
-      fixedLayerMock.verify();
-    }
-  );
-
   it('should update viewport when entering lightbox mode', () => {
     const requestingEl = document.createElement('div');
 
-    viewport.vsync_ = {mutate: callback => callback()};
+    viewport.vsync_ = {mutate: (callback) => callback()};
     env.sandbox.stub(viewport, 'enterOverlayMode');
     env.sandbox.stub(viewport, 'maybeEnterFieLightboxMode').callsFake(NOOP);
     env.sandbox.stub(viewport.fixedLayer_, 'enterLightbox');
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('updateLightboxMode')
-      .withArgs(true)
-      .once();
+    bindingMock.expects('updateLightboxMode').withArgs(true).once();
 
     viewport.enterLightboxMode(requestingEl);
 
@@ -628,15 +670,12 @@ describes.fakeWin('Viewport', {}, env => {
   it('should update viewport when leaving lightbox mode', () => {
     const requestingEl = document.createElement('div');
 
-    viewport.vsync_ = {mutate: callback => callback()};
+    viewport.vsync_ = {mutate: (callback) => callback()};
     env.sandbox.stub(viewport, 'leaveOverlayMode');
     env.sandbox.stub(viewport, 'maybeLeaveFieLightboxMode').callsFake(NOOP);
     env.sandbox.stub(viewport.fixedLayer_, 'leaveLightbox');
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('updateLightboxMode')
-      .withArgs(false)
-      .once();
+    bindingMock.expects('updateLightboxMode').withArgs(false).once();
 
     viewport.leaveLightboxMode(requestingEl);
 
@@ -661,7 +700,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     env.sandbox.stub(viewport, 'isLightboxExperimentOn').callsFake(() => true);
 
-    env.sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
+    env.sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake((el) => {
       expect(el).to.equal(requestingElement);
       return fieMock;
     });
@@ -677,7 +716,7 @@ describes.fakeWin('Viewport', {}, env => {
       leaveFullOverlayMode: env.sandbox.spy(),
     };
 
-    env.sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
+    env.sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake((el) => {
       expect(el).to.equal(requestingElement);
       return fieMock;
     });
@@ -770,7 +809,7 @@ describes.fakeWin('Viewport', {}, env => {
   it('should defer scroll events', () => {
     let changeEvent = null;
     let eventCount = 0;
-    viewport.onChanged(event => {
+    viewport.onChanged((event) => {
       changeEvent = event;
       eventCount++;
     });
@@ -847,124 +886,304 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should update scroll pos and reset cache', () => {
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('setScrollTop')
-      .withArgs(117)
-      .once();
+    bindingMock.expects('setScrollTop').withArgs(117).once();
     viewport.setScrollTop(117);
     expect(viewport./*OK*/ scrollTop_).to.be.null;
   });
 
-  it('scrolls with scrollIntoView respecting padding', function*() {
-    const element = document.createElement('div');
+  // WebKit returns document.body, while others return documentElement.
+  for (const scrollingElementProperty of ['body', 'documentElement']) {
+    function stubComputedStyleElementOnly(element, style) {
+      env.sandbox
+        .stub(env.win, 'getComputedStyle')
+        .callsFake((checkElement) => {
+          if (element === checkElement) {
+            return style;
+          }
+          return {};
+        });
+    }
 
-    // scrollIntoView traverses up the DOM tree, so it needs the node to
-    // be attached.
-    document.body.appendChild(element);
+    describe(`with scrollingElement = document.${scrollingElementProperty}`, () => {
+      let element;
+      let bindingMock;
 
-    const bindingMock = env.sandbox.mock(binding);
+      beforeEach(() => {
+        element = env.win.document.createElement('div');
 
-    bindingMock
-      .expects('getScrollingElement')
-      .returns(document.body)
-      .atLeast(1);
+        // scrollIntoView traverses up the DOM tree, so it needs the node to
+        // be attached.
+        env.win.document.body.appendChild(element);
 
-    const top = 111;
+        bindingMock = env.sandbox.mock(binding);
 
-    bindingMock
-      .expects('getLayoutRect')
-      .withArgs(element)
-      .returns({top})
-      .once();
+        bindingMock
+          .expects('getScrollingElement')
+          .returns(env.win.document[scrollingElementProperty])
+          .atLeast(1);
+      });
 
-    bindingMock
-      .expects('setScrollTop')
-      .withArgs(top - /* padding */ 19)
-      .once();
+      it('scrolls with scrollIntoView respecting padding', async () => {
+        const top = 111;
 
-    stubVsyncMeasure();
+        bindingMock
+          .expects('getLayoutRect')
+          .withArgs(element)
+          .returns({top})
+          .once();
 
-    yield viewport.scrollIntoView(element);
+        bindingMock
+          .expects('setScrollTop')
+          .withArgs(top - /* padding */ 19)
+          .once();
 
-    bindingMock.verify();
-  });
+        stubVsyncMeasure();
 
-  it('scrolls with animateScrollIntoView respecting padding', async () => {
-    const element = document.createElement('div');
+        await viewport.scrollIntoView(element);
 
-    // animateScrollIntoView traverses up the DOM tree, so it needs the node to
-    // be attached.
-    document.body.appendChild(element);
+        bindingMock.verify();
+      });
 
-    const bindingMock = env.sandbox.mock(binding);
+      it('scrolls with scrollIntoView respecting scroll-padding-top', async () => {
+        const scrollPaddingTop = 66;
 
-    bindingMock
-      .expects('getScrollingElement')
-      .returns(document.body)
-      .atLeast(1);
+        // `scroll-padding-*` properties are always set on documentElement.
+        stubComputedStyleElementOnly(env.win.document.documentElement, {
+          scrollPaddingTop: `${scrollPaddingTop}`,
+        });
 
-    const top = 111;
+        const top = 111;
 
-    bindingMock
-      .expects('getLayoutRect')
-      .withArgs(element)
-      .returns({top})
-      .once();
+        bindingMock
+          .expects('getLayoutRect')
+          .withArgs(element)
+          .returns({top})
+          .once();
 
-    const interpolateScrollIntoView = env.sandbox.stub(
-      viewport,
-      'interpolateScrollIntoView_'
-    );
+        bindingMock
+          .expects('setScrollTop')
+          .withArgs(top - scrollPaddingTop - /* padding */ 19)
+          .once();
 
-    stubVsyncMeasure();
+        stubVsyncMeasure();
 
-    const duration = 1000;
-    const pos = 'top';
-    const promise = viewport.animateScrollIntoView(element, pos, duration);
+        await viewport.scrollIntoView(element);
 
-    clock.tick(duration);
+        bindingMock.verify();
+      });
 
-    runVsync();
+      it('scrolls with animateScrollIntoView respecting padding', async () => {
+        const top = 111;
 
-    await promise;
+        bindingMock
+          .expects('getLayoutRect')
+          .withArgs(element)
+          .returns({top})
+          .once();
 
-    bindingMock.verify();
+        const interpolateScrollIntoView = env.sandbox.stub(
+          viewport,
+          'interpolateScrollIntoView_'
+        );
 
-    expect(
-      interpolateScrollIntoView.withArgs(
-        /* parent       */ env.sandbox.match.any,
-        /* curScrollTop */ env.sandbox.match.any,
-        /* newScrollTop */ top - /* padding */ 19,
-        /* duration     */ env.sandbox.match.any,
-        /* curve        */ env.sandbox.match.any
-      )
-    ).to.be.calledOnce;
-  });
+        stubVsyncMeasure();
 
-  it('should not change scrollTop for animateScrollIntoView', () => {
-    const element = document.createElement('div');
-    const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('getLayoutRect')
-      .withArgs(element)
-      .returns({top: 111})
-      .once();
-    viewport.paddingTop_ = 0;
-    env.sandbox.stub(viewport, 'getScrollTop').returns(111);
-    bindingMock
-      .expects('setScrollTop')
-      .withArgs(111)
-      .never();
-    const duration = 1000;
-    const pos = 'top';
-    const promise = viewport.animateScrollIntoView(element, pos, 1000);
-    promise.then(() => {
-      bindingMock.verify();
+        const duration = 1000;
+        const pos = 'top';
+        const promise = viewport.animateScrollIntoView(element, pos, duration);
+
+        clock.tick(duration);
+
+        runVsync();
+
+        await promise;
+
+        bindingMock.verify();
+
+        expect(
+          interpolateScrollIntoView.withArgs(
+            /* parent       */ env.sandbox.match.any,
+            /* curScrollTop */ env.sandbox.match.any,
+            /* newScrollTop */ top - /* padding */ 19,
+            /* duration     */ env.sandbox.match.any,
+            /* curve        */ env.sandbox.match.any
+          )
+        ).to.be.calledOnce;
+      });
+
+      it('scrolls with animateScrollIntoView respecting scroll-padding-top (pos=top)', async () => {
+        const scrollPaddingTop = 53;
+
+        // `scroll-padding-*` properties are always set on documentElement.
+        stubComputedStyleElementOnly(env.win.document.documentElement, {
+          scrollPaddingTop: `${scrollPaddingTop}`,
+        });
+
+        const top = 111;
+
+        bindingMock
+          .expects('getLayoutRect')
+          .withArgs(element)
+          .returns({top})
+          .once();
+
+        const interpolateScrollIntoView = env.sandbox.stub(
+          viewport,
+          'interpolateScrollIntoView_'
+        );
+
+        stubVsyncMeasure();
+
+        const duration = 1000;
+        const pos = 'top';
+        const promise = viewport.animateScrollIntoView(element, pos, duration);
+
+        clock.tick(duration);
+
+        runVsync();
+
+        await promise;
+
+        bindingMock.verify();
+
+        const scrollTopUnadjusted = -scrollPaddingTop;
+        expect(
+          interpolateScrollIntoView.withArgs(
+            /* parent       */ env.sandbox.match.any,
+            /* curScrollTop */ env.sandbox.match.any,
+            /* newScrollTop */ top + scrollTopUnadjusted - /* padding */ 19,
+            /* duration     */ env.sandbox.match.any,
+            /* curve        */ env.sandbox.match.any
+          )
+        ).to.be.calledOnce;
+      });
+
+      it('scrolls with animateScrollIntoView respecting scroll-padding-bottom (pos=bottom)', async () => {
+        const scrollPaddingBottom = 53;
+
+        // `scroll-padding-*` properties are always set on documentElement.
+        stubComputedStyleElementOnly(env.win.document.documentElement, {
+          scrollPaddingBottom: `${scrollPaddingBottom}`,
+        });
+
+        const top = 0;
+        const height = 300;
+
+        bindingMock
+          .expects('getLayoutRect')
+          .withArgs(element)
+          .returns({top, height})
+          .once();
+
+        const interpolateScrollIntoView = env.sandbox.stub(
+          viewport,
+          'interpolateScrollIntoView_'
+        );
+
+        stubVsyncMeasure();
+
+        const duration = 1000;
+        const pos = 'bottom';
+        const promise = viewport.animateScrollIntoView(element, pos, duration);
+
+        clock.tick(duration);
+
+        runVsync();
+
+        await promise;
+
+        bindingMock.verify();
+
+        const viewportHeight = 222;
+
+        const scrollTopUnadjusted =
+          -viewportHeight + scrollPaddingBottom + height;
+        expect(
+          interpolateScrollIntoView.withArgs(
+            /* parent       */ env.sandbox.match.any,
+            /* curScrollTop */ env.sandbox.match.any,
+            /* newScrollTop */ top + scrollTopUnadjusted - /* padding */ 19,
+            /* duration     */ env.sandbox.match.any,
+            /* curve        */ env.sandbox.match.any
+          )
+        ).to.be.calledOnce;
+      });
+
+      it('scrolls with animateScrollIntoView respecting scroll-padding-bottom (pos=center)', async () => {
+        const scrollPaddingTop = 12;
+        const scrollPaddingBottom = 34;
+
+        // `scroll-padding-*` properties are always set on documentElement.
+        stubComputedStyleElementOnly(env.win.document.documentElement, {
+          scrollPaddingTop: `${scrollPaddingTop}`,
+          scrollPaddingBottom: `${scrollPaddingBottom}`,
+        });
+
+        const top = 0;
+        const height = 300;
+
+        bindingMock
+          .expects('getLayoutRect')
+          .withArgs(element)
+          .returns({top, height})
+          .once();
+
+        const interpolateScrollIntoView = env.sandbox.stub(
+          viewport,
+          'interpolateScrollIntoView_'
+        );
+
+        stubVsyncMeasure();
+
+        const duration = 1000;
+        const pos = 'center';
+        const promise = viewport.animateScrollIntoView(element, pos, duration);
+
+        clock.tick(duration);
+
+        runVsync();
+
+        await promise;
+
+        bindingMock.verify();
+
+        const viewportHeight = 222;
+
+        const effectiveParentHeight =
+          viewportHeight - scrollPaddingTop - scrollPaddingBottom;
+        const scrollTopUnadjusted = -effectiveParentHeight / 2 + height / 2;
+        expect(
+          interpolateScrollIntoView.withArgs(
+            /* parent       */ env.sandbox.match.any,
+            /* curScrollTop */ env.sandbox.match.any,
+            /* newScrollTop */ top + scrollTopUnadjusted - /* padding */ 19,
+            /* duration     */ env.sandbox.match.any,
+            /* curve        */ env.sandbox.match.any
+          )
+        ).to.be.calledOnce;
+      });
+
+      it('should not change scrollTop for animateScrollIntoView', () => {
+        bindingMock
+          .expects('getLayoutRect')
+          .withArgs(element)
+          .returns({top: 111})
+          .once();
+        viewport.paddingTop_ = 0;
+        env.sandbox.stub(viewport, 'getScrollTop').returns(111);
+        bindingMock.expects('setScrollTop').withArgs(111).never();
+        const duration = 1000;
+        const pos = 'top';
+        const promise = viewport.animateScrollIntoView(element, pos, 1000);
+        promise.then(() => {
+          bindingMock.verify();
+        });
+        clock.tick(duration);
+        runVsync();
+        return promise;
+      });
     });
-    clock.tick(duration);
-    runVsync();
-    return promise;
-  });
+  }
 
   it('should send cached scroll pos to getLayoutRect', () => {
     const element = document.createElement('div');
@@ -987,7 +1206,7 @@ describes.fakeWin('Viewport', {}, env => {
     const el = document.createElement('div');
     el.getBoundingClientRect = () => layoutRectLtwh(1, 2, 3, 4);
     stubVsyncMeasure();
-    return viewport.getClientRectAsync(el).then(res => {
+    return viewport.getClientRectAsync(el).then((res) => {
       expect(res).to.deep.equal(layoutRectLtwh(1, 2, 3, 4));
     });
   });
@@ -1001,38 +1220,26 @@ describes.fakeWin('Viewport', {}, env => {
     const el = document.createElement('div');
     el.getBoundingClientRect = () => layoutRectLtwh(1, 2, 3, 4);
     stubVsyncMeasure();
-    return viewport.getClientRectAsync(el).then(res => {
+    return viewport.getClientRectAsync(el).then((res) => {
       expect(res).to.deep.equal(layoutRectLtwh(6, 7, 3, 4));
     });
   });
 
   it('should deletegate scrollWidth', () => {
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('getScrollWidth')
-      .withArgs()
-      .returns(111)
-      .once();
+    bindingMock.expects('getScrollWidth').withArgs().returns(111).once();
     expect(viewport.getScrollWidth()).to.equal(111);
   });
 
   it('should deletegate scrollHeight', () => {
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('getScrollHeight')
-      .withArgs()
-      .returns(117)
-      .once();
+    bindingMock.expects('getScrollHeight').withArgs().returns(117).once();
     expect(viewport.getScrollHeight()).to.equal(117);
   });
 
   it('should delegate contentHeight', () => {
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('getContentHeight')
-      .withArgs()
-      .returns(117)
-      .once();
+    bindingMock.expects('getContentHeight').withArgs().returns(117).once();
     expect(viewport.getContentHeight()).to.equal(117);
     bindingMock.verify();
   });
@@ -1046,15 +1253,12 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should scroll to target position when the viewer sets scrollTop', () => {
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('setScrollTop')
-      .withArgs(117)
-      .once();
+    bindingMock.expects('setScrollTop').withArgs(117).once();
     viewerScrollDocHandler({scrollTop: 117});
     bindingMock.verify();
   });
 
-  describes.realWin('top-level styles', {amp: 1}, env => {
+  describes.realWin('top-level styles', {amp: 1}, (env) => {
     let win;
     let root;
 
@@ -1080,7 +1284,9 @@ describes.fakeWin('Viewport', {}, env => {
       .run('should set pan-y with experiment', () => {
         viewer.isEmbedded = () => true;
         viewport = new ViewportImpl(ampdoc, binding, viewer);
-        expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
+        expect(win.getComputedStyle(root)['touch-action']).to.equal(
+          'pan-y pinch-zoom'
+        );
       });
   });
 
@@ -1131,12 +1337,12 @@ describes.fakeWin('Viewport', {}, env => {
       iframeWin.document.body.appendChild(element);
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(element, 0, 0)
+        .withArgs(element, 0, 0)
         .returns({left: 20, top: 10})
         .once();
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(iframe, 0, 0)
+        .withArgs(iframe, 0, 0)
         .returns({left: 211, top: 111})
         .once();
 
@@ -1152,12 +1358,12 @@ describes.fakeWin('Viewport', {}, env => {
       iframeWin.document.body.appendChild(element);
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(element, 0, 0)
+        .withArgs(element, 0, 0)
         .returns({left: 20, top: 10})
         .once();
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(iframe, 200, 100)
+        .withArgs(iframe, 200, 100)
         .returns({left: 211, top: 111})
         .once();
 
@@ -1168,7 +1374,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   describe('overrideGlobalScrollTo', () => {
-    const originalScrollTo = function() {};
+    const originalScrollTo = function () {};
 
     beforeEach(() => {
       windowApi.scrollTo = originalScrollTo;
@@ -1225,7 +1431,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 });
 
-describe('Viewport META', () => {
+describes.sandboxed('Viewport META', {}, (env) => {
   describe('parseViewportMeta', () => {
     it('should accept null or empty strings', () => {
       expect(parseViewportMeta(null)).to.be.empty;
@@ -1399,10 +1605,10 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
-        getParam: param => {
+        getParam: (param) => {
           if (param == 'paddingTop') {
             return 0;
           }
@@ -1416,10 +1622,10 @@ describe('Viewport META', () => {
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
-      viewportMetaSetter = window.sandbox.spy();
+      viewportMetaSetter = env.sandbox.spy();
       Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
-        set: value => {
+        set: (value) => {
           viewportMetaSetter(value);
           viewportMetaString = value;
         },
@@ -1432,7 +1638,7 @@ describe('Viewport META', () => {
               add() {},
             },
           },
-          querySelector: selector => {
+          querySelector: (selector) => {
             if (selector == 'meta[name=viewport]') {
               return viewportMeta;
             }
@@ -1444,6 +1650,7 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
         Promise: window.Promise,
+        performance: new FakePerformance(window),
       };
       installTimerService(windowApi);
       installVsyncService(windowApi);
@@ -1526,13 +1733,13 @@ describe('Viewport META', () => {
   });
 });
 
-describe('createViewport', () => {
+describes.sandboxed('createViewport', {}, () => {
   describes.fakeWin(
     'in Android',
     {
       win: {navigator: {userAgent: 'Android'}},
     },
-    env => {
+    (env) => {
       let win;
 
       beforeEach(() => {
@@ -1569,7 +1776,7 @@ describe('createViewport', () => {
     {
       win: {navigator: {userAgent: 'iPhone'}},
     },
-    env => {
+    (env) => {
       let win;
       let ampDoc;
       let viewer;
@@ -1637,7 +1844,7 @@ describe('createViewport', () => {
   );
 });
 
-describes.realWin('marginBottomOfLastChild', {}, env => {
+describes.realWin('marginBottomOfLastChild', {}, (env) => {
   let win;
   let doc;
   let element;

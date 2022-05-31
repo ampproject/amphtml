@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-recaptcha-input';
 import {AmpRecaptchaService} from '../amp-recaptcha-service';
 
@@ -31,7 +15,7 @@ describes.realWin(
       extensions: ['amp-recaptcha-input'],
     },
   },
-  env => {
+  (env) => {
     let recaptchaService;
     const fakeSitekey = 'fake-sitekey-fortesting';
     const anotherFakeSitekey = 'another-fake-sitekey-fortesting';
@@ -109,16 +93,40 @@ describes.realWin(
         ' if they pass a different sitekey',
       () => {
         expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-        return recaptchaService.register(fakeSitekey).then(() => {
-          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
-          expect(recaptchaService.iframe_).to.be.ok;
-
-          return recaptchaService.register(anotherFakeSitekey).catch(err => {
+        return recaptchaService
+          .register(fakeSitekey)
+          .then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+            return recaptchaService.register(anotherFakeSitekey);
+          })
+          .catch((err) => {
             expect(err).to.be.ok;
+            expect(err.message).to.have.string('sitekey');
             expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
           });
-        });
+      }
+    );
+
+    it(
+      'should not allow elements to register,' +
+        ' if they do not all or none pass in the global attribute',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+        return recaptchaService
+          .register(fakeSitekey, true)
+          .then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+            return recaptchaService.register(fakeSitekey, false);
+          })
+          .catch((err) => {
+            expect(err).to.be.ok;
+            expect(err.message).to.have.string('data-global');
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+          });
       }
     );
 
@@ -178,7 +186,7 @@ describes.realWin(
     it('should reject if there is no iframe on execute', () => {
       expect(recaptchaService.registeredElementCount_).to.be.equal(0);
       expect(recaptchaService.iframe_).to.not.be.ok;
-      return recaptchaService.execute(0, '').catch(err => {
+      return recaptchaService.execute(0, '').catch((err) => {
         expect(err).to.be.ok;
       });
     });

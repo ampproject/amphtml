@@ -1,21 +1,5 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-3d-gltf';
-import {createIframeWithMessageStub} from '../../../../testing/iframe';
+import {createIframeWithMessageStub} from '#testing/iframe';
 
 describes.realWin(
   'amp-3d-gltf',
@@ -25,7 +9,7 @@ describes.realWin(
     },
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let iframe;
@@ -41,8 +25,8 @@ describes.realWin(
       iframe.setAttribute('data-amp-3p-sentinel', sentinel);
       iframe.name = 'test_nomaster';
 
-      sendFakeMessage = type => {
-        return new Promise(resolve => {
+      sendFakeMessage = (type) => {
+        return new Promise((resolve) => {
           iframe.postMessageToParent({sentinel, type});
           setTimeout(resolve, 100);
         });
@@ -57,9 +41,9 @@ describes.realWin(
       amp3dGltfEl.setAttribute('height', '240');
 
       doc.body.appendChild(amp3dGltfEl);
-      await amp3dGltfEl.build();
+      await amp3dGltfEl.buildInternal();
 
-      const amp3dGltf = amp3dGltfEl.implementation_;
+      const amp3dGltf = await amp3dGltfEl.getImpl();
       env.sandbox
         .stub(amp3dGltf, 'iframe_')
         .get(() => iframe)
@@ -80,7 +64,7 @@ describes.realWin(
       expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
     });
 
-    // TODO (#16080): this test times out on Travis. Re-enable when fixed.
+    // TODO (#16080): this test times out on CI. Re-enable when fixed.
     it.skip('sends toggleAmpViewport(false) when exiting viewport', async () => {
       const amp3dGltf = await createElement();
 
@@ -94,7 +78,7 @@ describes.realWin(
       expect(postMessageSpy.firstCall.args[1].args).to.be.false;
     });
 
-    // TODO (#16080): this test times out on Travis. Re-enable when fixed.
+    // TODO (#16080): this test times out on CI. Re-enable when fixed.
     it.skip('sends toggleAmpViewport(true) when entering viewport', async () => {
       const amp3dGltf = await createElement();
       const postMessageSpy = env.sandbox.spy(amp3dGltf, 'postMessage_');

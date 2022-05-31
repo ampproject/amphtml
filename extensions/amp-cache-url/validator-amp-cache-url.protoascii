@@ -1,0 +1,10 @@
+tags: {  # amp-cache-url
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-cache-url"
+    version: "0.1"
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}

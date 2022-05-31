@@ -1,19 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from './services';
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -21,8 +9,6 @@ import {
   setupInit,
   setupInput,
 } from './utils/xhr-utils';
-import {dict} from './utils/object';
-import {user} from './log';
 
 /**
  *
@@ -43,13 +29,13 @@ export function fetchDocument(win, input, opt_init) {
     : null;
   init.responseType = 'document';
   return getViewerInterceptResponse(win, ampdocSingle, input, init).then(
-    interceptorResponse => {
+    (interceptorResponse) => {
       if (interceptorResponse) {
         return interceptorResponse
           .text()
-          .then(body => new DOMParser().parseFromString(body, 'text/html'));
+          .then((body) => new DOMParser().parseFromString(body, 'text/html'));
       }
-      return xhrRequest(input, init).then(resp => {
+      return xhrRequest(input, init).then((resp) => {
         const {xhr} = resp;
         return xhr.responseXML;
       });
@@ -99,7 +85,7 @@ function xhrRequest(input, init) {
           '',
           /** @type {!ResponseInit} */ (options)
         );
-        const promise = assertSuccess(response).then(response => ({
+        const promise = assertSuccess(response).then((response) => ({
           response,
           xhr,
         }));
@@ -126,11 +112,11 @@ function xhrRequest(input, init) {
  * @return {!JsonObject}
  */
 function parseHeaders(rawHeaders) {
-  const headers = dict({});
+  const headers = {};
   // Replace instances of \r\n and \n followed by at least one space or
   // horizontal tab with a space.
   const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
-  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+  preProcessedHeaders.split(/\r?\n/).forEach(function (line) {
     const parts = line.split(':');
     const key = parts.shift().trim();
     if (key) {

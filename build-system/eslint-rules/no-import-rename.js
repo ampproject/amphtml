@@ -1,42 +1,27 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const path = require('path');
 
 // Forbids using these imports unless is is explicitly imported as the same
-// name. This aids in writing lint rules for these imports.
+// name. This aids in writing lint rules and transforms for these imports.
 //
 // GOOD
-// import { dict } from 'src/utils/object';
-// dict();
+// import { setStyle } from '#core/dom/style';
+// setStyle();
 //
 // BAD
-// import * as obj from 'src/utils/object';
-// obj.dict()
+// import * as obj from '#core/dom/style';
+// obj.setStyle()
 //
 // Bad
-// import { dict as otherName } from 'src/utils/object';
+// import { setStyle as otherName } from '#core/dom/style';
 // otherName()
 
 const imports = {
-  'src/utils/object': ['dict'],
-  'src/static-template': ['htmlFor'],
-  'src/experiments': ['isExperimentOn'],
-  'src/style': [
+  '#core/dom/css-selectors': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
+  '#core/dom/query': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
+  '#core/dom/static-template': ['htmlFor'],
+  '#core/dom/style': [
     'assertDoesNotContainDisplay',
     'assertNotDisplay',
     'resetStyles',
@@ -44,12 +29,20 @@ const imports = {
     'setStyle',
     'setStyles',
   ],
-  'src/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
-  'src/dom': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
-  'src/log': ['user', 'dev'],
+  '#core/types/enum': ['mangleObjectValues'],
+  '#core/types/pure': ['pure'],
+  '#experiments': ['isExperimentOn'],
+  '#utils/log': ['user', 'dev'],
+  '#preact/utils': ['propName', 'tabindexFromProps'],
+  'src/mode': ['getMode'],
 };
 
-module.exports = function(context) {
+module.exports = function (context) {
+  /**
+   * @param {*} node
+   * @param {string} modulePath
+   * @param {*} mods
+   */
   function ImportSpecifier(node, modulePath, mods) {
     const {imported, local} = node;
     const {name} = imported;
@@ -70,6 +63,14 @@ module.exports = function(context) {
     });
   }
 
+  /**
+   * @param {*} node
+   * @param {string} modulePath
+   * @param {*} mods
+   * @return {{
+   *   ImportDeclaration: {Function(node: *): void},
+   * }}
+   */
   function ImportNamespaceSpecifier(node, modulePath, mods) {
     const ns = node.local.name;
     const variable = context.getScope().set.get(ns);
@@ -77,7 +78,9 @@ module.exports = function(context) {
 
     for (let i = 0; i < references.length; i++) {
       const ref = references[i];
-      const node = context.getNodeByRangeIndex(ref.identifier.start);
+      const [start] = ref.identifier.range;
+      const node = context.getNodeByRangeIndex(start);
+
       const {parent} = node;
 
       if (parent.type !== 'MemberExpression') {

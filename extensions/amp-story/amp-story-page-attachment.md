@@ -3,97 +3,161 @@ $category@: presentation
 formats:
   - stories
 teaser:
-  text: An additional pane of content that can be associated with a single page of an AMP story.
+  text: A panel of content that opens inline with an AMP story page.
+toc: true
+$title: amp-story-page-attachment
+version: '0.1'
+versions:
+  - '0.1'
+latest_version: '0.1'
+is_current: true
+$path: /documentation/components/amp-story-page-attachment.html
+$localization:
+  path: '/{locale}/documentation/components/amp-story-page-attachment.html'
+layouts:
+  - nodisplay  
 ---
 
-<!--
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+# amp-story-page-attachment
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+## Usage
 
-      http://www.apache.org/licenses/LICENSE-2.0
+`amp-story-page-attachment` allows additional content in the form of inline AMPHTML content on specific AMP story pages. This content is revealed to users through a "swipe up" gesture, or a tap on the call to action element.
+A UI button prompting the viewer to open the attachment will appear at the bottom of every page with a `amp-story-page-attachment` element.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
-# `amp-story-page-attachment`
-
-Story page attachments allow you to provide additional AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
-A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
-  </tr>
-</table>
-
-[TOC]
-
-<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
+<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
-    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" />
+    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment.gif" />
   </noscript>
 </amp-img>
+
+```html
+<amp-story-page id="page-attachment-example">
+  <amp-story-grid-layer template="fill">
+    <amp-img src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
+  </amp-story-grid-layer>
+  <amp-story-page-attachment layout="nodisplay">
+    <h1>My title</h1>
+    <p>Lots of interesting text with <a href="https://example.ampproject.org">links</a>!</p>
+    <p>More text and a YouTube video!</p>
+    <amp-youtube
+        data-videoid="b4Vhdr8jtx0"
+        layout="responsive"
+        width="480" height="270">
+    </amp-youtube>
+    <p>And a tweet!</p>
+    <amp-twitter
+        data-tweetid="885634330868850689"
+        layout="responsive"
+        width="480" height="270">
+    </amp-twitter>
+  </amp-story-page-attachment>
+</amp-story-page>
+```
 
 ## Placement
 
 The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
 
-## Optional customization
+[tip type="important"]
+Both [`amp-story-page-attachment`](amp-story-page-attachment.md) and [`amp-story-page-outlink`](amp-story-page-outlink.md) must be the last child tag of an [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page?format=stories). Because of this, you may include neither or one, but not both.
+[/tip]
 
-### `data-cta-text`
+## Attributes
 
-Customizes the call to action text displayed on the UI prompt to open the attachment.
-Default: "Swipe up"
+When no attributes are set, the default UI will render:
 
-```html
-<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more"
-  >...</amp-story-page-attachment
->
-```
-
-### `data-title`
-
-Displays the provided title in the page attachment header.
-Default: `null`
+![amp-story-page-attachment-default](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-default.jpg)
 
 ```html
-<amp-story-page-attachment layout="nodisplay" data-title="My title"
-  >...</amp-story-page-attachment
->
+<amp-story-page-attachment
+  layout="nodisplay">
+   ...
+</amp-story-page-attachment>
 ```
 
-### `theme`
+### `theme` (optional)
 
-Enables light or dark mode for the page attachment header and content background.
-Values: "light" (default), "dark"
+String representing the color theme, default is `light`. Accepts values `light` & `dark`.
+
+![amp-story-page-attachment-dark-theme](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-dark-theme.jpg)
 
 ```html
-<amp-story-page-attachment layout="nodisplay" theme="dark"
-  >...</amp-story-page-attachment
->
+<amp-story-page-attachment
+  layout="nodisplay"
+  theme="dark">
+  ...
+</amp-story-page-attachment>
 ```
 
-## Allowed content and components
+### `cta-text` (optional)
+
+String that customizes the button text. The default is "Swipe up".
+
+![amp-story-page-attachment-cta-text](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-cta-text.jpg)
+
+```html
+<amp-story-page-attachment
+  layout="nodisplay"
+  cta-text="Explore Tasting Menu">
+   ...
+</amp-story-page-attachment>
+```
+
+### `cta-image` (optional)
+
+String representing a URL pointing to an image. Optimize performance and avoid distortion by using a 48x48px image.
+
+![amp-story-page-attachment-1-image](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-1-image.jpg)
+
+```html
+<amp-story-page-attachment
+  layout="nodisplay"
+  cta-image="images/48x48image.jpg">
+   ...
+</amp-story-page-attachment>
+```
+
+### `cta-image-2` (optional)
+
+String representing a URL pointing to an image. Two images will display when `cta-image` and `cta-image-2` are defined. Optimize performance and avoid distortion by using a 48x48px image.
+
+![amp-story-page-attachment-2-images](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-2-images.jpg)
+
+```html
+<amp-story-page-attachment
+  layout="nodisplay"
+  cta-image="images/48x48image.jpg"
+  cta-image-2="images/48x48image2.jpg">
+   ...
+</amp-story-page-attachment>
+```
+
+### `title` (optional)
+
+String that displays in the attachment's header when scrolling beyond the height of the viewport.
+
+```html
+<amp-story-page-attachment
+  layout="nodisplay"
+  title="My title"
+  >
+  ...
+</amp-story-page-attachment>
+```
+
+[tip type="note"]
+`amp-story-page-attachment` previously supported outlinking. Please use `amp-story-page-outlink` for one-tap outlinking UI.
+[/tip]
+
+### Supported AMP Components in a Page Attachment
+
+The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
 
 Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
 
-<summary>List of allowed AMP components in a page attachment</summary>
+List of allowed AMP components in a page attachment:
+
 <ul>
   <li><code>&lt;amp-3d-gltf></code></li>
   <li><code>&lt;amp-3q-player></code></li>
@@ -121,8 +185,6 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
   <li><code>&lt;amp-gist></code></li>
   <li><code>&lt;amp-gist></code></li>
   <li><code>&lt;amp-google-document-embed></code></li>
-  <li><code>&lt;amp-google-vrview-image></code></li>
-  <li><code>&lt;amp-google-vrview-image></code></li>
   <li><code>&lt;amp-hulu></code></li>
   <li><code>&lt;amp-ima-video></code></li>
   <li><code>&lt;amp-image-slider></code></li>
@@ -161,29 +223,3 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
   <li><code>&lt;amp-yotpo></code></li>
   <li><code>&lt;amp-youtube></code></li>
 </ul>
-
-## Example
-
-```html
-<amp-story-page id="foo">
-  <amp-story-grid-layer template="fill">
-    <amp-img src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
-  </amp-story-grid-layer>
-  <amp-story-page-attachment layout="nodisplay">
-    <h1>My title</h1>
-    <p>Lots of interesting text with <a href="https://example.ampproject.org">links</a>!</p>
-    <p>More text and a YouTube video!</p>
-    <amp-youtube
-        data-videoid="b4Vhdr8jtx0"
-        layout="responsive"
-        width="480" height="270">
-    </amp-youtube>
-    <p>And a tweet!</p>
-    <amp-twitter
-        data-tweetid="885634330868850689"
-        layout="responsive"
-        width="480" height="270">
-    </amp-twitter>
-  </amp-story-page-attachment>
-</amp-story-page>
-```

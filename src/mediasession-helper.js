@@ -1,22 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from './services';
-import {devAssert, userAssert} from './log';
-import {isArray, isObject} from './types';
-import {tryParseJson} from './json';
+import {isArray, isObject} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {devAssert, userAssert} from '#utils/log';
 
 /**
  * @typedef {{
@@ -38,27 +25,18 @@ export const EMPTY_METADATA = {
 
 /**
  * Updates the Media Session API's metadata
- * @param {!Element} element
  * @param {!Window} win
  * @param {!MetadataDef} metadata
  * @param {function()=} playHandler
  * @param {function()=} pauseHandler
  */
-export function setMediaSession(
-  element,
-  win,
-  metadata,
-  playHandler,
-  pauseHandler
-) {
+export function setMediaSession(win, metadata, playHandler, pauseHandler) {
   const {navigator} = win;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
     navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
 
-    // Add metadata
-    validateMetadata(element, metadata);
     navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
@@ -140,15 +118,14 @@ export function parseFavicon(doc) {
 /**
  * @param {!Element} element
  * @param {!MetadataDef} metadata
- * @private
  */
-function validateMetadata(element, metadata) {
+export function validateMediaMetadata(element, metadata) {
   const urlService = Services.urlForDoc(element);
   // Ensure src of artwork has valid protocol
   if (metadata && metadata.artwork) {
     const {artwork} = metadata;
     devAssert(isArray(artwork));
-    artwork.forEach(item => {
+    artwork.forEach((item) => {
       if (item) {
         const src = isObject(item) ? item.src : item;
         userAssert(urlService.isProtocolValid(src));

@@ -1,22 +1,19 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   isJsonOrObj,
@@ -25,17 +22,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-mowplayer';
 
@@ -76,6 +63,15 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /**
+     * Prefix to embed URLs. Overridden on tests.
+     * @private @const {string}
+     */
+    this.baseUrl_ = 'https://mowplayer.com/watch/';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -92,11 +88,6 @@ class AmpMowplayer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -125,7 +116,7 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
     return (this.videoIframeSrc_ =
-      'https://mowplayer.com/watch/' + this.mediaid_);
+      this.baseUrl_ + encodeURIComponent(this.mediaid_));
   }
 
   /** @override */
@@ -140,9 +131,12 @@ class AmpMowplayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
       this.listenToFrame_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
     });
     this.playerReadyResolver_(loaded);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return loaded;
   }
 
@@ -158,6 +152,9 @@ class AmpMowplayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -188,13 +185,11 @@ class AmpMowplayer extends AMP.BaseElement {
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'event': 'command',
-            'func': command,
-            'args': opt_args || '',
-          })
-        );
+        const message = JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        });
         this.iframe_.contentWindow./*OK*/ postMessage(
           message,
           'https://mowplayer.com'
@@ -235,10 +230,10 @@ class AmpMowplayer extends AMP.BaseElement {
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
       redispatch(element, playerState.toString(), {
-        [PlayerStates.PLAYING]: VideoEvents.PLAYING,
-        [PlayerStates.PAUSED]: VideoEvents.PAUSE,
+        [PlayerStates.PLAYING]: VideoEvents_Enum.PLAYING,
+        [PlayerStates.PAUSED]: VideoEvents_Enum.PAUSE,
         // mowplayer does not fire pause and ended together.
-        [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+        [PlayerStates.ENDED]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
       });
       return;
     }
@@ -249,7 +244,7 @@ class AmpMowplayer extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
   }
@@ -289,6 +284,11 @@ class AmpMowplayer extends AMP.BaseElement {
   /** @override */
   pause() {
     this.sendCommand_('pauseVideo');
+    // The player doesn't appear to respect "pauseVideo" message.
+    const iframe = this.iframe_;
+    if (iframe) {
+      iframe.src = iframe.src;
+    }
   }
 
   /** @override */
@@ -374,6 +374,6 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpMowplayer);
 });

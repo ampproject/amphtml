@@ -1,21 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {px, setStyle, setStyles} from '#core/dom/style';
 
-import {Services} from '../../../src/services';
-import {px, setStyle, setStyles} from '../../../src/style';
+import {Services} from '#service';
 
 /** @const {number} Fixed button height from design spec. */
 const MAX_HEIGHT = 32;
@@ -31,8 +16,8 @@ export class ButtonTextFitter {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /** @private {!Document} */
     this.doc_ = ampdoc.win.document;
@@ -40,7 +25,7 @@ export class ButtonTextFitter {
     /** @private {!Element} */
     this.measurer_ = this.doc_.createElement('div');
 
-    this.resources_.mutateElement(this.measurer_, () => {
+    this.mutator_.mutateElement(this.measurer_, () => {
       this.doc_.body.appendChild(this.measurer_);
       setStyles(this.measurer_, {
         position: 'absolute',
@@ -62,7 +47,7 @@ export class ButtonTextFitter {
    */
   fit(pageElement, container, content) {
     let success = false;
-    return this.resources_
+    return this.mutator_
       .mutateElement(container, () => {
         this.measurer_.textContent = content;
         const fontSize = calculateFontSize(

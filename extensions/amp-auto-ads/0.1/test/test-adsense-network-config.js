@@ -1,21 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../../../../src/services';
 import {getAdNetworkConfig} from '../ad-network-config';
+import {Attributes} from '../attributes';
 
 describes.realWin(
   'adsense-network-config',
@@ -26,7 +12,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let ampAutoAdsElem;
     let document;
 
@@ -43,6 +29,7 @@ describes.realWin(
     describe('AdSense', () => {
       const AD_CLIENT = 'ca-pub-1234';
       const AD_HOST = 'ca-pub-5678';
+      const AD_HOST_CHANNEL = '987654';
 
       beforeEach(() => {
         ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
@@ -61,6 +48,23 @@ describes.realWin(
       it('should report responsive-enabled', () => {
         const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
         expect(adNetwork.isResponsiveEnabled()).to.equal(true);
+      });
+
+      it('should force no-fill if adsbygoogle is set', () => {
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        env.win.adsbygoogle = {};
+        expect(
+          adNetwork.filterConfig({
+            [Attributes.STICKY_AD_ATTRIBUTES]: {
+              'data-google-id': '123',
+            },
+          })
+        ).to.deep.equal({
+          [Attributes.STICKY_AD_ATTRIBUTES]: {
+            'data-google-id': '123',
+            'data-no-fill': 'true',
+          },
+        });
       });
 
       // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
@@ -96,6 +100,26 @@ describes.realWin(
           'data-ad-host': AD_HOST,
         });
         ampAutoAdsElem.removeAttribute('data-ad-host');
+      });
+
+      it('should add data-ad-host-channel to attributes if set on ampAutoAdsElem', () => {
+        ampAutoAdsElem.setAttribute('data-ad-host', AD_HOST);
+        ampAutoAdsElem.setAttribute('data-ad-host-channel', AD_HOST_CHANNEL);
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getAttributes()).to.deep.equal({
+          'type': 'adsense',
+          'data-ad-client': AD_CLIENT,
+          'data-ad-host': AD_HOST,
+          'data-ad-host-channel': AD_HOST_CHANNEL,
+        });
+      });
+
+      it('should add data-ad-host-channel to attributes only if also data-ad-host is present', () => {
+        ampAutoAdsElem.setAttribute('data-ad-host-channel', AD_HOST_CHANNEL);
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getAttributes()).to.not.have.property(
+          'data-ad-host-channel'
+        );
       });
 
       it('should get the default ad constraints', () => {

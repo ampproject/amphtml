@@ -1,25 +1,10 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as fakeTimers from '@sinonjs/fake-timers';
 
 import * as DocumentFetcher from '../../../../src/document-fetcher';
-import * as lolex from 'lolex';
-import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
+import {AccessServerAdapter} from '../amp-access-server';
 
-describes.realWin('AccessServerAdapter', {amp: true}, env => {
+describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
   let win;
   let document;
   let ampdoc;
@@ -33,7 +18,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     win = env.win;
     document = win.document;
     ampdoc = env.ampdoc;
-    clock = lolex.install({target: win});
+    clock = fakeTimers.withGlobal(win).install();
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -140,10 +125,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       it('should fallback to client auth when not on proxy', () => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
-        clientAdapterMock
-          .expects('authorize')
-          .returns(p)
-          .once();
+        clientAdapterMock.expects('authorize').returns(p).once();
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -152,10 +134,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       it('should fallback to client auth w/o server state', () => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
-        clientAdapterMock
-          .expects('authorize')
-          .returns(p)
-          .once();
+        clientAdapterMock.expects('authorize').returns(p).once();
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -200,7 +179,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           .callsFake(() => {
             return Promise.resolve();
           });
-        return adapter.authorize().then(response => {
+        return adapter.authorize().then((response) => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
           expect(replaceSectionsStub).to.be.calledOnce;
@@ -245,7 +224,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           () => {
             throw new Error('must never happen');
           },
-          error => {
+          (error) => {
             expect(error).to.match(/intentional/);
           }
         );
@@ -295,7 +274,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             () => {
               throw new Error('must never happen');
             },
-            error => {
+            (error) => {
               expect(error).to.match(/timeout/);
             }
           );
@@ -331,10 +310,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
 
     describe('pingback', () => {
       it('should always send client pingback', () => {
-        clientAdapterMock
-          .expects('pingback')
-          .returns(Promise.resolve())
-          .once();
+        clientAdapterMock.expects('pingback').returns(Promise.resolve()).once();
         adapter.pingback();
       });
     });

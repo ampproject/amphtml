@@ -1,35 +1,23 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {isArray} from '#core/types';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
 
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
-import {Services} from '../../../src/services';
+
+import {fetchDocument} from '../../../src/document-fetcher';
+import {getMode} from '../../../src/mode';
 import {
   assertHttpsUrl,
   isProxyOrigin,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';
@@ -98,14 +86,8 @@ export class AccessServerJwtAdapter {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    const stateElement = ampdoc
-      .getRootNode()
-      .querySelector('meta[name="i-amphtml-access-state"]');
-
     /** @private @const {?string} */
-    this.serverState_ = stateElement
-      ? stateElement.getAttribute('content')
-      : null;
+    this.serverState_ = ampdoc.getMetaByName('i-amphtml-access-state');
 
     const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server-jwt');
 
@@ -202,7 +184,7 @@ export class AccessServerJwtAdapter {
       /* useAuthData */ false
     );
     let jwtPromise = urlPromise
-      .then(url => {
+      .then((url) => {
         dev().fine(TAG, 'Authorization URL: ', url);
         return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
@@ -211,10 +193,10 @@ export class AccessServerJwtAdapter {
           })
         );
       })
-      .then(resp => {
+      .then((resp) => {
         return resp.text();
       })
-      .then(encoded => {
+      .then((encoded) => {
         const jwt = this.jwtHelper_.decode(encoded);
         userAssert(
           jwt['amp_authdata'],
@@ -225,7 +207,7 @@ export class AccessServerJwtAdapter {
     if (this.shouldBeValidated_()) {
       // Validate JWT in the development mode.
       if (this.jwtHelper_.isVerificationSupported()) {
-        jwtPromise = jwtPromise.then(resp => {
+        jwtPromise = jwtPromise.then((resp) => {
           return this.jwtHelper_
             .decodeAndVerify(resp.encoded, this.loadKeyPem_())
             .then(() => resp);
@@ -237,12 +219,12 @@ export class AccessServerJwtAdapter {
             " it doesn't support WebCrypto APIs"
         );
       }
-      jwtPromise = jwtPromise.then(resp => {
+      jwtPromise = jwtPromise.then((resp) => {
         this.validateJwt_(resp.jwt);
         return resp;
       });
     }
-    return jwtPromise.catch(reason => {
+    return jwtPromise.catch((reason) => {
       throw user().createError('JWT fetch or validation failed: ', reason);
     });
   }
@@ -257,7 +239,7 @@ export class AccessServerJwtAdapter {
     }
     return this.xhr_
       .fetchText(dev().assertString(this.keyUrl_))
-      .then(res => res.text());
+      .then((res) => res.text());
   }
 
   /**
@@ -307,7 +289,7 @@ export class AccessServerJwtAdapter {
       'Proceed via client protocol via ',
       this.clientAdapter_.getAuthorizationUrl()
     );
-    return this.fetchJwt_().then(resp => {
+    return this.fetchJwt_().then((resp) => {
       return resp.jwt['amp_authdata'];
     });
   }
@@ -318,16 +300,14 @@ export class AccessServerJwtAdapter {
    */
   authorizeOnServer_() {
     dev().fine(TAG, 'Proceed via server protocol');
-    return this.fetchJwt_().then(resp => {
+    return this.fetchJwt_().then((resp) => {
       const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
-      const request = serializeQueryString(
-        dict({
-          'url': removeFragment(this.ampdoc.win.location.href),
-          'state': this.serverState_,
-          'jwt': encoded,
-        })
-      );
+      const request = serializeQueryString({
+        'url': removeFragment(this.ampdoc.win.location.href),
+        'state': this.serverState_,
+        'jwt': encoded,
+      });
       dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       dev().fine(TAG, '- access data: ', accessData);
       // Note that `application/x-www-form-urlencoded` is used to avoid
@@ -338,12 +318,12 @@ export class AccessServerJwtAdapter {
           fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: request,
-            headers: dict({
+            headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
-            }),
+            },
           })
         )
-        .then(response => {
+        .then((response) => {
           dev().fine(TAG, 'Authorization response: ', response);
           return this.replaceSections_(response);
         })

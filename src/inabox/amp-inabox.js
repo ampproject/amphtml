@@ -1,50 +1,41 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
-import '../polyfills';
-import {Navigation} from '../service/navigation';
-import {Services} from '../services';
-import {adopt} from '../runtime';
-import {cssText as ampSharedCss} from '../../build/ampshared.css';
-import {doNotTrackImpression} from '../impression';
-import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {getA4AId, registerIniLoadListener} from './utils';
-import {getMode} from '../mode';
-import {installAmpdocServicesForInabox} from './inabox-services';
+import '#polyfills';
+import {maybeInsertOriginTrialToken} from '#ads/google/a4a/utils';
+
+import {TickLabel_Enum} from '#core/constants/enums';
+import * as mode from '#core/mode';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installBuiltinElements,
   installRuntimeServices,
-} from '../service/core-services';
-import {installDocService} from '../service/ampdoc-impl';
-import {installErrorReporting} from '../error';
-import {installPerformanceService} from '../service/performance-impl';
-import {installPlatformService} from '../service/platform-impl';
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {Navigation} from '#service/navigation';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+
+import {installAmpdocServicesForInabox} from './inabox-services';
+import {maybeRenderInaboxAsStoryAd} from './inabox-story-ad';
+import {getA4AId, registerIniLoadListener} from './utils';
+
+import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
+import {installErrorReporting} from '../error-reporting';
+import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
+import {doNotTrackImpression} from '../impression';
+import {getMode} from '../mode';
+import {adopt} from '../runtime';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
-import {internalRuntimeVersion} from '../internal-version';
 import {maybeValidate} from '../validator-integration';
-import {startupChunk} from '../chunk';
-import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
 getMode(self).a4aId = getA4AId(self);
@@ -69,6 +60,7 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
@@ -76,11 +68,12 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  perf.tick('is');
+  perf.tick(TickLabel_Enum.INSTALL_STYLES);
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
   installStylesForDoc(
     ampdoc,
+    // TODO: Can this be eliminated in ESM mode?
     ampSharedCss +
       'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
     () => {
@@ -109,13 +102,15 @@ startupChunk(self.document, function initial() {
         self.document,
         function final() {
           Navigation.installAnchorClickInterceptor(ampdoc, self);
+          maybeInsertOriginTrialToken(self);
+          maybeRenderInaboxAsStoryAd(ampdoc);
           maybeValidate(self);
           makeBodyVisible(self.document);
         },
         /* makes the body visible */ true
       );
       startupChunk(self.document, function finalTick() {
-        perf.tick('e_is');
+        perf.tick(TickLabel_Enum.END_INSTALL_STYLES);
         Services.resourcesForDoc(ampdoc).ampInitComplete();
         // TODO(erwinm): move invocation of the `flush` method when we have the
         // new ticks in place to batch the ticks properly.
@@ -133,11 +128,8 @@ startupChunk(self.document, function initial() {
 if (self.console) {
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${mode.version()}`,
     self.location.href
   );
 }
-self.document.documentElement.setAttribute(
-  'amp-version',
-  internalRuntimeVersion()
-);
+self.document.documentElement.setAttribute('amp-version', mode.version());

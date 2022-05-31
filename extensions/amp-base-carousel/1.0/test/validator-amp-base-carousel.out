@@ -1,0 +1,184 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-base-carousel tag. See the inline comments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Boolean values -->
+|    <section>
+|      <!-- Valid: true -->
+|      <amp-base-carousel width="4" height="3" auto-advance="true">
+|      </amp-base-carousel>
+|      <!-- Valid: false -->
+|      <amp-base-carousel width="4" height="3" auto-advance="false">
+|      </amp-base-carousel>
+|      <!-- Valid: booleans with a media query -->
+|      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true, false">
+|      </amp-base-carousel>
+|      <!-- Valid: booleans with multiple media queries -->
+|      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true, (max-height: 1000px) true, false">
+|      </amp-base-carousel>
+|      <!-- Valid: no value for loop -->
+|      <amp-base-carousel width="4" height="3" loop>
+|      </amp-base-carousel>
+|      <!-- Invalid: no default value-->
+|      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:34:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) true'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: no value -->
+|      <amp-base-carousel width="4" height="3" auto-advance>
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:37:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: incorrect value -->
+|      <amp-base-carousel width="4" height="3" auto-advance="5">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:40:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '5'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: incorrect in media query -->
+|      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true, (max-height: 1000px) 5, false">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:43:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) true, (max-height: 1000px) 5, false'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|    </section>
+|
+|    <!-- Integer values-->
+|    <section>
+|      <!-- Valid: positive integer value -->
+|      <amp-base-carousel width="4" height="3" advance-count="2">
+|      </amp-base-carousel>
+|      <!-- Valid: negative integer value -->
+|      <amp-base-carousel width="4" height="3" advance-count="-2">
+|      </amp-base-carousel>
+|      <!-- Valid: integer values with media queries -->
+|      <amp-base-carousel width="4" height="3" advance-count="(min-width: 800px) 3, 1">
+|      </amp-base-carousel>
+|      <!-- Valid: integer values with multiple media queries -->
+|      <amp-base-carousel width="4" height="3" advance-count="(min-width: 800px) -3, (max-height: 1000px) 3, 1">
+|      </amp-base-carousel>
+|      <!-- Invalid: no default value-->
+|      <amp-base-carousel width="4" height="3" advance-count="(min-width: 800px) 3">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:62:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) 3'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: no value -->
+|      <amp-base-carousel width="4" height="3" advance-count>
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:65:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: floating point value -->
+|      <amp-base-carousel width="4" height="3" advance-count="3.2">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:68:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '3.2'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: floating point value in media query -->
+|      <amp-base-carousel width="4" height="3" advance-count="(min-width: 800px) -3, (max-height: 1000px) 3.2, 1">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:71:4 The attribute 'advance-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) -3, (max-height: 1000px) 3.2, 1'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|    </section>
+|
+|    <!-- Positive float values-->
+|    <section>
+|      <!-- Valid: integer value -->
+|      <amp-base-carousel width="4" height="3" visible-count="2">
+|      </amp-base-carousel>
+|      <!-- Valid: floating point value -->
+|      <amp-base-carousel width="4" height="3" visible-count="3.2">
+|      </amp-base-carousel>
+|      <!-- Valid: mixed value with one media query -->
+|      <amp-base-carousel width="4" height="3" visible-count="(min-width: 800px) 3.2, 1">
+|      </amp-base-carousel>
+|      <!-- Valid: mixed values with multiple media queries -->
+|      <amp-base-carousel width="4" height="3" visible-count="(min-width: 800px) 3, (max-height: 1000px) 3, 1.1">
+|      </amp-base-carousel>
+|      <!-- Invalid: negative integer value -->
+|      <amp-base-carousel width="4" height="3" visible-count="-2">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:90:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '-2'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: no default value-->
+|      <amp-base-carousel width="4" height="3" visible-count="(min-width: 800px) 3">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:93:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) 3'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: no value -->
+|      <amp-base-carousel width="4" height="3" visible-count>
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:96:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: string value -->
+|      <amp-base-carousel width="4" height="3" visible-count="foo">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:99:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value 'foo'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: negative value in media query -->
+|      <amp-base-carousel width="4" height="3" visible-count="(min-width: 800px) -3, (max-height: 1000px) 3, 1">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:102:4 The attribute 'visible-count' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) -3, (max-height: 1000px) 3, 1'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|    </section>
+|
+|    <!-- String values -->
+|    <section>
+|      <!-- Valid: horizontal -->
+|      <amp-base-carousel width="4" height="3" orientation="horizontal">
+|      </amp-base-carousel>
+|      <!-- Valid: vertical -->
+|      <amp-base-carousel width="4" height="3" orientation="vertical">
+|      </amp-base-carousel>
+|      <!-- Valid: strings with a media query -->
+|      <amp-base-carousel width="4" height="3" orientation="(min-width: 800px) horizontal, vertical">
+|      </amp-base-carousel>
+|      <!-- Valid: strings with multiple media queries -->
+|      <amp-base-carousel width="4" height="3" orientation="(min-width: 800px) horizontal, (max-height: 1000px) horizontal, vertical">
+|      </amp-base-carousel>
+|      <!-- Invalid: no default value-->
+|      <amp-base-carousel width="4" height="3" orientation="(min-width: 800px) horizontal">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:121:4 The attribute 'orientation' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) horizontal'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: no value -->
+|      <amp-base-carousel width="4" height="3" orientation>
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:124:4 The attribute 'orientation' in tag 'amp-base-carousel' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: incorrect value -->
+|      <amp-base-carousel width="4" height="3" orientation="true">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:127:4 The attribute 'orientation' in tag 'amp-base-carousel' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|      <!-- Invalid: incorrect in media query -->
+|      <amp-base-carousel width="4" height="3" orientation="(min-width: 800px) vertical, (max-height: 1000px) true, horizontal">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:130:4 The attribute 'orientation' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px) vertical, (max-height: 1000px) true, horizontal'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|    </section>
+|
+|    <!-- Spaces-->
+|    <section>
+|      <!-- Valid: spaces between groups -->
+|      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true, false">
+|      </amp-base-carousel>
+|      <!-- Valid: no spaces between groups -->
+|      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px) true,(max-height: 1000px) true,false">
+|      </amp-base-carousel>
+|      <!-- Invalid: no space between media query and value -->
+|      <amp-base-carousel width="4" height="3" auto-advance="(min-width: 800px)true, false">
+>>     ^~~~~~~~~
+amp-base-carousel/1.0/test/validator-amp-base-carousel.html:143:4 The attribute 'auto-advance' in tag 'amp-base-carousel' is set to the invalid value '(min-width: 800px)true, false'. (see https://amp.dev/documentation/components/amp-base-carousel/)
+|      </amp-base-carousel>
+|    </section>
+|  </body>
+|  </html>

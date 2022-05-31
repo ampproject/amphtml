@@ -1,23 +1,10 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {endsWith} from '#core/types/string';
 
-import {Services} from '../../../src/services';
-import {endsWith} from '../../../src/string';
-import {getElementLayoutBox} from './utils';
-import {user} from '../../../src/log';
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {measurePageLayoutBox} from './measure-page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -119,7 +106,7 @@ export class AdTracker {
       return Promise.resolve(false);
     }
     return this.getDistanceFromAd_(yPosition, this.ads_[adIndex]).then(
-      distance => {
+      (distance) => {
         if (distance < this.minAdSpacing_) {
           return true;
         }
@@ -136,7 +123,7 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return getElementLayoutBox(ad).then(box => {
+    return measurePageLayoutBox(ad).then((box) => {
       if (yPosition >= box.top && yPosition <= box.bottom) {
         return 0;
       } else {
@@ -172,7 +159,7 @@ export class AdTracker {
 export function getExistingAds(ampdoc) {
   return [].slice
     .call(ampdoc.getRootNode().querySelectorAll('AMP-AD'))
-    .filter(ad => {
+    .filter((ad) => {
       // Filters out AMP-STICKY-AD.
       if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
         return false;
@@ -203,22 +190,24 @@ export function getAdConstraintsFromConfigObj(ampdoc, configObj) {
     return null;
   }
 
-  const subsequentMinSpacing = (obj['subsequentMinSpacing'] || []).map(item => {
-    const adCount = item['adCount'];
-    if (adCount == null) {
-      user().warn(TAG, 'No subsequentMinSpacing adCount specified');
-      return null;
+  const subsequentMinSpacing = (obj['subsequentMinSpacing'] || []).map(
+    (item) => {
+      const adCount = item['adCount'];
+      if (adCount == null) {
+        user().warn(TAG, 'No subsequentMinSpacing adCount specified');
+        return null;
+      }
+      const spacing = getValueFromString(item['spacing'], viewportHeight);
+      if (spacing == null) {
+        user().warn(TAG, 'Invalid subsequent min spacing');
+        return null;
+      }
+      return {
+        adCount,
+        spacing,
+      };
     }
-    const spacing = getValueFromString(item['spacing'], viewportHeight);
-    if (spacing == null) {
-      user().warn(TAG, 'Invalid subsequent min spacing');
-      return null;
-    }
-    return {
-      adCount,
-      spacing,
-    };
-  });
+  );
 
   if (subsequentMinSpacing.indexOf(null) != -1) {
     return null;

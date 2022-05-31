@@ -1,0 +1,135 @@
+
+
+@import './amp-story-dev-tools-tab-debug.css';
+@import './amp-story-dev-tools-tab-preview.css';
+
+amp-story-dev-tools {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: black !important;
+  font-size: 16px !important;
+  font-family: 'Poppins', sans-serif !important;
+  color: white !important;
+  --i-amphtml-story-dev-tools-vertical-spacing: 30px !important;
+  --i-amphtml-story-dev-tools-accent: #79B3FF !important;
+  --i-amphtml-story-dev-tools-accent-light: #92c1ff !important;
+  --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55 !important;
+
+  --i-amphtml-story-dev-tools-error-color: #FF5252 !important;
+  --i-amphtml-story-dev-tools-gray-1: #101010 !important;
+  --i-amphtml-story-dev-tools-gray-2: #2E3137 !important;
+  --i-amphtml-story-dev-tools-gray-3: #2E2E2E !important;
+  --i-amphtml-story-dev-tools-gray-4: #3D3D3D !important;
+  --i-amphtml-story-dev-tools-gray-5: #525358 !important;
+  --i-amphtml-story-dev-tools-gray-transparent-1: #111111CC !important;
+  --i-amphtml-story-dev-tools-white-transparent-1: #FFFFFF22 !important;
+  --i-amphtml-story-dev-tools-white-transparent-2: #FFFFFF35 !important;
+  --i-amphtml-story-dev-tools-white-transparent-3: #FFFFFF77 !important;
+  --i-amphtml-story-dev-tools-white-transparent-4: #FFFFFFCC !important;
+  --i-amphtml-story-dev-tools-black-transparent-1: #00000077 !important;
+
+
+  --i-amphtml-story-dev-tools-material-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  --i-amphtml-story-dev-tools-material-easing-accelerated: cubic-bezier(0.4, 0.0, 1, 1) !important;
+  --i-amphtml-story-dev-tools-material-easing-decelerated: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+amp-story-dev-tools, amp-story-dev-tools * {
+  box-sizing: border-box !important;
+}
+
+.i-amphtml-story-dev-tools-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.i-amphtml-story-dev-tools-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-top: 15px !important;
+  padding: 15px 10% !important;
+}
+
+.i-amphtml-story-dev-tools-brand {
+  display: flex !important;
+}
+
+.i-amphtml-story-dev-tools-brand-text > span {
+  display: block !important;
+  letter-spacing: 0.1em !important;
+  line-height: 1.2em !important;
+  padding-inline-start: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-brand-text > span:nth-child(2) {
+  color: var(--i-amphtml-story-dev-tools-accent) !important;
+  font-size: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.i-amphtml-story-dev-tools-button {
+  cursor: pointer !important;
+  font-size: 13px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-accent-translucent) !important;
+  border-radius: 20px !important;
+  padding-inline-start: 10px !important;
+  padding-inline-end: 6px !important;
+  height: 32px !important;
+  color: var(--i-amphtml-story-dev-tools-accent) !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  outline: none !important;
+}
+
+.i-amphtml-story-dev-tools-button:hover, .i-amphtml-story-dev-tools-button:focus  {
+  background: var(--i-amphtml-story-dev-tools-accent-translucent) !important;
+}
+
+.i-amphtml-story-dev-tools-button svg {
+  background: var(--i-amphtml-story-dev-tools-accent) !important;
+  padding: 3px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  margin-inline-start: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector {
+  padding-bottom: 0.2em !important;
+  margin: 0 16px !important;
+  cursor: pointer !important;
+  opacity: 0.4 !important;
+  font-size: inherit !important;
+  background: none !important;
+  border: none !important;
+  color: inherit !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector:not([active]):hover, .i-amphtml-story-dev-tools-tabs > button:not([active]):focus {
+  opacity: 0.9 !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector[active] {
+  opacity: 1 !important;
+  cursor: initial !important;
+  border-bottom: 2px solid white !important;
+}
+
+.i-amphtml-story-dev-tools-tab {
+  flex: 1 !important;
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Carousel 0.1</title>
+    <link rel="canonical" href="amps.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <script
+      async
+      custom-element="amp-carousel"
+      src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"
+    ></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-custom>
+      rect.red {
+        fill: red;
+      }
+      rect.blue {
+        fill: blue;
+      }
+      rect.green {
+        fill: green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Autoplay slides</h1>
+    <button id="go-to-last" on="tap:autoplay-carousel.goToSlide(index=2)">
+      go to last slide
+    </button>
+    <br />
+    <amp-carousel
+      id="autoplay-carousel"
+      width="400"
+      height="225"
+      layout="fixed"
+      type="slides"
+      autoplay
+      delay="1000"
+    >
+      <amp-layout id="slide1" layout="responsive" width="440" height="225">
+        <svg viewBox="0 0 440 225">
+          <rect class="red" width="440" height="225" />
+          Sorry, your browser does not support inline SVG.
+        </svg>
+      </amp-layout>
+      <amp-layout id="slide2" layout="responsive" width="440" height="225">
+        <svg viewBox="0 0 440 225">
+          <rect class="blue" width="440" height="225" />
+          Sorry, your browser does not support inline SVG.
+        </svg>
+      </amp-layout>
+      <amp-layout id="slide3" layout="responsive" width="440" height="225">
+        <svg viewBox="0 0 440 225">
+          <rect class="green" width="440" height="225" />
+          Sorry, your browser does not support inline SVG.
+        </svg>
+      </amp-layout>
+    </amp-carousel>
+  </body>
+</html>

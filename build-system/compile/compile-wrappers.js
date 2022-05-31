@@ -1,26 +1,25 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+const fs = require('fs-extra');
+const json5 = require('json5');
 const {VERSION} = require('./internal-version');
+
+const latestVersions = json5.parse(
+  fs.readFileSync(
+    require.resolve('./bundles.legacy-latest-versions.jsonc'),
+    'utf8'
+  )
+);
 
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
+// If "AMP" is already an object then that means another runtime has already
+// been initialized and the current runtime must exit early. This can occur
+// if multiple AMP libraries are included in the html or when both the module
+// and nomodule runtimes execute in older browsers such as safari < 11.
 exports.mainBinary =
   'var global=self;self.AMP=self.AMP||[];' +
-  'try{(function(_){\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
+  'try{(function(_){' +
+  'if(self.AMP&&!Array.isArray(self.AMP))return;' +
+  '\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
   'setTimeout(function(){' +
   'var s=document.body.style;' +
   's.opacity=1;' +
@@ -28,32 +27,39 @@ exports.mainBinary =
   's.animation="none";' +
   's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function(
-  name,
-  loadPriority,
-  intermediateDeps,
-  opt_splitMarker
-) {
-  opt_splitMarker = opt_splitMarker || '';
+/** @type {'high'} */
+let ExtensionLoadPriorityDef;
 
-  // Single pass intermediate modules do not need an AMP.push wrapper.
-  if (name.startsWith('_base_')) {
-    return '(function() {<%= contents %>}());';
-  }
+/**
+ * Wrapper that either registers the extension or schedules it for execution
+ * by the main binary
+ * @param {string} name
+ * @param {string} version
+ * @param {boolean=} isModule
+ * @param {ExtensionLoadPriorityDef=} loadPriority
+ * @return {string}
+ */
+function extension(name, version, isModule, loadPriority) {
+  const payload = extensionPayload(name, version, isModule, loadPriority);
+  return `(self.AMP=self.AMP||[]).push(${payload});`;
+}
 
-  let deps = '';
-  if (intermediateDeps && intermediateDeps.length) {
-    deps = 'i:';
-    function quote(s) {
-      return `"${s}"`;
-    }
-    if (intermediateDeps.length == 1) {
-      deps += quote(intermediateDeps[0]);
-    } else {
-      deps += `[${intermediateDeps.map(quote).join(',')}]`;
-    }
-    deps += ',';
-  }
+exports.extension = extension;
+
+/**
+ * Wrap in a structure that allows lazy execution and provides extension
+ * metadata.
+ * The returned code corresponds to an object. A bundle is not complete until
+ * this object is wrapped in a loader like `AMP.push`.
+ * @see {@link extension}
+ * @see {@link bento}
+ * @param {string} name
+ * @param {string} version
+ * @param {boolean=} isModule
+ * @param {ExtensionLoadPriorityDef=} loadPriority
+ * @return {string}
+ */
+function extensionPayload(name, version, isModule, loadPriority) {
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -61,11 +67,20 @@ exports.extension = function(
     }
     priority = 'p:"high",';
   }
+  // Use a numeric value instead of boolean. "m" stands for "module"
+  const m = isModule ? 1 : 0;
+  const latest = latestVersions[name] === version;
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-    `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
-    '<%= contents %>\n})});'
+    '{' +
+    `m:${m},` +
+    `v:"${VERSION}",` +
+    `n:"${name}",` +
+    `ev:"${version}",` +
+    `l:${latest},` +
+    priority +
+    `f:(function(AMP,_){<%= contents %>})` +
+    '}'
   );
-};
+}
 
 exports.none = '<%= contents %>';

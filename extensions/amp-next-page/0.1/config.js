@@ -1,27 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isArray} from '#core/types';
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
+import {user, userAssert} from '#utils/log';
+
 import {
   getSourceOrigin,
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {isArray} from '../../../src/types';
-import {user, userAssert} from '../../../src/log';
 
 const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';
 
@@ -72,7 +59,7 @@ export function assertConfig(context, config, documentUrl) {
  * @param {string} documentUrl
  */
 function assertRecos(context, recos, documentUrl) {
-  recos.forEach(reco => assertReco(context, reco, documentUrl));
+  recos.forEach((reco) => assertReco(context, reco, documentUrl));
 }
 
 const BANNED_SELECTOR_PATTERNS = [/(^|\W)i-amphtml-/];
@@ -83,8 +70,8 @@ const BANNED_SELECTOR_PATTERNS = [/(^|\W)i-amphtml-/];
  * @param {!Array<string>} selectors
  */
 function assertSelectors(selectors) {
-  selectors.forEach(selector => {
-    BANNED_SELECTOR_PATTERNS.forEach(pattern => {
+  selectors.forEach((selector) => {
+    BANNED_SELECTOR_PATTERNS.forEach((pattern) => {
       user().assertString(
         selector,
         'amp-next-page hideSelector value should be a string'

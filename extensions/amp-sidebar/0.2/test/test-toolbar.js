@@ -1,31 +1,18 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toArray} from '#core/types/array';
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+
+import {createIframePromise} from '#testing/iframe';
+
 import {Toolbar} from '../toolbar';
-import {createIframePromise} from '../../../../testing/iframe';
-import {toArray} from '../../../../src/types';
 
-describes.realWin('amp-sidebar - toolbar', {}, env => {
+describes.realWin('amp-sidebar - toolbar', {}, (env) => {
   let timer;
 
   function getToolbars(options) {
     options = options || {};
-    return createIframePromise().then(iframe => {
+    return createIframePromise().then((iframe) => {
       const {win} = iframe;
       const {document: doc} = win;
 
@@ -34,13 +21,13 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
       const ampdoc = new AmpDocSingle(win);
       const contextElement = {
         getAmpDoc: () => ampdoc,
-        mutateElement: cb => {
+        mutateElement: (cb) => {
           cb();
           return Promise.resolve();
         },
       };
 
-      env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
+      env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
         callback();
       });
 
@@ -50,7 +37,7 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
       doc.body.appendChild(toolbarContainerElement);
 
       // Create our individual toolbars
-      options.forEach(toolbarObj => {
+      options.forEach((toolbarObj) => {
         const navToolbar = doc.createElement('nav');
         if (toolbarObj.media) {
           navToolbar.setAttribute('toolbar', toolbar.media);
@@ -114,17 +101,17 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
 
   it('toolbar header should be hidden for a \
    non-matching window size for (min-width: 768px)', () => {
-    return getToolbars([{}]).then(obj => {
+    return getToolbars([{}]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1024px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
         const toolbarElements = toArray(
           obj.ampdoc.getRootNode().getElementsByClassName('i-amphtml-toolbar')
         );
         resizeIframeToWidth(obj.iframe, '1px', () => {
-          toolbars.forEach(toolbar => {
+          toolbars.forEach((toolbar) => {
             toolbar.onLayoutChange();
           });
           expect(toolbarElements.length).to.be.above(0);
@@ -136,10 +123,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
 
   it('toolbar header should be shown for a \
    matching window size for (min-width: 768px)', () => {
-    return getToolbars([{}]).then(obj => {
+    return getToolbars([{}]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
         const toolbarElements = toArray(
@@ -158,10 +145,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
       {
         'toolbar-target': targetId,
       },
-    ]).then(obj => {
+    ]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1024px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
         const toolbarQuery = `#${targetId} > nav[toolbar]`;
@@ -181,13 +168,13 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
       {
         'toolbar-target': targetId,
       },
-    ]).then(obj => {
+    ]).then((obj) => {
       const {toolbars} = obj;
       const toolbarTargets = toArray(
         obj.ampdoc.getRootNode().querySelectorAll(`#${targetId}`)
       );
       resizeIframeToWidth(obj.iframe, '4000px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
         expect(toolbars.length).to.be.equal(1);
@@ -204,13 +191,13 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
       {
         'toolbar-target': targetId,
       },
-    ]).then(obj => {
+    ]).then((obj) => {
       const {toolbars} = obj;
       const toolbarTargets = toArray(
         obj.ampdoc.getRootNode().querySelectorAll(`#${targetId}`)
       );
       resizeIframeToWidth(obj.iframe, '200px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
         expect(toolbars.length).to.be.equal(1);
@@ -226,10 +213,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
       {
         toolbarOnlyOnNav: true,
       },
-    ]).then(obj => {
+    ]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
         const toolbarNavElementsWithState = toArray(
@@ -249,10 +236,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
       {
         toolbarOnlyOnNav: true,
       },
-    ]).then(obj => {
+    ]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '0px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
         const toolbarNavElementsWithState = toArray(
@@ -268,10 +255,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
 
   it('toolbar should be in the hidden state \
    when it is not being displayed', () => {
-    return getToolbars([{}]).then(obj => {
+    return getToolbars([{}]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
           expect(toolbar.isToolbarShown_()).to.be.false;
         });
@@ -281,10 +268,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
 
   it('toolbar should be in the shown state \
    when it is being displayed', () => {
-    return getToolbars([{}]).then(obj => {
+    return getToolbars([{}]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
           expect(toolbar.isToolbarShown_()).to.be.true;
         });
@@ -294,10 +281,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
 
   it('toolbar should not be able to be shown \
    if already in the shown state', () => {
-    return getToolbars([{}]).then(obj => {
+    return getToolbars([{}]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '4000px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
           expect(toolbar.isToolbarShown_()).to.be.true;
         });
@@ -307,10 +294,10 @@ describes.realWin('amp-sidebar - toolbar', {}, env => {
 
   it('toolbar should be able to be shown \
    if not in the shown state, and return a promise', () => {
-    return getToolbars([{}]).then(obj => {
+    return getToolbars([{}]).then((obj) => {
       const {toolbars} = obj;
       resizeIframeToWidth(obj.iframe, '1px', () => {
-        toolbars.forEach(toolbar => {
+        toolbars.forEach((toolbar) => {
           toolbar.onLayoutChange();
           expect(toolbar).to.exist;
         });

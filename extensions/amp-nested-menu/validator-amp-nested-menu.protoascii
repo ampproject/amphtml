@@ -1,18 +1,3 @@
-#
-# Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
 tags: {  # amp-nested-menu
   html_format: AMP
   tag_name: "SCRIPT"
@@ -39,25 +24,29 @@ tags: {  # amp-nested-menu
     supported_layouts: FILL
   }
   descendant_tag_list: "amp-nested-menu-allowed-descendants"
-  spec_url: "https://amp.dev/documentation/components/amp-nested-menu"
+  spec_url: "https://amp.dev/documentation/components/amp-nested-menu/"
 }
 tags: {  # <amp-nested-menu> <div amp-nested-submenu(-open/-close)>
   html_format: AMP
   tag_name: "DIV"
   spec_name: "div amp-nested-menu"
+  descriptive_name: "div amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   # submenus inside accordion do not display correctly due to styling of <amp-accordion>.
   disallowed_ancestor: "AMP-ACCORDION"
   attrs: {
     name: "amp-nested-submenu"
+    dispatch_key: NAME_VALUE_DISPATCH
     mandatory_oneof: "['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open']"
   }
   attrs: {
     name: "amp-nested-submenu-close"
+    dispatch_key: NAME_VALUE_DISPATCH
     mandatory_oneof: "['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open']"
   }
   attrs: {
     name: "amp-nested-submenu-open"
+    dispatch_key: NAME_VALUE_DISPATCH
     mandatory_oneof: "['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open']"
   }
 }
@@ -123,7 +112,7 @@ tags: {  # <amp-nested-menu> <span amp-nested-submenu-open/close>
   attr_lists: "amp-nested-menu-actions"
 }
 descendant_tag_list {
-  # Purposefully being restrictive when whitelisting child components;
+  # Purposefully being restrictive when allowlisting child components;
   # On demand, add more components to this list after manual testing.
   name: "amp-nested-menu-allowed-descendants"
   tag: "A"
@@ -133,9 +122,11 @@ descendant_tag_list {
   tag: "B"
   tag: "BR"
   tag: "BUTTON"
+  tag: "CIRCLE"
   tag: "COL"
   tag: "COLGROUP"
   tag: "DIV"
+  tag: "ELLIPSE"
   tag: "EM"
   tag: "FIELDSET"
   tag: "FORM"
@@ -149,17 +140,24 @@ descendant_tag_list {
   tag: "INPUT"
   tag: "LABEL"
   tag: "LI"
+  tag: "LINE"
   tag: "MARK"
   tag: "NAV"
   tag: "OL"
   tag: "OPTION"
   tag: "P"
+  tag: "PATH"
+  tag: "POLYGON"
+  tag: "POLYLINE"
+  tag: "RECT"
   tag: "SECTION"
+  tag: "SELECT"
   tag: "SPAN"
   tag: "STRIKE"
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"
+  tag: "SVG"
   tag: "TABLE"
   tag: "TBODY"
   tag: "TD"
@@ -170,4 +168,5 @@ descendant_tag_list {
   tag: "TR"
   tag: "U"
   tag: "UL"
+  tag: "USE"
 }

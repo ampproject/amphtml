@@ -1,38 +1,26 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {parseQueryString} from '#core/types/string/url';
 
-import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
-import {ActivateBar, ScrollUserBar} from './scroll-bar';
-import {Audio} from './scroll-audio';
-import {CSS} from '../../../build/amp-access-scroll-0.1.css';
-import {ReadDepthTracker} from './read-depth-tracker.js';
+import {Services} from '#service';
+
+import {ReadDepthTracker} from './read-depth-tracker';
+import {ScrollBar} from './scroll-bar';
+import {PROTOCOL_VERSION} from './scroll-protocol';
 import {Relay} from './scroll-relay';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
+import {Sheet} from './scroll-sheet';
+import {buildUrl, connectHostname} from './scroll-url';
+
+import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString} from '../../../src/url';
+import {addParamToUrl, isProxyOrigin} from '../../../src/url';
+import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 
 const TAG = 'amp-access-scroll-elt';
 /**
  * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const accessConfig = baseUrl => {
+const accessConfig = (baseUrl) => {
   /** @const {!JsonObject} */
   const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
     'authorization':
@@ -41,7 +29,8 @@ const accessConfig = baseUrl => {
       '&cid=CLIENT_ID(scroll1)' +
       '&c=CANONICAL_URL' +
       '&o=AMPDOC_URL' +
-      '&x=QUERY_PARAM(scrollx)',
+      '&x=QUERY_PARAM(scrollx)' +
+      `&p=${PROTOCOL_VERSION}`,
     'pingback':
       `${baseUrl}/amp/pingback` +
       '?rid=READER_ID' +
@@ -51,7 +40,8 @@ const accessConfig = baseUrl => {
       '&r=DOCUMENT_REFERRER' +
       '&x=QUERY_PARAM(scrollx)' +
       '&d=AUTHDATA(scroll)' +
-      '&v=AUTHDATA(visitId)',
+      '&v=AUTHDATA(visitId)' +
+      `&p=${PROTOCOL_VERSION}`,
     'namespace': 'scroll',
   });
   return ACCESS_CONFIG;
@@ -61,7 +51,7 @@ const accessConfig = baseUrl => {
  * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const analyticsConfig = baseUrl => {
+const analyticsConfig = (baseUrl) => {
   const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'scroll':
@@ -75,7 +65,8 @@ const analyticsConfig = baseUrl => {
         '&d=AUTHDATA(scroll.scroll)' +
         '&v=AUTHDATA(scroll.visitId)' +
         '&h=SOURCE_HOSTNAME' +
-        '&s=${totalEngagedTime}',
+        '&s=${totalEngagedTime}' +
+        `&p=${PROTOCOL_VERSION}`,
     },
     'triggers': {
       'trackInterval': {
@@ -89,28 +80,6 @@ const analyticsConfig = baseUrl => {
     },
   });
   return ANALYTICS_CONFIG;
-};
-
-/**
- * The eTLD for scroll URLs in development mode.
- *
- * Enables amp-access-scroll to work with dev/staging environments.
- *
- * @param {!JsonObject} config
- * @return {string}
- */
-const devEtld = config => {
-  return getMode().development && config['etld'] ? config['etld'] : '';
-};
-
-/**
- * The connect server hostname.
- *
- * @param {!JsonObject} config
- * @return {string}
- */
-const connectHostname = config => {
-  return `https://connect${devEtld(config) || '.scroll.com'}`;
 };
 
 /**
@@ -147,7 +116,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
   /** @override */
   authorize() {
     // TODO(dbow): Handle timeout?
-    return super.authorize().then(response => {
+    return super.authorize().then((response) => {
       const isStory = this.ampdoc
         .getRootNode()
         .querySelector('amp-story[standalone]');
@@ -155,24 +124,25 @@ export class ScrollAccessVendor extends AccessClientAdapter {
       if (response && response['scroll']) {
         if (!isStory) {
           // Display Scrollbar and set up features
-          const bar = new ScrollUserBar(
-            this.ampdoc,
-            this.accessSource_,
-            this.baseUrl_
-          );
-          const audio = new Audio(this.ampdoc);
+          const bar = new ScrollBar(this.ampdoc, this.accessSource_);
+          const sheet = new Sheet(this.ampdoc);
 
           const relay = new Relay(this.baseUrl_);
-          relay.register(audio.window, message => {
-            if (message['_scramp'] === 'au') {
-              audio.update(message);
+          relay.register(sheet.window, (message) => {
+            if (message['_scramp'] === 'au' || message['_scramp'] === 'st') {
+              sheet.update(message);
             }
           });
-          relay.register(bar.window);
+          relay.register(bar.window, (message) => {
+            if (message['_scramp'] === 'st') {
+              sheet.update(message);
+              bar.update(message);
+            }
+          });
 
           const config = this.accessSource_.getAdapterConfig();
           addAnalytics(this.ampdoc, config);
-          if (response['features'] && response['features']['readDepth']) {
+          if (response['features'] && response['features']['d']) {
             new ReadDepthTracker(
               this.ampdoc,
               this.accessSource_,
@@ -186,7 +156,11 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           response['blocker'] &&
           ScrollContentBlocker.shouldCheck(this.ampdoc)
         ) {
-          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();
+          new ScrollContentBlocker(
+            this.ampdoc,
+            this.accessSource_,
+            response['features'] && response['features']['r']
+          ).check();
         }
       }
       return response;
@@ -211,13 +185,17 @@ class ScrollContentBlocker {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
+   * @param {boolean} redirect
    */
-  constructor(ampdoc, accessSource) {
+  constructor(ampdoc, accessSource, redirect) {
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
+
+    /** @const @private {boolean} */
+    this.redirect_ = redirect;
   }
 
   /**
@@ -227,21 +205,40 @@ class ScrollContentBlocker {
     Services.xhrFor(this.ampdoc_.win)
       .fetchJson('https://block.scroll.com/check.json')
       .then(
-        () => false,
-        e => this.blockedByScrollApp_(e.message)
+        (response) => response.json().then((json) => json['dns'] === true),
+        (e) => this.blockedByScrollApp_(e.message)
       )
-      .then(blockedByScrollApp => {
+      .then((blockedByScrollApp) => {
         if (blockedByScrollApp === true) {
-          // TODO(dbow): Ideally we would automatically redirect to the page
-          // here, but for now we are adding a button so we redirect on user
-          // action.
-          new ActivateBar(
-            this.ampdoc_,
-            this.accessSource_,
-            connectHostname(this.accessSource_.getAdapterConfig())
-          );
+          this.handleBlocked_();
         }
       });
+  }
+
+  /** @private */
+  handleBlocked_() {
+    // Redirect app auth flow if enabled and not on AMP proxy.
+    if (this.redirect_ && !isProxyOrigin(this.ampdoc_.win.location)) {
+      buildUrl(this.accessSource_, 'https://scroll.com/loginwithapp').then(
+        (url) => {
+          const navigationService = Services.navigationForDoc(this.ampdoc_);
+          navigationService.navigateTo(
+            this.ampdoc_.win,
+            addParamToUrl(url, 'feature', 'r')
+          );
+        }
+      );
+    } else {
+      // Prompt to activate.
+      const baseUrl = connectHostname(this.accessSource_.getAdapterConfig());
+      const bar = new ScrollBar(this.ampdoc_, this.accessSource_);
+      const relay = new Relay(baseUrl);
+      relay.register(bar.window, (message) => {
+        if (message['_scramp'] === 'st') {
+          bar.update(message);
+        }
+      });
+    }
   }
 
   /**
@@ -274,7 +271,7 @@ function addAnalytics(ampdoc, vendorConfig) {
 
   // Create analytics element
   const doc = /** @type {!Document} */ (ampdoc.win.document);
-  const attributes = dict({'trigger': 'immediate'});
+  const attributes = {'trigger': 'immediate'};
   if (vendorConfig['dataConsentId']) {
     attributes['data-block-on-consent'] = '';
   }
@@ -283,13 +280,9 @@ function addAnalytics(ampdoc, vendorConfig) {
     'amp-analytics',
     attributes
   );
-  const scriptElem = createElementWithAttributes(
-    doc,
-    'script',
-    dict({
-      'type': 'application/json',
-    })
-  );
+  const scriptElem = createElementWithAttributes(doc, 'script', {
+    'type': 'application/json',
+  });
   const ANALYTICS_CONFIG = analyticsConfig(connectHostname(vendorConfig));
   scriptElem.textContent = JSON.stringify(ANALYTICS_CONFIG);
   analyticsElem.appendChild(scriptElem);

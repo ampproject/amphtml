@@ -1,0 +1,137 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-story with amp-story-captions</title>
+  <link rel="canonical" href="example.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-story-captions" src="https://cdn.ampproject.org/v0/amp-story-captions-0.1.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap" rel="stylesheet">
+  <style amp-custom>
+    .bottom {
+      align-content: end;
+      padding: 0;
+    }
+
+    .scrim {
+      background: linear-gradient(to bottom, transparent, #000);
+      color: #fff;
+      font-size: calc(5 * var(--story-page-vw));
+      padding: 32px;
+    }
+
+    amp-story-captions {
+      margin-bottom: 16px;
+    }
+
+    .page2 {
+      background-color: #fff;
+    }
+
+    amp-story-captions {
+      /* font-size: 2px !important; */
+    }
+  </style>
+</head>
+<body>
+  <amp-story
+      standalone
+      title="Demo Story"
+      publisher="AMP Story"
+      publisher-logo-src="example.com/logo.png"
+      poster-portrait-src="example.com/poster.jpg">
+    <amp-story-page id="page1" auto-advance-after="video">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions">
+          <track kind="subtitles" src="captions.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">This element is always above captions.</div>
+          <amp-story-captions id="captions" layout="fixed-height" height="100"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-container" auto-advance-after="video-container">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video-container"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-container">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">This element is always above captions and never overlaps.</div>
+          <amp-story-captions id="captions-container" layout="container"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-captions-preset-default" auto-advance-after="video-container">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video-container"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-preset-default">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">Default preset example.</div>
+          <div class="static-text">This element is always above captions and never overlaps.</div>
+          <amp-story-captions style-preset="default" id="captions-preset-default" layout="container"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-captions-preset-appear" auto-advance-after="video-container">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video-container"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-preset-appear">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">Appear preset example.</div>
+          <div class="static-text">This element is always above captions and never overlaps.</div>
+          <amp-story-captions style-preset="appear" style="--story-captions-font-size: .8em; --story-captions-font-family: 'Shadows Into Light'" id="captions-preset-appear" layout="container"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-fill" auto-advance-after="video-fill">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video-fill"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-fill">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">This element is always above captions and never overlaps.</div>
+          <amp-story-captions id="captions-fill" layout="fill"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
+</body>
+
+</html>

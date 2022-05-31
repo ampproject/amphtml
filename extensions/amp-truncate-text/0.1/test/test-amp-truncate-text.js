@@ -1,23 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-truncate-text';
-import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
-import {toggleExperiment} from '../../../../src/experiments';
+import {setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {toggleExperiment} from '#experiments';
 
 // Lint complains about a template string due to lines being too long.
 const loremText =
@@ -38,7 +23,7 @@ describes.realWin(
       extensions: ['amp-truncate-text'],
     },
   },
-  env => {
+  (env) => {
     let doc;
     let win;
 
@@ -54,7 +39,6 @@ describes.realWin(
      */
     function createTests({useShadow}) {
       beforeEach(() => {
-        toggleExperiment(win, 'amp-truncate-text', true);
         if (useShadow) {
           toggleExperiment(win, 'amp-truncate-text-shadow', true);
         }
@@ -65,7 +49,7 @@ describes.realWin(
        *    run and we have re-truncateed.
        */
       function afterMutationAndClamp() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve);
         });
       }
@@ -84,7 +68,7 @@ describes.realWin(
         });
         element.innerHTML = content;
         container.appendChild(element);
-        await element.build();
+        await element.buildInternal();
         await element.layoutCallback();
         await afterMutationAndClamp();
 
@@ -97,7 +81,7 @@ describes.realWin(
         }
 
         return toArray(element.querySelectorAll('[class$="-slot"]'))
-          .map(c => toArray(c.childNodes))
+          .map((c) => toArray(c.childNodes))
           .reduce((acc, c) => acc.concat(c), []);
       }
 
@@ -273,10 +257,11 @@ describes.realWin(
             width: 10,
             height: 13,
           });
+          const impl = await element.getImpl(false);
           const childNodes = getChildNodes(element);
 
           childNodes[0].data = 'Good night and good luck';
-          await element.implementation_.mutateElement(() => {});
+          await impl.mutateElement(() => {});
 
           expect(element.scrollHeight).to.equal(13);
           expect(getTextContent(element)).to.match(/^Good/);

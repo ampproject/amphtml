@@ -1,0 +1,42 @@
+<!--
+  Test Description:
+  This test demonstrates that if the first script is a module LTS version, all
+  following scripts must also be a module/nomodule LTS version pair.
+-->
+<!doctype html>
+<html ⚡ transformed="google;v=1">
+<head>
+  <meta charset="utf-8">
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name="viewport" content="width=device-width">
+
+  <!-- Valid: first script is a module LTS version -->
+  <script async crossorigin=anonymous src=https://cdn.ampproject.org/lts/v0.mjs type=module></script>
+
+  <!-- Valid: nomodule LTS version pair -->
+  <script async nomodule src=https://cdn.ampproject.org/lts/v0.js></script>
+
+  <!-- Valid: module LTS version pair -->
+  <script async crossorigin=anonymous custom-element=amp-ad src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs type=module></script>
+
+  <!-- Valid: nomodule LTS version pair -->
+  <script async custom-element=amp-ad nomodule src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js></script>
+
+  <!-- Invalid: standard version -->
+  <script async custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script>
+
+  <!-- Invalid: LTS version -->
+  <script async custom-element=amp-anim src=https://cdn.ampproject.org/lts/v0/amp-anim-0.1.js></script>
+
+  <!-- Invalid: module version -->
+  <script async crossorigin=anonymous custom-element=amp-audio src=https://cdn.ampproject.org/v0/amp-audio-0.1.mjs type=module></script>
+
+  <!-- Invalid: nomodule version -->
+  <script async custom-element=amp-audio nomodule src=https://cdn.ampproject.org/v0/amp-audio-0.1.js></script>
+
+  <link rel="canonical" href="./regular-html-version.html">
+</head>
+<body>
+  Hello, world.
+</body>
+</html>

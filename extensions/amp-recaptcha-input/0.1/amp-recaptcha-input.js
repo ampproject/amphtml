@@ -1,37 +1,24 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Async Input Element that uses the
  * amp-recaptcha-service to dispatch actions, and return
  * recaptcha tokens
  */
 
 import {
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
+} from '#core/constants/async-input';
+import {Layout_Enum} from '#core/dom/layout';
+import {setStyles, toggle} from '#core/dom/style';
+
+import {userAssert} from '#utils/log';
+
+import {
   AmpRecaptchaService,
   recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
-import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
-} from '../../../src/async-input';
+
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
-import {Layout} from '../../../src/layout';
-import {setStyles, toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';
@@ -53,6 +40,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.registerPromise_ = null;
+
+    /** @private {boolean} */
+    this.global_ = false;
   }
 
   /** @override */
@@ -70,19 +60,21 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     );
 
     userAssert(
-      this.element.getAttribute(AsyncInputAttributes.NAME),
+      this.element.getAttribute(AsyncInputAttributes_Enum.NAME),
       'The %s attribute is required for <amp-recaptcha-input> %s',
-      AsyncInputAttributes.NAME,
+      AsyncInputAttributes_Enum.NAME,
       this.element
     );
 
-    return recaptchaServiceForDoc(this.element).then(service => {
+    this.global_ = this.element.hasAttribute('data-global');
+
+    return recaptchaServiceForDoc(this.element).then((service) => {
       this.recaptchaService_ = service;
 
       return this.mutateElement(() => {
         toggle(this.element);
         // Add the required AsyncInput class
-        this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
+        this.element.classList.add(AsyncInputClasses_Enum.ASYNC_INPUT);
         /**
          * These styles will create an in-place element, that is 1x1,
          * but invisible. Absolute positioning keeps it where it would have
@@ -102,13 +94,16 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /** @override */
   layoutCallback() {
     if (!this.registerPromise_ && this.sitekey_) {
-      this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
+      this.registerPromise_ = this.recaptchaService_.register(
+        this.sitekey_,
+        this.global_
+      );
     }
 
     return /** @type {!Promise} */ (this.registerPromise_);
@@ -145,7 +140,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc('amp-recaptcha', AmpRecaptchaService);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });

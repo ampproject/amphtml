@@ -1,25 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import * as docready from '#core/document/ready';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import * as docready from '../../../../src/document-ready';
+import {Services} from '#service';
+
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.fakeWin(
   'getHighlightParam',
@@ -28,7 +14,7 @@ describes.fakeWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     it('get a param', () => {
       // URL encoded '{"s":["amp","highlight"]}'.
       env.win.location =
@@ -121,9 +107,10 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let root = null;
-    let docreadyCb = null;
+    let initCb = null;
+
     beforeEach(() => {
       const {document} = env.win;
       root = document.createElement('div');
@@ -135,11 +122,14 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      env.sandbox.stub(docready, 'whenDocumentReady').returns({
-        then: cb => {
-          docreadyCb = cb;
-        },
-      });
+      env.sandbox
+        .stub(docready, 'whenDocumentReady')
+        .returns({then: (cb) => (initCb = cb)});
+
+      const platform = Services.platformFor(env.ampdoc.win);
+      if (platform.isChrome()) {
+        env.sandbox.stub(platform, 'getMajorVersion').returns(92);
+      }
     });
 
     it('initialize with visibility=visible', () => {
@@ -164,7 +154,7 @@ describes.realWin(
 
       // initHighlight_ is not called before document become ready.
       expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
+      initCb();
       // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
       expect(handler.highlightedNodes_).not.to.be.null;
 
@@ -196,8 +186,8 @@ describes.realWin(
 
       const viewerOrigin = 'http://localhost:9876';
       const port = new WindowPortEmulator(window, viewerOrigin);
-      port.addEventListener = function() {};
-      port.postMessage = function() {};
+      port.addEventListener = function () {};
+      port.postMessage = function () {};
       const messaging = new Messaging(env.win, port);
 
       handler.setupMessaging(messaging);
@@ -226,7 +216,7 @@ describes.realWin(
         sentences: ['amp', 'highlight'],
         skipRendering: true,
       });
-      docreadyCb();
+      initCb();
 
       expect(scrollStub).not.to.be.called;
 
@@ -267,8 +257,8 @@ describes.realWin(
 
       // initHighlight_ is not called before document become ready.
       expect(handler.highlightedNodes_).to.be.null;
-      docreadyCb();
-      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+      initCb();
+      // initHighlight_ was called in initCb() and highlightedNodes_ is set.
       expect(handler.highlightedNodes_).not.to.be.null;
 
       expect(setScrollTop).to.be.calledOnce;
@@ -310,7 +300,7 @@ describes.realWin(
       );
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
+      initCb();
 
       expect(scrollStub).not.to.be.called;
 
@@ -345,10 +335,10 @@ describes.realWin(
       );
       env.sandbox
         .stub(ampdoc, 'getVisibilityState')
-        .returns(VisibilityState.PRERENDER);
+        .returns(VisibilityState_Enum.PRERENDER);
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
-      docreadyCb();
+      initCb();
 
       expect(setScrollTop).to.be.calledOnce;
       expect(setScrollTop.firstCall.args.length).to.equal(1);
@@ -365,7 +355,7 @@ describes.realWin(
 
     it('calcTopToCenterHighlightedNodes_ center elements', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
@@ -382,7 +372,7 @@ describes.realWin(
 
     it('calcTopToCenterHighlightedNodes_ too tall element', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
@@ -401,7 +391,7 @@ describes.realWin(
 
     it('mayAdjustTop_', () => {
       const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
-      docreadyCb();
+      initCb();
       expect(handler.highlightedNodes_).not.to.be.null;
 
       // Set up an environment where calcTopToCenterHighlightedNodes_
@@ -422,5 +412,115 @@ describes.realWin(
       expect(setScrollTopStub).to.be.calledOnce;
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
+  }
+);
+
+describes.realWin(
+  'HighlightHandler',
+  {
+    // We can not overwrite win.location with realWin.
+    amp: {
+      ampdoc: 'single',
+    },
+  },
+  (env) => {
+    // TODO(dmanek): remove `ifChrome` once we remove Chrome version detection
+    describe
+      .configure()
+      .ifChrome()
+      .run('Text Fragments', () => {
+        let root = null;
+
+        beforeEach(() => {
+          const {document} = env.win;
+          root = document.createElement('div');
+          document.body.appendChild(root);
+          const div0 = document.createElement('div');
+          div0.textContent = 'text in amp doc';
+          root.appendChild(div0);
+          const div1 = document.createElement('div');
+          div1.textContent = 'highlighted text';
+          root.appendChild(div1);
+
+          //  Used in Chrome 93+
+          env.sandbox.stub(env.ampdoc, 'whenFirstVisible');
+
+          const platform = Services.platformFor(env.ampdoc.win);
+          if (platform.isChrome()) {
+            env.sandbox.stub(platform, 'getMajorVersion').returns(93);
+          }
+        });
+
+        it('should highlight using text fragments', async () => {
+          const {ampdoc} = env;
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: ['amp', 'highlight'],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
+          expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+            'text=amp&text=highlight'
+          );
+        });
+
+        it('should not highlight using text fragments for Chrome 92', async () => {
+          const {ampdoc} = env;
+          const platform = Services.platformFor(ampdoc.win);
+          platform.getMajorVersion.returns(92);
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: ['amp', 'highlight'],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).not.to.be.called;
+        });
+
+        it('should not highlight if highlightInfo.sentences is empty', async () => {
+          const {ampdoc} = env;
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          ampdoc.whenFirstVisible.returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: [],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).not.to.be.called;
+        });
+      });
   }
 );

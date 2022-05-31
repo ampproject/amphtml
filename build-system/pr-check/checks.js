@@ -1,106 +1,120 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
- * @fileoverview
- * This script performs quick checks on the source code
- * prior to running unit and integration tests.
- * This is run during the CI stage = build; job = checks.
+ * @fileoverview Script that runs various checks during CI.
  */
 
-const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
-const {reportAllExpectedTests} = require('../tasks/report-test-status');
-const {runYarnChecks} = require('./yarn-checks');
+const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
+const {timedExecOrDie} = require('./utils');
 
-const FILENAME = 'checks.js';
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'checks.js';
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
-
-  if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp check-exact-versions');
-    timedExecOrDie('gulp lint');
-    timedExecOrDie('gulp prettify');
-    timedExecOrDie('gulp presubmit');
-    timedExecOrDie('gulp ava');
-    timedExecOrDie('gulp babel-plugin-tests');
-    timedExecOrDie('gulp caches-json');
-    timedExecOrDie('gulp dev-dashboard-tests');
-    timedExecOrDie('gulp dep-check');
-    timedExecOrDie('gulp check-types');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    await reportAllExpectedTests(buildTargets);
-    timedExecOrDie('gulp update-packages');
-
-    timedExecOrDie('gulp check-exact-versions');
-    timedExecOrDie('gulp lint');
-    timedExecOrDie('gulp prettify');
-    timedExecOrDie('gulp presubmit');
-
-    if (buildTargets.has('AVA')) {
-      timedExecOrDie('gulp ava');
-    }
-
-    if (buildTargets.has('BABEL_PLUGIN')) {
-      timedExecOrDie('gulp babel-plugin-tests');
-    }
-
-    if (buildTargets.has('CACHES_JSON')) {
-      timedExecOrDie('gulp caches-json');
-    }
-
-    // Check document links only for PR builds.
-    if (buildTargets.has('DOCS')) {
-      timedExecOrDie('gulp check-links --local_changes');
-    }
-
-    if (buildTargets.has('DEV_DASHBOARD')) {
-      timedExecOrDie('gulp dev-dashboard-tests');
-    }
-
-    // Validate owners syntax only for PR builds.
-    if (buildTargets.has('OWNERS')) {
-      timedExecOrDie('gulp check-owners --local_changes');
-    }
-
-    if (buildTargets.has('RUNTIME')) {
-      timedExecOrDie('gulp dep-check');
-      timedExecOrDie('gulp check-types');
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+/**
+ * Steps to run during push builds.
+ */
+function pushBuildWorkflow() {
+  timedExecOrDie('amp presubmit');
+  timedExecOrDie('amp check-invalid-whitespaces');
+  timedExecOrDie('amp lint');
+  timedExecOrDie('amp prettify');
+  timedExecOrDie('amp check-json-schemas');
+  timedExecOrDie('amp ava');
+  timedExecOrDie('amp check-build-system');
+  timedExecOrDie('amp check-ignore-lists');
+  timedExecOrDie('amp babel-plugin-tests');
+  timedExecOrDie('amp check-exact-versions');
+  timedExecOrDie('amp check-renovate-config');
+  timedExecOrDie('amp server-tests');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
+  timedExecOrDie('amp dep-check');
+  timedExecOrDie('amp check-types');
+  timedExecOrDie('amp check-sourcemaps');
+  timedExecOrDie('amp performance-urls');
+  timedExecOrDie('amp check-analytics-vendors-list');
+  timedExecOrDie('amp check-video-interface-list');
+  timedExecOrDie('amp get-zindex');
+  timedExecOrDie('amp markdown-toc');
 }
 
-main();
+/**
+ * Steps to run during PR builds.
+ */
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.PRESUBMIT)) {
+    timedExecOrDie('amp presubmit');
+  }
+
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    timedExecOrDie('amp check-invalid-whitespaces');
+  }
+
+  if (buildTargetsInclude(Targets.IGNORE_LIST)) {
+    timedExecOrDie(`amp check-ignore-lists`);
+  }
+
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
+    timedExecOrDie('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
+    timedExecOrDie('amp lint --local_changes');
+  }
+
+  if (buildTargetsInclude(Targets.PRETTIFY)) {
+    timedExecOrDie('amp prettify');
+  }
+
+  if (buildTargetsInclude(Targets.JSON_FILES)) {
+    timedExecOrDie('amp check-json-schemas');
+  }
+
+  if (buildTargetsInclude(Targets.AVA)) {
+    timedExecOrDie('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    timedExecOrDie('amp check-build-system');
+  }
+
+  if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
+    timedExecOrDie('amp babel-plugin-tests');
+  }
+
+  if (buildTargetsInclude(Targets.DOCS)) {
+    timedExecOrDie('amp check-links --local_changes'); // only for PR builds
+    timedExecOrDie('amp markdown-toc');
+  }
+
+  if (buildTargetsInclude(Targets.OWNERS)) {
+    timedExecOrDie('amp check-owners --local_changes'); // only for PR builds
+  }
+
+  if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
+    timedExecOrDie('amp check-exact-versions');
+  }
+
+  if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
+    timedExecOrDie('amp check-renovate-config');
+  }
+
+  if (buildTargetsInclude(Targets.SERVER)) {
+    timedExecOrDie('amp server-tests');
+  }
+
+  if (buildTargetsInclude(Targets.AVA, Targets.RUNTIME)) {
+    timedExecOrDie('amp make-extension --name=t --test --cleanup');
+    timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
+  }
+
+  if (buildTargetsInclude(Targets.RUNTIME)) {
+    timedExecOrDie('amp dep-check');
+    timedExecOrDie('amp check-types');
+    timedExecOrDie('amp check-sourcemaps');
+    timedExecOrDie('amp performance-urls');
+    timedExecOrDie('amp check-analytics-vendors-list');
+    timedExecOrDie('amp check-video-interface-list');
+    timedExecOrDie('amp get-zindex');
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

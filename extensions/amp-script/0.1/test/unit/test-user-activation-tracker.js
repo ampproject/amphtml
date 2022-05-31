@@ -1,26 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {htmlFor} from '#core/dom/static-template';
 
 import {
   ACTIVATION_TIMEOUT,
   UserActivationTracker,
 } from '../../user-activation-tracker';
-import {htmlFor} from '../../../../../src/static-template';
 
-describes.realWin('UserActivationTracker', {}, env => {
+describes.realWin('UserActivationTracker', {}, (env) => {
   let win;
   let root;
   let tracker;
@@ -31,9 +16,7 @@ describes.realWin('UserActivationTracker', {}, env => {
     const doc = win.document;
     const html = htmlFor(doc);
 
-    root = html`
-      <root></root>
-    `;
+    root = html` <root></root> `;
     doc.body.appendChild(root);
 
     tracker = new UserActivationTracker(root);
@@ -42,7 +25,7 @@ describes.realWin('UserActivationTracker', {}, env => {
   });
 
   function microTask() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       win.setTimeout(resolve, 0);
     });
   }

@@ -1,23 +1,11 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {tryParseJson} from '#core/types/object/json';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from '../src/3p-frame-messaging';
-import {dev, devAssert, user, userAssert} from '../src/log';
-import {tryParseJson} from '../src/json';
+
+/** @typedef {import('#core/3p-frame-messaging').IframeTransportEventDef} IframeTransportDef */
 
 /** @private @const {string} */
 const TAG_ = 'iframe-transport-client';
@@ -60,15 +48,12 @@ export class IframeTransportClient {
       )
     );
     this.iframeMessagingClient_.makeRequest(
-      MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
-      MessageType.IFRAME_TRANSPORT_EVENTS,
-      eventData => {
-        const events =
-          /**
-           * @type
-           *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
-           */
-          (eventData['events']);
+      MessageType_Enum.SEND_IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
+      (eventData) => {
+        const events = /** @type {!Array<IframeTransportEventDef>} */ (
+          eventData['events']
+        );
         devAssert(
           events,
           'Received malformed events list in ' + this.win_.location.href
@@ -77,7 +62,7 @@ export class IframeTransportClient {
           events.length,
           'Received empty events list in ' + this.win_.location.href
         );
-        events.forEach(event => {
+        events.forEach((event) => {
           try {
             devAssert(
               event.creativeId,
@@ -180,7 +165,7 @@ export class IframeTransportContext {
    */
   sendResponseToCreative(data) {
     this.iframeMessagingClient_./*OK*/ sendMessage(
-      MessageType.IFRAME_TRANSPORT_RESPONSE,
+      MessageType_Enum.IFRAME_TRANSPORT_RESPONSE,
       /** @type {!JsonObject} */
       ({message: data, ...this.baseMessage_})
     );

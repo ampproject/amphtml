@@ -1,23 +1,15 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssert, userAssert} from '#core/assert';
+import {fromIterator, isArray} from '#core/types/array';
+import {isObject, map} from '#core/types/object';
 
-import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
-import {dict, map} from './object';
-import {fromIterator} from './array';
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {getMode} from '../mode';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -25,10 +17,6 @@ import {
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
-import {getMode} from '../mode';
-import {isArray, isObject} from '../types';
-import {isExperimentOn} from '../experiments';
-import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -69,7 +57,8 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  * `ArrayBuffer` and `Blob` are already supported by the structured clone
  * algorithm. Other serialization-needing types such as `URLSearchParams`
  * (which is not supported in IE and Safari) and `FederatedCredentials` are
- * not used in AMP runtime.
+ * not used in AMP runtime. `init.body` can also be a string
+ * (application/x-www-form-urlencoded) but that doesn't require serialization.
  *
  * @param {string} input The URL of the XHR to convert to structured
  *     cloneable.
@@ -77,10 +66,9 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable.
  * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
  *     cloneable request.
- * @private
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = {...init};
+  const newInit = /** @type {!FetchInitDef} */ ({...init});
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -155,12 +143,11 @@ export function fromStructuredCloneable(response, responseType) {
   if (response['init']) {
     const init = response['init'];
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     }
     if (init.status) {
@@ -193,7 +180,6 @@ export function fromStructuredCloneable(response, responseType) {
  * @return {!Promise<!Response|undefined>}
  *     A response returned by the interceptor if XHR is intercepted or
  *     `Promise<undefined>` otherwise.
- * @private
  */
 export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
@@ -220,7 +206,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
 
   return whenUnblocked
     .then(() => viewer.isTrustedViewer())
-    .then(viewerTrusted => {
+    .then((viewerTrusted) => {
       if (
         !(
           viewerTrusted ||
@@ -230,12 +216,14 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       ) {
         return;
       }
-      const messagePayload = dict({
+      const messagePayload = {
         'originalRequest': toStructuredCloneable(input, init),
-      });
+      };
       return viewer
         .sendMessageAwaitResponse('xhr', messagePayload)
-        .then(response => fromStructuredCloneable(response, init.responseType));
+        .then((response) =>
+          fromStructuredCloneable(response, init.responseType)
+        );
     });
 }
 
@@ -275,7 +263,7 @@ export function setupInit(opt_init, opt_accept) {
   );
 
   init.method = normalizeMethod_(init.method);
-  init.headers = init.headers || dict({});
+  init.headers = init.headers || {};
   if (opt_accept) {
     init.headers['Accept'] = opt_accept;
   }
@@ -317,7 +305,7 @@ export function setupJsonFetchInit(init) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
     devAssert(
-      allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+      allowedJsonBodyTypes_.some((test) => test(fetchInit.body)),
       'body must be of type object or array. %s',
       fetchInit.body
     );
@@ -373,52 +361,19 @@ function isRetriable(status) {
  * Returns the response if successful or otherwise throws an error.
  * @param {!Response} response
  * @return {!Promise<!Response>}
- * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (response.ok) {
       return resolve(response);
     }
 
     const {status} = response;
     const err = user().createError(`HTTP error ${status}`);
-    err.retriable = isRetriable(status);
+    err['retriable'] = isRetriable(status);
     // TODO(@jridgewell, #9448): Callers who need the response should
     // skip processing.
-    err.response = response;
+    err['response'] = response;
     throw err;
   });
-}
-
-/**
- * Returns a promise resolving to a string identity token if the element
- * contains the 'crossorigin' attribute and the amp-viewer-assistance extension
- * is present. Resolves to undefined otherwise.
- * @param {!Element} element
- * @return {!Promise<undefined>}
- */
-export function getViewerAuthTokenIfAvailable(element) {
-  const crossOriginAttr = element.getAttribute('crossorigin');
-  if (
-    crossOriginAttr &&
-    crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post'
-  ) {
-    return (
-      Services.viewerAssistanceForDocOrNull(element)
-        .then(va => {
-          userAssert(
-            va,
-            'crossorigin="amp-viewer-auth-token-post" ' +
-              'requires amp-viewer-assistance extension.'
-          );
-          return va.getIdTokenPromise();
-        })
-        // If crossorigin attr is present, resolve with token or empty string.
-        .then(token => token || '')
-        .catch(() => '')
-    );
-  }
-  // If crossorigin attribute is missing, always resolve with undefined.
-  return Promise.resolve(undefined);
 }

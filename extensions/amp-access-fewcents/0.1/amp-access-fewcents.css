@@ -1,0 +1,119 @@
+#amp-access-fewcents-dialog {
+  padding: 20px;
+}
+
+.aaf-container {
+  height: auto;
+  width: 70%;
+  max-width: 540px;
+  align-items: center;
+  margin: auto;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 15px;
+  background-color: whitesmoke;
+  border: 0px;
+  border-radius: 5px;
+  opacity: 1;
+  transition: opacity 0.5s ease 0s;
+  font-family: Arial;
+  font-weight: normal;
+  box-shadow: 1px 2px 2px 2px grey;
+  overflow: hidden;
+}
+
+.aaf-headerText {
+  text-align: center;
+  font-size: 17px;
+  text-align: center;
+  word-wrap: normal;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.aaf-purchase-button {
+  line-height: 1.2;
+  cursor: pointer;
+  color: white;
+  border: 0;
+  background: rgb(8, 40, 154);
+  width: 100%;
+  border-radius: 5px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  outline: none;
+  margin: auto;
+  padding: 0px 25px;
+  max-width: 160px;
+}
+
+.aaf-imageTag {
+  max-height: 30px;
+}
+
+.aaf-already-bought {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 4px;
+  color: rgb(8, 40, 154);
+}
+
+.aaf-price-btn-div {
+  display: flex;
+  place-content: center space-evenly;
+  align-items: center;
+  margin: 12px auto 0px;
+  max-width: 250px;
+}
+
+.aaf-article-price {
+  font-size: 24px;
+  font-weight: 400;
+  text-align: center;
+  margin-right: 10px;
+  color: rgb(0, 0, 0);
+}
+
+.aaf-btn-div {
+  line-height: 1.2;
+  margin-top: 0.5 rem;
+  text-align: center;
+}
+
+.aaf-bottom-div {
+  display: flex;
+  align-items: center;
+}
+
+.aaf-fewcents-image-tag {
+  max-height: 45px;
+}
+
+.aaf-refRow {
+  text-align: center;
+  word-break: break-word;
+  color: rgb(168, 163, 163);
+}
+
+.aaf-refElements {
+  padding: 4px;
+  font-size: 11px;
+  text-align: center;
+  color: rgb(168, 163, 163);
+  white-space: nowrap;
+}
+
+.aaf-partition-bar {
+  font-size: 11px;
+  margin: 0px 4px;
+}
+
+@media (max-width: 786px) {
+  #amp-access-fewcents-dialog {
+    width: 350px;
+  }
+}

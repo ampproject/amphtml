@@ -1,20 +1,4 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -28,13 +12,13 @@ export class MutatorInterface {
    * @param {function()=} opt_callback A callback function.
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {}
+  forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {}
 
   /**
    * Return a promise that requests the runtime to update the size of
    * this element to the specified value.
    * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeSize}, the runtime
+   * as soon as possible. However, unlike in {@link forceChangeSize}, the runtime
    * may refuse to make a change in which case it will reject promise, call the
    * `overflowCallback` method on the target resource with the height value.
    * Overflow callback is expected to provide the reader with the user action
@@ -49,7 +33,7 @@ export class MutatorInterface {
    * @return {!Promise}
    * @param {?Event=} opt_event
    */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {}
+  requestChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {}
 
   /**
    * Expands the element.
@@ -93,11 +77,15 @@ export class MutatorInterface {
    * first argument to this method and all the mutation work should be done
    * in the mutator callback which is called in the "mutation" vsync phase.
    *
+   * By default, all mutations force a remeasure. If you know that a mutation
+   * cannot cause a change to the layout, you may use the skipRemeasure arg.
+   *
    * @param {!Element} element
    * @param {function()} mutator
+   * @param {boolean=} skipRemeasure
    * @return {!Promise}
    */
-  mutateElement(element, mutator) {}
+  mutateElement(element, mutator, skipRemeasure) {}
 
   /**
    * Runs the specified mutation on the element and ensures that remeasures and

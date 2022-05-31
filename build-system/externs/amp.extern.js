@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @externs */
 
 /**
@@ -31,7 +15,8 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
  *
  * @typedef {{
- *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|undefined|string),
+ *   responseType: (string|undefined),
+ *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|!Array|string|undefined|null),
  *   cache: (string|undefined),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
@@ -42,46 +27,62 @@
  *   prerenderSafe: (boolean|undefined),
  * }}
  */
-var FetchInitDef;
+let FetchInitDef;
+
+// TODO: add MediaQueryListEvent to closure's builtin externs.
+/**
+ * @typedef {{
+ *   matches: function():boolean,
+ *   media: string
+ * }}
+ */
+let MediaQueryListEvent;
 
 /**
  * Externed due to being passed across component/runtime boundary.
  * @typedef {{xhrUrl: string, fetchOpt: !FetchInitDef}}
  */
-var FetchRequestDef;
+let FetchRequestDef;
 
 /** @constructor */
-var FormDataWrapperInterface = function() {};
+let FormDataWrapperInterface = function () {};
 
-FormDataWrapperInterface.prototype.entries = function() {};
-FormDataWrapperInterface.prototype.getFormData = function() {};
+FormDataWrapperInterface.prototype.entries = function () {};
+FormDataWrapperInterface.prototype.getFormData = function () {};
 
 FormData.prototype.entries = function () {};
-
-/**
- * A type for Objects that can be JSON serialized or that come from
- * JSON serialization. Requires the objects fields to be accessed with
- * bracket notation object['name'] to make sure the fields do not get
- * obfuscated.
- * @constructor
- * @dict
- */
-function JsonObject() {}
-
-/**
- * @typedef {{
- *   YOU_MUST_USE: string,
- *   jsonLiteral: function(),
- *   TO_MAKE_THIS_TYPE: string,
- * }}
- */
-var InternalJsonLiteralTypeDef;
 
 /**
  * Force the dataset property to be handled as a JsonObject.
  * @type {!JsonObject}
  */
 Element.prototype.dataset;
+
+/** Needed for partial shadow DOM polyfill used in shadow docs. */
+Element.prototype.__AMP_SHADOW_ROOT;
+
+/** @type {?ShadowRoot} */
+Element.prototype.shadowRoot;
+
+// Fullscreen methods
+// TODO: upstream these types to closure.
+Document.prototype.cancelFullScreen;
+Document.prototype.webkitExitFullscreen;
+Element.prototype.cancelFullScreen;
+Element.prototype.exitFullscreen;
+Element.prototype.webkitExitFullscreen;
+Element.prototype.webkitCancelFullScreen;
+Element.prototype.mozCancelFullScreen;
+Element.prototype.msExitFullscreen;
+Element.prototype.requestFullscreen;
+Element.prototype.requestFullScreen;
+Element.prototype.webkitRequestFullscreen;
+Element.prototype.webkitEnterFullscreen;
+Element.prototype.msRequestFullscreen;
+Element.prototype.mozRequestFullScreen;
+
+/** @type {boolean|undefined} */
+Element.prototype.webkitDisplayingFullscreen;
 
 /**
  * - n is the name.
@@ -96,32 +97,59 @@ Element.prototype.dataset;
  */
 function ExtensionPayload() {}
 
-/** @type {string} */
+/**
+ * Extension name.
+ * @type {string}
+ */
 ExtensionPayload.prototype.n;
 
-/** @type {function(!Object,!Object)} */
-ExtensionPayload.prototype.f;
+/**
+ * Extension version.
+ * @type {string}
+ */
+ExtensionPayload.prototype.ev;
 
-/** @type {string|undefined} */
+/**
+ * Whether this extension version is the latest version.
+ * @type {boolean}
+ */
+ExtensionPayload.prototype.l;
+
+/**
+ * Priority.
+ * @type {string|undefined}
+ */
 ExtensionPayload.prototype.p;
 
-/** @type {string} */
+/**
+ * RTV (release) version.
+ * @type {string}
+ */
 ExtensionPayload.prototype.v;
 
-/** @type {!Array<string>|string|undefined} */
-ExtensionPayload.prototype.i;
+/**
+ * If the value of "m" is 1 then the current extension is of type "module",
+ * else it is of type "nomodule".
+ * @type {number}
+ */
+ExtensionPayload.prototype.m;
 
+/**
+ * Install function.
+ * @type {function(!Object,!Object)}
+ */
+ExtensionPayload.prototype.f;
 
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
  */
-var JsonValue;
+let JsonValue;
 
 /**
  * @constructor
  * @dict
  */
-function VideoAnalyticsDetailsDef() {};
+function VideoAnalyticsDetailsDef() {}
 /** @type {boolean} */
 VideoAnalyticsDetailsDef.prototype.autoplay;
 /** @type {number} */
@@ -143,18 +171,14 @@ VideoAnalyticsDetailsDef.prototype.state;
 /** @type {number} */
 VideoAnalyticsDetailsDef.prototype.width;
 
-
 // Node.js global
-var process = {};
+let process = {};
 process.env;
 process.env.NODE_ENV;
 
-/** @type {boolean|undefined} */
-window.IS_AMP_ALT;
-
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
-window.context = {};
+window.context;
 window.context.sentinel;
 window.context.clientId;
 window.context.initialLayoutRect;
@@ -164,7 +188,7 @@ window.context.experimentToggles;
 window.context.master;
 window.context.isMaster;
 window.context.ampcontextVersion;
-window.context.ampcontextFilepath
+window.context.ampcontextFilepath;
 window.context.canary;
 window.context.canonicalUrl;
 window.context.consentSharedData;
@@ -183,23 +207,39 @@ window.context.tagName;
 
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
-/* @type {?Object} */
-window.sf_ = {};
-/* @type {?Object} */
+window.sf_;
 window.sf_.cfg;
 
 // Exposed to custom ad iframes.
-/* @type {!Function} */
+/** @type {function(function(!Object, function(!Object)), !Array<string>=, !Array<string>=)} */
 window.draw3p;
 
 // AMP's globals
+window.testLocation;
+window.Location.originalHash;
 window.__AMP_SERVICES;
 window.__AMP_TEST;
 window.__AMP_TEST_IFRAME;
 window.__AMP_TAG;
 window.__AMP_TOP;
 window.__AMP_PARENT;
-window.AMP = {};
+window.__AMP_WEAKREF_ID;
+window.__AMP_URL_CACHE;
+window.__AMP_LOG;
+
+/** @type {undefined|boolean} */
+window.ENABLE_LOG;
+
+// TODO: uncomment line below when src/mode.js is added to typechecking.
+// https://github.com/ampproject/amphtml/issues/34099
+
+// /** @type {undefined|../../src/mode.ModeDef} */
+window.__AMP_MODE;
+
+/** @type {boolean|undefined} */
+window.AMP_DEV_MODE;
+
+window.AMP;
 window.AMP._ = {};
 window.AMP.push;
 window.AMP.title;
@@ -209,7 +249,6 @@ window.AMP.ampdoc;
 window.AMP.config;
 window.AMP.config.urls;
 window.AMP.BaseElement;
-window.AMP.BaseTemplate;
 window.AMP.registerElement;
 window.AMP.registerTemplate;
 window.AMP.registerServiceForDoc;
@@ -218,12 +257,25 @@ window.AMP.toggleExperiment;
 window.AMP.setLogLevel;
 window.AMP.setTickFunction;
 window.AMP.viewer;
-window.AMP.viewport = {};
+window.AMP.viewport;
 window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
-window.AMP.attachShadowDoc;
-window.AMP.attachShadowDocAsStream;
+
+/**
+ * This symbol is exposed by bundles transformed by `scoped-require.js` to avoid
+ * polluting the global namespace with `require`.
+ * It allows AMP extensions to consume code injected into their binaries that
+ * cannot be run through Closure Compiler, e.g. React code with JSX.
+ * @type {!function(string):?}
+ */
+window.AMP.require;
+
+/** @type {function(!HTMLElement, !Document, !string, Object)} */
+window.AMP.attachShadowDoc = function (element, document, url, options) {};
+
+/** @type {function(!HTMLElement, !string, Object)} */
+window.AMP.attachShadowDocAsStream = function (element, url, options) {};
 
 /** @constructor */
 function AmpConfigType() {}
@@ -239,15 +291,21 @@ AmpConfigType.prototype.thirdPartyFrameRegex;
 /* @public {string} */
 AmpConfigType.prototype.errorReporting;
 /* @public {string} */
+AmpConfigType.prototype.betaErrorReporting;
+/* @public {string} */
 AmpConfigType.prototype.cdn;
 /* @public {string} */
 AmpConfigType.prototype.cdnUrl;
 /* @public {string} */
 AmpConfigType.prototype.errorReportingUrl;
 /* @public {string} */
+AmpConfigType.prototype.betaErrorReportingUrl;
+/* @public {string} */
 AmpConfigType.prototype.localDev;
 /* @public {string} */
 AmpConfigType.prototype.v;
+/* @public {string} */
+AmpConfigType.prototype.type;
 /* @public {boolean} */
 AmpConfigType.prototype.canary;
 /* @public {string} */
@@ -256,8 +314,14 @@ AmpConfigType.prototype.runtime;
 AmpConfigType.prototype.test;
 /* @public {string|undefined} */
 AmpConfigType.prototype.spt;
+/* @public {boolean|undefined} */
+AmpConfigType.prototype.esm;
+/* @public {string} */
+AmpConfigType.prototype.geoApi;
+/* @public {string} */
+AmpConfigType.prototype.geoApiUrl;
 
-/** @type {!AmpConfigType}  */
+/** @type {!AmpConfigType} */
 window.AMP_CONFIG;
 
 window.AMP_CONTEXT_DATA;
@@ -290,26 +354,26 @@ function IframeTransportContext() {}
 IframeTransportContext.onAnalyticsEvent;
 IframeTransportContext.sendResponseToCreative;
 
-/** @typedef {function(!JsonObject)} */
-let VegaChartFactory;
-
-// amp-viz-vega related externs.
-/**
- * @typedef {{spec: function(!JsonObject, function(?Error, !VegaChartFactory))}}
- */
-let VegaParser;
-/**
- * @typedef {{parse: VegaParser}}
- */
-let VegaObject;
-/* @type {!VegaObject} */
-window.vg;
-
 // amp-date-picker externs
 /**
  * @type {function(*)}
  */
-let ReactRender = function() {};
+let ReactRender = function () {};
+
+/** @constructor */
+let RRule;
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function (unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function (unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -317,9 +381,9 @@ let ReactRender = function() {};
 let PropTypes = {};
 
 /**
- * @@dict
+ * @dict
  */
-let ReactDates = {};
+let ReactDates;
 
 /** @constructor */
 ReactDates.DayPickerSingleDateController;
@@ -351,7 +415,7 @@ ReactDatesConstants.HORIZONTAL_ORIENTATION;
 /**
  * @constructor
  */
-var Inputmask = class {};
+let Inputmask = class {};
 
 /** @param {!Object} unusedOpts */
 Inputmask.extendAliases = function (unusedOpts) {};
@@ -371,86 +435,210 @@ window.AMP.dependencies = {};
  * @param {!Element} unusedElement
  * @return {!Inputmask}
  */
-window.AMP.dependencies.inputmaskFactory = function(unusedElement) {};
-
-// Should have been defined in the closure compiler's extern file for
-// IntersectionObserverEntry, but appears to have been omitted.
-IntersectionObserverEntry.prototype.rootBounds;
+window.AMP.dependencies.inputmaskFactory = function (unusedElement) {};
 
 // TODO (remove after we update closure compiler externs)
 window.PerformancePaintTiming;
 window.PerformanceObserver;
-Object.prototype.entryTypes
+Object.prototype.entryTypes;
+Window.prototype.origin;
+HTMLAnchorElement.prototype.origin;
 
 /** @typedef {number}  */
-var time;
-
-/**
- * This type signifies a callback that can be called to remove the listener.
- * @typedef {function()}
- */
-var UnlistenDef;
-
+let time;
 
 /**
  * Just an element, but used with AMP custom elements..
- * @typedef {!Element}
+ * @constructor @extends {HTMLElement}
  */
-var AmpElement;
+
+// Commented out segments below have been migrated into
+// #core/dom/amp-element.extern, but are left here for now for easy access
+// during migration
+
+// let AmpElement = function () {};
+// /** */
+// AmpElement.prototype.pause = function () {};
+
+// /** */
+// AmpElement.prototype.unmount = function () {};
+
+// *
+//  * @param {number=} opt_parentPriority
+//  * @return {!Promise}
+
+// AmpElement.prototype.ensureLoaded = function (opt_parentPriority) {};
+
+// /** @return {?Element} */
+// AmpElement.prototype.getPlaceholder = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.R1 = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.deferredMount = function () {};
 
 /** @return {!Signals} */
-AmpElement.prototype.signals = function() {};
+AmpElement.prototype.signals = function () {};
+
+/** @param {boolean} show */
+AmpElement.prototype.togglePlaceholder = function (show) {};
+
+/** @return {{width: number, height: number}} */
+AmpElement.prototype.getLayoutSize = function () {};
 
 /**
- * Must be externed to avoid Closure DCE'ing this function on
- * custom-element.CustomAmpElement.prototype in single-pass compilation.
- * @return {string}
+ * TODO: remove this when typechecking is restored to AMP.BaseElement.
+ * @typedef {*}
  */
-AmpElement.prototype.elementName = function() {};
-
-var Signals = class {};
-/**
-  * @param {string} unusedName
-  * @return {number|!Error|null}
-  */
-Signals.prototype.get = function(unusedName) {};
+let BaseElement;
 
 /**
-  * @param {string} unusedName
-  * @return {!Promise<time>}
-  */
-Signals.prototype.whenSignal = function(unusedName) {};
+ * @param {boolean=} opt_waitForBuild
+ * @return {!Promise<!BaseElement>}
+ */
+AmpElement.prototype.getImpl = function (opt_waitForBuild) {};
+
+/** @return {!Promise} */
+AmpElement.prototype.buildInternal = function () {};
+
+/** @return {!Promise} */
+AmpElement.prototype.mountInternal = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuilt = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuilding = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getBuildPriority = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getLayoutPriority = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isRelayoutNeeded = function () {};
+
+/** @return {boolean|number} */
+AmpElement.prototype.renderOutsideViewport = function () {};
+
+/** @return {boolean|number} */
+AmpElement.prototype.idleRenderOutsideViewport = function () {};
+
+/** @type {number|undefined} */
+AmpElement.prototype.layoutScheduleTime;
+
+/** @return {!Promise} */
+AmpElement.prototype.layoutCallback = function () {};
+
+/** */
+AmpElement.prototype.unlayoutCallback = function () {};
+
+/** @return {!Promise} */
+AmpElement.prototype.whenLoaded = function () {};
+
+/** @param {boolean} pretendDisconnected */
+AmpElement.prototype.disconnect = function (pretendDisconnected) {};
+
+/** @return {boolean} */
+AmpElement.prototype.reconstructWhenReparented = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isBuildRenderBlocking = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.prerenderAllowed = function () {};
+
+/** @return {string} */
+AmpElement.prototype.getLayout = function () {};
 
 /**
-  * @param {string} unusedName
-  * @param {time=} unusedOpt_time
-  */
-Signals.prototype.signal = function(unusedName, unusedOpt_time) {};
+ * @param {{width: number, height: number, top: number, bottom: number}} layoutBox
+ * @param {boolean=} opt_sizeChanged
+ */
+AmpElement.prototype.updateLayoutBox = function (layoutBox, opt_sizeChanged) {};
+
+/** */
+AmpElement.prototype.collapsedCallback = function () {};
+
+/** @return {boolean} */
+AmpElement.prototype.isUpgraded = function () {};
+
+/** @return {number} */
+AmpElement.prototype.getUpgradeDelayMs = function () {};
 
 /**
-  * @param {string} unusedName
-  * @param {!Error} unusedError
-  */
-Signals.prototype.rejectSignal = function(unusedName, unusedError) {};
+ * @param {boolean} overflown
+ * @param {number|undefined} requestedHeight
+ * @param {number|undefined} requestedWidth
+ */
+AmpElement.prototype.overflowCallback = function (
+  overflown,
+  requestedHeight,
+  requestedWidth
+) {};
+
+/**
+ * @param {number|undefined} newHeight
+ * @param {number|undefined} newWidth
+ * @param {?} opt_newMargins
+ */
+AmpElement.prototype.applySize = function (
+  newHeight,
+  newWidth,
+  opt_newMargins
+) {};
+
+/** */
+AmpElement.prototype.expand = function () {};
+
+/** */
+AmpElement.prototype.collapse = function () {};
+
+let Signals = class {};
+/**
+ * @param {string} unusedName
+ * @return {?number|?Error}
+ */
+Signals.prototype.get = function (unusedName) {};
+
+/**
+ * @param {string} unusedName
+ * @return {!Promise<time>}
+ */
+Signals.prototype.whenSignal = function (unusedName) {};
+
+/**
+ * @param {string} unusedName
+ * @param {time=} unusedOpt_time
+ */
+Signals.prototype.signal = function (unusedName, unusedOpt_time) {};
+
+/**
+ * @param {string} unusedName
+ * @param {!Error} unusedError
+ */
+Signals.prototype.rejectSignal = function (unusedName, unusedError) {};
 
 /** @param {string} unusedName */
-Signals.prototype.reset = function(unusedName) {};
+Signals.prototype.reset = function (unusedName) {};
 
 // Temp until we figure out forward declarations
 /** @constructor */
-var AccessService = function() {};
+let AccessService = function () {};
 /** @constructor @struct */
-var UserNotificationManager = function() {};
+let UserNotificationManager = function () {};
 UserNotificationManager.prototype.get;
 /** @constructor @struct */
-var Cid = function() {};
+let Cid = function () {};
 /** @constructor @struct */
-var Activity = function() {};
+let Activity = function () {};
 /** @constructor */
-var AmpStoryVariableService = function() {};
+let AmpStoryVariableService = function () {};
 
 // data
-var data;
+let data;
 data.tweetid;
 data.requestedHeight;
 data.requestedWidth;
@@ -498,7 +686,7 @@ data.sitekey;
 data.fortesting;
 
 // 3p code
-var twttr;
+let twttr;
 twttr.events;
 twttr.events.bind;
 twttr.widgets;
@@ -506,36 +694,37 @@ twttr.widgets.createTweet;
 twttr.widgets.createMoment;
 twttr.widgets.createTimeline;
 
-var FB;
+let FB;
 FB.init;
 
-var gist;
+let gist;
 gist.gistid;
 
-var bodymovin;
+let bodymovin;
 bodymovin.loadAnimation;
-var animationHandler;
+let animationHandler;
 animationHandler.play;
 animationHandler.pause;
 animationHandler.stop;
 animationHandler.goToAndStop;
 animationHandler.totalFrames;
 
-var grecaptcha;
+let grecaptcha;
 grecaptcha.execute;
 
 // Validator
-var amp;
+let amp;
 amp.validator;
-amp.validator.validateUrlAndLog = function(string, doc) {}
+amp.validator.validateUrlAndLog = function (string, doc) {};
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
-Activity.prototype.getTotalEngagedTime = function() {};
-Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
-AccessService.prototype.getAccessReaderId = function() {};
-AccessService.prototype.getAuthdataField = function(field) {};
+Activity.prototype.getTotalEngagedTime = function () {};
+Activity.prototype.getIncrementalEngagedTime = function (name, reset) {};
+AccessService.prototype.getAccessReaderId = function () {};
+AccessService.prototype.getAuthdataField = function (field) {};
 // Same for amp-analytics
+
 /**
  * The "get CID" parameters.
  * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
@@ -543,9 +732,10 @@ AccessService.prototype.getAuthdataField = function(field) {};
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
+ *   cookieName: (string|undefined),
  * }}
  */
-var GetCidDef;
+let GetCidDef;
 /**
  * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
  *     for the case where this doc is not served by an AMP proxy. GetCidDef
@@ -569,64 +759,70 @@ var GetCidDef;
  *      This promise may take a long time to resolve if consent isn't
  *      given.
  */
-Cid.prototype.get = function(
-    externalCidScope, consent, opt_persistenceConsent) {}
+Cid.prototype.get = function (
+  externalCidScope,
+  consent,
+  opt_persistenceConsent
+) {};
 
-AmpStoryVariableService.prototype.onStateChange = function(event) {};
+AmpStoryVariableService.prototype.onStateChange = function (event) {};
 AmpStoryVariableService.pageIndex;
 AmpStoryVariableService.pageId;
 
-var AMP = {};
-window.AMP;
-// Externed explicitly because we do not export Class shaped names
-// by default.
-/**
- * This uses the internal name of the type, because there appears to be no
- * other way to reference an ES6 type from an extern that is defined in
- * the app.
- * @constructor @struct
- * @extends {BaseElement$$module$src$base_element}
- */
-AMP.BaseElement = class {
-  /** @param {!AmpElement} element */
-  constructor(element) {}
-};
+// TODO: uncomment when typechecking restored to BaseElement.
+// https://github.com/ampproject/amphtml/issues/34099
 
-/**
- * This uses the internal name of the type, because there appears to be no
- * other way to reference an ES6 type from an extern that is defined in
- * the app.
- * @constructor @struct
- * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
- */
-AMP.AmpAdXOriginIframeHandler = class {
-  /**
-   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
-   */
-  constructor(baseInstance) {}
-};
+// // Externed explicitly because we do not export Class shaped names
+// // by default.
+// /**
+//  * This uses the internal name of the type, because there appears to be no
+//  * other way to reference an ES6 type from an extern that is defined in
+//  * the app.
+//  * @constructor @struct
+//  * @extends {BaseElement$$module$src$base_element}
+//  */
+// AMP.BaseElement = class {
+//   /** @param {!AmpElement} element */
+//   constructor(element) {}
+// };
 
-/**
- * This uses the internal name of the type, because there appears to be no
- * other way to reference an ES6 type from an extern that is defined in
- * the app.
- * @constructor @struct
- * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
- */
-AMP.AmpAdUIHandler = class {
-  /**
-   * @param {!AMP.BaseElement} baseInstance
-   */
-  constructor(baseInstance) {}
-};
+// TODO: uncomment when typechecking restored to AmpAdXOriginIframeHandler.
+// https://github.com/ampproject/amphtml/issues/34099
 
-AMP.BaseTemplate;
+// /**
+//  * This uses the internal name of the type, because there appears to be no
+//  * other way to reference an ES6 type from an extern that is defined in
+//  * the app.
+//  * @constructor @struct
+//  * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
+//  */
+// AMP.AmpAdXOriginIframeHandler = class {
+//   /**
+//    * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
+//    */
+//   constructor(baseInstance) {}
+// };
 
-AMP.RealTimeConfigManager;
+// TODO: uncomment when typechecking is restored to AmpAdUIHandler.
+// https://github.com/ampproject/amphtml/issues/34099
+
+// /**
+//  * This uses the internal name of the type, because there appears to be no
+//  * other way to reference an ES6 type from an extern that is defined in
+//  * the app.
+//  * @constructor @struct
+//  * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
+//  */
+// AMP.AmpAdUIHandler = class {
+//   /**
+//    * @param {!AMP.BaseElement} baseInstance
+//    */
+//   constructor(baseInstance) {}
+// };
 
 /**
  * Actual filled values for this exists in
- * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * src/service/real-time-config/real-time-config-impl.js
  * @enum {string}
  */
 const RTC_ERROR_ENUM = {};
@@ -636,16 +832,7 @@ const RTC_ERROR_ENUM = {};
       rtcTime: number,
       callout: string,
       error: (RTC_ERROR_ENUM|undefined)}} */
-var rtcResponseDef;
-
-/**
- * This symbol is exposed by browserify bundles transformed by
- * `scoped-require.js` to avoid polluting the global namespace with `require`.
- * It allows AMP extensions to consume code injected into their binaries that
- * cannot be run through Closure Compiler, e.g. React code with JSX.
- * @type {!function(string):?}
- */
-AMP.require;
+let rtcResponseDef;
 
 /**
  * TransitionDef function that accepts normtime, typically between 0 and 1 and
@@ -655,7 +842,7 @@ AMP.require;
  * transition and "false" for ongoing.
  * @typedef {function(number, boolean):?|function(number):?}
  */
-var TransitionDef;
+let TransitionDef;
 
 ///////////////////
 // amp-bind externs
@@ -709,9 +896,19 @@ let BindEvaluateExpressionResultDef;
 
 /**
  * Options for Bind.rescan().
- * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ * @typedef {{update: (boolean|string|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
  */
 let BindRescanOptionsDef;
+
+/**
+ * Options bag used in Bind.setState().
+ * @typedef {{
+ *    skipEval: (boolean|undefined),
+ *    skipAmpState: (boolean|undefined),
+ *    constrain: (Array<!Element>|undefined),
+ * }}
+ */
+let BindSetStateOptionsDef;
 
 /////////////////////////////
 ////// Web Anmomation externs
@@ -724,8 +921,7 @@ let BindRescanOptionsDef;
  *   !WebKeyframeAnimationDef
  * }
  */
-var WebAnimationDef;
-
+let WebAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -736,8 +932,7 @@ var WebAnimationDef;
  *   animations: !Array<!WebAnimationDef>,
  * }}
  */
-var WebMultiAnimationDef;
-
+let WebMultiAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -748,8 +943,7 @@ var WebMultiAnimationDef;
  *   switch: !Array<!WebAnimationDef>,
  * }}
  */
-var WebSwitchAnimationDef;
-
+let WebSwitchAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -760,8 +954,7 @@ var WebSwitchAnimationDef;
  *   animation: string,
  * }}
  */
-var WebCompAnimationDef;
-
+let WebCompAnimationDef;
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -772,14 +965,12 @@ var WebCompAnimationDef;
  *   keyframes: (string|!WebKeyframesDef),
  * }}
  */
-var WebKeyframeAnimationDef;
-
+let WebKeyframeAnimationDef;
 
 /**
  * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
  */
-var WebKeyframesDef;
-
+let WebKeyframesDef;
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties
@@ -796,8 +987,7 @@ var WebKeyframesDef;
  *   fill: (?|undefined),
  * }}
  */
-var WebAnimationTimingDef;
-
+let WebAnimationTimingDef;
 
 /**
  * Indicates an extension to a type that allows specifying vars. Vars are
@@ -806,8 +996,7 @@ var WebAnimationTimingDef;
  * @mixin
  * @typedef {Object}
  */
-var WebAnimationVarsDef;
-
+let WebAnimationVarsDef;
 
 /**
  * Defines media parameters for an animation.
@@ -818,8 +1007,7 @@ var WebAnimationVarsDef;
  *   supports: (string|undefined),
  * }}
  */
-var WebAnimationConditionalDef;
-
+let WebAnimationConditionalDef;
 
 /**
  * @typedef {{
@@ -828,8 +1016,7 @@ var WebAnimationConditionalDef;
  *   subtargets: (!Array<!WebAnimationSubtargetDef>|undefined),
  * }}
  */
-var WebAnimationSelectorDef;
-
+let WebAnimationSelectorDef;
 
 /**
  * @mixes WebAnimationTimingDef
@@ -840,13 +1027,12 @@ var WebAnimationSelectorDef;
  *   selector: (string|undefined),
  * }}
  */
-var WebAnimationSubtargetDef;
+let WebAnimationSubtargetDef;
 
-var ampInaboxPositionObserver;
+let ampInaboxPositionObserver;
 ampInaboxPositionObserver.observe;
 ampInaboxPositionObserver.getTargetRect;
 ampInaboxPositionObserver.getViewportRect;
-
 
 /**
  * TODO(dvoytenko): remove FeaturePolicy once it's added in Closure externs.
@@ -879,6 +1065,16 @@ class FeaturePolicy {
 }
 
 /**
- * @type {?FeaturePolicy}
+ * Going through the standardization process now.
+ *
+ * See https://developers.google.com/web/updates/2019/02/constructable-stylesheets.
+ *
+ * @param {string} cssText
  */
-HTMLIFrameElement.prototype.featurePolicy;
+CSSStyleSheet.prototype.replaceSync = function (cssText) {};
+
+/** @type {!Array<!CSSStyleSheet>|undefined} */
+ShadowRoot.prototype.adoptedStyleSheets;
+
+/** @type {undefined|boolean} */
+Error.prototype.expected;

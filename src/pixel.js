@@ -1,23 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {WindowInterface} from '#core/window/interface';
 
-import {WindowInterface} from '../src/window-interface';
-import {createElementWithAttributes} from '../src/dom';
-import {dict} from '../src/utils/object';
-import {user} from '../src/log';
+import {user} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'pixel';
@@ -29,6 +13,7 @@ const TAG = 'pixel';
  * @return {!Element}
  */
 export function createPixel(win, src, referrerPolicy) {
+  // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
@@ -52,13 +37,15 @@ function createNoReferrerPixel(win, src) {
     const iframe = createElementWithAttributes(
       /** @type {!Document} */ (win.document),
       'iframe',
-      dict({
+      {
         'src': 'about:blank',
         'style': 'display:none',
-      })
+      }
     );
+    iframe.onload = () => {
+      createImagePixel(iframe.contentWindow, src);
+    };
     win.document.body.appendChild(iframe);
-    createImagePixel(iframe.contentWindow, src);
     return iframe;
   }
 }

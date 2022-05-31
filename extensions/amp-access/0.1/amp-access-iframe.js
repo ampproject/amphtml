@@ -1,29 +1,16 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {toggle} from '#core/dom/style';
+import {isArray} from '#core/types';
+import {parseJson} from '#core/types/object/json';
 
-import {Deferred} from '../../../src/utils/promise';
+import {Services} from '#service';
+
+import {dev, userAssert} from '#utils/log';
+
 import {Messenger} from './iframe-api/messenger';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {toggle} from '../../../src/style';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 
 const AUTHORIZATION_TIMEOUT = 3000;
 const EXPIRATION_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 days
@@ -160,7 +147,7 @@ export class AccessIframeAdapter {
    * @private
    */
   resolveConfig_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const configJson = parseJson(JSON.stringify(this.configJson_));
       if (this.iframeVars_) {
         const varsString = this.iframeVars_.join('&');
@@ -169,7 +156,7 @@ export class AccessIframeAdapter {
           /* useAuthData */ false
         );
         resolve(
-          varsPromise.then(vars => {
+          varsPromise.then((vars) => {
             configJson['iframeVars'] = vars;
             return configJson;
           })
@@ -200,7 +187,7 @@ export class AccessIframeAdapter {
       .then(() => {
         return this.messenger_.sendCommandRsvp('authorize', {});
       })
-      .then(data => {
+      .then((data) => {
         if (data) {
           // Store the value in a non-blocking microtask.
           Promise.resolve().then(() => this.store_(data));
@@ -257,12 +244,10 @@ export class AccessIframeAdapter {
       if (data) {
         storage.setItem(
           TAG,
-          JSON.stringify(
-            dict({
-              't': this.ampdoc.win.Date.now(),
-              'd': data,
-            })
-          )
+          JSON.stringify({
+            't': this.ampdoc.win.Date.now(),
+            'd': data,
+          })
         );
       } else {
         storage.removeItem(TAG);
@@ -281,7 +266,7 @@ export class AccessIframeAdapter {
   handleCommand_(cmd, unusedPayload) {
     if (cmd == 'connect') {
       // First ever message. Indicates that the receiver is listening.
-      this.configPromise_.then(configJson => {
+      this.configPromise_.then((configJson) => {
         this.messenger_
           .sendCommandRsvp('start', {
             'protocol': 'amp-access',

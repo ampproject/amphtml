@@ -1,0 +1,29 @@
+tags: {  # amp-onetap-google
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-onetap-google"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # <amp-onetap-google>
+  html_format: AMP
+  tag_name: "AMP-ONETAP-GOOGLE"
+  requires_extension: "amp-onetap-google"
+  unique: true
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: {
+    name: "data-src"
+    mandatory: true,
+    value_url: {
+      protocol: "https"
+    }
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

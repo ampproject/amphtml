@@ -1,22 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
-/**
  * This interface is intended to be implemented by Subscription platforms to
  * provide method of getting entitlements.
  *
@@ -24,10 +6,10 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  */
 export class SubscriptionPlatform {
   /**
-   * Returns the service Id.
+   * Returns the platform key.
    * @return {string}
    */
-  getServiceId() {}
+  getPlatformKey() {}
 
   /**
    * Requests entitlement for a subscription platform.
@@ -40,8 +22,16 @@ export class SubscriptionPlatform {
    * rendering.
    * @param {!./entitlement.Entitlement} unusedEntitlement
    * @param {?./entitlement.Entitlement} unusedGrantEntitlement
+   * @param {function()=} unusedContinueAuthorizationFlow Usually this is undefined. When it's defined,
+   *   that means (1) the authorization flow is blocked and (2) the subscription platform receiving
+   *   this callback is responsible for unblocking the flow. Once the flow is unblocked, the
+   *   platform should execute the `unusedContinueAuthorizationFlow` method to continue the flow.
    */
-  activate(unusedEntitlement, unusedGrantEntitlement) {}
+  activate(
+    unusedEntitlement,
+    unusedGrantEntitlement,
+    unusedContinueAuthorizationFlow
+  ) {}
 
   /**
    * Reset the platform and renderer.
@@ -71,10 +61,10 @@ export class SubscriptionPlatform {
 
   /**
    * Performs the pingback to the subscription platform.
-   * @param {!./entitlement.Entitlement} unusedSelectedPlatform
+   * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} unusedEntitlement
    * @return {!Promise|undefined}
    */
-  pingback(unusedSelectedPlatform) {}
+  pingback(unusedEntitlement) {}
 
   /**
    * Tells if the platform supports a score factor
@@ -86,9 +76,10 @@ export class SubscriptionPlatform {
   /**
    * Executes action for the local platform.
    * @param {string} unusedAction
+   * @param {?string} unusedSourceId
    * @return {!Promise<boolean>}
    */
-  executeAction(unusedAction) {}
+  executeAction(unusedAction, unusedSourceId) {}
 
   /**
    * Returns the base score configured for the platform.
@@ -103,14 +94,4 @@ export class SubscriptionPlatform {
    * @param {?JsonObject} unusedOptions
    */
   decorateUI(unusedElement, unusedAction, unusedOptions) {}
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }

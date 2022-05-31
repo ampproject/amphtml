@@ -1,24 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {installTimerService} from '#service/timer-impl';
+
+import {stubService} from '#testing/helpers/service';
 
 import {Input} from '../../src/input';
-import {installTimerService} from '../../src/service/timer-impl.js';
-import {stubService} from '../../testing/test-helper';
 
-describe('Input', () => {
+describes.sandboxed('Input', {}, (env) => {
   let clock;
   let input;
   let eventListeners;
@@ -26,7 +12,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     eventListeners = {};
 
@@ -66,19 +52,19 @@ describe('Input', () => {
 
   it('should fire states immediately', () => {
     let touchDetected = undefined;
-    input.onTouchDetected(detected => {
+    input.onTouchDetected((detected) => {
       touchDetected = detected;
     }, true);
     expect(touchDetected).to.equal(true);
 
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     }, true);
     expect(mouseDetected).to.equal(false);
 
     let kbActive = undefined;
-    input.onKeyboardStateChanged(active => {
+    input.onKeyboardStateChanged((active) => {
       kbActive = active;
     }, true);
     expect(kbActive).to.equal(false);
@@ -93,7 +79,7 @@ describe('Input', () => {
   it('should detect mouse', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -113,7 +99,7 @@ describe('Input', () => {
   it('should try to detect mouse again', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -133,7 +119,7 @@ describe('Input', () => {
   it('should ignore mouse move if it belongs to touch', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -152,7 +138,7 @@ describe('Input', () => {
   it('should stop trying to detect mouse after few attempts', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -174,7 +160,7 @@ describe('Input', () => {
   it('should detect keyboard states', () => {
     expect(input.isKeyboardActive()).to.equal(false);
     let kbActive = undefined;
-    input.onKeyboardStateChanged(active => {
+    input.onKeyboardStateChanged((active) => {
       kbActive = active;
     });
     expect(kbActive).to.equal(undefined);
@@ -200,7 +186,7 @@ describe('Input', () => {
   it('should ignore keyboard state on input', () => {
     expect(input.isKeyboardActive()).to.equal(false);
     let kbActive = undefined;
-    input.onKeyboardStateChanged(active => {
+    input.onKeyboardStateChanged((active) => {
       kbActive = active;
     });
     expect(kbActive).to.equal(undefined);
@@ -212,43 +198,47 @@ describe('Input', () => {
   });
 });
 
-describes.realWin('test-input.js setupInputModeClasses', {amp: false}, env => {
-  let ampdoc;
-  let input;
-  let body;
+describes.realWin(
+  'test-input.js setupInputModeClasses',
+  {amp: false},
+  (env) => {
+    let ampdoc;
+    let input;
+    let body;
 
-  beforeEach(() => {
-    body = env.win.document.body;
-    ampdoc = {
-      waitForBodyOpen: () => Promise.resolve(body),
-    };
-    stubService(env.sandbox, env.win, 'vsync', 'mutate').callsFake(func => {
-      func();
+    beforeEach(() => {
+      body = env.win.document.body;
+      ampdoc = {
+        waitForBodyOpen: () => Promise.resolve(body),
+      };
+      stubService(env.sandbox, env.win, 'vsync', 'mutate').callsFake((func) => {
+        func();
+      });
+      input = new Input(env.win);
+      input.setupInputModeClasses(ampdoc);
     });
-    input = new Input(env.win);
-    input.setupInputModeClasses(ampdoc);
-  });
 
-  it('should add amp-mode-mouse class to body when mouseConfirmed', async () => {
-    expect(body).to.not.have.class('amp-mode-mouse');
-    input.mouseConfirmed_();
-    await new Promise(setTimeout);
-    expect(body).to.have.class('amp-mode-mouse');
-  });
-
-  it('should add amp-mode-keyboard-active class to body when onKeyDown', async () => {
-    expect(body).to.not.have.class('amp-mode-keyboard-active');
-    simulateKeyDown();
-    await new Promise(setTimeout);
-    expect(body).to.have.class('amp-mode-keyboard-active');
-  });
-
-  function simulateKeyDown() {
-    const event = new /*OK*/ KeyboardEvent('keydown', {
-      'keyCode': 65,
-      'which': 65,
-      bubbles: true,
+    it('should add amp-mode-mouse class to body when mouseConfirmed', async () => {
+      expect(body).to.not.have.class('amp-mode-mouse');
+      input.mouseConfirmed_();
+      await new Promise(setTimeout);
+      expect(body).to.have.class('amp-mode-mouse');
     });
-    env.win.document.body.dispatchEvent(event);
+
+    it('should add amp-mode-keyboard-active class to body when onKeyDown', async () => {
+      expect(body).to.not.have.class('amp-mode-keyboard-active');
+      simulateKeyDown();
+      await new Promise(setTimeout);
+      expect(body).to.have.class('amp-mode-keyboard-active');
+    });
+
+    function simulateKeyDown() {
+      const event = new /*OK*/ KeyboardEvent('keydown', {
+        'keyCode': 65,
+        'which': 65,
+        bubbles: true,
+      });
+      env.win.document.body.dispatchEvent(event);
+    }
   }
-});
+);

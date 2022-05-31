@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {FriendlyFrameRenderer} from '../friendly-frame-renderer';
 
 const realWinConfig = {
@@ -22,9 +6,10 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
+describes.realWin('FriendlyFrameRenderer', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
+  let window, document;
   let containerElement;
   let context;
   let creativeData;
@@ -32,6 +17,9 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
   let renderPromise;
 
   beforeEach(() => {
+    window = env.win;
+    document = window.document;
+
     context = {
       size: {width: '320', height: '50'},
       adUrl: 'http://www.google.com',
@@ -47,6 +35,8 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
     renderer = new FriendlyFrameRenderer();
     containerElement = document.createElement('div');
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};
@@ -78,15 +68,17 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
   });
 
   it('should set the correct srcdoc on the iframe', () => {
-    const srcdoc =
-      '<base href="http://www.google.com">' +
-      '<meta http-equiv=Content-Security-Policy content="script-src ' +
-      "'none';object-src 'none';child-src 'none'\">" +
-      '<p>Hello, World!</p>';
     return renderPromise.then(() => {
       const iframe = containerElement.querySelector('iframe');
       expect(iframe).to.be.ok;
-      expect(iframe.getAttribute('srcdoc')).to.equal(srcdoc);
+      const srcdoc = iframe.getAttribute('srcdoc');
+      expect(srcdoc).to.contain('<base href="http://www.google.com">');
+      expect(srcdoc).to.contain(
+        '<meta http-equiv=Content-Security-Policy content="script-src '
+      );
+      expect(srcdoc).to.contain(
+        ";object-src 'none';child-src 'none'\"><p>Hello, World!</p>"
+      );
     });
   });
 

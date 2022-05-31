@@ -1,36 +1,19 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as fakeTimers from '@sinonjs/fake-timers';
 
-import * as lolex from 'lolex';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../../src/event-helper';
+import {Services} from '#service';
+
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
+
 import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
-import {Services} from '../../../../src/services';
 
-describes.fakeWin('media-performance-metrics-service', {}, env => {
+describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   let clock;
   let service;
   let tickStub;
   let win;
 
   before(() => {
-    clock = lolex.install({
-      target: win,
-      toFake: ['Date'],
-      now: 0,
-    });
+    clock = fakeTimers.withGlobal(window).install({toFake: ['Date'], now: 0});
   });
 
   after(() => {
@@ -42,7 +25,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     env.sandbox
       .stub(Services, 'performanceFor')
       .returns({tickDelta: () => {}, flush: () => {}});
-    service = new MediaPerformanceMetricsService();
+    service = new MediaPerformanceMetricsService(win);
     tickStub = env.sandbox.stub(service.performanceService_, 'tickDelta');
   });
 
@@ -62,7 +45,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     clock.tick(300);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(5);
+    expect(tickStub).to.have.callCount(7);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -76,7 +59,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     clock.tick(10000);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(1);
+    expect(tickStub).to.have.callCount(3);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -96,7 +79,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     video2.dispatchEvent(new Event('playing'));
     service.stopMeasuring(video2);
 
-    expect(tickStub).to.have.callCount(9);
+    expect(tickStub).to.have.callCount(13);
     expect(flushStub).to.have.been.calledTwice;
   });
 
@@ -338,14 +321,14 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
   });
 
   describe('Errors', () => {
-    it('should detect the video as already errored', done => {
+    it('should detect the video as already errored', (done) => {
       const video = win.document.createElement('video');
 
       video.onerror = () => {
         service.startMeasuring(video);
         service.stopMeasuring(video);
 
-        expect(tickStub).to.have.been.calledOnceWithExactly('verr', 4);
+        expect(tickStub).to.have.been.calledWithExactly('verr', 4);
         done();
       };
 
@@ -360,7 +343,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       service.startMeasuring(video);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledOnceWithExactly('verr', 0);
+      expect(tickStub).to.have.been.calledWithExactly('verr', 0);
     });
 
     it('should detect that the video errors', () => {
@@ -373,7 +356,95 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(300);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledOnceWithExactly('verr', 0);
+      expect(tickStub).to.have.been.calledWithExactly('verr', 0);
+    });
+  });
+
+  describe('Cache state', () => {
+    it('should register the video as playing from origin', () => {
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vcs', 0);
+    });
+
+    it('should register the video as playing from origin w/ cache miss', () => {
+      const video = win.document.createElement('video');
+      const cacheSource = win.document.createElement('source');
+      const originSource = win.document.createElement('source');
+      cacheSource.setAttribute(
+        'src',
+        'htps://foo-com.cdn.ampproject.org/bv/s/foo.com/foo.mp4'
+      );
+      cacheSource.setAttribute('i-amphtml-video-cached-source', '');
+      originSource.setAttribute('src', 'foo.mp4');
+      video.appendChild(cacheSource);
+      video.appendChild(originSource);
+      env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vcs', 1);
+    });
+
+    it('should register the video as playing from cache', () => {
+      const url = 'https://foo-com.cdn.ampproject.org/bv/s/foo.com/foo.mp4';
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      source.setAttribute('src', url);
+      source.setAttribute('i-amphtml-video-cached-source', '');
+      video.appendChild(source);
+      env.sandbox.stub(video, 'currentSrc').value(url);
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vcs', 2);
+    });
+  });
+
+  describe('Video on first page', () => {
+    it('should report the video is on the first page', () => {
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      const firstPage = win.document.createElement('amp-story-page');
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      firstPage.appendChild(video);
+      win.document.body.appendChild(firstPage);
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vofp', 1);
+    });
+
+    it('should report the video is not on the first page', () => {
+      // Create first page with unregistered video
+      const firstPage = win.document.createElement('amp-story-page');
+      firstPage.appendChild(win.document.createElement('video'));
+      win.document.body.appendChild(firstPage);
+
+      // Create second page with registered video
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      const secondPage = win.document.createElement('amp-story-page');
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      secondPage.appendChild(video);
+      win.document.body.appendChild(secondPage);
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vofp', 0);
     });
   });
 });

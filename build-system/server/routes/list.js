@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const cors = require('../amp-cors');
 const router = require('express').Router();
 
@@ -42,11 +26,11 @@ router.use('/vegetable-data/get', (req, res) => {
 /*
  * Infinite scroll related endpoints.
  */
-const randInt = n => {
+const randInt = (n) => {
   return Math.floor(Math.random()) * n;
 };
 
-const squareImgUrl = width => {
+const squareImgUrl = (width) => {
   return `http://picsum.photos/${width}?${randInt(50)}`;
 };
 
@@ -96,13 +80,13 @@ const generateResults = (category, count = 2) => {
   return r;
 };
 
-router.get('/infinite-scroll-random/:category', function(request, response) {
+router.get('/infinite-scroll-random/:category', function (request, response) {
   const {category} = request.params;
   const result = generateResults(category);
   response.json(result);
 });
 
-router.get('/infinite-scroll-faulty', function(req, res) {
+router.get('/infinite-scroll-faulty', function (req, res) {
   const {query} = req;
   const code = query['code'];
   const items = generateJson(12);
@@ -113,14 +97,14 @@ router.get('/infinite-scroll-faulty', function(req, res) {
   res.json({items, next});
 });
 
-router.get('/infinite-scroll-error', function(req, res) {
+router.get('/infinite-scroll-error', function (req, res) {
   const {query} = req;
   const code = query['code'] || 404;
   res.status(code);
   res.json({'msg': code});
 });
 
-router.get('/infinite-scroll', function(req, res) {
+router.get('/infinite-scroll', function (req, res) {
   const {query} = req;
   const numberOfItems = query['items'] || 10;
   const pagesLeft = query['left'] || 1;
@@ -158,7 +142,7 @@ const generateJsonWithState = (numberOfItems, pagesLeft) => {
   return results;
 };
 
-router.get('/infinite-scroll-state', function(req, res) {
+router.get('/infinite-scroll-state', function (req, res) {
   const {query} = req;
   const numberOfItems = query['items'] || 2;
   const pagesLeft = query['left'] || 0;
@@ -175,7 +159,7 @@ router.get('/infinite-scroll-state', function(req, res) {
   res.json(results);
 });
 
-router.get('/ecommerce-nested-menu', function(req, res) {
+router.get('/ecommerce-nested-menu', function (_req, res) {
   res.json({
     'menu': [
       {

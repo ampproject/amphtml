@@ -1,22 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeElement} from '#core/dom';
+import {toArray} from '#core/types/array';
 
 import {ampMediaElementFor} from './utils';
-import {removeElement} from '../../../src/dom';
-import {toArray} from '../../../src/types';
 
 /**
  * Class handling HTMLMediaElements sources.
@@ -49,7 +34,7 @@ export class Sources {
    * @private
    */
   applyTracksToElement_(element) {
-    Array.prototype.forEach.call(this.trackEls_, trackEl => {
+    this.trackEls_.forEach((trackEl) => {
       const track = document.createElement('track');
       track.id = trackEl.id;
       track.kind = trackEl.kind;
@@ -80,9 +65,10 @@ export class Sources {
       element.setAttribute('src', this.srcAttr_);
     }
 
-    Array.prototype.forEach.call(this.srcEls_, srcEl =>
-      element.appendChild(srcEl)
-    );
+    this.srcEls_.forEach((srcEl) => element.appendChild(srcEl));
+    if (element.changedSources) {
+      element.changedSources();
+    }
 
     if (this.trackEls_.length > 0) {
       // Wait for "loadedmetadata" before adding tracks.
@@ -110,7 +96,16 @@ export class Sources {
    *     element.
    */
   static removeFrom(win, element) {
-    const elementToUse = ampMediaElementFor(element) || element;
+    let elementToUse;
+    if (element.tagName === 'VIDEO') {
+      // A video element and its amp-video parent can each have different
+      // sources. We prefer to remove and return the video's sources because
+      // amp-video's sources are primarily those provided by the publisher's
+      // whereas the video's sources are added and modified via amp-video JS.
+      elementToUse = element;
+    } else {
+      elementToUse = ampMediaElementFor(element) || element;
+    }
 
     let srcEl = null;
     // If the src attribute is specified, create a source element from it as it
@@ -122,10 +117,10 @@ export class Sources {
     }
 
     const srcEls = toArray(elementToUse.querySelectorAll('source'));
-    srcEls.forEach(srcEl => removeElement(srcEl));
+    srcEls.forEach((srcEl) => removeElement(srcEl));
 
     const trackEls = toArray(elementToUse.querySelectorAll('track'));
-    trackEls.forEach(trackEl => removeElement(trackEl));
+    trackEls.forEach((trackEl) => removeElement(trackEl));
 
     // If the src attribute is present, browsers will follow it and ignore the
     // HTMLSourceElements. To ensure this behavior, drop the sources if the src

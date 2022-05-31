@@ -1,0 +1,167 @@
+{
+  "2": {
+    "string": "Koppintson a Tovább elemre"
+  },
+  "3": {
+    "string": "Koppintson a Vissza elemre"
+  },
+  "4": {
+    "string": "Nem sikerült a hivatkozást vágólapra másolni :("
+  },
+  "5": {
+    "string": "Hivatkozás vágólapra másolva!"
+  },
+  "6": {
+    "string": "E-mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Link mutatása"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Sajnos úgy tűnik, a böngészője nem támogatja ezt a látványt"
+  },
+  "22": {
+    "string": "Elfogadás"
+  },
+  "23": {
+    "string": "Elutasítás"
+  },
+  "25": {
+    "string": "Megtekintés az eredeti tartományban:"
+  },
+  "26": {
+    "string": "További információ az AMP eredményekről"
+  },
+  "27": {
+    "string": "Folytatás mindenképp"
+  },
+  "34": {
+    "string": "Videó lejátszása"
+  },
+  "35": {
+    "string": "Csúsztatás felfelé"
+  },
+  "63": {
+    "string": "Vonal"
+  },
+  "64": {
+    "string": "Frissítve"
+  },
+  "65": {
+    "string": "Nem sikerült lejátszani a videót"
+  },
+  "66": {
+    "string": "Történet némítása"
+  },
+  "67": {
+    "string": "Történet némításának feloldása"
+  },
+  "68": {
+    "string": "Történetinformáció"
+  },
+  "69": {
+    "string": "Történet megosztása"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "2/1. tipp"
+  },
+  "76": {
+    "string": "A következő képernyőre koppintással léphet"
+  },
+  "77": {
+    "string": "Tovább"
+  },
+  "78": {
+    "string": "2/2. tipp"
+  },
+  "79": {
+    "string": "A következő történetre csúsztatással léphet"
+  },
+  "80": {
+    "string": "Rendben"
+  },
+  "81": {
+    "string": "Tipp"
+  },
+  "83": {
+    "string": "Aktiválás"
+  },
+  "84": {
+    "string": "PONTSZÁM:"
+  },
+  "85": {
+    "string": "Történet szüneteltetése"
+  },
+  "86": {
+    "string": "Történet lejátszása"
+  },
+  "87": {
+    "string": "Bezárás"
+  },
+  "88": {
+    "string": "Ugrás a következőre"
+  },
+  "89": {
+    "string": "A választ ide fogjuk küldeni"
+  },
+  "90": {
+    "string": "Következő történet"
+  },
+  "91": {
+    "string": "Következő oldal"
+  },
+  "92": {
+    "string": "Visszajátszás"
+  },
+  "93": {
+    "string": "Előző oldal"
+  },
+  "96": {
+    "string": "A felfedezéshez mozgassa az eszközt"
+  },
+  "97": {
+    "string": "Megnyitás"
+  },
+  "98": {
+    "string": "Az űrlap nincs elküldve, próbálja újra"
+  },
+  "99": {
+    "string": "Az űrlap sikeresen elküldve"
+  },
+  "101": {
+    "string": "Vásárolj most"
+  }
+}

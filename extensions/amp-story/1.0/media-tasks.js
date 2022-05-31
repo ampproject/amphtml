@@ -1,22 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {isConnectedNode} from '#core/dom';
+import {tryPlay} from '#core/dom/video';
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Sources} from './sources';
-import {isConnectedNode} from '../../../src/dom';
 
 /**
  * The name for a boolean property on an element indicating whether that element
@@ -220,10 +206,7 @@ export class PlayTask extends MediaTask {
       return Promise.resolve();
     }
 
-    // The play() invocation is wrapped in a Promise.resolve(...) due to the
-    // fact that some browsers return a promise from media elements' play()
-    // function, while others return a boolean.
-    return tryResolve(() => mediaEl.play());
+    return tryPlay(mediaEl);
   }
 }
 
@@ -317,6 +300,15 @@ export class LoadTask extends MediaTask {
     mediaEl.load();
     return Promise.resolve();
   }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    // When recycling a media pool element, its sources are removed and the
+    // LoadTask runs to reset it (buffered data, readyState, etc). It needs to
+    // run synchronously so the media element can't be used in a new context
+    // but with old data.
+    return true;
+  }
 }
 
 /**
@@ -373,6 +365,11 @@ export class UpdateSourcesTask extends MediaTask {
     this.newSources_.applyToElement(this.win_, mediaEl);
     return Promise.resolve();
   }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
 }
 
 /**
@@ -405,6 +402,11 @@ export class SwapIntoDomTask extends MediaTask {
     );
     return Promise.resolve();
   }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
 }
 
 /**
@@ -428,5 +430,10 @@ export class SwapOutOfDomTask extends MediaTask {
     copyAttributes(mediaEl, this.placeholderEl_);
     mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
     return Promise.resolve();
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
   }
 }

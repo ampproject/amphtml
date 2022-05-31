@@ -1,37 +1,22 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpEvents} from '../../../src/amp-events';
-import {CSS} from '../../../build/amp-mega-menu-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
+import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {
   closest,
   closestAncestorElementBySelector,
-  isConnectedNode,
-  isRTL,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  tryFocus,
-} from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
-import {mod} from '../../../src/utils/math';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {toArray} from '../../../src/types';
+} from '#core/dom/query';
+import {mod} from '#core/math';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {dev, userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-mega-menu-0.1.css';
 
 /** @const {string} */
 const TAG = 'amp-mega-menu';
@@ -45,6 +30,11 @@ const ARIA_LABEL_CLOSE = 'Close the menu';
  * template rendering via dynamically fetched data.
  */
 export class AmpMegaMenu extends AMP.BaseElement {
+  /** @override  */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -85,7 +75,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.FIXED_HEIGHT;
+    return layout === Layout_Enum.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -98,7 +88,10 @@ export class AmpMegaMenu extends AMP.BaseElement {
     this.registerMenuItems_();
     // items may not be present after build if dynamically rendered via amp-list,
     // in which case register them after DOM update instead.
-    this.element.addEventListener(AmpEvents.DOM_UPDATE, this.domUpdateHandler_);
+    this.element.addEventListener(
+      AmpEvents_Enum.DOM_UPDATE,
+      this.domUpdateHandler_
+    );
 
     if (!this.maskElement_) {
       this.maskElement_ = this.createMaskElement_();
@@ -110,7 +103,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.element.removeEventListener(
-      AmpEvents.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       this.domUpdateHandler_
     );
     // Ensure that menu is closed when hidden via media query.
@@ -145,8 +138,8 @@ export class AmpMegaMenu extends AMP.BaseElement {
     this.items_ = toArray(scopedQuerySelectorAll(this.element, 'nav > * > li'));
     // first filter out items that have already been registered.
     this.items_
-      .filter(item => !item.classList.contains('i-amphtml-mega-menu-item'))
-      .forEach(item => {
+      .filter((item) => !item.classList.contains('i-amphtml-mega-menu-item'))
+      .forEach((item) => {
         // if item has only one child, then use that as the heading element.
         if (item.childElementCount == 1) {
           const heading = dev().assertElement(item.firstElementChild);
@@ -181,8 +174,8 @@ export class AmpMegaMenu extends AMP.BaseElement {
     if (!heading.hasAttribute('tabindex')) {
       heading.setAttribute('tabindex', 0);
     }
-    heading.addEventListener('click', e => this.handleHeadingClick_(e));
-    heading.addEventListener('keydown', e => this.handleHeadingKeyDown_(e));
+    heading.addEventListener('click', (e) => this.handleHeadingClick_(e));
+    heading.addEventListener('keydown', (e) => this.handleHeadingKeyDown_(e));
 
     // Skip if item does not have a submenu or its heading already has tap action.
     if (!content || this.action_.hasAction(heading, 'tap', item)) {
@@ -235,7 +228,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * @private
    */
   handleRootKeyDown_(event) {
-    if (event.key === Keys.ESCAPE && this.collapse_()) {
+    if (event.key === Keys_Enum.ESCAPE && this.collapse_()) {
       event.preventDefault();
     }
   }
@@ -269,7 +262,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   shouldHandleClick_(event) {
     const target = dev().assertElement(event.target);
     const currentTarget = dev().assertElement(event.currentTarget);
-    const hasAnchor = !!closest(target, e => e.tagName == 'A', currentTarget);
+    const hasAnchor = !!closest(target, (e) => e.tagName == 'A', currentTarget);
     if (hasAnchor) {
       return false;
     }
@@ -292,12 +285,12 @@ export class AmpMegaMenu extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.LEFT_ARROW: /* fallthrough */
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.LEFT_ARROW: /* fallthrough */
+      case Keys_Enum.RIGHT_ARROW:
         this.handleNavigationKeyDown_(event);
         return;
-      case Keys.ENTER: /* fallthrough */
-      case Keys.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         if (event.target == event.currentTarget) {
           this.handleHeadingClick_(event);
         }
@@ -315,7 +308,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
     const index = this.items_.indexOf(item);
     if (index !== -1) {
       event.preventDefault();
-      let dir = event.key == Keys.LEFT_ARROW ? -1 : 1;
+      let dir = event.key == Keys_Enum.LEFT_ARROW ? -1 : 1;
       // Left is 'previous' in LTR and 'next' in RTL; vice versa for Right.
       if (isRTL(this.document_)) {
         dir = -dir;
@@ -432,6 +425,6 @@ export class AmpMegaMenu extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpMegaMenu, CSS);
 });

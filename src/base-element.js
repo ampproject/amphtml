@@ -1,26 +1,18 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
+import {dispatchCustomEvent} from '#core/dom';
+import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
+import {isArray} from '#core/types';
+import {getWin} from '#core/window';
 
-import {ActionTrust, DEFAULT_ACTION} from './action-constants';
-import {Layout, LayoutPriority} from './layout';
-import {Services} from './services';
-import {devAssert, user, userAssert} from './log';
-import {getData, listen, loadPromise} from './event-helper';
+import {Services} from '#service';
+
+import {getData, listen, loadPromise} from '#utils/event-helper';
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {getMode} from './mode';
-import {isArray, toWin} from './types';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -36,18 +28,9 @@ import {isArray, toWin} from './types';
  *
  * The complete lifecycle of a custom DOM element is:
  *
- *           ||
- *           || createdCallback
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT UPGRADED> <NOT ATTACHED>
+ *    State: <NOT BUILT> <NOT UPGRADED>
  *           ||
  *           || upgrade
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT ATTACHED>
- *           ||
- *           || firstAttachedCallback
  *           ||
  *           \/
  *    State: <NOT BUILT>
@@ -70,7 +53,6 @@ import {isArray, toWin} from './types';
  *           ||                         ||
  *           ||                 =========
  *           ||
- *           || viewportCallback
  *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
@@ -106,19 +88,158 @@ import {isArray, toWin} from './types';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
- * When the dimensions of an element has changed, the 'onMeasureChanged'
- * callback is called.
- *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
  * is optional.
+ * @implements {BaseElementInterface}
  */
 export class BaseElement {
+  /**
+   * Whether this element supports R1 protocol, which includes:
+   * 1. Layout/unlayout are not managed by the runtime, but instead are
+   *    implemented by the element as needed.
+   * 2. The element can defer its build until later. See `deferredMount`.
+   * 3. The construction of the element is delayed until mount.
+   *
+   * Notice, in this mode `layoutCallback`, `pauseCallback`, `onLayoutMeasure`,
+   * `getLayoutSize`, and other methods are deprecated. The element must
+   * independently handle each of these states internally.
+   *
+   * @return {boolean}
+   *
+   */
+  static R1() {
+    return false;
+  }
+
+  /**
+   * Whether this element supports deferred-build mode. In this mode, the
+   * element's build will be deferred roughly based on the
+   * `content-visibility: auto` rules.
+   *
+   * Only used for R1 elements.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   *
+   */
+  static deferredMount(unusedElement) {
+    return true;
+  }
+
+  /**
+   * Subclasses can override this method to opt-in into being called to
+   * prerender when document itself is not yet visible (pre-render mode).
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during prerender mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   *
+   */
+  static prerenderAllowed(unusedElement) {
+    return false;
+  }
+
+  /**
+   * Subclasses can override this method to opt-in into being called to
+   * render when document itself is in preview mode.
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during preview mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
+   *
+   * Defaults to prerender behavior for most elements.
+   *
+   * @param {!AmpElement} element
+   * @return {boolean}
+   */
+  static previewAllowed(element) {
+    return this.prerenderAllowed(element);
+  }
+
+  /**
+   * Subclasses can override this method to indicate that an element can load
+   * network resources.
+   *
+   * Such elements can have their `ensureLoaded` method called.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   *
+   */
+  static usesLoading(unusedElement) {
+    return false;
+  }
+
+  /**
+   * Subclasses can override this method to provide a svg logo that will be
+   * displayed as the loader.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
+   *
+   */
+  static createLoaderLogoCallback(unusedElement) {
+    return {};
+  }
+
+  /**
+   * This is the element's build priority.
+   *
+   * The lower the number, the higher the priority.
+   *
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {number}
+   *
+   */
+  static getBuildPriority(unusedElement) {
+    return LayoutPriority_Enum.CONTENT;
+  }
+
+  /**
+   * Called by the framework to give the element a chance to preconnect to
+   * hosts and prefetch resources it is likely to need. May be called
+   * multiple times because connections can time out.
+   *
+   * Returns an array of URLs to be preconnected.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {?Array<string>}
+   *
+   */
+  static getPreconnects(unusedElement) {
+    return null;
+  }
+
+  /**
+   * Subclasses can override this method to indicate that instances need to
+   * use Shadow DOM. The Runtime will ensure that the Shadow DOM polyfill is
+   * installed before upgrading and building this class.
+   *
+   * @return {boolean}
+   *
+   */
+  static requiresShadowDom() {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const {!Element} */
     this.element = element;
+
+    /** @public @const {!Window} */
+    this.win = getWin(element);
+
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
@@ -126,33 +247,23 @@ export class BaseElement {
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
-    Any private property for BaseElement should be declared in
-    build-system/externs/amp.multipass.extern.js. This is so closure compiler
-    doesn't reuse the same symbol it would use in the core compilation unit for
-    the private property in the extensions compilation unit's private
-    properties.
+    Any private property for BaseElement MUST be wrapped with quotes. We cannot
+    allow Closure Compiler to mangle privates in this class, because it can
+    reuse the same mangled name for a different property in, i.e., amp-youtube's
+    BaseElement subclass (which lives in a different binary).
     */
-
-    /** @package {!Layout} */
-    this.layout_ = Layout.NODISPLAY;
-
-    /** @package {boolean} */
-    this.inViewport_ = false;
-
-    /** @public @const {!Window} */
-    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
      * trust required to invoke the handler.
      * @private {?Object<string, {
      *   handler: function(!./service/action-impl.ActionInvocation),
-     *   minTrust: ActionTrust,
+     *   minTrust: ActionTrust_Enum,
      * }>} */
-    this.actionMap_ = null;
+    this['actionMap_'] = null;
 
     /** @private {?string} */
-    this.defaultActionAlias_ = null;
+    this['defaultActionAlias_'] = null;
   }
 
   /**
@@ -168,7 +279,7 @@ export class BaseElement {
    * @return {?string}
    */
   getDefaultActionAlias() {
-    return this.defaultActionAlias_;
+    return this['defaultActionAlias_'];
   }
 
   /**
@@ -178,11 +289,12 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LayoutPriority.CONTENT.
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
    * @return {number}
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutPriority() {
-    return LayoutPriority.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /**
@@ -202,9 +314,9 @@ export class BaseElement {
       .updateLayoutPriority(this.element, newLayoutPriority);
   }
 
-  /** @return {!Layout} */
+  /** @return {!Layout_Enum} */
   getLayout() {
-    return this.layout_;
+    return this.element.getLayout();
   }
 
   /**
@@ -212,27 +324,19 @@ export class BaseElement {
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
   }
 
   /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!./layout-rect.LayoutRectDef}
+   * Returns a previously measured layout size.
+   * @return {!./layout-rect.LayoutSizeDef}
+   * TODO(#31915): remove once R1 migration is complete.
    */
-  getPageLayoutBox() {
-    return this.element.getPageLayoutBox();
-  }
-
-  /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @public
-   * @return {!Window}
-   */
-  getWin() {
-    return this.win;
+  getLayoutSize() {
+    return this.element.getLayoutSize();
   }
 
   /**
@@ -270,14 +374,14 @@ export class BaseElement {
 
   /**
    * Intended to be implemented by subclasses. Tests whether the element
-   * supports the specified layout. By default only Layout.NODISPLAY is
+   * supports the specified layout. By default only Layout_Enum.NODISPLAY is
    * supported.
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @return {boolean}
    * @public
    */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /**
@@ -288,13 +392,6 @@ export class BaseElement {
    */
   isAlwaysFixed() {
     return false;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
   }
 
   /**
@@ -313,23 +410,6 @@ export class BaseElement {
   upgradeCallback() {
     // Subclasses may override.
     return null;
-  }
-
-  /**
-   * Called when the element is first created. Note that for element created
-   * using createElement this may be before any children are added.
-   */
-  createdCallback() {
-    // Subclasses may override.
-  }
-
-  /**
-   * Override in subclass to adjust the element when it is being added to the
-   * DOM. Could e.g. be used to insert a fallback. Should not typically start
-   * loading a resource.
-   */
-  firstAttachedCallback() {
-    // Subclasses may override.
   }
 
   /**
@@ -355,8 +435,19 @@ export class BaseElement {
    * hosts and prefetch resources it is likely to need. May be called
    * multiple times because connections can time out.
    * @param {boolean=} opt_onLayout
+   * TODO(#31915): remove once R1 migration is complete.
    */
   preconnectCallback(opt_onLayout) {
+    // Subclasses may override.
+  }
+
+  /**
+   * Override in subclass to adjust the element when it is being added to
+   * the DOM. Could e.g. be used to add a listener. Notice, that this
+   * callback is called immediately after `buildCallback()` if the element
+   * is attached to the DOM.
+   */
+  attachedCallback() {
     // Subclasses may override.
   }
 
@@ -369,16 +460,25 @@ export class BaseElement {
   }
 
   /**
-   * Subclasses can override this method to opt-in into being called to
-   * prerender when document itself is not yet visible (pre-render mode).
+   * Set itself as a container element that can be monitored by the scheduler
+   * for auto-mounting. Scheduler is used for R1 elements. A container is
+   * usually a top-level scrollable overlay such as a lightbox or a sidebar.
+   * The main scheduler (`IntersectionObserver`) cannot properly handle elements
+   * inside a non-document scroller and this method instructs the scheduler
+   * to also use the `IntersectionObserver` corresponding to the container.
    *
-   * The return value of this function is used to determine whether or not the
-   * element will be built _and_ laid out during prerender mode. Therefore, any
-   * changes to the return value _after_ buildCallback() will have no affect.
-   * @return {boolean}
+   * @param {!Element=} opt_scroller A child of the container that should be
+   * monitored. Typically a scrollable element.
    */
-  prerenderAllowed() {
-    return false;
+  setAsContainer(opt_scroller) {
+    this.element.setAsContainerInternal(opt_scroller);
+  }
+
+  /**
+   * Removes itself as a container. See `setAsContainer`.
+   */
+  removeAsContainer() {
+    this.element.removeAsContainerInternal();
   }
 
   /**
@@ -401,18 +501,6 @@ export class BaseElement {
    */
   createPlaceholderCallback() {
     return null;
-  }
-
-  /**
-   * Subclasses can override this method to provide a svg logo that will be
-   * displayed as the loader.
-   * @return {{
-   *  content: (!Element|undefined),
-   *  color: (string|undefined),
-   * }}
-   */
-  createLoaderLogoCallback() {
-    return {};
   }
 
   /**
@@ -441,6 +529,45 @@ export class BaseElement {
   }
 
   /**
+   * Ensure that the element is being eagerly loaded.
+   *
+   * Only used for R1 elements.
+   */
+  ensureLoaded() {}
+
+  /**
+   * Update the current `readyState`.
+   *
+   * Only used for R1 elements.
+   *
+   * @param {!./ready-state.ReadyState_Enum} state
+   * @param {*=} opt_failure
+   * @final
+   */
+  setReadyState(state, opt_failure) {
+    this.element.setReadyStateInternal(state, opt_failure);
+  }
+
+  /**
+   * Load heavy elements, perform expensive operations, add global
+   * listeners/observers, etc. The mount and unmount can be called multiple
+   * times for resource management. The unmount should reverse the changes
+   * made by the mount. See `unmountCallback` for more info.
+   *
+   * If this callback returns a promise, the `readyState` becomes "complete"
+   * after the promise is resolved.
+   *
+   * @param {!AbortSignal=} opt_abortSignal
+   * @return {?Promise|undefined}
+   */
+  mountCallback(opt_abortSignal) {}
+
+  /**
+   * Unload heavy elements, remove global listeners, etc.
+   */
+  unmountCallback() {}
+
+  /**
    * Subclasses can override this method to opt-in into receiving additional
    * {@link layoutCallback} calls. Note that this method is not consulted for
    * the first layout given that each element must be laid out at least once.
@@ -461,6 +588,7 @@ export class BaseElement {
    * {@link isRelayoutNeeded} method.
    *
    * @return {!Promise}
+   * TODO(#31915): remove once R1 migration is complete.
    */
   layoutCallback() {
     return Promise.resolve();
@@ -480,16 +608,10 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
-
-  /**
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   pauseCallback() {}
 
@@ -497,6 +619,7 @@ export class BaseElement {
    * Requests the element to resume its activity when the document returns from
    * an inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content may be resumed.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   resumeCallback() {}
 
@@ -507,6 +630,7 @@ export class BaseElement {
    * {@link layoutCallback} in case document becomes active again.
    *
    * @return {boolean}
+   * TODO(#31915): remove once R1 migration is complete.
    */
   unlayoutCallback() {
     return false;
@@ -516,6 +640,7 @@ export class BaseElement {
    * Subclasses can override this method to opt-in into calling
    * {@link unlayoutCallback} when paused.
    * @return {boolean}
+   * TODO(#31915): remove once R1 migration is complete.
    */
   unlayoutOnPause() {
     return false;
@@ -551,13 +676,6 @@ export class BaseElement {
     return loadPromise(element);
   }
 
-  /** @private */
-  initActionMap_() {
-    if (!this.actionMap_) {
-      this.actionMap_ = this.win.Object.create(null);
-    }
-  }
-
   /**
    * Registers the action handler for the method with the specified name.
    *
@@ -566,33 +684,33 @@ export class BaseElement {
    *
    * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
-   * @param {ActionTrust} minTrust
+   * @param {ActionTrust_Enum} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
-    this.initActionMap_();
-    this.actionMap_[alias] = {handler, minTrust};
+  registerAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
+    initActionMap(this);
+    this['actionMap_'][alias] = {handler, minTrust};
   }
 
   /**
    * Registers the default action for this component.
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {string=} alias
-   * @param {ActionTrust=} minTrust
+   * @param {ActionTrust_Enum=} minTrust
    * @public
    */
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.DEFAULT
+    minTrust = ActionTrust_Enum.DEFAULT
   ) {
     devAssert(
-      !this.defaultActionAlias_,
+      !this['defaultActionAlias_'],
       'Default action "%s" already registered.',
-      this.defaultActionAlias_
+      this['defaultActionAlias_']
     );
     this.registerAction(alias, handler, minTrust);
-    this.defaultActionAlias_ = alias;
+    this['defaultActionAlias_'] = alias;
   }
 
   /**
@@ -610,59 +728,15 @@ export class BaseElement {
     let {method} = invocation;
     // If the default action has an alias, the handler will be stored under it.
     if (method === DEFAULT_ACTION) {
-      method = this.defaultActionAlias_ || method;
+      method = this['defaultActionAlias_'] || method;
     }
-    this.initActionMap_();
-    const holder = this.actionMap_[method];
+    initActionMap(this);
+    const holder = this['actionMap_'][method];
     const {tagName} = this.element;
     userAssert(holder, `Method not found: ${method} in ${tagName}`);
     const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
-    }
-  }
-
-  /**
-   * Utility method that propagates attributes from this element
-   * to the given element.
-   * If `opt_removeMissingAttrs` is true, then also removes any specified
-   * attributes that are missing on this element from the target element.
-   * @param {string|!Array<string>} attributes
-   * @param {!Element} element
-   * @param {boolean=} opt_removeMissingAttrs
-   * @public @final
-   */
-  propagateAttributes(attributes, element, opt_removeMissingAttrs) {
-    attributes = isArray(attributes) ? attributes : [attributes];
-    for (let i = 0; i < attributes.length; i++) {
-      const attr = attributes[i];
-      const val = this.element.getAttribute(attr);
-      if (null !== val) {
-        element.setAttribute(attr, val);
-      } else if (opt_removeMissingAttrs) {
-        element.removeAttribute(attr);
-      }
-    }
-  }
-
-  /**
-   * Utility method to propagate all data attributes from this element
-   * to the target element. (For use with arbitrary data attributes.)
-   * Removes any data attributes that are missing on this element from
-   * the target element.
-   * @param {!Element} targetElement
-   */
-  propagateDataset(targetElement) {
-    for (const key in targetElement.dataset) {
-      if (!(key in this.element.dataset)) {
-        delete targetElement.dataset[key];
-      }
-    }
-
-    for (const key in this.element.dataset) {
-      if (targetElement.dataset[key] !== this.element.dataset[key]) {
-        targetElement.dataset[key] = this.element.dataset[key];
-      }
     }
   }
 
@@ -675,13 +749,13 @@ export class BaseElement {
    * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
-      listen(element, eventType, event => {
-        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+    const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
+      listen(element, eventType, (event) => {
+        dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 
-    return () => unlisteners.forEach(unlisten => unlisten());
+    return () => unlisteners.forEach((unlisten) => unlisten());
   }
 
   /**
@@ -722,24 +796,13 @@ export class BaseElement {
   }
 
   /**
-   * Hides or shows the loading indicator. This function must only
-   * be called inside a mutate context.
+   * Hides or shows the loading indicator.
    * @param {boolean} state
-   * @param {boolean=} opt_force
+   * @param {boolean=} force
    * @public @final
    */
-  toggleLoading(state, opt_force) {
-    this.element.toggleLoading(state, {force: !!opt_force});
-  }
-
-  /**
-   * Returns whether the loading indicator is reused again after the first
-   * render.
-   * @return {boolean}
-   * @public
-   */
-  isLoadingReused() {
-    return false;
+  toggleLoading(state, force = false) {
+    this.element.toggleLoading(state, force);
   }
 
   /**
@@ -760,46 +823,6 @@ export class BaseElement {
   }
 
   /**
-   * Returns the original nodes of the custom element without any service nodes
-   * that could have been added for markup. These nodes can include Text,
-   * Comment and other child nodes.
-   * @return {!Array<!Node>}
-   * @public @final
-   */
-  getRealChildNodes() {
-    return this.element.getRealChildNodes();
-  }
-
-  /**
-   * Returns the original children of the custom element without any service
-   * nodes that could have been added for markup.
-   * @return {!Array<!Element>}
-   * @public @final
-   */
-  getRealChildren() {
-    return this.element.getRealChildren();
-  }
-
-  /**
-   * Configures the supplied element to have a "fill content" layout. The
-   * exact interpretation of "fill content" depends on the element's layout.
-   *
-   * If `opt_replacedContent` is specified, it indicates whether the "replaced
-   * content" styling should be applied. Replaced content is not allowed to
-   * have its own paddings or border.
-   *
-   * @param {!Element} element
-   * @param {boolean=} opt_replacedContent
-   * @public @final
-   */
-  applyFillContent(element, opt_replacedContent) {
-    element.classList.add('i-amphtml-fill-content');
-    if (opt_replacedContent) {
-      element.classList.add('i-amphtml-replaced-content');
-    }
-  }
-
-  /**
    * Returns the viewport within which the element operates.
    * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
@@ -814,21 +837,6 @@ export class BaseElement {
    */
   getIntersectionElementLayoutBox() {
     return this.getLayoutBox();
-  }
-
-  /**
-   * Requests the runtime to update the height of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
-   * as soon as possible.
-   * @param {number} newHeight
-   * @public
-   */
-  changeHeight(newHeight) {
-    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
-      this.element,
-      newHeight,
-      /* newWidth */ undefined
-    );
   }
 
   /**
@@ -851,10 +859,25 @@ export class BaseElement {
   }
 
   /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible.
+   * @param {number} newHeight
+   * @public
+   */
+  forceChangeHeight(newHeight) {
+    Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
+  }
+
+  /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * as soon as possible. However, unlike in {@link forceChangeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
    * the necessary user action. (The overflow element is shown only if the
@@ -865,7 +888,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       /* newWidth */ undefined
@@ -889,7 +912,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       newWidth,
@@ -952,6 +975,21 @@ export class BaseElement {
   }
 
   /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+      this.element,
+      mutator,
+      /* skipRemeasure */ true
+    );
+  }
+
+  /**
    * Called every time an owned AmpElement collapses itself.
    * See {@link collapse}.
    * @param {!AmpElement} unusedElement Child element that was collapsed.
@@ -967,15 +1005,6 @@ export class BaseElement {
    */
   expand() {
     Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
-  }
-
-  /**
-   * Called every time an owned AmpElement expands itself.
-   * See {@link expand}.
-   * @param {!AmpElement} unusedElement Child element that was expanded.
-   */
-  expandedCallback(unusedElement) {
-    // Subclasses may override.
   }
 
   /**
@@ -998,20 +1027,37 @@ export class BaseElement {
    * This may currently not work with extended elements. Please file
    * an issue if that is required.
    * @public
+   * TODO(#31915): remove once R1 migration is complete.
    */
   onLayoutMeasure() {}
-
-  /**
-   * Called only when the measurements of an amp-element changes. This
-   * would not trigger for every measurement invalidation caused by a mutation.
-   * @public
-   */
-  onMeasureChanged() {}
 
   /**
    * @return {./log.Log}
    */
   user() {
     return user(this.element);
+  }
+
+  /**
+   * Returns this BaseElement instance. This is equivalent to Bento's
+   * imperative API object, since this is where we define the element's custom
+   * APIs.
+   *
+   * @return {!Promise<!Object>}
+   */
+  getApi() {
+    return this;
+  }
+}
+
+/**
+ * This would usually be a private method on BaseElement class, but we cannot
+ * use privates here. So, it's manually devirtualized into a regular function.
+ *
+ * @param {typeof BaseElement} baseElement
+ */
+function initActionMap(baseElement) {
+  if (!baseElement['actionMap_']) {
+    baseElement['actionMap_'] = baseElement.win.Object.create(null);
   }
 }

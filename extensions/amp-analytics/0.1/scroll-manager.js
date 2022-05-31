@@ -1,21 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
 
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
+import {devAssert} from '#utils/log';
 
 /**
  * @typedef {{
@@ -25,6 +12,10 @@ import {Services} from '../../../src/services';
  *   height: number,
  *   scrollHeight: number,
  *   scrollWidth: number,
+ *   initialSize: {
+ *      scrollHeight: number,
+ *      scrollWidth: number
+ *  }
  * }}
  */
 export let ScrollEventDef;
@@ -37,17 +28,26 @@ export let ScrollEventDef;
  */
 export class ScrollManager {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./analytics-root.AnalyticsRoot} root
    */
-  constructor(ampdoc) {
+  constructor(root) {
     /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = Services.viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(root.ampdoc);
 
-    /** @private {!UnlistenDef|null} */
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(root.ampdoc);
+
+    /** @private {?UnlistenDef} */
     this.viewportOnChangedUnlistener_ = null;
 
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */
     this.scrollObservable_ = new Observable();
+
+    /** @const @private {!Element} */
+    this.root_ = root.getRootElement();
+
+    /**  @private {?Promise} */
+    this.initialRootRectPromise_ = null;
   }
 
   /**
@@ -76,16 +76,35 @@ export class ScrollManager {
   addScrollHandler(handler) {
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
-    /** {./scroll-manager.ScrollEventDef} */
-    const scrollEvent = {
-      top: this.viewport_.getScrollTop(),
-      left: this.viewport_.getScrollLeft(),
-      width: size.width,
-      height: size.height,
-      scrollWidth: this.viewport_.getScrollWidth(),
-      scrollHeight: this.viewport_.getScrollHeight(),
-    };
-    handler(scrollEvent);
+
+    this.getInitRootElementRect_().then((initRootElementRect) => {
+      // In the case of shadow/embedded documents, the root element's
+      // layoutRect is relative to the parent doc's origin
+      const {
+        height: scrollHeight,
+        left: scrollLeft,
+        top: scrollTop,
+        width: scrollWidth,
+      } = initRootElementRect;
+
+      /** {./scroll-manager.ScrollEventDef} */
+      const scrollEvent = {
+        // In the case of shadow documents (e.g. amp-next-page), we offset
+        // the event's top and left coordinates by the top/left position of
+        // the document's container element (so that scroll triggers become relative to
+        // container instead of the top-level host page). In the case of a top-level
+        // page, the container/root is the document body so scrollTop and scrollLeft
+        // are both 0 and the measurements are not affected
+        top: this.viewport_.getScrollTop() - scrollTop,
+        left: this.viewport_.getScrollLeft() - scrollLeft,
+        width: size.width,
+        height: size.height,
+        scrollHeight,
+        scrollWidth,
+        initialSize: {scrollHeight, scrollWidth},
+      };
+      handler(scrollEvent);
+    });
 
     if (this.scrollObservable_.getHandlerCount() === 0) {
       this.addViewportOnChangedListener_();
@@ -96,20 +115,47 @@ export class ScrollManager {
 
   /**
    * @param {!../../../src/service/viewport/viewport-interface.ViewportChangedEventDef} e
+   * @return {!Promise}
    * @private
    */
   onScroll_(e) {
-    /** {./scroll-manager.ScrollEventDef} */
-    const scrollEvent = {
-      top: e.top,
-      left: e.left,
-      width: e.width,
-      height: e.height,
-      scrollWidth: this.viewport_.getScrollWidth(),
-      scrollHeight: this.viewport_.getScrollHeight(),
-    };
-    // Fire all of our children scroll observables
-    this.scrollObservable_.fire(scrollEvent);
+    return Promise.all([
+      // Initial root layout rectangle
+      this.getInitRootElementRect_(),
+      // Current root layout rectangle
+      this.measureRootElement_(),
+    ]).then((rects) => {
+      // Initial root layout rectangle
+      const {height: initialScrollHeight, width: initialScrollWidth} = rects[0];
+      // Current root layout rectangle
+      const {
+        height: scrollHeight,
+        left: scrollLeft,
+        top: scrollTop,
+        width: scrollWidth,
+      } = rects[1];
+      /** {./scroll-manager.ScrollEventDef} */
+      const scrollEvent = {
+        // In the case of shadow documents (e.g. amp-next-page), we offset
+        // the event's top and left coordinates by the top/left position of
+        // the document's container element (so that scroll triggers become relative to
+        // container instead of the top-level host page). In the case of a top-level
+        // page, the container/root is the document body so scrollTop and scrollLeft
+        // are both 0 and the measurements are not affected
+        top: e.top - scrollTop,
+        left: e.left - scrollLeft,
+        width: e.width,
+        height: e.height,
+        scrollWidth,
+        scrollHeight,
+        initialSize: {
+          scrollHeight: initialScrollHeight,
+          scrollWidth: initialScrollWidth,
+        },
+      };
+      // Fire all of our children scroll observables
+      this.scrollObservable_.fire(scrollEvent);
+    });
   }
 
   /**
@@ -131,5 +177,27 @@ export class ScrollManager {
     this.viewportOnChangedUnlistener_ = this.viewport_.onChanged(
       this.onScroll_.bind(this)
     );
+  }
+
+  /**
+   * Gets the cached layout rectangle of the root element
+   * @return {!Promise<!../../../src/layout-rect.LayoutRectDef>}
+   */
+  getInitRootElementRect_() {
+    return devAssert(
+      this.initialRootRectPromise_ || this.measureRootElement_()
+    );
+  }
+
+  /**
+   * Gets the layout rectangle of the root element
+   * @return {!Promise<!../../../src/layout-rect.LayoutRectDef>}
+   */
+  measureRootElement_() {
+    const rectPromise = this.mutator_.measureElement(() =>
+      this.viewport_.getLayoutRect(this.root_)
+    );
+    this.initialRootRectPromise_ = this.initialRootRectPromise_ || rectPromise;
+    return rectPromise;
   }
 }

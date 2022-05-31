@@ -1,42 +1,30 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {Layout} from '../../../src/layout';
-import {NextPageService} from './next-page-service';
-import {Services} from '../../../src/services';
-import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {assertConfig} from './config';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {isJsonScriptTag, removeElement} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   childElementsByAttr,
   childElementsByTag,
   elementByTag,
-  isJsonScriptTag,
-  removeElement,
-} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
-import {fetchDocument} from '../../../src/document-fetcher';
+} from '#core/dom/query';
+import {parseJson, tryParseJson} from '#core/types/object/json';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {assertConfig} from './config';
+import {NextPageService} from './next-page-service';
+
+import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {
+  UrlReplacementPolicy_Enum,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseJson, tryParseJson} from '../../../src/json';
+import {fetchDocument} from '../../../src/document-fetcher';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-next-page';
 
@@ -47,7 +35,7 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -70,13 +58,25 @@ export class AmpNextPage extends AMP.BaseElement {
       removeElement(separator);
     }
 
-    return nextPageServiceForDoc(this.getAmpDoc()).then(service => {
+    return nextPageServiceForDoc(this.getAmpDoc()).then((service) => {
       if (service.isActive()) {
         return;
       }
 
       const {element} = this;
       element.classList.add('i-amphtml-next-page');
+
+      // Warning for validation conflicts between 1.0 and 0.1
+      const prohibitedAttribute = element.hasAttribute('deep-parsing')
+        ? 'deep-parsing'
+        : element.hasAttribute('xssi-prefix')
+        ? 'xssi-prefix'
+        : element.hasAttribute('max-pages')
+        ? 'max-pages'
+        : null;
+      if (prohibitedAttribute) {
+        this.unsupportedFeatureWarn_(prohibitedAttribute);
+      }
 
       const src = element.getAttribute('src');
       let configPromise;
@@ -99,14 +99,14 @@ export class AmpNextPage extends AMP.BaseElement {
 
         const consentPolicyId = this.getConsentPolicy();
         const consent = consentPolicyId
-          ? getConsentPolicyState(element, consentPolicyId).catch(err => {
+          ? getConsentPolicyState(element, consentPolicyId).catch((err) => {
               user().error(TAG, 'Error determining consent state', err);
               return CONSENT_POLICY_STATE.UNKNOWN;
             })
           : Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
 
         pagesPromise = consent
-          .then(state =>
+          .then((state) =>
             this.fetchAdSensePages_(
               client,
               slot,
@@ -114,7 +114,7 @@ export class AmpNextPage extends AMP.BaseElement {
                 state === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
             )
           )
-          .catch(error => {
+          .catch((error) => {
             user().warn(
               TAG,
               'error fetching recommendations from AdSense',
@@ -129,11 +129,15 @@ export class AmpNextPage extends AMP.BaseElement {
       const inlineConfig = this.getInlineConfig_();
 
       if (src) {
-        configPromise = this.fetchConfig_().catch(error =>
+        configPromise = this.fetchConfig_().catch((error) =>
           user().error(TAG, 'error fetching config', error)
         );
       } else {
         configPromise = Promise.resolve(inlineConfig);
+      }
+
+      if (inlineConfig && (src || type)) {
+        this.unsupportedFeatureWarn_('mixing configuration types');
       }
 
       userAssert(
@@ -143,7 +147,7 @@ export class AmpNextPage extends AMP.BaseElement {
         TAG
       );
 
-      return Promise.all([configPromise, pagesPromise]).then(values => {
+      return Promise.all([configPromise, pagesPromise]).then((values) => {
         const config = values[0] || {};
         const pages = values[1] || [];
         config.pages = pages.concat(config.pages || []);
@@ -172,7 +176,7 @@ export class AmpNextPage extends AMP.BaseElement {
       `${TAG} config should ` +
         'be inside a <script> tag with type="application/json"'
     );
-    return tryParseJson(scriptElement.textContent, error => {
+    return tryParseJson(scriptElement.textContent, (error) => {
       user().error(TAG, 'failed to parse config', error);
     });
   }
@@ -195,7 +199,7 @@ export class AmpNextPage extends AMP.BaseElement {
       '&ecr=1&crui=title&is_amp=3&output=xml';
     return fetchDocument(this.win, adUrl, {
       credentials: personalized ? 'include' : 'omit',
-    }).then(doc => {
+    }).then((doc) => {
       const urlService = Services.urlForDoc(dev().assertElement(this.element));
       const {origin} = urlService.parse(this.getAmpDoc().getUrl());
 
@@ -236,7 +240,7 @@ export class AmpNextPage extends AMP.BaseElement {
     const {element} = this;
     const config = assertConfig(element, configJson, this.getAmpDoc().getUrl());
     service.register(element, config, separator);
-    service.setAppendPageHandler(element => this.appendPage_(element));
+    service.setAppendPageHandler((element) => this.appendPage_(element));
   }
 
   /**
@@ -255,8 +259,19 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   fetchConfig_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
+  }
+
+  /**
+   * @param {string} feature unsupported feature
+   * @private
+   */
+  unsupportedFeatureWarn_(feature) {
+    user().warn(
+      TAG,
+      `${feature} is a feature of ${TAG} 1.0, please update your version to use it`
+    );
   }
 }
 
@@ -265,10 +280,9 @@ export class AmpNextPage extends AMP.BaseElement {
  * @return {!Promise<!NextPageService>}
  */
 function nextPageServiceForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!NextPageService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    SERVICE_ID
-  ));
+  return /** @type {!Promise<!NextPageService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID)
+  );
 }
 
 /**
@@ -300,8 +314,10 @@ function extractAdSenseTextContent(el) {
   return content.trim();
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   const service = new NextPageService();
-  AMP.registerServiceForDoc(SERVICE_ID, () => service);
+  AMP.registerServiceForDoc(SERVICE_ID, function () {
+    return service;
+  });
   AMP.registerElement(TAG, AmpNextPage, CSS);
 });

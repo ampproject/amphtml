@@ -1,21 +1,8 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-call-tracking';
-import {Services} from '../../../../src/services';
+import {realChildElements} from '#core/dom/query';
+
+import {Services} from '#service';
+
 import {clearResponseCacheForTesting} from '../amp-call-tracking';
 
 describes.realWin(
@@ -25,7 +12,7 @@ describes.realWin(
       extensions: ['amp-call-tracking'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let xhrMock;
 
@@ -53,7 +40,7 @@ describes.realWin(
 
       doc.body.appendChild(callTrackingEl);
       return callTrackingEl
-        .build()
+        .buildInternal()
         .then(() => {
           return callTrackingEl.layoutCallback();
         })
@@ -65,7 +52,7 @@ describes.realWin(
         .expects('fetchJson')
         .withArgs(
           url,
-          env.sandbox.match(init => init.credentials == 'include')
+          env.sandbox.match((init) => init.credentials == 'include')
         )
         .returns(
           Promise.resolve({
@@ -77,7 +64,7 @@ describes.realWin(
     }
 
     function expectHyperlinkToBe(callTrackingEl, href, textContent) {
-      const hyperlink = callTrackingEl.getRealChildren()[0];
+      const hyperlink = realChildElements(callTrackingEl)[0];
 
       expect(hyperlink.getAttribute('href')).to.equal(href);
       expect(hyperlink.textContent).to.equal(textContent);
@@ -97,7 +84,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(callTrackingEl, `tel:${phoneNumber}`, phoneNumber);
       });
     });
@@ -117,7 +104,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(
           callTrackingEl,
           `tel:${phoneNumber}`,
@@ -138,7 +125,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(
           callTrackingEl,
           `tel:${defaultNumber}`,

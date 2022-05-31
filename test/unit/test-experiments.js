@@ -1,22 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
 
 import {
   RANDOM_NUMBER_GENERATORS,
   experimentToggles,
+  forceExperimentBranch,
+  getActiveExperimentBranches,
   getBinaryType,
   getExperimentBranch,
   getExperimentTogglesForTesting,
@@ -25,38 +13,63 @@ import {
   randomlySelectUnsetExperiments,
   resetExperimentTogglesForTesting,
   toggleExperiment,
-} from '../../src/experiments';
-import {createElementWithAttributes} from '../../src/dom';
+} from '#experiments';
 
 function fakeLocalStorage(initial = {}) {
   const state = {...initial};
   return {
-    getItem: key => (key in state ? state[key] : null),
+    getItem: (key) => (key in state ? state[key] : null),
     setItem: (key, value) => (state[key] = value),
   };
 }
 
-describe('experimentToggles', () => {
+describes.sandboxed('experimentToggles', {}, () => {
   it('should return experiment status map', () => {
     const win = {
-      localStorage: fakeLocalStorage({
-        'amp-experiment-toggles': '-exp3,exp4,exp5',
-      }),
       AMP_CONFIG: {
-        exp1: 1,
-        exp2: 0,
-        exp3: 1,
-        exp4: 0,
+        exp1: 1, // Initialized here
+        exp2: 0, // Initialized here
+        exp3: 1, // Initialized here
+        exp4: 0, // Initialized here
+        exp5: 1, // Initialized here
+        exp6: 0, // Initialized here
         v: '12345667',
       },
+      AMP_EXP: {
+        exp3: 0, // Overrides AMP_CONFIG
+        exp4: 1, // Overrides AMP_CONFIG
+        exp5: 0, // Overrides AMP_CONFIG
+        exp6: 1, // Overrides AMP_CONFIG
+        exp7: 1, // Initialized here
+        exp8: 0, // Initialized here
+        exp9: 1, // Initialized here
+        exp10: 0, // Initialized here
+      },
+      localStorage: fakeLocalStorage({
+        'amp-experiment-toggles': [
+          'exp5', // Overrides AMP_CONFIG and AMP_EXP
+          '-exp6', // Overrides AMP_CONFIG and AMP_EXP
+          '-exp9', // Overrides AMP_EXP
+          'exp10', // Overrides AMP_EXP
+          'exp11', // Initialized here
+          '-exp12', // Initialized here
+        ].join(','),
+      }),
     };
     resetExperimentTogglesForTesting(window);
     expect(experimentToggles(win)).to.deep.equal({
       exp1: true,
       exp2: false,
-      exp3: false, // overridden in cookie
-      exp4: true, // overridden in cookie
+      exp3: false,
+      exp4: true,
       exp5: true,
+      exp6: false,
+      exp7: true,
+      exp8: false,
+      exp9: false,
+      exp10: true,
+      exp11: true,
+      exp12: false,
       // "v" should not appear here
     });
   });
@@ -104,7 +117,7 @@ describe('experimentToggles', () => {
   });
 });
 
-describe('isExperimentOn', () => {
+describes.sandboxed('isExperimentOn', {}, (env) => {
   let win;
 
   beforeEach(() => {
@@ -185,7 +198,7 @@ describe('isExperimentOn', () => {
       win.AMP_CONFIG['e2'] = 0;
       expectExperiment('', 'e2').to.be.false;
 
-      window.sandbox.stub(Math, 'random').returns(0.5);
+      env.sandbox.stub(Math, 'random').returns(0.5);
       win.AMP_CONFIG['e3'] = 0.3;
       expectExperiment('', 'e3').to.be.false;
 
@@ -200,7 +213,7 @@ describe('isExperimentOn', () => {
     });
 
     it('should cache calc value', () => {
-      window.sandbox.stub(Math, 'random').returns(0.4);
+      env.sandbox.stub(Math, 'random').returns(0.4);
       win.AMP_CONFIG['e1'] = 0.5;
       win.AMP_CONFIG['e2'] = 0.1;
 
@@ -210,11 +223,11 @@ describe('isExperimentOn', () => {
   });
 });
 
-describe('toggleExperiment', () => {
+describes.sandboxed('toggleExperiment', {}, (env) => {
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
   });
 
@@ -443,14 +456,14 @@ describe('toggleExperiment', () => {
   });
 });
 
-describes.realWin('meta override', {}, env => {
+describes.realWin('meta override', {}, (env) => {
   let win;
 
   beforeEach(() => {
     win = env.win;
   });
 
-  it('should allow override iff the experiment is whitelisted', () => {
+  it('should allow override iff the experiment is allowlisted', () => {
     win.AMP_CONFIG = {
       'allow-doc-opt-in': ['e1', 'e3'],
       e1: 0,
@@ -467,7 +480,7 @@ describes.realWin('meta override', {}, env => {
     resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not allowlisted
     expect(isExperimentOn(win, 'e3')).to.be.true;
 
     toggleExperiment(win, 'e1', false);
@@ -479,14 +492,14 @@ describes.realWin('meta override', {}, env => {
   });
 });
 
-describes.fakeWin('url override', {}, env => {
+describes.fakeWin('url override', {}, (env) => {
   let win;
 
   beforeEach(() => {
     win = env.win;
   });
 
-  it('should allow override iff the experiment is whitelisted', () => {
+  it('should allow override iff the experiment is allowlisted', () => {
     win.AMP_CONFIG = {
       'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6', 'e7', 'e8'],
       e1: 0,
@@ -502,10 +515,10 @@ describes.fakeWin('url override', {}, env => {
     resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not allowlisted
     expect(isExperimentOn(win, 'e3')).to.be.true;
     expect(isExperimentOn(win, 'e4')).to.be.false;
-    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not whitelisted
+    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not allowlisted
     expect(isExperimentOn(win, 'e6')).to.be.false;
     expect(isExperimentOn(win, 'e7')).to.be.true; // overrides cookies
     expect(isExperimentOn(win, 'e8')).to.be.false; // overrides cookies
@@ -529,7 +542,7 @@ describes.fakeWin('url override', {}, env => {
   });
 });
 
-describe('isCanary', () => {
+describes.sandboxed('isCanary', {}, () => {
   it('should return value based on binary version', () => {
     const win = {
       AMP_CONFIG: {
@@ -542,7 +555,7 @@ describe('isCanary', () => {
   });
 });
 
-describe('getBinaryType', () => {
+describes.sandboxed('getBinaryType', {}, () => {
   it('should return correct type', () => {
     const win = {
       AMP_CONFIG: {
@@ -564,21 +577,22 @@ describe('getBinaryType', () => {
   });
 });
 
-describe('experiment branch tests', () => {
+describes.sandboxed('experiment branch tests', {}, (env) => {
   describe('#randomlySelectUnsetExperiments', () => {
     let accurateRandomStub;
     let cachedAccuratePrng;
-    let testExperimentSet;
+    let testExperimentList;
 
     beforeEach(() => {
       const experimentFrequency = 1.0;
-      testExperimentSet = {
-        testExperimentId: {
+      testExperimentList = [
+        {
+          experimentId: 'testExperimentId',
           isTrafficEligible: () => true,
           branches: ['branch1_id', 'branch2_id'],
         },
-      };
-      window.sandbox.win = {
+      ];
+      env.sandbox.win = {
         location: {
           hostname: 'test.server.name.com',
         },
@@ -590,7 +604,7 @@ describe('experiment branch tests', () => {
           querySelector: () => {},
         },
       };
-      accurateRandomStub = window.sandbox.stub().returns(-1);
+      accurateRandomStub = env.sandbox.stub().returns(-1);
       cachedAccuratePrng = RANDOM_NUMBER_GENERATORS.accuratePrng;
       RANDOM_NUMBER_GENERATORS.accuratePrng = accurateRandomStub;
     });
@@ -601,294 +615,310 @@ describe('experiment branch tests', () => {
 
     it('handles empty experiments list', () => {
       // Opt out of experiment.
-      toggleExperiment(window.sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetExperiments(window.sandbox.win, {});
+      toggleExperiment(env.sandbox.win, 'testExperimentId', false, true);
+      randomlySelectUnsetExperiments(env.sandbox.win, []);
       expect(
-        isExperimentOn(window.sandbox.win, 'testExperimentId'),
+        isExperimentOn(env.sandbox.win, 'testExperimentId'),
         'experiment is on'
       ).to.be.false;
-      expect(window.sandbox.win.__AMP_EXPERIMENT_BRANCHES).to.be.empty;
+      expect(env.sandbox.win.__AMP_EXPERIMENT_BRANCHES).to.be.empty;
     });
 
     it('handles experiment not diverted path', () => {
       // Opt out of experiment.
-      toggleExperiment(window.sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentSet);
+      toggleExperiment(env.sandbox.win, 'testExperimentId', false, true);
+      randomlySelectUnsetExperiments(env.sandbox.win, testExperimentList);
       expect(
-        isExperimentOn(window.sandbox.win, 'testExperimentId'),
+        isExperimentOn(env.sandbox.win, 'testExperimentId'),
         'experiment is on'
       ).to.be.false;
-      expect(getExperimentBranch(window.sandbox.win, 'testExperimentId')).to.not
-        .be.ok;
+      expect(getExperimentBranch(env.sandbox.win, 'testExperimentId')).to.not.be
+        .ok;
     });
 
     it('handles experiment diverted path 1', () => {
       // Force experiment on.
-      toggleExperiment(window.sandbox.win, 'testExperimentId', true, true);
+      toggleExperiment(env.sandbox.win, 'testExperimentId', true, true);
       // force the control branch to be chosen by making the accurate PRNG
       // return a value < 0.5.
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
-      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentSet);
+      randomlySelectUnsetExperiments(env.sandbox.win, testExperimentList);
       expect(
-        isExperimentOn(window.sandbox.win, 'testExperimentId'),
+        isExperimentOn(env.sandbox.win, 'testExperimentId'),
         'experiment is on'
       ).to.be.true;
-      expect(
-        getExperimentBranch(window.sandbox.win, 'testExperimentId')
-      ).to.equal('branch1_id');
+      expect(getExperimentBranch(env.sandbox.win, 'testExperimentId')).to.equal(
+        'branch1_id'
+      );
     });
 
     it('handles experiment diverted path 2', () => {
       // Force experiment on.
-      toggleExperiment(window.sandbox.win, 'testExperimentId', true, true);
+      toggleExperiment(env.sandbox.win, 'testExperimentId', true, true);
       // Force the experiment branch to be chosen by making the accurate PRNG
       // return a value > 0.5.
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
-      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentSet);
+      randomlySelectUnsetExperiments(env.sandbox.win, testExperimentList);
       expect(
-        isExperimentOn(window.sandbox.win, 'testExperimentId'),
+        isExperimentOn(env.sandbox.win, 'testExperimentId'),
         'experiment is on'
       ).to.be.true;
-      expect(
-        getExperimentBranch(window.sandbox.win, 'testExperimentId')
-      ).to.equal('branch2_id');
+      expect(getExperimentBranch(env.sandbox.win, 'testExperimentId')).to.equal(
+        'branch2_id'
+      );
     });
 
     it('picks a branch if traffic eligible', () => {
-      toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      window.sandbox.win.trafficEligible = true;
-      const experimentInfo = {
-        'expt_0': {
-          isTrafficEligible: win => {
+      toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+      env.sandbox.win.trafficEligible = true;
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
+          isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
-      randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-      expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
-      expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.equal('0_0');
+      randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+      expect(isExperimentOn(env.sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.equal('0_0');
     });
 
     it("doesn't pick a branch if traffic ineligible", () => {
-      toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      window.sandbox.win.trafficEligible = false;
-      const experimentInfo = {
-        'expt_0': {
-          isTrafficEligible: win => {
+      toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+      env.sandbox.win.trafficEligible = false;
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
+          isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
-      randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-      expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
-      expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.be.null;
+      randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+      expect(isExperimentOn(env.sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.be.null;
     });
 
     it("doesn't pick a branch if no traffic eligibility function", () => {
-      toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      const experimentInfo = {
-        'expt_0': {
+      toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: undefined,
           branches: ['0_0', '0_1'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
-      randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-      expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
-      expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.be.null;
+      randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+      expect(isExperimentOn(env.sandbox.win, 'expt_0')).to.be.true;
+      expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.be.null;
     });
 
     it(
       "doesn't pick a branch if traffic becomes eligible after first " +
         'diversion',
       () => {
-        toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-        window.sandbox.win.trafficEligible = false;
-        const experimentInfo = {
-          'expt_0': {
-            isTrafficEligible: win => {
+        toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+        env.sandbox.win.trafficEligible = false;
+        const experimentInfo = [
+          {
+            experimentId: 'expt_0',
+            isTrafficEligible: (win) => {
               return win.trafficEligible;
             },
             branches: ['0_0', '0_1'],
           },
-        };
+        ];
         RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
 
-        randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-        expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
-        expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.be.null;
+        randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+        expect(isExperimentOn(env.sandbox.win, 'expt_0')).to.be.true;
+        expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.be.null;
 
-        window.sandbox.win.trafficEligible = true;
+        env.sandbox.win.trafficEligible = true;
 
-        randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-        expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
-        expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.be.null;
+        randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+        expect(isExperimentOn(env.sandbox.win, 'expt_0')).to.be.true;
+        expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.be.null;
       }
     );
 
     it('handles multiple experiments', () => {
-      toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      toggleExperiment(window.sandbox.win, 'expt_1', false, true);
-      toggleExperiment(window.sandbox.win, 'expt_2', true, true);
-      toggleExperiment(window.sandbox.win, 'expt_3', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_1', false, true);
+      toggleExperiment(env.sandbox.win, 'expt_2', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_3', true, true);
 
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_c', '0_e'],
         },
-        'expt_1': {
+        {
+          experimentId: 'expt_1',
           isTrafficEligible: () => true,
           branches: ['1_c', '1_e'],
         },
-        'expt_2': {
+        {
+          experimentId: 'expt_2',
           isTrafficEligible: () => true,
           branches: ['2_c', '2_e'],
         },
         // expt_3 omitted.
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.6);
-      randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-      expect(isExperimentOn(window.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
+      randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+      expect(isExperimentOn(env.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
         .true;
-      expect(isExperimentOn(window.sandbox.win, 'expt_1'), 'expt_1 is on').to.be
+      expect(isExperimentOn(env.sandbox.win, 'expt_1'), 'expt_1 is on').to.be
         .false;
-      expect(isExperimentOn(window.sandbox.win, 'expt_2'), 'expt_2 is on').to.be
+      expect(isExperimentOn(env.sandbox.win, 'expt_2'), 'expt_2 is on').to.be
         .true;
       // Note: calling isExperimentOn('expt_3') would actually evaluate the
       // frequency for expt_3, possibly enabling it.  Since we wanted it to be
       // omitted altogether, we'll evaluate it only via its branch.
-      expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.equal('0_e');
-      expect(getExperimentBranch(window.sandbox.win, 'expt_1')).to.not.be.ok;
-      expect(getExperimentBranch(window.sandbox.win, 'expt_2')).to.equal('2_e');
-      expect(getExperimentBranch(window.sandbox.win, 'expt_3')).to.not.be.ok;
+      expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.equal('0_e');
+      expect(getExperimentBranch(env.sandbox.win, 'expt_1')).to.not.be.ok;
+      expect(getExperimentBranch(env.sandbox.win, 'expt_2')).to.equal('2_e');
+      expect(getExperimentBranch(env.sandbox.win, 'expt_3')).to.not.be.ok;
     });
 
     it('handles multi-way branches', () => {
-      toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      const experimentInfo = {
-        'expt_0': {
+      toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.7);
-      randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-      expect(isExperimentOn(window.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
+      randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+      expect(isExperimentOn(env.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
         .true;
-      expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.equal('0_3');
+      expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.equal('0_3');
     });
 
     it('handles multiple experiments with multi-way branches', () => {
-      toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      toggleExperiment(window.sandbox.win, 'expt_1', false, true);
-      toggleExperiment(window.sandbox.win, 'expt_2', true, true);
-      toggleExperiment(window.sandbox.win, 'expt_3', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_1', false, true);
+      toggleExperiment(env.sandbox.win, 'expt_2', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_3', true, true);
 
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
         },
-        'expt_1': {
+        {
+          experimentId: 'expt_1',
           isTrafficEligible: () => true,
           branches: ['1_0', '1_1', '1_2', '1_3', '1_4'],
         },
-        'expt_2': {
+        {
+          experimentId: 'expt_2',
           isTrafficEligible: () => true,
           branches: ['2_0', '2_1', '2_2', '2_3', '2_4'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
       RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
-      randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
-      expect(isExperimentOn(window.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
+      randomlySelectUnsetExperiments(env.sandbox.win, experimentInfo);
+      expect(isExperimentOn(env.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
         .true;
-      expect(isExperimentOn(window.sandbox.win, 'expt_1'), 'expt_1 is on').to.be
+      expect(isExperimentOn(env.sandbox.win, 'expt_1'), 'expt_1 is on').to.be
         .false;
-      expect(isExperimentOn(window.sandbox.win, 'expt_2'), 'expt_2 is on').to.be
+      expect(isExperimentOn(env.sandbox.win, 'expt_2'), 'expt_2 is on').to.be
         .true;
       // Note: calling isExperimentOn('expt_3') would actually evaluate the
       // frequency for expt_3, possibly enabling it.  Since we wanted it to be
       // omitted altogether, we'll evaluate it only via its branch.
-      expect(getExperimentBranch(window.sandbox.win, 'expt_0')).to.equal('0_3');
-      expect(getExperimentBranch(window.sandbox.win, 'expt_1')).to.not.be.ok;
-      expect(getExperimentBranch(window.sandbox.win, 'expt_2')).to.equal('2_1');
-      expect(getExperimentBranch(window.sandbox.win, 'expt_3')).to.not.be.ok;
+      expect(getExperimentBranch(env.sandbox.win, 'expt_0')).to.equal('0_3');
+      expect(getExperimentBranch(env.sandbox.win, 'expt_1')).to.not.be.ok;
+      expect(getExperimentBranch(env.sandbox.win, 'expt_2')).to.equal('2_1');
+      expect(getExperimentBranch(env.sandbox.win, 'expt_3')).to.not.be.ok;
     });
 
     it('should not process the same experiment twice', () => {
-      const exptAInfo = {
-        'fooExpt': {
+      const exptAInfo = [
+        {
+          experimentId: 'fooExpt',
           isTrafficEligible: () => true,
           branches: ['012345', '987654'],
         },
-      };
-      const exptBInfo = {
-        'fooExpt': {
+      ];
+      const exptBInfo = [
+        {
+          experimentId: 'fooExpt',
           isTrafficEligible: () => true,
           branches: ['246810', '108642'],
         },
-      };
-      toggleExperiment(window.sandbox.win, 'fooExpt', false, true);
-      randomlySelectUnsetExperiments(window.sandbox.win, exptAInfo);
-      randomlySelectUnsetExperiments(window.sandbox.win, exptBInfo);
+      ];
+      toggleExperiment(env.sandbox.win, 'fooExpt', false, true);
+      randomlySelectUnsetExperiments(env.sandbox.win, exptAInfo);
+      randomlySelectUnsetExperiments(env.sandbox.win, exptBInfo);
       // Even though we tried to set up a second time, using a config
       // parameter that should ensure that the experiment was activated, the
       // experiment framework should evaluate each experiment only once per
       // page and should not enable it.
-      expect(isExperimentOn(window.sandbox.win, 'fooExpt')).to.be.false;
-      expect(getExperimentBranch(window.sandbox.win, 'fooExpt')).to.not.be.ok;
+      expect(isExperimentOn(env.sandbox.win, 'fooExpt')).to.be.false;
+      expect(getExperimentBranch(env.sandbox.win, 'fooExpt')).to.not.be.ok;
     });
 
     it('returns empty experiments map', () => {
       // Opt out of experiment.
-      toggleExperiment(window.sandbox.win, 'testExperimentId', false, true);
-      const exps = randomlySelectUnsetExperiments(window.sandbox.win, {});
+      toggleExperiment(env.sandbox.win, 'testExperimentId', false, true);
+      const exps = randomlySelectUnsetExperiments(env.sandbox.win, []);
       expect(exps).to.be.empty;
     });
 
     it('returns map with experiment diverted path 1', () => {
       // Force experiment on.
-      toggleExperiment(window.sandbox.win, 'testExperimentId', true, true);
+      toggleExperiment(env.sandbox.win, 'testExperimentId', true, true);
       // force the control branch to be chosen by making the accurate PRNG
       // return a value < 0.5.
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
       const exps = randomlySelectUnsetExperiments(
-        window.sandbox.win,
-        testExperimentSet
+        env.sandbox.win,
+        testExperimentList
       );
       expect(exps).to.deep.equal({'testExperimentId': 'branch1_id'});
     });
 
     it('returns map with multiple experiments with multi-way branches', () => {
-      toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      toggleExperiment(window.sandbox.win, 'expt_1', false, true);
-      toggleExperiment(window.sandbox.win, 'expt_2', true, true);
-      toggleExperiment(window.sandbox.win, 'expt_3', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_0', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_1', false, true);
+      toggleExperiment(env.sandbox.win, 'expt_2', true, true);
+      toggleExperiment(env.sandbox.win, 'expt_3', true, true);
 
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
         },
-        'expt_1': {
+        {
+          experimentId: 'expt_1',
           isTrafficEligible: () => true,
           branches: ['1_0', '1_1', '1_2', '1_3', '1_4'],
         },
-        'expt_2': {
+        {
+          experimentId: 'expt_2',
           isTrafficEligible: () => true,
           branches: ['2_0', '2_1', '2_2', '2_3', '2_4'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
       RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
       const exps = randomlySelectUnsetExperiments(
-        window.sandbox.win,
+        env.sandbox.win,
         experimentInfo
       );
 
@@ -896,6 +926,21 @@ describe('experiment branch tests', () => {
         'expt_0': '0_3',
         'expt_2': '2_1',
       });
+    });
+  });
+});
+
+describes.fakeWin('getActiveExperimentBranches', {}, (env) => {
+  it('should return an empty object if no active branches', () => {
+    expect(getActiveExperimentBranches(env.win)).to.eql({});
+  });
+
+  it('should return obj containing all branches', () => {
+    forceExperimentBranch(env.win, 'exp1', '1234');
+    forceExperimentBranch(env.win, 'exp2', '5678');
+    expect(getActiveExperimentBranches(env.win)).to.eql({
+      exp1: '1234',
+      exp2: '5678',
     });
   });
 });

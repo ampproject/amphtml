@@ -1,27 +1,15 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggleExperiment} from '#experiments';
 
-import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpList} from '../amp-list';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
+import {AmpDocService} from '#service/ampdoc-impl';
+
 import {
   measureElementStub,
   measureMutateElementStub,
   mutateElementStub,
-} from '../../../../testing/test-helper';
+} from '#testing/helpers/service';
+
+import {AmpList} from '../amp-list';
 
 const HAS_MORE_ITEMS_PAYLOAD = {
   'items': ['1', '2'],
@@ -36,12 +24,13 @@ describes.realWin(
       extensions: ['amp-list'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
     let element, list;
     let templates;
+    let lockHeightSpy, unlockHeightSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -53,15 +42,48 @@ describes.realWin(
         findAndRenderTemplate: env.sandbox.stub(),
         findAndRenderTemplateArray: env.sandbox.stub(),
       };
-      env.sandbox.stub(Services, 'templatesFor').returns(templates);
+      env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
       env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
+      element = doc.createElement('amp-list');
+      list = new AmpList(element);
+      lockHeightSpy = env.sandbox.spy(list, 'lockHeightAndMutate_');
+      unlockHeightSpy = env.sandbox.spy(list, 'unlockHeightInsideMutate_');
+    });
+
+    afterEach(() => {
+      expect(lockHeightSpy).not.called;
+      expect(unlockHeightSpy).not.called;
+    });
+
+    it('should not init if layout="container"', async () => {
+      toggleExperiment(win, 'amp-list-layout-container', true);
+      const placeholder = doc.createElement('div');
+      placeholder.style.height = '1337px';
+      element.appendChild(placeholder);
+      element.getPlaceholder = () => placeholder;
+
+      element.setAttribute('load-more', 'manual');
+      doc.body.appendChild(element);
+
+      element.setAttribute('layout', 'container');
+
+      list = new AmpList(element);
+      list.isLayoutSupported('container');
+      list.element.applySize = () => {};
+
+      env.sandbox.stub(list, 'getOverflowElement').returns(null);
+      env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+
+      allowConsoleError(() => {
+        expect(() => list.buildCallback()).to.throw(
+          'amp-list initialized with layout=container does not support infinite scrolling with [load-more]. amp-list​​​'
+        );
+      });
+      toggleExperiment(win, 'amp-list-layout-container', false);
     });
 
     describe('manual', () => {
       beforeEach(() => {
-        element = doc.createElement('amp-list');
-        list = new AmpList(element);
-
         env.sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
         env.sandbox.stub(list, 'getFallback').returns(null);
 
@@ -82,7 +104,7 @@ describes.realWin(
 
         env.sandbox.stub(list, 'getOverflowElement').returns(null);
         env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 
@@ -147,9 +169,6 @@ describes.realWin(
 
     describe('loading states', () => {
       beforeEach(() => {
-        element = doc.createElement('amp-list');
-        list = new AmpList(element);
-
         env.sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
         env.sandbox.stub(list, 'getFallback').returns(null);
 
@@ -171,7 +190,7 @@ describes.realWin(
         env.sandbox
           .stub(list, 'prepareAndSendFetch_')
           .returns(Promise.resolve(HAS_MORE_ITEMS_PAYLOAD));
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 
@@ -223,7 +242,7 @@ describes.realWin(
       });
 
       // TODO(cathyxz) Create a mirror test for automatic amp-list loading once the automatic tests are unskipped
-      it('should call focus on the last element after load more is clicked', async () => {
+      it('should call focus on the last focusable element after load more is clicked', async () => {
         env.sandbox
           .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
           .returns(Promise.resolve([]));
@@ -232,20 +251,21 @@ describes.realWin(
           .stub(list, 'maybeRenderLoadMoreTemplates_')
           .returns(Promise.resolve([]));
 
-        const div1 = doc.createElement('div');
-        div1.textContent = '1';
-        const div2 = doc.createElement('div');
-        div2.textContent = '2';
-        updateBindingsStub.onCall(0).returns(Promise.resolve([div1, div2]));
-        const focusSpy = env.sandbox.spy(div2, 'focus');
+        const el1 = doc.createElement('div');
+        el1.textContent = '1';
+        const el2 = doc.createElement('a');
+        el2.setAttribute('href', 'https://google.com/');
+        el2.textContent = '2';
+        updateBindingsStub.onCall(0).returns(Promise.resolve([el1, el2]));
+        const focusSpy = env.sandbox.spy(el2, 'focus');
 
         await list.layoutCallback();
 
-        const div3 = doc.createElement('div');
-        div3.textContent = '3';
-        const div4 = doc.createElement('div');
-        div4.textContent = '4';
-        updateBindingsStub.onCall(1).returns(Promise.resolve([div3, div4]));
+        const el3 = doc.createElement('div');
+        el3.textContent = '3';
+        const el4 = doc.createElement('div');
+        el4.textContent = '4';
+        updateBindingsStub.onCall(1).returns(Promise.resolve([el3, el4]));
 
         await list.loadMoreCallback_(
           /* opt_reload */ false,

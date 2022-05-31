@@ -1,33 +1,22 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+
+import {Services} from '#service';
+
+import {getDetail} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
 } from './amp-gwd-animation-impl';
+
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {Services} from '../../../src/services';
-import {getDetail} from '../../../src/event-helper';
-import {
-  getExistingServiceForDocInEmbedScope,
-  getParentWindowFrameElement,
-} from '../../../src/service';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {
+  getParentWindowFrameElement,
+  getServiceForDocOrNull,
+} from '../../../src/service-helpers';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation
@@ -217,12 +206,12 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   executeInvocation_(invocation) {
     const service = userAssert(
-      getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
+      getServiceForDocOrNull(this.element, GWD_SERVICE_NAME),
       'Cannot execute action because the GWD service is not registered.'
     );
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
-    const actionArgs = argPaths.map(argPath =>
+    const actionArgs = argPaths.map((argPath) =>
       getValueForExpr(invocation, argPath)
     );
 
@@ -241,12 +230,12 @@ export class GwdAnimation extends AMP.BaseElement {
     const eventName = getDetail(event)['eventName'];
     const timelineEventName = `${this.timelineEventPrefix_}${eventName}`;
 
-    // TODO(wg-ui-and-a11y): Should animation timeline events be low trust?
+    // TODO(wg-components): Should animation timeline events be low trust?
     actionService.trigger(
       this.element,
       timelineEventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
   }
 
@@ -302,7 +291,7 @@ export function addAction(context, target, event, actionStr) {
   actionService.setActions(target, newActionsStr);
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);
   AMP.registerElement(TAG, GwdAnimation, CSS);
 });

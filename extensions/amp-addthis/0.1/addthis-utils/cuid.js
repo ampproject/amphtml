@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 const RE_CUID = /^[0-9a-f]{16}$/;
 const MAX_HEX = 0xffffffff;
 const CUID_SESSION_TIME = Date.now();
@@ -23,7 +8,7 @@ const CUID_SESSION_TIME = Date.now();
  * @param {string} cuid
  * @return {Date}
  */
-const getDateFromCuid = cuid => {
+const getDateFromCuid = (cuid) => {
   let date = new Date();
   try {
     date = new Date(parseInt(cuid.substr(0, 8), 16) * 1000);
@@ -36,13 +21,13 @@ const getDateFromCuid = cuid => {
  * @param {string} cuid
  * @return {boolean}
  */
-const isCuidInFuture = cuid => {
+const isCuidInFuture = (cuid) => {
   const date = getDateFromCuid(cuid);
   date.setDate(date.getDate() - 1);
   return isDateInFuture(date);
 };
 
-export const isDateInFuture = date => {
+export const isDateInFuture = (date) => {
   const now = new Date();
   if (date.getFullYear() < now.getFullYear()) {
     return false;
@@ -64,7 +49,7 @@ export const isDateInFuture = date => {
  * @param {string} cuid
  * @return {boolean}
  */
-export const isValidCUID = cuid => {
+export const isValidCUID = (cuid) => {
   return Boolean(cuid && cuid.match(RE_CUID) && !isCuidInFuture(cuid));
 };
 

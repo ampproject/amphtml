@@ -1,0 +1,197 @@
+
+
+/* 1em = 16px for interactive components, unless overriden by font-size */
+.i-amphtml-story-interactive-option-container {
+  background-color: var(--i-amphtml-interactive-options-chip-background-color) !important;
+  border-radius: 1em !important;
+  color: var(--i-amphtml-interactive-strong-text-color) !important;
+  font-weight: bold !important;
+  padding: .5em !important;
+}
+
+.i-amphtml-story-interactive-option {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 3.5em !important;
+  overflow: hidden !important;
+  padding: 0px .75em !important;
+  position: relative !important;
+  box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  border-radius: .5em !important;
+  background-color: var(--i-amphtml-interactive-option-background-color);
+  border: none !important;
+  font: inherit !important;
+  color: inherit !important;
+  width: 100% !important;
+  outline: none !important;
+  text-align: start !important;
+}
+
+.i-amphtml-story-interactive-option:not(:first-child) {
+  margin-top: .5em !important;
+}
+
+.i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected {
+  background-color: var(--i-amphtml-interactive-theme-shading-base);
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  animation: i-amphtml-interactive-animation-flash-background-color forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-option::after {
+  content: '' !important;
+  background-color: var(--i-amphtml-interactive-theme-shading) !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  left: 0 !important;
+  top: 0 !important;
+  transform: translateX(-100%) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:focus::before {
+    opacity: 1 !important;
+    background-color: var(--i-amphtml-interactive-theme-shading) !important;
+}
+
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option::after {
+  transform: translateX(100%)!important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option::after {
+  transform: translateX(calc(var(--option-percentage) - 100%)) !important;
+}
+
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option::after {
+  transform: translateX(calc(100% - var(--option-percentage)))!important;
+}
+
+.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-has-data) .i-amphtml-story-interactive-option::after {
+  visibility: hidden !important;
+}
+
+.i-amphtml-story-interactive-option-text {
+  font-size: 1.375em !important;
+  margin: 0 !important;
+  z-index: 1 !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+  transform-origin: left !important;
+  line-height: 1.3em !important;
+  word-wrap: break-word !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  max-height: 2.6em !important;
+}
+
+.i-amphtml-story-interactive-poll-two-lines .i-amphtml-story-interactive-option-text {
+  font-size: 1.125em !important;
+}
+
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-text{
+  transform-origin: right !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-text {
+  transform: scale(0.72) !important;
+}
+
+.i-amphtml-story-interactive-option-percentage {
+  font-weight: 700 !important;
+  font-size: 1.75em !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+  transform: translateX(2em) !important;
+  flex-shrink: 0 !important;
+  /* Percentage sign always goes to the right of the number, regardless of language. TODO(mszylkowski): rtl for arabic */
+  direction: ltr !important;
+}
+
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-percentage {
+  transform: translateX(-2em) !important;
+}
+
+.i-amphtml-story-interactive-has-data.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option-percentage,
+.i-amphtml-story-interactive-has-data.i-amphtml-story-interactive-post-selection:not([dir="rtl"]) .i-amphtml-story-interactive-option-percentage {
+  opacity: 1 !important;
+  transform: translateX(0px) !important;
+}
+
+.i-amphtml-story-interactive-option-percentage-sign {
+  font-size: .6em !important;
+  margin-left: -.25em !important;
+  display: inline-block !important;
+}
+
+.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-has-data) .i-amphtml-story-interactive-option-percentage {
+  visibility: hidden !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option::before {
+  background-color: var(--i-amphtml-interactive-theme-shading-flash) !important;
+  content: '' !important;
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  left: 0 !important;
+  opacity: 0 !important;
+  animation: i-amphtml-interactive-animation-landing-animation-flash-background var(--i-amphtml-interactive-animation-time) !important;
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(2)::before {
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(3)::before {
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(4)::before {
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option
+    .i-amphtml-story-interactive-option-text {
+    transform-origin: center !important;
+    animation: i-amphtml-story-interactive-option-text-landing-text var(--i-amphtml-interactive-animation-time) !important;
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(2)
+    .i-amphtml-story-interactive-option-text {
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(3)
+    .i-amphtml-story-interactive-option-text {
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(4)
+    .i-amphtml-story-interactive-option-text {
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
+}
+
+@keyframes i-amphtml-story-interactive-option-text-landing-text {
+  33% {
+    transform: translateY(.2em);
+  }
+}

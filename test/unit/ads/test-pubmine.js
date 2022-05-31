@@ -1,25 +1,10 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {pubmine} from '#ads/vendors/pubmine';
 
-import {pubmine} from '../../../ads/pubmine';
-
-describes.fakeWin('pubmine', {}, env => {
+describes.fakeWin('pubmine', {}, (env) => {
   let win;
   const mockData = {
-    siteid: 'amp-test',
+    siteid: '12345',
+    blogid: '23456',
     section: 1,
     pt: 2,
     ht: 2,
@@ -32,7 +17,7 @@ describes.fakeWin('pubmine', {}, env => {
   }
 
   function getSlotElement() {
-    return win.document.querySelector('#atatags-amp-test1');
+    return win.document.querySelector('#atatags-123451');
   }
 
   beforeEach(() => {
@@ -49,6 +34,9 @@ describes.fakeWin('pubmine', {}, env => {
       ht: 2,
       tn: 'amp',
       amp: true,
+      consent: 0,
+      siteid: 12345,
+      blogid: 23456,
     };
     pubmine(win, mockData);
     expect(win.__ATA_PP).to.deep.equal(expectedConfig);

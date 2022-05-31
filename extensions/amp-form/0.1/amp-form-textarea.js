@@ -1,27 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {removeElement} from '#core/dom';
+import {computedStyle, px, setStyle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {throttle} from '#core/types/function';
 
-import {AmpEvents} from '../../../src/amp-events';
-import {Services} from '../../../src/services';
-import {computedStyle, px, setStyle} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
-import {iterateCursor, removeElement} from '../../../src/dom';
-import {listen, listenOncePromise} from '../../../src/event-helper';
-import {throttle} from '../../../src/utils/rate-limit';
-import {toArray} from '../../../src/types';
+import {Services} from '#service';
+
+import {listen, listenOncePromise} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -64,7 +50,7 @@ export class AmpFormTextarea {
       }
     };
 
-    listen(root, AmpEvents.DOM_UPDATE, maybeInstall);
+    listen(root, AmpEvents_Enum.DOM_UPDATE, maybeInstall);
     maybeInstall();
   }
 
@@ -87,7 +73,7 @@ export class AmpFormTextarea {
     this.unlisteners_ = [];
 
     this.unlisteners_.push(
-      listen(root, 'input', e => {
+      listen(root, 'input', (e) => {
         const element = dev().assertElement(e.target);
         if (
           element.tagName != 'TEXTAREA' ||
@@ -101,7 +87,7 @@ export class AmpFormTextarea {
     );
 
     this.unlisteners_.push(
-      listen(root, 'mousedown', e => {
+      listen(root, 'mousedown', (e) => {
         if (e.which != 1) {
           return;
         }
@@ -119,13 +105,13 @@ export class AmpFormTextarea {
 
     let cachedTextareaElements = root.querySelectorAll('textarea');
     this.unlisteners_.push(
-      listen(root, AmpEvents.DOM_UPDATE, () => {
+      listen(root, AmpEvents_Enum.DOM_UPDATE, () => {
         cachedTextareaElements = root.querySelectorAll('textarea');
       })
     );
     const throttledResize = throttle(
       this.win_,
-      e => {
+      (e) => {
         if (e.relayoutAll) {
           resizeTextareaElements(cachedTextareaElements);
         }
@@ -141,7 +127,7 @@ export class AmpFormTextarea {
    * Cleanup any consumed resources
    */
   dispose() {
-    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.forEach((unlistener) => unlistener());
   }
 }
 
@@ -153,8 +139,8 @@ export class AmpFormTextarea {
  */
 export function handleInitialOverflowElements(textareas) {
   return Promise.all(
-    toArray(textareas).map(element => {
-      return getHasOverflow(element).then(hasOverflow => {
+    toArray(textareas).map((element) => {
+      return getHasOverflow(element).then((hasOverflow) => {
         if (hasOverflow) {
           user().warn(
             'AMP-FORM',
@@ -184,10 +170,10 @@ export function getHasOverflow(element) {
 
 /**
  * Attempt to resize all textarea elements
- * @param {!IArrayLike<!Element>} elements
+ * @param {!NodeList} elements
  */
 function resizeTextareaElements(elements) {
-  iterateCursor(elements, element => {
+  elements.forEach((element) => {
     if (
       element.tagName != 'TEXTAREA' ||
       !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)
@@ -211,7 +197,7 @@ function handleTextareaDrag(element) {
   Promise.all([
     mutator.measureElement(() => element./*OK*/ scrollHeight),
     listenOncePromise(element, 'mouseup'),
-  ]).then(results => {
+  ]).then((results) => {
     const heightMouseDown = results[0];
     let heightMouseUp = 0;
 
@@ -249,9 +235,9 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  */
 export function maybeResizeTextarea(element) {
   const mutator = Services.mutatorForDoc(element);
-  const win = /** @type {!Window} */ (devAssert(
-    element.ownerDocument.defaultView
-  ));
+  const win = /** @type {!Window} */ (
+    devAssert(element.ownerDocument.defaultView)
+  );
 
   let offset = 0;
   let scrollHeight = 0;
@@ -286,7 +272,7 @@ export function maybeResizeTextarea(element) {
       }
     },
     () => {
-      return minScrollHeightPromise.then(minScrollHeight => {
+      return minScrollHeightPromise.then((minScrollHeight) => {
         const height = minScrollHeight + offset;
         // Prevent the scrollbar from appearing
         // unless the text is beyond the max-height
@@ -295,7 +281,15 @@ export function maybeResizeTextarea(element) {
         // Prevent the textarea from shrinking if it has not yet expanded.
         const hasExpanded =
           AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA in element.dataset;
-        const shouldResize = hasExpanded || scrollHeight <= minScrollHeight;
+
+        // There is super specific a bug in Chrome affecting scrollHeight calculation
+        // for textareas with padding when the document is zoomed in.
+        // It makes the scrollHeight calculation off by ~1px.
+        // This is why we have a small error margin.
+        // TODO: Remove error margin when chrome bug is resolved (https://bugs.chromium.org/p/chromium/issues/detail?id=1171989).
+        const errorMargin = /google/i.test(win.navigator.vendor) ? 3 : 0;
+        const shouldResize =
+          hasExpanded || scrollHeight <= minScrollHeight + errorMargin;
 
         if (shouldResize) {
           element.dataset[AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA] = '';

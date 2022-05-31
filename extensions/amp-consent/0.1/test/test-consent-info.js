@@ -1,56 +1,46 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 
 import {
   CONSENT_ITEM_STATE,
+  METADATA_STORAGE_KEY,
+  PURPOSE_CONSENT_STATE,
+  composeMetadataStoreValue,
   composeStoreValue,
   constructConsentInfo,
+  constructMetadata,
+  convertStorageMetadata,
   getStoredConsentInfo,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from '../consent-info';
-import {dict} from '../../../../src/utils/object';
 
 describes.fakeWin('ConsentInfo', {}, () => {
   describe('getStoredConsentInfo', () => {
     it('construct consentInfo from undefined', () => {
-      expect(getStoredConsentInfo(undefined)).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-          'consentString': undefined,
-          'isDirty': undefined,
-        })
-      );
+      expect(getStoredConsentInfo(undefined)).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.UNKNOWN,
+        'consentString': undefined,
+        'consentMetadata': undefined,
+        'purposeConsents': undefined,
+        'isDirty': undefined,
+      });
     });
 
     it('construct consentInfo from legacy value', () => {
-      expect(getStoredConsentInfo(true)).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.ACCEPTED,
-          'consentString': undefined,
-          'isDirty': undefined,
-        })
-      );
-      expect(getStoredConsentInfo(false)).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.REJECTED,
-          'consentString': undefined,
-          'isDirty': undefined,
-        })
-      );
+      expect(getStoredConsentInfo(true)).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.ACCEPTED,
+        'consentString': undefined,
+        'consentMetadata': undefined,
+        'purposeConsents': undefined,
+        'isDirty': undefined,
+      });
+      expect(getStoredConsentInfo(false)).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.REJECTED,
+        'consentString': undefined,
+        'consentMetadata': undefined,
+        'purposeConsents': undefined,
+        'isDirty': undefined,
+      });
     });
 
     it('construct consentInfo from stored value', () => {
@@ -58,38 +48,145 @@ describes.fakeWin('ConsentInfo', {}, () => {
         getStoredConsentInfo({
           's': 1,
         })
-      ).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.ACCEPTED,
-          'consentString': undefined,
-          'isDirty': undefined,
-        })
-      );
+      ).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.ACCEPTED,
+        'consentString': undefined,
+        'consentMetadata': constructMetadata(),
+        'purposeConsents': undefined,
+        'isDirty': undefined,
+      });
       expect(
         getStoredConsentInfo({
           's': 0,
           'r': 'test',
         })
-      ).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.REJECTED,
-          'consentString': 'test',
-          'isDirty': undefined,
+      ).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.REJECTED,
+        'consentString': 'test',
+        'consentMetadata': constructMetadata(),
+        'purposeConsents': undefined,
+        'isDirty': undefined,
+      });
+      expect(
+        getStoredConsentInfo({
+          's': 0,
+          'r': 'test',
+          'm': {},
         })
-      );
+      ).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.REJECTED,
+        'consentString': 'test',
+        'isDirty': undefined,
+        'purposeConsents': undefined,
+        'consentMetadata': constructMetadata(),
+      });
+      expect(
+        getStoredConsentInfo({
+          's': 0,
+          'r': 'test',
+          'm': {
+            [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+              CONSENT_STRING_TYPE.TCF_V2,
+            [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+            [METADATA_STORAGE_KEY.GDPR_APPLIES]: false,
+          },
+        })
+      ).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.REJECTED,
+        'consentString': 'test',
+        'isDirty': undefined,
+        'purposeConsents': undefined,
+        'consentMetadata': constructMetadata(
+          CONSENT_STRING_TYPE.TCF_V2,
+          '1~1.35.41.101',
+          false
+        ),
+      });
       expect(
         getStoredConsentInfo({
           's': -1,
           'r': 'test',
+          'm': {
+            [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+              CONSENT_STRING_TYPE.TCF_V2,
+            [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+          },
           'd': 1,
         })
-      ).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-          'consentString': 'test',
-          'isDirty': true,
+      ).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.UNKNOWN,
+        'consentString': 'test',
+        'isDirty': true,
+        'purposeConsents': undefined,
+        'consentMetadata': constructMetadata(
+          CONSENT_STRING_TYPE.TCF_V2,
+          '1~1.35.41.101'
+        ),
+      });
+      expect(
+        getStoredConsentInfo({
+          's': -1,
+          'r': 'test',
+          'pc': {
+            'abc': 1,
+            'xyz': 2,
+          },
+          'd': 1,
         })
-      );
+      ).to.deep.equal({
+        'consentState': CONSENT_ITEM_STATE.UNKNOWN,
+        'consentString': 'test',
+        'isDirty': true,
+        'purposeConsents': {
+          'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'xyz': PURPOSE_CONSENT_STATE.REJECTED,
+        },
+        'consentMetadata': constructMetadata(),
+      });
+    });
+
+    it('construct ConsentMetadataDef from stored value', () => {
+      expect(convertStorageMetadata()).to.deep.equals({
+        'consentStringType': undefined,
+        'additionalConsent': undefined,
+        'gdprApplies': undefined,
+        'purposeOne': undefined,
+      });
+      expect(
+        convertStorageMetadata({
+          [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+            CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+        })
+      ).to.deep.equal({
+        'consentStringType': CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+        'additionalConsent': undefined,
+        'gdprApplies': undefined,
+        'purposeOne': undefined,
+      });
+      expect(
+        convertStorageMetadata({
+          undefined,
+          [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+        })
+      ).to.deep.equal({
+        'consentStringType': undefined,
+        'additionalConsent': '1~1.35.41.101',
+        'gdprApplies': undefined,
+        'purposeOne': undefined,
+      });
+      expect(
+        convertStorageMetadata({
+          [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+            CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+          [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+          [METADATA_STORAGE_KEY.PURPOSE_ONE]: true,
+        })
+      ).to.deep.equal({
+        'consentStringType': CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+        'additionalConsent': '1~1.35.41.101',
+        'gdprApplies': undefined,
+        'purposeOne': true,
+      });
     });
 
     it('throw error with invalid value', () => {
@@ -100,12 +197,11 @@ describes.fakeWin('ConsentInfo', {}, () => {
   });
 
   it('composeStoreValue/getStoredConsentInfo', () => {
-    let consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED);
-    expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
-      consentInfo
+    let consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      undefined,
+      constructMetadata()
     );
-
-    consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
       consentInfo
     );
@@ -113,6 +209,27 @@ describes.fakeWin('ConsentInfo', {}, () => {
     consentInfo = constructConsentInfo(
       CONSENT_ITEM_STATE.ACCEPTED,
       'test',
+      constructMetadata()
+    );
+    expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
+      consentInfo
+    );
+
+    consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      'test',
+      constructMetadata(),
+      {'abc': PURPOSE_CONSENT_STATE.ACCEPTED}
+    );
+    expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
+      consentInfo
+    );
+
+    consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      'test',
+      constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.35.41.101', true),
+      {'abc': PURPOSE_CONSENT_STATE.ACCEPTED},
       true
     );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
@@ -128,35 +245,90 @@ describes.fakeWin('ConsentInfo', {}, () => {
       };
     });
 
-    it('legacy stored value', () => {
-      //TODO(@zhouyx): Remove after turn on amp-consent-v2
+    it('new format', () => {
       expect(composeStoreValue(consentInfo)).to.be.null;
       consentInfo['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
-      expect(composeStoreValue(consentInfo)).to.equal(true);
-    });
-
-    it('new format', () => {
-      expect(composeStoreValue(consentInfo, true)).to.be.null;
-      consentInfo['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
-      expect(composeStoreValue(consentInfo, true)).to.deep.equal({
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 1,
       });
     });
 
     it('add field only when defined', () => {
       consentInfo['consentState'] = CONSENT_ITEM_STATE.REJECTED;
-      expect(composeStoreValue(consentInfo)).to.deep.equal(false);
-      consentInfo['idDirty'] = false;
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
+        's': 0,
+      });
+      consentInfo['isDirty'] = false;
       consentInfo['consentString'] = 'test';
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
         'r': 'test',
       });
+      consentInfo['purposeConsents'] = {'zyx': PURPOSE_CONSENT_STATE.REJECTED};
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
+        's': 0,
+        'r': 'test',
+        'pc': {'zyx': 2},
+      });
+      delete consentInfo['purposeConsents'];
       consentInfo['isDirty'] = true;
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
         'r': 'test',
         'd': 1,
+      });
+      consentInfo['consentMetadata'] = constructMetadata(
+        CONSENT_STRING_TYPE.TCF_V1,
+        '1~1.35.41.101',
+        false
+      );
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
+        's': 0,
+        'r': 'test',
+        'd': 1,
+        'm': {
+          [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+            CONSENT_STRING_TYPE.TCF_V1,
+          [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+          [METADATA_STORAGE_KEY.GDPR_APPLIES]: false,
+        },
+      });
+    });
+
+    it('add field only when defined for metadata', () => {
+      expect(
+        composeMetadataStoreValue(
+          constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+        )
+      ).to.deep.equal({
+        [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+          CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+      });
+      expect(
+        composeMetadataStoreValue(constructMetadata(undefined, '1~1.35.41.101'))
+      ).to.deep.equal({
+        [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+      });
+      expect(
+        composeMetadataStoreValue(
+          constructMetadata(undefined, undefined, false)
+        )
+      ).to.deep.equal({
+        [METADATA_STORAGE_KEY.GDPR_APPLIES]: false,
+      });
+      expect(
+        composeMetadataStoreValue(
+          constructMetadata(
+            CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+            '1~1.35.41.101',
+            true
+          )
+        )
+      ).to.deep.equal({
+        [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+          CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+        [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+        [METADATA_STORAGE_KEY.GDPR_APPLIES]: true,
       });
     });
   });
@@ -231,7 +403,71 @@ describes.fakeWin('ConsentInfo', {}, () => {
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
     infoA['consentString'] = 'test';
+    infoB['consentMetadata'] = constructMetadata();
+    infoA['consentMetadata'] = constructMetadata(
+      CONSENT_STRING_TYPE.US_PRIVACY_STRING
+    );
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
+
+    infoB['consentMetadata'] = constructMetadata(
+      CONSENT_STRING_TYPE.US_PRIVACY_STRING
+    );
+
+    infoB['purposeConsents'] = {'abc': PURPOSE_CONSENT_STATE.ACCEPTED};
+    infoA['purposeConsents'] = {'xyz': PURPOSE_CONSENT_STATE.ACCEPTED};
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
+
+    infoB['purposeConsents'] = {'xyz': PURPOSE_CONSENT_STATE.ACCEPTED};
     infoB['isDirty'] = true;
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
+
+    infoA['isDirty'] = true;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.true;
+  });
+
+  describe('metadata', () => {
+    it('constructMetadata', () => {
+      expect(constructMetadata()).to.deep.equal({
+        'consentStringType': undefined,
+        'additionalConsent': undefined,
+        'gdprApplies': undefined,
+        'purposeOne': undefined,
+      });
+      expect(
+        constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+      ).to.deep.equal({
+        'consentStringType': CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+        'additionalConsent': undefined,
+        'gdprApplies': undefined,
+        'purposeOne': undefined,
+      });
+      expect(constructMetadata(undefined, '1~1.35.41.101')).to.deep.equal({
+        'consentStringType': undefined,
+        'additionalConsent': '1~1.35.41.101',
+        'gdprApplies': undefined,
+        'purposeOne': undefined,
+      });
+      expect(
+        constructMetadata(undefined, undefined, true, false)
+      ).to.deep.equal({
+        'consentStringType': undefined,
+        'additionalConsent': undefined,
+        'gdprApplies': true,
+        'purposeOne': false,
+      });
+      expect(
+        constructMetadata(
+          CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+          '1~1.35.41.101',
+          true,
+          true
+        )
+      ).to.deep.equal({
+        'consentStringType': CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+        'additionalConsent': '1~1.35.41.101',
+        'gdprApplies': true,
+        'purposeOne': true,
+      });
+    });
   });
 });

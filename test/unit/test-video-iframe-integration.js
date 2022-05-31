@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   AmpVideoIntegration,
   adopt,
@@ -22,7 +6,7 @@ import {
 
 const NOOP = () => {};
 
-describes.realWin('video-iframe-integration', {amp: false}, env => {
+describes.realWin('video-iframe-integration', {amp: false}, (env) => {
   function pushToGlobal(global, callback) {
     (global.AmpVideoIframe = global.AmpVideoIframe || []).push(callback);
   }
@@ -90,7 +74,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
           'hidecontrols',
         ];
 
-        validMethods.forEach(method => {
+        validMethods.forEach((method) => {
           const spy = env.sandbox.spy();
           integration.method(method, spy);
           integration.onMessage_({event: 'method', method});
@@ -107,7 +91,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
         const invalidMethods = 'tacos al pastor'.split(' ');
 
-        invalidMethods.forEach(method => {
+        invalidMethods.forEach((method) => {
           const spy = env.sandbox.spy();
           expect(() => integration.method(method, spy)).to.throw(
             /Invalid method/
@@ -146,24 +130,51 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
       });
     });
 
-    describe('#getIntersection', () => {
-      it('should request and receive intersection', () => {
-        const integration = new AmpVideoIntegration();
-        const postToParent = env.sandbox.spy(integration, 'postToParent_');
+    describe('get async value from host document', () => {
+      let integration;
+      let postToParent;
+      let callback;
 
-        const callback = env.sandbox.spy();
+      beforeEach(() => {
+        integration = new AmpVideoIntegration();
+        postToParent = env.sandbox.spy(integration, 'postToParent_');
+        callback = env.sandbox.spy();
 
-        const id = integration.getIntersectionForTesting_(callback);
+        integration.listenToOnce_ = env.sandbox.spy();
+      });
+
+      it('getIntersection should request and receive intersection', () => {
+        const id = integration.getFromHostForTesting_(
+          'getIntersection',
+          callback
+        );
 
         expect(
           postToParent.withArgs(env.sandbox.match({method: 'getIntersection'}))
         ).to.have.been.calledOnce;
 
-        const mockedIntersection = {tacos: 'al pastor'};
+        expect(integration.listenToOnce_).to.have.been.calledOnce;
 
-        integration.onMessage_({id, args: mockedIntersection});
+        const response = {tacos: 'al pastor'};
+        integration.onMessage_({id, args: response});
+        expect(callback.withArgs(response)).to.have.been.calledOnce;
+      });
 
-        expect(callback.withArgs(mockedIntersection)).to.have.been.calledOnce;
+      it('getConsentData should request and receive consent data', () => {
+        const id = integration.getFromHostForTesting_(
+          'getConsentData',
+          callback
+        );
+
+        expect(
+          postToParent.withArgs(env.sandbox.match({method: 'getConsentData'}))
+        ).to.have.been.calledOnce;
+
+        expect(integration.listenToOnce_).to.have.been.calledOnce;
+
+        const response = {tacos: 'al pastor'};
+        integration.onMessage_({id, args: response});
+        expect(callback.withArgs(response)).to.have.been.calledOnce;
       });
     });
 
@@ -209,18 +220,25 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
           integration.listenTo('jwplayer', player);
 
-          expectedEvents.forEach(event => {
+          expectedEvents.forEach((event) => {
             expect(player.on.withArgs(event, env.sandbox.match.any)).to.have
               .been.calledOnce;
           });
 
-          expectedMethods.forEach(method => {
+          expectedMethods.forEach((method) => {
             expect(methodSpy.withArgs(method, env.sandbox.match.any)).to.have
               .been.calledOnce;
           });
 
           expect(listenToOnce.callCount).to.equal(expectedMethods.length);
         });
+      });
+
+      it('uses global jwplayer() to get instance when not passed in', () => {
+        const instance = {on: env.sandbox.spy()};
+        env.win.jwplayer = env.sandbox.stub().returns(instance);
+        new AmpVideoIntegration(env.win).listenTo('jwplayer');
+        expect(instance.on).to.have.been.called;
       });
 
       function mockVideoJsPlayer() {
@@ -262,7 +280,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
             /* initializer */ () => player
           );
 
-          expectedMethods.forEach(method => {
+          expectedMethods.forEach((method) => {
             expect(methodSpy.withArgs(method, env.sandbox.match.any)).to.have
               .been.calledOnce;
           });
@@ -289,7 +307,7 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
 
           it('fails if no initializer provided or Video.JS not present', () => {
             const win = {};
-            expect(() => getVideoJs(win)).to.throw;
+            expect(() => getVideoJs(win)).to.throw();
           });
         });
       });

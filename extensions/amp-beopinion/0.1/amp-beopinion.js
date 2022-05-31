@@ -1,27 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-beopinion';
+
+const TYPE = 'beopinion';
 
 class AmpBeOpinion extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -38,20 +26,16 @@ class AmpBeOpinion extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
     // Hosts the script that renders widgets.
     preconnect.preload(
       this.getAmpDoc(),
-      'https://widget.beopinion.com/sdk.js',
+      'https://widget.beop.io/sdk.js',
       'script'
     );
-    preconnect.url(this.getAmpDoc(), 'https://s.beopinion.com', opt_onLayout);
-    preconnect.url(this.getAmpDoc(), 'https://t.beopinion.com', opt_onLayout);
-    preconnect.url(
-      this.getAmpDoc(),
-      'https://data.beopinion.com',
-      opt_onLayout
-    );
+    preconnect.url(this.getAmpDoc(), 'https://s.beop.io', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://t.beop.io', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://data.beop.io', opt_onLayout);
   }
 
   /** @override */
@@ -72,16 +56,17 @@ class AmpBeOpinion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'beopinion');
-    this.applyFillContent(iframe);
+    const iframe = getIframe(this.win, this.element, TYPE);
+    iframe.title = this.element.title || 'BeOpinion content';
+    applyFillContent(iframe);
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         // We only get the message if and when there is a tweet to display,
         // so hide the placeholder
         this.togglePlaceholder(false);
-        this./*OK*/ changeHeight(data['height']);
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );
@@ -117,6 +102,6 @@ class AmpBeOpinion extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBeOpinion);
 });

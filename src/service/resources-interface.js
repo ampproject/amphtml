@@ -1,33 +1,37 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {MutatorInterface} from './mutator-interface';
-
 /** @const {string} */
 export const READY_SCAN_SIGNAL = 'ready-scan';
 
-/* eslint-disable no-unused-vars */
+/**
+ * The internal structure of a ChangeHeightRequest.
+ * @typedef {{
+ *   newMargins: !../layout-rect.LayoutMarginsChangeDef,
+ *   currentMargins: !../layout-rect.LayoutMarginsDef
+ * }}
+ */
+export let MarginChangeDef;
+
+/**
+ * The internal structure of a ChangeHeightRequest.
+ * @typedef {{
+ *   resource: !./resource.Resource,
+ *   newHeight: (number|undefined),
+ *   newWidth: (number|undefined),
+ *   marginChange: (!MarginChangeDef|undefined),
+ *   event: (?Event|undefined),
+ *   force: boolean,
+ *   callback: (function(boolean)|undefined),
+ * }}
+ */
+export let ChangeSizeRequestDef;
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
-export class ResourcesInterface extends MutatorInterface {
+export class ResourcesInterface {
   /**
    * Returns a list of resources.
    * @return {!Array<!./resource.Resource>}
-   * @export
    */
   get() {}
 
@@ -89,7 +93,6 @@ export class ResourcesInterface extends MutatorInterface {
    * @param {boolean} layout
    * @param {number=} opt_parentPriority
    * @param {boolean=} opt_forceOutsideViewport
-   * @package
    */
   scheduleLayoutOrPreload(
     resource,
@@ -107,6 +110,20 @@ export class ResourcesInterface extends MutatorInterface {
   schedulePass(opt_delay, opt_relayoutAll) {}
 
   /**
+   * Enqueue, or update if already exists, a mutation task for a resource.
+   * @param {./resource.Resource} resource
+   * @param {ChangeSizeRequestDef} newRequest
+   * @package
+   */
+  updateOrEnqueueMutateTask(resource, newRequest) {}
+
+  /**
+   * Schedules the work pass at the latest with the specified delay.
+   * @package
+   */
+  schedulePassVsync() {}
+
+  /**
    * Registers a callback to be called when the next pass happens.
    * @param {function()} callback
    */
@@ -122,6 +139,18 @@ export class ResourcesInterface extends MutatorInterface {
    * May never be called in Shadow Mode.
    */
   ampInitComplete() {}
+
+  /**
+   * @param {number} relayoutTop
+   * @package
+   */
+  setRelayoutTop(relayoutTop) {}
+
+  /**
+   * Flag that the height could have been changed.
+   * @package
+   */
+  maybeHeightChanged() {}
 
   /**
    * Updates the priority of the resource. If there are tasks currently

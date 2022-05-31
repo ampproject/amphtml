@@ -1,41 +1,28 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {MediaPool, MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {findIndex} from '../../../../src/utils/array';
+import {findIndex} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {MediaPool, MediaType_Enum} from '../media-pool';
 
 const NOOP = () => {};
 
-describes.realWin('media-pool', {}, env => {
+describes.realWin('media-pool', {}, (env) => {
   let win;
   let mediaPool;
   let distanceFnStub;
   const COUNTS = {
-    [MediaType.AUDIO]: 2,
-    [MediaType.VIDEO]: 2,
+    [MediaType_Enum.AUDIO]: 2,
+    [MediaType_Enum.VIDEO]: 2,
   };
 
   beforeEach(() => {
     win = env.win;
     env.sandbox
       .stub(Services, 'vsyncFor')
-      .callsFake(() => ({mutate: task => task()}));
+      .callsFake(() => ({mutate: (task) => task()}));
     env.sandbox.stub(Services, 'timerFor').callsFake(() => ({delay: NOOP}));
 
-    mediaPool = new MediaPool(win, COUNTS, element => {
+    mediaPool = new MediaPool(win, COUNTS, (element) => {
       return distanceFnStub(element);
     });
   });
@@ -71,7 +58,7 @@ describes.realWin('media-pool', {}, env => {
    * @return {function(!Element): number} The distance
    */
   function arrayOrderDistanceFn(elements) {
-    return element => {
+    return (element) => {
       const index = elements.indexOf(element);
       if (index < 0) {
         return Infinity;
@@ -89,9 +76,9 @@ describes.realWin('media-pool', {}, env => {
     const results = [];
 
     const pools = Array.isArray(poolOrPools) ? poolOrPools : [poolOrPools];
-    pools.forEach(pool => {
-      Object.keys(pool).forEach(key => {
-        pool[key].forEach(el => {
+    pools.forEach((pool) => {
+      Object.keys(pool).forEach((key) => {
+        pool[key].forEach((el) => {
           results.push(el);
         });
       });
@@ -106,7 +93,7 @@ describes.realWin('media-pool', {}, env => {
    * @return {boolean>}
    */
   function isElementInPool(array, element) {
-    const index = findIndex(array, el => {
+    const index = findIndex(array, (el) => {
       return el['replaced-media'] === element.getAttribute('id');
     });
 
@@ -122,7 +109,7 @@ describes.realWin('media-pool', {}, env => {
   });
 
   it('should allocate element on play', () => {
-    mediaPool = new MediaPool(win, {'video': 2}, unusedEl => 0);
+    mediaPool = new MediaPool(win, {'video': 2}, (unusedEl) => 0);
 
     const videoEl = createMediaElement('video');
     mediaPool.register(videoEl);
@@ -144,8 +131,8 @@ describes.realWin('media-pool', {}, env => {
       arrayOrderDistanceFn(elements)
     );
 
-    elements.forEach(element => mediaPool.register(element));
-    elements.forEach(element => mediaPool.play(element));
+    elements.forEach((element) => mediaPool.register(element));
+    elements.forEach((element) => mediaPool.play(element));
 
     expect(mediaPool.allocated['video'].length).to.equal(2);
     expect(isElementInPool(mediaPool.allocated['video'], elements[0])).to.be
@@ -165,9 +152,9 @@ describes.realWin('media-pool', {}, env => {
       arrayOrderDistanceFn(elements)
     );
 
-    elements.forEach(element => mediaPool.register(element));
+    elements.forEach((element) => mediaPool.register(element));
 
     // Call play() to ensure it doesn't throw.
-    elements.forEach(element => mediaPool.play(element));
+    elements.forEach((element) => mediaPool.play(element));
   });
 });

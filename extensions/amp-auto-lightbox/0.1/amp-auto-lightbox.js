@@ -1,20 +1,4 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Detects <amp-img> elements to set the `lightbox` attribute
  * automatically.
  *
@@ -22,17 +6,21 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/common-signals';
-import {Services} from '../../../src/services';
-import {
-  closestAncestorElementBySelector,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {dispatchCustomEvent} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {AutoLightboxEvents_Enum} from '../../../src/auto-lightbox';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -112,31 +100,40 @@ const META_OG_TYPE = 'meta[property="og:type"]';
 
 const NOOP = () => {};
 
-/**
- * For better minification.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Document|!ShadowRoot}
- */
-const getRootNode = ampdoc => ampdoc.getRootNode();
-
 /** @visibleForTesting */
 export class Criteria {
   /**
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsAll(element) {
+  static meetsAll(element, ampdoc, renderWidth, renderHeight) {
     return (
-      Criteria.meetsSizingCriteria(element) &&
-      Criteria.meetsTreeShapeCriteria(element)
+      Criteria.meetsSizingCriteria(
+        element,
+        ampdoc,
+        renderWidth,
+        renderHeight
+      ) && Criteria.meetsTreeShapeCriteria(element, ampdoc)
     );
   }
 
   /**
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {boolean}
    */
-  static meetsTreeShapeCriteria(element) {
+  static meetsTreeShapeCriteria(element, ampdoc) {
+    if (
+      element.tagName === 'IMG' &&
+      closestAncestorElementBySelector(element, 'amp-img')
+    ) {
+      // Images that are a child of an AMP-IMG do not need additional treatment.
+      return false;
+    }
+
     const disabledSelector = `${DISABLED_ANCESTORS},${DISABLED_BY_ATTR}`;
     const disabledAncestor = closestAncestorElementBySelector(
       element,
@@ -145,23 +142,24 @@ export class Criteria {
     if (disabledAncestor) {
       return false;
     }
-    const actions = Services.actionServiceForDoc(element);
+    const actions = Services.actionServiceForDoc(ampdoc || element);
     return !actions.hasResolvableAction(element, 'tap');
   }
 
   /**
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsSizingCriteria(element) {
-    const {naturalWidth, naturalHeight} = dev().assertElement(
-      element.querySelector('img')
+  static meetsSizingCriteria(element, ampdoc, renderWidth, renderHeight) {
+    const {naturalHeight, naturalWidth} = getMaxNaturalDimensions(
+      dev().assertElement(element.querySelector('img') || element)
     );
 
-    const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
-
-    const viewport = Services.viewportForDoc(element);
-    const {width: vw, height: vh} = viewport.getSize();
+    const viewport = Services.viewportForDoc(ampdoc);
+    const {height: vh, width: vw} = viewport.getSize();
 
     return meetsSizingCriteria(
       renderWidth,
@@ -172,6 +170,57 @@ export class Criteria {
       vh
     );
   }
+}
+
+/**
+ * Regex for the width-selection portion of a srcset, so for the
+ * general grammar: (URL [NUM[w|x]],)*, this should express "NUMw".
+ * E.g. in "image1.png 100w, image2.png 50w", this matches "100w" and "50w"
+ */
+const srcsetWidthRe = /\s+([0-9]+)w(,|[\S\s]*$)/g;
+
+/**
+ * Parses srcset partially to get the maximum defined intrinsic width.
+ * @param {!Element} img
+ * @return {number} -1 if no srcset, or if srcset is defined by dpr instead of
+ *   width. (This value is useful for comparisons, see getMaxNaturalDimensions.)
+ */
+function getMaxWidthFromSrcset(img) {
+  let max = -1;
+
+  const srcsetAttr = img.getAttribute('srcset');
+  if (srcsetAttr) {
+    let match;
+    while ((match = srcsetWidthRe.exec(srcsetAttr))) {
+      const width = parseInt(match[1], 10);
+      if (width > max) {
+        max = width;
+      }
+    }
+  }
+
+  return max;
+}
+
+/**
+ * Gets the maximum natural dimensions for an image with srcset.
+ * This is necessary when the browser selects a src that is not shrunk for its
+ * render size, but the srcset provides a different, higher resolution image
+ * that can be used in the lightbox.
+ * @param {!Element} img
+ * @return {{naturalWidth: number, naturalHeight: number}}
+ */
+function getMaxNaturalDimensions(img) {
+  const {naturalHeight, naturalWidth} = img;
+  const ratio = naturalWidth / naturalHeight;
+  const maxWidthFromSrcset = getMaxWidthFromSrcset(img);
+  if (maxWidthFromSrcset > naturalWidth) {
+    return {
+      naturalWidth: maxWidthFromSrcset,
+      naturalHeight: maxWidthFromSrcset / ratio,
+    };
+  }
+  return {naturalWidth, naturalHeight};
 }
 
 /**
@@ -212,17 +261,22 @@ export function meetsSizingCriteria(
  * @return {!Promise}
  */
 function markAsVisited(candidate) {
-  return Mutation.mutate(candidate, () => {
+  return Services.mutatorForDoc(candidate).mutateElement(candidate, () => {
     candidate.setAttribute(VISITED_ATTR, '');
   });
 }
 
 /**
- * @param {string} tagName
+ * @param {!Array<string>} tagNames
  * @return {string}
  */
-function candidateSelector(tagName) {
-  return `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
+function candidateSelector(tagNames) {
+  return tagNames
+    .map(
+      (tagName) =>
+        `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`
+    )
+    .join(',');
 }
 
 /**
@@ -230,8 +284,11 @@ function candidateSelector(tagName) {
  * @return {!Promise}
  */
 function whenLoaded(element) {
-  return whenUpgradedToCustomElement(element).then(element =>
-    element.signals().whenSignal(CommonSignals.LOAD_END)
+  if (element.tagName === 'IMG') {
+    return loadPromise(element);
+  }
+  return whenUpgradedToCustomElement(element).then((element) =>
+    element.signals().whenSignal(CommonSignals_Enum.LOAD_END)
   );
 }
 
@@ -243,7 +300,7 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(root) {
-    const selector = candidateSelector('amp-img');
+    const selector = candidateSelector(['amp-img', 'img']);
     const candidates = toArray(root.querySelectorAll(selector));
     // TODO(alanorozco): DOM mutations should be wrapped in mutate contexts.
     // Alternatively, use in-memory "visited" marker instead of attribute.
@@ -263,7 +320,7 @@ export class DocMetaAnnotations {
    * @return {string|undefined}
    */
   static getOgType(ampdoc) {
-    const tag = getRootNode(ampdoc).querySelector(META_OG_TYPE);
+    const tag = ampdoc.getRootNode().querySelector(META_OG_TYPE);
     if (tag) {
       return tag.getAttribute('content');
     }
@@ -284,12 +341,12 @@ export class DocMetaAnnotations {
    * @return {!Array<string>}
    */
   static getAllLdJsonTypes(ampdoc) {
-    return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
-      .map(el => {
+    return toArray(ampdoc.getRootNode().querySelectorAll(SCRIPT_LD_JSON))
+      .map((el) => {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
       })
-      .filter(typeOrUndefined => typeOrUndefined);
+      .filter(Boolean);
   }
 
   /**
@@ -300,25 +357,7 @@ export class DocMetaAnnotations {
    */
   static hasValidLdJsonType(ampdoc) {
     return DocMetaAnnotations.getAllLdJsonTypes(ampdoc).some(
-      type => ENABLED_LD_JSON_TYPES[type]
-    );
-  }
-}
-
-/**
- * Wrapper for an element-implementation-mutate sequence for readability and
- * mocking in tests.
- * @visibleForTesting
- */
-export class Mutation {
-  /**
-   * @param {!Element} ampEl
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  static mutate(ampEl, mutator) {
-    return whenUpgradedToCustomElement(ampEl).then(ampEl =>
-      ampEl.getResources().mutateElement(ampEl, mutator)
+      (type) => ENABLED_LD_JSON_TYPES[type]
     );
   }
 }
@@ -332,10 +371,8 @@ export class Mutation {
 function usesLightboxExplicitly(ampdoc) {
   // TODO(alanorozco): Backport into Extensions service.
   const requiredExtensionSelector = `script[custom-element="${REQUIRED_EXTENSION}"]`;
-
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
-
-  const exists = selector => !!getRootNode(ampdoc).querySelector(selector);
+  const exists = (selector) => !!ampdoc.getRootNode().querySelector(selector);
 
   return (
     exists(requiredExtensionSelector) && exists(lightboxedElementsSelector)
@@ -377,15 +414,17 @@ function generateLightboxUid() {
  * @visibleForTesting
  */
 export function apply(ampdoc, element) {
-  return Mutation.mutate(element, () => {
+  const mutator = Services.mutatorForDoc(ampdoc);
+  const mutatePromise = mutator.mutateElement(element, () => {
     element.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
-  }).then(() => {
+  });
+  return mutatePromise.then(() => {
     Services.extensionsFor(ampdoc.win).installExtensionForDoc(
       ampdoc,
       REQUIRED_EXTENSION
     );
 
-    element.dispatchCustomEvent(AutoLightboxEvents.NEWLY_SET);
+    dispatchCustomEvent(element, AutoLightboxEvents_Enum.NEWLY_SET);
 
     return element;
   });
@@ -397,13 +436,27 @@ export function apply(ampdoc, element) {
  * @return {!Array<!Promise<!Element|undefined>>}
  */
 export function runCandidates(ampdoc, candidates) {
-  return candidates.map(candidate =>
+  return candidates.map((candidate) =>
     whenLoaded(candidate).then(() => {
-      if (!Criteria.meetsAll(candidate)) {
-        return;
-      }
-      dev().info(TAG, 'apply', candidate);
-      return apply(ampdoc, candidate);
+      return measureIntersectionNoRoot(candidate).then(
+        ({boundingClientRect}) => {
+          if (
+            candidate.tagName !== 'IMG' &&
+            !candidate.signals().get(CommonSignals_Enum.LOAD_END)
+          ) {
+            // <amp-img> will change the img's src inline data on unlayout and
+            // remove it from DOM.
+            return;
+          }
+
+          const {height, width} = boundingClientRect;
+          if (!Criteria.meetsAll(candidate, ampdoc, width, height)) {
+            return;
+          }
+          dev().info(TAG, 'apply', candidate);
+          return apply(ampdoc, candidate);
+        }
+      );
     }, NOOP)
   );
 }
@@ -423,10 +476,10 @@ export function scan(ampdoc, opt_root) {
   return runCandidates(ampdoc, Scanner.getCandidates(root));
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, e => {
+    ampdoc.getRootNode().addEventListener(AmpEvents_Enum.DOM_UPDATE, (e) => {
       const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });

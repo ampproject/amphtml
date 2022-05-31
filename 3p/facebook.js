@@ -1,24 +1,21 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {setStyle} from '#core/dom/style';
+import {isEnumValue} from '#core/types/enum';
+import {dashToUnderline} from '#core/types/string';
 
-import {dashToUnderline} from '../src/string';
-import {dict} from '../src/utils/object';
+import {devAssert} from '#utils/log';
+
 import {loadScript} from './3p';
-import {setStyle} from '../src/style';
-import {userAssert} from '../src/log';
+
+/** @const @enum {string} */
+export const FacebookEmbedType = {
+  // Allows users to comment on the embedded content using their Facebook
+  // accounts. Correlates to amp-facebook-comments.
+  COMMENTS: 'comments',
+  LIKE: 'like',
+  PAGE: 'page',
+  POST: 'post',
+  VIDEO: 'video',
+};
 
 /**
  * Produces the Facebook SDK object for the passed in callback.
@@ -93,57 +90,12 @@ function getVideoContainer(global, data) {
 }
 
 /**
- * Create DOM element for the Facebook embedded content plugin for comments or
- * comment replies.
- * @see https://developers.facebook.com/docs/plugins/embedded-comments
- * @param {!Window} global
- * @param {!Object} data The element data
- * @return {!Element} div
- */
-function getCommentContainer(global, data) {
-  const c = global.document.getElementById('c');
-  const container = createContainer(global, 'comment-embed', data.href);
-  container.setAttribute(
-    'data-include-parent',
-    data.includeCommentParent || 'false'
-  );
-  container.setAttribute('data-width', c./*OK*/ offsetWidth);
-  return container;
-}
-
-/**
  * Gets the default type to embed as, if not specified.
  * @param {string} href
  * @return {string}
  */
 function getDefaultEmbedAs(href) {
   return href.match(/\/videos\/\d+\/?$/) ? 'video' : 'post';
-}
-
-/**
- * Create DOM element for the Facebook embedded content plugin.
- * @param {!Window} global
- * @param {!Object} data The element data
- * @return {!Element} div
- */
-function getEmbedContainer(global, data) {
-  const embedAs = data.embedAs || getDefaultEmbedAs(data.href);
-
-  userAssert(
-    ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
-    'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
-      ' "post", "video" or "comment" but was: %s',
-    embedAs
-  );
-
-  switch (embedAs) {
-    case 'comment':
-      return getCommentContainer(global, data);
-    case 'video':
-      return getVideoContainer(global, data);
-    default:
-      return getPostContainer(global, data);
-  }
 }
 
 /**
@@ -207,33 +159,48 @@ function getLikeContainer(global, data) {
 }
 
 /**
+ * Create DOM element for the Facebook embedded content plugin.
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @param {string} embedAs
+ * @return {!Element} div
+ */
+function getEmbedContainer(global, data, embedAs) {
+  devAssert(isEnumValue(FacebookEmbedType, embedAs));
+  switch (embedAs) {
+    case FacebookEmbedType.PAGE:
+      return getPageContainer(global, data);
+    case FacebookEmbedType.LIKE:
+      return getLikeContainer(global, data);
+    case FacebookEmbedType.COMMENTS:
+      return getCommentsContainer(global, data);
+    case FacebookEmbedType.VIDEO:
+      return getVideoContainer(global, data);
+    default:
+      return getPostContainer(global, data);
+  }
+}
+
+/**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function facebook(global, data) {
-  const extension = global.context.tagName;
-  let container;
-
-  if (extension === 'AMP-FACEBOOK-PAGE') {
-    container = getPageContainer(global, data);
-  } else if (extension === 'AMP-FACEBOOK-LIKE') {
-    container = getLikeContainer(global, data);
-  } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
-    container = getCommentsContainer(global, data);
-  } /*AMP-FACEBOOK */ else {
-    container = getEmbedContainer(global, data);
-  }
-
+  const container = getEmbedContainer(
+    global,
+    data,
+    data.embedAs || getDefaultEmbedAs(data.href)
+  );
   global.document.getElementById('c').appendChild(container);
 
   getFacebookSdk(
     global,
-    FB => {
+    (FB) => {
       // Dimensions are given by the parent frame.
       delete data.width;
       delete data.height;
 
-      FB.Event.subscribe('xfbml.resize', event => {
+      FB.Event.subscribe('xfbml.resize', (event) => {
         context.updateDimensions(
           parseInt(event.width, 10),
           parseInt(event.height, 10) + /* margins */ 20
@@ -243,11 +210,9 @@ export function facebook(global, data) {
       FB.init({xfbml: true, version: 'v2.5'});
 
       // Report to parent that the SDK has loaded and is ready to paint
-      const message = JSON.stringify(
-        dict({
-          'action': 'ready',
-        })
-      );
+      const message = JSON.stringify({
+        'action': 'ready',
+      });
       global.parent./*OK*/ postMessage(message, '*');
     },
     data.locale ? data.locale : dashToUnderline(window.navigator.language)

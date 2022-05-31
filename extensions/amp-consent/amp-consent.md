@@ -4,70 +4,34 @@ formats:
   - websites
   - stories
 teaser:
-  text: Provides the ability to collect and store a user's consent through a UI control.
+  text: Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
 ---
 
-<!--
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-consent
-
-Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <li><a href="https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/">Basic user consent flow</a></li>
-      <li><a href="https://amp.dev/documentation/examples/user-consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
-    </td>
-  </tr>
-</table>
 
 ## Overview
 
 As a publisher, you can use the `<amp-consent>` component to implement user controls. The component allows you to:
 
-- Determine if the user should be asked to interact with the control.
-- Capture the user’s consent decision.
-- Makes the user’s setting available to elements on the AMP page to modify the page’s behavior.
+-   Determine if the user should be asked to interact with the control.
+-   Capture the user’s consent decision.
+-   Makes the user’s setting available to elements on the AMP page to modify the page’s behavior.
 
-If you are a vendor that wants to customize your component's behavior based on amp-consent, you can read more [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md).
+If you are a vendor that wants to customize your component's behavior based on amp-consent, or need to collect more advanced consent information you can read more [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/customizing-extension-behaviors-on-consent.md).
 
 ## Usage
 
 Only a single `<amp-consent>` element is allowed on the page, and that element must specify a unique `id`.
 
 If you also include an `<amp-user-notification>` element on the page, the UI associated with the `<amp-consent>` and `<amp-user-notification>` will not be deterministic. Avoid using `<amp-consent>` with `<amp-user-notification>` if this would be problematic.
+
+## Granular and global consent
+
+`<amp-consent>` supports **global consent**, in which users can make a single consent choice for a website. It also supports **granular consent**, allowing users to make a set of choices.
+
+To implement granular consent, define a set of **consent purposes**. Choose a name for each purpose. Create a UI that allows the user to make choices for each, and use the `setPurpose()` action to save each choice.
+
+The other actions that `<amp-consent>` supports apply to both granular and global consent. Thus, a webpage can implement both types simultaneously.
 
 ## Consent configuration
 
@@ -87,9 +51,9 @@ Example:
     }
   </script>
   <div id="consent-ui">
-    <button on="tap:consent-element.accept" role="button">Accept</button>
-    <button on="tap:consent-element.reject" role="button">Reject</button>
-    <button on="tap:consent-element.dismiss" role="button">Dismiss</button>
+    <button on="tap:consent-element.accept">Accept</button>
+    <button on="tap:consent-element.reject">Reject</button>
+    <button on="tap:consent-element.dismiss">Dismiss</button>
   </div>
 </amp-consent>
 ```
@@ -146,7 +110,11 @@ AMP expects the response to be a JSON object like the following:
 }
 ```
 
+For granular consent, this response can also contain a map of `purposeConsent` choices.
+
 **Note: The legacy `promptIfUnknown` is migrating to `consentRequired` as prompt is no longer strictly required to manage consents.**
+
+The `consentStateValue` can be thought of as a signal for the runtime to block and unblock components. The value `accepted` instructs AMP that the user has given consent (or doesn't revoke consent in the opt-out case). This can be used to serve personalized ads in some scenarios. The value `rejected` means the user doesn't give consent (or has revoked consent in the opt-out case) and vendors may decide to not serve personalized ads.
 
 Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
 
@@ -178,6 +146,16 @@ useful when publishers want to use their own server to decide if consent is requ
 
 Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples).
 
+#### purposeConsentRequired
+
+For [granular consent](#granular-and-global-consent), `purposeConsentRequired` lets you specify an array of consent purposes. Until the user has made a choice for each, the [consent UI](#prompt-ui) will appear each time they visit your webpage.
+
+For example, if you want to make sure the user makes a choice for consent purposes you've called `purpose-analytics` and `purpose-marketing`, your JSON would include:
+
+```json
+"purposeConsentRequired": ["purpose-analytics", "purpose-marketing"]
+```
+
 #### onUpdateHref
 
 `onUpdateHref`: Instructs AMP to make a CORS HTTPS POST request with credentials to the specified URL whenever the stored consent state changes.
@@ -202,12 +180,12 @@ The consent decisions collected from user via this prompt UI will be stored in `
 
 `geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location to assist client side decisions.
 
-`geoOverride` is a JSON object keyed by geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid `<amp-consent>` config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config. The only exception here is that the `consentInstanceId` cannot be overwritten by `geoOverride` config, because AMP only manage and store consent information in a single instance.
+`geoOverride` is a JSON object keyed by geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/main/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid `<amp-consent>` config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config. The only exception here is that the `consentInstanceId` cannot be overwritten by `geoOverride` config, because AMP only manage and store consent information in a single instance.
 
 Two important tips when configuring `amp-geo`:
 
-- All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
-- Provide an `geoGroupUnknown` override for users that are failed be be identified by `<amp-geo>`.
+-   All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
+-   Provide an `geoGroupUnknown` override for users that are failed be be identified by `<amp-geo>`.
 
 Take the following config as an example:
 
@@ -287,6 +265,23 @@ AMP will check client cache and server in parallel to find the previous consent 
 
 `xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's response. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
+#### uiConfig
+
+`uiConfig` provides extra UI and behaviors to `<amp-consent>`. `uiConfig` is an optional JSON object that can contain the key `overlay` which is a boolean. `overlay: true` will add a light black overlay behind the consent prompt to help users focus on the prompt. Additionally, this will stop user interaction with the contents beneath the consent prompt (such as scrolling). `overlay: false` is the default.
+
+#### captions
+
+`captions` provides accessibility features for screen reader users for `<amp-consent>`. `captions` is an optional JSON an object that can contain the `consentPromptCaption` and `buttonActionCaption` strings. The default values for these fields are 'User Consent Prompt' and 'Focus Prompt' respectivly, but they can be overriden and customized for your use case (such as localization). When a consent prompt in an iframe is loaded, the screen reader will read the `consentPromptCaption` and then the `buttonActionCaption`. The `consentPromptCaption` should act as a title for the consent prompt, while the `buttonActionCaption` should inform the user that they can interact with the iframe.
+
+```json
+{
+  "captions": {
+    "consentPromptCaption": "This is an example user consent prompt",
+    "buttonActionCaption": "Click to interact with the prompt"
+  }
+}
+```
+
 ## Consent Management
 
 The `<amp-consent>` element supports customizing the consent prompt UI and post-prompt UI, which can be used to manage consent.
@@ -313,16 +308,16 @@ _Example_: Displays a prompt user interface
     }
   </script>
   <div id="consent-ui">
-    <button on="tap:consent-element.accept" role="button">Accept</button>
-    <button on="tap:consent-element.reject" role="button">Reject</button>
-    <button on="tap:consent-element.dismiss" role="button">Dismiss</button>
+    <button on="tap:consent-element.accept">Accept</button>
+    <button on="tap:consent-element.reject">Reject</button>
+    <button on="tap:consent-element.dismiss">Dismiss</button>
   </div>
 </amp-consent>
 ```
 
 AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden based on the three user actions described below.
 
-AMP also supports external consent UI flow with the usage of `<amp-iframe>`. More information about the communication of user actions can be found [below](#prompt-actions-from-external-consent-ui).
+AMP also supports external consent UI flow via `promptUiSrc` which will load your custom iframe. More information about the communication of user actions can be found [here](./integrating-consent.md#Informing-Consent-response).
 
 #### Prompt UI for Stories
 
@@ -336,20 +331,16 @@ _Example_: Displays a prompt user interface on an AMP Story
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
     {
-      "consents": {
-        "my-consent": {
-          "checkConsentHref": "https://foo.com/api/show-consent",
-          "promptUI": "consent-ui"
-        }
-      }
+      "checkConsentHref": "https://foo.com/api/show-consent",
+      "promptUI": "consent-ui"
     }
   </script>
   <amp-story-consent id="consent-ui" layout="nodisplay">
     <script type="application/json">
       {
-        “title”: "My title",
-        “message”: "My example message.",
-        “vendors”: ["Item 1", "Item 2", "Item 3", "Item 4"]
+        "title": "My title",
+        "message": "My example message.",
+        "vendors": ["Item 1", "Item 2", "Item 3", "Item 4"]
       }
     </script>
   </amp-story-consent>
@@ -358,38 +349,40 @@ _Example_: Displays a prompt user interface on an AMP Story
 
 #### Prompt Actions
 
-There are three types of user actions that are associated with the consent prompt: `accept`, `reject` and `dismiss`.
+Three user actions apply to both granular and global consent: `accept`, `reject` and `dismiss`.
 
 To enable the user to choose a consent state and hide the prompt UI, add an `on` attribute to a button with the
 following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
-- `accept`: publisher instructs AMP to remember the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
+-   `accept`: publisher instructs AMP to remember the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
 
-- `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
+-   `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
 
-- `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
+-   `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
-##### Prompt Actions from External Consent UI
+The `setPurpose` action is used in [granular consent](#granular-and-global-consent). You can use it to temporarily store the user's choice for an individual consent purpose. This action takes the form `setPurpose({purpose name}={boolean value})`. Setting a purpose to `true` marks it as accepted; setting it to `false` marks it as rejected.
 
-When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
+For example, to mark a consent purpose called `performanceCookies` as `true`, you would use
 
-_Example: iframe `consent-response` request_
-
-```javascript
-window.parent.postMessage(
-  {
-    type: 'consent-response',
-    action: 'accept/reject/dismiss',
-  },
-  '*'
-);
+```js
+myConsent.setPurpose(performanceCookies=true)
 ```
 
-<a name="post-prompt"></a>
+The `accept` and `reject` actions, which accept or deny global consent, both save granular consent choices as well. If you pass either of these the argument `(purposeConsentDefault={boolean value})`, any consent purposes for which the user has not made a choice will be assigned that boolean value.
+
+For example, the action
+
+```js
+myConsent.accept(purposeConsentDefault=false)
+```
+
+will reject any consent purposes for which the user has not made a choice.
+
+If you don't use `purposeConsentDefault`, any purposes for which the user has not made a choice will remain unset. For this reason, especially when the prompt UI is a form with checkboxes, it's generally recommended that you include this argument.
 
 ### Post-prompt UI (optional)
 
-You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to a child element of `<amp-consent>` by id.
+You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to an element by id. If the element is a child element of the `<amp-consent>`, it will be fixed to the bottom of the page same as prompt UIs. You can also inline the `postPromptUI` in the document, but please be aware of the potential layout shift caused by toggling the display of this element.
 
 When defined, the post-prompt UI is shown when all prompt UIs have been hidden, or initially on page load if no prompt UI was triggered.
 
@@ -397,12 +390,8 @@ When defined, the post-prompt UI is shown when all prompt UIs have been hidden, 
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
     {
-      "consents": {
-        "consent-foo": {
-          ...
-          "promptUI": "consent-ui"
-        }
-      },
+      "consentInstanceId": "consent-foo",
+      "promptUI": "consent-ui",
       "postPromptUI": "post-consent-ui"
     }
   </script>
@@ -410,7 +399,7 @@ When defined, the post-prompt UI is shown when all prompt UIs have been hidden, 
     ...
   </div>
   <div id="post-consent-ui">
-    <button on="tap:consent-element.dismiss" role="button">Settings</button>
+    <button on="tap:consent-element.dismiss">Settings</button>
   </div>
 </amp-consent>
 ```
@@ -429,13 +418,15 @@ The consent information (from the response or from user action on client side) w
 
 A couple of implications with this behavior:
 
-- When stored user consent no longer applies, the change will be synced through `checkConsentHref` response. But the change will be applied one-time off due to the client cache.
-- When a user travels, `<amp-consent>` will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: true` and `consentRequired: false`.
-- If a promptUI is used to collect user consent. Using `expireCache: true` will prompt consent dialog and block users from content on their following visits.
+-   When stored user consent no longer applies, the change will be synced through `checkConsentHref` response. But the change will be applied one-time off due to the client cache.
+-   When a user travels, `<amp-consent>` will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: true` and `consentRequired: false`.
+-   If a promptUI is used to collect user consent. Using `expireCache: true` will prompt consent dialog and block users from content on their following visits.
+
+`<amp-consent>` stores consent choices in a key called `amp-store:{xxx}`, where `{xxx}` is your domain. The value is base64-encoded JSON.
 
 ### Basic blocking behaviors
 
-To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
+In global consent, to block components, either add the `data-block-on-consent` attribute to the AMP component or add the `amp-consent-blocking` meta tag with the list of extensions to be blocked. Note, that if you're using the `type` attribute for CMP integration, you must also include the `amp-consent-blocking` meta tag. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
@@ -443,6 +434,18 @@ _Example: Blocking the analytics until user accepts consent_
 
 ```html
 <amp-analytics data-block-on-consent type="googleanalytics"> </amp-analytics>
+```
+
+or
+
+```html
+<meta name="amp-consent-blocking" content="amp-analytics,amp-ad" />
+```
+
+For granular consent, use the `data-block-on-consent-purposes` attribute with a comma-separated list of consent purposes. For example, the following will block an `amp-pixel` component until the user accepts purposes named `performance` and `marketing`:
+
+```html
+<amp-pixel data-block-on-consent-purposes="performance, marketing"></amp-pixel>
 ```
 
 ### Advanced predefined consent blocking behaviors
@@ -460,30 +463,19 @@ _Example: Blocking the analytics until user respond to consent_
 
 AMP may support more advanced pre-defined blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved only for the following supported pre-defined attributes:
 
-- `_till_responded` : Unblock the component until the user has responded to the consent prompt, or the consent prompt has been skipped.
-- `_till_accepted` : [Default basic blocking behavior](#basic-blocking-behaviors), expect that when `_till_accepted` is explicitly added, individual components cannot override the blocking behavior.
-- `_auto_reject` : Always reject the consent automatically if consent is required but unknown. The reject consent decision will not be stored. It is recommended not to specify a consent prompt UI when auto rejecting consent for every components.
+-   `_till_responded` : Unblock the component until the user has responded to the consent prompt, or the consent prompt has been skipped.
+-   `_till_accepted` : [Default basic blocking behavior](#basic-blocking-behaviors), expect that when `_till_accepted` is explicitly added, individual components cannot override the blocking behavior.
+-   `_auto_reject` : Always reject the consent automatically if consent is required but unknown. The reject consent decision will not be stored. It is recommended not to specify a consent prompt UI when auto rejecting consent for every components.
 
 When one of the pre-defined attributes is used, AMP assumes that the publisher takes final control on the consent blocking behaviors. Individual components cannot override the blocking behaviors brought by pre-defined consent policy, they can however still customize components' behaviors after having been unblocked.
 
 ### Customize Consent Blocking Behaviors
 
-An optional `policy` object can be added to the `<amp-consent>` element's JSON configuration object to customize consent blocking behaviors.
+An optional `policy` property can be added to the `<amp-consent>` element's JSON configuration object. Its value is an object that customizes consent blocking behaviors.
 
 ```html
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
-    {
-      "checkConsentHref"
-      "consentInstanceId": "ping2"
-      "geo": abc,
-      "extraConfig" : {
-        'id': xxx
-        'config': asdsdfasd,
-      },
-      "postPromptUI": 'test'
-    }
-
     {
       "consentInstanceId": xxx
       "checkConsentHref": "https://example.com/api/show-consent"
@@ -500,7 +492,7 @@ An optional `policy` object can be added to the `<amp-consent>` element's JSON c
 </amp-consent>
 ```
 
-Right now only customizing the `default` policy instance is supported. The "default" behavior policy applies to every component that is blocked by consent with `data-block-on-consent` attribute.
+The `default` policy is the only one allowed to be configured. This policy applies to every element that is blocked by the `data-block-on-consent` attribute.
 
 ### Policy Instance (optional)
 
@@ -520,8 +512,8 @@ When used as a single value, `timeout` equals the timeout value in second.
 
 When used as an object. `timeout` object supports two attributes
 
-- `seconds`: timeout value in second
-- `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
+-   `seconds`: timeout value in second
+-   `fallbackAction` (optional): the fallback action at timeout if no user action is taken and no state has been stored. The fallback actions supported are `reject` and `dismiss`. Default action is `dismiss` if not configured. Note the consent state changed due to fallback action at timeout will not be stored on client side.
 
 ```html
 "default": { "waitFor": { "my-consent": [] }, "timeout": { "seconds": 2,
@@ -532,12 +524,12 @@ When used as an object. `timeout` object supports two attributes
 
 The table below lists the vendors and components that are integrated with amp-consent
 
-| Integration                       | Prod Availability | Documentation                                                                                          | Ready For Testing |
-| --------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------ | ----------------- |
-| DoubleClick & AdSense Integration | 05/10/18          | [Link](https://support.google.com/dfp_premium/answer/7678538)                                          | Yes               |
-| AMP IMA Video Integration         | 05/15/18          | [Link](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/consent-blocking.md) | Yes               |
-| AMP Geo                           | 05/10/18          | [Link](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/)            | Yes               |
-| AMP Stories                       | 05/15/18          | [Link](#prompt-ui-for-stories)                                                                         | Yes               |
+| Integration                       | Prod Availability | Documentation                                                                                        | Ready For Testing |
+| --------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- | ----------------- |
+| DoubleClick & AdSense Integration | 05/10/18          | [Link](https://support.google.com/dfp_premium/answer/7678538)                                        | Yes               |
+| AMP IMA Video Integration         | 05/15/18          | [Link](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ima-video/consent-blocking.md) | Yes               |
+| AMP Geo                           | 05/10/18          | [Link](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/)          | Yes               |
+| AMP Stories                       | 05/15/18          | [Link](#prompt-ui-for-stories)                                                                       | Yes               |
 
 ## FAQs
 
@@ -606,7 +598,7 @@ You should try out the [advanced consent flows](https://amp.dev/documentation/ex
 
 ##### How can I show a persistent UX element for users to update their consent preferences?
 
-You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/) for a similar implementation.
+You can use the optional [post-prompt UI](<#post-prompt-ui-(optional)>) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/client_side_user_consent_flow/) for a similar implementation.
 
 ##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users?
 
@@ -626,20 +618,42 @@ You can use the response of `checkConsentHref` to show a consent to the user if 
 
 Yes. See example [here](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/).
 
+##### Does AMP support the IAB TCF?
+
+AMP supports popular transparency consent frameworks including the IAB TCF v1, TCF v2 and the IAB US Privacy String.
+Please check with your consent management platform (CMP) and ad networks on their AMP support. AMP will read and pass the strings passed by the frameworks (IAB TCF v1, TCF v2 and the IAB US Privacy String) when received by CMPs/ad networks.
+
 ##### I can't see feature X being supported, what can I do?
 
 Join in on the discussion where we are discussing [upcoming potential features](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345). Please chime in on the thread if something isn't supported yet.
 
 ## Related resources
 
-- Blog post: [New functionality to help manage user choice in AMP pages](https://www.ampproject.org/latest/blog/new-functionality-to-help-manage-user-choice-in-amp-pages/)
-- Blog post: [Dynamic geo-personalization](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/)
-- [`<amp-geo>` documentation](https://amp.dev/documentation/components/amp-geo)
-- [DoubleClick/ AdSense documentation ](https://support.google.com/dfp_premium/answer/7678538#amp-pages)
-- [New feature discussion for amp-consent](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345)
+-   Blog post: [New functionality to help manage user choice in AMP pages](https://www.ampproject.org/latest/blog/new-functionality-to-help-manage-user-choice-in-amp-pages/)
+-   Blog post: [Dynamic geo-personalization](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/)
+-   [`<amp-geo>` documentation](https://amp.dev/documentation/components/amp-geo)
+-   [DoubleClick/ AdSense documentation ](https://support.google.com/dfp_premium/answer/7678538#amp-pages)
+-   [New feature discussion for amp-consent](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345)
 
 ## Supported Consent Management Platforms
 
-- Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
-- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/sourcepoint.md)
-- Your Integrated platform here!
+<!-- markdown-link-check-disable -->
+
+-   AppConsent : [Website](https://sfbx.io/en/produits/) - [Documentation](./cmps/appconsent.md)
+-   ConsentManager : [Website](https://www.consentmanager.net/) - [Documentation](https://help.consentmanager.net/books/cmp/page/using-the-cmp-with-amp-websites)
+-   Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
+-   Funding Choices : [Website](https://fundingchoices.google.com/start) - [Documentation](./cmps/googlefc.md)
+-   iubenda : [Website](https://www.iubenda.com/) - [Documentation](./cmps/iubenda.md)
+-   LiveRamp : [Website](https://liveramp.com/our-platform/preference-consent-management/) - [Documentation](./cmps/liveramp.md)
+-   Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
+-   Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
+-   OneTrust: [Website](https://www.onetrust.com/) - [Documentation](./cmps/onetrust.md)
+-   opencmp : [Documentation](./cmps/opencmp.md)
+-   Pubtech : [Website](https://www.pubtech.ai/) - [Documentation](./cmps/pubtech.md)
+-   Quantcast : [Website](https://www.quantcast.com) - [Documentation](https://help.quantcast.com/hc/en-us/categories/360002940873-Quantcast-Choice)
+-   Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
+-   SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
+-   UniConsent : [Website](http://www.uniconsent.com/) - [Documentation](./cmps/uniconsent.md)
+-   Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
+
+-   Your Integrated platform here!

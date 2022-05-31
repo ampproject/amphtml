@@ -1,25 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-nested-menu';
-import * as lolex from 'lolex';
-import {Keys} from '../../../../src/utils/key-codes';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {tryFocus} from '../../../../src/dom';
+import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {Keys_Enum} from '#core/constants/key-codes';
+import {tryFocus} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+
+const ANIMATION_TIMEOUT = 600;
 
 describes.realWin(
   'amp-nested-menu component',
@@ -28,17 +14,14 @@ describes.realWin(
       extensions: ['amp-nested-menu'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let clock;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = lolex.install({target: win});
-
-      // TODO(#25343): remove this toggle when cleaning up experiment post launch.
-      toggleExperiment(win, 'amp-nested-menu', true);
+      clock = fakeTimers.withGlobal(win).install();
     });
 
     async function getNestedMenu(options) {
@@ -52,7 +35,7 @@ describes.realWin(
       element.appendChild(ul);
       doc.body.appendChild(element);
 
-      [1, 2, 3].forEach(i => {
+      [1, 2, 3, 4].forEach((i) => {
         const item = htmlFor(doc)`
           <li>
             <button amp-nested-submenu-open></button>
@@ -81,7 +64,7 @@ describes.realWin(
         }
       });
 
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       return element;
     }
@@ -102,47 +85,65 @@ describes.realWin(
       const submenuEl3 = doc.getElementById('submenu-3');
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('open')).to.be.false;
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('false');
       const clickEvent = new Event('click', {bubbles: true});
       openEl1.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl1.hasAttribute('open')).to.be.true;
       expect(submenuEl1.hasAttribute('child-open')).to.be.false;
       expect(submenuEl3.hasAttribute('open')).to.be.false;
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('true');
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('false');
       openEl3.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('true');
       expect(submenuEl1.hasAttribute('child-open')).to.be.true;
       expect(submenuEl3.hasAttribute('open')).to.be.true;
     });
 
     it('should close corresponding submenu when close element is clicked', async () => {
       const menuEl = await getNestedMenu();
+      const impl = await menuEl.getImpl(false);
       const closeEl1 = doc.getElementById('close-1');
       const submenuEl1 = doc.getElementById('submenu-1');
       const closeEl3 = doc.getElementById('close-3');
       const submenuEl3 = doc.getElementById('submenu-3');
-      menuEl.implementation_.open_(submenuEl1);
-      menuEl.implementation_.open_(submenuEl3);
+      const openEl3 = doc.getElementById('open-3');
+      const openEl1 = doc.getElementById('open-1');
+      impl.open_(submenuEl1);
+      clock.tick(ANIMATION_TIMEOUT);
+      impl.open_(submenuEl3);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('true');
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('true');
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl1.hasAttribute('open')).to.be.true;
       const clickEvent = new Event('click', {bubbles: true});
       closeEl3.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('false');
       expect(submenuEl1.hasAttribute('child-open')).to.be.false;
       expect(submenuEl3.hasAttribute('open')).to.be.false;
       closeEl1.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('false');
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('open')).to.be.false;
     });
 
     it('should return to root menu on reset', async () => {
       const menuEl = await getNestedMenu();
+      const impl = await menuEl.getImpl(false);
       const submenuEl1 = doc.getElementById('submenu-1');
       const submenuEl3 = doc.getElementById('submenu-3');
-      menuEl.implementation_.open_(submenuEl1);
-      menuEl.implementation_.open_(submenuEl3);
+      impl.open_(submenuEl1);
+      impl.open_(submenuEl3);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl1.hasAttribute('child-open')).to.be.true;
       expect(submenuEl1.hasAttribute('open')).to.be.true;
       expect(submenuEl3.hasAttribute('open')).to.be.true;
-      menuEl.implementation_.reset();
+      impl.reset();
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('open')).to.be.false;
@@ -151,11 +152,14 @@ describes.realWin(
 
     it('should return to parent menu when left arrow key is pressed and side=right', async () => {
       const menuEl = await getNestedMenu({'side': 'right'});
+      const impl = await menuEl.getImpl(false);
       const submenuEl = doc.getElementById('submenu-1');
-      menuEl.implementation_.open_(submenuEl);
+      impl.open_(submenuEl);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl.hasAttribute('open')).to.be.true;
-      const keyEvent = new KeyboardEvent('keydown', {key: Keys.LEFT_ARROW});
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: Keys_Enum.LEFT_ARROW,
+      });
       menuEl.dispatchEvent(keyEvent);
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl.hasAttribute('open')).to.be.false;
@@ -163,11 +167,14 @@ describes.realWin(
 
     it('should return to parent menu when right arrow key is pressed and side=left', async () => {
       const menuEl = await getNestedMenu({'side': 'left'});
+      const impl = await menuEl.getImpl(false);
       const submenuEl = doc.getElementById('submenu-1');
-      menuEl.implementation_.open_(submenuEl);
+      impl.open_(submenuEl);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl.hasAttribute('open')).to.be.true;
-      const keyEvent = new KeyboardEvent('keydown', {key: Keys.RIGHT_ARROW});
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: Keys_Enum.RIGHT_ARROW,
+      });
       menuEl.dispatchEvent(keyEvent);
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl.hasAttribute('open')).to.be.false;
@@ -182,7 +189,7 @@ describes.realWin(
       tryFocus(openEl);
       expect(doc.activeElement).to.equal(openEl);
       const keyEvent = new KeyboardEvent('keydown', {
-        key: Keys.RIGHT_ARROW,
+        key: Keys_Enum.RIGHT_ARROW,
         bubbles: true,
       });
       openEl.dispatchEvent(keyEvent);
@@ -199,7 +206,7 @@ describes.realWin(
       tryFocus(openEl);
       expect(doc.activeElement).to.equal(openEl);
       const keyEvent = new KeyboardEvent('keydown', {
-        key: Keys.LEFT_ARROW,
+        key: Keys_Enum.LEFT_ARROW,
         bubbles: true,
       });
       openEl.dispatchEvent(keyEvent);
@@ -214,29 +221,50 @@ describes.realWin(
       tryFocus(openEl1);
       expect(doc.activeElement).to.equal(openEl1);
       const downKeyEvent = new KeyboardEvent('keydown', {
-        key: Keys.DOWN_ARROW,
+        key: Keys_Enum.DOWN_ARROW,
         bubbles: true,
       });
       openEl1.dispatchEvent(downKeyEvent);
       expect(doc.activeElement).to.equal(openEl2);
       const upKeyEvent = new KeyboardEvent('keydown', {
-        key: Keys.UP_ARROW,
+        key: Keys_Enum.UP_ARROW,
         bubbles: true,
       });
       openEl2.dispatchEvent(upKeyEvent);
       expect(doc.activeElement).to.equal(openEl1);
     });
 
+    it('should focus on first/last items when home/end key is pressed', async () => {
+      await getNestedMenu();
+      const openEl1 = doc.getElementById('open-1');
+      const openEl4 = doc.getElementById('open-4');
+      tryFocus(openEl1);
+      expect(doc.activeElement).to.equal(openEl1);
+      const endKeyEvent = new KeyboardEvent('keydown', {
+        key: Keys_Enum.END,
+        bubbles: true,
+      });
+      openEl1.dispatchEvent(endKeyEvent);
+      expect(doc.activeElement).to.equal(openEl4);
+      const homeKeyEvent = new KeyboardEvent('keydown', {
+        key: Keys_Enum.HOME,
+        bubbles: true,
+      });
+      openEl4.dispatchEvent(homeKeyEvent);
+      expect(doc.activeElement).to.equal(openEl1);
+    });
+
     it('should shift focus to close/open button when submenu is opened/closed, respectively', async () => {
       const menuEl = await getNestedMenu();
+      const impl = await menuEl.getImpl(false);
       const openEl = doc.getElementById('open-1');
       const closeEl = doc.getElementById('close-1');
       const submenuEl = doc.getElementById('submenu-1');
-      menuEl.implementation_.open_(submenuEl);
-      clock.tick(600);
+      impl.open_(submenuEl);
+      clock.tick(ANIMATION_TIMEOUT);
       expect(doc.activeElement).to.equal(closeEl);
-      menuEl.implementation_.close_(submenuEl);
-      clock.tick(600);
+      impl.close_(submenuEl);
+      clock.tick(ANIMATION_TIMEOUT);
       expect(doc.activeElement).to.equal(openEl);
     });
   }

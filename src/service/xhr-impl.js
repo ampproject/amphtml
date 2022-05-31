@@ -1,20 +1,8 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseJson} from '#core/types/object/json';
 
-import {Services} from '../services';
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -22,13 +10,11 @@ import {
   setupInit,
   setupInput,
   setupJsonFetchInit,
-} from '../utils/xhr-utils';
-import {dev, user} from '../log';
-import {getCorsUrl, parseUrlDeprecated} from '../url';
-import {getService, registerServiceBuilder} from '../service';
+} from '#utils/xhr-utils';
+
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
-import {startsWith} from '../string';
+import {getService, registerServiceBuilder} from '../service-helpers';
+import {getCorsUrl, parseUrlDeprecated} from '../url';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -73,7 +59,7 @@ export class Xhr {
       this.ampdocSingle_,
       input,
       init
-    ).then(interceptorResponse => {
+    ).then((interceptorResponse) => {
       if (interceptorResponse) {
         return interceptorResponse;
       }
@@ -81,8 +67,9 @@ export class Xhr {
       // will expect a native `FormData` object in the `body` property, so
       // the native `FormData` object needs to be unwrapped.
       if (isFormDataWrapper(init.body)) {
-        const formDataWrapper =
-          /** @type {!FormDataWrapperInterface} */ (init.body);
+        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (
+          init.body
+        );
         init.body = formDataWrapper.getFormData();
       }
       return this.win.fetch.apply(null, arguments);
@@ -105,13 +92,13 @@ export class Xhr {
     input = setupInput(this.win, input, init);
     init = setupAMPCors(this.win, input, init);
     return this.fetch_(input, init).then(
-      response => response,
-      reason => {
+      (response) => response,
+      (reason) => {
         const targetOrigin = parseUrlDeprecated(input).origin;
         throw user().createExpectedError(
           'XHR',
           `Failed fetching (${targetOrigin}/...):`,
-          reason && reason.message
+          reason && /** @type {!Error} */ (reason).message
         );
       }
     );
@@ -161,8 +148,8 @@ export class Xhr {
       return res.json();
     }
 
-    return res.text().then(txt => {
-      if (!startsWith(txt, dev().assertString(prefix))) {
+    return res.text().then((txt) => {
+      if (!txt.startsWith(dev().assertString(prefix))) {
         user().warn(
           'XHR',
           `Failed to strip missing prefix "${prefix}" in fetch response.`
@@ -180,7 +167,7 @@ export class Xhr {
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
-    return this.fetchAmpCors_(input, init).then(response =>
+    return this.fetchAmpCors_(input, init).then((response) =>
       assertSuccess(response)
     );
   }
@@ -197,7 +184,7 @@ export class Xhr {
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
-    return this.fetchAmpCors_(input, opt_init).then(response =>
+    return this.fetchAmpCors_(input, opt_init).then((response) =>
       assertSuccess(response)
     );
   }

@@ -1,27 +1,12 @@
-#
-# Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
-
 tags: {  # amp-base-carousel
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-base-carousel"
     version: "0.1"
+    version: "1.0"
     version: "latest"
+    bento_supported_version: "1.0"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -58,19 +43,29 @@ attr_lists: {
     value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
   }
   attrs: {
-    name: "horizontal"
+    name: "controls"
+    # Media query / (always|auto|never)
+    value_regex: "([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)"
+  }
+  attrs: {
+    name: "horizontal" # 0.1 only
     # Media query / boolean pairs
     value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
   }
   attrs: {
     name: "loop"
     # Media query / boolean pairs
-    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false|^$)"
   }
   attrs: {
     name: "mixed-length"
     # Media query / boolean pairs
     value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+  attrs: {
+    name: "orientation" # 1.0 only
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(horizontal|vertical),\\s*)*(horizontal|vertical)"
   }
   attrs: {
     name: "slide"
@@ -104,9 +99,10 @@ attr_lists: {
   attrs: { name: "[auto-advance-count]" }
   attrs: { name: "[auto-advance-interval]" }
   attrs: { name: "[auto-advance-loops]" }
-  attrs: { name: "[horizontal]" }
+  attrs: { name: "[horizontal]" } # 0.1 only
   attrs: { name: "[loop]" }
   attrs: { name: "[mixed-length]" }
+  attrs: { name: "[orientation]" } # 1.0 only
   attrs: { name: "[slide]" }
   attrs: { name: "[snap]" }
   attrs: { name: "[snap-align]" }
@@ -116,12 +112,11 @@ attr_lists: {
 
 tags: {  # <amp-base-carousel>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-BASE-CAROUSEL"
   requires_extension: "amp-base-carousel"
   attr_lists: "amp-base-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-base-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-base-carousel/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -135,7 +130,6 @@ tags: {  # <amp-base-carousel>
 
 tags: {  # <amp-base-carousel lightbox>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-BASE-CAROUSEL"
   spec_name: "AMP-BASE-CAROUSEL [lightbox]"
   requires_extension: "amp-base-carousel"
@@ -146,7 +140,7 @@ tags: {  # <amp-base-carousel lightbox>
   }
   attr_lists: "amp-base-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-base-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-base-carousel/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -166,9 +160,9 @@ tags: {  # <amp-base-carousel lightbox>
 
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [lightbox-exclude]"
+  descriptive_name: "amp-base-carousel [lightbox-exclude] child"
   attrs: {
     name: "lightbox-exclude"
     mandatory: true
@@ -176,9 +170,9 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [child]"
+  descriptive_name: "amp-base-carousel [lightbox-thumbnail-id] child"
   attrs: {
     name: "lightbox-thumbnail-id"
     value_regex_casei: "^[a-z][a-z\\d_-]*"

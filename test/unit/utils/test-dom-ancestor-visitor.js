@@ -1,21 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {DomAncestorVisitor} from '../../../src/utils/dom-ancestor-visitor';
+import {DomAncestorVisitor} from '#utils/dom-ancestor-visitor';
 
-describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
+describes.realWin('#DomAncestorVisitor', {amp: true}, (env) => {
   let doc, win;
   let domAncestorVisitor;
   beforeEach(() => {
@@ -31,7 +16,7 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
     parent.id = 'parent';
 
     let result = false;
-    const callback = el => {
+    const callback = (el) => {
       if (el.id == 'parent') {
         result = true;
         return true;
@@ -54,14 +39,14 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
     parent.appendChild(child);
 
     let result1 = false;
-    const callback1 = el => {
+    const callback1 = (el) => {
       if (el.id == 'parent') {
         result1 = true;
         return true;
       }
     };
     let result2 = false;
-    const callback2 = el => {
+    const callback2 = (el) => {
       if (el.id == 'parent') {
         result2 = true;
         return true;
@@ -88,7 +73,7 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
       elements.push(el);
     }
     domAncestorVisitor
-      .addVisitor(el => {
+      .addVisitor((el) => {
         el.classList.add('visited');
         if (el.id == '50') {
           return true;

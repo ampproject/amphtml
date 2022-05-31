@@ -1,39 +1,31 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
+import '../amp-ad';
+import * as fakeTimers from '@sinonjs/fake-timers';
+import {expect} from 'chai';
+
+import {adConfig} from '#ads/_config';
+
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {createElementWithAttributes} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import * as mode from '#core/mode';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
+import {stubServiceForDoc} from '#testing/helpers/service';
+
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
-import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {LayoutPriority} from '../../../../src/layout';
-import {Services} from '../../../../src/services';
-import {adConfig} from '../../../../ads/_config';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
-import {user} from '../../../../src/log';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
     type: '_ping_',
     width: 300,
     height: 250,
-    src: 'https://testsrc',
+    src: 'https://src.test',
     'data-valid': 'true',
     'data-width': '6666',
   });
@@ -46,7 +38,11 @@ function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
     return true;
   };
 
-  return new AmpAd3PImpl(ampAdElement);
+  const impl = new AmpAd3PImpl(ampAdElement);
+  // Initialize internal implementation structure since `isBuilt` is forced
+  // to return `true` above.
+  ampAdElement.impl_ = impl;
+  return impl;
 }
 
 describes.realWin(
@@ -54,11 +50,11 @@ describes.realWin(
   {
     amp: {
       runtimeOn: false,
-      canonicalUrl: 'https://canonical.url',
+      canonicalUrl: 'https://canonical.test',
     },
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let ad3p;
     let win;
     let registryBackup;
@@ -66,7 +62,7 @@ describes.realWin(
 
     beforeEach(() => {
       registryBackup = Object.create(null);
-      Object.keys(adConfig).forEach(k => {
+      Object.keys(adConfig).forEach((k) => {
         registryBackup[k] = adConfig[k];
         delete adConfig[k];
       });
@@ -82,7 +78,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      Object.keys(registryBackup).forEach(k => {
+      Object.keys(registryBackup).forEach((k) => {
         adConfig[k] = registryBackup[k];
       });
       registryBackup = null;
@@ -101,10 +97,12 @@ describes.realWin(
           expect(url).to.match(/frame(.max)?.html/);
           const data = JSON.parse(iframe.name).attributes;
           expect(data).to.have.property('type', '_ping_');
-          expect(data).to.have.property('src', 'https://testsrc');
+          expect(data).to.have.property('src', 'https://src.test');
           expect(data).to.have.property('width', 300);
           expect(data).to.have.property('height', 250);
-          expect(data._context.canonicalUrl).to.equal('https://canonical.url/');
+          expect(data._context.canonicalUrl).to.equal(
+            'https://canonical.test/'
+          );
         });
       });
 
@@ -119,7 +117,7 @@ describes.realWin(
         expect(newLayout).to.not.equal(secondLayout);
       });
 
-      it('should propagete CID to ad iframe', () => {
+      it('should propagate CID to ad iframe', () => {
         env.sandbox.stub(adCid, 'getAdCid').resolves('sentinel123');
 
         return ad3p.layoutCallback().then(() => {
@@ -144,7 +142,7 @@ describes.realWin(
         });
       });
 
-      it('should propagate consent state to ad iframe', () => {
+      it('should propagate consent values to ad iframe', () => {
         ad3p.element.setAttribute('data-block-on-consent', '');
         env.sandbox
           .stub(consent, 'getConsentPolicyState')
@@ -152,6 +150,9 @@ describes.realWin(
         env.sandbox
           .stub(consent, 'getConsentPolicySharedData')
           .resolves({a: 1, b: 2});
+        env.sandbox
+          .stub(consent, 'getConsentMetadata')
+          .resolves({consentStringType: 2, gdprApplies: true});
 
         return ad3p.layoutCallback().then(() => {
           const frame = ad3p.element.querySelector('iframe[src]');
@@ -163,6 +164,10 @@ describes.realWin(
             CONSENT_POLICY_STATE.SUFFICIENT
           );
           expect(data._context.consentSharedData).to.deep.equal({a: 1, b: 2});
+          expect(data._context.initialConsentMetadata).to.deep.equal({
+            consentStringType: 2,
+            gdprApplies: true,
+          });
         });
       });
 
@@ -174,6 +179,28 @@ describes.realWin(
           expect(data).to.be.ok;
           expect(data._context).to.be.ok;
           expect(data._context.initialConsentState).to.be.null;
+        });
+      });
+
+      it('should propagate pageViewId64 to ad iframe', () => {
+        stubServiceForDoc(
+          env.sandbox,
+          env.ampdoc,
+          'documentInfo',
+          'get'
+        ).returns({
+          get pageViewId64() {
+            return Promise.resolve('pageViewId64Stub');
+          },
+        });
+
+        return ad3p.layoutCallback().then(() => {
+          const frame = ad3p.element.querySelector('iframe[src]');
+          expect(frame).to.be.ok;
+          const data = JSON.parse(frame.name).attributes;
+          expect(data).to.be.ok;
+          expect(data._context).to.be.ok;
+          expect(data._context.pageViewId64).to.equal('pageViewId64Stub');
         });
       });
 
@@ -190,6 +217,7 @@ describes.realWin(
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
         const ad3p = createAmpAd(win);
+        ad3p.uiHandler = new AmpAdUIHandler(ad3p);
         adContainerElement.appendChild(ad3p.element);
 
         ad3p.onLayoutMeasure();
@@ -198,7 +226,7 @@ describes.realWin(
         });
       });
 
-      it('should allow position:fixed with whitelisted ad container', () => {
+      it('should allow position:fixed with an allowed ad container', () => {
         const adContainerElement = win.document.createElement('amp-sticky-ad');
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
@@ -227,7 +255,7 @@ describes.realWin(
       });
 
       it('should use custom path', () => {
-        const remoteUrl = 'https://example.com/boot/remote.html';
+        const remoteUrl = 'https://src.test/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -241,24 +269,6 @@ describes.realWin(
           ).to.be.ok;
         });
       });
-
-      it('should use default path if custom disabled', () => {
-        const meta = win.document.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/boot/remote.html');
-        win.document.head.appendChild(meta);
-        ad3p.config.remoteHTMLDisabled = true;
-        ad3p.onLayoutMeasure();
-        env.sandbox.stub(user(), 'error');
-        return ad3p.layoutCallback().then(() => {
-          expect(
-            win.document.querySelector(
-              'iframe[src="' +
-                'http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
-            )
-          ).to.be.ok;
-        });
-      });
     });
 
     describe('pause/resume', () => {
@@ -268,85 +278,69 @@ describes.realWin(
         });
 
         it('should noop pause', () => {
-          expect(() => ad3p.pauseCallback()).to.not.throw;
+          expect(() => ad3p.pauseCallback()).to.not.throw();
         });
 
         it('should noop resume', () => {
-          expect(() => ad3p.resumeCallback()).to.not.throw;
+          expect(() => ad3p.resumeCallback()).to.not.throw();
+        });
+      });
+
+      describe('during layout', () => {
+        it('sticky ad: should not layout w/o scroll', () => {
+          ad3p.element.setAttribute('sticky', 'bottom');
+          ad3p.buildCallback();
+          const maybeInitStickyAdSpy = env.sandbox.spy(
+            ad3p.uiHandler,
+            'maybeInitStickyAd'
+          );
+          expect(maybeInitStickyAdSpy).to.not.be.called;
+          Services.viewportForDoc(env.ampdoc).scrollObservable_.fire();
+          return Promise.resolve().then(() => {
+            expect(maybeInitStickyAdSpy).to.be.called;
+          });
         });
       });
 
       describe('after layout', () => {
-        let xOriginIframeHandler;
-
-        beforeEach(() => {
-          return ad3p.layoutCallback().then(() => {
-            xOriginIframeHandler = ad3p.xOriginIframeHandler_;
-          });
+        beforeEach(async () => {
+          await ad3p.layoutCallback();
         });
 
-        it('should require unlayout if iframe is not pausable', () => {
-          env.sandbox
-            ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
-            .returns(false);
+        it('should require unlayout', () => {
           expect(ad3p.unlayoutOnPause()).to.be.true;
-        });
-
-        it('should NOT require unlayout if iframe is pausable', () => {
-          window.sandbox
-            ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
-            .returns(true);
-          expect(ad3p.unlayoutOnPause()).to.be.false;
-        });
-
-        it('should pause iframe', () => {
-          const stub = window.sandbox./*OK*/ stub(
-            xOriginIframeHandler,
-            'setPaused'
-          );
-          ad3p.pauseCallback();
-          expect(stub).to.be.calledOnce.calledWith(true);
-        });
-
-        it('should resume iframe', () => {
-          const stub = window.sandbox./*OK*/ stub(
-            xOriginIframeHandler,
-            'setPaused'
-          );
-          ad3p.resumeCallback();
-          expect(stub).to.be.calledOnce.calledWith(false);
         });
       });
     });
 
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
+        env.sandbox.stub(mode, 'isProd').returns(true);
         ad3p.buildCallback();
         ad3p.preconnectCallback();
         return whenFirstVisible.then(() => {
           const fetches = win.document.querySelectorAll('link[rel=preload]');
           expect(fetches).to.have.length(2);
-          expect(
-            Array.from(fetches)
-              .map(link => link.href)
-              .sort()
-          ).to.jsonEqual([
-            'http://ads.localhost:9876/dist.3p/current/frame.max.html',
-            'http://ads.localhost:9876/dist.3p/current/integration.js',
-          ]);
+          expect(fetches[0].href).to.match(
+            /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
+          );
+          expect(fetches[1]).to.have.property(
+            'href',
+            'https://3p.ampproject.net/$internalRuntimeVersion$/vendor/_ping_.js'
+          );
 
           const preconnects = win.document.querySelectorAll(
             'link[rel=preconnect]'
           );
           expect(preconnects[preconnects.length - 1]).to.have.property(
             'href',
-            'https://testsrc/'
+            'https://src.test/'
           );
         });
       });
 
       it('should use remote html path for preload', () => {
-        const remoteUrl = 'https://example.com/boot/remote.html';
+        const remoteUrl = 'https://src.test/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -356,28 +350,7 @@ describes.realWin(
         return whenFirstVisible.then(() => {
           expect(
             Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              link => link.href == `${remoteUrl}?$internalRuntimeVersion$`
-            )
-          ).to.be.true;
-        });
-      });
-
-      it('should not use remote html path for preload if disabled', () => {
-        const meta = win.document.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/boot/remote.html');
-        win.document.head.appendChild(meta);
-        ad3p.config.remoteHTMLDisabled = true;
-        ad3p.buildCallback();
-        allowConsoleError(() => {
-          ad3p.preconnectCallback();
-        });
-        return whenFirstVisible.then(() => {
-          expect(
-            Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              link =>
-                link.href ==
-                'http://ads.localhost:9876/dist.3p/current/frame.max.html'
+              (link) => link.href == `${remoteUrl}?$internalRuntimeVersion$`
             )
           ).to.be.true;
         });
@@ -403,9 +376,9 @@ describes.realWin(
         }
       );
 
-      it('should only allow rendering one ad per second', function*() {
-        const clock = lolex.install({
-          target: win,
+      it('should only allow rendering one ad per second', async () => {
+        ad3p.getVsync().runScheduledTasks_();
+        const clock = fakeTimers.withGlobal(win).install({
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
         });
         const ad3p2 = createAmpAd(win);
@@ -418,14 +391,16 @@ describes.realWin(
 
         // Ad loading should only block 1s.
         clock.tick(999);
-        yield macroTask();
+        await macroTask();
         expect(ad3p2.renderOutsideViewport()).to.equal(false);
         clock.tick(2);
-        yield oneSecPromise;
+        await oneSecPromise;
+        clock.tick(2);
+        await macroTask();
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
       });
 
-      it('should only allow rendering one ad a time', function*() {
+      it('should only allow rendering one ad a time', function* () {
         const ad3p2 = createAmpAd(win);
         expect(ad3p.renderOutsideViewport()).to.equal(3);
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
@@ -668,7 +643,7 @@ describes.realWin(
   }
 );
 
-describe('#getLayoutPriority', () => {
+describes.sandboxed('#getLayoutPriority', {}, () => {
   describes.realWin(
     'with shadow AmpDoc',
     {
@@ -676,10 +651,10 @@ describe('#getLayoutPriority', () => {
         ampdoc: 'shadow',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 1', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority_Enum.METADATA);
       });
     }
   );
@@ -691,10 +666,10 @@ describe('#getLayoutPriority', () => {
         ampdoc: 'single',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 2', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
       });
     }
   );

@@ -1,28 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {rethrowAsync} from '#core/error';
+import {parseJson} from '#core/types/object/json';
 
-import {dict} from './../../../src/utils/object';
-import {getData} from './../../../src/event-helper';
-import {parseJson} from './../../../src/json';
+import {getData} from '#utils/event-helper';
+
 import {
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {rethrowAsync} from './../../../src/log';
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not
@@ -36,18 +21,17 @@ import {rethrowAsync} from './../../../src/log';
  */
 export function debounce(func, wait, immediate) {
   let timeout;
-  return function() {
-    const context = this,
-      args = arguments;
+  return function () {
+    const args = arguments;
     clearTimeout(timeout);
-    timeout = setTimeout(function() {
+    timeout = setTimeout(() => {
       timeout = null;
       if (!immediate) {
-        func.apply(context, args);
+        func.apply(this, args);
       }
     }, wait);
     if (immediate && !timeout) {
-      func.apply(context, args);
+      func.apply(this, args);
     }
   };
 }
@@ -55,7 +39,6 @@ export function debounce(func, wait, immediate) {
 /**
  *
  * Gets an element creator using a given document to create elements.
- * @export getElementCreator
  * @param {Document} document
  * @return {!Function}
  */
@@ -76,7 +59,7 @@ export function getElementCreator(document) {
  */
 function appendChildren(element, children) {
   children = !children ? [] : Array.isArray(children) ? children : [children];
-  children.forEach(child => element.appendChild(child));
+  children.forEach((child) => element.appendChild(child));
 }
 
 /**
@@ -124,11 +107,11 @@ function parsePlaybuzzEventData(data) {
     }
   } catch (e) {
     rethrowAsync('amp-playbuzz', err, e);
-    return dict({});
+    return {};
   }
 
   rethrowAsync('amp-playbuzz', err, data);
-  return dict({});
+  return {};
 }
 
 /**
@@ -139,23 +122,21 @@ export function composeEmbedUrl(options) {
   const embedUrl =
     options.itemUrl +
     '?' +
-    serializeQueryString(
-      dict({
-        'feed': true,
-        'implementation': 'amp',
-        'src': options.itemUrl,
-        'embedBy': '00000000-0000-0000-0000-000000000000',
-        'game': options.relativeUrl,
-        'comments': undefined,
-        'useComments': options.displayComments,
-        'gameInfo': options.displayItemInfo,
-        'useShares': options.displayShareBar,
-        'socialReferrer': false, //always false - will use parent url for sharing
-        'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
-        'parentUrl': options.parentUrl, //used for sharing
-        'parentHost': options.parentHost,
-      })
-    );
+    serializeQueryString({
+      'feed': true,
+      'implementation': 'amp',
+      'src': options.itemUrl,
+      'embedBy': '00000000-0000-0000-0000-000000000000',
+      'game': options.relativeUrl,
+      'comments': undefined,
+      'useComments': options.displayComments,
+      'gameInfo': options.displayItemInfo,
+      'useShares': options.displayShareBar,
+      'socialReferrer': false, //always false - will use parent url for sharing
+      'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
+      'parentUrl': options.parentUrl, //used for sharing
+      'parentHost': options.parentHost,
+    });
   return embedUrl;
 }
 
@@ -166,7 +147,8 @@ export function composeEmbedUrl(options) {
  * @return {string}
  */
 function sanitizeUrl(localtion) {
-  return removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  const url = removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  return url.replace(/(www\.)?playbuzz\.com/, 'app.ex.co/stories');
 }
 
 /**
@@ -177,7 +159,7 @@ function sanitizeUrl(localtion) {
  * @return {string}
  */
 export function composeItemSrcUrl(src, itemId) {
-  const DEFAULT_BASE_URL = '//www.playbuzz.com/';
+  const DEFAULT_BASE_URL = '//app.ex.co/stories/';
 
   const iframeSrcUrl = itemId
     ? DEFAULT_BASE_URL + 'item/' + itemId

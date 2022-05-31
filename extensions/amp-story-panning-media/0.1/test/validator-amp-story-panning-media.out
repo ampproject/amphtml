@@ -1,0 +1,76 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the amp-story-panning-media tags.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|    <head>
+|      <meta charset="utf-8">
+|      <title>amp-story-panning-media example</title>
+|      <link rel="canonical" href="example.html">
+|      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|      <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|      <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|      <script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
+|    </head>
+|    <body>
+|      <!-- Valid -->
+|      <amp-story
+|          standalone
+|          title="Demo Story"
+|          publisher="AMP Story"
+|          publisher-logo-src="example.com/logo.png"
+|          poster-portrait-src="example.com/poster.jpg">
+|        <amp-story-page id="cover">
+|          <amp-story-grid-layer template="fill">
+|            <amp-story-panning-media layout="fill">
+|            <amp-img
+|              layout="fill"
+|              width="4000"
+|              height="3059"
+|              src="img/conservatory-coords.jpg">
+|            </amp-img>
+|          </amp-story-panning-media>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|        <amp-story-page id="page-1">
+|          <amp-story-grid-layer template="fill">
+|            <amp-story-panning-media
+|              layout="fill"
+|              data-x="10%"
+|              data-y="-10%"
+|              data-zoom="2"
+|              lock-bounds
+|            >
+|            <amp-img
+|              layout="fill"
+|              width="4000"
+|              height="3059"
+|              src="img/conservatory-coords.jpg">
+|            </amp-img>
+|          </amp-story-panning-media>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|        <amp-story-page id="page-2">
+|          <amp-story-grid-layer template="fill">
+|            <amp-story-panning-media
+|              layout="fill"
+|              data-x="20.5%"
+|              data-y="-20.5%"
+|              data-zoom="2.5"
+|              lock-bounds
+|            >
+|            <amp-img
+|              layout="fill"
+|              width="4000"
+|              height="3059"
+|              src="img/conservatory-coords.jpg">
+|            </amp-img>
+|          </amp-story-panning-media>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|      </amp-story>
+|    </body>
+|  </html>

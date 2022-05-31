@@ -1,24 +1,9 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-autocomplete';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+
 import {AmpAutocomplete} from '../amp-autocomplete';
-import {Keys} from '../../../../src/utils/key-codes';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin(
   'amp-autocomplete unit tests',
@@ -27,19 +12,18 @@ describes.realWin(
       extensions: ['amp-autocomplete'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, impl;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      return buildAmpAutocomplete().then(ampAutocomplete => {
+      return buildAmpAutocomplete().then((ampAutocomplete) => {
         impl = ampAutocomplete;
       });
     });
 
     function buildAmpAutocomplete(wantSsr) {
-      const form = doc.createElement('form');
       const element = createElementWithAttributes(doc, 'amp-autocomplete', {
         layout: 'container',
         filter: 'substring',
@@ -54,8 +38,7 @@ describes.realWin(
       script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
       element.appendChild(script);
 
-      form.appendChild(element);
-      doc.body.appendChild(form);
+      doc.body.appendChild(element);
 
       if (wantSsr) {
         element.removeAttribute('filter');
@@ -75,13 +58,11 @@ describes.realWin(
 
     function getRenderedSuggestions() {
       const html = htmlFor(doc);
-      return html`
-        <div>
-          <div data-value="apple"></div>
-          <div data-value="mango"></div>
-          <div data-value="pear"></div>
-        </div>
-      `;
+      return [
+        html`<div data-value="apple"></div>`,
+        html`<div data-value="mango"></div>`,
+        html`<div data-value="pear"></div>`,
+      ];
     }
 
     describe('mutatedAttributesCallback_()', () => {
@@ -125,6 +106,29 @@ describes.realWin(
             expect(autocompleteSpy).to.have.been.calledWith(
               ['a', 'b', 'c'],
               ''
+            );
+          });
+      });
+
+      it('should mutate expected src value with "query" attribute', () => {
+        return impl
+          .layoutCallback()
+          .then(() => {
+            impl.queryKey_ = 'q';
+            impl.srcBase_ = 'https://www.data.com/';
+            expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://www.data.com/?q=abc'
+            );
+            return impl.mutatedAttributesCallback({
+              'src': 'https://example.com',
+            });
+          })
+          .then(() => {
+            expect(impl.srcBase_).to.equal('https://example.com');
+            expect(impl.generateSrc_('')).to.equal('https://example.com?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://example.com?q=abc'
             );
           });
       });
@@ -264,6 +268,82 @@ describes.realWin(
           .returns(Promise.resolve({rendered}));
         await impl.getRemoteData_();
         expect(ssrSpy).to.be.calledOnce;
+      });
+    });
+
+    describe('filterDataAndRenderResults_()', () => {
+      let renderSpy;
+
+      describe('with string data', () => {
+        beforeEach(() => {
+          // Use prefix filter for these tests.
+          impl.filter_ = 'prefix';
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
+        });
+
+        it('should resolve when data is []', async () => {
+          await impl.filterDataAndRenderResults_([], '');
+          expect(renderSpy).not.to.have.been.called;
+        });
+
+        it('should render data unchanged when input empty', async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], '');
+          expect(renderSpy).to.have.been.calledWith(
+            ['aa', 'bb', 'cc'],
+            impl.container_,
+            ''
+          );
+        });
+
+        it("should render no data when input doesn't match", async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], 'd');
+          expect(renderSpy).to.have.been.calledWith([], impl.container_, 'd');
+        });
+
+        it('should filter string data when input provided', async () => {
+          await impl.filterDataAndRenderResults_(['aa', 'bb', 'cc'], 'a');
+          expect(renderSpy).to.have.been.calledWith(
+            ['aa'],
+            impl.container_,
+            'a'
+          );
+        });
+      });
+
+      describe('with object data', () => {
+        beforeEach(async () => {
+          impl = await buildAmpAutocomplete(true);
+          impl.filter_ = 'prefix';
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
+          env.sandbox
+            .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
+            .returns(Promise.resolve(getRenderedSuggestions()));
+        });
+
+        it('should add objToJson property to objects', async () => {
+          const obj1 = {value: 'aa', any: 'zz'};
+          const obj2 = {value: 'bb', any: 'yy'};
+          await impl.filterDataAndRenderResults_([obj1, obj2], '');
+          expect(renderSpy).to.have.been.calledWithMatch(
+            [
+              {...obj1, objToJson: env.sandbox.match.func},
+              {...obj2, objToJson: env.sandbox.match.func},
+            ],
+            impl.container_,
+            ''
+          );
+        });
+
+        it('should add objToJson property to objects and filter', async () => {
+          const obj1 = {value: 'aa', any: 'zz'};
+          const obj2 = {value: 'bb', any: 'yy'};
+          await impl.filterDataAndRenderResults_([obj1, obj2], 'a');
+          expect(renderSpy).to.have.been.calledWithMatch(
+            [{...obj1, objToJson: env.sandbox.match.func}],
+            impl.container_,
+            'a'
+          );
+        });
       });
     });
 
@@ -424,18 +504,18 @@ describes.realWin(
       expect(impl.tokenPrefixMatch_(item, 'd c')).to.be.false;
     });
 
-    it('truncateToMaxEntries_() should truncate given data', () => {
+    it('truncateToMaxItems_() should truncate given data', () => {
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c', 'd']);
-      impl.maxEntries_ = 3;
+      impl.maxItems_ = 3;
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c']);
-      expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c'])
-      ).to.have.ordered.members(['a', 'b', 'c']);
-      expect(impl.truncateToMaxEntries_(['a', 'b'])).to.have.ordered.members([
+      expect(impl.truncateToMaxItems_(['a', 'b', 'c'])).to.have.ordered.members(
+        ['a', 'b', 'c']
+      );
+      expect(impl.truncateToMaxItems_(['a', 'b'])).to.have.ordered.members([
         'a',
         'b',
       ]);
@@ -537,7 +617,7 @@ describes.realWin(
     });
 
     describe('keyDownHandler_() on arrow keys', () => {
-      const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
+      const event = {key: Keys_Enum.DOWN_ARROW, preventDefault: () => {}};
       let displayInputSpy, updateActiveSpy, eventPreventSpy;
 
       beforeEach(() => {
@@ -600,7 +680,7 @@ describes.realWin(
         return impl
           .layoutCallback()
           .then(() => {
-            event.key = Keys.UP_ARROW;
+            event.key = Keys_Enum.UP_ARROW;
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -614,7 +694,7 @@ describes.realWin(
         return impl
           .layoutCallback()
           .then(() => {
-            event.key = Keys.UP_ARROW;
+            event.key = Keys_Enum.UP_ARROW;
             impl.activeIndex_ = 0;
             return impl.keyDownHandler_(event);
           })
@@ -628,7 +708,7 @@ describes.realWin(
 
     describe('keyDownHandler_() on Enter', () => {
       const event = {
-        key: Keys.ENTER,
+        key: Keys_Enum.ENTER,
         preventDefault: () => {},
         target: {textContent: 'hello'},
       };
@@ -678,7 +758,7 @@ describes.realWin(
             impl.activeElement_ = impl.createElementFromItem_('abc');
             env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
             env.sandbox
-              .stub(impl.binding_, 'shouldPreventFormSubmissionOnEnter')
+              .stub(impl.binding_, 'shouldPreventDefaultOnEnter')
               .returns(true);
             return impl.keyDownHandler_(event);
           })
@@ -692,7 +772,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Esc', () => {
-      const event = {key: Keys.ESCAPE, preventDefault: () => {}};
+      const event = {key: Keys_Enum.ESCAPE, preventDefault: () => {}};
       const displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
@@ -718,13 +798,13 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Tab', () => {
-      const event = {key: Keys.TAB, preventDefault: () => {}};
+      const event = {key: Keys_Enum.TAB, preventDefault: () => {}};
       const eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
       env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       return impl
         .layoutCallback()
         .then(() => {
@@ -738,7 +818,7 @@ describes.realWin(
     });
 
     describe('keyDownHandler_() on Backspace', () => {
-      const event = {key: Keys.BACKSPACE};
+      const event = {key: Keys_Enum.BACKSPACE};
 
       it('should set flag to true when suggest-first is present', () => {
         return impl
@@ -768,7 +848,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() and fallthrough on any other key', () => {
-      const event = {key: Keys.LEFT_ARROW};
+      const event = {key: Keys_Enum.LEFT_ARROW};
       return impl.layoutCallback().then(() => {
         return expect(impl.keyDownHandler_(event)).to.be.fulfilled;
       });
@@ -777,6 +857,9 @@ describes.realWin(
     it('should call toggleResultsHandler_()', () => {
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+      const form = doc.createElement('form');
+      form.appendChild(impl.element);
+      doc.body.appendChild(form);
       return impl
         .layoutCallback()
         .then(() => {
@@ -784,7 +867,7 @@ describes.realWin(
         })
         .then(() => {
           expect(toggleResultsSpy).to.have.been.calledOnce;
-          expect(impl.inputElement_.form.getAttribute('autocomplete')).to.equal(
+          expect(impl.getFormOrNull_().getAttribute('autocomplete')).to.equal(
             'off'
           );
           expect(resetSpy).not.to.have.been.called;
@@ -811,29 +894,67 @@ describes.realWin(
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledTwice;
-          expect(selectItemSpy).to.have.been.called;
+          expect(selectItemSpy).to.have.been.calledWith(null);
           expect(impl.inputElement_.value).to.equal('');
           mockEl = impl.createElementFromItem_('abc');
           return impl.selectHandler_({target: mockEl});
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledWith(mockEl);
-          expect(selectItemSpy).to.have.been.calledWith(mockEl);
+          expect(selectItemSpy).to.have.been.calledWith('abc');
           expect(impl.inputElement_.value).to.equal('abc');
         });
     });
 
-    it('should fire select event from selectItem_', () => {
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+    it('should set input based on data-value and select item from data-json', async () => {
+      const selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
+      const mockEl = impl.createElementFromItem_('abc');
+      const object = {a: 'aa', b: 'bb'};
+      mockEl.setAttribute('data-json', JSON.stringify(object));
+
+      await impl.layoutCallback();
+      await impl.selectHandler_({target: mockEl});
+
+      expect(impl.inputElement_.value).to.equal('abc');
+      expect(selectItemSpy).to.have.been.calledWith('abc', object);
+    });
+
+    it('should fire events from selectItem_', () => {
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
-      const mockEl = doc.createElement('div');
+      const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
       return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
-        mockEl.setAttribute('data-value', 'test');
-        impl.selectItem_(mockEl);
+        impl.selectItem_('test', {val: 'v'});
         expect(fireEventSpy).to.have.been.calledOnce;
-        expect(fireEventSpy).to.have.been.calledWith('test');
-        expect(triggerSpy).to.have.been.calledOnce;
+        expect(fireEventSpy).to.have.been.calledWith('test', {val: 'v'});
+        expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
+        expect(triggerSpy).to.have.been.calledWith(
+          impl.inputElement_,
+          'change'
+        );
+        expect(dispatchSpy).to.have.been.calledOnce;
+      });
+    });
+
+    it('should fire event if when selectedObject is null', () => {
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
+      const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
+      const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
+      return impl.layoutCallback().then(() => {
+        impl.toggleResults_(true);
+        impl.selectItem_('test', /* selectedObject= */ null);
+        expect(fireEventSpy).to.have.been.calledOnce;
+        expect(fireEventSpy).to.have.been.calledWith(
+          'test',
+          /* selectedObject= */ null
+        );
+        expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
+        expect(triggerSpy).to.have.been.calledWith(
+          impl.inputElement_,
+          'change'
+        );
+        expect(dispatchSpy).to.have.been.calledOnce;
       });
     });
 
@@ -928,8 +1049,8 @@ describes.realWin(
       impl = await buildAmpAutocomplete(true);
       const sourceData = ['apple', 'mango', 'pear'];
       const rendered = getRenderedSuggestions();
-      rendered.children[2].removeAttribute('data-value', '');
-      rendered.children[2].setAttribute('data-disabled', '');
+      rendered[2].removeAttribute('data-value', '');
+      rendered[2].setAttribute('data-disabled', '');
       env.sandbox
         .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(rendered));
@@ -957,7 +1078,7 @@ describes.realWin(
       });
 
       it('should throw error when fallback is not provided', () => {
-        return impl.layoutCallback().catch(e => {
+        return impl.layoutCallback().catch((e) => {
           expect(getDataSpy).to.have.been.calledOnce;
           expect(fallbackSpy).to.have.been.calledWith(e);
           expect(toggleFallbackSpy).not.to.have.been.called;
@@ -992,6 +1113,19 @@ describes.realWin(
         expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
         expect(impl.generateSrc_('abc')).to.equal(
           'https://www.data.com/?q=abc'
+        );
+      });
+    });
+
+    it('should preserve existing query parameters when generating src values from "query" attribute', () => {
+      return impl.layoutCallback().then(() => {
+        impl.queryKey_ = 'q';
+        impl.srcBase_ = 'https://www.data.com/?param=1';
+        expect(impl.generateSrc_('')).to.equal(
+          'https://www.data.com/?param=1&q='
+        );
+        expect(impl.generateSrc_('abc')).to.equal(
+          'https://www.data.com/?param=1&q=abc'
         );
       });
     });

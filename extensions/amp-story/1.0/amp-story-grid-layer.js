@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This is a layer that lays its children out into a grid. Its
  * implementation is based off of the CSS Grid Spec.
  *
@@ -26,9 +10,15 @@
  * </code>
  */
 
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from '#core/dom/style';
+
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {isPrerenderActivePage} from './prerender-active-page';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -54,77 +44,61 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
 const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
   SUPPORTED_CSS_GRID_ATTRIBUTES
 )
-  .map(key => `[${key}]`)
+  .map((key) => `[${key}]`)
   .join(',');
 
 /**
- * The attribute name for grid layer templates.
- * @private @const {string}
+ * @typedef {{
+ *  aspect-ratio: string,
+ *  scaling-factor: ?float,
+ * }}
  */
-const TEMPLATE_ATTRIBUTE_NAME = 'template';
-
-/**
- * A mapping of template attribute values to CSS class names.
- * @const {!Object<string, string>}
- */
-export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
-  'fill': 'i-amphtml-story-grid-template-fill',
-  'vertical': 'i-amphtml-story-grid-template-vertical',
-  'horizontal': 'i-amphtml-story-grid-template-horizontal',
-  'thirds': 'i-amphtml-story-grid-template-thirds',
-};
+export let PresetDetails;
 
 /**
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
+  /** @override  */
+  static prerenderAllowed(element) {
+    return isPrerenderActivePage(element.parentElement);
+  }
+
+  /** @override  */
+  static previewAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {boolean} */
-    this.prerenderAllowed_ = false;
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    // Only prerender if child of the first page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type amp-story-grid-layer'
-    );
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.applyTemplateClassName_();
+    this.applyAspectRatioAttributes_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return this.prerenderAllowed_;
-  }
-
   /**
-   * Applies internal CSS class names for the template attribute, so that styles
-   * can use the class name instead of compound
-   * amp-story-grid-layer[template="..."] selectors, since the latter increases
-   * CSS specificity and can prevent users from being able to override styles.
+   * Grab the aspect-ratio attribute and apply to CSS variable as a fraction.
    * @private
    */
-  applyTemplateClassName_() {
-    if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
-      const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
-      this.element.classList.add(templateClassName);
+  applyAspectRatioAttributes_() {
+    if (!this.element.hasAttribute('aspect-ratio')) {
+      return;
     }
+    setImportantStyles(this.element, {
+      '--aspect-ratio': this.element
+        .getAttribute('aspect-ratio')
+        .replace(':', '/'),
+    });
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for descendants of the
+   * Copies the allowlisted CSS grid styles for descendants of the
    * <amp-story-grid-layer> element.
    * @private
    */
@@ -134,13 +108,13 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
     );
 
-    Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
+    elementsToUpgradeStyles.forEach((element) => {
       this.setCssGridStyles_(element);
     });
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
+   * Copies the allowlisted CSS grid styles for the <amp-story-grid-layer>
    * element itself.
    * @private
    */
@@ -150,7 +124,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /**
    * Copies the values of an element's attributes to its styles, if the
-   * attributes/properties are in the whitelist.
+   * attributes/properties are in the allowlist.
    *
    * @param {!Element} element The element whose styles should be copied from
    *     its attributes.

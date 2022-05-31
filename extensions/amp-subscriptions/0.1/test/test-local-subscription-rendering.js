@@ -1,27 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
 import {Action} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
 import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
+describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
   let win, doc, ampdoc;
   let renderer;
   let dialog, serviceAdapter;
@@ -38,9 +25,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialog,
       serviceAdapter
     );
-    const serviceIds = ['service1', 'service2'];
+    const platformKeys = ['platformKey1', 'platformKey2'];
     entitlementsForService1 = new Entitlement({
-      service: serviceIds[0],
+      service: platformKeys[0],
       granted: false,
       grantReason: null,
     });
@@ -79,7 +66,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         'subscriptions-decorate': '',
       });
       elements = [actions1, actions2];
-      elements.forEach(element => {
+      elements.forEach((element) => {
         doc.body.appendChild(element);
       });
     });
@@ -96,7 +83,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     }
 
     function displayed(array) {
-      elements.forEach(element => {
+      elements.forEach((element) => {
         const shouldBeDisplayed = array.includes(element);
         expect(isDisplayed(element)).to.equal(
           shouldBeDisplayed,
@@ -134,7 +121,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     let dialog0, dialog1, dialog2, dialog3;
 
     beforeEach(() => {
-      templatesMock = env.sandbox.mock(Services.templatesFor(win));
+      templatesMock = env.sandbox.mock(Services.templatesForDoc(ampdoc));
       dialogMock = env.sandbox.mock(renderer.dialog_);
       dialog0 = createElementWithAttributes(doc, 'div', {
         'id': 'dialog0',
@@ -174,7 +161,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialogMock
         .expects('open')
         .withExactArgs(
-          env.sandbox.match(arg => {
+          env.sandbox.match((arg) => {
             content = arg;
             return true;
           }),
@@ -202,7 +189,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialogMock
         .expects('open')
         .withExactArgs(
-          env.sandbox.match(arg => {
+          env.sandbox.match((arg) => {
             content = arg;
             return true;
           }),

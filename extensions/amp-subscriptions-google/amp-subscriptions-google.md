@@ -6,53 +6,7 @@ teaser:
   text: Implements subscription-style access protocol for Subscribe with Google.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-subscriptions-google
-
-Implements subscription-style access protocol for Subscribe with Google.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Beta.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-subscriptions-google"
-        src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty">
-      <strong>
-        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
-          Supported Layouts
-        </a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Introduction
 
@@ -94,6 +48,53 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
 </head>
 ```
 
+## Real Time Config (rtc)
+
+Real Time Config allows the publisher to specify the sku or sku's for a subscribe button at page load time. The allows user specific offers, time limited offers etc.
+
+To enable rtc add a `skuMapUrl` to the `subscribe.google.com` service.
+
+```html
+<script type="application/json" id="amp-subscriptions">
+  {
+    "services": [
+      {
+        // Local service configuration
+      },
+      {
+        "serviceId": "subscribe.google.com"
+        "skuMapUrl": "https://example.com/sky/map/endpoint"
+      }
+    ]
+  }
+</script>
+```
+
+The `skuMapUrl` is called on page load. It should be a map of element id's and configurations:
+
+```JSON
+{
+  "subscribe.google.com": {
+    // button that goes straight to purchase flow
+    "elementId": {
+      "sku": "sku"
+     },
+    // button that launches an offer carousel
+    "anotherElementId": {
+      "carouselOptions": {
+          "skus": ["basic", "premium_monthly"],
+      }
+    }
+  }
+}
+```
+
+Each configuration corresponds to the sku or skus associated with the button.
+
+To enable a button for rtc add the `subscriptions-google-rtc` attribute. If this attribute is present the button will be disabled until the skuMapUrl request is completed. Once the skuMap is resolved the `subscriptions-google-rtc` attribute will be removed and `subscriptions-google-rtc-set` attribute added. These attributes may be used for CSS styling, however it is recommended that the button not be hidden if it will cause a page re-layout when displayed.
+
+Note: The `skuMapUrl` can be the same as the local service auth url as the JSON objects do not conflict. If the auth url is cacheable (`max-age=1` is sufficient) this will allow in a single request to the server to resove authentication and mapping.
+
 ## Entitlements pingback
 
 As described in [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint), if a `pingbackUrl` is specified by the local service, the entitlements response returned by the "winning" service will be sent to the `pingbackUrl` via a POST request.
@@ -115,7 +116,7 @@ If `subscribe.google.com` is the "winning" service, the request to the `pingback
 }
 ```
 
-Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
+Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/main/docs/entitlements-flow.md#entitlement-response) format.
 
 ## Example with markup
 
@@ -136,10 +137,10 @@ Where `data` matches the [entitlements response](https://github.com/subscription
     {
       "services": [
         {
-           // Local service configuration
+          // Local service configuration
           "authorizationUrl": "https://...",
           "pingbackUrl": "https://...",
-          "actions":{
+          "actions": {
             "login": "https://...",
             "subscribe": "https://..."
           }

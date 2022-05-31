@@ -14,11 +14,14 @@
  * the License.
  */
 
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+
+import {dev, user, userAssert} from '#utils/log';
+
 import {CONFIG_TAG, TAG} from './vars';
-import {dev, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {parseUrlDeprecated} from '../../../src/url';
 import {webPushServiceForDoc} from './web-push-service';
+
+import {parseUrlDeprecated} from '../../../src/url';
 
 /** @enum {string} */
 export const WebPushConfigAttributes = {
@@ -151,7 +154,7 @@ export class WebPushConfig extends AMP.BaseElement {
     this.validate();
     const config = this.parseConfig();
 
-    webPushServiceForDoc(this.element).then(service => {
+    webPushServiceForDoc(this.element).then((service) => {
       service.start(config).catch(() => {});
     });
 
@@ -207,7 +210,7 @@ export class WebPushConfig extends AMP.BaseElement {
 
     this.setWidgetDisabled_(widget, true);
 
-    webPushServiceForDoc(this.element).then(service => {
+    webPushServiceForDoc(this.element).then((service) => {
       service
         .subscribe(() => {
           // On popup closed
@@ -239,7 +242,7 @@ export class WebPushConfig extends AMP.BaseElement {
 
     this.setWidgetDisabled_(widget, true);
 
-    webPushServiceForDoc(this.element).then(service => {
+    webPushServiceForDoc(this.element).then((service) => {
       service.unsubscribe().then(() => {
         this.setWidgetDisabled_(widget, false);
       });

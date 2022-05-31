@@ -1,31 +1,17 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Provides a services to preconnect to a url to warm up the
  * connection before the real request can be made.
  */
 
-import {Services} from './services';
-import {dev} from './log';
-import {htmlFor} from './static-template';
+import {whenDocumentComplete} from '#core/document/ready';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
+
+import {registerServiceBuilder} from './service-helpers';
 import {parseUrlDeprecated} from './url';
-import {registerServiceBuilder} from './service';
-import {startsWith} from './string';
-import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -112,6 +98,13 @@ export class PreconnectService {
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
+   *
+   * It is safe to call this method during prerender with any value,
+   * because no action will be performed until the doc is visible.
+   *
+   * It is safe to call this method with non-HTTP(s) URLs as other URLs
+   * are skipped.
+   *
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
@@ -193,6 +186,12 @@ export class PreconnectService {
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
+   * It is safe to call this method during prerender with any value,
+   * because no action will be performed until the doc is visible.
+   *
+   * It is safe to call this method with non-HTTP(s) URLs as other URLs
+   * are skipped.
+   *
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {string=} opt_preloadAs
@@ -254,7 +253,7 @@ export class PreconnectService {
    * @return {boolean}
    */
   isInterestingUrl_(url) {
-    if (startsWith(url, 'https:') || startsWith(url, 'http:')) {
+    if (url.startsWith('https:') || url.startsWith('http:')) {
       return true;
     }
     return false;

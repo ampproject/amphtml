@@ -1,26 +1,11 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {installServiceInEmbedScope} from '../../../src/service';
-import {scopedQuerySelector, waitForChild} from '../../../src/dom';
-import {toArray} from '../../../src/types';
-import {whenDocumentReady} from '../../../src/document-ready';
+import {waitForChild} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {scopedQuerySelector} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {hasOwn} from '#core/types/object';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
 
 /**
  * CSS class used to deactivate animations.
@@ -133,18 +118,13 @@ function setCounter(receiver, counterName, counterValue) {
 /**
  * AMP GWD animation runtime service.
  * @implements {../../../src/service.Disposable}
- * @implements {../../../src/service.EmbeddableService}
  */
 export class AmpGwdRuntimeService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc An AMP document
    *     with GWD content in which to install the animation runtime controller.
-   * @param {!Window=} opt_win If in a FIE, the FIE window in which to install
-   *     the service.
    */
-  constructor(ampdoc, opt_win) {
-    // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -153,7 +133,7 @@ export class AmpGwdRuntimeService {
      * provided AmpDoc's window when in FIE.
      * @const @private {!Window}
      */
-    this.win_ = opt_win || ampdoc.win;
+    this.win_ = ampdoc.win;
 
     /**
      * The GWD ad document root. This will differ from the top-level AmpDoc's
@@ -166,10 +146,7 @@ export class AmpGwdRuntimeService {
     this.boundOnAnimationEndEvent_ = this.onAnimationEndEvent_.bind(this);
 
     // Initialize once the body and DOM is ready.
-    const docReadyPromise = opt_win
-      ? whenDocumentReady(this.doc_)
-      : ampdoc.whenReady();
-    docReadyPromise.then(() => {
+    ampdoc.whenReady().then(() => {
       // If the page deck is not yet in the DOM, wait until it is. The page deck
       // must be present in the body before the runtime can be initialized, as
       // it must activate animations on the first page. It's not clear whether
@@ -187,19 +164,6 @@ export class AmpGwdRuntimeService {
         this.initialize_.bind(this)
       );
     });
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      GWD_SERVICE_NAME,
-      new AmpGwdRuntimeService(ampdoc, embedWin)
-    );
   }
 
   /**
@@ -302,7 +266,7 @@ export class AmpGwdRuntimeService {
     // Reset other animation state on the page and all descendants.
     [pageEl]
       .concat(toArray(pageEl.querySelectorAll('*')))
-      .forEach(el => this.resetAnimatedElement_(el));
+      .forEach((el) => this.resetAnimatedElement_(el));
   }
 
   /**
@@ -522,10 +486,10 @@ export class AmpGwdRuntimeService {
       return;
     }
 
-    const detail = dict({
+    const detail = {
       'eventName': userEventName,
       'sourceEvent': event,
-    });
+    };
     const timelineEvent = createCustomEvent(
       this.win_,
       GWD_TIMELINE_EVENT,

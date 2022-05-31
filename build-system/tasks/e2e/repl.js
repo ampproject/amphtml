@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const READY_MESSAGE = 'e2e repl ready';
 const CONTINUE_MESSAGE = 'cleaning up repl';
 
@@ -26,8 +10,8 @@ const REPL_INFINITE_TIMEOUT = 86400000; // milliseconds in a day
  *    This will cause the test to wait indefinitely when you want to execute
  *    commands in the DevTools console.
  *    You may have to change `async() => {}` to `async function() {}`
- * 2. Run gulp with Node debugging enabled:
- *   `node --inspect-brk $(which gulp) e2e ...`
+ * 2. Run amp with Node debugging enabled:
+ *   `node --inspect-brk $(which amp) e2e ...`
  * 3. Open Chrome DevTools and open the Node debugger
  * 4. Wait for the `READY_MESSAGE` to appear in the console
  * 5. You are now free to execute code in the console using the controller API.
@@ -46,7 +30,7 @@ function installRepl(global, env) {
    * @param {*} mochaThis
    * @return {!Promise}
    */
-  global.repl = function(mochaThis) {
+  global.repl = function (mochaThis) {
     mochaThis.timeout(REPL_INFINITE_TIMEOUT);
 
     const {controller} = env;
@@ -55,7 +39,7 @@ function installRepl(global, env) {
     global.repl.continue = replContinue;
 
     if (!replPromise) {
-      replPromise = new Promise(resolve => {
+      replPromise = new Promise((resolve) => {
         replResolve = resolve;
       });
     }
@@ -65,6 +49,9 @@ function installRepl(global, env) {
     return replPromise;
   };
 
+  /**
+   * Continues execution while debugging.
+   */
   function replContinue() {
     if (!replResolve) {
       return;
@@ -81,6 +68,9 @@ function installRepl(global, env) {
   }
 }
 
+/**
+ * Ends the debugging session.
+ */
 function uninstallRepl() {
   delete global.repl;
 }

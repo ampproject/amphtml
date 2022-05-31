@@ -1,22 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../services';
-import {dev} from '../log';
-import {dict} from '../utils/object';
+import {dev} from '#utils/log';
+
 import {getSourceOrigin} from '../url';
 
 /**
@@ -85,7 +70,7 @@ export class CacheCidApi {
       this.publisherCidPromise_ = this.fetchCid_(url);
     }
 
-    return this.publisherCidPromise_.then(publisherCid => {
+    return this.publisherCidPromise_.then((publisherCid) => {
       return publisherCid ? this.scopeCid_(publisherCid, scope) : null;
     });
   }
@@ -97,9 +82,9 @@ export class CacheCidApi {
    * @return {!Promise<?string>}
    */
   fetchCid_(url, useAlternate = true) {
-    const payload = dict({
+    const payload = {
       'publisherOrigin': getSourceOrigin(this.ampdoc_.win.location),
-    });
+    };
 
     // Make the XHR request to the cache endpoint.
     const timeoutMessage = 'fetchCidTimeout';
@@ -115,8 +100,8 @@ export class CacheCidApi {
         }),
         timeoutMessage
       )
-      .then(res => {
-        return res.json().then(response => {
+      .then((res) => {
+        return res.json().then((response) => {
           if (response['optOut']) {
             return null;
           }
@@ -130,9 +115,9 @@ export class CacheCidApi {
           return cid;
         });
       })
-      .catch(e => {
+      .catch((e) => {
         if (e && e.response) {
-          e.response.json().then(res => {
+          e.response.json().then((res) => {
             dev().error(TAG_, JSON.stringify(res));
           });
         } else {
@@ -157,7 +142,7 @@ export class CacheCidApi {
     const text = publisherCid + ';' + scope;
     return Services.cryptoFor(this.ampdoc_.win)
       .sha384Base64(text)
-      .then(enc => {
+      .then((enc) => {
         return 'amp-' + enc;
       });
   }

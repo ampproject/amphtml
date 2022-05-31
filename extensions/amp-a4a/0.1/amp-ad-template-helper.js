@@ -1,28 +1,18 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {LruCache} from '#core/data-structures/lru-cache';
+import {createElementWithAttributes} from '#core/dom';
+import {isArray} from '#core/types';
 
-import {LruCache} from '../../../src/utils/lru-cache';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {Services} from '#service';
+
+import {devAssert} from '#utils/log';
+
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service-helpers';
 import {parseUrlDeprecated} from '../../../src/url';
-import {urls} from '../../../src/config';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -34,13 +24,15 @@ const TEMPLATE_CORS_CONFIG = {
   credentials: 'omit',
 };
 
+const SERVICE_ID = 'AmpAdTemplateHelper';
+
 export class AmpAdTemplateHelper {
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @private {!Window} */
-    this.win_ = win;
+  constructor(ampdoc) {
+    /** @private @const */
+    this.parentAmpdoc_ = ampdoc;
 
     /** @private {LruCache} */
     this.cache_ = new LruCache(5);
@@ -53,16 +45,17 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
+    const {win} = this.parentAmpdoc_;
     const proxyUrl =
-      getMode(this.win_).localDev && !isNaN(templateUrl)
-        ? `http://ads.localhost:${this.win_.location.port}` +
+      getMode(win).localDev && !isNaN(templateUrl)
+        ? `http://ads.localhost:${win.location.port}` +
           `/a4a_template/adzerk/${templateUrl}`
         : this.getTemplateProxyUrl_(templateUrl);
     let templatePromise = this.cache_.get(proxyUrl);
     if (!templatePromise) {
-      templatePromise = Services.xhrFor(this.win_)
+      templatePromise = Services.xhrFor(win)
         .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
-        .then(response => response.text());
+        .then((response) => response.text());
       this.cache_.put(proxyUrl, templatePromise);
     }
     devAssert(templatePromise);
@@ -75,7 +68,7 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    return Services.templatesFor(this.win_).findAndRenderTemplate(
+    return Services.templatesForDoc(element).findAndRenderTemplate(
       element,
       templateValues
     );
@@ -86,9 +79,9 @@ export class AmpAdTemplateHelper {
    * @param {!Array|!JsonObject} analyticsValue
    */
   insertAnalytics(element, analyticsValue) {
-    analyticsValue = /**@type {!Array}*/ (isArray(analyticsValue)
-      ? analyticsValue
-      : [analyticsValue]);
+    analyticsValue = /**@type {!Array}*/ (
+      isArray(analyticsValue) ? analyticsValue : [analyticsValue]
+    );
     for (let i = 0; i < analyticsValue.length; i++) {
       const config = analyticsValue[i];
       const analyticsEle = element.ownerDocument.createElement('amp-analytics');
@@ -102,9 +95,9 @@ export class AmpAdTemplateHelper {
         const scriptElem = createElementWithAttributes(
           element.ownerDocument,
           'script',
-          dict({
+          {
             'type': 'application/json',
-          })
+          }
         );
         scriptElem.textContent = JSON.stringify(config['inline']);
         analyticsEle.appendChild(scriptElem);
@@ -131,4 +124,15 @@ export class AmpAdTemplateHelper {
           loc.hostname +
           loc.pathname;
   }
+}
+
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} target
+ * @return {!AmpAdTemplateHelper}
+ */
+export function getAmpAdTemplateHelper(target) {
+  registerServiceBuilderForDoc(target, SERVICE_ID, AmpAdTemplateHelper);
+  return /** @type {!AmpAdTemplateHelper} */ (
+    getServiceForDoc(target, SERVICE_ID)
+  );
 }

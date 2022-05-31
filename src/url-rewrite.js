@@ -1,19 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseSrcset} from '#core/dom/srcset';
 
+import {user} from '#utils/log';
+
+import * as urls from './config/urls';
 import {
   checkCorsUrl,
   getSourceUrl,
@@ -21,10 +10,6 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from './url';
-import {parseSrcset} from './srcset';
-import {startsWith} from './string';
-import {urls} from './config';
-import {user} from './log';
 
 const TAG = 'URL-REWRITE';
 
@@ -88,7 +73,6 @@ export function rewriteAttributesForElement(
  * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @return {string}
- * @private
  * @visibleForTesting
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
@@ -131,7 +115,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrlDeprecated(getSourceUrl(windowLocation));
 
-  if (attrName == 'href' && !startsWith(attrValue, '#')) {
+  if (attrName == 'href' && !attrValue.startsWith('#')) {
     return resolveRelativeUrl(attrValue, baseUrl);
   }
 
@@ -152,7 +136,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
       user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
-    return srcset.stringify(url =>
+    return srcset.stringify((url) =>
       resolveImageUrlAttr(url, baseUrl, isProxyHost)
     );
   }

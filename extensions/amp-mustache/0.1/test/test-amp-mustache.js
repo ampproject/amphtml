@@ -1,23 +1,8 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import mustache from '#third_party/mustache/mustache';
 
 import * as sanitizer from '../../../../src/sanitizer';
-import * as service from '../../../../src/service';
+import * as service from '../../../../src/service-helpers';
 import {AmpMustache} from '../amp-mustache';
-import mustache from '../../../../third_party/mustache/mustache';
 
 describes.repeated(
   'amp-mustache 0.1',
@@ -27,16 +12,16 @@ describes.repeated(
     },
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
-  (name, variant) => {
+  (name, variant, env) => {
     let viewerCanRenderTemplates = false;
 
     beforeEach(() => {
-      const getServiceForDocStub = window.sandbox.stub(
+      const getServiceForDocStub = env.sandbox.stub(
         service,
         'getServiceForDoc'
       );
       getServiceForDocStub.returns({
-        hasCapability: unused => viewerCanRenderTemplates,
+        hasCapability: (unused) => viewerCanRenderTemplates,
       });
     });
 
@@ -56,16 +41,16 @@ describes.repeated(
       template = new AmpMustache(templateElement);
       isTemplateTypeScript = templateType == 'script';
       isTemplateType = templateType == 'template';
-      textContentSetup = contents => {
+      textContentSetup = (contents) => {
         if (isTemplateType) {
           templateElement.content.textContent = contents;
         } else if (isTemplateTypeScript) {
           templateElement.textContent = contents;
         }
       };
-      innerHtmlSetup = html => {
+      innerHtmlSetup = (html) => {
         if (isTemplateType) {
-          templateElement./*OK*/ innerHTML = html;
+          templateElement.innerHTML = html;
         } else if (isTemplateTypeScript) {
           templateElement.textContent = html;
         }
@@ -77,25 +62,30 @@ describes.repeated(
     it('should render', () => {
       textContentSetup('value = {{value}}');
       template.compileCallback();
-      const result = template.render({value: 'abc'});
-      expect(result./*OK*/ innerHTML).to.equal('value = abc');
+      const data = {value: 'abc'};
+      expect(template.render(data).innerHTML).to.equal('value = abc');
+      expect(template.renderAsString(data)).to.equal('value = abc');
     });
 
     it('should render {{.}} from string', () => {
       textContentSetup('value = {{.}}');
       template.compileCallback();
-      const result = template.render('abc');
-      expect(result./*OK*/ innerHTML).to.equal('value = abc');
+      const data = 'abc';
+      expect(template.render(data).innerHTML).to.equal('value = abc');
+      expect(template.renderAsString(data)).to.equal('value = abc');
     });
 
     it('should sanitize output', () => {
       innerHtmlSetup('value = <a href="{{value}}">abc</a>');
       template.compileCallback();
+      const data = {
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      };
       allowConsoleError(() => {
-        const result = template.render({
-          value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-        });
-        expect(result./*OK*/ innerHTML).to.equal(
+        expect(template.render(data).innerHTML).to.equal(
+          'value = <a target="_top">abc</a>'
+        );
+        expect(template.renderAsString(data)).to.equal(
           'value = <a target="_top">abc</a>'
         );
       });
@@ -106,12 +96,31 @@ describes.repeated(
         'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>'
       );
       template.compileCallback();
-      const result = template.render({
-        value: 'a',
-      });
-      expect(result./*OK*/ innerHTML).to.not.equal(
+      const data = {value: 'a'};
+      expect(template.render(data).innerHTML).to.not.equal(
         '<a href="javascript:alert(0)">abc</a>'
       );
+      expect(template.renderAsString(data)).to.not.equal(
+        '<a href="javascript:alert(0)">abc</a>'
+      );
+    });
+
+    it('should unwrap output on compile', () => {
+      innerHtmlSetup('<a>abc</a>');
+      template.compileCallback();
+      const result = template.render({});
+      expect(result.tagName).to.equal('A');
+      expect(result.innerHTML).to.equal('abc');
+      expect(template.renderAsString({})).to.equal('<a>abc</a>');
+    });
+
+    it('should render fragments', () => {
+      innerHtmlSetup('<a>abc</a><a>def</a>');
+      template.compileCallback();
+      const result = template.render({});
+      expect(result.tagName).to.equal('DIV');
+      expect(result.innerHTML).to.equal('<a>abc</a><a>def</a>');
+      expect(template.renderAsString({})).to.equal('<a>abc</a><a>def</a>');
     });
 
     describe('Sanitizing data- attributes', () => {
@@ -151,7 +160,7 @@ describes.repeated(
           const result = template.render({
             value: /*eslint no-script-url: 0*/ 'javascript:alert();',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
+          expect(result.innerHTML).to.equal(
             'value = <a data-="" style="color:red;" target="_top">abc</a>'
           );
         });
@@ -163,7 +172,7 @@ describes.repeated(
         const result = template.render({
           value: 'https://google.com/',
         });
-        expect(result./*OK*/ innerHTML).to.equal(
+        expect(result.innerHTML).to.equal(
           'value = <a data-=""' +
             ' href="https://google.com/" target="_top">abc</a>'
         );
@@ -181,7 +190,7 @@ describes.repeated(
             value: 'myid',
             invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
+          expect(result.innerHTML).to.equal(
             'value = <a data-my-id="myid">abc</a>'
           );
         });
@@ -201,7 +210,7 @@ describes.repeated(
             value: 'myid',
             invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
+          expect(result.innerHTML).to.equal(
             'value = <input value="myid" type="text">'
           );
         });
@@ -210,10 +219,11 @@ describes.repeated(
       it('should allow rendering textarea', () => {
         innerHtmlSetup('value = <textarea>{{value}}</textarea>');
         template.compileCallback();
-        const result = template.render({
-          value: 'Cool story bro.',
-        });
-        expect(result./*OK*/ innerHTML).to.equal(
+        const data = {value: 'Cool story bro.'};
+        expect(template.render(data).innerHTML).to.equal(
+          'value = <textarea>Cool story bro.</textarea>'
+        );
+        expect(template.renderAsString(data)).to.equal(
           'value = <textarea>Cool story bro.</textarea>'
         );
       });
@@ -226,9 +236,7 @@ describes.repeated(
             value: 'myid',
             type: 'image',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
-            'value = <input value="myid">'
-          );
+          expect(result.innerHTML).to.equal('value = <input value="myid">');
         });
 
         allowConsoleError(() => {
@@ -236,16 +244,14 @@ describes.repeated(
             value: 'myid',
             type: 'button',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
-            'value = <input value="myid">'
-          );
+          expect(result.innerHTML).to.equal('value = <input value="myid">');
         });
 
         const fileResult = template.render({
           value: 'myid',
           type: 'file',
         });
-        expect(fileResult./*OK*/ innerHTML).to.equal(
+        expect(fileResult.innerHTML).to.equal(
           'value = <input value="myid" type="file">'
         );
 
@@ -253,7 +259,7 @@ describes.repeated(
           value: 'myid',
           type: 'password',
         });
-        expect(passwordResult./*OK*/ innerHTML).to.equal(
+        expect(passwordResult.innerHTML).to.equal(
           'value = <input value="myid" type="password">'
         );
       });
@@ -265,7 +271,7 @@ describes.repeated(
           value: 'myid',
           type: 'text',
         });
-        expect(result./*OK*/ innerHTML).to.equal(
+        expect(result.innerHTML).to.equal(
           'value = <input value="myid" type="text">'
         );
       });
@@ -283,9 +289,7 @@ describes.repeated(
           const result = template.render({
             value: 'myid',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
-            'value = <input value="myid">'
-          );
+          expect(result.innerHTML).to.equal('value = <input value="myid">');
         });
       });
 
@@ -298,7 +302,7 @@ describes.repeated(
         const result = template.render({
           value: 'myid',
         });
-        expect(result./*OK*/ innerHTML).to.equal(
+        expect(result.innerHTML).to.equal(
           'value = <form><input value="myid"></form><input value="hello">'
         );
       });
@@ -313,7 +317,7 @@ describes.repeated(
         );
         template.compileCallback();
         const result = template.render({});
-        expect(result./*OK*/ innerHTML).to.equal(
+        expect(result.innerHTML).to.equal(
           'text before a template ' +
             '<template type="amp-mustache">text inside template</template> ' +
             'text after a template'
@@ -329,7 +333,7 @@ describes.repeated(
           );
           template.compileCallback();
           const result = template.render({});
-          expect(result./*OK*/ innerHTML).to.equal(
+          expect(result.innerHTML).to.equal(
             'text before a template  text after a template'
           );
         });
@@ -346,7 +350,7 @@ describes.repeated(
             mutualValue: 'Mutual',
             nestedOnlyValue: 'Nested',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
+          expect(result.innerHTML).to.equal(
             'outer: Outer Mutual ' +
               '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
               ' {{mutualValue}}</template>'
@@ -355,7 +359,7 @@ describes.repeated(
 
         it('should compile and render nested templates when invoked', () => {
           const outerTemplateElement = document.createElement('template');
-          outerTemplateElement./*OK*/ innerHTML =
+          outerTemplateElement.innerHTML =
             'outer: {{value}} ' +
             '<template type="amp-mustache">nested: {{value}}</template>';
           const outerTemplate = new AmpMustache(outerTemplateElement);
@@ -369,12 +373,12 @@ describes.repeated(
           const nestedResult = nestedTemplate.render({
             value: 'Nested',
           });
-          expect(nestedResult./*OK*/ innerHTML).to.equal('nested: Nested');
+          expect(nestedResult.innerHTML).to.equal('nested: Nested');
         });
 
         it('should sanitize the inner template when it gets rendered', () => {
           const outerTemplateElement = document.createElement('template');
-          outerTemplateElement./*OK*/ innerHTML =
+          outerTemplateElement.innerHTML =
             'outer: {{value}} ' +
             '<template type="amp-mustache">' +
             '<div onclick="javascript:alert(\'I am evil\')">nested</div>: ' +
@@ -391,7 +395,7 @@ describes.repeated(
             const nestedResult = nestedTemplate.render({
               value: 'Nested',
             });
-            expect(nestedResult./*OK*/ innerHTML).to.equal(
+            expect(nestedResult.innerHTML).to.equal(
               '<div>nested</div>: Nested'
             );
           });
@@ -401,7 +405,7 @@ describes.repeated(
           'should not allow users to pass data having key that starts with ' +
             '__AMP_NESTED_TEMPLATE_0 when there is a nested template',
           () => {
-            templateElement./*OK*/ innerHTML =
+            templateElement.innerHTML =
               'outer: {{value}} ' +
               '<template type="amp-mustache">nested: {{value}}</template>';
             template.compileCallback();
@@ -409,7 +413,7 @@ describes.repeated(
               __AMP_NESTED_TEMPLATE_0: 'MUST NOT RENDER THIS',
               value: 'Outer',
             });
-            expect(result./*OK*/ innerHTML).to.equal(
+            expect(result.innerHTML).to.equal(
               'outer: Outer ' +
                 '<template type="amp-mustache">nested: {{value}}</template>'
             );
@@ -421,12 +425,12 @@ describes.repeated(
             ' there are no nested templates, even though it is not a weird name' +
             ' for a template variable',
           () => {
-            templateElement./*OK*/ innerHTML = '{{__AMP_NESTED_TEMPLATE_0}}';
+            templateElement.innerHTML = '{{__AMP_NESTED_TEMPLATE_0}}';
             template.compileCallback();
             const result = template.render({
               __AMP_NESTED_TEMPLATE_0: '123',
             });
-            expect(result./*OK*/ innerHTML).to.equal('123');
+            expect(result.innerHTML).to.equal('123');
           }
         );
       }
@@ -444,7 +448,7 @@ describes.repeated(
             '<small></small><strong></strong><sub></sub>' +
             '<sup></sup><time></time><u></u><hr>',
         });
-        expect(result./*OK*/ innerHTML).to.equal(
+        expect(result.innerHTML).to.equal(
           'value = <b>abc</b><div>def</div>' +
             '<br><code></code><del></del><em></em>' +
             '<i></i><ins></ins><mark></mark><s></s>' +
@@ -459,6 +463,7 @@ describes.repeated(
         const result = template.render({
           value:
             '<table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -469,8 +474,9 @@ describes.repeated(
             '</tr></tfoot>' +
             '</table>',
         });
-        expect(result./*OK*/ innerHTML).to.equal(
+        expect(result.innerHTML).to.equal(
           'value = <table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -492,7 +498,7 @@ describes.repeated(
               '<a href="javascript:alert(\'XSS\')">test</a>' +
               '<img src="x" onerror="alert(\'XSS\')" />',
           });
-          expect(result./*OK*/ innerHTML).to.equal(
+          expect(result.innerHTML).to.equal(
             'value = <a target="_top">test</a>'
           );
         });
@@ -520,20 +526,21 @@ describes.repeated(
       if (isTemplateTypeScript) {
         it('should not foster text nodes in script template', () => {
           return allowConsoleError(() => {
-            const result = template.render({
+            const data = {
               'content': 'Howdy',
               'replies': [{'content': 'hi'}],
-            });
-            expect(result.innerHTML).to.equal(
+            };
+            const result =
               '<tbody>' +
-                '<tr>' +
-                '<td>Howdy</td>' +
-                '</tr>' +
-                '<tr>' +
-                '<td>hi</td>' +
-                '</tr>' +
-                '</tbody>'
-            );
+              '<tr>' +
+              '<td>Howdy</td>' +
+              '</tr>' +
+              '<tr>' +
+              '<td>hi</td>' +
+              '</tr>' +
+              '</tbody>';
+            expect(template.render(data).innerHTML).to.equal(result);
+            expect(template.renderAsString(data)).to.equal(result);
           });
         });
       }
@@ -573,26 +580,84 @@ describes.repeated(
       });
 
       it('should not call mustache parsing', () => {
-        window.sandbox.spy(mustache, 'parse');
+        env.sandbox.spy(mustache, 'parse');
         template.compileCallback();
         expect(mustache.parse).to.have.not.been.called;
       });
 
       it('should not mustache render but still sanitize html', () => {
-        window.sandbox.spy(sanitizer, 'sanitizeHtml');
-        window.sandbox.spy(mustache, 'render');
+        env.sandbox.spy(sanitizer, 'sanitizeHtml');
+        env.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
         expect(sanitizer.sanitizeHtml).to.have.been.called;
       });
     });
 
-    it('should unwrap output', () => {
-      innerHtmlSetup('<a>abc</a>');
-      template.compileCallback();
-      const result = template.render({});
-      expect(result.tagName).to.equal('A');
-      expect(result./*OK*/ innerHTML).to.equal('abc');
+    describe('setHtml()', () => {
+      it('should unwrap singular element output', () => {
+        template.compileCallback();
+        const result = template.setHtml('<a>abc</a>');
+        expect(result).to.have.length(1);
+        expect(result[0].tagName).to.equal('A');
+        expect(result[0].innerHTML).to.equal('abc');
+      });
+
+      it('should wrap singular text node output', () => {
+        template.compileCallback();
+        const result = template.setHtml('abc');
+        expect(result).to.have.length(1);
+        expect(result[0].tagName).to.equal('DIV');
+        expect(result[0].innerHTML).to.equal('abc');
+      });
+
+      it('should unwrap output with many elements', () => {
+        template.compileCallback();
+        const result = template.setHtml('<a>abc</a><a>def</a>');
+        expect(result).to.have.length(2);
+        const {0: first, 1: second} = result;
+        expect(first.tagName).to.equal('A');
+        expect(first.innerHTML).to.equal('abc');
+        expect(second.tagName).to.equal('A');
+        expect(second.innerHTML).to.equal('def');
+      });
+
+      it('should unwrap output with many elements and wrap text nodes', () => {
+        const html = `<a>abc</a>
+        def
+        <a>ghi  </a>`;
+        template.compileCallback();
+        const result = template.setHtml(html);
+        expect(result).to.have.length(3);
+        const {0: first, 1: second, 2: third} = result;
+        expect(first.tagName).to.equal('A');
+        expect(first.innerHTML).to.equal('abc');
+        expect(second.tagName).to.equal('DIV');
+        expect(second.innerHTML).to.equal('def');
+        expect(third.tagName).to.equal('A');
+        expect(third.innerHTML).to.equal('ghi  ');
+      });
+
+      it('should unwrap output with many elements and preserve subtrees', () => {
+        const html = `
+        <div>
+          <a>abc</a>
+        </div>
+        def
+        <a>ghi  </a>`;
+        template.compileCallback();
+        const result = template.setHtml(html);
+        expect(result).to.have.length(3);
+        const {0: first, 1: second, 2: third} = result;
+        expect(first.tagName).to.equal('DIV');
+        expect(first.children).to.have.length(1);
+        expect(first.firstElementChild.tagName).to.equal('A');
+        expect(first.firstElementChild.innerHTML).to.equal('abc');
+        expect(second.tagName).to.equal('DIV');
+        expect(second.innerHTML).to.equal('def');
+        expect(third.tagName).to.equal('A');
+        expect(third.innerHTML).to.equal('ghi  ');
+      });
     });
   }
 );

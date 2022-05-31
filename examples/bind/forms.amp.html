@@ -1,5 +1,5 @@
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
     <meta charset="utf-8">
     <title>Forms Examples in AMP</title>
@@ -73,6 +73,27 @@
               <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
           </template>
       </div>
+  </form>
+
+  <h2 class="sample-heading">Form validation with amp-bind input values</h2>
+  <button on="tap:AMP.setState({txt: 'hello'})">
+    set txt
+  </button>
+  <button on="tap:AMP.setState({txt: ''})">
+    clear
+  </button>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank"
+    custom-validation-reporting="show-all-on-submit">
+    <input type="text" name="name" placeholder="Name..." /><br />
+    <span visible-when-invalid="valueMissing"
+          validation-for="message">MISSING VALUE</span>
+    <textarea id="message" required [text]="txt" name="message"></textarea><br />
+    <input type="submit" value="Submit" />
+    <div submit-success>
+      <template type="amp-mustache">
+          Success! Thanks {{name}} for submitting this message: {{message}}
+      </template>
+  </div>
   </form>
 </body>
 </html>

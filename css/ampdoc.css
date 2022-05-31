@@ -1,17 +1,7 @@
+
+
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @fileoverview CSS specifically for non-AMP4ADS formats.
  */
 
 /**
@@ -40,7 +30,7 @@ html:not([amp4ads]) body {
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
- * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
  */
 html:not([amp4ads]) body {
   margin: 0 !important;
@@ -60,7 +50,7 @@ body {
  * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
  */
 html.i-amphtml-singledoc.i-amphtml-embedded {
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 /**
@@ -88,21 +78,6 @@ html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
 
 
 /**
- * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
- * does NOT respect `html {overflow-x: hidden}`.
- * Note! For all other natural cases body's style is `body {overflow: visible}`
- * to avoid visibility issues with iframes.
- */
-html.i-amphtml-webview > body {
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
-  /* A <body> height of 0 will be hidden due to "overflow-x: hidden". */
-  /* Prevent this by setting min-height to 100vh. See b/74541306. */
-  min-height: 100vh !important;
-}
-
-
-/**
  * iOS-Embed mode (iOS <= 8). The `body` itself is scrollable.
  */
 html.i-amphtml-ios-embed-legacy > body {
@@ -120,7 +95,7 @@ html.i-amphtml-ios-embed {
   position: static;
 }
 
-/** Wrapper for iOS Embed Wrapper mode. */
+/** Wrapper for iOS Embed Wrapper mode (iOS <= 12). */
 #i-amphtml-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
@@ -241,19 +216,8 @@ amp-live-list > [update] {
 /**
  * Display none elements
  */
-amp-experiment, amp-share-tracking {
+amp-experiment {
   display: none;
-}
-
-.i-amphtml-jank-meter {
-  position: fixed;
-  background-color: rgba(232,72,95,.5);
-  bottom: 0;
-  right: 0;
-  color: #fff;
-  font-size: 16px;
-  z-index: 1000;
-  padding: 5px;
 }
 
 /* amp-list CSS to avoid FOUC */
@@ -277,6 +241,20 @@ amp-list[load-more] [load-more-end]
 }
 
 /**
+ * amp-list error messaging container should be hidden at first.
+ */
+ amp-list [fetch-error] {
+  display: none;
+}
+
+/**
+ * amp-list initial content should be displayed (similar to placeholder).
+ */
+amp-list[diffable] div[role="list"] {
+  display: block;
+}
+
+/**
  * amp-story
  */
 amp-story[standalone], amp-story-page {
@@ -291,7 +269,7 @@ amp-story[standalone], amp-story-page {
 }
 
 amp-story[standalone] {
-  background-color: #202125 !important;
+  background-color: #000 !important;
   position: relative !important;
 }
 
@@ -299,7 +277,11 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-story .amp-active > div {
+/* Hide amp-loader in stories
+ * TODO(maxbittker): remove after amp-loader is no longer imported in stories
+ */
+amp-story .amp-active > div,
+amp-story .i-amphtml-loader-background {
   display: none !important;
 }
 
@@ -343,5 +325,18 @@ amp-autocomplete > textarea,
  * doesn't push the preset's defaults into v0.js making it larger.
  */
 [amp-fx^="fly-in"] {
+  visibility: hidden;
+}
+
+/**
+ * amp-script[nodom] is an element with no UI, similar to amp-analytics.
+ */
+amp-script[nodom], amp-script[sandboxed] {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
   visibility: hidden;
 }

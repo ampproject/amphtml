@@ -1,20 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../services';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @implements {../service/mutator-interface.MutatorInterface}
@@ -22,19 +8,18 @@ import {Services} from '../services';
 export class InaboxMutator {
   /**
    * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../service/resources-interface.ResourcesInterface} resources
    */
-  constructor(ampdoc, resources) {
+  constructor(ampdoc) {
     /** @const @private {!../service/resources-interface.ResourcesInterface} */
-    this.resources_ = resources;
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = Services./*OK*/ vsyncFor(ampdoc.win);
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.attemptChangeSize(element, newHeight, newWidth, opt_newMargins).then(
+  forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+    this.requestChangeSize(element, newHeight, newWidth, opt_newMargins).then(
       () => {
         if (opt_callback) {
           opt_callback();
@@ -44,11 +29,11 @@ export class InaboxMutator {
   }
 
   /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
+  requestChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return this.mutateElement(element, () => {
       this.resources_
         .getResourceForElement(element)
-        ./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+        .changeSize(newHeight, newWidth, opt_newMargins);
     });
   }
 
@@ -56,10 +41,6 @@ export class InaboxMutator {
   expandElement(element) {
     const resource = this.resources_.getResourceForElement(element);
     resource.completeExpand();
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.expandedCallback(element);
-    }
     this.resources_./*OK*/ schedulePass();
   }
 
@@ -100,4 +81,11 @@ export class InaboxMutator {
       },
     });
   }
+}
+
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installInaboxMutatorServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'mutator', InaboxMutator);
 }

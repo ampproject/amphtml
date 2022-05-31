@@ -1,50 +1,40 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {waitForBodyOpenPromise} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+import * as mode from '#core/mode';
 
-import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {isExperimentOn, toggleExperiment} from '#experiments';
+
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from '#polyfills/stubs/intersection-observer-stub';
+import {shouldLoadPolyfill as shouldLoadResObPolyfill} from '#polyfills/stubs/resize-observer-stub';
+
+import {Services} from '#service';
 import {
-  LogLevel, // eslint-disable-line no-unused-vars
+  installAmpdocServices,
+  installRuntimeServices,
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {
+  installExtensionsService,
+  stubLegacyElements,
+} from '#service/extensions-impl';
+
+import {
   dev,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
-} from './log';
+} from '#utils/log';
+
+import {BaseElement} from './base-element';
+import {startupChunk} from './chunk';
+import * as urls from './config/urls';
+import {reportErrorForWin} from './error-reporting';
+import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
-import {Services} from './services';
+import {hasRenderDelayingServices} from './render-delaying-services';
+
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {config} from './config';
-import {getMode} from './mode';
-import {hasRenderDelayingServices} from './render-delaying-services';
-import {
-  installAmpdocServices,
-  installRuntimeServices,
-} from './service/core-services';
-import {
-  installExtensionsService,
-  stubLegacyElements,
-} from './service/extensions-impl';
-import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn, toggleExperiment} from './experiments';
-import {reportErrorForWin} from './error';
-import {setStyle} from './style';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
-import {waitForBodyOpenPromise} from './dom';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -59,7 +49,7 @@ const TAG = 'runtime';
  *  canonicalUrl: (string|undefined),
  *  head: (Element|undefined),
  *  ampdoc: (!./service/ampdoc-impl.AmpDoc | undefined),
- *  setVisibilityState: (function(!VisibilityState)|undefined),
+ *  setVisibilityState: (function(!VisibilityState_Enum)|undefined),
  *  postMessage: (function()|undefined),
  *  onMessage: (function()|undefined),
  *  close: (function()|undefined),
@@ -104,29 +94,57 @@ function adoptShared(global, callback) {
   // `AMP.extension()` function is only installed in a non-minified mode.
   // This function is meant to play the same role for development and testing
   // as `AMP.push()` in production.
-  if (!getMode().minified) {
+  if (!mode.isMinified()) {
     /**
      * @param {string} unusedName
      * @param {string} unusedVersion
      * @param {function(!Object)} installer
      * @const
      */
-    global.AMP.extension = function(unusedName, unusedVersion, installer) {
+    global.AMP.extension = function (unusedName, unusedVersion, installer) {
       installer(global.AMP);
     };
   }
 
-  /** @const */
-  global.AMP.config = config;
+  /**
+   * @const {{
+   *   urls: {
+   *     thirdParty: string,
+   *     thirdPartyFrameHost: string,
+   *     thirdPartyFrameRegex: !RegExp,
+   *     cdn: string,
+   *     cdnProxyRegex: !RegExp,
+   *     localhostRegex: !RegExp,
+   *     errorReporting: string,
+   *     betaErrorReporting: string,
+   *     localDev: boolean,
+   *     trustedViewerHosts: !Array<!RegExp>,
+   *     geoApi: ?string,
+   *   }
+   * }}
+   */
+  global.AMP.config = {
+    urls: {
+      thirdParty: urls.thirdParty,
+      thirdPartyFrameHost: urls.thirdPartyFrameHost,
+      thirdPartyFrameRegex: urls.thirdPartyFrameRegex,
+      cdn: urls.cdn,
+      cdnProxyRegex: urls.cdnProxyRegex,
+      localhostRegex: urls.localhostRegex,
+      errorReporting: urls.errorReporting,
+      betaErrorReporting: urls.betaErrorReporting,
+      localDev: urls.localDev,
+      trustedViewerHosts: urls.trustedViewerHosts,
+      geoApi: urls.geoApi,
+    },
+  };
 
   global.AMP.BaseElement = BaseElement;
-
-  global.AMP.BaseTemplate = BaseTemplate;
 
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
-   * @param {function(new:BaseElement, !Element)} implementationClass
+   * @param {typeof BaseElement} implementationClass
    * @param {?string|undefined} css
    */
   global.AMP.registerElement = extensions.addElement.bind(extensions);
@@ -134,11 +152,9 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {function(new:BaseTemplate)} implementationClass
+   * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
-  global.AMP.registerTemplate = function(name, implementationClass) {
-    registerExtendedTemplate(global, name, implementationClass);
-  };
+  global.AMP.registerTemplate = extensions.addTemplate.bind(extensions);
 
   /**
    * Registers an ampdoc service.
@@ -162,7 +178,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!LogLevel} level
+   * @param {import('#utils/log').LogLevel_Enum} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 
@@ -171,7 +187,6 @@ function adoptShared(global, callback) {
    * @param {function(string,?string=,number=)} unusedFn
    * @param {function()=} opt_flush
    * @deprecated
-   * @export
    */
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
@@ -187,21 +202,18 @@ function adoptShared(global, callback) {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
-          extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
+          extensions.registerExtension(
+            fnOrStruct.n,
+            fnOrStruct.ev,
+            fnOrStruct.l,
+            fnOrStruct.f,
+            global.AMP
+          );
         }
       });
     };
 
-    // We support extension declarations which declare they have an
-    // "intermediate" dependency that needs to be loaded before they
-    // can execute.
-    if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
-      preloadDeps(extensions, fnOrStruct).then(function() {
-        return startRegisterOrChunk(global, fnOrStruct, register);
-      });
-    } else {
-      startRegisterOrChunk(global, fnOrStruct, register);
-    }
+    startRegisterOrChunk(global, fnOrStruct, register);
   }
 
   // Handle high priority extensions now, and if necessary issue
@@ -229,7 +241,7 @@ function adoptShared(global, callback) {
      * Registers a new custom element.
      * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
      */
-    global.AMP.push = function(fnOrStruct) {
+    global.AMP.push = function (fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
         return;
       }
@@ -257,9 +269,10 @@ function adoptShared(global, callback) {
   // If the closure passed to maybePumpEarlyFrame didn't execute
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
-    global.AMP.push = /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (preregisteredExtensions.push.bind(
-      preregisteredExtensions
-    ));
+    global.AMP.push =
+      /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (
+        preregisteredExtensions.push.bind(preregisteredExtensions)
+      );
   }
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
@@ -268,32 +281,16 @@ function adoptShared(global, callback) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
 
-  return iniPromise;
-}
-
-/**
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
- * @return {!Promise}
- */
-function preloadDeps(extensions, fnOrStruct) {
-  // Allow a single string as the intermediate dependency OR allow
-  // for an array if intermediate dependencies that needs to be
-  // resolved first before executing this current extension.
-  if (Array.isArray(fnOrStruct.i)) {
-    const promises = fnOrStruct.i.map(dep => {
-      return extensions.preloadExtension(dep);
-    });
-    return Promise.all(promises);
-  } else if (typeof fnOrStruct.i == 'string') {
-    return extensions.preloadExtension(fnOrStruct.i);
+  // Some deferred polyfills.
+  const extensionsFor = Services.extensionsFor(global);
+  if (shouldLoadResObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-resize-observer-polyfill');
   }
-  dev().error(
-    'RUNTIME',
-    'dependency is neither an array or a string',
-    fnOrStruct.i
-  );
-  return Promise.resolve();
+  if (shouldLoadInObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-intersection-observer-polyfill');
+  }
+
+  return iniPromise;
 }
 
 /**
@@ -326,7 +323,7 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
  * @return {!Promise}
  */
 export function adopt(global) {
-  return adoptShared(global, global => {
+  return adoptShared(global, (global) => {
     // Shared runtimes variables between both multi-doc and single-doc pages
     adoptServicesAndResources(global);
 
@@ -344,7 +341,7 @@ export function adopt(global) {
  * @return {!Promise}
  */
 export function adoptWithMultidocDeps(global) {
-  return adoptShared(global, global => {
+  return adoptShared(global, (global) => {
     // Shared runtimes variables between both multi-doc and single-doc pages
     adoptServicesAndResources(global);
 
@@ -390,7 +387,12 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  if (mode.isEsm()) {
+    const style = global.document.querySelector('style[amp-runtime]');
+    global.AMP.combinedCss = style ? style.textContent : '';
+  } else {
+    global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  }
 }
 
 /**
@@ -432,9 +434,8 @@ export function adoptShadowMode(global) {
      * @param {!Object<string, string>=} opt_initParams
      * @return {!Object}
      */
-    global.AMP.attachShadowDocAsStream = manager.attachShadowDocAsStream.bind(
-      manager
-    );
+    global.AMP.attachShadowDocAsStream =
+      manager.attachShadowDocAsStream.bind(manager);
 
     return waitForBodyOpenPromise(global.document);
   });
@@ -447,29 +448,44 @@ export function adoptShadowMode(global) {
  * If they are different, returns false, and initiates a load
  * of the respective extension via a versioned URL.
  *
- * This is currently guarded by the 'version-locking' experiment.
- * With this active, all scripts in a given page are guaranteed
- * to have the same AMP release version.
- *
  * @param {!Window} win
  * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
-  if (!isExperimentOn(win, 'version-locking')) {
+  if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
     return false;
   }
   if (typeof fnOrStruct == 'function') {
     return false;
   }
+
+  if (mode.isEsm()) {
+    // If we're in a module runtime, trying to execute a nomodule extension
+    // simply remove the nomodule extension so that it is not executed.
+    if (!fnOrStruct.m) {
+      return true;
+    }
+  } else {
+    // If we're in a nomodule runtime, trying to execute a module extension
+    // simply remove the module extension so that it is not executed.
+    if (fnOrStruct.m) {
+      return true;
+    }
+  }
+
   const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
   // in the config that is fully determined by the primary binary.
-  if (internalRuntimeVersion() == v) {
+  if (mode.version() == v) {
     return false;
   }
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n);
+  Services.extensionsFor(win).reloadExtension(
+    fnOrStruct.n,
+    fnOrStruct.ev,
+    fnOrStruct.l
+  );
   return true;
 }
 
@@ -481,10 +497,6 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!isExperimentOn(win, 'pump-early-frame')) {
-    cb();
-    return;
-  }
   // There is definitely nothing to draw yet, so we might as well
   // proceed.
   if (!win.document.body) {

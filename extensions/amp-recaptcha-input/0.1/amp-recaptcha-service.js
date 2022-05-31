@@ -1,39 +1,24 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Service for recaptcha components
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+import * as mode from '#core/mode';
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import * as urls from '../../../src/config/urls';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
-import {urls} from '../../../src/config';
+import {getMode} from '../../../src/mode';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {getSourceOrigin} from '../../../src/url';
+import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 /**
  * @fileoverview
@@ -88,15 +73,19 @@ export class AmpRecaptchaService {
 
     /** @private {Object} */
     this.executeMap_ = {};
+
+    /** @private {boolean} */
+    this.global_;
   }
 
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
    * @param {string} sitekey
+   * @param {boolean} global
    * @return {Promise}
    */
-  register(sitekey) {
+  register(sitekey, global = false) {
     if (!this.sitekey_) {
       this.sitekey_ = sitekey;
     } else if (this.sitekey_ !== sitekey) {
@@ -104,6 +93,16 @@ export class AmpRecaptchaService {
         new Error(
           'You must supply the same sitekey ' +
             'to all amp-recaptcha-input elements.'
+        )
+      );
+    }
+    if (this.global_ === undefined) {
+      this.global_ = global;
+    } else if (this.global_ !== global) {
+      return Promise.reject(
+        new Error(
+          'You must supply the data-global attribute ' +
+            'to all or none of the amp-recaptcha-input elements.'
         )
       );
     }
@@ -150,10 +149,10 @@ export class AmpRecaptchaService {
       reject: executePromise.reject,
     };
     this.recaptchaApiReady_.promise.then(() => {
-      const message = dict({
+      const message = {
         'id': messageId,
         'action': 'amp_' + action,
-      });
+      };
 
       // Send the message
       this.postMessageToIframe_(
@@ -171,7 +170,7 @@ export class AmpRecaptchaService {
    * @return {?Promise}
    */
   initialize_() {
-    return this.createRecaptchaFrame_().then(iframe => {
+    return this.createRecaptchaFrame_().then((iframe) => {
       this.iframe_ = iframe;
 
       this.unlisteners_ = [
@@ -201,7 +200,7 @@ export class AmpRecaptchaService {
   dispose_() {
     if (this.iframe_) {
       removeElement(this.iframe_);
-      this.unlisteners_.forEach(unlistener => unlistener());
+      this.unlisteners_.forEach((unlistener) => unlistener());
       this.iframe_ = null;
       this.iframeLoadPromise_ = null;
       this.recaptchaApiReady_ = new Deferred();
@@ -219,24 +218,23 @@ export class AmpRecaptchaService {
   createRecaptchaFrame_() {
     const iframe = this.win_.document.createElement('iframe');
 
-    return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
+    return this.getRecaptchaFrameSrc_().then((recaptchaFrameSrc) => {
       this.recaptchaFrameOrigin_ = getSourceOrigin(recaptchaFrameSrc);
       iframe.src = recaptchaFrameSrc;
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute(
         'name',
-        JSON.stringify(
-          dict({
-            'sitekey': this.sitekey_,
-            'sentinel': 'amp-recaptcha',
-          })
-        )
+        JSON.stringify({
+          'sitekey': this.sitekey_,
+          'sentinel': 'amp-recaptcha',
+          'global': this.global_,
+        })
       );
       iframe.classList.add('i-amphtml-recaptcha-iframe');
       setStyle(iframe, 'border', 'none');
       /** @this {!Element} */
-      iframe.onload = function() {
+      iframe.onload = function () {
         // Chrome does not reflect the iframe readystate.
         this.readyState = 'complete';
       };
@@ -277,15 +275,15 @@ export class AmpRecaptchaService {
       // TODO: win location href curls domain MAY need to be the same
       return ampToolboxCacheUrl
         .createCurlsSubdomain(winLocation.href)
-        .then(curlsSubdomain => {
+        .then((curlsSubdomain) => {
           return (
             '//' +
             curlsSubdomain +
             '.recaptcha.' +
             winLocation.host +
             '/dist.3p/' +
-            (getMode().minified
-              ? `${internalRuntimeVersion()}/recaptcha`
+            (mode.isMinified()
+              ? `${mode.version()}/recaptcha`
               : 'current/recaptcha.max') +
             '.html'
           );
@@ -309,11 +307,11 @@ export class AmpRecaptchaService {
       );
     }
 
-    return curlsSubdomainPromise.then(curlsSubdomain => {
+    return curlsSubdomainPromise.then((curlsSubdomain) => {
       const recaptchaFrameSrc =
         'https://' +
         curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${mode.version()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });
@@ -395,8 +393,7 @@ export class AmpRecaptchaService {
  * @return {!Promise<!AmpRecaptchaService>}
  */
 export function recaptchaServiceForDoc(element) {
-  return /** @type {!Promise<!AmpRecaptchaService>} */ (getServicePromiseForDoc(
-    element,
-    'amp-recaptcha'
-  ));
+  return /** @type {!Promise<!AmpRecaptchaService>} */ (
+    getServicePromiseForDoc(element, 'amp-recaptcha')
+  );
 }

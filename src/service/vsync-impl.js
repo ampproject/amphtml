@@ -1,32 +1,20 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../utils/promise';
-import {JankMeter} from './jank-meter';
-import {Pass} from '../pass';
-import {Services} from '../services';
+import {Deferred} from '#core/data-structures/promise';
 import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
-import {cancellation} from '../error';
-import {dev, devAssert, rethrowAsync} from '../log';
-import {getService, registerServiceBuilder} from '../service';
+} from '#core/document/visibility';
+import {rethrowAsync} from '#core/error';
+
+import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
 import {installTimerService} from './timer-impl';
+
+import {cancellation} from '../error-reporting';
+import {Pass} from '../pass';
+import {getService, registerServiceBuilder} from '../service-helpers';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -153,9 +141,6 @@ export class Vsync {
         this.boundOnVisibilityChanged_
       );
     }
-
-    /** @private {!JankMeter} */
-    this.jankMeter_ = new JankMeter(this.win);
   }
 
   /** @override */
@@ -215,9 +200,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return /** @type {function(!VsyncStateDef=)} */ (opt_state => {
-      this.run(task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=)} */ (
+      (opt_state) => {
+        this.run(task, opt_state);
+      }
+    );
   }
 
   /**
@@ -261,7 +248,7 @@ export class Vsync {
    * @template TYPE
    */
   measurePromise(measurer) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.measure(() => {
         resolve(measurer());
       });
@@ -331,9 +318,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ (opt_state => {
-      return this.runAnim(contextNode, task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+      (opt_state) => {
+        return this.runAnim(contextNode, task, opt_state);
+      }
+    );
   }
 
   /**
@@ -358,7 +347,7 @@ export class Vsync {
       const startTime = Date.now();
       let prevTime = 0;
       const task = this.createAnimTask(contextNode, {
-        mutate: state => {
+        mutate: (state) => {
           const timeSinceStart = Date.now() - startTime;
           const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
           if (!res) {
@@ -382,7 +371,6 @@ export class Vsync {
     }
     // Schedule actual animation frame and then run tasks.
     this.scheduled_ = true;
-    this.jankMeter_.onScheduled();
     this.forceSchedule_();
   }
 
@@ -405,9 +393,8 @@ export class Vsync {
   runScheduledTasks_() {
     this.backupPass_.cancel();
     this.scheduled_ = false;
-    this.jankMeter_.onRun();
 
-    const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
+    const {nextFrameResolver_: resolver, states_: states, tasks_: tasks} = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering
@@ -446,7 +433,7 @@ export class Vsync {
       return raf.bind(this.win);
     }
     let lastTime = 0;
-    return fn => {
+    return (fn) => {
       const now = Date.now();
       // By default we take 16ms between frames, but if the last frame is say
       // 10ms ago, we only want to wait 6ms.
@@ -462,7 +449,6 @@ export class Vsync {
  * @param {function(!VsyncStateDef):undefined|undefined} callback
  * @param {!VsyncStateDef} state
  * @return {boolean}
- * @noinline
  */
 function callTask_(callback, state) {
   devAssert(callback);

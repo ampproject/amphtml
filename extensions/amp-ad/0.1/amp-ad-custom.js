@@ -1,31 +1,19 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpAdUIHandler} from './amp-ad-ui';
-import {CommonSignals} from '../../../src/common-signals';
-import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {removeChildren} from '#core/dom';
+import {LayoutPriority_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   childElementByTag,
   closestAncestorElementBySelector,
-  removeChildren,
-} from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+} from '#core/dom/query';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
+import {AmpAdUIHandler} from './amp-ad-ui';
+
+import {addParamToUrl} from '../../../src/url';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -58,7 +46,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Since this is AMPHTML we are trusting that it will load responsibly
-    return LayoutPriority.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /** @override */
@@ -98,13 +86,13 @@ export class AmpAdCustom extends AMP.BaseElement {
       ampCustomadXhrPromises[fullUrl] ||
       Services.xhrFor(this.win)
         .fetchJson(fullUrl)
-        .then(res => res.json());
+        .then((res) => res.json());
     if (this.slot_ !== null) {
       // Cache this response if using `data-slot` feature so only one request
       // is made per url
       ampCustomadXhrPromises[fullUrl] = responsePromise;
     }
-    return responsePromise.then(data => {
+    return responsePromise.then((data) => {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
@@ -123,16 +111,16 @@ export class AmpAdCustom extends AMP.BaseElement {
       this.renderStarted();
 
       try {
-        Services.templatesFor(this.win)
+        Services.templatesForDoc(this.element)
           .findAndRenderTemplate(this.element, templateData)
-          .then(renderedElement => {
+          .then((renderedElement) => {
             // Get here when the template has been rendered Clear out the
             // child template and replace it by the rendered version Note that
             // we can't clear templates that's not ad's child because they
             // maybe used by other ad component.
             removeChildren(this.element);
             this.element.appendChild(renderedElement);
-            this.signals().signal(CommonSignals.INI_LOAD);
+            this.signals().signal(CommonSignals_Enum.INI_LOAD);
           });
       } catch (e) {
         this.uiHandler.applyNoContentUI();

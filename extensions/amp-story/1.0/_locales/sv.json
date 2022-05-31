@@ -1,0 +1,170 @@
+{
+  "2": {
+    "string": "Tryck på Nästa"
+  },
+  "3": {
+    "string": "Tryck på Tillbaka"
+  },
+  "4": {
+    "string": "Det gick inte att kopiera länken till Urklipp :("
+  },
+  "5": {
+    "string": "Länken kopierad!"
+  },
+  "6": {
+    "string": "E-post"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Få länk"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Det verkar dessvärre som om din webbläsare inte stöder den här upplevelsen"
+  },
+  "22": {
+    "string": "Godkänn"
+  },
+  "23": {
+    "string": "Avvisa"
+  },
+  "25": {
+    "string": "Visa på originaldomänen:"
+  },
+  "26": {
+    "string": "Mer om AMP-resultat"
+  },
+  "27": {
+    "string": "Fortsätt ändå"
+  },
+  "34": {
+    "string": "Spela video"
+  },
+  "35": {
+    "string": "Svep upp"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Uppdaterad"
+  },
+  "65": {
+    "string": "Videon kunde inte spelas"
+  },
+  "66": {
+    "string": "Stäng av ljudet på story"
+  },
+  "67": {
+    "string": "Slå på ljudet på storyn"
+  },
+  "68": {
+    "string": "Storyinformation"
+  },
+  "69": {
+    "string": "Dela story"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Tips 1 av 2"
+  },
+  "76": {
+    "string": "Tryck för att gå till nästa skärm"
+  },
+  "77": {
+    "string": "Nästa"
+  },
+  "78": {
+    "string": "Tips 2 av 2"
+  },
+  "79": {
+    "string": "Svep för att gå till nästa story"
+  },
+  "80": {
+    "string": "Jag förstår"
+  },
+  "81": {
+    "string": "Tips"
+  },
+  "83": {
+    "string": "Aktivera"
+  },
+  "84": {
+    "string": "POÄNG:"
+  },
+  "85": {
+    "string": "Pausa story"
+  },
+  "86": {
+    "string": "Spela story"
+  },
+  "87": {
+    "string": "Stäng"
+  },
+  "88": {
+    "string": "Hoppa över nästa"
+  },
+  "89": {
+    "string": "Ditt svar skickas till"
+  },
+  "90": {
+    "string": "Nästa story"
+  },
+  "91": {
+    "string": "Nästa sida"
+  },
+  "92": {
+    "string": "Spela igen"
+  },
+  "93": {
+    "string": "Föregående sida"
+  },
+  "96": {
+    "string": "Flytta enheten för att utforska"
+  },
+  "97": {
+    "string": "Öppnar"
+  },
+  "98": {
+    "string": "Formuläret har inte skickats, försök igen"
+  },
+  "99": {
+    "string": "Formuläret har skickats in"
+  },
+  "101": {
+    "string": "Shoppa nu"
+  },
+  "110": {
+    "string": "Prenumerera med Google"
+  }
+}

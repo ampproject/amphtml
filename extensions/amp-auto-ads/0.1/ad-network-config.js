@@ -1,23 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AdSenseNetworkConfig} from './adsense-network-config';
+import {AlrightNetworkConfig} from './alright-network-config';
 import {DenakopNetworkConfig} from './denakop-network-config';
 import {DoubleclickNetworkConfig} from './doubleclick-network-config';
+import {FirstImpressionIoConfig} from './firstimpression.io-network-config';
 import {PingNetworkConfig} from './ping-network-config';
+import {PremiumadsNetworkConfig} from './premiumads-network-config';
+import {WunderkindNetworkConfig} from './wunderkind-network-config';
+
 import {getMode} from '../../../src/mode';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */
@@ -46,6 +35,14 @@ export class AdNetworkConfigDef {
    * @return {string}
    */
   getConfigUrl() {}
+
+  /**
+   * After fetching the config, this method is called to allow rewriting the
+   * config on the client side.
+   * @param {!JsonObject} unusedConfig
+   * @return {!JsonObject}
+   */
+  filterConfig(unusedConfig) {}
 
   /**
    * Any attributes derived from either the page or the auto-amp-ads tag that
@@ -80,11 +77,23 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   if (type == 'adsense') {
     return new AdSenseNetworkConfig(autoAmpAdsElement);
   }
+  if (type == 'alright') {
+    return new AlrightNetworkConfig(autoAmpAdsElement);
+  }
   if (type == 'denakop') {
     return new DenakopNetworkConfig(autoAmpAdsElement);
   }
   if (type == 'doubleclick') {
     return new DoubleclickNetworkConfig(autoAmpAdsElement);
+  }
+  if (type == 'firstimpression.io') {
+    return new FirstImpressionIoConfig(autoAmpAdsElement);
+  }
+  if (type == 'premiumads') {
+    return new PremiumadsNetworkConfig(autoAmpAdsElement);
+  }
+  if (type == 'wunderkind') {
+    return new WunderkindNetworkConfig(autoAmpAdsElement);
   }
   return null;
 }

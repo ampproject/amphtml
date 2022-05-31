@@ -1,28 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {
   CONSTANTS,
   deserializeMessage,
   listen,
   serializeMessage,
-} from '../src/3p-frame-messaging';
-import {Observable} from '../src/observable';
-import {dev} from '../src/log';
-import {dict, map} from '../src/utils/object';
-import {getData} from '../src/event-helper';
+} from '#core/3p-frame-messaging';
+import {Observable} from '#core/data-structures/observable';
+import {map} from '#core/types/object';
+
+import {getData} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {getMode} from '../src/mode';
 
 export class IframeMessagingClient {
@@ -62,13 +49,13 @@ export class IframeMessagingClient {
   getData(requestType, payload, callback) {
     const responseType = requestType + CONSTANTS.responseTypeSuffix;
     const messageId = this.nextMessageId_++;
-    const unlisten = this.registerCallback(responseType, result => {
+    const unlisten = this.registerCallback(responseType, (result) => {
       if (result[CONSTANTS.messageIdFieldName] === messageId) {
         unlisten();
         callback(result[CONSTANTS.contentFieldName]);
       }
     });
-    const data = dict();
+    const data = {};
     data[CONSTANTS.payloadFieldName] = payload;
     data[CONSTANTS.messageIdFieldName] = messageId;
     this.sendMessage(requestType, data);
@@ -100,7 +87,7 @@ export class IframeMessagingClient {
    * @return {*} TODO(#23582): Specify return type
    */
   requestOnce(requestType, responseType, callback) {
-    const unlisten = this.registerCallback(responseType, event => {
+    const unlisten = this.registerCallback(responseType, (event) => {
       unlisten();
       callback(event);
     });
@@ -169,16 +156,12 @@ export class IframeMessagingClient {
   /**
    * @param {!Window} win
    * @param {string} msg
-   * @suppress {checkTypes} // Can be removed after closure compiler update their externs.
    */
   postMessageWithUserActivation_(win, msg) {
-    win./*OK*/ postMessage(
-      msg,
-      dict({
-        'targetOrigin': '*',
-        'includeUserActivation': true,
-      })
-    );
+    win./*OK*/ postMessage(msg, {
+      'targetOrigin': '*',
+      'includeUserActivation': true,
+    });
   }
 
   /**
@@ -191,7 +174,7 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', event => {
+    listen(this.win_, 'message', (event) => {
       // If we have set a host window, strictly check that it's from it.
       if (this.hostWindow_ && event.source != this.hostWindow_) {
         return;

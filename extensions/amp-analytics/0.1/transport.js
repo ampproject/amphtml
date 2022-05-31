@@ -1,19 +1,14 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeElement} from '#core/dom';
+import {toggle} from '#core/dom/style';
+import {getWin} from '#core/window';
+import {WindowInterface} from '#core/window/interface';
 
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
+import {IframeTransport} from './iframe-transport';
 import {
   BatchSegmentDef,
   RequestDef,
@@ -21,23 +16,17 @@ import {
   TransportSerializers,
   defaultSerializer,
 } from './transport-serializer';
-import {IframeTransport} from './iframe-transport';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getMode} from '../../../src/mode';
+import {createPixel} from '../../../src/pixel';
+import {getTopWindow} from '../../../src/service-helpers';
 import {
   assertHttpsUrl,
   checkCorsUrl,
+  isAmpScriptUri,
   parseUrlDeprecated,
 } from '../../../src/url';
-import {createPixel} from '../../../src/pixel';
-import {dev, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
-import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {toWin} from '../../../src/types';
-import {toggle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';
@@ -47,20 +36,23 @@ const TAG_ = 'amp-analytics/transport';
  */
 export class Transport {
   /**
-   * @param {!Window} win
+   * @param {!AmpDoc} ampdoc
    * @param {!JsonObject} options
    */
-  constructor(win, options = /** @type {!JsonObject} */ ({})) {
+  constructor(ampdoc, options = /** @type {!JsonObject} */ ({})) {
+    /** @private {!AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private {!Window} */
-    this.win_ = win;
+    this.win_ = ampdoc.win;
 
     /** @private {!JsonObject} */
     this.options_ = options;
 
     /** @private {string|undefined} */
-    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_[
-      'referrerPolicy'
-    ]);
+    this.referrerPolicy_ = /** @type {string|undefined} */ (
+      this.options_['referrerPolicy']
+    );
 
     // no-referrer is only supported in image transport
     if (this.referrerPolicy_ === 'no-referrer') {
@@ -75,7 +67,7 @@ export class Transport {
     this.iframeTransport_ = null;
 
     /** @private {boolean} */
-    this.isInabox_ = getMode(win).runtime == 'inabox';
+    this.isInabox_ = getMode(this.win_).runtime == 'inabox';
   }
 
   /**
@@ -97,8 +89,10 @@ export class Transport {
       const request = inBatch
         ? serializer.generateBatchRequest(url, segments, withPayload)
         : serializer.generateRequest(url, segments[0], withPayload);
-      assertHttpsUrl(request.url, 'amp-analytics request');
-      checkCorsUrl(request.url);
+      if (!isAmpScriptUri(request.url)) {
+        assertHttpsUrl(request.url, 'amp-analytics request');
+        checkCorsUrl(request.url);
+      }
       return request;
     }
 
@@ -110,6 +104,14 @@ export class Transport {
         return;
       }
       this.iframeTransport_.sendRequest(getRequest(false).url);
+      return;
+    }
+
+    if (this.options_['amp-script']) {
+      Transport.forwardRequestToAmpScript(this.ampdoc_, {
+        url,
+        payload: getRequest(true).payload,
+      });
       return;
     }
 
@@ -142,7 +144,7 @@ export class Transport {
 
   /**
    * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * extensions/amp-analytics/0.1/vendors/* who have transport/iframe defined.
    * This is limited to MRC-accreddited vendors. The frame is removed if the
    * user navigates/swipes away from the page, and is recreated if the user
    * navigates back to the page.
@@ -155,7 +157,7 @@ export class Transport {
     }
 
     // In the case of FIE rendering, we should be using the parent doc win.
-    const topWin = getTopWindow(toWin(element.ownerDocument.defaultView));
+    const topWin = getTopWindow(getWin(element));
     const type = element.getAttribute('type');
     // In inabox there is no amp-ad element.
     const ampAdResourceId = this.isInabox_
@@ -188,7 +190,7 @@ export class Transport {
    * Sends a ping request using an iframe, that is removed 5 seconds after
    * it is loaded.
    * This is not available as a standard transport, but rather used for
-   * specific, whitelisted requests.
+   * specific, allowlisted requests.
    * Note that this is unrelated to the iframeTransport
    *
    * @param {string} url
@@ -207,7 +209,7 @@ export class Transport {
         parseUrlDeprecated(this.win_.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.'
+        'amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md for details.'
     );
 
     /** @const {!Element} */
@@ -229,9 +231,9 @@ export class Transport {
    * @return {!TransportSerializerDef}
    */
   getSerializer_() {
-    return /** @type {!TransportSerializerDef} */ (TransportSerializers[
-      'default'
-    ]);
+    return /** @type {!TransportSerializerDef} */ (
+      TransportSerializers['default']
+    );
   }
 
   /**
@@ -241,6 +243,9 @@ export class Transport {
    * @param {string|undefined} referrerPolicy
    */
   static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
+    if (!win) {
+      return;
+    }
     const image = createPixel(win, request.url, referrerPolicy);
     loadPromise(image)
       .then(() => {
@@ -303,6 +308,18 @@ export class Transport {
     xhr.send(request.payload || '');
     return true;
   }
+
+  /**
+   * @param {!AmpDoc} ampdoc
+   * @param {!RequestDef} request
+   * @return {!Promise}
+   */
+  static forwardRequestToAmpScript(ampdoc, request) {
+    return Services.scriptForDocOrNull(ampdoc).then((ampScriptService) => {
+      userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+      ampScriptService.fetch(request.url, JSON.parse(request.payload));
+    });
+  }
 }
 
 /**
@@ -313,7 +330,7 @@ export class Transport {
  */
 function cacheFuncResult(func) {
   const cachedValue = {};
-  return arg => {
+  return (arg) => {
     const key = String(arg);
     if (cachedValue[key] === undefined) {
       cachedValue[key] = func(arg);

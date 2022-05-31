@@ -1,25 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as mode from '../../../../src/mode';
-import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
-import {NotificationPermission} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
-import {WebPushService} from '../web-push-service';
+import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
 import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
+import {NotificationPermission} from '../vars';
+import {WebPushService} from '../web-push-service';
 import {WindowMessenger} from '../window-messenger';
 
 const FAKE_IFRAME_URL =
@@ -30,7 +14,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
 
     beforeEach(() => {
@@ -88,7 +72,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should not support HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://site.com/');
       env.sandbox.stub(mode, 'getMode').callsFake(() => {
@@ -109,7 +93,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support localhost HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://localhost/');
       expect(env.ampdoc.win.location.href).to.be.equal('http://localhost/');
@@ -127,7 +111,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support localhost HTTP location with port', () => {
       env.ampdoc.win.location.resetHref('http://localhost:8000/');
       const webPush = new WebPushService(env.ampdoc);
@@ -147,7 +131,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support 127.0.0.1 HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://127.0.0.1/');
       const webPush = new WebPushService(env.ampdoc);
@@ -165,7 +149,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support 127.0.0.1 HTTP location with port', () => {
       env.ampdoc.win.location.resetHref('http://localhost:9000/');
       const webPush = new WebPushService(env.ampdoc);
@@ -185,22 +169,19 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -210,12 +191,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );
@@ -244,13 +224,13 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should receive reply from helper iframe for permission query', () => {
       return setupHelperIframe()
         .then(() => {
           return webPush.queryNotificationPermission();
         })
-        .then(permission => {
+        .then((permission) => {
           expect(permission).to.eq(NotificationPermission.DEFAULT);
         });
     });
@@ -262,22 +242,19 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -287,12 +264,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );
@@ -515,7 +491,7 @@ describes.realWin(
     });
 
     // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
-    it.skip('should forward amp-web-push-subscription-state message to SW', done => {
+    it.skip('should forward amp-web-push-subscription-state message to SW', (done) => {
       let iframeWindowControllerMock = null;
 
       return setupHelperIframe().then(() => {
@@ -537,7 +513,7 @@ describes.realWin(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
           )
-          .callsFake(message => {
+          .callsFake((message) => {
             if (message.topic === 'amp-web-push-subscription-state') {
               done();
             }
@@ -553,22 +529,19 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -578,12 +551,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );
@@ -643,7 +615,7 @@ describes.realWin(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
           )
-          .callsFake(message => {
+          .callsFake((message) => {
             if (message.topic === 'amp-web-push-subscribe') {
               return Promise.resolve();
             }
@@ -696,18 +668,16 @@ describes.realWin(
 
       const urlWithSingleParam =
         'https://a.com/?' + WebPushService.PERMISSION_POPUP_URL_FRAGMENT;
-      const newUrlWithSingleParam = webPush.removePermissionPopupUrlFragmentFromUrl(
-        urlWithSingleParam
-      );
+      const newUrlWithSingleParam =
+        webPush.removePermissionPopupUrlFragmentFromUrl(urlWithSingleParam);
       expect(newUrlWithSingleParam).to.eq('https://a.com/');
 
       const urlWithMultipleParams =
         'https://a.com/?a=1&' +
         WebPushService.PERMISSION_POPUP_URL_FRAGMENT +
         '&b=2';
-      const newUrlWithMultipleParams = webPush.removePermissionPopupUrlFragmentFromUrl(
-        urlWithMultipleParams
-      );
+      const newUrlWithMultipleParams =
+        webPush.removePermissionPopupUrlFragmentFromUrl(urlWithMultipleParams);
       expect(newUrlWithMultipleParams).to.eq('https://a.com/?a=1&b=2');
     });
   }
@@ -718,22 +688,19 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_SCOPE
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+        FAKE_IFRAME_URL;
     }
 
     function setupHelperIframe() {
@@ -743,12 +710,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushHelperFrame = AmpWebPushHelperFrame;
-        iframeWindow._ampWebPushHelperFrame = new iframeWindow.AmpWebPushHelperFrame(
-          {
+        iframeWindow._ampWebPushHelperFrame =
+          new iframeWindow.AmpWebPushHelperFrame({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
         iframeWindow._ampWebPushHelperFrame.run(
           env.win.location.ancestorOrigins[0]
         );
@@ -785,7 +751,7 @@ describes.realWin(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
           )
-          .callsFake(message => {
+          .callsFake((message) => {
             if (message.topic === 'amp-web-push-unsubscribe') {
               return Promise.resolve();
             }

@@ -1,20 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-date-countdown';
-//import {Services} from '../../../../src/services';
+//import {Services} from '../../../../src/service';
 
 describes.realWin(
   'amp-date-countdown',
@@ -24,7 +9,7 @@ describes.realWin(
       extensions: ['amp-date-countdown'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let impl;
@@ -32,20 +17,21 @@ describes.realWin(
     const endDate = new Date(ISOEndDate);
     const twoDaysBeforeEndDate = new Date(endDate - 86400000 * 2); //substract 2 days
 
-    beforeEach(() => {
+    beforeEach(async () => {
       ({win /*, sandbox*/} = env);
 
       element = win.document.createElement('amp-date-countdown');
       element.setAttribute('end-date', ISOEndDate);
+      element.setAttribute('layout', 'responsive');
       win.document.body.appendChild(element);
-      impl = element.implementation_;
+      impl = await element.getImpl(false);
     });
 
     it(
       'should display timeleft in the format ' +
         '{d} {days} {h} {hours} {m} {minutes} {s} {seconds}',
-      () => {
-        element.build();
+      async () => {
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate),
           impl.getLocaleWord_('en')
@@ -77,8 +63,8 @@ describes.realWin(
       'should display timeleft in the format ' +
         '{d} {days} {h} {hours} {m} {minutes} {s} {seconds},' +
         'in i18n Chinese Simplified',
-      () => {
-        element.build();
+      async () => {
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate),
           impl.getLocaleWord_('zh-cn')
@@ -104,8 +90,8 @@ describes.realWin(
       }
     );
 
-    it('should display timeleft in the format {hh}:{mm}:{ss}', () => {
-      element.build();
+    it('should display timeleft in the format {hh}:{mm}:{ss}', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate),
         impl.getLocaleWord_('en')
@@ -119,8 +105,8 @@ describes.realWin(
     it(
       'should display timeleft in the format ' +
         '{h} {hours} and {m} {minutes} and {s} {seconds}',
-      () => {
-        element.build();
+      async () => {
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate - 1000),
           impl.getLocaleWord_('en')
@@ -145,8 +131,8 @@ describes.realWin(
       }
     );
 
-    it('should display timeleft in the format {d} {days} {h}:{mm}', () => {
-      element.build();
+    it('should display timeleft in the format {d} {days} {h}:{mm}', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate - 1000),
         impl.getLocaleWord_('en')
@@ -157,8 +143,8 @@ describes.realWin(
       expect(itemElement.textContent).to.equal('1 Days 23:59');
     });
 
-    it('should calculate the timeleft after added offset-seconds', () => {
-      element.build();
+    it('should calculate the timeleft after added offset-seconds', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(
           endDate - twoDaysBeforeEndDate + 24 * 60 * 60 * 1000
@@ -187,8 +173,8 @@ describes.realWin(
       );
     });
 
-    it('should calculate the timeleft after substracted offset-seconds', () => {
-      element.build();
+    it('should calculate the timeleft after substracted offset-seconds', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(
           endDate - twoDaysBeforeEndDate + -1 * 24 * 60 * 60 * 1000
@@ -216,5 +202,91 @@ describes.realWin(
         '1 Days 0 Hours 0 Minutes 0 Seconds'
       );
     });
+
+    it(
+      'should calculate a negative time when target is in future ' +
+        'when using the "data-count-up" attribute',
+      async () => {
+        const countUp = true;
+        element.setAttribute('data-count-up', '');
+        element.setAttribute('when-ended', 'continue');
+        await element.buildInternal();
+        const timeObj = Object.assign(
+          impl.getYDHMSFromMs_(
+            endDate -
+              twoDaysBeforeEndDate - //two days in future
+              24 * 60 * 60 * 1000 - //minus 1 day
+              60 * 60 * 1000 - //minus 1 hour
+              60 * 1000 - //minus 1 minute
+              1000, //minus 1 second
+            countUp
+          ), // hours * minutes * seconds * ms
+          impl.getLocaleWord_('en')
+        ); // English
+        const itemElement = win.document.createElement('div');
+        itemElement.textContent =
+          timeObj.d +
+          ' ' +
+          timeObj.days +
+          ' ' +
+          timeObj.h +
+          ' ' +
+          timeObj.hours +
+          ' ' +
+          timeObj.m +
+          ' ' +
+          timeObj.minutes +
+          ' ' +
+          timeObj.s +
+          ' ' +
+          timeObj.seconds;
+        expect(itemElement.textContent).to.equal(
+          '0 Days -22 Hours -58 Minutes -58 Seconds'
+        );
+      }
+    );
+
+    it(
+      'should calculate a positive time when target is in past ' +
+        'when using the "data-count-up" attribute',
+      async () => {
+        const countUp = true;
+        element.setAttribute('data-count-up', '');
+        element.setAttribute('when-ended', 'continue');
+        await element.buildInternal();
+        const timeObj = Object.assign(
+          impl.getYDHMSFromMs_(
+            twoDaysBeforeEndDate -
+              endDate + //two days in past
+              24 * 60 * 60 * 1000 + //plus 1 day
+              60 * 60 * 1000 + //plus 1 hour
+              60 * 1000 + //plus 1 minute
+              1000, //plus 1 second
+            countUp
+          ), // hours * minutes * seconds * ms
+          impl.getLocaleWord_('en')
+        ); // English
+        const itemElement = win.document.createElement('div');
+        itemElement.textContent =
+          timeObj.d +
+          ' ' +
+          timeObj.days +
+          ' ' +
+          timeObj.h +
+          ' ' +
+          timeObj.hours +
+          ' ' +
+          timeObj.m +
+          ' ' +
+          timeObj.minutes +
+          ' ' +
+          timeObj.s +
+          ' ' +
+          timeObj.seconds;
+        expect(itemElement.textContent).to.equal(
+          '0 Days 22 Hours 58 Minutes 59 Seconds'
+        );
+      }
+    );
   }
 );

@@ -1,26 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {isArray} from '#core/types';
+import {getWin} from '#core/window';
 
-import {CommonSignals} from './common-signals';
-import {Services} from './services';
-import {createElementWithAttributes, removeElement} from './dom';
-import {devAssert} from './log';
-import {dict} from './utils/object';
-import {isArray, toWin} from './types';
-import {triggerAnalyticsEvent} from './analytics';
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {devAssert} from '#utils/log';
 
 /**
  * Method to create scoped analytics element for any element.
@@ -38,21 +24,13 @@ export function insertAnalyticsElement(
   disableImmediate = false
 ) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
-  const analyticsElem = createElementWithAttributes(
-    doc,
-    'amp-analytics',
-    dict({
-      'sandbox': 'true',
-      'trigger': disableImmediate ? '' : 'immediate',
-    })
-  );
-  const scriptElem = createElementWithAttributes(
-    doc,
-    'script',
-    dict({
-      'type': 'application/json',
-    })
-  );
+  const analyticsElem = createElementWithAttributes(doc, 'amp-analytics', {
+    'sandbox': 'true',
+    'trigger': disableImmediate ? '' : 'immediate',
+  });
+  const scriptElem = createElementWithAttributes(doc, 'script', {
+    'type': 'application/json',
+  });
   scriptElem.textContent = JSON.stringify(config);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = config;
@@ -60,13 +38,11 @@ export function insertAnalyticsElement(
   // Force load analytics extension if script not included in page.
   if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
-    const extensions = Services.extensionsFor(
-      toWin(parentElement.ownerDocument.defaultView)
-    );
+    const extensions = Services.extensionsFor(getWin(parentElement));
     const ampdoc = Services.ampdoc(parentElement);
     extensions./*OK*/ installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {
-    Services.analyticsForDocOrNull(parentElement).then(analytics => {
+    Services.analyticsForDocOrNull(parentElement).then((analytics) => {
       devAssert(analytics);
     });
   }
@@ -108,7 +84,7 @@ class CustomEventReporter {
 
     this.parent_
       .signals()
-      .whenSignal(CommonSignals.LOAD_START)
+      .whenSignal(CommonSignals_Enum.LOAD_START)
       .then(() => {
         insertAnalyticsElement(this.parent_, config, true);
       });
@@ -126,7 +102,8 @@ class CustomEventReporter {
     triggerAnalyticsEvent(
       this.parent_,
       this.getEventTypeInSandbox_(eventType),
-      opt_vars
+      opt_vars,
+      /** enableDataVars */ false
     );
   }
   /**
@@ -229,12 +206,12 @@ export function useAnalyticsInSandbox(element, promise) {
   // Listener to LOAD_START signal. Insert analytics element on LOAD_START
   element
     .signals()
-    .whenSignal(CommonSignals.LOAD_START)
+    .whenSignal(CommonSignals_Enum.LOAD_START)
     .then(() => {
       if (analyticsElement || !configPromise) {
         return;
       }
-      configPromise.then(config => {
+      configPromise.then((config) => {
         if (!configPromise) {
           // If config promise resolve after unload, do nothing.
           return;
@@ -247,7 +224,7 @@ export function useAnalyticsInSandbox(element, promise) {
   // Listener to UNLOAD signal. Destroy remove element on UNLOAD
   element
     .signals()
-    .whenSignal(CommonSignals.UNLOAD)
+    .whenSignal(CommonSignals_Enum.UNLOAD)
     .then(() => {
       configPromise = null;
       if (analyticsElement) {

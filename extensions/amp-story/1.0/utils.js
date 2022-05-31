@@ -1,56 +1,36 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
+} from '#core/dom/query';
+import {setStyle, toggle} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {StateProperty} from './amp-story-store-service';
+
 import {getMode} from '../../../src/mode';
-import {
-  getSourceOrigin,
-  isProxyOrigin,
-  resolveRelativeUrl,
-} from '../../../src/url';
-import {getState} from '../../../src/history';
-import {setStyle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {createShadowRoot} from '../../../src/shadow-embed';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
  * @param {string} time
+ * @param {number=} fallbackMs Used when `time` is not a valid time string.
  * @return {number|undefined}
  */
-export function timeStrToMillis(time) {
+export function timeStrToMillis(time, fallbackMs = NaN) {
   const match = time.toLowerCase().match(/^([0-9\.]+)\s*(s|ms)$/);
-  if (!match) {
-    return NaN;
+
+  const num = match ? match[1] : undefined;
+  const units = match ? match[2] : undefined;
+
+  if (!match || match.length !== 3 || (units !== 's' && units !== 'ms')) {
+    return fallbackMs;
   }
 
-  const num = match[1];
-  const units = match[2];
-
-  userAssert(
-    match && match.length == 3 && (units == 's' || units == 'ms'),
-    'Invalid time string %s',
-    time
-  );
-
-  return units == 's' ? parseFloat(num) * 1000 : parseInt(num, 10);
+  return Math.round((units == 's' ? 1000 : 1) * parseFloat(num));
 }
 
 /**
@@ -74,7 +54,7 @@ export function hasTapAction(el) {
  * @return {!ClientRect}
  */
 export function unscaledClientRect(el) {
-  const {width, height, left, top} = el./*OK*/ getBoundingClientRect();
+  const {height, left, top, width} = el./*OK*/ getBoundingClientRect();
 
   const scaleFactorX = width == 0 ? 1 : width / el./*OK*/ offsetWidth;
   const scaleFactorY = height == 0 ? 1 : height / el./*OK*/ offsetHeight;
@@ -102,6 +82,7 @@ export function ampMediaElementFor(el) {
  * @param  {!Element} container
  * @param  {!Element} element
  * @param  {string} css
+ * @return {!Element}
  */
 export function createShadowRootWithStyle(container, element, css) {
   const style = self.document.createElement('style');
@@ -113,6 +94,7 @@ export function createShadowRootWithStyle(container, element, css) {
 
   containerToUse.appendChild(style);
   containerToUse.appendChild(element);
+  return container;
 }
 
 /**
@@ -153,10 +135,10 @@ export function getRGBFromCssColorValue(cssValue) {
  * @return {string} '#fff' or '#000'
  */
 export function getTextColorForRGB(rgb) {
-  const {r, g, b} = rgb;
+  const {b, g, r} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-  const getLinearRGBValue = x => {
+  const getLinearRGBValue = (x) => {
     // 8bit to sRGB.
     x /= 255;
 
@@ -223,99 +205,53 @@ export function userAssertValidProtocol(element, url) {
  * @return {string}
  */
 export function getSourceOriginForElement(element, url) {
-  let domainName;
-
+  const urlService = Services.urlForDoc(element);
+  let parsed;
   try {
-    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
-    // Remove protocol prefix.
-    domainName = Services.urlForDoc(element).parse(domainName).hostname;
-  } catch (e) {
+    parsed = urlService.parse(urlService.getSourceOrigin(url));
+  } catch (_) {
     // Unknown path prefix in url.
-    domainName = Services.urlForDoc(element).parse(url).hostname;
+    parsed = urlService.parse(url);
   }
-  return domainName;
-}
-
-/**
- * Resolves an image url and optimizes it if served from the cache.
- * @param {!Document} doc
- * @param {string} url
- * @return {string}
- */
-export function resolveImgSrc(doc, url) {
-  let urlSrc = resolveRelativeUrl(url, doc.location);
-  if (isProxyOrigin(doc.location.href)) {
-    // TODO(Enriqe): add extra params for resized image, for example:
-    // (/ii/w${width}/s)
-    urlSrc = urlSrc.replace('/c/s/', '/i/s/');
-  }
-  return urlSrc;
-}
-
-/** @enum {string} */
-export const HistoryState = {
-  ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
-  PAGE_ID: 'ampStoryPageId',
-  NAVIGATION_PATH: 'ampStoryNavigationPath',
-};
-
-/**
- * Updates the value for a given state in the window history.
- * @param {!Window} win
- * @param {string} stateName
- * @param {string|boolean|Array<string>|null} value
- */
-export function setHistoryState(win, stateName, value) {
-  const {history} = win;
-  const state = getState(history) || {};
-  const newHistory = {
-    ...state,
-    [stateName]: value,
-  };
-
-  history.replaceState(newHistory, '');
-}
-
-/**
- * Returns the value of a given state of the window history.
- * @param {!Window} win
- * @param {string} stateName
- * @return {*}
- */
-export function getHistoryState(win, stateName) {
-  const {history} = win;
-  if (history && getState(history)) {
-    return getState(history)[stateName];
-  }
-  return null;
-}
-
-/**
- * Returns a boolean indicating whether the media element is visible or has to
- * play, or hidden by any publisher CSS rule.
- * @param {!Element} ampMediaEl amp-video or amp-audio
- * @param {!../../../src/service/resource.Resource} resource
- * @return {boolean}
- */
-export function isMediaDisplayed(ampMediaEl, resource) {
-  // Considers amp-audio elements with a layout=nodisplay attribute as
-  // displayed, since they are expected to play when the page is active.
-  return (
-    resource.isDisplayed() ||
-    (ampMediaEl.tagName === 'AMP-AUDIO' &&
-      ampMediaEl.getLayout() === Layout.NODISPLAY)
-  );
+  return parsed.hostname;
 }
 
 /**
  * Whether a Story should show the URL info dialog.
  * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
+ * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
  * @return {boolean}
  */
-export function shouldShowStoryUrlInfo(viewer) {
+export function shouldShowStoryUrlInfo(viewer, storeService) {
+  if (!storeService.get(StateProperty.CAN_SHOW_STORY_URL_INFO)) {
+    return false;
+  }
   const showStoryUrlInfo = viewer.getParam('showStoryUrlInfo');
   return showStoryUrlInfo ? showStoryUrlInfo !== '0' : viewer.isEmbedded();
+}
+
+/**
+ * Retrieves an attribute src from the <amp-story> element.
+ * @param {!Element} element
+ * @param {string} attribute
+ * @param {string=} warn
+ * @return {?string}
+ */
+export function getStoryAttributeSrc(element, attribute, warn) {
+  const storyEl = dev().assertElement(
+    closestAncestorElementBySelector(element, 'AMP-STORY')
+  );
+  const url = storyEl.getAttribute(attribute);
+  if (!url) {
+    if (warn) {
+      user().warn(
+        'AMP-STORY',
+        `Expected ${attribute} attribute on <amp-story>`
+      );
+    }
+    return null;
+  }
+  return Services.urlForDoc(storyEl).assertHttpsUrl(url, storyEl, attribute);
 }
 
 /**
@@ -341,8 +277,84 @@ export function setTextBackgroundColor(element) {
     TEXT_BACKGROUND_COLOR_SELECTOR
   );
 
-  Array.prototype.forEach.call(elementsToUpgradeStyles, el => {
+  elementsToUpgradeStyles.forEach((el) => {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });
+}
+
+/**
+ * Click a clone of the anchor in the context of the light dom.
+ * Used to apply linker logic on shadow-dom anchors.
+ * @param {!Element} anchorElement
+ * @param {!Element} domElement element from the light dom
+ */
+export function triggerClickFromLightDom(anchorElement, domElement) {
+  const outerAnchor = anchorElement.cloneNode();
+  toggle(outerAnchor, false);
+  domElement.appendChild(outerAnchor);
+  outerAnchor.click();
+  outerAnchor.remove();
+}
+
+/**
+ * Makes a proxy URL if document is served from a proxy origin. No-op otherwise.
+ * @param {string} url
+ * @param {!AmpDoc} ampDoc
+ * @return {string}
+ */
+export const maybeMakeProxyUrl = (url, ampDoc) => {
+  const urlService = Services.urlForDoc(ampDoc);
+  const loc = ampDoc.win.location;
+  if (!urlService.isProxyOrigin(loc.origin) || urlService.isProxyOrigin(url)) {
+    return url;
+  }
+  const resolvedRelativeUrl = urlService.resolveRelativeUrl(
+    url,
+    urlService.getSourceOrigin(loc.href)
+  );
+  return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
+};
+
+/**
+ * Whether the document is transformed
+ * @param {!AmpDoc} ampdoc
+ * @return {boolean}
+ */
+export function isTransformed(ampdoc) {
+  return ampdoc.getRootNode().documentElement.hasAttribute('transformed');
+}
+
+/**
+ * Wrapper for classes that depend on story services being installed
+ * so they can fetch the services synchronously. This allows the extension
+ * to be installed on the doc as a script tag.
+ *
+ * @param {AMP.BaseElement.constructor} klass
+ * @return {AMP.BaseElement.constructor}
+ */
+export function dependsOnStoryServices(klass) {
+  return class extends AMP.BaseElement {
+    /**
+     * @override
+     * @return {AMP.BaseElement|Promise<AMP.BaseElement>}
+     */
+    upgradeCallback() {
+      const storyEl = closestAncestorElementBySelector(
+        this.element,
+        'amp-story'
+      );
+      if (!storyEl) {
+        // Unit tests may mock or install the services internally, so
+        // instantiating immediately allows us to test implementations without
+        // placing the element inside an <amp-story>.
+        // In reality, this would cause failures. This is okay since upgradable
+        // elements are required to descend from an <amp-story>.
+        return new klass(this.element);
+      }
+      return whenUpgradedToCustomElement(storyEl)
+        .then(() => storyEl.getImpl())
+        .then(() => new klass(this.element));
+    }
+  };
 }

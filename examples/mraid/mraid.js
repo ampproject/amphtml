@@ -1,7 +1,7 @@
 // Fake mraid.js that lets us pretend to be in a mobile app environment.
 window.mraid = {};
-console.log("initiate marid object");
-window.mraid.getState = function() {
+console.log('initiate marid object');
+window.mraid.getState = function () {
   return Math.random() < 0.5 ? 'ready' : 'loading';
 };
 const visibleRect = {
@@ -12,16 +12,16 @@ const visibleRect = {
   top: 0,
   width: 5,
   x: 0,
-  y: 0
-}
-window.mraid.addEventListener = function(event, callback) {
+  y: 0,
+};
+window.mraid.addEventListener = function (event, callback) {
   console.log('fake addEventListener API');
   console.log('event is ', event);
   if (event === 'ready') {
     window.setTimeout(callback, 1000);
   } else if (event === 'exposureChange') {
     console.log('the callback is ', callback);
-    window.setTimeout(function() {
+    window.setTimeout(function () {
       console.log('mraid.js about to call exposureChange callback');
       callback(70, visibleRect, null);
       mockVisible(callback, 50.5, 200);
@@ -31,13 +31,13 @@ window.mraid.addEventListener = function(event, callback) {
     console.log('unknown event ' + event);
   }
 };
-window.mraid.close = function() {
+window.mraid.close = function () {
   console.log('close');
 };
 window.mraid.open = function (url) {
   console.log('open ' + url);
 };
-window.mraid.expand = function() {
+window.mraid.expand = function () {
   console.log('expand');
 };
 

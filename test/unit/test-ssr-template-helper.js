@@ -1,20 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../../src/services';
 import {SsrTemplateHelper} from '../../src/ssr-template-helper';
 
 describes.fakeWin(
@@ -22,7 +7,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let ampdoc;
     let hasCapabilityStub;
     let ssrTemplateHelper;
@@ -35,7 +20,7 @@ describes.fakeWin(
     beforeEach(() => {
       ampdoc = env.ampdoc;
       win = env.win;
-      templates = Services.templatesFor(win);
+      templates = Services.templatesForDoc(ampdoc);
       viewer = Services.viewerForDoc(ampdoc);
       viewer.isTrustedViewer = () => Promise.resolve(true);
       hasCapabilityStub = env.sandbox.stub(viewer, 'hasCapability');
@@ -90,7 +75,7 @@ describes.fakeWin(
 
         return ssrTemplateHelper.ssr({}, {}, {}).then(
           () => Promise.reject(),
-          err => {
+          (err) => {
             expect(err).match(errorMsg);
           }
         );
@@ -178,7 +163,7 @@ describes.fakeWin(
 
           return ssrTemplateHelper
             .applySsrOrCsrTemplate({}, {html: '<div>some template</div>'})
-            .then(renderedHTML => {
+            .then((renderedHTML) => {
               expect(findAndSetHtmlForTemplate).to.have.been.calledWith(
                 {},
                 '<div>some template</div>'
@@ -191,7 +176,7 @@ describes.fakeWin(
           allowConsoleError(() => {
             expect(() => {
               ssrTemplateHelper.applySsrOrCsrTemplate({}, {html: null});
-            }).to.throw(/Server side html response must be defined/);
+            }).to.throw(/Skipping template rendering due to failed fetch/);
           });
         });
 
@@ -204,7 +189,7 @@ describes.fakeWin(
             .applySsrOrCsrTemplate({}, {html: '<div>some templates</div>'})
             .then(
               () => Promise.reject(),
-              error => expect(error).to.match(errorMsg)
+              (error) => expect(error).to.match(errorMsg)
             );
         });
 

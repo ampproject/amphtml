@@ -1,36 +1,21 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {AutoFullscreenManager} from '../../src/service/video-manager-impl';
-import {PlayingStates} from '../../src/video-interface';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {AutoFullscreenManager} from '#service/video-manager-impl';
 
-describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
+import {PlayingStates_Enum} from '../../src/video-interface';
+
+describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
   let ampdoc;
   let autoFullscreenManager;
+  let ioCallback;
 
   function createVideo() {
     const element = env.win.document.createElement('div');
-    const noop = () => {};
-    Object.assign(element, {
-      getIntersectionChangeEntry: noop,
-    });
-    return {
+    const impl = {
       element,
-      signals: () => ({whenSignal: () => ({then: noop})}),
+      signals: () => ({whenSignal: () => ({then: () => {}})}),
     };
+    element.getImpl = () => Promise.resolve(impl);
+    return impl;
   }
 
   function mockCenteredVideo(element) {
@@ -42,10 +27,25 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     env.win.screen.orientation.type = orientation;
   }
 
+  function fireIntersection({boundingClientRect, intersectionRatio, target}) {
+    ioCallback([
+      {
+        target,
+        boundingClientRect,
+        rootBounds: {},
+        intersectionRatio,
+      },
+    ]);
+  }
+
   beforeEach(() => {
     ampdoc = env.ampdoc;
     autoFullscreenManager = new AutoFullscreenManager(ampdoc);
     env.sandbox.stub(autoFullscreenManager, 'canFullscreen_').returns(true);
+    env.win.IntersectionObserver = (cb) => {
+      ioCallback = cb;
+      return {observe: () => {}, unobserve: () => {}, disconnect: () => {}};
+    };
   });
 
   it('should enter fullscreen if a video is centered in portrait', () => {
@@ -106,7 +106,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     expect(exit).to.not.have.been.called;
   });
 
-  it('selects the only video playing manually amongst visible', () => {
+  it('selects the only video playing manually amongst visible', async () => {
     const video1 = createVideo();
     const video2 = createVideo();
     const video3 = createVideo();
@@ -116,28 +116,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       height: 1000,
     });
 
-    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    const video3Entry = {
       // Visible:
-      intersectionRatio: 1,
-      boundingClientRect: {
-        top: 0,
-        bottom: 200,
-        width: 300,
-        height: 200,
-      },
-    });
-    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
-      // Visible:
-      intersectionRatio: 1,
-      boundingClientRect: {
-        top: 200,
-        bottom: 400,
-        width: 300,
-        height: 200,
-      },
-    });
-    env.sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
-      // Visible:
+      target: video3.element,
       intersectionRatio: 1,
       boundingClientRect: {
         top: 400,
@@ -145,27 +126,28 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
+    };
 
     const getPlayingState = env.sandbox.stub(
       autoFullscreenManager,
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PAUSED);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_AUTO);
-    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PAUSED);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_AUTO);
+    getPlayingState.withArgs(video3).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
-      video3
-    );
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
+    fireIntersection(video3Entry);
+    expect(await bestCenteredPromise).equal(video3);
   });
 
-  it('selects center-most video among those visible and playing', () => {
+  it('selects center-most video among those visible and playing', async () => {
     const video1 = createVideo();
     const video2 = createVideo();
     const video3 = createVideo();
@@ -175,8 +157,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       height: 600,
     });
 
-    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    const video1Entry = {
       // Visible:
+      target: video1.element,
       intersectionRatio: 1,
       boundingClientRect: {
         top: 0,
@@ -184,9 +167,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
-    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+    };
+    const video2Entry = {
       // Visible:
+      target: video2.element,
       intersectionRatio: 1,
       boundingClientRect: {
         top: 200,
@@ -194,9 +178,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
-    env.sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
+    };
+    const video3Entry = {
       // Visible:
+      target: video3.element,
       intersectionRatio: 1,
       boundingClientRect: {
         top: 400,
@@ -204,27 +189,28 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
+    };
 
     const getPlayingState = env.sandbox.stub(
       autoFullscreenManager,
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video3).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
-      video2
-    );
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
+    [video1Entry, video2Entry, video3Entry].forEach(fireIntersection);
+    expect(await bestCenteredPromise).to.equal(video2);
   });
 
-  it('selects top-most video if two videos are equally centered', () => {
+  it('selects top-most video if two videos are equally centered', async () => {
     const video1 = createVideo();
     const video2 = createVideo();
 
@@ -233,8 +219,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       height: 400,
     });
 
-    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    const video1Entry = {
       // Visible:
+      target: video1.element,
       intersectionRatio: 1,
       boundingClientRect: {
         top: 0,
@@ -242,9 +229,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
-    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+    };
+    const video2Entry = {
       // Visible:
+      target: video2.element,
       intersectionRatio: 1,
       boundingClientRect: {
         top: 200,
@@ -252,25 +240,26 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
+    };
 
     const getPlayingState = env.sandbox.stub(
       autoFullscreenManager,
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
-      video1
-    );
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
+    [video1Entry, video2Entry].forEach(fireIntersection);
+    expect(await bestCenteredPromise).to.equal(video1);
   });
 
-  it('selects the highest intersection ratio if two videos are visible', () => {
+  it('selects the highest intersection ratio if two videos are visible', async () => {
     const video1 = createVideo();
     const video2 = createVideo();
 
@@ -279,7 +268,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       height: 400,
     });
 
-    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    const video1Entry = {
+      target: video1.element,
       intersectionRatio: 0.9,
       boundingClientRect: {
         top: -30,
@@ -287,9 +277,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
-    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+    };
+    const video2Entry = {
       // Visible:
+      target: video2.element,
       intersectionRatio: 1,
       boundingClientRect: {
         top: 200,
@@ -297,21 +288,22 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         width: 300,
         height: 200,
       },
-    });
+    };
 
     const getPlayingState = env.sandbox.stub(
       autoFullscreenManager,
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
-      video2
-    );
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
+    [video1Entry, video2Entry].forEach(fireIntersection);
+    expect(await bestCenteredPromise).to.equal(video2);
   });
 });

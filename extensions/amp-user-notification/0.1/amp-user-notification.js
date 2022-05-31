@@ -1,41 +1,27 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {toggle} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
 
-import {CSS} from '../../../build/amp-user-notification-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {Services} from '#service';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '#service/notification-ui-manager';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {toggle} from '../../../src/style';
+} from '../../../src/service-helpers';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
 
 /**
- * @export
  * @typedef {{
  *   showNotification: boolean
  * }}
@@ -200,7 +186,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     const userNotificationManagerPromise =
       /** @type {!Promise<!UserNotificationManager>} */
       (getServicePromiseForDoc(ampdoc, SERVICE_ID));
-    userNotificationManagerPromise.then(manager => {
+    userNotificationManagerPromise.then((manager) => {
       manager.registerUserNotification(
         dev().assertString(this.elementId_),
         this
@@ -215,10 +201,10 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   isNotificationRequiredGeo_(geoGroup, includeGeos) {
-    return Services.geoForDocOrNull(this.element).then(geo => {
+    return Services.geoForDocOrNull(this.element).then((geo) => {
       userAssert(geo, 'requires <amp-geo> to use promptIfUnknownForGeoGroup');
 
-      const matchedGeos = geoGroup.split(/,\s*/).filter(group => {
+      const matchedGeos = geoGroup.split(/,\s*/).filter((group) => {
         return geo.isInCountryGroup(group) == GEO_IN_GROUP.IN;
       });
 
@@ -236,7 +222,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   buildGetHref_(ampUserId) {
     const showIfHref = dev().assertString(this.showIfHref_);
-    return this.urlReplacements_.expandUrlAsync(showIfHref).then(href => {
+    return this.urlReplacements_.expandUrlAsync(showIfHref).then((href) => {
       const data = /** @type {!JsonObject} */ ({
         'elementId': this.elementId_,
         'ampUserId': ampUserId,
@@ -254,13 +240,13 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   getShowEndpoint_(ampUserId) {
     this.ampUserId_ = ampUserId;
-    return this.buildGetHref_(ampUserId).then(href => {
+    return this.buildGetHref_(ampUserId).then((href) => {
       const getReq = {
         credentials: 'include',
       };
       return Services.xhrFor(this.win)
         .fetchJson(href, getReq)
-        .then(res => res.json());
+        .then((res) => res.json());
     });
   }
 
@@ -287,10 +273,10 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Object}
    */
   buildPostDismissRequest_(enctype, elementId, ampUserId) {
-    const body = dict({
+    const body = {
       'elementId': elementId,
       'ampUserId': ampUserId,
-    });
+    };
     return {
       method: 'POST',
       credentials: 'include',
@@ -330,10 +316,10 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   optoutOfCid_() {
     return this.getCidService_()
-      .then(cid => cid.optOut())
+      .then((cid) => cid.optOut())
       .then(
         () => this.dismiss(/*forceNoPersist*/ false),
-        reason => {
+        (reason) => {
           dev().error(TAG, 'Failed to opt out of Cid', reason);
           // If optout fails, dismiss notification without persisting.
           this.dismiss(/*forceNoPersist*/ true);
@@ -347,7 +333,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getAsyncCid_() {
-    return this.getCidService_().then(cid => {
+    return this.getCidService_().then((cid) => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting
@@ -375,7 +361,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   shouldShow() {
-    return this.isDismissed().then(dismissed => {
+    return this.isDismissed().then((dismissed) => {
       if (dismissed) {
         // Consent has been accepted. Nothing more to do.
         return false;
@@ -418,10 +404,10 @@ export class AmpUserNotification extends AMP.BaseElement {
       return Promise.resolve(false);
     }
     return this.storagePromise_
-      .then(storage => storage.get(this.storageKey_))
+      .then((storage) => storage.get(this.storageKey_))
       .then(
-        persistedValue => !!persistedValue,
-        reason => {
+        (persistedValue) => !!persistedValue,
+        (reason) => {
           dev().error(TAG, 'Failed to read storage', reason);
           return false;
         }
@@ -443,7 +429,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     if (this.persistDismissal_ && !forceNoPersist) {
       // Store and post.
-      this.storagePromise_.then(storage => {
+      this.storagePromise_.then((storage) => {
         storage.set(this.storageKey_, true);
       });
     }
@@ -526,9 +512,9 @@ export class UserNotificationManager {
     // that blocks until one notification is dismissed.
     return this.managerReadyPromise_
       .then(() => userNotification.shouldShow())
-      .then(shouldShow => {
+      .then((shouldShow) => {
         if (shouldShow) {
-          return this.notificationUiManagerPromise_.then(manager => {
+          return this.notificationUiManagerPromise_.then((manager) => {
             return manager.registerUI(
               userNotification.show.bind(userNotification)
             );
@@ -573,7 +559,7 @@ export function installUserNotificationManagerForTesting(ampdoc) {
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerServiceForDoc(SERVICE_ID, UserNotificationManager);
   AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   AMP.registerElement(TAG, AmpUserNotification, CSS);

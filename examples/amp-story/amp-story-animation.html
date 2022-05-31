@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>amp-animation inside amp-story</title>
+    <link rel="canonical" href="." />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"/>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+    <script async custom-element="amp-bodymovin-animation" src="https://cdn.ampproject.org/v0/amp-bodymovin-animation-0.1.js"></script>
+    <style amp-custom>
+      body {
+        font-family: sans-serif;
+        font-size: 18px;
+      }
+      .box {
+        background: blue;
+        width: 80px;
+        height: 100px;
+        margin: 0 0 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <amp-story standalone>
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <strong class="animate">rotate with amp-story-animation</strong>
+          <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
+          <div animate-in="fly-in-top" animate-in-after="first">
+            fly-in with animate-in, after the previous element
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            {
+              "selector": ".animate",
+              "duration": "1s",
+              "keyframes": {"transform": "rotate(360deg)"}
+            }
+          </script>
+        </amp-story-animation>
+      </amp-story-page>
+
+      <amp-story-page id="page1">
+        <amp-story-grid-layer template="vertical">
+          <strong class="animate">
+            bounce forward with amp-story-animation
+          </strong>
+          <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
+          <div animate-in="fly-in-top" animate-in-after="first">
+            fly-in with animate-in, after the previous element
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            {
+              "selector": ".animate",
+              "duration": "0.5s",
+              "keyframes": [
+                {"transform": "scale(1)"},
+                {"transform": "scale(1.5)"},
+                {"transform": "scale(1)"}
+              ]
+            }
+          </script>
+        </amp-story-animation>
+      </amp-story-page>
+
+      <amp-story-page id="page2">
+        <amp-story-grid-layer template="vertical">
+          <div class="box animate-bottom-right"></div>
+          <div class="box animate-bottom"></div>
+          <div class="box animate-right"></div>
+        </amp-story-grid-layer>
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            [
+              {
+                "selector": ".animate-bottom",
+                "duration": "2s",
+                "iterations": "infinite",
+                "keyframes": [
+                  {"transform": "none"},
+                  {"transform": "translate(0, calc(100vh - y() - height()))"},
+                  {"transform": "none"}
+                ]
+              },
+              {
+                "selector": ".animate-right",
+                "duration": "2s",
+                "iterations": "infinite",
+                "keyframes": [
+                  {"transform": "none"},
+                  {"transform": "translate(calc(100vw - x() - width()), 0)"},
+                  {"transform": "none"}
+                ]
+              },
+              {
+                "selector": ".animate-bottom-right",
+                "duration": "2s",
+                "iterations": "infinite",
+                "keyframes": [
+                  {"transform": "none"},
+                  {"transform": "translate(calc(100vw - x() - width()), calc(100vh - y() - height()))"},
+                  {"transform": "none"}
+                ]
+              }
+            ]
+          </script>
+        </amp-story-animation>
+      </amp-story-page>
+
+      <amp-story-page id="hidden-animations">
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            [
+              {
+                "selector": ".anim",
+                "keyframes": {
+                  "transform": ["translate3d(-100%, 0px, 0)", "translate3d(0px, 0px, 0)"]
+                },
+                "delay": 100,
+                "direction": "normal",
+                "duration": 1000,
+                "easing": "cubic-bezier(0.19, 1, 0.22, 1)",
+                "fill": "both"
+              }
+            ]
+          </script>
+        </amp-story-animation>
+        <amp-story-grid-layer template="vertical">
+          <amp-video autoplay="autoplay" layout="fill" loop="loop">
+            <source type="video/mp4" src="./video/stamp.mp4">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" aspect-ratio="412:618">
+          <div class="anim" style="width:80%;height:20%;position:absolute;font-size:30px;background:white;left:10%;top:20%;transform:translate3d(-100%, 0px, 0)">
+            This is the animated text with initial frame in CSS
+          </div>
+          <div class="anim" style="width:80%;height:20%;position:absolute;font-size:30px;background:white;left:10%;top:60%">
+            This is the animated text with final frame in CSS
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="bodymovin">
+        <amp-story-grid-layer template="vertical">
+          <amp-bodymovin-animation layout="responsive" width="200" height="200" src="https://nainar.github.io/loader.json" loop>
+          </amp-bodymovin-animation>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

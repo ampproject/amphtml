@@ -1,27 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {BrowserController, RequestBank} from '#testing/helpers/service';
 
-import {BrowserController, RequestBank} from '../../testing/test-helper';
+// TODO(zhouyx, #11459): Unskip the test on Safari and Firefox.
+const t = describes.sandboxed.configure().skipSafari().skipFirefox().skipEdge();
 
-const t = describe
-  .configure()
-  .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
-  .skipEdge();
-
-t.run('user-error', function() {
+t.run('user-error', {}, function () {
   describes.integration(
     'user-error integration test',
     {
@@ -48,10 +30,14 @@ t.run('user-error', function() {
             referrerpolicy="fail-referrer">
             `,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with amp-pixel user().assert err', () => {
@@ -88,10 +74,14 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-img');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with amp-img user().error err', () => {
@@ -129,10 +119,14 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-ad');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with 3p error message', () => {

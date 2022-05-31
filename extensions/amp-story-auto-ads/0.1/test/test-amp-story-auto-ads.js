@@ -1,43 +1,39 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
-import * as storyEvents from '../../../amp-story/1.0/events';
-import {
-  Action,
-  StateProperty,
-  UIType,
-  getStoreService,
-} from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
-import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
-import {CommonSignals} from '../../../../src/common-signals';
+import * as experiments from '#experiments';
+import {forceExperimentBranch, getExperimentBranch} from '#experiments';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
+
 import {
   MockStoryImpl,
   addStoryAutoAdsConfig,
   addStoryPages,
 } from './story-mock';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
-import {Services} from '../../../../src/services';
+import {
+  Action,
+  StateProperty,
+  UIType_Enum,
+  getStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
+import * as storyEvents from '../../../amp-story/1.0/events';
+import {
+  AmpStoryAutoAds,
+  Attributes,
+  RELEVANT_PLAYER_EXPS,
+} from '../amp-story-auto-ads';
 import {StoryAdPage} from '../story-ad-page';
-import {macroTask} from '../../../../testing/yield';
-import {registerServiceBuilder} from '../../../../src/service';
+forceExperimentBranch;
 
 const NOOP = () => {};
 
-// TODO(ccordry): Continue to refactor the rest of this file to use new test helpers.
+// TODO(ccordry): Refactor these tests using new associated classes & try to remove stubbing private methods.
 describes.realWin(
   'amp-story-auto-ads',
   {
@@ -45,7 +41,7 @@ describes.realWin(
       extensions: ['amp-story:1.0', 'amp-story-auto-ads'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let adElement;
@@ -54,15 +50,18 @@ describes.realWin(
     let story;
     let storeService;
     let storeGetterStub;
+    let viewer;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      const viewer = Services.viewerForDoc(env.ampdoc);
+      viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function () {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
       adElement = win.document.createElement('amp-story-auto-ads');
       storyElement = win.document.createElement('amp-story');
       win.document.body.appendChild(storyElement);
@@ -76,6 +75,59 @@ describes.realWin(
         .withArgs(StateProperty.PAGE_IDS)
         .returns(['1', '2', '3', '4', '5', '6', '7', '8']);
       storeGetterStub.callThrough();
+    });
+
+    describe('shared experiments', () => {
+      beforeEach(async () => {
+        RELEVANT_PLAYER_EXPS[123] = 'fake-exp';
+        env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
+      });
+
+      it('handles null response', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve(null));
+        await autoAds.buildCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
+
+      it('handles empty array', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: []}));
+        await autoAds.buildCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
+
+      it('correctly ssets relevant ids', async () => {
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: [123]}));
+        await autoAds.buildCallback();
+        expect(getExperimentBranch(win, 'fake-exp')).to.equal('123');
+      });
+
+      it('does not set random ids', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: [456]}));
+        await autoAds.buildCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
     });
 
     describe('ad creation', () => {
@@ -100,6 +152,120 @@ describes.realWin(
         const ampAd = doc.querySelector('amp-ad');
         expect(ampAd).not.to.exist;
       });
+
+      it('does not create multiple ads in stories of 8 pages', async () => {
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        // Fake click to ad page.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        const ampAds = doc.querySelectorAll('amp-ad');
+        expect(ampAds.length).to.equal(1);
+      });
+
+      it('creates multiple ads if enough pages', async () => {
+        storeGetterStub
+          .withArgs(StateProperty.PAGE_IDS)
+          .returns([
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+            '10',
+            '11',
+            '12',
+            '13',
+            '14',
+            '15',
+          ]);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        // Fake click to ad page.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        const ampAds = doc.querySelectorAll('amp-ad');
+        expect(ampAds.length).to.equal(2);
+      });
+
+      it('does not fetch new ad when viewing previous ad', async () => {
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        // Fake click to ad page.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        // Visit ad page again.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        const ampAds = doc.querySelectorAll('amp-ad');
+        expect(ampAds.length).to.equal(1);
+      });
+
+      it('should call onPageChange and onNewAdView as required', async () => {
+        storeGetterStub
+          .withArgs(StateProperty.PAGE_IDS)
+          .returns([
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            'i-amphtml-ad-page-1',
+            '8',
+            '9',
+            '10',
+            '11',
+            '12',
+            '13',
+            '14',
+            '15',
+          ]);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        const onPageChange = env.sandbox.spy(
+          autoAds.placementAlgorithm_,
+          'onPageChange'
+        );
+        const onNewAdView = env.sandbox.spy(
+          autoAds.placementAlgorithm_,
+          'onNewAdView'
+        );
+
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: '7',
+          index: 6,
+        });
+        expect(onPageChange).to.be.calledWith('7');
+        expect(onNewAdView).not.to.be.called;
+
+        onPageChange.resetHistory();
+        onNewAdView.resetHistory();
+
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        expect(onPageChange).not.to.be.called;
+        expect(onNewAdView).to.be.calledWith(7);
+      });
     });
 
     describe('service installation', () => {
@@ -122,7 +288,8 @@ describes.realWin(
         await autoAds.layoutCallback();
         expect(installExtensionForDocStub).to.be.calledWithExactly(
           env.ampdoc,
-          'amp-mustache'
+          'amp-mustache',
+          'latest'
         );
       });
 
@@ -147,7 +314,7 @@ describes.realWin(
         new MockStoryImpl(storyElement);
         addStoryAutoAdsConfig(adElement);
         await autoAds.buildCallback();
-        autoAds.layoutCallback();
+        await autoAds.layoutCallback();
       });
 
       it('should create glassPane', () => {
@@ -165,31 +332,33 @@ describes.realWin(
 
     describe('visible attribute', () => {
       beforeEach(() => {
-        env.sandbox.stub(autoAds, 'analyticsEvent_').returns(NOOP);
-        autoAds.adPagesCreated_ = 1;
-        autoAds.adPageIds_ = {'ad-page-1': 1};
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
       });
 
-      it('sets the visible attribute when showing', () => {
+      it('sets the visible attribute when showing', async () => {
         const setVisibleStub = env.sandbox.stub(
           autoAds,
           'setVisibleAttribute_'
         );
-        env.sandbox.stub(autoAds, 'startNextAdPage_').returns(NOOP);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
         // Switching to ad page.
-        autoAds.handleActivePageChange_(
-          /* pageIndex */ 1,
-          /* pageId */ 'ad-page-1'
-        );
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
         expect(setVisibleStub.calledOnce).to.be.true;
       });
 
-      it('removes the visible attribute when showing', () => {
+      it('removes the visible attribute when exiting', async () => {
         const removeVisibleStub = env.sandbox.stub(
           autoAds,
           'removeVisibleAttribute_'
         );
-        autoAds.idOfAdShowing_ = 'ad-page-1';
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        autoAds.visibleAdPage_ = {getId: () => 'i-amphtml-ad-page-1'};
         autoAds.handleActivePageChange_(
           /* pageIndex */ 2,
           /* pageId */ 'non-ad-page'
@@ -198,93 +367,76 @@ describes.realWin(
       });
     });
 
-    describe('ad badge', () => {
+    describe('system layer', () => {
       beforeEach(async () => {
+        // TODO(#33969) remove when launched.
         // Force sync mutateElement.
         env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
         addStoryAutoAdsConfig(adElement);
         await story.buildCallback();
         // Fire these events so that story ads thinks the parent story is ready.
-        story.signals().signal(CommonSignals.BUILT);
-        story.signals().signal(CommonSignals.INI_LOAD);
+        story.signals().signal(CommonSignals_Enum.BUILT);
+        story.signals().signal(CommonSignals_Enum.INI_LOAD);
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
       });
 
-      it('should propigate the ad-showing attribute', () => {
-        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
-          Attributes.AD_SHOWING
+      it('should create ad badge', () => {
+        const adBadge = doc.querySelector('.i-amphtml-story-ad-badge');
+        expect(adBadge).to.exist;
+      });
+
+      it('should propagate the ad-showing attribute to badge', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
         );
+        expect(adBadgeContainer).not.to.have.attribute(Attributes.AD_SHOWING);
         storeService.dispatch(Action.TOGGLE_AD, true);
-        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
-          Attributes.AD_SHOWING
+        expect(adBadgeContainer).to.have.attribute(Attributes.AD_SHOWING);
+      });
+
+      it('should propagate the desktop-one-panel attribute to ad badge', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
+        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.MOBILE);
+        expect(adBadgeContainer).not.to.have.attribute(
+          Attributes.DESKTOP_ONE_PANEL
+        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_ONE_PANEL);
+        expect(adBadgeContainer).to.have.attribute(
+          Attributes.DESKTOP_ONE_PANEL
         );
       });
 
-      it('should propigate the desktop-panels attribute', () => {
-        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(
-          Attributes.DESKTOP_PANELS
+      it('should propagate the dir=rtl attribute', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
         );
-        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
-          Attributes.DESKTOP_PANELS
-        );
-      });
-
-      it('should propigate the dir=rtl attribute', () => {
-        expect(autoAds.getAdBadgeRoot()).not.to.have.attribute(Attributes.DIR);
+        expect(adBadgeContainer).not.to.have.attribute(Attributes.DIR);
         storeService.dispatch(Action.TOGGLE_RTL, true);
-        expect(autoAds.getAdBadgeRoot()).to.have.attribute(
-          Attributes.DIR,
-          'rtl'
-        );
+        expect(adBadgeContainer).to.have.attribute(Attributes.DIR, 'rtl');
       });
     });
 
     describe('analytics triggers', () => {
-      it('should fire "story-ad-insert" upon insertion', async () => {
-        autoAds.uniquePagesCount_ = 10;
-        autoAds.adPagesCreated_ = 1;
-        env.sandbox.stub(autoAds, 'startNextAdPage_');
-        env.sandbox
-          .stub(autoAds, 'tryToPlaceAdAfterPage_')
-          .resolves(/* placed */ 1);
-        const analyticsStub = env.sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.handleActivePageChange_(3, 'fakePage');
-        await macroTask();
-        expect(analyticsStub).to.be.called;
-        expect(analyticsStub).to.have.been.calledWithMatch('story-ad-insert', {
-          'insertTime': env.sandbox.match.number,
-        });
-      });
-
-      it('should fire "story-ad-discard" upon discarded ad', async () => {
-        autoAds.uniquePagesCount_ = 10;
-        autoAds.adPagesCreated_ = 1;
-        env.sandbox.stub(autoAds, 'startNextAdPage_');
-        env.sandbox
-          .stub(autoAds, 'tryToPlaceAdAfterPage_')
-          .resolves(/* discard */ 2);
-        const analyticsStub = env.sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.handleActivePageChange_(3, 'fakePage');
-        await macroTask();
-        expect(analyticsStub).to.be.called;
-        expect(analyticsStub).to.have.been.calledWithMatch('story-ad-discard', {
-          'discardTime': env.sandbox.match.number,
-        });
-      });
-
       it('should fire "story-ad-view" upon ad visible', () => {
         autoAds.ampStory_ = {
           element: storyElement,
           addPage: NOOP,
         };
         autoAds.setVisibleAttribute_ = NOOP;
-        autoAds.adPagesCreated_ = 1;
-        env.sandbox.stub(autoAds, 'startNextAdPage_');
+        autoAds.placementAlgorithm_ = {onPageChange: NOOP};
+        autoAds.adPageManager_ = {
+          getAdPageById: () => ({
+            hasBeenViewed: () => true,
+          }),
+          getIndexById: () => 1,
+          hasId: () => true,
+          numberOfAdsCreated: () => 1,
+        };
         const analyticsStub = env.sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.adPageIds_ = {'ad-page-1': 1};
-        autoAds.handleActivePageChange_(1, 'ad-page-1');
+        autoAds.handleActivePageChange_(1, 'i-amphtml-ad-page-1');
         expect(analyticsStub).to.be.called;
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-view', {
           'viewTime': env.sandbox.match.number,
@@ -296,12 +448,14 @@ describes.realWin(
           element: storyElement,
           addPage: NOOP,
         };
-        autoAds.adPagesCreated_ = 1;
-        const page = win.document.createElement('amp-story-page');
-        page.getImpl = () => Promise.resolve();
-
+        autoAds.placementAlgorithm_ = {onPageChange: NOOP};
+        autoAds.visibleAdPage_ = {getId: () => 'page-1'};
+        autoAds.adPageManager_ = {
+          hasId: () => false,
+          numberOfAdsCreated: () => 1,
+          getIndexById: () => 1,
+        };
         const analyticsStub = env.sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.idOfAdShowing_ = 'ad-page-1';
         autoAds.handleActivePageChange_(1, 'page-3');
 
         expect(analyticsStub).to.be.called;
@@ -342,7 +496,7 @@ describes.realWin(
         const dispatchStub = env.sandbox.spy(storyEvents, 'dispatch');
 
         const ampAd = doc.querySelector('amp-ad');
-        ampAd.signals().signal(CommonSignals.INI_LOAD);
+        ampAd.signals().signal(CommonSignals_Enum.INI_LOAD);
         await macroTask();
 
         expect(insertSpy).calledWith('story-page-0', 'i-amphtml-ad-page-1');

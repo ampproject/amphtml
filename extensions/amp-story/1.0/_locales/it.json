@@ -1,0 +1,170 @@
+{
+  "2": {
+    "string": "Tocca Avanti"
+  },
+  "3": {
+    "string": "Tocca Indietro"
+  },
+  "4": {
+    "string": "Impossibile copiare il link negli appunti :("
+  },
+  "5": {
+    "string": "Link copiato!"
+  },
+  "6": {
+    "string": "Email"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Ottieni link"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Spiacenti, il browser in uso non supporta questa esperienza"
+  },
+  "22": {
+    "string": "Accetta"
+  },
+  "23": {
+    "string": "Rifiuta"
+  },
+  "25": {
+    "string": "Visualizza nel dominio originale:"
+  },
+  "26": {
+    "string": "Ulteriori informazioni sui risultati AMP"
+  },
+  "27": {
+    "string": "Continua comunque"
+  },
+  "34": {
+    "string": "Riproduci video"
+  },
+  "35": {
+    "string": "Scorri verso l'alto"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Aggiornato"
+  },
+  "65": {
+    "string": "Impossibile riprodurre il video"
+  },
+  "66": {
+    "string": "Disattiva audio storia"
+  },
+  "67": {
+    "string": "Riattiva audio storia"
+  },
+  "68": {
+    "string": "Informazioni sulla storia"
+  },
+  "69": {
+    "string": "Condividi storia"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Suggerimento 1 di 2"
+  },
+  "76": {
+    "string": "Tocca per passare alla schermata successiva"
+  },
+  "77": {
+    "string": "Avanti"
+  },
+  "78": {
+    "string": "Suggerimento 2 di 2"
+  },
+  "79": {
+    "string": "Scorri per passare alla storia successiva"
+  },
+  "80": {
+    "string": "Ho capito"
+  },
+  "81": {
+    "string": "Suggerimento"
+  },
+  "83": {
+    "string": "Attiva"
+  },
+  "84": {
+    "string": "PUNTEGGIO:"
+  },
+  "85": {
+    "string": "Metti storia in pausa"
+  },
+  "86": {
+    "string": "Riproduci storia"
+  },
+  "87": {
+    "string": "Chiudi"
+  },
+  "88": {
+    "string": "Prossimo elemento"
+  },
+  "89": {
+    "string": "La tua risposta verrà inviata a"
+  },
+  "90": {
+    "string": "Storia successiva"
+  },
+  "91": {
+    "string": "Pagina successiva"
+  },
+  "92": {
+    "string": "Riproduci di nuovo"
+  },
+  "93": {
+    "string": "Pagina precedente"
+  },
+  "96": {
+    "string": "Muovi il dispositivo per esplorare"
+  },
+  "97": {
+    "string": "Apertura in corso"
+  },
+  "98": {
+    "string": "Invio del modulo non riuscito, riprova"
+  },
+  "99": {
+    "string": "Invio del modulo riuscito"
+  },
+  "101": {
+    "string": "Acquista ora"
+  },
+  "110": {
+    "string": "Abbonati con Google"
+  }
+}

@@ -6,18 +6,16 @@
     "OWNERS": "json5",
 
     // Enable JSON auto-formatting for these files.
-    ".eslintrc": "json",
     ".prettierrc": "json",
     ".renovaterc.json": "json",
-    ".codecov.yml": "yaml",
-    ".lando.yml": "yaml",
-    ".lgtm.yml": "yaml",
-    ".travis.yml": "yaml"
+
+    // Allow comments in JSON schema files.
+    "*.schema.json": "jsonc"
   },
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
   // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
-  "eslint.autoFixOnSave": true,
+  "editor.codeActionsOnSave": {"source.fixAll.eslint": true},
   "[js]": {"editor.formatOnSave": false},
 
   // Auto-fix non-JS files with Prettier using amphtml's custom settings. Needs
@@ -25,5 +23,33 @@
   "[yaml]": {"editor.formatOnSave": true},
   "[json]": {"editor.formatOnSave": true},
   "[json5]": {"editor.formatOnSave": true},
-  "[markdown]": {"editor.formatOnSave": true}
+  "[markdown]": {"editor.formatOnSave": true},
+
+  // Validate JSON schemas on the fly. Also used by the `amp check-json-schemas`
+  // task. Do not use URLs from the web, they are unsupported by this task.
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "build-system/global-configs/canary-config.json",
+        "build-system/global-configs/prod-config.json"
+      ],
+      "url": "./build-system/json-schemas/amp-config.json"
+    },
+    {
+      "fileMatch": ["build-system/tasks/bundle-size/APPROVERS.json"],
+      "url": "./build-system/json-schemas/APPROVERS.json"
+    },
+    {
+      "fileMatch": ["build-system/global-configs/caches.json"],
+      "url": "./build-system/json-schemas/caches.json"
+    },
+    {
+      "fileMatch": ["build-system/tasks/bundle-size/filesize.json"],
+      "url": "./build-system/json-schemas/filesize.json"
+    },
+    {
+      "fileMatch": ["test/visual-diff/visual-tests.jsonc"],
+      "url": "./build-system/json-schemas/visual-tests.json"
+    }
+  ]
 }

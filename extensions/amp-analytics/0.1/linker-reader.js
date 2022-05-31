@@ -1,29 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {hasOwn} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {hasOwn} from '../../../src/utils/object';
+import {user} from '#utils/log';
+
 import {parseLinker} from './linker';
-import {
-  parseQueryString,
-  parseUrlDeprecated,
-  removeParamsFromSearch,
-} from '../../../src/url';
 
-import {user} from '../../../src/log';
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
+import {removeParamsFromSearch} from '../../../src/url';
 
 const TAG = 'amp-analytics/linker-reader';
 
@@ -69,15 +52,13 @@ export class LinkerReader {
    * @return {?Object<string, string>}
    */
   parseAndCleanQueryString_(name) {
-    const parsedUrl = parseUrlDeprecated(this.win_.location.href);
-    const params = parseQueryString(parsedUrl.search);
+    const params = parseQueryString(this.win_.location.search);
     if (!hasOwn(params, name)) {
       // Linker param not found.
       return null;
     }
     const value = params[name];
-
-    this.removeLinkerParam_(parsedUrl, name);
+    this.removeLinkerParam_(this.win_.location, name);
     return parseLinker(value);
   }
 

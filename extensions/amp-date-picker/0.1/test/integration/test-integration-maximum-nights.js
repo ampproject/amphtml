@@ -1,29 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as fakeTimers from '@sinonjs/fake-timers';
 
-import * as lolex from 'lolex';
-import {htmlFor} from '../../../../../src/static-template';
-import {poll} from '../../../../../testing/iframe';
+import {htmlFor} from '#core/dom/static-template';
 
-const config = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass();
+import {poll} from '#testing/iframe';
 
-config.run('amp-date-picker', function() {
+const config = describes.sandboxed.configure().ifChrome();
+
+config.run('amp-date-picker', {}, function () {
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
@@ -39,16 +22,15 @@ config.run('amp-date-picker', function() {
       body: '',
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       let doc;
       let clock;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         win = env.win;
         doc = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
 
@@ -65,12 +47,12 @@ config.run('amp-date-picker', function() {
         ></amp-date-picker>
       </div>`);
         const picker = doc.getElementById('picker');
-        return picker.implementation_
-          .buildCallback()
-          .then(() => picker.implementation_.layoutCallback());
+        const impl = await picker.getImpl(false);
+        await impl.buildCallback();
+        await impl.layoutCallback();
       });
 
-      after(() => {
+      afterEach(() => {
         clock.uninstall();
       });
 
@@ -88,7 +70,7 @@ config.run('amp-date-picker', function() {
         return null;
       }
 
-      it('should appear as blocked when a date is beyond the maximum', () => {
+      it.skip('should appear as blocked when a date is beyond the maximum', () => {
         const picker = doc.getElementById('picker');
         const startButton = getCalendarButtonByDay(picker, '6');
         const beyondButton = getCalendarButtonByDay(picker, '10');

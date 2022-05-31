@@ -1,0 +1,82 @@
+tags: {  # amp-story-360
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-360"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-360>
+  html_format: AMP
+  tag_name: "AMP-STORY-360"
+  requires_extension: "amp-story-360"
+  mandatory_ancestor: "AMP-STORY"
+  spec_url: "https://amp.dev/documentation/components/amp-story-360"
+  attrs: {
+    name: "controls"
+    value: "gyroscope"
+  }
+  attrs: {
+    name: "duration"
+    value_regex: "([0-9\\.]+)\\s*(s|ms)"
+  }
+  attrs: {
+    name: "heading-end"
+    value_regex: "-?\\d+\\.?\\d*"
+    trigger: {
+      also_requires_attr: "duration"
+    }
+  }
+  attrs: {
+    name: "heading-start"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "pitch-end"
+    value_regex: "-?\\d+\\.?\\d*"
+    trigger: {
+      also_requires_attr: "duration"
+    }
+  }
+  attrs: {
+    name: "pitch-start"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "scene-heading"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "scene-pitch"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "scene-roll"
+    value_regex: "-?\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "zoom-end"
+    value_regex: "\\d+\\.?\\d*"
+    trigger: {
+      also_requires_attr: "duration"
+    }
+  }
+  attrs: {
+    name: "zoom-start"
+    value_regex: "\\d+\\.?\\d*"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "AMP-IMG"
+    child_tag_name_oneof: "AMP-VIDEO"
+  }
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+  }
+}

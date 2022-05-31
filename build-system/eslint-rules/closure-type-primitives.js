@@ -1,21 +1,6 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
-const doctrine = require('doctrine');
+const doctrine = require('@jridgewell/doctrine');
 const traverse = require('traverse');
 
 /** @typedef {!Object} */
@@ -32,18 +17,20 @@ let EslintNodeDef;
  */
 let ClosureCommentDef;
 
-module.exports = function(context) {
+module.exports = function (context) {
   const sourceCode = context.getSourceCode();
 
   return {
     meta: {
       fixable: 'code',
     },
-    Program: function() {
-      const comments = /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
+    Program: function () {
+      const comments = /** @type {!Array<!EslintNodeDef>} */ (
+        sourceCode.getAllComments()
+      );
       comments
-        .map(node => parseClosureComments(context, node))
-        .forEach(comment => checkClosureComments(context, comment));
+        .map((node) => parseClosureComments(context, node))
+        .forEach((comment) => checkClosureComments(context, comment));
     },
   };
 };
@@ -90,8 +77,8 @@ function checkClosureComments(context, closureComment) {
     return;
   }
 
-  const {parsed, node} = closureComment;
-  traverse(parsed).forEach(astNode => {
+  const {node, parsed} = closureComment;
+  traverse(parsed).forEach((astNode) => {
     if (!astNode) {
       return;
     }
@@ -156,7 +143,7 @@ function checkNonNullableNodes(context, node, astNode) {
     return;
   }
 
-  const {type, name} = astNode.expression;
+  const {name, type} = astNode.expression;
   if (type === 'FunctionType') {
     reportNonNullablePrimitive(context, node, 'function');
   } else if (type === 'UndefinedLiteral') {

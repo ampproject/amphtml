@@ -1,30 +1,13 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {hasOwn} from '#core/types/object';
 
-import {
-  DEFAULT_SCORE_CONFIG,
-  SubscriptionsScoreFactor,
-} from './score-factors.js';
-import {Deferred} from '../../../src/utils/promise';
+import {devAssert, user} from '#utils/log';
+
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
 import {Entitlement} from './entitlement';
-import {Observable} from '../../../src/observable';
-import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
 
-/** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
+/** @typedef {{platformKey: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
 
 /** @const */
@@ -38,24 +21,29 @@ const TAG = 'amp-subscriptions';
  */
 let PlatformWeightDef;
 
+/**
+ * Manages subscription platforms.
+ */
 export class PlatformStore {
   /**
-   * @param {!Array<string>} expectedServiceIds
+   * @param {!Array<string>} platformKeys
    * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
+   * @param {!Observable<!EntitlementChangeEventDef>} opt_externalOnEntitlementResolvedCallbacks
    */
   constructor(
-    expectedServiceIds,
+    platformKeys,
     scoreConfig,
     fallbackEntitlement,
-    opt_Platforms
+    opt_Platforms,
+    opt_externalOnEntitlementResolvedCallbacks
   ) {
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = opt_Platforms || dict();
+    this.subscriptionPlatforms_ = opt_Platforms || {};
 
     /** @private @const {!Array<string>} */
-    this.serviceIds_ = expectedServiceIds;
+    this.platformKeys_ = platformKeys;
 
     /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
@@ -65,14 +53,14 @@ export class PlatformStore {
      * {!Object<string, !Deferred<!./entitlement.Entitlement>>}
      */
     this.entitlementDeferredMap_ = {};
-    expectedServiceIds.forEach(serviceId => {
-      this.entitlementDeferredMap_[serviceId] = new Deferred();
+    platformKeys.forEach((platformKey) => {
+      this.entitlementDeferredMap_[platformKey] = new Deferred();
     });
 
     /** @private @const {!Observable<!EntitlementChangeEventDef>} */
     this.onEntitlementResolvedCallbacks_ = new Observable();
 
-    /** @private @const {!Observable<{serviceId: string}>} */
+    /** @private @const {!Observable<{platformKey: string}>} */
     this.onPlatformResolvedCallbacks_ = new Observable();
 
     /** @private {?Deferred} */
@@ -82,10 +70,10 @@ export class PlatformStore {
     this.grantStatusEntitlement_ = null;
 
     /** @private {?Deferred<?Entitlement>} */
-    this.grantStatusEntitlementPromise_ = null;
+    this.grantStatusEntitlementDeferred_ = null;
 
     /** @private {?Deferred<!Array<!./entitlement.Entitlement>>} */
-    this.allResolvedPromise_ = null;
+    this.allResolvedDeferred_ = null;
 
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
@@ -95,17 +83,23 @@ export class PlatformStore {
 
     /** @private @const {!Object<string, number>} */
     this.scoreConfig_ = Object.assign(DEFAULT_SCORE_CONFIG, scoreConfig);
+
+    /** @private @const {!Observable<!EntitlementChangeEventDef>} */
+    this.externalOnEntitlementResolvedCallbacks_ =
+      opt_externalOnEntitlementResolvedCallbacks
+        ? opt_externalOnEntitlementResolvedCallbacks
+        : new Observable();
   }
 
   /**
    * Resolves a platform in the store
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!./subscription-platform.SubscriptionPlatform} platform
    */
-  resolvePlatform(serviceId, platform) {
-    this.subscriptionPlatforms_[serviceId] = platform;
+  resolvePlatform(platformKey, platform) {
+    this.subscriptionPlatforms_[platformKey] = platform;
     this.onPlatformResolvedCallbacks_.fire({
-      serviceId,
+      platformKey,
     });
   }
 
@@ -119,28 +113,51 @@ export class PlatformStore {
     for (const platformKey in this.subscriptionPlatforms_) {
       this.subscriptionPlatforms_[platformKey].reset();
     }
-    // Then create new platform store withe the newply reset platforms in it.
+
+    // Then create new platform store with the newly reset platforms in it.
     return new PlatformStore(
-      this.serviceIds_,
+      this.platformKeys_,
       this.scoreConfig_,
       this.fallbackEntitlement_,
-      this.subscriptionPlatforms_
+      this.subscriptionPlatforms_,
+      this.externalOnEntitlementResolvedCallbacks_
     );
   }
 
   /**
-   *Calls a callback for when a platform is resolved.
-   * @param {string} serviceId
+   * Resets a given platform.
+   * @param {string} platformKey
+   */
+  resetPlatform(platformKey) {
+    // Remove platform's entitlement.
+    delete this.entitlements_[platformKey];
+
+    // Reset platform's deferred entitlement map entry.
+    this.entitlementDeferredMap_[platformKey] = new Deferred();
+
+    // Reset platform's UX.
+    this.subscriptionPlatforms_[platformKey].reset();
+
+    // Reset summary promises.
+    this.grantStatusPromise_ = null;
+    this.grantStatusEntitlement_ = null;
+    this.grantStatusEntitlementDeferred_ = null;
+    this.allResolvedDeferred_ = null;
+  }
+
+  /**
+   * Calls a callback for when a platform is resolved.
+   * @param {string} platformKey
    * @param {!Function} callback
    */
-  onPlatformResolves(serviceId, callback) {
-    const platform = this.subscriptionPlatforms_[serviceId];
+  onPlatformResolves(platformKey, callback) {
+    const platform = this.subscriptionPlatforms_[platformKey];
     if (platform) {
       callback(platform);
     } else {
-      this.onPlatformResolvedCallbacks_.add(e => {
-        if (e.serviceId === serviceId) {
-          callback(this.getPlatform(serviceId));
+      this.onPlatformResolvedCallbacks_.add((e) => {
+        if (e.platformKey === platformKey) {
+          callback(this.getPlatform(platformKey));
         }
       });
     }
@@ -148,20 +165,21 @@ export class PlatformStore {
 
   /**
    * Returns the platform for the given id
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
-  getPlatform(serviceId) {
-    const platform = this.subscriptionPlatforms_[serviceId];
-    devAssert(platform, `Platform for id ${serviceId} is not resolved`);
+  getPlatform(platformKey) {
+    const platform = this.subscriptionPlatforms_[platformKey];
+    devAssert(platform, `Platform for id ${platformKey} is not resolved`);
     return platform;
   }
 
   /**
    * Returns the local platform
+   * @private
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
-  getLocalPlatform() {
+  getLocalPlatform_() {
     const localPlatform =
       /** @type {!./subscription-platform.SubscriptionPlatform} */
       (this.getPlatform('local'));
@@ -183,7 +201,7 @@ export class PlatformStore {
   }
 
   /**
-   * This registers a callback which is called whenever a service id is resolved
+   * This registers a callback which is called whenever a platform key is resolved
    * with an entitlement.
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
@@ -192,54 +210,73 @@ export class PlatformStore {
   }
 
   /**
-   * This resolves the entitlement to a serviceId
-   * @param {string} serviceId
+   * This registers a callback which is called whenever a platform key is resolved
+   * with an entitlement.
+   * @param {function(!EntitlementChangeEventDef):void} callback
+   */
+  addOnEntitlementResolvedCallback(callback) {
+    this.externalOnEntitlementResolvedCallbacks_.add(callback);
+  }
+
+  /**
+   * This resolves the entitlement to a platformKey
+   * @param {string} platformKey
    * @param {!./entitlement.Entitlement} entitlement
    */
-  resolveEntitlement(serviceId, entitlement) {
+  resolveEntitlement(platformKey, entitlement) {
     if (entitlement) {
-      entitlement.service = serviceId;
+      entitlement.service = platformKey;
     }
-    this.entitlements_[serviceId] = entitlement;
-    const deferred = this.entitlementDeferredMap_[serviceId];
+    this.entitlements_[platformKey] = entitlement;
+    const deferred = this.entitlementDeferredMap_[platformKey];
     if (deferred) {
       deferred.resolve(entitlement);
     }
-    // Remove this serviceId as a failed platform now
-    if (this.failedPlatforms_.indexOf(serviceId) != -1) {
-      this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
+    // Remove this platformKey from the failed platforms list
+    if (this.failedPlatforms_.indexOf(platformKey) !== -1) {
+      this.failedPlatforms_.splice(
+        this.failedPlatforms_.indexOf(platformKey),
+        1
+      );
     }
     // Call all onChange callbacks.
     if (entitlement.granted) {
       this.saveGrantEntitlement_(entitlement);
     }
-    this.onEntitlementResolvedCallbacks_.fire({serviceId, entitlement});
+    this.onEntitlementResolvedCallbacks_.fire({
+      platformKey,
+      entitlement,
+    });
+    this.externalOnEntitlementResolvedCallbacks_.fire({
+      platformKey,
+      entitlement,
+    });
   }
 
   /**
    * Returns entitlement for a platform.
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {!./entitlement.Entitlement} entitlement
    */
-  getResolvedEntitlementFor(serviceId) {
+  getResolvedEntitlementFor(platformKey) {
     devAssert(
-      this.entitlements_[serviceId],
-      `Platform ${serviceId} has not yet resolved with entitlements`
+      this.entitlements_[platformKey],
+      `Platform ${platformKey} has not yet resolved with entitlements`
     );
-    return this.entitlements_[serviceId];
+    return this.entitlements_[platformKey];
   }
 
   /**
    * Returns entitlement for a platform once it's resolved.
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {!Promise<!./entitlement.Entitlement>} entitlement
    */
-  getEntitlementPromiseFor(serviceId) {
+  getEntitlementPromiseFor(platformKey) {
     devAssert(
-      this.entitlementDeferredMap_[serviceId],
-      `Platform ${serviceId} is not declared`
+      this.entitlementDeferredMap_[platformKey],
+      `Platform ${platformKey} is not declared`
     );
-    return this.entitlementDeferredMap_[serviceId].promise;
+    return this.entitlementDeferredMap_[platformKey].promise;
   }
 
   /**
@@ -259,14 +296,14 @@ export class PlatformStore {
    * }
    */
   getScoreFactorStates() {
-    const states = dict({});
+    const states = {};
     return Promise.all(
-      this.serviceIds_.map(platformId => {
-        states[platformId] = dict();
+      this.platformKeys_.map((platformId) => {
+        states[platformId] = {};
         return Promise.all(
-          Object.values(SubscriptionsScoreFactor).map(scoreFactor =>
+          Object.values(SubscriptionsScoreFactor).map((scoreFactor) =>
             this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
-              factorValue => {
+              (factorValue) => {
                 states[platformId][scoreFactor] = factorValue;
               }
             )
@@ -278,15 +315,15 @@ export class PlatformStore {
 
   /**
    * Return a score factor for a platform once it's resolved
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {string} scoreFactor
    * @return {!Promise<number>}
    * @private
    */
-  getScoreFactorPromiseFor_(serviceId, scoreFactor) {
+  getScoreFactorPromiseFor_(platformKey, scoreFactor) {
     // Make sure the platform is ready
-    return this.getEntitlementPromiseFor(serviceId).then(() => {
-      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(
+    return this.getEntitlementPromiseFor(platformKey).then(() => {
+      return this.subscriptionPlatforms_[platformKey].getSupportedScoreFactor(
         scoreFactor
       );
     });
@@ -316,7 +353,7 @@ export class PlatformStore {
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
-      this.onChange(e => {
+      this.onChange((e) => {
         const {entitlement} = e;
         if (entitlement.granted) {
           this.grantStatusPromise_.resolve(true);
@@ -352,31 +389,37 @@ export class PlatformStore {
    * @return {!Promise<?Entitlement>}
    */
   getGrantEntitlement() {
-    if (this.grantStatusEntitlementPromise_) {
-      return this.grantStatusEntitlementPromise_.promise;
+    // Define when grant entitlement promise can resolve.
+    const canResolveImmediately = () =>
+      this.grantStatusEntitlement_ &&
+      (this.grantStatusEntitlement_.isSubscriber() ||
+        this.grantStatusEntitlement_.isFree());
+    const canResolve = () =>
+      canResolveImmediately() || this.areAllPlatformsResolved_();
+
+    // Cache deferred.
+    if (this.grantStatusEntitlementDeferred_) {
+      return this.grantStatusEntitlementDeferred_.promise;
     }
-    this.grantStatusEntitlementPromise_ = new Deferred();
-    if (
-      (this.grantStatusEntitlement_ &&
-        this.grantStatusEntitlement_.isSubscriber()) ||
-      this.areAllPlatformsResolved_()
-    ) {
-      this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
+    this.grantStatusEntitlementDeferred_ = new Deferred();
+
+    // Resolve when possible.
+    if (canResolve()) {
+      this.grantStatusEntitlementDeferred_.resolve(
+        this.grantStatusEntitlement_
+      );
     } else {
       this.onEntitlementResolvedCallbacks_.add(() => {
         // Grant entitlement only if subscriber
-        if (
-          (this.grantStatusEntitlement_ &&
-            this.grantStatusEntitlement_.isSubscriber()) ||
-          this.areAllPlatformsResolved_()
-        ) {
-          this.grantStatusEntitlementPromise_.resolve(
+        if (canResolve()) {
+          this.grantStatusEntitlementDeferred_.resolve(
             this.grantStatusEntitlement_
           );
         }
       });
     }
-    return this.grantStatusEntitlementPromise_.promise;
+
+    return this.grantStatusEntitlementDeferred_.promise;
   }
 
   /**
@@ -387,30 +430,34 @@ export class PlatformStore {
   }
 
   /**
-   * Returns entitlements when all services are done fetching them.
+   * Returns entitlements when all platforms are done fetching them.
    * @return {!Promise<!Array<!./entitlement.Entitlement>>}
    */
   getAllPlatformsEntitlements() {
-    if (this.allResolvedPromise_) {
-      return this.allResolvedPromise_.promise;
+    // Cache deferred.
+    if (this.allResolvedDeferred_) {
+      return this.allResolvedDeferred_.promise;
     }
-    this.allResolvedPromise_ = new Deferred();
+    this.allResolvedDeferred_ = new Deferred();
+
+    // Resolve when possible.
     if (this.areAllPlatformsResolved_()) {
       // Resolve with null if none of the entitlements unblock the reader
-      this.allResolvedPromise_.resolve(
+      this.allResolvedDeferred_.resolve(
         this.getAvailablePlatformsEntitlements_()
       );
     } else {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange(() => {
         if (this.areAllPlatformsResolved_()) {
-          this.allResolvedPromise_.resolve(
+          this.allResolvedDeferred_.resolve(
             this.getAvailablePlatformsEntitlements_()
           );
         }
       });
     }
-    return this.allResolvedPromise_.promise;
+
+    return this.allResolvedDeferred_.promise;
   }
 
   /**
@@ -429,7 +476,7 @@ export class PlatformStore {
   }
 
   /**
-   * Returns entitlements when all services are done fetching them.
+   * Returns platform after all platforms fetch entitlements.
    * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatform() {
@@ -447,7 +494,7 @@ export class PlatformStore {
    */
   areAllPlatformsResolved_() {
     const entitlementsResolved = Object.keys(this.entitlements_).length;
-    return entitlementsResolved === this.serviceIds_.length;
+    return entitlementsResolved === this.platformKeys_.length;
   }
 
   /**
@@ -485,14 +532,14 @@ export class PlatformStore {
       'All platforms are not resolved yet'
     );
 
-    // Subscriber wins immediately.
+    // Prefer platforms that granted with subscriptions or free articles.
     const availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
       const entitlement = this.getResolvedEntitlementFor(
-        platform.getServiceId()
+        platform.getPlatformKey()
       );
-      if (entitlement.isSubscriber()) {
+      if (entitlement.isSubscriber() || entitlement.isFree()) {
         return platform;
       }
     }
@@ -507,7 +554,7 @@ export class PlatformStore {
    */
   getAllPlatformWeights_() {
     // Get weights for all of the platforms.
-    return this.getAvailablePlatforms().map(platform => {
+    return this.getAvailablePlatforms().map((platform) => {
       return {
         platform,
         weight: this.calculatePlatformWeight_(platform),
@@ -527,7 +574,7 @@ export class PlatformStore {
     // Start with base score
     const weight = platform.getBaseScore();
 
-    // Iterate score factors checking service support
+    // Iterate score factors checking platform support
     for (const factor in this.scoreConfig_) {
       if (hasOwn(this.scoreConfig_, factor)) {
         factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
@@ -548,12 +595,12 @@ export class PlatformStore {
    * @private
    */
   rankPlatformsByWeight_(platformWeights) {
-    const localPlatform = this.getLocalPlatform();
+    const localPlatform = this.getLocalPlatform_();
     platformWeights.sort((platform1, platform2) => {
       // Force local platform to win ties
       if (
-        platform2.weight == platform1.weight &&
-        platform1.platform == localPlatform
+        platform2.weight === platform1.weight &&
+        platform1.platform === localPlatform
       ) {
         return -1;
       }
@@ -573,9 +620,9 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatformForFactor_(factor) {
-    const platformWeights = this.getAvailablePlatforms().map(platform => {
+    const platformWeights = this.getAvailablePlatforms().map((platform) => {
       const factorValue = platform.getSupportedScoreFactor(factor);
-      const weight = typeof factorValue == 'number' ? factorValue : 0;
+      const weight = typeof factorValue === 'number' ? factorValue : 0;
       return {platform, weight};
     });
     return this.rankPlatformsByWeight_(platformWeights);
@@ -585,15 +632,15 @@ export class PlatformStore {
    * Records a platform failure
    * logs error if all platforms have failed
    * uses fallback if there is one.
-   * @param {string} serviceId
+   * @param {string} platformKey
    */
-  reportPlatformFailureAndFallback(serviceId) {
+  reportPlatformFailureAndFallback(platformKey) {
     if (
-      serviceId === this.getLocalPlatform().getServiceId() &&
+      platformKey === this.getLocalPlatform_().getPlatformKey() &&
       this.fallbackEntitlement_
     ) {
       this.resolveEntitlement(
-        this.getLocalPlatform().getServiceId(),
+        this.getLocalPlatform_().getPlatformKey(),
         this.fallbackEntitlement_
       );
       user().warn(
@@ -601,10 +648,10 @@ export class PlatformStore {
         'Local platform has failed to resolve,  ' +
           'using fallback entitlement.'
       );
-    } else if (this.failedPlatforms_.indexOf(serviceId) == -1) {
-      const entitlement = Entitlement.empty(serviceId);
-      this.resolveEntitlement(serviceId, entitlement);
-      this.failedPlatforms_.push(serviceId);
+    } else if (this.failedPlatforms_.indexOf(platformKey) === -1) {
+      const entitlement = Entitlement.empty(platformKey);
+      this.resolveEntitlement(platformKey, entitlement);
+      this.failedPlatforms_.push(platformKey);
     }
   }
 

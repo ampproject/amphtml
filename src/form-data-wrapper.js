@@ -1,23 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {iterateCursor} from '#core/dom';
+import {getFormAsObject, getSubmitButtonUsed} from '#core/dom/form';
+import {map} from '#core/types/object';
 
-import {Services} from './services';
-import {getFormAsObject, getSubmitButtonUsed} from './form';
-import {iterateCursor} from './dom';
-import {map} from './utils/object';
+import {Services} from '#service';
 
 /**
  * Create a form data wrapper. The wrapper is necessary to provide a common
@@ -93,9 +78,9 @@ export class PolyfillFormDataWrapper {
   /** @override */
   entries() {
     const fieldEntries = [];
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => fieldEntries.push([name, value]));
+      values.forEach((value) => fieldEntries.push([name, value]));
     });
 
     // Generator functions are not supported by the current Babel configuration,
@@ -114,9 +99,9 @@ export class PolyfillFormDataWrapper {
   getFormData() {
     const formData = new FormData();
 
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => formData.append(name, value));
+      values.forEach((value) => formData.append(name, value));
     });
 
     return formData;
@@ -198,7 +183,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
     super(opt_form);
 
     if (opt_form) {
-      iterateCursor(opt_form.elements, input => {
+      iterateCursor(opt_form.elements, (input) => {
         if (input.type == 'file' && input.files.length == 0) {
           this.formData_.delete(input.name);
           this.formData_.append(input.name, new Blob([]), '');

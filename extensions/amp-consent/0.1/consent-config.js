@@ -1,46 +1,43 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {getChildJsonConfig} from '#core/dom';
+import {childElementByTag} from '#core/dom/query';
+import {deepMerge, hasOwn, map} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {devAssert, user, userAssert} from '#utils/log';
 
 import {CMP_CONFIG} from './cmps';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {getConsentStateManager} from './consent-state-manager';
+
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '../../../src/services';
-import {deepMerge, hasOwn, map} from '../../../src/utils/object';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
 
 const TAG = 'amp-consent/consent-config';
+const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
 
 const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'promptUI': true,
   'checkConsentHref': true,
+  // `promptIfUnknownForGeoGroup` is legacy field
   'promptIfUnknownForGeoGroup': true,
   'onUpdateHref': true,
 };
+
+/** @const @type {!Object<string, boolean>} */
+const CONSENT_VARS_ALLOWED_LIST = {
+  'PAGE_VIEW_ID': true,
+  'PAGE_VIEW_ID_64': true,
+  'SOURCE_URL': true,
+};
+
+/** @const @type {string} */
+export const CID_SCOPE = 'AMP-CONSENT';
 
 export class ConsentConfig {
   /** @param {!Element} element */
   constructor(element) {
     /** @private {!Element} */
     this.element_ = element;
-
-    /** @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
 
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
@@ -76,14 +73,6 @@ export class ConsentConfig {
    */
   convertInlineConfigFormat_(config) {
     const consentsConfigDepr = config['consents'];
-    if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
-      userAssert(consentsConfigDepr, '%s: consents config is required', TAG);
-      userAssert(
-        Object.keys(consentsConfigDepr).length != 0,
-        "%s: can't find consent instance",
-        TAG
-      );
-    }
 
     if (!config['consents']) {
       // New format, return
@@ -128,19 +117,16 @@ export class ConsentConfig {
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
-      /** @type {!JsonObject} */ (userAssert(
-        this.getInlineConfig_(),
-        '%s: Inline config not found'
-      ))
+      /** @type {!JsonObject} */ (
+        userAssert(this.getInlineConfig_(), '%s: Inline config not found')
+      )
     );
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = /** @type {!JsonObject} */ (deepMerge(
-      cmpConfig || {},
-      inlineConfig || {},
-      1
-    ));
+    const config = /** @type {!JsonObject} */ (
+      deepMerge(cmpConfig || {}, inlineConfig || {}, 1)
+    );
 
     userAssert(
       config['consentInstanceId'],
@@ -164,8 +150,7 @@ export class ConsentConfig {
       }
     }
 
-    // TODO(micajuineho): delete promptIfUnknownForGeoGroup, once we migrate fully
-    // Migrate to geoOverride
+    // `promptIfUnknownForGeoGroup` is legacy field
     const group = config['promptIfUnknownForGeoGroup'];
     if (typeof group === 'string') {
       config['consentRequired'] = false;
@@ -181,9 +166,9 @@ export class ConsentConfig {
       config['consentRequired'] = 'remote';
     }
 
-    return this.mergeGeoOverride_(config).then(mergedConfig =>
-      this.validateMergedGeoOverride_(mergedConfig)
-    );
+    return this.mergeGeoOverride_(config)
+      .then((mergedConfig) => this.validateMergedGeoOverride_(mergedConfig))
+      .then((validatedConfig) => this.checkStoryConsent_(validatedConfig));
   }
 
   /**
@@ -195,7 +180,7 @@ export class ConsentConfig {
     if (!config['geoOverride']) {
       return Promise.resolve(config);
     }
-    return Services.geoForDocOrNull(this.element_).then(geoService => {
+    return Services.geoForDocOrNull(this.element_).then((geoService) => {
       userAssert(
         geoService,
         '%s: requires <amp-geo> to use `geoOverride`',
@@ -248,6 +233,23 @@ export class ConsentConfig {
   }
 
   /**
+   * Validate if story consent then no promptUiSrc
+   * @param {!JsonObject} config
+   * @return {!JsonObject}
+   */
+  checkStoryConsent_(config) {
+    if (childElementByTag(this.element_, AMP_STORY_CONSENT_TAG)) {
+      userAssert(
+        !config['promptUISrc'],
+        '%s: `promptUiSrc` cannot be specified while using %s.',
+        TAG,
+        AMP_STORY_CONSENT_TAG
+      );
+    }
+    return config;
+  }
+
+  /**
    * Read the inline config from publisher
    * @return {?JsonObject}
    */
@@ -275,10 +277,6 @@ export class ConsentConfig {
    * @return {?JsonObject}
    */
   getCMPConfig_() {
-    if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
-      return null;
-    }
-
     const type = this.element_.getAttribute('type');
     if (!type) {
       return null;
@@ -304,6 +302,42 @@ export class ConsentConfig {
       devAssert(config[attribute], 'CMP config must specify %s', attribute);
     }
   }
+}
+
+/**
+ * Expand consent endpoint url
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} url
+ * @param {Object<string, *>=} opt_vars
+ * @return {!Promise<string>}
+ */
+export function expandConsentEndpointUrl(element, url, opt_vars) {
+  const vars = {
+    'CLIENT_ID': getConsentCID(element),
+    'CONSENT_PAGE_VIEW_ID_64': () =>
+      getConsentStateManager(element).then((consentStateManager) =>
+        consentStateManager.consentPageViewId64()
+      ),
+    ...opt_vars,
+  };
+  return Services.urlReplacementsForDoc(element).expandUrlAsync(url, vars, {
+    ...vars,
+    ...CONSENT_VARS_ALLOWED_LIST,
+  });
+}
+
+/**
+ * Return AMP CONSENT scoped CID
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} node
+ * @return {!Promise<string>}
+ */
+export function getConsentCID(node) {
+  return Services.cidForDoc(node).then((cid) => {
+    return cid.get(
+      {scope: CID_SCOPE, createCookieIfNotPresent: true},
+      /** consent */ Promise.resolve()
+    );
+  });
 }
 
 /**

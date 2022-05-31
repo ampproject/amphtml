@@ -1,26 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {includes} from '#core/types/string';
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {forceExperimentBranch} from '#experiments';
+
+import {user, userAssert} from '#utils/log';
+
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {startsWith} from '../../../src/string';
-import {user, userAssert} from '../../../src/log';
+
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
+
+/**
+ * Allow elements to opt into an experiment branch.
+ * @const {string}
+ */
+const EXPERIMENT_BRANCH_ATTR = 'data-experiment-id';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
   /**
@@ -38,10 +33,19 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     userAssert(
-      this.element.hasAttribute('src'),
-      'Attribute src required for <amp-ad type="fake">: %s',
+      this.element.hasAttribute('src') || this.element.hasAttribute('srcdoc'),
+      'Attribute src or srcdoc required for <amp-ad type="fake">: %s',
       this.element
     );
+    if (this.element.hasAttribute(EXPERIMENT_BRANCH_ATTR)) {
+      this.element
+        .getAttribute(EXPERIMENT_BRANCH_ATTR)
+        .split(',')
+        .forEach((experiment) => {
+          const expParts = experiment.split(':');
+          forceExperimentBranch(this.win, expParts[0], expParts[1]);
+        });
+    }
     super.buildCallback();
   }
 
@@ -51,7 +55,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     // value start with `i-amphtml-demo-`. So that fake ad can only be used in
     // invalid AMP pages.
     const id = this.element.getAttribute('id');
-    if (!id || !startsWith(id, 'i-amphtml-demo-')) {
+    if (!id || !id.startsWith('i-amphtml-demo-')) {
       user().warn(TAG, 'Only works with id starts with i-amphtml-demo-');
       return false;
     }
@@ -60,34 +64,42 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return this.element.getAttribute('src');
+    const src = this.element.getAttribute('src');
+    if (src) {
+      return src;
+    }
+    const srcdoc = this.element.getAttribute('srcdoc');
+    return `data:text/html,${encodeURIComponent(srcdoc)}`;
   }
 
   /** @override */
   sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then(response => {
+    return super.sendXhrRequest(adUrl).then((response) => {
       if (!response) {
         return null;
       }
-      const {
-        status,
-        headers,
-      } = /** @type {{status: number, headers: !Headers}} */ (response);
+      const {headers, status} =
+        /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
-      // This mode is primarily used for A4A Envelop for testing.
-      // See DEVELOPING.md for more info.
+      // This mode is primarily used for A4A Envelope for testing.
+      // See developing.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
-        return response.text().then(
-          responseText =>
-            new Response(this.transformCreative_(responseText), {
-              status,
-              headers,
-            })
-        );
+        return response.text().then((responseText) => {
+          // When using data: url the legacy amp cors param is interpreted as
+          // part of the body, so remove it.
+          if (includes(responseText, '?__amp_source_origin=')) {
+            responseText = responseText.split('?__amp_source_origin=')[0];
+          }
+          return new Response(this.transformCreative_(responseText), {
+            status,
+            headers,
+          });
+        });
       }
 
-      // Normal mode: Expect the creative is written in AMP4ADS doc.
+      // Normal mode: Expect the creative is already transformed and includes
+      // amp-ad-metadata
       return response;
     });
   }
@@ -134,6 +146,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 }
 
-AMP.extension('amp-ad-network-fake-impl', '0.1', AMP => {
+AMP.extension('amp-ad-network-fake-impl', '0.1', (AMP) => {
   AMP.registerElement('amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
 });

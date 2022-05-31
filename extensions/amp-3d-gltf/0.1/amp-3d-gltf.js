@@ -1,30 +1,23 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Deferred} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '#core/dom/layout/size-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+
+import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 const TAG = 'amp-3d-gltf';
+const TYPE = '3d-gltf';
 
 const isWebGLSupported = () => {
   const canvas = document.createElement('canvas');
@@ -48,10 +41,15 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.willBeLoaded_ = new Deferred();
 
     /** @private {!JsonObject} */
-    this.context_ = dict();
+    this.context_ = {};
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -60,7 +58,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
     preconnect.url(
       this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
@@ -80,6 +78,9 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
+    this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -91,6 +92,7 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.willBeReady_ = new Deferred();
     this.willBeLoaded_ = new Deferred();
 
+    unobserveContentSize(this.element, this.onResized_);
     return true;
   }
 
@@ -101,15 +103,15 @@ export class Amp3dGltf extends AMP.BaseElement {
         ? fmt(this.element.getAttribute(name))
         : dflt;
 
-    const bool = x => x !== 'false';
-    const string = x => x;
-    const number = x => parseFloat(x);
+    const bool = (x) => x !== 'false';
+    const string = (x) => x;
+    const number = (x) => parseFloat(x);
 
     const src = assertHttpsUrl(getOption('src', string, ''), this.element);
 
     const useAlpha = getOption('alpha', bool, false);
 
-    this.context_ = dict({
+    this.context_ = {
       'src': resolveRelativeUrl(src, this.getAmpDoc().getUrl()),
       'renderer': {
         'alpha': useAlpha,
@@ -128,35 +130,38 @@ export class Amp3dGltf extends AMP.BaseElement {
         'enableZoom': getOption('enableZoom', bool, true),
         'autoRotate': getOption('autoRotate', bool, false),
       },
-    });
+    };
     this.registerAction(
       'setModelRotation',
-      invocation => {
-        this.sendCommandWhenReady_(
-          'setModelRotation',
-          invocation.args
-        ).catch(e =>
-          dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
+      (invocation) => {
+        this.sendCommandWhenReady_('setModelRotation', invocation.args).catch(
+          (e) => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
   /** @override */
   layoutCallback() {
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
+    );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);
       return Promise.resolve();
     }
 
-    const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
-
-    this.applyFillContent(iframe, true);
+    const iframe = getIframe(this.win, this.element, TYPE, this.context_);
+    iframe.title = this.element.title || 'GLTF 3D model';
+    applyFillContent(iframe, true);
     this.iframe_ = iframe;
     this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 
     this.element.appendChild(this.iframe_);
+
+    observeContentSize(this.element, this.onResized_);
 
     return this.willBeLoaded_.promise;
   }
@@ -180,7 +185,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.toggleFallback(true);
       }),
     ];
-    return () => disposers.forEach(d => d());
+    return () => disposers.forEach((d) => d());
   }
 
   /**
@@ -193,10 +198,10 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   sendCommandWhenReady_(action, args) {
     return this.willBeReady_.promise.then(() => {
-      const message = dict({
+      const message = {
         'action': action,
         'args': args,
-      });
+      };
 
       this.postMessage_('action', message);
     });
@@ -215,10 +220,10 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
-    return this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
+  viewportCallback_(inViewport) {
+    this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
   }
 
   /** @override */
@@ -233,14 +238,11 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * Sends `setSize` command when ready
-   *
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
    */
-  onLayoutMeasure() {
-    const box = this.getLayoutBox();
-    this.sendCommandWhenReady_(
-      'setSize',
-      dict({'width': box.width, 'height': box.height})
-    );
+  onResized_({height, width}) {
+    this.sendCommandWhenReady_('setSize', {'width': width, 'height': height});
   }
 
   /** @override */
@@ -249,6 +251,6 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3dGltf);
 });

@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 module.exports = {
@@ -20,7 +5,19 @@ module.exports = {
     fixable: 'code',
   },
 
+  /**
+   * @param {EslintContext} context
+   * @return {{
+   *   VariableDeclarator: {Function(node: CompilerNode): void},
+   *   'BlockStatement, Program': {Function (node: CompilerNode): void},
+   * }}
+   */
   create(context) {
+    /**
+     * @param {CompilerNode} node
+     * @param {boolean=} renamable
+     * @return {boolean}
+     */
     function shouldBeDestructure(node, renamable = false) {
       const {id, init} = node;
 
@@ -33,11 +30,11 @@ module.exports = {
       }
 
       const {name} = id;
-      const {object, property, computed} = init;
+      const {computed, object, property} = init;
       if (
         computed ||
         object.type === 'Super' ||
-        property.leadingComments ||
+        context.getCommentsBefore(property).length > 0 ||
         property.type !== 'Identifier'
       ) {
         return false;
@@ -46,6 +43,10 @@ module.exports = {
       return renamable || property.name === name;
     }
 
+    /**
+     * @param {CompilerNode} node
+     * @return {boolean}
+     */
     function shouldBeIdempotent(node) {
       while (node.type === 'MemberExpression') {
         node = node.object;
@@ -54,6 +55,14 @@ module.exports = {
       return node.type === 'Identifier' || node.type === 'ThisExpression';
     }
 
+    /**
+     *
+     * @param {Map<K, V>} map
+     * @param {K} key
+     * @param {CompilerNode} node
+     * @param {*} declaration
+     * @return {string[]}
+     */
     function setStruct(map, key, node, declaration) {
       if (map.has(key)) {
         const struct = map.get(key);
@@ -72,6 +81,9 @@ module.exports = {
       }
     }
 
+    /**
+     * @param {Map[]} maps
+     */
     function processMaps(maps) {
       for (let i = 0; i < maps.length; i++) {
         const map = maps[i];
@@ -80,8 +92,12 @@ module.exports = {
       }
     }
 
+    /**
+     * @param {*} struct
+     * @param {*} base
+     */
     function processVariables(struct, base) {
-      const {names, nodes, declarations, node} = struct;
+      const {declarations, names, node, nodes} = struct;
 
       if (nodes.size === 0) {
         return;
@@ -94,22 +110,22 @@ module.exports = {
           const fixes = [];
           const ids = [];
 
-          names.forEach(name => ids.push(name));
+          names.forEach((name) => ids.push(name));
           const replacement = `{${ids.join(', ')}} = ${base}`;
           fixes.push(fixer.replaceText(node, replacement));
 
-          declarations.forEach(declaration => {
+          declarations.forEach((declaration) => {
             const {declarations} = declaration;
-            const all = declarations.every(decl => nodes.has(decl));
+            const all = declarations.every((decl) => nodes.has(decl));
             if (!all) {
               return;
             }
 
             fixes.push(fixer.remove(declaration));
-            declarations.forEach(decl => nodes.delete(decl));
+            declarations.forEach((decl) => nodes.delete(decl));
           });
 
-          nodes.forEach(node => {
+          nodes.forEach((node) => {
             fixes.push(fixer.remove(node));
           });
           return fixes;
@@ -118,13 +134,16 @@ module.exports = {
     }
 
     return {
+      /**
+       * @param {CompilerNode} node
+       */
       VariableDeclarator(node) {
         if (!shouldBeDestructure(node)) {
           return;
         }
 
         const {init} = node;
-        if (init.leadingComments) {
+        if (context.getCommentsInside(node).length > 0) {
           return;
         }
 
@@ -141,7 +160,10 @@ module.exports = {
         });
       },
 
-      'BlockStatement, Program': function(node) {
+      /**
+       * @param {CompilerNode} node
+       */
+      'BlockStatement, Program': function (node) {
         const {body} = node;
         const sourceCode = context.getSourceCode();
         const letMap = new Map();
@@ -161,7 +183,7 @@ module.exports = {
             const decl = declarations[j];
             const {id, init} = decl;
 
-            if (!init || init.leadingComments) {
+            if (!init || context.getCommentsInside(decl).length > 0) {
               continue;
             }
 
@@ -193,12 +215,13 @@ module.exports = {
               const names = setStruct(variables, base, decl, node);
               const {properties} = id;
               for (let k = 0; k < properties.length; k++) {
-                const {key} = properties[k];
-                if (key.type !== 'Identifier') {
-                  // Deep destructuring, too complicated.
-                  return;
+                const prop = properties[k];
+                names.add(sourceCode.getText(prop));
+                if (!prop.key) {
+                  // rest element
+                  processMaps([letMap, constMap]);
+                  break;
                 }
-                names.add(key.name);
               }
             }
           }

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
+</head>
+<body style="margin: 0; padding: 0">
+  <!--
+    This video is blocked until consent.
+    Notice the lack of `src` or `sources`, which are added after consent data is
+    received.
+  -->
+  <video
+    playsinline
+    controls
+    style="width: 100vw; height: 100vh;"
+    data-src-after-consent="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4">
+  </video>
+
+  <!--
+    Integration script.
+    This example is written in ES5 for browser compatibility.
+    If you wish to write an integration script in ES2015+ that doesn't support
+    olders browser support or is otherwise transpiled into ES5, see
+    frame-consent-es2015.html
+  -->
+  <script>
+    // Wait for API to initialize
+    (window.AmpVideoIframe = window.AmpVideoIframe || [])
+        .push(onAmpIntegrationReady);
+
+    function onAmpIntegrationReady(integration) {
+      // `integration` is an object containing the tools required to
+      // integrate.
+      integration.getConsentData(function(consent) {
+        var video = document.querySelector('video');
+
+        // Remove video and stop here when consent is not given.
+        if (
+          consent.consentPolicyState !== /* SUFFICIENT */ 1 &&
+          consent.consentPolicyState !== /* UNKNOWN_NOT_REQUIRED */ 3
+        ) {
+          video.parentElement.removeChild(video);
+          // Posting an error allows the host document to display a fallback
+          // element and/or dispose of the iframe.
+          integration.postEvent('error');
+          return;
+        }
+
+        // Otherwise set `src` once consent is available.
+        // This can also be accomplished by initializing the video element
+        // only at this point.
+        video.src = video.dataset.srcAfterConsent;
+
+        // And then "unblock" by defining implementation.
+        // If you're using `integration.listenTo()`, that would the only
+        // required call at this point.
+        var muted = false;
+
+        video.addEventListener('playing', function() {
+          integration.postEvent('playing');
+        });
+
+        video.addEventListener('pause', function() {
+          integration.postEvent('pause');
+        });
+
+        video.addEventListener('ended', function() {
+          integration.postEvent('ended');
+        });
+
+        video.addEventListener('canplay', function() {
+          integration.postEvent('canplay');
+        });
+
+        video.addEventListener('volumechange', function() {
+          if (video.volume < 0.01) {
+            muted = true;
+            integration.postEvent('muted');
+            return;
+          }
+          if (muted) {
+            muted = false;
+            integration.postEvent('unmuted');
+          }
+        });
+
+        integration.method('play', function() {
+          video.play();
+        });
+        integration.method('pause', function() {
+          video.pause();
+        });
+        integration.method('mute', function() {
+          video.muted = true;
+        });
+        integration.method('unmute', function() {
+          video.muted = false;
+        });
+        integration.method('showcontrols', function() {
+          video.controls = true;
+        });
+        integration.method('hidecontrols', function() {
+          video.controls = false;
+        });
+        integration.method('fullscreenenter', function() {
+          // Unsupported in example. This should be a call to `requestFullscreen`
+          // or browser equivalents.
+        });
+        integration.method('fullscreenexit', function() {
+          // Unsupported in example. This should be a call to `exitFullscreen`
+          // or browser equivalents.
+        });
+
+        setInterval(function() {
+          // Post a custom analytics event every 3 seconds.
+          integration.postAnalyticsEvent('video-custom-foo', /* optional */ {
+            'myVar': Math.random().toString(),
+          });
+        }, 3000);
+      });
+    }
+  </script>
+</body>
+</html>

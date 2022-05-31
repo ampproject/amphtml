@@ -1,21 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-yotpo';
-import {yotpo} from '../../../../3p/yotpo';
+import {yotpo} from '#3p/yotpo';
 
 describes.realWin(
   'amp-yotpo',
@@ -24,7 +8,7 @@ describes.realWin(
       extensions: ['amp-yotpo'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     const widgets = [
@@ -32,6 +16,7 @@ describes.realWin(
       {name: 'BottomLine', selector: '.yotpo.bottomLine'},
       {name: 'PicturesGallery', selector: '.yotpo.yotpo-pictures-gallery'},
       {name: 'ReviewsCarousel', selector: '.yotpo.yotpo-reviews-carousel'},
+      {name: 'ReviewsTab', selector: '.yotpo.yotpo-modal'},
       {name: 'badge', selector: '.yotpo.badge,.yotpo.yotpo-badge'},
       {name: 'questions-bottomline', selector: '.yotpo.QABottomLine'},
       {name: 'slider', selector: '.yotpo.yotpo-slider'},
@@ -53,7 +38,7 @@ describes.realWin(
       ampYotpo.setAttribute('data-widget-type', opts.widgetType);
       doc.body.appendChild(ampYotpo);
       return ampYotpo
-        .build()
+        .buildInternal()
         .then(() => ampYotpo.layoutCallback())
         .then(() => ampYotpo);
     }
@@ -65,7 +50,7 @@ describes.realWin(
         height: 200,
         widgetType: 'BottomLine',
       };
-      return getYotpo(opts).then(ampYotpo => {
+      return getYotpo(opts).then((ampYotpo) => {
         const iframe = ampYotpo.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');

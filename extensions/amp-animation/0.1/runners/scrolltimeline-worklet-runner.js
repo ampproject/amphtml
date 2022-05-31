@@ -1,27 +1,10 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
 
 import {AnimationRunner} from './animation-runner';
-import {Services} from '../../../../src/services';
-import {
-  assertDoesNotContainDisplay,
-  px,
-  setStyles,
-} from '../../../../src/style';
-import {dev} from '../../../../src/log';
 import {getTotalDuration} from './utils';
 
 const moduleName = 'amp-animation-worklet';
@@ -68,7 +51,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
     const adjustedTimeRange = (1 - this.initialInViewPercent_) * timeRange;
     const initialElementOffset = this.initialInViewPercent_ * timeRange;
 
-    this.requests_.map(request => {
+    this.requests_.map((request) => {
       // Apply vars.
       if (request.vars) {
         setStyles(request.target, assertDoesNotContainDisplay(request.vars));
@@ -86,7 +69,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
           const keyframeEffect = new KeyframeEffect(
             request.target,
             request.keyframes,
-            request.timing
+            /** @type {AnimationEffectTimingProperties} */ (request.timing)
           );
           const player = new this.win_.WorkletAnimation(
             `${moduleName}`,
@@ -99,7 +82,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
           player.play();
           this.players_.push(player);
         },
-        e => {
+        (e) => {
           dev().error('AMP-ANIMATION', e);
         }
       );
@@ -124,7 +107,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
     if (!this.players_) {
       return;
     }
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       player.cancel();
     });
   }

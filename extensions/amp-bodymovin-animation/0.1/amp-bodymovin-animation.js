@@ -1,36 +1,22 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Deferred} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {clamp} from '#core/math';
+import {isFiniteNumber, isObject} from '#core/types';
+import {parseJson} from '#core/types/object/json';
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {batchFetchJsonFor} from '../../../src/batched-json';
-import {clamp} from '../../../src/utils/math';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
+import {Services} from '#service';
+
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isFiniteNumber, isObject} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {parseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
-import {userAssert} from '../../../src/log';
+import {batchFetchJsonFor} from '../../../src/batched-json';
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-bodymovin-animation';
+const TYPE = 'bodymovinanimation';
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -73,12 +59,14 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    const scriptToLoad =
-      this.renderer_ === 'svg'
-        ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
-        : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
-    preconnect.url(this.getAmpDoc(), scriptToLoad, opt_onLayout);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
+    // Different scripts are loaded based on `renderer` but their origin is the
+    // same. See 3p/bodymovinanimation.js#libSourceUrl.
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdnjs.cloudflare.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -101,53 +89,49 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       () => {
         this.play_();
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'pause',
       () => {
         this.pause_();
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'stop',
       () => {
         this.stop_();
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'seekTo',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           this.seekTo_(args);
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
   /** @override */
   layoutCallback() {
     const animData = batchFetchJsonFor(this.ampdoc_, this.element);
-    return animData.then(data => {
+    return animData.then((data) => {
       const opt_context = {
         loop: this.loop_,
         autoplay: this.autoplay_,
         renderer: this.renderer_,
         animationData: data,
       };
-      const iframe = getIframe(
-        this.win,
-        this.element,
-        'bodymovinanimation',
-        opt_context
-      );
+      const iframe = getIframe(this.win, this.element, TYPE, opt_context);
+      iframe.title = this.element.title || 'Airbnb BodyMovin animation';
       return Services.vsyncFor(this.win)
         .mutatePromise(() => {
-          this.applyFillContent(iframe);
+          applyFillContent(iframe);
           this.unlistenMessage_ = listen(
             this.win,
             'message',
@@ -189,16 +173,16 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       !getData(event) ||
       !(
         isObject(getData(event)) ||
-        startsWith(/** @type {string} */ (getData(event)), '{')
+        /** @type {string} */ (getData(event)).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.
     }
 
     /** @const {?JsonObject} */
-    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : parseJson(getData(event)));
+    const eventData = /** @type {?JsonObject} */ (
+      isObject(getData(event)) ? getData(event) : parseJson(getData(event))
+    );
     if (eventData === undefined) {
       return; // We only process valid JSON.
     }
@@ -217,13 +201,11 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   sendCommand_(action, opt_valueType, opt_value) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'action': action,
-            'valueType': opt_valueType || '',
-            'value': opt_value || '',
-          })
-        );
+        const message = JSON.stringify({
+          'action': action,
+          'valueType': opt_valueType || '',
+          'value': opt_value || '',
+        });
         this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
@@ -262,6 +244,6 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBodymovinAnimation);
 });

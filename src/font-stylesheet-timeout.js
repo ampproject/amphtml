@@ -1,22 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {onDocumentReady} from '#core/document/ready';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 
-import {escapeCssSelectorIdent} from './css';
-import {onDocumentReady} from './document-ready';
-import {urls} from './config';
+import * as urls from './config/urls';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -41,15 +26,22 @@ export function fontStylesheetTimeout(win) {
  * @param {!Window} win
  */
 function maybeTimeoutFonts(win) {
-  let timeSinceResponseStart = 0;
-  // If available, we start counting from the time the HTTP response
+  // Educated guess 😅, but we're calculating the correct value further down
+  // if available.
+  let timeSinceNavigationStart = 1500;
+  // If available, we start counting from the time the HTTP request
   // for the page started. The preload scanner should then quickly
   // start the CSS download.
   const perf = win.performance;
-  if (perf && perf.timing && perf.timing.responseStart) {
-    timeSinceResponseStart = Date.now() - perf.timing.responseStart;
+  if (perf && perf.timing && perf.timing.navigationStart) {
+    timeSinceNavigationStart = Date.now() - perf.timing.navigationStart;
   }
-  const timeout = Math.max(1, 250 - timeSinceResponseStart);
+  // Set timeout such that we have some time to paint fonts in time for
+  // the desired goal of a 2500ms for LCP.
+  const timeout = Math.max(
+    1,
+    2500 - 400 /* Estimated max time to paint */ - timeSinceNavigationStart
+  );
 
   // Avoid timer dependency since this runs very early in execution.
   win.setTimeout(() => {

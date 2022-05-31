@@ -1,25 +1,11 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
-import {poll} from '../../../../testing/iframe';
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
+import {poll} from '#testing/iframe';
 
 describes.realWin(
   'amp-sticky-ad 1.0 version',
@@ -35,7 +21,7 @@ describes.realWin(
       extensions: ['amp-sticky-ad:1.0', 'amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampStickyAd;
     let ampAd;
@@ -43,7 +29,7 @@ describes.realWin(
     let addToFixedLayerStub, addToFixedLayerPromise;
     const adUpgradedToCustomElementPromise = Promise.resolve();
     describe('with valid child 1.0', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         win = env.win;
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -54,8 +40,8 @@ describes.realWin(
         });
         ampStickyAd.appendChild(ampAd);
         win.document.body.appendChild(ampStickyAd);
-        ampStickyAd.build();
-        impl = ampStickyAd.implementation_;
+        ampStickyAd.buildInternal();
+        impl = await ampStickyAd.getImpl(false);
         addToFixedLayerPromise = Promise.resolve();
         addToFixedLayerStub = env.sandbox
           .stub(impl.viewport_, 'addToFixedLayer')
@@ -63,7 +49,7 @@ describes.realWin(
       });
 
       // TODO(#16916): Make this test work with synchronous throws.
-      it.skip('should listen to scroll event', function*() {
+      it.skip('should listen to scroll event', function* () {
         const spy = env.sandbox.spy(impl, 'removeOnScrollListener_');
         expect(impl.scrollUnlisten_).to.be.null;
         yield macroTask();
@@ -87,16 +73,16 @@ describes.realWin(
         const getScrollTopSpy = env.sandbox.spy();
         const getScrollHeightSpy = env.sandbox.spy();
 
-        impl.viewport_.getScrollTop = function() {
+        impl.viewport_.getScrollTop = function () {
           getScrollTopSpy();
           return 1;
         };
-        impl.viewport_.getScrollHeight = function() {
+        impl.viewport_.getScrollHeight = function () {
           getScrollHeightSpy();
           return 300;
         };
         impl.onScroll_();
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 0);
         }).then(() => {
           expect(getScrollTopSpy).to.have.been.called;
@@ -129,10 +115,10 @@ describes.realWin(
         );
         getScrollHeightStub.returns(300);
 
-        impl.mutateElement = function(callback) {
+        impl.mutateElement = function (callback) {
           callback();
         };
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         impl.adReadyPromise_ = Promise.resolve();
@@ -176,19 +162,19 @@ describes.realWin(
         const addCloseButtonSpy = env.sandbox.spy(impl, 'addCloseButton_');
         env.sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(() => {});
 
-        impl.viewport_.getScrollTop = function() {
+        impl.viewport_.getScrollTop = function () {
           return 100;
         };
-        impl.viewport_.getSize = function() {
+        impl.viewport_.getSize = function () {
           return {height: 50};
         };
-        impl.viewport_.getScrollHeight = function() {
+        impl.viewport_.getScrollHeight = function () {
           return 300;
         };
-        impl.mutateElement = function(callback) {
+        impl.mutateElement = function (callback) {
           callback();
         };
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
 
@@ -210,27 +196,26 @@ describes.realWin(
         });
       });
 
-      it('should wait for built and render-start signals', () => {
-        impl.vsync_.mutate = function(callback) {
+      it('should wait for built and render-start signals', async () => {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         const layoutAdSpy = env.sandbox.spy(impl, 'layoutAd_');
         impl.scheduleLayoutForAd_();
         expect(layoutAdSpy).to.not.been.called;
-        impl.ad_.signals().signal('built');
-        return adUpgradedToCustomElementPromise.then(() => {
-          return impl.ad_
-            .signals()
-            .whenSignal('built')
-            .then(() => {
-              expect(layoutAdSpy).to.be.called;
-              expect(ampStickyAd).to.not.have.attribute('visible');
-              impl.ad_.signals().signal('render-start');
-              return poll('visible attribute must be set', () => {
-                return ampStickyAd.hasAttribute('visible');
-              });
-            });
-        });
+
+        await adUpgradedToCustomElementPromise;
+        const ad = impl.ad_;
+        ad.signals().signal('built');
+        await ad.signals().whenSignal('built');
+        await new Promise(setTimeout);
+        expect(layoutAdSpy).to.be.called;
+        expect(ampStickyAd).to.not.have.attribute('visible');
+
+        ad.signals().signal('render-start');
+        await poll('visible attribute must be set', () =>
+          ampStickyAd.hasAttribute('visible')
+        );
       });
 
       it('should not allow container to be set semi-transparent', () => {
@@ -238,7 +223,7 @@ describes.realWin(
           'style',
           'background-color: rgba(55, 55, 55, 0.55) !important'
         );
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         const layoutPromise = impl.layoutAd_();
@@ -256,7 +241,7 @@ describes.realWin(
           'style',
           'background-color: transparent !important'
         );
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         const layoutPromise = impl.layoutAd_();
@@ -279,6 +264,7 @@ describes.realWin(
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
         ampImg = win.document.createElement('amp-img');
+        ampImg.setAttribute('layout', 'nodisplay');
         ampAd1 = createElementWithAttributes(win.document, 'amp-ad', {
           'type': '_ping_',
           'height': 50,
@@ -292,9 +278,9 @@ describes.realWin(
         win.document.body.appendChild(ampStickyAd);
       });
 
-      it('should not build when child is not ad', () => {
+      it('should not build when child is not ad', async () => {
         ampStickyAd.appendChild(ampImg);
-        const impl = ampStickyAd.implementation_;
+        const impl = await ampStickyAd.getImpl(false);
         allowConsoleError(() => {
           expect(() => impl.buildCallback()).to.throw(
             /amp-sticky-ad must have a single amp-ad child/
@@ -302,10 +288,10 @@ describes.realWin(
         });
       });
 
-      it('should not build when has more than 1 children', () => {
+      it('should not build when has more than 1 children', async () => {
         ampStickyAd.appendChild(ampAd1);
         ampStickyAd.appendChild(ampAd2);
-        const impl = ampStickyAd.implementation_;
+        const impl = await ampStickyAd.getImpl(false);
 
         allowConsoleError(() => {
           expect(() => impl.buildCallback()).to.throw(
@@ -331,12 +317,12 @@ describes.realWin(
       extensions: ['amp-sticky-ad:1.0', 'amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampStickyAd;
     let impl;
     let addToFixedLayerPromise;
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
       ampStickyAd = win.document.createElement('amp-sticky-ad');
       ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -347,30 +333,30 @@ describes.realWin(
       });
       ampStickyAd.appendChild(ampAd);
       win.document.body.appendChild(ampStickyAd);
-      ampStickyAd.build();
-      impl = ampStickyAd.implementation_;
+      ampStickyAd.buildInternal();
+      impl = await ampStickyAd.getImpl(false);
       addToFixedLayerPromise = Promise.resolve();
       env.sandbox
         .stub(impl.viewport_, 'addToFixedLayer')
         .callsFake(() => addToFixedLayerPromise);
-      return ampAd.implementation_.upgradeCallback();
+      return impl.upgradeCallback();
     });
 
     // TODO(zhouyx, #18574): Fix failing borderWidth check and re-enable.
     it.skip('close button should close ad and reset body borderBottom', () => {
-      impl.viewport_.getScrollTop = function() {
+      impl.viewport_.getScrollTop = function () {
         return 100;
       };
-      impl.viewport_.getSize = function() {
+      impl.viewport_.getSize = function () {
         return {height: 50};
       };
-      impl.viewport_.getScrollHeight = function() {
+      impl.viewport_.getScrollHeight = function () {
         return 300;
       };
-      impl.mutateElement = function(callback) {
+      impl.mutateElement = function (callback) {
         callback();
       };
-      impl.vsync_.mutate = function(callback) {
+      impl.vsync_.mutate = function (callback) {
         callback();
       };
       env.sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
@@ -403,19 +389,19 @@ describes.realWin(
 
     // TODO(zhouyx, #18574): Fix failing borderWidth check and re-enable.
     it.skip('should collapse and reset borderBottom when its child do', () => {
-      impl.viewport_.getScrollTop = function() {
+      impl.viewport_.getScrollTop = function () {
         return 100;
       };
-      impl.viewport_.getSize = function() {
+      impl.viewport_.getSize = function () {
         return {height: 50};
       };
-      impl.viewport_.getScrollHeight = function() {
+      impl.viewport_.getScrollHeight = function () {
         return 300;
       };
-      impl.mutateElement = function(callback) {
+      impl.mutateElement = function (callback) {
         callback();
       };
-      impl.vsync_.mutate = function(callback) {
+      impl.vsync_.mutate = function (callback) {
         callback();
       };
       env.sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});

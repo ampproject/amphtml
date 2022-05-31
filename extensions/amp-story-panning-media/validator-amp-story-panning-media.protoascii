@@ -1,0 +1,40 @@
+tags: {  # amp-story-panning-media
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-panning-media"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-panning-media>
+  html_format: AMP
+  tag_name: "AMP-STORY-PANNING-MEDIA"
+  requires_extension: "amp-story-panning-media"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  spec_url: "https://amp.dev/documentation/components/amp-story-panning-media"
+  amp_layout: {
+    supported_layouts: FILL
+  }
+  attrs: {
+    name: "data-x"
+    value_regex: "-?(0|[0-9]?\\d\\.?\\d*%|100%)"
+  }
+  attrs: {
+    name: "data-y"
+    value_regex: "-?(0|[0-9]?\\d\\.?\\d*%|100%)"
+  }
+  attrs: {
+    name: "data-zoom"
+    value_regex: "\\d+\\.?\\d*"
+  }
+  attrs: {
+    name: "lock-bounds"
+    value: ""
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "AMP-IMG"
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "2": {
+    "string": "Tap Next",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+  },
+  "3": {
+    "string": "Tap Back",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+  },
+  "4": {
+    "string": "Could not copy link to clipboard :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+  },
+  "5": {
+    "string": "Link copied!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+  },
+  "6": {
+    "string": "Email",
+    "description": "Button label for the share target that shares a link via email."
+  },
+  "7": {
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
+  },
+  "9": {
+    "string": "Get Link",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+  },
+  "10": {
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
+  },
+  "11": {
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
+  },
+  "12": {
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
+  },
+  "14": {
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
+  },
+  "15": {
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
+  },
+  "16": {
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
+  },
+  "21": {
+    "string": "We're sorry, it looks like your browser doesn't support this experience",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+  },
+  "22": {
+    "string": "Accept",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
+  },
+  "23": {
+    "string": "Decline",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+  },
+  "25": {
+    "string": "View on original domain:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+  },
+  "26": {
+    "string": "More about AMP results",
+    "description": "Label for a link to documentation on how AMP links are handled."
+  },
+  "27": {
+    "string": "Continue Anyway",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+  },
+  "34": {
+    "string": "Play video",
+    "description": "Label for a button to play the video visible on the page."
+  },
+  "35": {
+    "string": "Swipe up",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+  },
+  "63": {
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
+  },
+  "64": {
+    "string": "Updated",
+    "description": "Label that indicates that additional content has been added to a story"
+  },
+  "65": {
+    "string": "Video failed to play",
+    "description": "Label indicating that the video visible on the page failed to play."
+  },
+  "66": {
+    "string": "Mute story",
+    "description": "Label for the mute button that turns off the sound in the story"
+  },
+  "67": {
+    "string": "Unmute story",
+    "description": "Label for the unmute button that turns the sound in the story back on"
+  },
+  "68": {
+    "string": "Story information",
+    "description": "Label for the information button that pulls up relevant information about the story content"
+  },
+  "69": {
+    "string": "Share story",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+  },
+  "71": {
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+  },
+  "72": {
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+  },
+  "73": {
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+  },
+  "74": {
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+  },
+  "75": {
+    "string": "Tip 1 of 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "76": {
+    "string": "Tap to go to the next screen",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "77": {
+    "string": "Next",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "78": {
+    "string": "Tip 2 of 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+  },
+  "79": {
+    "string": "Swipe to go to the next story",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+  },
+  "80": {
+    "string": "Got it",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+  },
+  "81": {
+    "string": "Tip",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
+  },
+  "83": {
+    "string": "Activate",
+    "description": "Label for the activate button to ask for device orientation permission"
+  },
+  "84": {
+    "string": "SCORE:",
+    "description": "Label for the results component preceding the score in percentages"
+  },
+  "85": {
+    "string": "Pause story",
+    "description": "Label for a button that pauses the media content on the story"
+  },
+  "86": {
+    "string": "Play story",
+    "description": "Label for a button that plays the media content on the story"
+  },
+  "87": {
+    "string": "Close",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+  },
+  "88": {
+    "string": "Skip next",
+    "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "Your response will be sent to",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "Next story",
+    "description": "Label for a button that advances to the next element in the carousel."
+  },
+  "91": {
+    "string": "Next page",
+    "description": "Label for a button that advances to the next page of the story."
+  },
+  "92": {
+    "string": "Replay",
+    "description": "Label for a button that replays the story."
+  },
+  "93": {
+    "string": "Previous page",
+    "description": "Label for a button that returns the user to the previous page of the story."
+  },
+  "96": {
+    "string": "Move device to explore",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "Opening",
+    "description": "Text displayed to users on tap of outlink button."
+  },
+  "98": {
+    "string": "Form not submitted, try again",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+  },
+  "99": {
+    "string": "Form successfully submitted",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+  },
+  "101": {
+    "string": "Shop now",
+    "description": "Label for the shopping CTA button."
+  },
+  "102": {
+    "string": "Featured in this story",
+    "description": "Label for a list of products that are featured in the story."
+  },
+  "103": {
+    "string": "Buy now",
+    "description": "Button label prompting users to shop for something."
+  },
+  "105": {
+    "string": "Details",
+    "description": "Button label prompting users to read about details of a product."
+  },
+  "106": {
+    "string": "Read more",
+    "description": "Label for a button to open a drawer containing additional content."
+  },
+  "107": {
+    "string": "Already a subscriber?",
+    "description": "Label for checking if the user is already a subscriber of the publisher site or not."
+  },
+  "108": {
+    "string": "Sign in",
+    "description": "Label for the sign in button to redirect users to publisher site to sign in."
+  },
+  "109": {
+    "string": "Subscribe with",
+    "description": "Button label prompting users to subscribe with the publisher."
+  },
+  "110": {
+    "string": "Subscribe with Google",
+    "description": "Button label prompting users to subscribe with the publisher via SwG."
+  },
+  "111": {
+    "string": "Captions on",
+    "description": "Label for the captions button that indicates the captions are turned on"
+  },
+  "112": {
+    "string": "Captions off",
+    "description": "Label for the captions button that indicates the captions are turned off"
+  },
+  "113": {
+    "string": "Skip",
+    "description": "Button label prompting users to exit paywall and potentially go to the next story."
+  }
+}

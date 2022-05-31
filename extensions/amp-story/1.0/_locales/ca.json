@@ -1,0 +1,167 @@
+{
+  "2": {
+    "string": "Toca Següent"
+  },
+  "3": {
+    "string": "Toca Enrere"
+  },
+  "4": {
+    "string": "No s'ha pogut copiar l'enllaç al porta-retalls :("
+  },
+  "5": {
+    "string": "S'ha copiat l'enllaç."
+  },
+  "6": {
+    "string": "Correu electrònic"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Obtén l'enllaç"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Sembla que el teu navegador no admet aquesta experiència"
+  },
+  "22": {
+    "string": "Accepta"
+  },
+  "23": {
+    "string": "Rebutja"
+  },
+  "25": {
+    "string": "Mostra al domini original:"
+  },
+  "26": {
+    "string": "Més informació sobre els resultats d'AMP"
+  },
+  "27": {
+    "string": "Continua de totes maneres"
+  },
+  "34": {
+    "string": "Reprodueix el vídeo"
+  },
+  "35": {
+    "string": "Llisca cap amunt"
+  },
+  "63": {
+    "string": "Línia"
+  },
+  "64": {
+    "string": "S'ha actualitzat"
+  },
+  "65": {
+    "string": "No s'ha pogut reproduir el vídeo"
+  },
+  "66": {
+    "string": "Silencia la història"
+  },
+  "67": {
+    "string": "Deixa de silenciar la història"
+  },
+  "68": {
+    "string": "Informació de la història"
+  },
+  "69": {
+    "string": "Comparteix la història"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Consell 1 de 2"
+  },
+  "76": {
+    "string": "Toca per anar a la pantalla següent"
+  },
+  "77": {
+    "string": "Següent"
+  },
+  "78": {
+    "string": "Consell 2 de 2"
+  },
+  "79": {
+    "string": "Fes lliscar el dit per anar a la història següent"
+  },
+  "80": {
+    "string": "Entesos"
+  },
+  "81": {
+    "string": "Consell"
+  },
+  "83": {
+    "string": "Activa"
+  },
+  "84": {
+    "string": "PUNTUACIÓ:"
+  },
+  "85": {
+    "string": "Posa en pausa la història"
+  },
+  "86": {
+    "string": "Reprodueix la història"
+  },
+  "87": {
+    "string": "Tanca"
+  },
+  "88": {
+    "string": "Salta al següent"
+  },
+  "89": {
+    "string": "La teva resposta s'enviarà a"
+  },
+  "90": {
+    "string": "Història següent"
+  },
+  "91": {
+    "string": "Pàgina següent"
+  },
+  "92": {
+    "string": "Torna a reproduir"
+  },
+  "93": {
+    "string": "Pàgina anterior"
+  },
+  "96": {
+    "string": "Mou el dispositiu per explorar"
+  },
+  "97": {
+    "string": "S'està obrint"
+  },
+  "98": {
+    "string": "El formulari no s'ha enviat, torna-ho a provar"
+  },
+  "99": {
+    "string": "El formulari s'ha enviat correctament"
+  },
+  "101": {
+    "string": "Compra ara"
+  }
+}

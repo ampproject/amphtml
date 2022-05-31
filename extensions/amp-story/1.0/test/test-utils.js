@@ -1,27 +1,19 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from '#core/dom/amp-element-helpers';
+import * as Preact from '#core/dom/jsx';
+
+import {StateProperty} from '../amp-story-store-service';
+import {
+  dependsOnStoryServices,
   getRGBFromCssColorValue,
   getTextColorForRGB,
   shouldShowStoryUrlInfo,
   timeStrToMillis,
 } from '../utils';
 
-describes.fakeWin('amp-story utils', {}, () => {
+describes.fakeWin('amp-story utils', {}, (env) => {
   describe('timeStrToMillis', () => {
     it('should return millis for a milliseconds string', () => {
       const millis = timeStrToMillis('100ms');
@@ -47,9 +39,15 @@ describes.fakeWin('amp-story utils', {}, () => {
       expect(millisForSeconds).to.equal(2500);
     });
 
-    it('should return undefined for invalid types', () => {
+    it('should return NaN for invalid types', () => {
       const convertedMillis = timeStrToMillis('10kg');
       expect(convertedMillis).to.be.NaN;
+    });
+
+    it('should return fallback value for invalid types', () => {
+      const fallback = 312;
+      const convertedMillis = timeStrToMillis('10kg', fallback);
+      expect(convertedMillis).to.equal(fallback);
     });
   });
 
@@ -103,7 +101,8 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => null,
         isEmbedded: () => true,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.true;
     });
 
     it('should be forced to false when isEmbedded', () => {
@@ -111,7 +110,8 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => '0',
         isEmbedded: () => true,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.false;
     });
 
     it('should be false when !isEmbedded', () => {
@@ -119,7 +119,8 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => null,
         isEmbedded: () => false,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.false;
     });
 
     it('should be forced to true when !isEmbedded', () => {
@@ -127,7 +128,71 @@ describes.fakeWin('amp-story utils', {}, () => {
         getParam: () => '1',
         isEmbedded: () => false,
       };
-      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+      const fakeStoreService = {get: () => true};
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.true;
+    });
+
+    it('should be false when CAN_SHOW_STORY_URL_INFO is false', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => true,
+      };
+      const fakeStoreService = {get: () => {}};
+      const getStub = env.sandbox.stub(fakeStoreService, 'get').returns(false);
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.false;
+      expect(getStub).to.be.calledOnceWithExactly(
+        StateProperty.CAN_SHOW_STORY_URL_INFO
+      );
+    });
+
+    it('should be true when CAN_SHOW_STORY_URL_INFO is true', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => true,
+      };
+      const fakeStoreService = {get: () => {}};
+      const getStub = env.sandbox.stub(fakeStoreService, 'get').returns(true);
+      expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.true;
+      expect(getStub).to.be.calledOnceWithExactly(
+        StateProperty.CAN_SHOW_STORY_URL_INFO
+      );
+    });
+  });
+
+  describe('dependsOnStoryServices', () => {
+    class Upgraded extends AMP.BaseElement {}
+
+    const Preupgrade = dependsOnStoryServices(Upgraded);
+
+    it('should upgrade immediately when not inside amp-story', () => {
+      const element = <div></div>;
+
+      const instance = new Preupgrade(element);
+      const upgraded = instance.upgradeCallback();
+
+      expect(upgraded instanceof Upgraded).to.be.true;
+      expect(upgraded.element).to.equal(element);
+    });
+
+    it('should upgrade after ancestor amp-story', async () => {
+      const element = <div></div>;
+      const story = <amp-story>{element}</amp-story>;
+
+      const instance = new Preupgrade(element);
+      const upgradedSpy = env.sandbox.spy((impl) => impl);
+      const upgradedPromise = instance.upgradeCallback().then(upgradedSpy);
+
+      expect(upgradedSpy).to.not.have.been.called;
+
+      story.getImpl = () => Promise.resolve();
+      story[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](story);
+      delete story[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+      delete story[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+
+      const upgraded = await upgradedPromise;
+
+      expect(upgraded instanceof Upgraded).to.be.true;
+      expect(upgraded.element).to.equal(element);
     });
   });
 });

@@ -1,40 +1,24 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {tryResolve} from '#core/data-structures/promise';
+import {tryParseJson} from '#core/types/object/json';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
+import {dev, devAssert} from '#utils/log';
+
+import {getMode} from '../../../src/mode';
 import {
   AmpA4A,
   CreativeMetaDataDef,
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
+import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
-import {dev, devAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';
 
 /** @visibleForTesting @type {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
-
-/** @private {?AmpAdTemplateHelper} */
-let ampAdTemplateHelper;
 
 /**
  * Fast Fetch implementation for AdZerk network that allows AMP creative
@@ -66,9 +50,6 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
     /** @private {?../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */
     this.ampCreativeJson_ = null;
-
-    ampAdTemplateHelper =
-      ampAdTemplateHelper || new AmpAdTemplateHelper(this.win);
   }
 
   /**
@@ -99,24 +80,27 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   maybeValidateAmpCreative(bytes, headers) {
+    // TODO(wg-monetization): this header name has been deprecated elsewhere,
+    // and is never returned by dev server.
     if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
+      return /**@type {!Promise<?ArrayBuffer>}*/ (Promise.resolve(null));
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();
-    return tryResolve(() => utf8Decode(bytes)).then(body => {
+    return tryResolve(() => utf8Decode(bytes)).then((body) => {
       checkStillCurrent();
       this.ampCreativeJson_ =
-        /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
-          body
-        ) || {});
+        /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          tryParseJson(body) || {}
+        );
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
+      const ampAdTemplateHelper = getAmpAdTemplateHelper(this.element);
       return ampAdTemplateHelper
         .fetch(this.ampCreativeJson_.templateUrl)
-        .then(parsedTemplate => {
+        .then((parsedTemplate) => {
           return utf8Encode(this.parseMetadataFromCreative(parsedTemplate));
         })
-        .catch(error => {
+        .catch((error) => {
           dev().warn(
             TAG,
             'Error fetching/expanding template',
@@ -170,18 +154,25 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       this.creativeMetadata_['customElementExtensions'],
       'amp-mustache'
     );
+    this.creativeMetadata_['extensions'] =
+      this.creativeMetadata_['extensions'] || [];
+    mergeExtensionsMetadata(
+      this.creativeMetadata_['extensions'],
+      this.creativeMetadata_['customElementExtensions']
+    );
     return /**@type {?CreativeMetaDataDef}*/ (this.creativeMetadata_);
   }
 
   /** @override */
   onCreativeRender(unusedMetadata) {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.data) {
+      const ampAdTemplateHelper = getAmpAdTemplateHelper(this.element);
       ampAdTemplateHelper
         .render(
           this.ampCreativeJson_.data,
           this.iframe.contentWindow.document.body
         )
-        .then(renderedElement => {
+        .then((renderedElement) => {
           if (this.ampCreativeJson_.analytics) {
             ampAdTemplateHelper.insertAnalytics(
               renderedElement,
@@ -207,6 +198,6 @@ function pushIfNotExist(array, item) {
   }
 }
 
-AMP.extension('amp-ad-network-adzerk-impl', '0.1', AMP => {
+AMP.extension('amp-ad-network-adzerk-impl', '0.1', (AMP) => {
   AMP.registerElement('amp-ad-network-adzerk-impl', AmpAdNetworkAdzerkImpl);
 });

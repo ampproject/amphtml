@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   computeInMasterFrame,
   loadScript,
@@ -21,13 +5,13 @@ import {
   validateData,
   validateSrcContains,
   validateSrcPrefix,
-} from '../../3p/3p';
+} from '#3p/3p';
 
-describe('3p', () => {
+describes.sandboxed('3p', {}, (env) => {
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
   });
 
   afterEach(() => {
@@ -182,12 +166,12 @@ describe('3p', () => {
             {
               type: 'TEST',
               foo: true,
-              'not-whitelisted': true,
+              'not-allowed': true,
             },
             [],
             ['foo']
           );
-        }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+        }).to.throw(/Unknown attribute for TEST: not-allowed./);
       });
     });
 
@@ -219,7 +203,7 @@ describe('3p', () => {
     let called = 0;
     nextTick(
       {
-        setTimeout: fn => {
+        setTimeout: (fn) => {
           fn();
         },
       },
@@ -258,13 +242,13 @@ describe('3p', () => {
     };
     let done;
     let workCalls = 0;
-    const work = d => {
+    const work = (d) => {
       workCalls++;
       done = d;
     };
     let progress = '';
-    const frame = id => {
-      return result => {
+    const frame = (id) => {
+      return (result) => {
         progress += result + id;
       };
     };
@@ -291,10 +275,10 @@ describe('3p', () => {
       expect(s.src).to.equal(url);
     });
 
-    it('should handle onSuccess callback', done => {
+    it('should handle onSuccess callback', (done) => {
       loadScript(
         window,
-        'http://localhost:9876/test/unit/test-3p.js',
+        'http://localhost:9876/examples/amp-ad/sticky.js',
         () => {
           done();
         },
@@ -304,7 +288,7 @@ describe('3p', () => {
       );
     });
 
-    it('should handle onFailure callback', done => {
+    it('should handle onFailure callback', (done) => {
       loadScript(
         window,
         'http://localhost:9876/404',

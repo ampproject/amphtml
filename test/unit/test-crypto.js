@@ -1,27 +1,14 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {Crypto} from '#service/crypto-impl';
+import {installExtensionsService} from '#service/extensions-impl';
+import {Platform} from '#service/platform-impl';
 
-import {Crypto} from '../../src/service/crypto-impl';
-import {Platform} from '../../src/service/platform-impl';
-import {Services} from '../../src/services';
+import {FakePerformance} from '#testing/fake-dom';
+
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installExtensionsService} from '../../src/service/extensions-impl';
 
-describes.realWin('crypto-impl', {}, env => {
+describes.realWin('crypto-impl', {}, (env) => {
   let win;
   let crypto;
 
@@ -38,7 +25,7 @@ describes.realWin('crypto-impl', {}, env => {
   }
 
   function testSuite(description, win, expectedError) {
-    // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+    // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
     describe
       .configure()
       .skipSafari()
@@ -51,7 +38,7 @@ describes.realWin('crypto-impl', {}, env => {
           if (expectedError) {
             expectAsyncConsoleError(expectedError);
           }
-          return crypto.sha384('abc').then(buffer => {
+          return crypto.sha384('abc').then((buffer) => {
             expect(buffer.length).to.equal(48);
             expect(buffer[0]).to.equal(203);
             expect(buffer[1]).to.equal(0);
@@ -63,7 +50,7 @@ describes.realWin('crypto-impl', {}, env => {
           if (expectedError) {
             expectAsyncConsoleError(expectedError);
           }
-          return crypto.sha384(uint8Array([1, 2, 3])).then(buffer => {
+          return crypto.sha384(uint8Array([1, 2, 3])).then((buffer) => {
             expect(buffer.length).to.equal(48);
             expect(buffer[0]).to.equal(134);
             expect(buffer[1]).to.equal(34);
@@ -113,7 +100,7 @@ describes.realWin('crypto-impl', {}, env => {
           if (expectedError) {
             expectAsyncConsoleError(expectedError);
           }
-          return crypto.uniform('abc').then(result => {
+          return crypto.uniform('abc').then((result) => {
             expect(result.toFixed(6)).to.equal('0.792976');
           });
         });
@@ -121,17 +108,20 @@ describes.realWin('crypto-impl', {}, env => {
   }
 
   function createCrypto(win) {
-    if (win && !win.document) {
+    if (!win.document) {
       win.document = env.win.document;
     }
+    win.performance = new FakePerformance(win);
     installDocService(win, /* isSingleDoc */ true);
     installExtensionsService(win);
     const extensions = Services.extensionsFor(win);
-    env.sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
-      expect(extensionId).to.equal('amp-crypto-polyfill');
-      installCryptoPolyfill(win);
-      return Promise.resolve();
-    });
+    env.sandbox
+      .stub(extensions, 'preloadExtension')
+      .callsFake((extensionId) => {
+        expect(extensionId).to.equal('amp-crypto-polyfill');
+        installCryptoPolyfill(win);
+        return Promise.resolve();
+      });
 
     return new Crypto(win);
   }
@@ -142,8 +132,9 @@ describes.realWin('crypto-impl', {}, env => {
   }
 
   testSuite('with native crypto API');
-  testSuite('with crypto lib', {});
+  testSuite('with crypto lib', {...win, crypto: null});
   testSuite('with native crypto API rejects', {
+    ...win,
     crypto: {
       subtle: {
         digest: () => Promise.reject('Operation not supported'),
@@ -153,6 +144,7 @@ describes.realWin('crypto-impl', {}, env => {
   testSuite(
     'with native crypto API throws',
     {
+      ...win,
       crypto: {
         subtle: {
           digest: () => {
@@ -165,10 +157,11 @@ describes.realWin('crypto-impl', {}, env => {
   );
 
   it('native API result should exactly equal to crypto lib result', () => {
+    const fakeWin = {...win, crypto: null};
     return Promise.all([
       createCrypto(win).sha384('abc'),
-      createCrypto({}).sha384('abc'),
-    ]).then(results => {
+      createCrypto(fakeWin).sha384('abc'),
+    ]).then((results) => {
       expect(results[0]).to.jsonEqual(results[1]);
     });
   });
@@ -180,7 +173,7 @@ describes.realWin('crypto-impl', {}, env => {
       'should not load closure lib when native API is available ' +
         '(string input)',
       () => {
-        return new Crypto(win).sha384Base64('abc').then(hash => {
+        return new Crypto(win).sha384Base64('abc').then((hash) => {
           expect(hash).to.equal(
             'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn'
           );
@@ -194,7 +187,7 @@ describes.realWin('crypto-impl', {}, env => {
       () => {
         return new Crypto(win)
           .sha384Base64(uint8Array([1, 2, 3]))
-          .then(hash => {
+          .then((hash) => {
             expect(hash).to.equal(
               'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3He57T8sjh2sTcMlhn053f8dJim3o5PUf2'
             );

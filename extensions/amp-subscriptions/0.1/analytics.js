@@ -1,22 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {dict} from '../../../src/utils/object';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {user} from '../../../src/log';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {user} from '#utils/log';
 
 const TAG = 'amp-subscriptions';
 
@@ -96,19 +79,17 @@ export class SubscriptionAnalytics {
 
   /**
    * @param {!SubscriptionAnalyticsEvents|string} eventType
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!JsonObject=} opt_vars
    * @param {!JsonObject=} internalVars
    */
-  serviceEvent(eventType, serviceId, opt_vars, internalVars) {
+  serviceEvent(eventType, platformKey, opt_vars, internalVars) {
     this.event(
       eventType,
-      /** @type {!JsonObject} */ (Object.assign(
-        dict({
-          'serviceId': serviceId,
-        }),
-        opt_vars
-      )),
+      /** @type {!JsonObject} */ ({
+        'serviceId': platformKey,
+        ...opt_vars,
+      }),
       internalVars
     );
   }
@@ -119,7 +100,7 @@ export class SubscriptionAnalytics {
    * @param {!JsonObject=} internalVars
    */
   event(eventType, opt_vars, internalVars) {
-    internalVars = internalVars || dict({});
+    internalVars = internalVars || {};
 
     const loggedString =
       eventType !== SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION
@@ -128,8 +109,13 @@ export class SubscriptionAnalytics {
 
     user().info(TAG, loggedString, opt_vars || '');
 
-    opt_vars = opt_vars || dict({});
-    triggerAnalyticsEvent(this.element_, loggedString, opt_vars);
+    opt_vars = opt_vars || {};
+    triggerAnalyticsEvent(
+      this.element_,
+      loggedString,
+      opt_vars,
+      /** enableDataVars */ false
+    );
 
     for (let l = 0; l < this.listeners_.length; l++) {
       this.listeners_[l](eventType, opt_vars, internalVars);
@@ -137,20 +123,20 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!Action|string} action
    * @param {!ActionStatus|string} status
    * @param {!JsonObject=} opt_vars
    */
-  actionEvent(serviceId, action, status, opt_vars) {
+  actionEvent(platformKey, action, status, opt_vars) {
     this.serviceEvent(
       SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
-      serviceId,
+      platformKey,
       opt_vars,
-      dict({
+      {
         'action': action,
         'status': status,
-      })
+      }
     );
   }
 }

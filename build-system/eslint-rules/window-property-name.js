@@ -1,20 +1,4 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * Checks that custom properties set on the window are prefixed with '__AMP_'.
  * The prefix is invalid in `id` attributes which prevents DOM clobbering.
@@ -37,9 +21,9 @@ const PATHS_TO_IGNORE = [
   path.resolve(ROOT_DIR, 'test/'),
 ];
 
-const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self'];
+const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self', 'globalThis'];
 
-module.exports = function(context) {
+module.exports = function (context) {
   /**
    * Looks up value of an identifier property.
    * E.g. given `window[FOO]`, finds `FOO = 'abc'` in code and returns `'abc'`.
@@ -84,11 +68,11 @@ module.exports = function(context) {
     AssignmentExpression(node) {
       const filePath = context.getFilename();
       // Only check source paths.
-      if (!PATHS_TO_INCLUDE.some(path => filePath.includes(path))) {
+      if (!PATHS_TO_INCLUDE.some((path) => filePath.includes(path))) {
         return;
       }
       // Ignore polyfills etc.
-      if (PATHS_TO_IGNORE.some(path => filePath.includes(path))) {
+      if (PATHS_TO_IGNORE.some((path) => filePath.includes(path))) {
         return;
       }
       // Ignore test files.

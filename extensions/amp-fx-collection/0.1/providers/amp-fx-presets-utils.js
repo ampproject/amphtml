@@ -1,29 +1,15 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Common animations utility functions used in the amp-fx
  * presets.
  */
 
+import {mapRange} from '#core/math';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
 import {FxType} from '../fx-type';
-import {Services} from '../../../../src/services';
-import {mapRange} from '../../../../src/utils/math';
-import {startsWith} from '../../../../src/string';
-import {userAssert} from '../../../../src/log';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;
@@ -45,7 +31,7 @@ export function convertEasingKeyword(keyword) {
     return curves[keyword];
   }
   userAssert(
-    startsWith(keyword, 'cubic-bezier'),
+    keyword.startsWith('cubic-bezier'),
     'All custom bezier curves should be specified by following the ' +
       '`cubic-bezier()` function notation.'
   );

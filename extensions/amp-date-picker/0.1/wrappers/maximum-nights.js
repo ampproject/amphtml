@@ -1,25 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {requireExternal} from '../../../../src/module';
 
 /**
  * Implements the `maximum-nights` attribute on the date range picker.
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)}
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component}
  */
 export function wrap(WrappedComponent) {
   const react = requireExternal('react');
@@ -49,7 +33,7 @@ export function wrap(WrappedComponent) {
   MaximumNights.prototype.constructor = MaximumNights;
 
   /** @override */
-  MaximumNights.prototype.componentWillReceiveProps = function(nextProps) {
+  MaximumNights.prototype.componentWillReceiveProps = function (nextProps) {
     const {props} = this;
     const shouldUpdate =
       props['isOutsideRange'] != nextProps['isOutsideRange'] ||
@@ -63,7 +47,7 @@ export function wrap(WrappedComponent) {
   };
 
   /** @override */
-  MaximumNights.prototype.render = function() {
+  MaximumNights.prototype.render = function () {
     const props = {...this.props};
     props['isOutsideRange'] = this.isOutsideRange_;
     return react.createElement(WrappedComponent, props);
@@ -94,7 +78,7 @@ export function wrap(WrappedComponent) {
       const firstIneligibleDay = startDate
         .clone()
         .add(maximumNights + 1, 'days');
-      return date => {
+      return (date) => {
         return (
           isOutsideRange(date) ||
           isInclusivelyAfterDay(date, firstIneligibleDay)
@@ -106,7 +90,7 @@ export function wrap(WrappedComponent) {
       const lastIneligibleDay = endDate
         .clone()
         .add(-1 * (maximumNights + 1), 'days');
-      return date => {
+      return (date) => {
         return (
           isOutsideRange(date) ||
           isInclusivelyBeforeDay(date, lastIneligibleDay)

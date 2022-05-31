@@ -1,0 +1,468 @@
+<!-- This testing page is meant to imitate a longer page with multiple sets of
+text, images, links, and ads.
+TODO(micajuineho) add back ads when serving compiled js -->
+<!DOCTYPE html>
+<html lang="en" amp="" i-amphtml-layout="" transformed="self;v=1">
+
+<head>
+    <script async="" src="https://cdn.ampproject.org/v0.js"></script>
+    <script async="" custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <!-- <script async="" custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script> -->
+    <title>Test Article</title>
+    <style amp-boilerplate="">
+        body {
+            -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            animation: -amp-start 8s steps(1, end) 0s 1 normal both
+        }
+
+        @-webkit-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-moz-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-ms-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-o-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+    </style>
+    <noscript>
+        <style amp-boilerplate="">
+            body {
+                -webkit-animation: none;
+                -moz-animation: none;
+                -ms-animation: none;
+                animation: none
+            }
+        </style>
+    </noscript>
+</head>
+
+<body>
+  <amp-analytics id="testing-analytics-speed">
+      <script type="application/json">
+          { "requests": { "2": "https://example2.com/", "12": "https://example12.com/", "13": "https://example13.com/", "14": "https://example14.com/", "18": "https://example18.com/", "19": "https://example19.com/", "21": "https://example21.com/", "22": "https://example22.com/", "23": "https://example23.com/", "24": "https://example24.com/", "25": "https://example25.com/", "26": "https://example26.com/", "27": "https://example27.com/", "28": "https://example28.com/", "39": "https://example39.com/", "40": "https://example40.com/", "41": "https://example41.com/" }, "triggers": { "30": { "request": "2", "vars": { "gtm.event": "gtm.pageview" }, "on": "visible" }, "31": { "request": "12", "selector": "a",
+                  "vars": {
+                    "gtm.event": "gtm.click"
+                  },
+                  "on": "click"
+                },
+                "33": {
+                  "request": "12",
+                  "timerSpec": {
+                    "interval": 15,
+                    "maxTimerLength": 7200
+                  },
+                  "vars": {
+                    "gtm.event": "gtm.timer"
+                  },
+                  "on": "timer"
+                },
+                "35": {
+                  "request": "12",
+                  "vars": {
+                    "gtm.event": "gtm.pageview"
+                  },
+                  "on": "visible"
+                },
+                "36": {
+                  "request": "13",
+                  "vars": {
+                    "gtm.event": "gtm.pageview"
+                  },
+                  "on": "visible"
+                },
+                "37": {
+                  "request": "14",
+                  "vars": {
+                    "gtm.event": "gtm.pageview"
+                  },
+                  "on": "visible"
+                },
+                "38": {
+                  "request": "18",
+                  "selector": "a.gtm-atomic-unit-link",
+                  "vars": {
+                    "gtm.event": "gtm.click"
+                  },
+                  "on": "click"
+                },
+                "40": {
+                  "request": "21",
+                  "selector": ".gtm-content-click",
+                  "vars": {
+                    "gtm.event": "gtm.click"
+                  },
+                  "on": "click"
+                },
+                "41": {
+                  "request": "22",
+                  "visibilitySpec": {
+                    "selector": "#gtm-footer",
+                    "visiblePercentageMin": 1,
+                    "visiblePercentageMax": 100,
+                    "continuousTimeMin": 1,
+                    "totalTimeMin": 1
+                  },
+                  "vars": {
+                    "gtm.event": "gtm.visible"
+                  },
+                  "on": "visible"
+                },
+                "42": {
+                  "request": "23",
+                  "selector": ".gtm-non-content-click",
+                  "vars": {
+                    "gtm.event": "gtm.click"
+                  },
+                  "on": "click"
+                },
+                "43": {
+                  "request": "24",
+                  "vars": {
+                    "gtm.event": "gtm.pageview"
+                  },
+                  "on": "visible"
+                },
+                "45": {
+                  "request": "26",
+                  "visibilitySpec": {
+                    "selector": "#gtm-story",
+                    "visiblePercentageMin": 1,
+                    "visiblePercentageMax": 100,
+                    "continuousTimeMin": 1,
+                    "totalTimeMin": 1
+                  },
+                  "vars": {
+                    "gtm.event": "gtm.visible"
+                  },
+                  "on": "visible"
+                },
+                "46": {
+                  "request": "27",
+                  "vars": {
+                    "gtm.event": "gtm.pageview"
+                  },
+                  "on": "visible"
+                },
+                "47": {
+                  "request": "28",
+                  "vars": {
+                    "gtm.event": "gtm.pageview"
+                  },
+                  "on": "visible",
+                  "enabled": "${queryParam(gclid)}"
+                },
+                "141698": {
+                  "request": "25",
+                  "visibilitySpec": {
+                    "selector": [
+                      "#gtm-ad-141698",
+                      "#gtm-ad-141699",
+                      "#gtm-ad-141701"
+                    ],
+                    "visiblePercentageMin": 1,
+                    "visiblePercentageMax": 100,
+                    "continuousTimeMin": 1,
+                    "totalTimeMin": 1
+                  },
+                  "vars": {
+                    "gtm.event": "gtm.visible"
+                  },
+                  "on": "visible"
+                },
+                "141700": {
+                  "request": "19",
+                  "visibilitySpec": {
+                    "selector": [
+                      "#gtm-atomic-unit-141700",
+                      "#gtm-atomic-unit-141702",
+                      "#gtm-atomic-unit-141703"
+                    ],
+                    "visiblePercentageMin": 1,
+                    "visiblePercentageMax": 100,
+                    "continuousTimeMin": 1,
+                    "totalTimeMin": 1
+                  },
+                  "vars": {
+                    "gtm.event": "gtm.visible"
+                  },
+                  "on": "visible"
+                }
+              }
+            }
+      </script>
+  </amp-analytics>
+
+  <div>
+      <amp-layout id="gtm-ad-141698" >
+          <!-- <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+              <div placeholder></div>
+              <div fallback></div>
+          </amp-ad>
+          <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+              <div placeholder></div>
+              <div fallback></div>
+          </amp-ad>
+          <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+              <div placeholder></div>
+              <div fallback></div>
+          </amp-ad>
+          <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+              <div placeholder></div>
+              <div fallback></div>
+          </amp-ad> -->
+      </amp-layout>
+  </div>
+  <div>
+      <amp-layout id="gtm-story">
+          <article>
+              <div>
+                  <h1>h1 header</h1>
+                  <div>
+                      <div>
+                        <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+                        width="289" height="216"></amp-img>
+                      </div>
+                  </div>
+              </div>
+              <div>
+                <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+                width="289" height="216"></amp-img>
+              </div>
+              <div>
+                  <div>
+                      <p>
+                          Cras proin elit id nunc metus fringilla ante integer mus facilisi sit duis elementum dictumst pharetra et sem mattis rutrum.
+                          </p>
+                          <p>
+                          Per integer dictum nisi tincidunt congue aliquet diam diam curae; quam et magna senectus lobortis mattis habitant sit tempor vitae.
+                          </p>
+                          <p>
+                          Magnis auctor quisque dolor mi laoreet suscipit ante porttitor libero ac porttitor sollicitudin mi nascetur lacus eros maecenas senectus a.
+                          </p>
+                          <p>
+                          Odio habitasse integer, eros facilisi faucibus leo hac senectus donec mus morbi congue primis dictumst ipsum non fusce nostra luctus.
+                          </p>
+                          <p>
+                          Pretium habitant cum himenaeos suspendisse condimentum euismod elementum sodales rhoncus orci quis varius tristique placerat interdum cubilia condimentum dapibus himenaeos.
+                          </p>
+                          <p>
+                          Scelerisque elit elit ullamcorper fames suspendisse ligula et arcu elementum vulputate duis ipsum natoque felis enim porta mi pulvinar duis.
+                          </p>
+                          <p>
+                          Ullamcorper platea dis vel vivamus commodo dictum dictum primis varius posuere at elit adipiscing semper senectus senectus hac sociis sapien.
+                          </p>
+                          <p>
+                          Enim lacus sed sed interdum eu facilisis consequat nibh fames amet faucibus nascetur maecenas ad per augue cubilia interdum amet.
+                          </p>
+                          <p>
+                          Condimentum nisi at sem nulla habitant pharetra dignissim ad montes erat vestibulum sociis eu auctor tellus vehicula fames ullamcorper enim.
+                          </p>
+                          <p>
+                          Euismod faucibus eu ante phasellus elit imperdiet potenti justo adipiscing, rhoncus euismod penatibus inceptos venenatis conubia aptent pharetra suscipit ridiculus.
+                          </p>
+                          <p>
+                          Enim litora vulputate leo lobortis nibh posuere magna inceptos quisque sociosqu penatibus eget non volutpat vestibulum metus a taciti conubia.
+                          </p>
+                          <p>
+                          Laoreet curabitur pulvinar euismod aliquet potenti porta turpis maecenas penatibus est posuere tellus ultricies vehicula convallis odio ullamcorper cras dui?
+                          </p>
+                          <p>
+                          Habitant vulputate ornare placerat commodo at mus accumsan platea volutpat volutpat vestibulum facilisi dictumst sem euismod fermentum fermentum hendrerit class?
+                          </p>
+                          <p>
+                          Auctor penatibus scelerisque morbi orci imperdiet rhoncus facilisis ante, tincidunt metus lacinia tempor nibh nam cum aenean metus mollis faucibus.
+                          </p>
+                          <p>
+                          Pulvinar, hendrerit luctus ipsum torquent consectetur curabitur et massa adipiscing turpis nisi dapibus accumsan netus massa lorem habitasse primis fermentum.
+                          </p>
+                          <p>
+                          Praesent vivamus felis donec congue quam class inceptos ut amet consectetur dolor fusce eu ridiculus orci class at vehicula amet.
+                          </p>
+                          <p>
+                          Cursus, auctor aliquam posuere magnis etiam fames orci quam vel risus orci sociosqu vitae amet dapibus pharetra varius sem vestibulum.
+                          </p>
+                          <p>
+                          Mattis praesent tristique dui platea donec diam aptent potenti at sodales mattis aliquam taciti sit imperdiet sociosqu orci facilisis ipsum.
+                          </p>
+                          <p>
+                          Mollis vehicula eu lobortis a facilisi malesuada ad placerat ultricies per pretium bibendum aliquam justo felis mi convallis cubilia eleifend!
+                          </p>
+                          <p>
+                          Luctus tincidunt varius himenaeos lacus phasellus mattis blandit sollicitudin nam nam id lacus cubilia velit libero platea ullamcorper aliquet rutrum.
+                          </p>
+                          <p>
+                          Curabitur bibendum vehicula placerat purus porta praesent class faucibus himenaeos morbi nulla senectus curae; eu fermentum litora congue maecenas quisque!
+                          </p>
+                          <p>
+                          Ut himenaeos venenatis tincidunt malesuada aliquet nisi luctus duis magnis hendrerit integer nullam aenean in diam taciti nunc elementum hendrerit.
+                          </p>
+                          <p>
+                          Hac ac vel semper ornare mollis massa fermentum nostra laoreet accumsan tincidunt laoreet tellus tincidunt lobortis habitasse magna cursus quis!
+                          </p>
+                          <p>
+                          Luctus vehicula iaculis sociosqu pretium turpis fermentum a massa hac quisque gravida imperdiet ante lobortis vitae aptent aptent, in sociosqu!
+                          </p>
+                          <p>
+                          Nullam id urna dolor blandit lectus sit duis conubia fames elit feugiat posuere accumsan elementum mollis nullam neque praesent feugiat.
+                          </p>
+                  </div>
+              </div>
+          </article>
+      </amp-layout>
+  </div>
+  <div>
+      <div>
+          <div>
+              <amp-layout id="gtm-ad-141699">
+                  <!-- <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                      <div placeholder></div>
+                      <div fallback></div>
+                  </amp-ad>
+                  <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                      <div placeholder></div>
+                      <div fallback></div>
+                  </amp-ad>
+                  <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                      <div placeholder></div>
+                      <div fallback></div>
+                  </amp-ad>
+                  <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                      <div placeholder></div>
+                      <div fallback></div>
+                  </amp-ad> -->
+              </amp-layout>
+          </div>
+      </div>
+  </div>
+  <div>
+      <div>
+          <amp-layout id="gtm-atomic-unit-141700">
+              <div>
+                  <div>
+                      <div>
+                          <div>
+                            <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+                            width="289" height="216"></amp-img>
+                          </div>
+                      </div>
+                      <figure>
+                        <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n"
+                        width="289" height="216"></amp-img>
+                      </figure>
+                      <div><a class="gtm-content-click" >click</a>
+
+          </div>
+          <a class="gtm-content-click">click</a>
+          </div>
+          </div>
+          </amp-layout>
+          <div>
+              <div>
+                  <amp-layout id="gtm-ad-141701">
+                      <!-- <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                          <div placeholder></div>
+                          <div fallback></div>
+                      </amp-ad>
+                      <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                          <div placeholder></div>
+                          <div fallback></div>
+                      </amp-ad>
+                      <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                          <div placeholder></div>
+                          <div fallback></div>
+                      </amp-ad>
+                      <amp-ad width="300" height="400" type="fake" id='i-amphtml-demo-id' data-vars-analytics-var="bar" src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+                          <div placeholder></div>
+                          <div fallback></div>
+                      </amp-ad> -->
+                  </amp-layout>
+              </div>
+          </div>
+          <amp-layout id="gtm-atomic-unit-141702">
+              <div>
+                  <div>
+                      <div>
+                          <div>
+                              <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width="289" height="216"></amp-img>
+                          </div>
+                      </div>
+                      <figure>
+                          <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width="289" height="216"></amp-img>
+                      </figure>
+                      <div><a class="gtm-content-click">click</a>
+
+                      </div>
+                      <a class="gtm-non-content-click">click</a>
+                  </div>
+              </div>
+          </amp-layout>
+          <amp-layout id="gtm-atomic-unit-141703">
+              <div>
+                  <div>
+                      <div>
+                          <div>
+                              <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width="289" height="216"></amp-img>
+                          </div>
+                      </div>
+                      <figure>
+                          <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width="289" height="216"></amp-img>
+                      </figure>
+                      <div><a class="gtm-content-click">click</a>
+
+                      </div>
+                      <a class="gtm-non-content-click">click</a>
+                  </div>
+              </div>
+          </amp-layout>
+          </div>
+          </div>
+          <div>
+              <amp-layout id="gtm-footer">
+                  <div>
+                      <footer>
+                          Footer
+                      </footer>
+                  </div>
+              </amp-layout>
+          </div>
+</body>
+
+</html>

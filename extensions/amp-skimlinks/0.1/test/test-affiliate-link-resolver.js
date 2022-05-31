@@ -1,28 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+
+import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
+import helpersFactory from './helpers';
 
 import {
   AFFILIATE_STATUS,
   AffiliateLinkResolver,
 } from '../affiliate-link-resolver';
 import {DEFAULT_CONFIG} from '../constants';
-import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
-import {Services} from '../../../../src/services';
 import {Waypoint} from '../waypoint';
-import helpersFactory from './helpers';
 
 const DOMAIN_RESOLVER_API_URL = DEFAULT_CONFIG.beaconUrl;
 
@@ -33,7 +19,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let xhr;
     let helpers;
@@ -297,7 +283,7 @@ describes.fakeWin(
           const twoStepsResponse = resolver.resolveUnknownAnchors(anchorList);
           // Replace all the unknown in the synchronous reponse,
           // asynchronous response will then overwrite it later.
-          const expectedSyncData = anchorList.map(a => {
+          const expectedSyncData = anchorList.map((a) => {
             return createAnchorReplacementObject(
               a,
               waypoint.getAffiliateUrl(a)
@@ -322,7 +308,7 @@ describes.fakeWin(
           ];
 
           expect(response.asyncResponse).to.be.an.instanceof(Promise);
-          return response.asyncResponse.then(anchorReplacementTuple => {
+          return response.asyncResponse.then((anchorReplacementTuple) => {
             expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
           });
         });
@@ -391,7 +377,7 @@ describes.fakeWin(
             )
           );
           expect(response.asyncResponse).to.be.an.instanceof(Promise);
-          return response.asyncResponse.then(anchorReplacementTuple => {
+          return response.asyncResponse.then((anchorReplacementTuple) => {
             expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
           });
         });

@@ -1,26 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+import {maybeExpandUrlParamsForTesting} from '#service/navigation';
+import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
+
+import {macroTask} from '#testing/helpers';
 
 import * as Impression from '../../src/impression';
-import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
-import {createElementWithAttributes} from '../../src/dom';
-import {installUrlReplacementsServiceForDoc} from '../../src/service/url-replacements-impl';
-import {macroTask} from '../../testing/yield';
-import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;
@@ -31,7 +18,7 @@ describes.sandboxed('Navigation', {}, () => {
       defaultPrevented: false,
       type: 'click',
     };
-    event.preventDefault = function() {
+    event.preventDefault = function () {
       event.defaultPrevented = true;
     };
   });
@@ -44,7 +31,7 @@ describes.sandboxed('Navigation', {}, () => {
       },
       amp: true,
     },
-    env => {
+    (env) => {
       let win, doc;
       let handler;
       let decorationSpy;
@@ -76,7 +63,7 @@ describes.sandboxed('Navigation', {}, () => {
           'handleCustomProtocolClick_'
         );
 
-        win.open = function() {};
+        win.open = function () {};
         winOpenStub = env.sandbox.stub(win, 'open').callsFake(() => {
           return {};
         });
@@ -179,37 +166,35 @@ describes.sandboxed('Navigation', {}, () => {
       });
 
       describe('anchor mutators', () => {
-        it('should throw error if priority is already in use', () => {
+        it('should not throw error if priority is already in use', () => {
           const priority = 10;
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '?am=1';
           }, priority);
-          allowConsoleError(() => {
-            expect(() =>
-              handler.registerAnchorMutator(element => {
-                element.href += '?am=2';
-              }, priority)
-            ).to.not.throw();
-          });
+          expect(() =>
+            handler.registerAnchorMutator((element) => {
+              element.href += '?am=2';
+            }, priority)
+          ).to.not.throw();
         });
 
         it('should execute in order', () => {
           anchor.href = 'https://www.testing-1-2-3.org';
           let transformedHref;
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '&second=2';
             transformedHref = element.href;
           }, 2);
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '&first=1';
             transformedHref = element.href;
           }, 1);
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '?third=3';
             transformedHref = element.href;
           }, 3);
           // If using a same priority, the order of registration is respected.
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '&third=3-1';
             transformedHref = element.href;
           }, 3);
@@ -251,7 +236,7 @@ describes.sandboxed('Navigation', {}, () => {
           expect(handleNavSpy).to.be.calledOnce;
         });
 
-        it('should only expand with whitelist', () => {
+        it('should only expand with allowlist', () => {
           anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
           handler.handle_(event);
           expect(anchor.href).to.equal(
@@ -289,14 +274,14 @@ describes.sandboxed('Navigation', {}, () => {
           win.location.href = originLocation;
         });
 
-        it('should decorate for page w/ ga tag', function*() {
+        it('should decorate for page w/ ga tag', function* () {
           handler.isEmbed_ = false;
           yield macroTask();
           handler.handle_(event);
           expect(decorationSpy).to.be.calledOnce;
         });
 
-        it('should not decorate for page w/o ga tag', function*() {
+        it('should not decorate for page w/o ga tag', function* () {
           handler.isEmbed_ = false;
           const ga = win.document.getElementsByTagName('amp-analytics');
           ga[0].parentNode.removeChild(ga[0]);
@@ -523,7 +508,7 @@ describes.sandboxed('Navigation', {}, () => {
           return replaceStateForTargetPromise
             .then(() => {
               expect(scrollIntoViewStub).to.have.callCount(1);
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 setTimeout(resolve, 2);
               });
             })
@@ -639,19 +624,16 @@ describes.sandboxed('Navigation', {}, () => {
         });
 
         it('should navigate relative to source url', () => {
+          // URLs relative to root.
           win.location.href =
             'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
-          const urlService = Services.urlForDoc(doc.documentElement);
+          handler.navigateTo(win, '/abc.html');
+          expect(win.location.href).to.equal('https://www.pub.com/abc.html');
 
-          env.sandbox.stub(urlService, 'getSourceUrl').callsFake(url => {
-            expect(url).to.equal('abc.html');
-            return 'https://www.pub.com/dir/abc.html';
-          });
-
-          allowConsoleError(() => {
-            handler.navigateTo(win, 'abc.html');
-          });
-
+          // URLs relative to current directory.
+          win.location.href =
+            'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
+          handler.navigateTo(win, 'abc.html');
           expect(win.location.href).to.equal(
             'https://www.pub.com/dir/abc.html'
           );
@@ -704,6 +686,148 @@ describes.sandboxed('Navigation', {}, () => {
           expect(win.location.href).to.equal('https://amp.pub.com/different');
         });
       });
+
+      describe('viewer intercept navigation', () => {
+        let ampdoc;
+        let viewerInterceptsNavigationSpy;
+        let sendMessageStub;
+        let hasCapabilityStub;
+
+        beforeEach(() => {
+          ampdoc = Services.ampdoc(doc);
+          viewerInterceptsNavigationSpy = env.sandbox.spy(
+            handler,
+            'viewerInterceptsNavigation'
+          );
+          sendMessageStub = env.sandbox.stub(handler.viewer_, 'sendMessage');
+          hasCapabilityStub = env.sandbox.stub(
+            handler.viewer_,
+            'hasCapability'
+          );
+
+          handler.isTrustedViewer_ = true;
+          handler.isLocalViewer_ = false;
+          hasCapabilityStub.returns(true);
+
+          ampdoc
+            .getRootNode()
+            .documentElement.setAttribute('allow-navigation-interception', '');
+        });
+
+        it('should allow with trusted viewer', () => {
+          handler.isTrustedViewer_ = true;
+          handler.isLocalViewer_ = false;
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.be.calledOnce;
+          expect(sendMessageStub).to.be.calledWithExactly('navigateTo', {
+            url: 'https://www.google.com/other',
+            requestedBy: 'intercept_click',
+          });
+
+          expect(event.defaultPrevented).to.be.true;
+        });
+
+        it('should allow with local viewer', () => {
+          handler.isTrustedViewer_ = false;
+          handler.isLocalViewer_ = true;
+
+          handler.handle_(event);
+
+          expect(
+            ampdoc
+              .getRootNode()
+              .documentElement.hasAttribute('allow-navigation-interception')
+          ).to.be.true;
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.be.calledOnce;
+          expect(sendMessageStub).to.be.calledWithExactly('navigateTo', {
+            url: 'https://www.google.com/other',
+            requestedBy: 'intercept_click',
+          });
+
+          expect(event.defaultPrevented).to.be.true;
+        });
+
+        it('should require trusted or local viewer', () => {
+          handler.isTrustedViewer_ = false;
+          handler.isLocalViewer_ = false;
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
+        it('should require interceptNavigation viewer capability', () => {
+          hasCapabilityStub.returns(false);
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
+        it('should not intercept requests a shadow doc', () => {
+          handler.isTrustedViewer_ = true;
+          handler.ampdoc.isSingleDoc = () => false;
+          // isSingleDoc affects where the services get stored. So stub the getters.
+          env.sandbox
+            .stub(Services, 'urlForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.url.obj);
+          env.sandbox
+            .stub(Services, 'viewerForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.viewer.obj);
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
+        it('should require opted in ampdoc', () => {
+          ampdoc
+            .getRootNode()
+            .documentElement.removeAttribute('allow-navigation-interception');
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+      });
     }
   );
 
@@ -714,7 +838,7 @@ describes.sandboxed('Navigation', {}, () => {
         ampdoc: 'fie',
       },
     },
-    env => {
+    (env) => {
       // TODO(dvoytenko, #11827): Make this test work on Safari.
       describe
         .configure()
@@ -736,16 +860,11 @@ describes.sandboxed('Navigation', {}, () => {
           beforeEach(() => {
             win = env.win;
             doc = win.document;
-            // TODO(#22733): cleanup `env.ampdoc` part.
-            ampdoc = doc.__AMPDOC || env.ampdoc;
+            ampdoc = env.ampdoc;
             parentWin = env.parentWin;
             embed = env.embed;
 
-            // TODO(#22733): cleanup `win.__AMP_SERVICES.navigation` part.
-            handler = (
-              (ampdoc.__AMP_SERVICES && ampdoc.__AMP_SERVICES.navigation) ||
-              win.__AMP_SERVICES.navigation
-            ).obj;
+            handler = ampdoc.__AMP_SERVICES.navigation.obj;
             winOpenStub = env.sandbox.stub(win, 'open').callsFake(() => {
               return {};
             });
@@ -765,9 +884,8 @@ describes.sandboxed('Navigation', {}, () => {
             // Navigation uses the UrlReplacements service scoped to the event
             // target, but for testing stub in the top-level service for simplicity.
             const {documentElement} = parentWin.document;
-            const urlReplacements = Services.urlReplacementsForDoc(
-              documentElement
-            );
+            const urlReplacements =
+              Services.urlReplacementsForDoc(documentElement);
             env.sandbox
               .stub(Services, 'urlReplacementsForDoc')
               .withArgs(anchor)
@@ -836,7 +954,7 @@ describes.sandboxed('Navigation', {}, () => {
   );
 });
 
-describes.realWin('anchor-click-interceptor', {amp: true}, env => {
+describes.realWin('anchor-click-interceptor', {amp: true}, (env) => {
   let doc;
   let ampdoc;
 

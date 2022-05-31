@@ -1,24 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {iterateCursor, removeElement} from '#core/dom';
 
-import {Mask} from './mask-impl';
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
 import {OutputMode} from './constants';
-import {Services} from '../../../src/services';
-import {iterateCursor, removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
+import {Mask} from './mask-impl';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
 const ELEMENT_MASK_OUTPUT_PROPERTY = '__amp_inputmask_hidden';
@@ -66,8 +53,8 @@ export class TextMask {
 
     this.controller_.mask();
 
-    Services.formSubmitForDoc(element).then(formSubmitService => {
-      formSubmitService.beforeSubmit(e => {
+    Services.formSubmitForDoc(element).then((formSubmitService) => {
+      formSubmitService.beforeSubmit((e) => {
         if (e.form != this.element_.form) {
           return;
         }
@@ -102,7 +89,7 @@ export class TextMask {
 
     if (!this.hiddenInput_) {
       const hiddenName = `${name}-unmasked`;
-      iterateCursor(this.element_.form.elements, element => {
+      iterateCursor(this.element_.form.elements, (element) => {
         const {name} = element;
         if (name == hiddenName && TextMask.isMaskOutputElement(element)) {
           return;

@@ -1,22 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseJson} from '#core/types/object/json';
+import {utf8Encode} from '#core/types/string/bytes';
 
 import {NameFrameRenderer} from '../name-frame-renderer';
-import {parseJson} from '../../../../src/json';
-import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
   amp: {},
@@ -24,19 +9,18 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('NameFrameRenderer', realWinConfig, env => {
+describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;
   let context;
   let creativeData;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     context = {
       size: {width: '320', height: '50'},
       requestUrl: 'http://www.google.com',
       win: env.win,
-      applyFillContent: () => {},
       sentinel: 's-1234',
     };
 
@@ -45,23 +29,22 @@ describes.realWin('NameFrameRenderer', realWinConfig, env => {
       additionalContextMetadata: {},
     };
 
-    containerElement = document.createElement('div');
+    containerElement = env.win.document.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
+    containerElement.getIntersectionChangeEntry = () => ({
+      time: null,
+      boundingClientRect: {},
+      rootBounds: {},
+      intersectionRect: {},
     });
-    containerElement.getIntersectionChangeEntry = () => ({});
-    document.body.appendChild(containerElement);
+    env.win.document.body.appendChild(containerElement);
 
-    new NameFrameRenderer().render(context, containerElement, creativeData);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(containerElement);
+    await new NameFrameRenderer().render(
+      context,
+      containerElement,
+      creativeData
+    );
   });
 
   it('should append iframe child', () => {

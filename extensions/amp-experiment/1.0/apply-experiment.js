@@ -1,28 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {user, userAssert} from '#utils/log';
 
-import {AttributeMutationDefaultClass} from './mutation/attribute-mutation-default-class';
-import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style';
-import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url';
-import {CharacterDataMutation} from './mutation/character-data-mutation';
 import {
   assertMutationRecordFormat,
   getElementsFromMutationRecordSelector,
 } from './mutation-record';
-import {user, userAssert} from '../../../src/log';
+import {AttributeMutationDefaultClass} from './mutation/attribute-mutation-default-class';
+import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style';
+import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url';
+import {CharacterDataMutation} from './mutation/character-data-mutation';
 
 const TAG = 'amp-experiment apply-experiment';
 
@@ -64,7 +49,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     // count the number of mutations that will applied
     const mutationRecordsAndElements = [];
     let totalMutations = 0;
-    mutationRecords.forEach(mutationRecord => {
+    mutationRecords.forEach((mutationRecord) => {
       assertMutationRecordFormat(mutationRecord);
 
       // Select the elements from the mutation record
@@ -94,7 +79,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     );
 
     // Parse and validate all mutations
-    mutations.forEach(mutation => {
+    mutations.forEach((mutation) => {
       userAssert(
         mutation.parseAndValidate(),
         'Mutation %s has an an unsupported value.',
@@ -103,7 +88,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     });
 
     // Apply all the mutations
-    mutations.forEach(mutation => {
+    mutations.forEach((mutation) => {
       mutation.mutate();
     });
   });
@@ -146,8 +131,8 @@ export function createMutationsFromMutationRecordsAndElements(
   mutationRecordsAndElements
 ) {
   const mutations = [];
-  mutationRecordsAndElements.forEach(mutationRecordAndElements => {
-    const {mutationRecord, elements} = mutationRecordAndElements;
+  mutationRecordsAndElements.forEach((mutationRecordAndElements) => {
+    const {elements, mutationRecord} = mutationRecordAndElements;
 
     let mutation = undefined;
     if (mutationRecord['type'] === 'characterData') {

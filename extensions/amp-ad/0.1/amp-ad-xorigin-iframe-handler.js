@@ -1,47 +1,40 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';
 
-import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {IntersectionObserver} from '../../../src/intersection-observer';
-import {Services} from '../../../src/services';
+import {CONSTANTS, MessageType_Enum} from '#core/3p-frame-messaging';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
+import {getHtml} from '#core/dom/get-html';
+import {applyFillContent} from '#core/dom/layout';
+import {setStyle} from '#core/dom/style';
+import {throttle} from '#core/types/function';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
+
+import {reportErrorToAnalytics} from '../../../src/error-reporting';
 import {
   SubscriptionApi,
-  isPausable,
   listenFor,
   listenForOncePromise,
-  makePausable,
   postMessageToWindows,
-  setPaused,
 } from '../../../src/iframe-helper';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {getHtml} from '../../../src/get-html';
-import {isExperimentOn} from '../../../src/experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {removeElement} from '../../../src/dom';
-import {reportErrorToAnalytics} from '../../../src/error';
-import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
 
 const VISIBILITY_TIMEOUT = 10000;
 
 const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
+
+/** @type {string} */
+const TAG = 'amp-ad-xorigin-iframe';
+
+/** @type {number} */
+const MSEC_REPEATED_REQUEST_DELAY = 500;
 
 export class AmpAdXOriginIframeHandler {
   /**
@@ -63,8 +56,17 @@ export class AmpAdXOriginIframeHandler {
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    /* This variable keeps keeps track when an invalid resize request is made, and
+     * is associated with each iframe. If the request is invalid, then a new request
+     * cannot be made until a certain amount of time has passed, 500 ms by default
+     * (see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down,
+     * a new request can be made.
+     */
+    /** @private {number} */
+    this.lastRejectedResizeTime_ = 0;
+
+    /** @private {?LegacyAdIntersectionObserverHost} */
+    this.legacyIntersectionObserverApiHost_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
@@ -82,6 +84,9 @@ export class AmpAdXOriginIframeHandler {
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */
+    this.inViewport_ = false;
+
+    /** @private {boolean} */
     this.sendPositionPending_ = false;
   }
 
@@ -97,21 +102,21 @@ export class AmpAdXOriginIframeHandler {
     devAssert(!this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
-    this.baseInstance_.applyFillContent(this.iframe);
+    if (!this.uiHandler_.isStickyAd()) {
+      applyFillContent(this.iframe);
+    }
     const timer = Services.timerFor(this.baseInstance_.win);
 
-    // Init IntersectionObserver service.
-    this.intersectionObserver_ = new IntersectionObserver(
-      this.baseInstance_,
-      this.iframe,
-      true
-    );
+    // Init the legacy observeInterection API service.
+    // (Behave like position observer)
+    this.legacyIntersectionObserverApiHost_ =
+      new LegacyAdIntersectionObserverHost(this.baseInstance_, this.iframe);
 
     this.embedStateApi_ = new SubscriptionApi(
       this.iframe,
       'send-embed-state',
       true,
-      () => this.sendEmbedInfo_(this.baseInstance_.isInViewport())
+      () => this.sendEmbedInfo_(this.inViewport_)
     );
 
     // Enable creative position observer if inabox experiment enabled OR
@@ -125,7 +130,7 @@ export class AmpAdXOriginIframeHandler {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
         this.iframe,
-        MessageType.SEND_POSITIONS,
+        MessageType_Enum.SEND_POSITIONS,
         true,
         () => {
           // TODO(@zhouyx): Make sendPosition_ only send to
@@ -137,11 +142,11 @@ export class AmpAdXOriginIframeHandler {
     }
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOncePromise(this.iframe, 'entity-id', true).then(info => {
+    listenForOncePromise(this.iframe, 'entity-id', true).then((info) => {
       this.element_.creativeId = info.data['id'];
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_HTML, payload => {
+    this.handleOneTimeRequest_(MessageType_Enum.GET_HTML, (payload) => {
       const selector = payload['selector'];
       const attributes = payload['attributes'];
       let content = '';
@@ -151,8 +156,8 @@ export class AmpAdXOriginIframeHandler {
       return Promise.resolve(content);
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
-      return this.baseInstance_.getConsentState().then(consentState => {
+    this.handleOneTimeRequest_(MessageType_Enum.GET_CONSENT_STATE, () => {
+      return this.baseInstance_.getConsentState().then((consentState) => {
         return {consentState};
       });
     });
@@ -166,13 +171,29 @@ export class AmpAdXOriginIframeHandler {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(
-            data['height'],
-            data['width'],
-            source,
-            origin,
-            event
-          );
+          if (
+            Date.now() - this.lastRejectedResizeTime_ >=
+            MSEC_REPEATED_REQUEST_DELAY
+          ) {
+            this.handleResize_(
+              data['id'],
+              data['height'],
+              data['width'],
+              source,
+              origin,
+              event
+            );
+          } else {
+            // need to wait 500ms until next resize request is allowed.
+            this.sendEmbedSizeResponse_(
+              false,
+              data['id'],
+              data['width'],
+              data['height'],
+              source,
+              origin
+            );
+          }
         },
         true,
         true
@@ -181,16 +202,19 @@ export class AmpAdXOriginIframeHandler {
 
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
-        this.sendEmbedInfo_(this.baseInstance_.isInViewport());
+        this.sendEmbedInfo_(this.inViewport_);
       })
     );
 
     this.unlisteners_.push(
       listenFor(
         this.iframe,
-        MessageType.USER_ERROR_IN_IFRAME,
-        data => {
-          this.userErrorForAnalytics_(data['message']);
+        MessageType_Enum.USER_ERROR_IN_IFRAME,
+        (data) => {
+          this.userErrorForAnalytics_(
+            data['message'],
+            data['expected'] == true
+          );
         },
         true,
         true /* opt_includingNestedWindows */
@@ -210,14 +234,10 @@ export class AmpAdXOriginIframeHandler {
       });
 
     // Calculate render-start and no-content signals.
-    const {
-      promise: renderStartPromise,
-      resolve: renderStartResolve,
-    } = new Deferred();
-    const {
-      promise: noContentPromise,
-      resolve: noContentResolve,
-    } = new Deferred();
+    const {promise: renderStartPromise, resolve: renderStartResolve} =
+      new Deferred();
+    const {promise: noContentPromise, resolve: noContentResolve} =
+      new Deferred();
 
     if (
       this.baseInstance_.config &&
@@ -229,7 +249,7 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         ['render-start', 'no-content'],
         true
-      ).then(info => {
+      ).then((info) => {
         const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStartMsgHandler_(info);
@@ -258,17 +278,13 @@ export class AmpAdXOriginIframeHandler {
     // Wait for initial load signal. Notice that this signal is not
     // used to resolve the final layout promise because iframe may still be
     // consuming significant network and CPU resources.
-    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
-      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
-      // received here as well.
-      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
-    });
-
-    // If "pausable-iframe" enabled, try to make the iframe pausable. It doesn't
-    // matter here whether this will succeed or not.
-    if (isExperimentOn(this.win_, 'pausable-iframe')) {
-      makePausable(this.iframe);
-    }
+    listenForOncePromise(this.iframe, CommonSignals_Enum.INI_LOAD, true).then(
+      () => {
+        // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
+        // received here as well.
+        this.baseInstance_.signals().signal(CommonSignals_Enum.INI_LOAD);
+      }
+    );
 
     this.element_.appendChild(this.iframe);
     if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
@@ -330,8 +346,8 @@ export class AmpAdXOriginIframeHandler {
           const messageId = info[CONSTANTS.messageIdFieldName];
           const payload = info[CONSTANTS.payloadFieldName];
 
-          getter(payload).then(content => {
-            const result = dict();
+          getter(payload).then((content) => {
+            const result = {};
             result[CONSTANTS.messageIdFieldName] = messageId;
             result[CONSTANTS.contentFieldName] = content;
             postMessageToWindows(
@@ -357,6 +373,7 @@ export class AmpAdXOriginIframeHandler {
   renderStartMsgHandler_(info) {
     const data = getData(info);
     this.handleResize_(
+      undefined,
       data['height'],
       data['width'],
       info['source'],
@@ -401,7 +418,7 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   cleanup_() {
-    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.forEach((unlistener) => unlistener());
     this.unlisteners_.length = 0;
     if (this.embedStateApi_) {
       this.embedStateApi_.destroy();
@@ -411,9 +428,9 @@ export class AmpAdXOriginIframeHandler {
       this.inaboxPositionApi_.destroy();
       this.inaboxPositionApi_ = null;
     }
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.destroy();
-      this.intersectionObserver_ = null;
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.destroy();
+      this.legacyIntersectionObserverApiHost_ = null;
     }
   }
 
@@ -421,6 +438,7 @@ export class AmpAdXOriginIframeHandler {
    * Updates the element's dimensions to accommodate the iframe's
    * requested dimensions. Notifies the window that request the resize
    * of success or failure.
+   * @param {number|undefined} id
    * @param {number|string|undefined} height
    * @param {number|string|undefined} width
    * @param {!Window} source
@@ -428,7 +446,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {!MessageEvent} event
    * @private
    */
-  handleResize_(height, width, source, origin, event) {
+  handleResize_(id, height, width, source, origin, event) {
     this.baseInstance_.getVsync().mutate(() => {
       if (!this.iframe) {
         // iframe can be cleanup before vsync.
@@ -439,9 +457,17 @@ export class AmpAdXOriginIframeHandler {
       this.uiHandler_
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
-          info => {
+          (info) => {
+            if (!info.success) {
+              // invalid request parameters, disable requests for 500ms
+              this.lastRejectedResizeTime_ = Date.now();
+            } else {
+              this.lastRejectedResizeTime_ = 0;
+            }
+            this.uiHandler_.adjustPadding();
             this.sendEmbedSizeResponse_(
               info.success,
+              id,
               info.newWidth,
               info.newHeight,
               source,
@@ -456,6 +482,7 @@ export class AmpAdXOriginIframeHandler {
   /**
    * Sends a response to the window which requested a resize.
    * @param {boolean} success
+   * @param {number|undefined} id
    * @param {number} requestedWidth
    * @param {number} requestedHeight
    * @param {!Window} source
@@ -464,6 +491,7 @@ export class AmpAdXOriginIframeHandler {
    */
   sendEmbedSizeResponse_(
     success,
+    id,
     requestedWidth,
     requestedHeight,
     source,
@@ -477,10 +505,11 @@ export class AmpAdXOriginIframeHandler {
       this.iframe,
       [{win: source, origin}],
       success ? 'embed-size-changed' : 'embed-size-denied',
-      dict({
+      {
+        'id': id,
         'requestedWidth': requestedWidth,
         'requestedHeight': requestedHeight,
-      }),
+      },
       true
     );
   }
@@ -493,13 +522,10 @@ export class AmpAdXOriginIframeHandler {
     if (!this.embedStateApi_) {
       return;
     }
-    this.embedStateApi_.send(
-      'embed-state',
-      dict({
-        'inViewport': inViewport,
-        'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
-      })
-    );
+    this.embedStateApi_.send('embed-state', {
+      'inViewport': inViewport,
+      'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
+    });
   }
 
   /**
@@ -510,16 +536,16 @@ export class AmpAdXOriginIframeHandler {
   getIframePositionPromise_() {
     return this.viewport_
       .getClientRectAsync(dev().assertElement(this.iframe))
-      .then(position => {
+      .then((position) => {
         devAssert(
           position,
           'element clientRect should intersects with root clientRect'
         );
         const viewport = this.viewport_.getRect();
-        return dict({
+        return {
           'targetRect': position,
           'viewportRect': viewport,
-        });
+        };
       });
   }
 
@@ -531,9 +557,9 @@ export class AmpAdXOriginIframeHandler {
     }
 
     this.sendPositionPending_ = true;
-    this.getIframePositionPromise_().then(position => {
+    this.getIframePositionPromise_().then((position) => {
       this.sendPositionPending_ = false;
-      this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
     });
   }
 
@@ -551,8 +577,8 @@ export class AmpAdXOriginIframeHandler {
         throttle(
           this.win_,
           () => {
-            this.getIframePositionPromise_().then(position => {
-              this.inaboxPositionApi_.send(MessageType.POSITION, position);
+            this.getIframePositionPromise_().then((position) => {
+              this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
             });
           },
           MIN_INABOX_POSITION_EVENT_INTERVAL
@@ -561,8 +587,8 @@ export class AmpAdXOriginIframeHandler {
     );
     this.unlisteners_.push(
       this.viewport_.onResize(() => {
-        this.getIframePositionPromise_().then(position => {
-          this.inaboxPositionApi_.send(MessageType.POSITION, position);
+        this.getIframePositionPromise_().then((position) => {
+          this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
         });
       })
     );
@@ -573,9 +599,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
-    }
+    this.inViewport_ = inViewport;
     this.sendEmbedInfo_(inViewport);
   }
 
@@ -585,41 +609,26 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.fire();
     }
   }
 
   /**
    * @param {string} message
+   * @param {boolean} expected
    * @private
    */
-  userErrorForAnalytics_(message) {
-    if (typeof message == 'string') {
+  userErrorForAnalytics_(message, expected) {
+    if (typeof message != 'string') {
+      return;
+    }
+    if (expected) {
+      dev().expectedError(TAG, message);
+    } else {
       const e = new Error(message);
       e.name = '3pError';
       reportErrorToAnalytics(e, this.baseInstance_.win);
-    }
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isPausable() {
-    return (
-      isExperimentOn(this.win_, 'pausable-iframe') &&
-      !!this.iframe &&
-      isPausable(this.iframe)
-    );
-  }
-
-  /**
-   * See `BaseElement.pauseCallback()` and `BaseElement.resumeCallback()`.
-   * @param {boolean} paused
-   */
-  setPaused(paused) {
-    if (isExperimentOn(this.win_, 'pausable-iframe') && this.iframe) {
-      setPaused(this.iframe, paused);
     }
   }
 }

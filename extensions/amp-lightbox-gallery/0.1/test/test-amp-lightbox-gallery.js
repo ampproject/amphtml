@@ -1,18 +1,6 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpCarousel as AmpBaseCarousel} from 'extensions/amp-base-carousel/0.1/amp-base-carousel';
+import {AmpScrollableCarousel} from 'extensions/amp-carousel/0.1/scrollable-carousel';
+import {AmpSlideScroll} from 'extensions/amp-carousel/0.1/slidescroll';
 
 import {installLightboxGallery} from '../amp-lightbox-gallery';
 
@@ -27,7 +15,7 @@ describes.realWin(
       extensions: [TAG],
     },
   },
-  env => {
+  (env) => {
     let win, doc, gallery;
 
     beforeEach(() => {
@@ -38,15 +26,28 @@ describes.realWin(
       });
     });
 
-    describe('basic functionality', function() {
+    describe('basic functionality', function () {
       this.timeout(5000);
-      it('should contain a container on build', done => {
-        gallery.build().then(() => {
+      it('should contain a container on build', (done) => {
+        gallery.buildInternal().then(() => {
           const container = doc.getElementsByClassName('i-amphtml-lbg');
           expect(container.length).to.equal(1);
           expect(container[0].tagName).to.equal('DIV');
           done();
         });
+      });
+
+      it('carousels must have expected functions on their prototype', () => {
+        function assertHasFunctions(klass) {
+          expect(klass.prototype.interactionNext).ok;
+          expect(klass.prototype.interactionPrev).ok;
+          expect(klass.prototype.goToSlide).ok;
+          expect(klass.prototype.goCallback).ok;
+        }
+
+        assertHasFunctions(AmpScrollableCarousel);
+        assertHasFunctions(AmpSlideScroll);
+        assertHasFunctions(AmpBaseCarousel);
       });
     });
   }

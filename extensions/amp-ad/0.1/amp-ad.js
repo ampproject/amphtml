@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
+import {getA4ARegistry} from '#ads/_a4a-config';
+import {adConfig} from '#ads/_config';
+
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
+
 import {CSS} from '../../../build/amp-ad-0.1.css';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {getA4ARegistry} from '../../../ads/_a4a-config';
-import {hasOwn} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
 
 /**
  * Construct ad network type-specific tag and script name.  Note that this
@@ -50,7 +55,7 @@ export class AmpAd extends AMP.BaseElement {
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-      ? Services.userNotificationManagerForDoc(this.element).then(service =>
+      ? Services.userNotificationManagerForDoc(this.element).then((service) =>
           service.get(consentId)
         )
       : Promise.resolve();
@@ -70,13 +75,13 @@ export class AmpAd extends AMP.BaseElement {
       this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
       const slotId = this.win.ampAdSlotIdCounter++;
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         this.getVsync().mutate(() => {
           this.element.setAttribute('data-amp-slot-index', slotId);
 
-          const useRemoteHtml =
-            !(adConfig[type] || {})['remoteHTMLDisabled'] &&
-            this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+          const useRemoteHtml = this.element
+            .getAmpDoc()
+            .getMetaByName('amp-3p-iframe-src');
           // TODO(tdrl): Check amp-ad registry to see if they have this already.
           // TODO(a4a-cam): Shorten this predicate.
           if (
@@ -96,8 +101,8 @@ export class AmpAd extends AMP.BaseElement {
           resolve(
             Services.extensionsFor(this.win)
               .loadElementClass(extensionTagName)
-              .then(ctor => new ctor(this.element))
-              .catch(error => {
+              .then((ctor) => new ctor(this.element))
+              .catch((error) => {
                 // Work around presubmit restrictions.
                 const TAG = this.element.tagName;
                 // Report error and fallback to 3p
@@ -117,7 +122,7 @@ export class AmpAd extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-ad', '0.1', AMP => {
+AMP.extension('amp-ad', '0.1', (AMP) => {
   AMP.registerElement('amp-ad', AmpAd, CSS);
   AMP.registerElement('amp-embed', AmpAd);
 });

@@ -1,29 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Timer} from '#service/timer-impl';
 
-import {Timer} from '../../src/service/timer-impl';
-
-describes.fakeWin('Timer', {}, env => {
+describes.fakeWin('Timer', {}, (env) => {
   let windowMock;
   let timer;
 
   beforeEach(() => {
-    const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
-    WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
+    const WindowApi = function () {};
+    WindowApi.prototype.setTimeout = function (unusedCallback, unusedDelay) {};
+    WindowApi.prototype.clearTimeout = function (unusedTimerId) {};
     WindowApi.prototype.document = {};
     WindowApi.prototype.Promise = window.Promise;
     const windowApi = new WindowApi();
@@ -38,39 +22,33 @@ describes.fakeWin('Timer', {}, env => {
 
   it('delay', () => {
     const handler = () => {};
-    windowMock
-      .expects('setTimeout')
-      .returns(1)
-      .once();
+    windowMock.expects('setTimeout').returns(1).once();
     windowMock.expects('clearTimeout').never();
     timer.delay(handler, 111);
   });
 
-  it('delay 0 real window', done => {
+  it('delay 0 real window', (done) => {
     timer = new Timer(self);
     timer.delay(done, 0);
   });
 
-  it('delay 1 real window', done => {
+  it('delay 1 real window', (done) => {
     timer = new Timer(self);
     timer.delay(done, 1);
   });
 
-  it('delay default', done => {
+  it('delay default', (done) => {
     windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
     timer.delay(done);
   });
 
   it('cancel', () => {
-    windowMock
-      .expects('clearTimeout')
-      .withExactArgs(1)
-      .once();
+    windowMock.expects('clearTimeout').withExactArgs(1).once();
     timer.cancel(1);
   });
 
-  it('cancel default', done => {
+  it('cancel default', (done) => {
     windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
     const id = timer.delay(() => {
@@ -87,7 +65,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        env.sandbox.match(value => {
+        env.sandbox.match((value) => {
           value();
           return true;
         }),
@@ -97,7 +75,7 @@ describes.fakeWin('Timer', {}, env => {
       .once();
 
     let c = 0;
-    return timer.promise(111).then(result => {
+    return timer.promise(111).then((result) => {
       c++;
       expect(c).to.equal(1);
       expect(result).to.be.undefined;
@@ -108,7 +86,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        env.sandbox.match(value => {
+        env.sandbox.match((value) => {
           value();
           return true;
         }),
@@ -120,11 +98,11 @@ describes.fakeWin('Timer', {}, env => {
     let c = 0;
     return timer
       .timeoutPromise(111)
-      .then(result => {
+      .then((result) => {
         c++;
         assert.fail('must never be here: ' + result);
       })
-      .catch(reason => {
+      .catch((reason) => {
         c++;
         expect(c).to.equal(1);
         expect(reason.message).to.contain('timeout');
@@ -135,7 +113,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        env.sandbox.match(unusedValue => {
+        env.sandbox.match((unusedValue) => {
           // No timeout
           return true;
         }),
@@ -145,7 +123,7 @@ describes.fakeWin('Timer', {}, env => {
       .once();
 
     let c = 0;
-    return timer.timeoutPromise(111, Promise.resolve('A')).then(result => {
+    return timer.timeoutPromise(111, Promise.resolve('A')).then((result) => {
       c++;
       expect(c).to.equal(1);
       expect(result).to.equal('A');
@@ -156,7 +134,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        env.sandbox.match(value => {
+        env.sandbox.match((value) => {
           // Immediate timeout
           value();
           return true;
@@ -169,11 +147,11 @@ describes.fakeWin('Timer', {}, env => {
     let c = 0;
     return timer
       .timeoutPromise(111, new Promise(() => {}))
-      .then(result => {
+      .then((result) => {
         c++;
         assert.fail('must never be here: ' + result);
       })
-      .catch(reason => {
+      .catch((reason) => {
         c++;
         expect(c).to.equal(1);
         expect(reason.message).to.contain('timeout');

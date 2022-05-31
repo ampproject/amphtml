@@ -1,22 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Entitlement} from './entitlement';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
 import {evaluateExpr} from './expr';
 
 /**
@@ -40,7 +23,7 @@ export class LocalSubscriptionPlatformRenderer {
     this.dialog_ = dialog;
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(ampdoc.win);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
@@ -49,7 +32,7 @@ export class LocalSubscriptionPlatformRenderer {
   /**
    *
    * @param {!JsonObject} renderState
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    */
   render(renderState) {
     return Promise.all([
@@ -66,7 +49,7 @@ export class LocalSubscriptionPlatformRenderer {
     // Close dialog. Ignored if the dialog is not currently open.
     this.dialog_.close();
     // Hide subscriptions sections.
-    return this.renderActionsInNode_(dict(), this.rootNode_, () => false);
+    return this.renderActionsInNode_({}, this.rootNode_, () => false);
   }
 
   /**
@@ -97,14 +80,14 @@ export class LocalSubscriptionPlatformRenderer {
           }
         }
       })
-      .then(candidate => {
+      .then((candidate) => {
         if (!candidate) {
           return;
         }
         if (candidate.tagName == 'TEMPLATE') {
           return this.templates_
             .renderTemplate(candidate, authResponse)
-            .then(element => {
+            .then((element) => {
               const renderState = /** @type {!JsonObject} */ (authResponse);
               return this.renderActionsInNode_(
                 renderState,
@@ -118,7 +101,7 @@ export class LocalSubscriptionPlatformRenderer {
         clone.removeAttribute('subscriptions-display');
         return clone;
       })
-      .then(element => {
+      .then((element) => {
         if (!element) {
           return;
         }
@@ -171,14 +154,4 @@ export class LocalSubscriptionPlatformRenderer {
       return rootNode;
     });
   }
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getEntitlementClassForTesting() {
-  return Entitlement;
 }

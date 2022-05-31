@@ -1,21 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import sinon from /*OK*/ 'sinon';
 
 import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
-/*OK*/ import sinon from 'sinon';
 
 /**
  * This is a unit test that is located with the E2E tests because it
@@ -36,7 +21,7 @@ describe('ControllerPromise', () => {
   describe('Promise wrapping behavior', () => {
     it('should behave like a normal thenable', () => {
       const p = new ControllerPromise(Promise.resolve('success'));
-      return p.then(result => /*OK*/ expect(result).to.equal('success'));
+      return p.then((result) => /*OK*/ expect(result).to.equal('success'));
     });
 
     it('should behave like a normal thenable with await', async () => {
@@ -46,10 +31,10 @@ describe('ControllerPromise', () => {
 
     it('should accept calls to `then`', async () => {
       const p = new ControllerPromise(Promise.resolve(1));
-      const two = p.then(x => x + 1);
+      const two = p.then((x) => x + 1);
 
-      const three = two.then(x => x + 1);
-      const four = two.then(x => x + 2);
+      const three = two.then((x) => x + 1);
+      const four = two.then((x) => x + 2);
 
       await expect(await two).to.equal(2);
       await expect(await three).to.equal(3);
@@ -58,10 +43,10 @@ describe('ControllerPromise', () => {
 
     it('should allow empty `then` calls', async () => {
       const p = new ControllerPromise(Promise.resolve(1));
-      const two = p.then(null).then(x => x + 1);
+      const two = p.then(null).then((x) => x + 1);
 
-      const three = two.then(x => x + 1);
-      const four = two.then(x => x + 2);
+      const three = two.then((x) => x + 1);
+      const four = two.then((x) => x + 2);
 
       await expect(await two).to.equal(2);
       await expect(await three).to.equal(3);
@@ -141,9 +126,9 @@ describe('ControllerPromise', () => {
 
     it('should accept long then chains', async () => {
       const p = new ControllerPromise(Promise.resolve(1));
-      const two = p.then(x => x + 1);
+      const two = p.then((x) => x + 1);
 
-      const three = two.then(x => x + 1).then(x => 'hello world ' + x);
+      const three = two.then((x) => x + 1).then((x) => 'hello world ' + x);
 
       /*OK*/ expect(await three).to.equal('hello world 3');
     });
@@ -157,7 +142,7 @@ describe('ControllerPromise', () => {
       );
 
       /*OK*/ expect(await p).to.equal(0);
-      /*OK*/ expect(await p.waitForValue(x => x == 5)).to.equal(5);
+      /*OK*/ expect(await p.waitForValue((x) => x == 5)).to.equal(5);
       /*OK*/ expect(await p).to.equal(0);
     });
 
@@ -166,10 +151,10 @@ describe('ControllerPromise', () => {
         Promise.resolve(0),
         getWaitFunction(getValueFunction)
       );
-      const testP = p.then(x => (x + 1) * 2);
+      const testP = p.then((x) => (x + 1) * 2);
 
       /*OK*/ expect(await testP).to.equal(2);
-      /*OK*/ expect(await testP.waitForValue(x => x == 12)).to.equal(12);
+      /*OK*/ expect(await testP.waitForValue((x) => x == 12)).to.equal(12);
       /*OK*/ expect(await testP).to.equal(2);
     });
 
@@ -178,10 +163,10 @@ describe('ControllerPromise', () => {
         Promise.resolve(0),
         getWaitFunction(getValueFunction)
       );
-      const testP = p.then(x => (x + 1) * 2).then(x => x + 1);
+      const testP = p.then((x) => (x + 1) * 2).then((x) => x + 1);
 
       /*OK*/ expect(await testP).to.equal(3);
-      /*OK*/ expect(await testP.waitForValue(x => x == 13)).to.equal(13);
+      /*OK*/ expect(await testP.waitForValue((x) => x == 13)).to.equal(13);
       /*OK*/ expect(await testP).to.equal(3);
     });
 
@@ -190,27 +175,27 @@ describe('ControllerPromise', () => {
         Promise.resolve(0),
         getWaitFunction(getErrorFunction)
       );
-      const testP = p.then(x => (x + 1) * 2).then(x => x + 1);
+      const testP = p.then((x) => (x + 1) * 2).then((x) => x + 1);
 
       /*OK*/ expect(await testP).to.equal(3);
-      /*OK*/ expect(await testP.waitForValue(x => x == 7)).to.equal(7);
+      /*OK*/ expect(await testP.waitForValue((x) => x == 7)).to.equal(7);
 
       return testP
-        .waitForValue(x => x == 11)
+        .waitForValue((x) => x == 11)
         .then(
           () => {
             throw new Error('should not succeed');
           },
-          e => {
+          (e) => {
             /*OK*/ expect(e).to.be.an('error');
-            return testP.waitForValue(x => x == 13);
+            return testP.waitForValue((x) => x == 13);
           }
         )
         .then(
           () => {
             throw new Error('should not succeed');
           },
-          e => {
+          (e) => {
             /*OK*/ expect(e).to.be.an('error');
           }
         );
@@ -277,11 +262,10 @@ describe('ControllerPromise', () => {
          */
         const valueFunction = valueFunctionGetter();
 
-        opt_mutate = opt_mutate || (x => x);
+        opt_mutate = opt_mutate || ((x) => x);
         return new Promise((resolve, reject) => {
           /**
-           * Poll for the new value. This simulates behavior in the concrete
-           * implementations of the `FunctionalTestController` implementations.
+           * Poll for the new value.
            * See {@link ../../build-system/tasks/e2e/selenium-webdriver-controller.js#getWaitFn_}
            */
           const id = setInterval(async () => {

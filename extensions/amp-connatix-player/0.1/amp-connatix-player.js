@@ -1,26 +1,61 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {getDataParamsFromAttributes, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '#core/dom/layout/size-observer';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
+import {setIsMediaComponent} from '../../../src/video-interface';
+
+/**
+ * @param {!Array<T>} promises
+ * @return {!Promise<!Array<{
+ *  status: string,
+ *  value: (T|undefined),
+ *  reason: *,
+ * }>>}
+ * @template T
+ */
+export function allSettled(promises) {
+  /**
+   * @param {*} value
+   * @return {{status: string, value: *}}
+   */
+  function onFulfilled(value) {
+    return {status: 'fulfilled', value};
+  }
+  /**
+   * @param {*} reason
+   * @return {{status: string, reason: *}}
+   */
+  function onRejected(reason) {
+    return {status: 'rejected', reason};
+  }
+  return Promise.all(
+    promises.map((promise) => {
+      return promise.then(onFulfilled, onRejected);
+    })
+  );
+}
 
 export class AmpConnatixPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -34,10 +69,21 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cds.connatix.com';
+    this.iframeDomain_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -46,15 +92,29 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * (play/pause etc)
    * @private
    * @param {string} command
+   * @param {Object=} opt_args
    */
-  sendCommand_(command) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      // Send message to the player
-      this.iframe_.contentWindow./*OK*/ postMessage(
-        command,
-        this.iframeDomain_
-      );
+  sendCommand_(command, opt_args) {
+    if (!this.playerReadyPromise_) {
+      return;
     }
+
+    this.playerReadyPromise_.then((iframe) => {
+      if (!iframe) {
+        return;
+      }
+
+      if (iframe.contentWindow) {
+        iframe.contentWindow./*OK*/ postMessage(
+          JSON.stringify({
+            'event': 'command',
+            'func': command,
+            'args': opt_args || '',
+          }),
+          this.iframeDomain_
+        );
+      }
+    });
   }
 
   /**
@@ -65,15 +125,89 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @private
    */
   bindToPlayerCommands_() {
-    this.win.addEventListener('message', e => {
+    this.win.addEventListener('message', (e) => {
       if (!this.iframe_ || e.source !== this.iframe_.contentWindow) {
         // Ignore messages from other iframes.
         return;
       }
-      // Player wants to close because the user interracted on its close button
-      if (getData(e) === 'cnx_close') {
-        this.destroyPlayerFrame_();
-        this.attemptCollapse();
+      const dataString = getData(e);
+      const dataJSON = tryParseJson(dataString);
+
+      if (!dataJSON || dataJSON['event'] !== 'command') {
+        return;
+      }
+
+      switch (dataJSON['func']) {
+        // Player wants to close because the user interacted on its close button
+        case 'cnxClose': {
+          this.destroyPlayerFrame_();
+          this.attemptCollapse();
+          break;
+        }
+        // Player rendered
+        case 'cnxPlayerRendered': {
+          this.playerReadyResolver_(this.iframe_);
+          break;
+        }
+      }
+    });
+  }
+
+  /**
+   * Binds to amp-consent
+   * @private
+   */
+  bindToAmpConsent_() {
+    const consentPolicyId = super.getConsentPolicy() || 'default';
+    const consentPolicyStatePromise = getConsentPolicyState(
+      this.element,
+      consentPolicyId
+    );
+    const consentPolicyInfoPromise = getConsentPolicyInfo(
+      this.element,
+      consentPolicyId
+    );
+    const consentPolicySharedDataPromise = getConsentPolicySharedData(
+      this.element,
+      consentPolicyId
+    );
+    const consentMetadataPromise = getConsentMetadata(
+      this.element,
+      consentPolicyId
+    );
+
+    allSettled([
+      consentPolicyStatePromise,
+      consentPolicyInfoPromise,
+      consentPolicySharedDataPromise,
+      consentMetadataPromise,
+    ]).then((values) => {
+      if (values && values.length === 4) {
+        const consentPolicyState = values[0];
+        const consentPolicyInfo = values[1];
+        const consentPolicySharedData = values[2];
+        const consentMetadata = values[3];
+        const ampConsentInfo = {
+          'consentPolicyStateEnum': CONSENT_POLICY_STATE,
+          'consentStringTypeEnum': CONSENT_STRING_TYPE,
+          'consentPolicyState': {
+            'error': consentPolicyState.reason,
+            'value': consentPolicyState.value,
+          },
+          'rawConsentString': {
+            'error': consentPolicyInfo.reason,
+            'value': consentPolicyInfo.value,
+          },
+          'consentSharedData': {
+            'error': consentPolicySharedData.reason,
+            'value': consentPolicySharedData.value,
+          },
+          'consentMetadata': {
+            'error': consentMetadata.reason,
+            'value': consentMetadata.value,
+          },
+        };
+        this.sendCommand_('ampConsentInfo', ampConsentInfo);
       }
     });
   }
@@ -93,6 +227,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    setIsMediaComponent(element);
+
     // Player id is mandatory
     this.playerId_ = userAssert(
       element.getAttribute('data-player-id'),
@@ -102,8 +238,17 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') || '';
-
-    this.bindToPlayerCommands_();
+    const elementsPlayer =
+      element.getAttribute('data-elements-player') || false;
+    if (elementsPlayer) {
+      this.iframeDomain_ = 'https://cdm.elements.video';
+    } else {
+      this.iframeDomain_ = 'https://cdm.connatix.com';
+    }
+    // will be used by sendCommand in order to send only after the player is rendered
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
   }
 
   /**
@@ -120,19 +265,16 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
   layoutCallback() {
     const {element} = this;
     // Url Params for iframe source
-    const urlParams = dict({
+    const urlParams = {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
-    });
-    const iframeUrl = this.iframeDomain_ + '/embed/index.html';
+      'url': Services.documentInfoForDoc(element).sourceUrl,
+      ...getDataParamsFromAttributes(element),
+    };
+    const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 
     const iframe = element.ownerDocument.createElement('iframe');
@@ -141,28 +283,64 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     iframe.src = src;
 
     // applyFillContent so that frame covers the entire component.
-    this.applyFillContent(iframe, /* replacedContent */ true);
+    applyFillContent(iframe, /* replacedContent */ true);
 
+    // append child iframe for element
     element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
-    // Return a load promise for the frame so the runtime knows when the
-    // component is ready.
-    return this.loadPromise(iframe);
+    // bind to player events (playerRendered after we can send commands to player and other)
+    this.bindToPlayerCommands_();
+    // bind to amp consent and send consent info to the iframe content and propagate to player
+    this.bindToAmpConsent_();
+
+    observeContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(true);
+
+    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_({height, width}) {
+    if (!this.iframe_) {
+      return;
+    }
+    this.sendCommand_('ampResize', {'width': width, 'height': height});
   }
 
   /** @override */
   pauseCallback() {
-    this.sendCommand_('pause');
+    if (!this.iframe_) {
+      return;
+    }
+    this.sendCommand_('ampPause');
+    // The player doesn't appear to respect "ampPause" message.
+    this.iframe_.src = this.iframe_.src;
   }
 
   /** @override */
   unlayoutCallback() {
     this.destroyPlayerFrame_();
+
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
+    unobserveContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 }
 
-AMP.extension('amp-connatix-player', '0.1', AMP => {
+AMP.extension('amp-connatix-player', '0.1', (AMP) => {
   AMP.registerElement('amp-connatix-player', AmpConnatixPlayer);
 });

@@ -1,18 +1,4 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
 import {
   AsYouGoValidator,
@@ -25,10 +11,9 @@ import {
   getFormValidator,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
-import {Services} from '../../../../src/services';
 import {ValidationBubble} from '../validation-bubble';
 
-describes.realWin('form-validators', {amp: true}, env => {
+describes.realWin('form-validators', {amp: true}, (env) => {
   const emailTypeValidationMsg = 'Yo! That email does not look so.. email-y';
   const textPatternValidationMsg = 'Yo! No blank emails';
 
@@ -49,14 +34,13 @@ describes.realWin('form-validators', {amp: true}, env => {
     form.setAttribute('method', 'POST');
     doc.body.appendChild(form);
 
-    const {name, email, text, submit} = getInputs(doc);
-    [name, email, text, submit].forEach(c => form.appendChild(c));
+    const {email, name, submit, text} = getInputs(doc);
+    [name, email, text, submit].forEach((c) => form.appendChild(c));
 
     if (isCustomValidations) {
-      const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
-        doc
-      );
-      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+      const {invalidEmail, invalidText, noEmail, noName} =
+        getCustomValidations(doc);
+      [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );
     }
@@ -724,17 +708,16 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[3].className).to.not.contain('visible');
 
       // Simulate a dynamic content event e.g. amp-list re-render.
-      const {name, email, submit} = getInputs(doc);
+      const {email, name, submit} = getInputs(doc);
       while (form.firstChild) {
         form.removeChild(form.firstChild);
       }
-      [name, email, submit].forEach(c => form.appendChild(c));
+      [name, email, submit].forEach((c) => form.appendChild(c));
 
-      validations.forEach(v => v.parentNode.removeChild(v));
-      const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
-        doc
-      );
-      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+      validations.forEach((v) => v.parentNode.removeChild(v));
+      const {invalidEmail, invalidText, noEmail, noName} =
+        getCustomValidations(doc);
+      [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );
       validations = doc.querySelectorAll('[visible-when-invalid]');

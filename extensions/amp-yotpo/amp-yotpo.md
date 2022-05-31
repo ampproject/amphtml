@@ -6,36 +6,7 @@ teaser:
   text: Embeds a Yotpo on-site widget.
 ---
 
-<!--
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-yotpo
-
-Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a> on-site widget.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-yotpo" src="https://cdn.ampproject.org/v0/amp-yotpo-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
 
 ## Overview
 
@@ -85,6 +56,10 @@ _Example: Display the reviews widget_
     <td>Each Yotpo widget has optional data attributes. For example, the reviews widget has an optional attribute named <code>product-id</code>. Refer to <a href="https://support.yotpo.com/en/on-site">Yottpo's documentation</a> for which attributes to specify.<br>
 When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>product-id</code> attribute becomes <code>data-product-id</code>.</td>
   </tr>
+   <tr>
+    <td width="40%"><strong>title (optional)</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Yotpo widget</code>.</td>
+  </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
@@ -93,4 +68,4 @@ When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo at
 
 ## Validation
 
-See [amp-yotpo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-yotpo/validator-amp-yotpo.protoascii) in the AMP validator specification.
+See [amp-yotpo rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-yotpo/validator-amp-yotpo.protoascii) in the AMP validator specification.

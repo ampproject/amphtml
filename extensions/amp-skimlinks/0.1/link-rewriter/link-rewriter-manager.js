@@ -1,24 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {Services} from '#service';
+import {Priority_Enum} from '#service/navigation';
+
 import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
 import {LinkRewriter} from './link-rewriter';
-import {Priority} from '../../../../src/service/navigation';
-import {Services} from '../../../../src/services';
 
 /**
  * LinkRewriterManager works together with LinkRewriter to allow rewriting
@@ -80,14 +66,14 @@ export class LinkRewriterManager {
     const navigation = Services.navigationForDoc(ampdoc);
     navigation.registerAnchorMutator(
       this.maybeRewriteLink.bind(this),
-      Priority.LINK_REWRITER_MANAGER
+      Priority_Enum.LINK_REWRITER_MANAGER
     );
   }
 
   /**
    * Create and configure a new LinkRewriter on the page.
    * @param {string} linkRewriterId - A unique id used to identify the link rewriter.
-   * @param {!function(!Array<!HTMLElement>): !./two-steps-response.TwoStepsResponse} resolveUnknownLinks
+   * @param {function(!Array<!HTMLElement>): !./two-steps-response.TwoStepsResponse} resolveUnknownLinks
    *   - Function to determine which anchor should be replaced and by what URL.
    *     Should return an instance of './two-steps-response.TwoStepsResponse'.
    * @param {?{linkSelector: string}=} options
@@ -164,7 +150,7 @@ export class LinkRewriterManager {
         clickType: event.type,
       };
 
-      suitableLinkRewriters.forEach(linkRewriter => {
+      suitableLinkRewriters.forEach((linkRewriter) => {
         const event = {
           type: EVENTS.CLICK,
           eventData,
@@ -184,9 +170,7 @@ export class LinkRewriterManager {
    * @private
    */
   getPriorityList_(ampdoc) {
-    const docInfo = Services.documentInfoForDoc(ampdoc);
-    const value = docInfo.metaTags[PRIORITY_META_TAG_NAME];
-
+    const value = ampdoc.getMetaByName(PRIORITY_META_TAG_NAME);
     return value ? value.trim().split(/\s+/) : [];
   }
 
@@ -197,7 +181,7 @@ export class LinkRewriterManager {
    */
   installGlobalEventListener_(rootNode) {
     rootNode.addEventListener(
-      AmpEvents.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       this.onDomChanged_.bind(this)
     );
   }
@@ -209,7 +193,7 @@ export class LinkRewriterManager {
    * @private
    */
   onDomChanged_() {
-    this.linkRewriters_.forEach(linkRewriter => {
+    this.linkRewriters_.forEach((linkRewriter) => {
       linkRewriter.onDomUpdated();
     });
   }

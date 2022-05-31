@@ -6,42 +6,7 @@ teaser:
   text: Displays a Megaphone.fm podcast episode or playlist.
 ---
 
-<!---
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-megaphone
-
-Displays a <a href="https://megaphone.fm/">Megaphone.fm</a> podcast episode or playlist.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-megaphone" src="https://cdn.ampproject.org/v0/amp-megaphone-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, fixed-height</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-megaphone/">Annotated code example for amp-megaphone</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Examples
 
@@ -110,4 +75,4 @@ The value for this attribute is the Megaphone.fm ID of a playlist.</td>
 
 ## Validation
 
-See [amp-megaphone rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-megaphone/validator-amp-megaphone.protoascii) in the AMP validator specification.
+See [amp-megaphone rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-megaphone/validator-amp-megaphone.protoascii) in the AMP validator specification.

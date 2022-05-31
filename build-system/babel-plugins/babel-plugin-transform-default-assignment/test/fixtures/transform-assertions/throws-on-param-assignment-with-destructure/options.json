@@ -1,0 +1,6 @@
+{
+  "plugins": [
+    "../../../.."
+  ],
+  "throws": "Can only fix default assignment type of identifiers.\n\tPlease replace with a parameter, and destructure in the function body."
+}
