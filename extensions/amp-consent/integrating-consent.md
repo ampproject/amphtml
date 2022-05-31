@@ -76,6 +76,23 @@ Action `'enter-fullscreen'` requests the AMP runtime to expand the iframe to ful
   }
 ```
 
+##### navigate-to
+
+```javascript
+window.parent.postMessage(
+  {
+    type: 'consent-ui',
+    action: 'navigate-to',
+    url: 'https://example.com',
+    target: (optional string, default '_top'),
+    opener: (optional boolean, default false),
+  },
+  '*'
+);
+```
+
+Action `'navigate-to'` will trigger an `AMP.navigateTo` event with the provided parameters. See [Actions and events in AMP](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md#target-amp-) for more details on how to use `AMP.navigateTo`.
+
 #### Informing Consent response
 
 Iframes can send a `consent-response` message to the parent AMP page to inform the user [actions](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#prompt-actions) along with additional consent information.

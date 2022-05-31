@@ -431,6 +431,29 @@ export class ConsentUI {
   }
 
   /**
+   * Handle the navigate-to event from the CMP iframe
+   * @param {!JsonObject} data
+   */
+  handleNavigateTo_(data) {
+    if (!data['url'] || typeof data['url'] !== 'string') {
+      user().error(TAG, 'No valid url provided in navigate-to event');
+      return;
+    }
+
+    const url = data['url'];
+    const options = {};
+    if (typeof data['opener'] === 'boolean') {
+      options.opener = data['opener'];
+    }
+    if (typeof data['target'] === 'string') {
+      options.target = data['target'];
+    }
+
+    const navigator = Services.navigationForDoc(this.ampdoc_);
+    navigator.navigateTo(this.win_, url, undefined, options);
+  }
+
+  /**
    * Enter the fullscreen state for the UI
    */
   enterFullscreen_() {
@@ -815,6 +838,15 @@ export class ConsentUI {
    *   action: 'enter-fullscreen'
    * }
    *
+   * Navigate top frame to URL
+   * {
+   *   type: 'consent-ui',
+   *   action: 'navigate-to',
+   *   url: 'https://example.com',
+   *   target: '_top',
+   *   opener: false,
+   * }
+   *
    * @param {!Event} event
    */
   handleIframeMessages_(event) {
@@ -855,6 +887,10 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         this.enterFullscreen_();
       });
+    }
+
+    if (requestAction === 'navigate-to') {
+      this.handleNavigateTo_(/** @type {!JsonObject} */ (data));
     }
   }
 
