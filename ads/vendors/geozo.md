@@ -4,8 +4,8 @@ Provides support for [Geozo](https://geozo.com) widgets.
 
 ### Required parameters
 
-- `src`
-- `data-gz-block`
+-   `src`
+-   `data-gz-block`
 
 ## Example
 
