@@ -14,6 +14,7 @@ amp-story[standalone] {
  * ratio, so a 31/40 min-aspect-ratio here ensures that the mobile UI is
  * displayed instead of the desktop UI. 
  */
+
 @media (min-aspect-ratio: 31/40) {
   /** Variables shared between page, system layer and pagination buttons. */
   :root:not([data-story-supports-landscape]):not([i-amphtml-story-mobile]) {
