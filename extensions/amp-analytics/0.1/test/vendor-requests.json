@@ -150,15 +150,15 @@
     "event": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=action&hsrc=3"
   },
   "gfksensic": {
-    "base": "https://%21regionid-config%21environment.sensic.net/tp?p=!regionID&m=!mediaID&v=1.0.0&t=s2s-amp",
+    "base": "https://%21regionid-config%21environment.sensic.net/tp?m=!mediaID&v=1.0.0&t=s2s-amp",
     "page_params": "<ignore for test>",
     "user_params": "<ignore for test>",
     "streaming_params": "<ignore for test>",
     "impression_params": "<ignore for test>",
     "custom_params": "<ignore for test>",
     "impression": "<ignore for test>",
-    "audio-play": "https://%21regionid-config%21environment.sensic.net/tp?p=!regionID&m=!mediaID&v=1.0.0&t=s2s-amp&ty=PL&c=default&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&vt=1&sp=-1&st=_timestamp_&sn=_counter(play__page_view_id_!streamID)_&!custom_params&optin=!optin&gdpr=1&gdpr_consent=_consent_string_&ext_amp_cid=_client_id(cid)_&r=_ampdoc_host_&ua=_user_agent_&l=_browser_language_",
-    "audio-stop": "https://%21regionid-config%21environment.sensic.net/tp?p=!regionID&m=!mediaID&v=1.0.0&t=s2s-amp&ty=ST&c=default&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&vt=1&sp=-1&st=_timestamp_&sn=_counter(stop__page_view_id_!streamID)_"
+    "audio-play": "https://%21regionid-config%21environment.sensic.net/tp?m=!mediaID&v=1.0.0&t=s2s-amp&ty=PL&c=default&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&vt=1&sp=-1&st=_timestamp_&sn=_counter(play__page_view_id_!streamID)_&!custom_params&optin=!optin&gdpr=1&gdpr_consent=_consent_string_&ext_amp_cid=_client_id(cid)_&r=_ampdoc_host_&ua=_user_agent_&l=_browser_language_",
+    "audio-stop": "https://%21regionid-config%21environment.sensic.net/tp?m=!mediaID&v=1.0.0&t=s2s-amp&ty=ST&c=default&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&vt=1&sp=-1&st=_timestamp_&sn=_counter(stop__page_view_id_!streamID)_"
   },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
