@@ -483,6 +483,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [ucfunnel](../../ads/vendors/ucfunnel.md)
 -   [Unruly](../../ads/vendors/unruly.md)
 -   [VMFive](../../ads/vendors/vmfive.md)
+-   [vox](../../ads/vendors/vox.md)
 -   [Webediads](../../ads/vendors/webediads.md)
 -   [Weborama](../../ads/vendors/weborama.md)
 -   [Widespace](../../ads/vendors/widespace.md)

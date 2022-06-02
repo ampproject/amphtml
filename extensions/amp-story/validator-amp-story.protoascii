@@ -711,6 +711,7 @@ descendant_tag_list: {
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
+  tag: "AMP-BODYMOVIN-ANIMATION"
   tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-DATE-DISPLAY"
   tag: "AMP-EXPERIMENT"

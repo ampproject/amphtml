@@ -147,6 +147,38 @@ export function objectsEqualShallow(o1, o2) {
 }
 
 /**
+ * Deeply compares 2 objects, and returns `true` if they match.
+ * @param {*} o1
+ * @param {*} o2
+ * @return {boolean}
+ */
+export function objectsEqualDeep(o1, o2) {
+  if (o1 === o2) {
+    return true;
+  }
+  if (o1 && o2 && typeof o1 === 'object' && typeof o2 === 'object') {
+    // Deep array compare:
+    if (Array.isArray(o1)) {
+      return (
+        Array.isArray(o2) &&
+        o1.length === o2.length &&
+        o1.every((value, i) => objectsEqualDeep(value, o2[i]))
+      );
+    }
+
+    // Deep object compare:
+    const o1Keys = Object.keys(o1);
+    const o2Keys = Object.keys(o2);
+    return (
+      o1Keys.length === o2Keys.length &&
+      o1Keys.every((key) => o2Keys.includes(key)) &&
+      o1Keys.every((key) => objectsEqualDeep(o1[key], o2[key]))
+    );
+  }
+  return false;
+}
+
+/**
  * @param {Object<string, R|undefined>} obj
  * @param {string} prop
  * @param {function(Object<string, R|undefined>, string): R} factory
