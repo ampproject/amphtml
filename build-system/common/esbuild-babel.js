@@ -201,7 +201,6 @@ function replaceOutputFile(outputFiles, original, text) {
     get contents() {
       // eslint-disable-next-line local/no-forbidden-terms
       const te = new TextEncoder();
-      //prettier-ignore
       return (contents ||= te.encode(text));
     },
   };
