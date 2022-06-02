@@ -8,6 +8,14 @@
     }
   },
   {
+    "name": "bento-autocomplete",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
     "name": "bento-base-carousel",
     "version": "1.0",
     "latestVersion": "0.1",
@@ -88,6 +96,15 @@
   },
   {
     "name": "bento-lightbox-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
+    "name": "bento-mega-menu",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {

@@ -1,1 +1,1 @@
-export {forwardRef, Children} from 'preact/compat';
+export {forwardRef, Children, memo} from 'preact/compat';
