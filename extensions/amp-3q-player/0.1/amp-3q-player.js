@@ -19,6 +19,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
+//import {addParamToUrl} from '../../../src/url';
 import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-3q-player';
@@ -74,8 +75,7 @@ class Amp3QPlayer extends AMP.BaseElement {
     if (el.getAttribute('data-player')) {
       this.playerId = userAssert(
         el.getAttribute('data-player'),
-        'One of data-id or data-player attributes is required for <amp-3q-player>',
-        //'data-player attribute is required for <amp-3q-player>',
+        'data-player attribute is required for <amp-3q-player>',
         el
       );
     }
@@ -205,7 +205,7 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @param {number} newHeight
    */
   resize_(newHeight) {
-    this.attemptChangeHeight(newHeight).catch(() => {});
+    this.attemptChangeHeight(newHeight);
   }
 
   /**
