@@ -413,7 +413,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should use storyNextUp value as default for auto-advance-after', async () => {
-    initializePageWithElement;
+    initializePageWithElement(element);
     env.sandbox
       .stub(Services.viewerForDoc(element), 'getParam')
       .withArgs('storyNextUp')

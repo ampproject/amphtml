@@ -351,9 +351,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.getAmpDoc().isPreview()) {
       this.setupAutoAdvanceForPreview_();
       this.initializeAdvancementConfig_();
-    }
-
-    if (this.getAmpDoc().isVisible()) {
+    } else if (this.getAmpDoc().isVisible()) {
       this.setupAutoAdvanceForVisible_();
       this.maybeSetStoryNextUp_();
       if (this.isActive() && handlePreviewToVisibleTransition) {
