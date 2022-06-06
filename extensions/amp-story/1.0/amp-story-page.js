@@ -341,13 +341,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       whenUpgradedToCustomElement(firstVideo)
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
-          const loopVideoIfTooShort = (duration) => {
-            const videoEl = firstVideo.querySelector('video');
-            const tooShort = duration < VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S;
-            videoEl.loop ||= tooShort;
-          };
           this.loadPromise(firstVideo).then(() => {
-            loopVideoIfTooShort(videoImpl.getDuration());
+            const duration = videoImpl.getDuration();
+            const tooShort = duration < VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S;
+            const videoEl = firstVideo.querySelector('video');
+            videoEl.loop ||= tooShort;
           });
         });
     }
