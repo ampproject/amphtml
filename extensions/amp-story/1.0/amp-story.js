@@ -42,6 +42,7 @@ import {
   toggle,
 } from '#core/dom/style';
 import {devError} from '#core/error';
+import {clamp} from '#core/math';
 import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
@@ -2810,34 +2811,20 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   calculateIndexOfLastPageToPreview_() {
-    const minPreviewPagesStr = this.viewer_?.getParam('minPreviewPages');
-    let minPreviewPages;
-    if (minPreviewPagesStr) {
-      minPreviewPages = parseInt(minPreviewPagesStr, 10);
-    }
-    if (!minPreviewPages) {
-      minPreviewPages = DEFAULT_MIN_PAGES_TO_PREVIEW;
-    }
-
-    const pctPagesToPreviewStr = this.viewer_?.getParam('pctPagesToPreview');
-    let pctPagesToPreview;
-    if (pctPagesToPreviewStr) {
-      pctPagesToPreview = parseInt(pctPagesToPreviewStr, 10);
-    }
-    if (!pctPagesToPreview) {
-      pctPagesToPreview = DEFAULT_PCT_PAGES_TO_PREVIEW;
-    }
+    const minPreviewPages =
+      parseInt(this.viewer_?.getParam('minPreviewPages'), 10) ??
+      DEFAULT_MIN_PAGES_TO_PREVIEW;
+    const pctPagesToPreview =
+      parseInt(this.viewer_?.getParam('pctPagesToPreview'), 10) ??
+      DEFAULT_PCT_PAGES_TO_PREVIEW;
 
     // We calculate the number of preview pages by taking the larger of the two
     // values: min # of preview pages vs the % of pages to show.
     const numPages = this.element.querySelectorAll('amp-story-page').length;
     let numPreviewPages = Math.ceil((pctPagesToPreview / 100) * numPages);
-    numPreviewPages = Math.max(numPreviewPages, minPreviewPages);
+    numPreviewPages = Math.max(minPreviewPages, numPreviewPages);
+    numPreviewPages = clamp(numPreviewPages, 1, numPages);
 
-    // We do not allow the returned index to be negative or exceed the index
-    // of the last story page.
-    numPreviewPages = Math.min(numPreviewPages, numPages);
-    numPreviewPages = Math.max(numPreviewPages, 1);
     return numPreviewPages - 1;
   }
 
