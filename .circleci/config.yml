@@ -92,7 +92,7 @@ commands:
   setup_node_environment:
     steps:
       - node/install:
-          lts: true
+          node-version: '16.15.0'
           install-npm: false
       - node/install-packages
   setup_vm:
