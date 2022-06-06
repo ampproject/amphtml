@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script async src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-mega-menu-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-mega-menu-1.0.css"
+    />
+    <style>
+      bento-mega-menu > section[expanded] > span {
+        background: lightgreen;
+        color: darkgreen;
+      }
+    </style>
+  </head>
+  <body>
+    <header style="background: white; z-index: 1001; position: relative; padding: 1px">
+      <h1>bento-mega-menu</h1>
+    </header>
+    <bento-mega-menu id="my-mega-menu">
+      <section>
+        <span>Menu Item 1</span>
+        <div>
+          These are the menu contents
+        </div>
+      </section>
+      <section>
+        <span>Menu Item 2</span>
+        <div>
+          Alias aspernatur beatae deserunt error esse eveniet excepturi quia suscipit totam vero.
+        </div>
+      </section>
+      <section>
+        <span>Menu Item 3</span>
+        <div>
+          <p>Hic impedit iste iure maiores minus necessitatibus nihil non numquam obcaecati pariatur perferendis quisquam quos recusandae saepe similique tempora ullam velit voluptatibus.</p>
+          <p>Hic impedit iste iure maiores minus necessitatibus nihil non numquam obcaecati pariatur perferendis quisquam quos recusandae saepe similique tempora ullam velit voluptatibus.</p>
+          <p>Hic impedit iste iure maiores minus necessitatibus nihil non numquam obcaecati pariatur perferendis quisquam quos recusandae saepe similique tempora ullam velit voluptatibus.</p>
+          <p>Hic impedit iste iure maiores minus necessitatibus nihil non numquam obcaecati pariatur perferendis quisquam quos recusandae saepe similique tempora ullam velit voluptatibus.</p>
+        </div>
+      </section>
+    </bento-mega-menu>
+
+    <p>For this demo, you can press 1, 2, or 3 to toggle the "expanded" property on any menu item</p>
+    <script>
+      document.addEventListener('keypress', (ev) => {
+        function toggle(number) {
+          const section = document.querySelectorAll('bento-mega-menu > section')[number - 1];
+          if (!section.hasAttribute('expanded')) {
+            section.setAttribute('expanded', '');
+          } else {
+            section.removeAttribute('expanded');
+          }
+        }
+        switch (ev.key) {
+          case '1':
+            return toggle(1);
+          case '2':
+            return toggle(2);
+          case '3':
+            return toggle(3);
+        }
+      });
+    </script>
+
+    <h1>Lorem ipsum dolor sit amet</h1>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam amet deserunt distinctio dolorum ducimus eaque error, hic itaque magni necessitatibus neque nisi perspiciatis, quaerat quisquam ratione recusandae repudiandae sit unde vero vitae? Consectetur eos eveniet laboriosam maxime minima quia repellat repellendus voluptates. Blanditiis dignissimos ea excepturi incidunt maiores nesciunt pariatur, qui quod repellat temporibus? Amet aperiam delectus deserunt distinctio excepturi harum ipsam nam necessitatibus nesciunt odit, praesentium quas quia rem sint voluptas! Adipisci at corporis dicta dolorem dolores enim, eum ex facilis in, ipsa itaque libero natus nobis quas qui quos repellat repudiandae sapiente? Ducimus nemo qui quis velit. Asperiores aspernatur at debitis earum, qui quia quo similique voluptate. Animi delectus possimus sapiente tenetur voluptas. Accusamus adipisci cumque esse iure nesciunt quaerat qui voluptas. Autem enim, ipsam minima nihil omnis veniam? Adipisci asperiores atque blanditiis dignissimos magni, quidem quo sed sit ullam ut. Aliquid cumque doloribus necessitatibus quo tenetur! Aspernatur at consequatur dolore eaque eius eligendi, facilis magnam nulla rerum veniam vitae voluptas! Ab dolores nostrum quidem vel velit? Ab alias aliquam deserunt distinctio dolores eos eum harum, hic impedit iste iure maiores minus necessitatibus nihil non numquam obcaecati pariatur perferendis quisquam quos recusandae saepe similique tempora ullam velit voluptatibus.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam amet deserunt distinctio dolorum ducimus eaque error, hic itaque magni necessitatibus neque nisi perspiciatis, quaerat quisquam ratione recusandae repudiandae sit unde vero vitae? Consectetur eos eveniet laboriosam maxime minima quia repellat repellendus voluptates. Blanditiis dignissimos ea excepturi incidunt maiores nesciunt pariatur, qui quod repellat temporibus? Amet aperiam delectus deserunt distinctio excepturi harum ipsam nam necessitatibus nesciunt odit, praesentium quas quia rem sint voluptas! Adipisci at corporis dicta dolorem dolores enim, eum ex facilis in, ipsa itaque libero natus nobis quas qui quos repellat repudiandae sapiente? Ducimus nemo qui quis velit. Asperiores aspernatur at debitis earum, qui quia quo similique voluptate. Animi delectus possimus sapiente tenetur voluptas. Accusamus adipisci cumque esse iure nesciunt quaerat qui voluptas. Autem enim, ipsam minima nihil omnis veniam? Adipisci asperiores atque blanditiis dignissimos magni, quidem quo sed sit ullam ut. Aliquid cumque doloribus necessitatibus quo tenetur! Aspernatur at consequatur dolore eaque eius eligendi, facilis magnam nulla rerum veniam vitae voluptas! Ab dolores nostrum quidem vel velit? Ab alias aliquam deserunt distinctio dolores eos eum harum, hic impedit iste iure maiores minus necessitatibus nihil non numquam obcaecati pariatur perferendis quisquam quos recusandae saepe similique tempora ullam velit voluptatibus.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquam amet deserunt distinctio dolorum ducimus eaque error, hic itaque magni necessitatibus neque nisi perspiciatis, quaerat quisquam ratione recusandae repudiandae sit unde vero vitae? Consectetur eos eveniet laboriosam maxime minima quia repellat repellendus voluptates. Blanditiis dignissimos ea excepturi incidunt maiores nesciunt pariatur, qui quod repellat temporibus? Amet aperiam delectus deserunt distinctio excepturi harum ipsam nam necessitatibus nesciunt odit, praesentium quas quia rem sint voluptas! Adipisci at corporis dicta dolorem dolores enim, eum ex facilis in, ipsa itaque libero natus nobis quas qui quos repellat repudiandae sapiente? Ducimus nemo qui quis velit. Asperiores aspernatur at debitis earum, qui quia quo similique voluptate. Animi delectus possimus sapiente tenetur voluptas. Accusamus adipisci cumque esse iure nesciunt quaerat qui voluptas. Autem enim, ipsam minima nihil omnis veniam? Adipisci asperiores atque blanditiis dignissimos magni, quidem quo sed sit ullam ut. Aliquid cumque doloribus necessitatibus quo tenetur! Aspernatur at consequatur dolore eaque eius eligendi, facilis magnam nulla rerum veniam vitae voluptas! Ab dolores nostrum quidem vel velit? Ab alias aliquam deserunt distinctio dolores eos eum harum, hic impedit iste iure maiores minus necessitatibus nihil non numquam obcaecati pariatur perferendis quisquam quos recusandae saepe similique tempora ullam velit voluptatibus.</p>
+  </body>
+</html>

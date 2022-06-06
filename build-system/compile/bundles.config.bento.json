@@ -104,6 +104,15 @@
     }
   },
   {
+    "name": "bento-mega-menu",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
     "name": "bento-mustache",
     "version": "1.0",
     "options": {
