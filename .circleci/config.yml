@@ -94,7 +94,8 @@ commands:
       - node/install:
           lts: true
           install-npm: false
-      - node/install-packages
+      - node/install-packages:
+          override-ci-command: 'npm ci --legacy-peer-deps'
   setup_vm:
     parameters:
       save-git-cache:
