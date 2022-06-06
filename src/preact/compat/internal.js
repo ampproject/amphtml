@@ -2,6 +2,8 @@ import {options, toChildArray} from /*OK*/ 'preact';
 
 import * as mode from '#core/mode';
 
+export {memo} from './memo';
+
 const REACT_FORWARD_SYMBOL =
   (typeof Symbol !== 'undefined' && Symbol.for?.('react.forward_ref')) || 0xf47;
 
@@ -80,7 +82,7 @@ function toArray(children) {
 
 /**
  * @param {import('preact').ComponentChildren} children
- * @param {function(import('preact').ComponentChildren):R} fn
+ * @param {function(import('preact').ComponentChildren, number):R} fn
  * @return {Array<R>}
  * @template R
  */

@@ -414,3 +414,24 @@ export function querySelectorInSlot(slot, selector) {
   }
   return null;
 }
+
+/**
+ * Finds a matching node inside an HTML template slot's children
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {HTMLElement[]}
+ */
+export function querySelectorAllInSlot(slot, selector) {
+  const nodes = /** @type {HTMLElement[] } */ (slot.assignedElements());
+
+  const list = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      list.push(node);
+    }
+    const children = scopedQuerySelectorAll(node, selector);
+    children.forEach((child) => list.push(child));
+  }
+  return list;
+}

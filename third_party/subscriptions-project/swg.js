@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.216 */
+/** Version: 0.1.22.219 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -127,6 +127,7 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
+  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -4996,7 +4997,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.216',
+    '_client': 'SwG 0.1.22.219',
   });
 }
 
@@ -5190,8 +5191,8 @@ class PayStartFlow {
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
-        // basic flow does not support native.
-        forceDisableNative: paySwgVersion == '2',
+        // SwG basic and TwG flows do not support native.
+        forceDisableNative: paySwgVersion == '2' || paySwgVersion == '3',
       }
     );
     return Promise.resolve();
@@ -6330,7 +6331,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.216',
+        '_client': 'SwG 0.1.22.219',
         'supportsEventManager': true,
       },
       args || {}
@@ -7243,7 +7244,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.216');
+    context.setClientVersion('SwG 0.1.22.219');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -11424,6 +11425,30 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
       '',
       true
     ),
+  [AnalyticsEvent.IMPRESSION_NEWSLETTER_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_NEWSLETTER_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter signup',
+    'success',
+    false
+  ),
+  [AnalyticsEvent.IMPRESSION_REGWALL_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_REGWALL_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration',
+    'success',
+    false
+  ),
 };
 
 /** @const {!Object<?AnalyticsEvent,?Object>} */
@@ -11580,8 +11605,17 @@ class EntitlementsManager {
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!./deps.DepsDef} deps
+   * @param {!boolean} useArticleEndpoint
+   * @param {!boolean} enableDefaultMeteringHandler
    */
-  constructor(win, pageConfig, fetcher, deps, useArticleEndpoint) {
+  constructor(
+    win,
+    pageConfig,
+    fetcher,
+    deps,
+    useArticleEndpoint,
+    enableDefaultMeteringHandler
+  ) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -11644,6 +11678,9 @@ class EntitlementsManager {
 
     /** @private @const {boolean} */
     this.useArticleEndpoint_ = useArticleEndpoint;
+
+    /** @private @const {boolean} */
+    this.enableDefaultMeteringHandler_ = enableDefaultMeteringHandler;
 
     /** @private {?Article} */
     this.article_ = null;
@@ -12181,6 +12218,14 @@ class EntitlementsManager {
     this.deps_
       .callbacks()
       .triggerEntitlementsResponse(Promise.resolve(entitlements));
+
+    // Implementation of the default ability to always consume metered entitlements
+    // if they are provided in an entitlements response.
+    if (this.enableDefaultMeteringHandler_) {
+      if (entitlements.enablesThisWithGoogleMetering()) {
+        entitlements.consume();
+      }
+    }
 
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
@@ -17979,6 +18024,7 @@ class ConfiguredRuntime {
    *     fetcher: (!FetcherInterface|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
+   *     enableDefaultMeteringHandler: (boolean|undefined),
    *     useArticleEndpoint: (boolean|undefined)
    *   }=} integr
    * @param {!../api/subscriptions.Config=} config
@@ -18068,7 +18114,8 @@ class ConfiguredRuntime {
       this.pageConfig_,
       this.fetcher_,
       this, // See note about 'this' above
-      integr.useArticleEndpoint || false
+      integr.useArticleEndpoint || false,
+      integr.enableDefaultMeteringHandler || false
     );
 
     /** @private @const {!ClientConfigManager} */
