@@ -92,9 +92,9 @@ commands:
   setup_node_environment:
     steps:
       - node/install:
-          node-version: '16.15.0'
           install-npm: false
-      - node/install-packages
+      - node/install-packages:
+          override-ci-command: 'npm ci --legacy-peer-deps'
   setup_vm:
     parameters:
       save-git-cache:
