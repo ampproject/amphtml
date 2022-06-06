@@ -6,7 +6,6 @@ const fs = require('fs');
 const JSON5 = require('json5');
 const os = require('os');
 const path = require('path');
-const Percy = require('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
 const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
@@ -139,9 +138,11 @@ function setPercyTargetCommit() {
  *
  * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
  *     manager.
- * @return {Promise<Percy|undefined>} percy agent instance.
+ * @return {Promise<percy|undefined>} percy agent instance.
  */
 async function launchPercyAgent(browserFetcher) {
+  const {default: Percy} = await import('@percy/core');
+
   if (argv.percy_disabled) {
     return;
   }
