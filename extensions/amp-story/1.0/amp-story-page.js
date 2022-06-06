@@ -341,19 +341,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       whenUpgradedToCustomElement(firstVideo)
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
-          const loopVideoIfTooShort = (vidLength) => {
+          const loopVideoIfTooShort = (duration) => {
             const videoEl = firstVideo.querySelector('video');
-            const tooShort = vidLength < VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S;
+            const tooShort = duration < VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S;
             videoEl.loop ||= tooShort;
           };
-
-          if (videoImpl.getDuration()) {
-            loopVideoIfTooShort(videoImpl.getDuration());
-          } else {
-            listenOnce(firstVideo, VideoEvents_Enum.LOADEDMETADATA, () => {
-              loopVideoIfTooShort(videoImpl.getDuration());
-            });
-          }
+          this.loadPromise(firstVideo).then(() => {
+            loopVideoIfTooShort(videoImpl.getDuration())
+          });
         });
     }
   }
