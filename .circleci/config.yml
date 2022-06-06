@@ -92,6 +92,7 @@ commands:
   setup_node_environment:
     steps:
       - node/install:
+          lts: true
           install-npm: false
       - node/install-packages:
           override-ci-command: 'npm ci --legacy-peer-deps'
