@@ -347,7 +347,7 @@ export class AmpStoryPage extends AMP.BaseElement {
             videoEl.loop ||= tooShort;
           };
           this.loadPromise(firstVideo).then(() => {
-            loopVideoIfTooShort(videoImpl.getDuration())
+            loopVideoIfTooShort(videoImpl.getDuration());
           });
         });
     }
