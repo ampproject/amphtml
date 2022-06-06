@@ -71,6 +71,14 @@ export const TapNavigationDirection = {
   'PREVIOUS': 2,
 };
 
+/** @enum {number} */
+export const AdvancementConfigType = {
+  ADVANCEMENT_CONFIG: 0,
+  MANUAL_ADVANCEMENT: 1,
+  TIME_BASED_ADVANCEMENT: 2,
+  MEDIA_BASED_ADVANCEMENT: 3,
+};
+
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
  * tracking its internal state when started/stopped, and listeners will never be
@@ -98,10 +106,11 @@ export class AdvancementConfig {
   }
 
   /**
-   * @return {string} A string indicating the type of advancement config.
+   * @return {AdvancementConfigType} A value indicating the type of advancement
+   *     config.
    */
   getType() {
-    return 'AdvancementConfig';
+    return AdvancementConfigType.ADVANCEMENT_CONFIG;
   }
 
   /**
@@ -187,7 +196,7 @@ export class AdvancementConfig {
   }
 
   /**
-   * @param {number} progressOverride
+   * @param {number=} progressOverride
    * @protected
    */
   onProgressUpdate(progressOverride = undefined) {
@@ -323,7 +332,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /** @override */
   getType() {
-    return 'ManualAdvancement';
+    return AdvancementConfigType.MANUAL_ADVANCEMENT;
   }
 
   /** @override */
@@ -823,7 +832,7 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   getType() {
-    return 'TimeBasedAdvancement';
+    return AdvancementConfigType.TIME_BASED_ADVANCEMENT;
   }
 
   /**
@@ -1012,7 +1021,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   getType() {
-    return 'MediaBasedAdvancement';
+    return AdvancementConfigType.MEDIA_BASED_ADVANCEMENT;
   }
 
   /**

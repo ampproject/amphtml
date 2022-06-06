@@ -50,7 +50,7 @@ import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {MediaPool} from './media-pool';
-import {AdvancementConfig} from './page-advancement';
+import {AdvancementConfig, AdvancementConfigType} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
@@ -172,8 +172,8 @@ export class AmpStoryPage extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = null;
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(this.element);
 
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
@@ -306,8 +306,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.viewer_ = Services.viewerForDoc(this.win.document.documentElement);
-
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -371,10 +369,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   setupAutoAdvanceForPreview_() {
-    let previewSecondsPerPage = this.viewer_.getParam('previewSecondsPerPage');
-    if (previewSecondsPerPage) {
-      previewSecondsPerPage = parseInt(previewSecondsPerPage, 10);
-    }
+    let previewSecondsPerPage = parseInt(
+      this.viewer_.getParam('previewSecondsPerPage'),
+      10
+    );
     if (isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0) {
       previewSecondsPerPage = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
     }
@@ -426,18 +424,23 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   handlePreviewToVisibleTransition_() {
+    const advancementType = this.advancement_?.getType();
     devAssert(
-      this.advancement_?.getType() === 'TimeBasedAdvancement',
+      advancementType === AdvancementConfigType.TIME_BASED_ADVANCEMENT,
       'The advancement is expected to be time-based in preview mode'
     );
 
+    // Here, we store the progress values of the time-based advancement used
+    // during the preview. After the advancement is reinitialized below, we
+    // set its progress to the value that has already elapsed in preview mode,
+    // ensuring that the progress bar accurately reflects the page's progress.
     const progress = this.advancement_.getProgress();
     const progressMs = this.advancement_.getProgressMs();
 
     this.initializeAdvancementConfig_();
 
     switch (this.advancement_.getType()) {
-      case 'AdvancementConfig':
+      case AdvancementConfigType.ADVANCEMENT_CONFIG:
         // With this advancement, the progress bar should be full instead of
         // gradually filling. We set the progress bar's progress to the 1.0
         // because the bar would otherwise stagnate at a value between 0 & 1.
@@ -445,7 +448,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.advancement_.start();
         break;
 
-      case 'MediaBasedAdvancement':
+      case AdvancementConfigType.MEDIA_BASED_ADVANCEMENT:
         // With this advancement, the progress bar should advance along with
         // the video/audio playback progress. We ensure that the new
         // advancement begins not at 0, but at the already-elapsed media
@@ -453,7 +456,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.advancement_.start(progress);
         break;
 
-      case 'TimeBasedAdvancement':
+      case AdvancementConfigType.TIME_BASED_ADVANCEMENT:
         // With this advancement, the progress bar should advance along with
         // time. We ensure that the new advancement begins not at 0, but at
         // the already-elapsed time.
