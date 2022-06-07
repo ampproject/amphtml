@@ -8,6 +8,8 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev, devAssert} from '#utils/log';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 import {
   Action,
@@ -43,9 +45,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
     this.subscriptionService_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
-
     /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
@@ -64,50 +63,53 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       Services.storyStoreServiceForOrNull(this.win),
       Services.subscriptionsServiceForDoc(this.element),
       Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, subscriptionService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.subscriptionService_ = subscriptionService;
-      this.localizationService_ = localizationService;
+    ]).then(
+      ([storeService, subscriptionService, unusedLocalizationService]) => {
+        this.storeService_ = storeService;
+        this.subscriptionService_ = subscriptionService;
 
-      const pages = this.win.document.querySelectorAll(
-        'amp-story-page:not([ad])'
-      );
-      devAssert(
-        pages.length >= 4,
-        'The number of pages should be at least 4 to enable subscriptions feature, got %s',
-        pages.length
-      );
+        const pages = this.win.document.querySelectorAll(
+          'amp-story-page:not([ad])'
+        );
+        devAssert(
+          pages.length >= 4,
+          'The number of pages should be at least 4 to enable subscriptions feature, got %s',
+          pages.length
+        );
 
-      let subscriptionsPageIndex = parseInt(
-        this.element.getAttribute('subscriptions-page-index'),
-        10
-      );
-      subscriptionsPageIndex = isNaN(subscriptionsPageIndex)
-        ? DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
-        : subscriptionsPageIndex;
-      this.storeService_.dispatch(
-        Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-        clamp(
-          subscriptionsPageIndex,
-          DEFAULT_SUBSCRIPTIONS_PAGE_INDEX,
-          pages.length - 1
-        )
-      );
+        let subscriptionsPageIndex = parseInt(
+          this.element.getAttribute('subscriptions-page-index'),
+          10
+        );
+        subscriptionsPageIndex = isNaN(subscriptionsPageIndex)
+          ? DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          : subscriptionsPageIndex;
+        this.storeService_.dispatch(
+          Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+          clamp(
+            subscriptionsPageIndex,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX,
+            pages.length - 1
+          )
+        );
 
-      // Get grant status immediately to set up the initial subscriptions state.
-      this.getGrantStatusAndUpdateState_();
-      // When the user finishes any of the actions, e.g. log in or subscribe, new entitlements would be
-      // re-fetched and this callback would be executed. Update states based on new entitlements.
-      this.subscriptionService_.addOnEntitlementResolvedCallback(() =>
-        this.getGrantStatusAndUpdateState_()
-      );
+        // Get grant status immediately to set up the initial subscriptions state.
+        this.getGrantStatusAndUpdateState_();
+        // When the user finishes any of the actions, e.g. log in or subscribe, new entitlements would be
+        // re-fetched and this callback would be executed. Update states based on new entitlements.
+        this.subscriptionService_.addOnEntitlementResolvedCallback(() =>
+          this.getGrantStatusAndUpdateState_()
+        );
 
-      // Create a paywall dialog element that have required attributes to be able to be
-      // rendered by amp-subscriptions.
-      this.element.appendChild(this.renderSubscriptionsDialogTemplate_());
-
-      this.initializeListeners_();
-    });
+        // Create a paywall dialog element that have required attributes to be able to be
+        // rendered by amp-subscriptions.
+        const template = this.renderSubscriptionsDialogTemplate_();
+        return localizeTemplate(template, this.element).then(() => {
+          this.element.appendChild(template);
+          this.initializeListeners_();
+        });
+      }
+    );
   }
 
   /** @override */
@@ -244,11 +246,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
         <div class="i-amphtml-story-subscriptions-dialog-banner">
-          <button class="i-amphtml-story-subscriptions-dialog-banner-button">
-            {this.localizationService_.getLocalizedString(
+          <button
+            class="i-amphtml-story-subscriptions-dialog-banner-button"
+            i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
-            )}
-          </button>
+            }
+          ></button>
         </div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
           <span class="i-amphtml-story-subscriptions-price">
@@ -274,9 +277,11 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
           >
             <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
             <span class="i-amphtml-story-subscriptions-publisher-button-text">
-              {this.localizationService_.getLocalizedString(
-                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_CTA
-              )}
+              <span
+                i-amphtml-i18n-text-content={
+                  LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_CTA
+                }
+              ></span>
               &nbsp;
               {getStoryAttributeSrc(this.element, 'publisher', /* warn */ true)}
             </span>
@@ -289,25 +294,27 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
             subscriptions-decorate="false"
           >
             <span class="i-amphtml-story-subscriptions-google-logo"></span>
-            <span class="i-amphtml-story-subscriptions-google-button-text">
-              {this.localizationService_.getLocalizedString(
+            <span
+              class="i-amphtml-story-subscriptions-google-button-text"
+              i-amphtml-i18n-text-content={
                 LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SWG
-              )}
-            </span>
+              }
+            ></span>
           </button>
           <span class="i-amphtml-story-subscriptions-signin">
-            {this.localizationService_.getLocalizedString(
-              LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
-            )}
+            <span
+              i-amphtml-i18n-text-content={
+                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
+              }
+            ></span>
             &nbsp;
             <button
               subscriptions-action="login"
               subscriptions-display="NOT granted"
-            >
-              {this.localizationService_.getLocalizedString(
+              i-amphtml-i18n-text-content={
                 LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SIGN_IN
-              )}
-            </button>
+              }
+            ></button>
           </span>
         </div>
       </div>

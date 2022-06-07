@@ -168,10 +168,10 @@ export class MediaPool {
     this.audioContext_ = null;
 
     /**
-     * Maps a media element's ID to its audio source.
+     * Maps a media element's ID to its audio gain node.
      * @private @const {!Object<string, !MediaElementAudioSourceNode>}
      */
-    this.audioSources_ = {};
+    this.audioGainNodes_ = {};
 
     /**
      * Maps a media element's ID to the element.  This is necessary, as elements
@@ -544,6 +544,10 @@ export class MediaPool {
       return Promise.resolve();
     }
 
+    if (this.audioGainNodes_[componentEl.id]) {
+      this.setVolume_(componentEl, 1);
+    }
+
     return componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
@@ -863,9 +867,9 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    const audioSource = this.audioSources_[domMediaEl.id];
-    if (audioSource) {
-      audioSource.disconnect();
+    const audioGainNode = this.audioGainNodes_[domMediaEl.id];
+    if (audioGainNode) {
+      audioGainNode.gain.value = 0;
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
@@ -875,7 +879,7 @@ export class MediaPool {
    * Unmutes the specified media element in the DOM.
    * @param {!DomElementDef} domMediaEl The media element to be unmuted.
    * @return {!Promise} A promise that is resolved when the specified media
-   *     element has been successfully paused.
+   *     element has been successfully unmuted.
    */
   unmute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -891,13 +895,13 @@ export class MediaPool {
     if (mediaType == MediaType_Enum.VIDEO) {
       const ampVideoEl = domMediaEl.parentElement;
       if (ampVideoEl) {
-        if (ampVideoEl.hasAttribute('noaudio')) {
-          this.setVolume_(domMediaEl, 0);
-        } else {
-          const volume = ampVideoEl.getAttribute('volume');
-          if (volume) {
-            this.setVolume_(domMediaEl, parseFloat(volume));
-          }
+        const volume = parseFloat(ampVideoEl.getAttribute('volume'));
+        const isMuted = volume <= 0 || ampVideoEl.hasAttribute('noaudio');
+        if (isMuted) {
+          return Promise.resolve();
+        }
+        if (volume < 1) {
+          this.setVolume_(domMediaEl, volume);
         }
       }
     }
@@ -921,13 +925,16 @@ export class MediaPool {
     }
 
     if (this.audioContext_) {
-      const audioSource =
-        this.audioSources_[domMediaEl.id] ||
-        this.audioContext_.createMediaElementSource(domMediaEl);
-      this.audioSources_[domMediaEl.id] = audioSource;
-      const gainNode = this.audioContext_.createGain();
-      gainNode.gain.value = volume;
-      audioSource.connect(gainNode).connect(this.audioContext_.destination);
+      if (!this.audioGainNodes_[domMediaEl.id]) {
+        const audioSource =
+          this.audioContext_.createMediaElementSource(domMediaEl);
+        const audioGainNode = this.audioContext_.createGain();
+        this.audioGainNodes_[domMediaEl.id] = audioGainNode;
+        audioSource
+          .connect(audioGainNode)
+          .connect(this.audioContext_.destination);
+      }
+      this.audioGainNodes_[domMediaEl.id].gain.value = volume;
     }
   }
 
