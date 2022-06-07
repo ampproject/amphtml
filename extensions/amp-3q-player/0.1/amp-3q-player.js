@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {
@@ -6,6 +7,7 @@ import {
   isFullscreenElement,
 } from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {setStyle} from '#core/dom/style';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 
 import {Services} from '#service';
@@ -204,8 +206,19 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @private
    * @param {number} newHeight
    */
+  // resize_(newHeight) {
+  //   this.attemptChangeHeight(newHeight);
+  // }
   resize_(newHeight) {
-    this.attemptChangeHeight(newHeight);
+    this.element.classList.remove(
+      'i-amphtml-fill-content',
+      'i-amphtml-replaced-content'
+    );
+
+    this.element.setAttribute('layout', 'container');
+    this.element.setAttribute('i-amphtml-layout', 'container');
+    this.element.classList.add('i-amphtml-layout-container');
+    setStyle(this.element, 'height', newHeight, 'px');
   }
 
   /**
