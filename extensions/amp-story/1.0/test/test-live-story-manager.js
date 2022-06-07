@@ -2,6 +2,7 @@ import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {addAttributesToElement} from '#core/dom';
 
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -36,6 +37,7 @@ describes.realWin(
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
+          page.getAmpDoc = () => new AmpDocSingle(win);
           const storyPage = new AmpStoryPage(page);
           env.sandbox.stub(storyPage, 'mutateElement').callsFake((fn) => fn());
           container.appendChild(page);
