@@ -82,14 +82,17 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     element.appendChild(gridLayerEl);
     story.appendChild(element);
     win.document.body.appendChild(story);
-
-    page = new AmpStoryPage(element);
-    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
+    initializePageWithElement(element);
   });
 
   afterEach(() => {
     element.remove();
   });
+
+  function initializePageWithElement(el) {
+    page = new AmpStoryPage(el);
+    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
+  }
 
   it('should build a page', async () => {
     page.buildCallback();
@@ -410,6 +413,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should use storyNextUp value as default for auto-advance-after', async () => {
+    initializePageWithElement(element);
     env.sandbox
       .stub(Services.viewerForDoc(element), 'getParam')
       .withArgs('storyNextUp')
@@ -421,11 +425,14 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should not use storyNextUp to override auto-advance-after value', async () => {
+    element.setAttribute('auto-advance-after', '20000ms');
+    // Reinitializing the AmpStoryPage because the auto-advance-after is used
+    // in its constructor.
+    initializePageWithElement(element);
     env.sandbox
       .stub(Services.viewerForDoc(element), 'getParam')
       .withArgs('storyNextUp')
       .returns('5s');
-    element.setAttribute('auto-advance-after', '20000ms');
     page.buildCallback();
 
     expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');

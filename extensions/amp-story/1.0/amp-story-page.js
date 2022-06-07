@@ -8,7 +8,9 @@
  * </amp-story-page>
  * </code>
  */
+import {devAssert} from '#core/assert';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -48,7 +50,7 @@ import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {MediaPool} from './media-pool';
-import {AdvancementConfig} from './page-advancement';
+import {AdvancementConfig, AdvancementConfigType} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
@@ -94,14 +96,8 @@ const TAG = 'amp-story-page';
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
-/** @private @const {string} */
-const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '3s';
-
-/** @private @const {string} */
-const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
-
 /** @private @const {number} */
-const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S = 5;
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S = 5;
 
 /** @private @const {number} */
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
@@ -175,6 +171,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(this.element);
 
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
@@ -250,6 +249,17 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /**
+     * The value of the 'auto-advance-after' attribute set by the publisher.
+     * @private {?string}
+     */
+    this.initialAutoAdvanceValue_ =
+      this.element.getAttribute('auto-advance-after');
+
+    /** @private {?VisibilityState_Enum} */
+    this.visibilityState_ = this.getAmpDoc().getVisibilityState();
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
   }
 
   /**
@@ -300,18 +310,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
-    if (this.getAmpDoc().isPreview()) {
-      this.setupAutoAdvanceForPreview_();
-    }
-    this.maybeSetStoryNextUp_();
-    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
-    this.advancement_.addPreviousListener(() => this.previous());
-    this.advancement_.addAdvanceListener(() =>
-      this.next(/* opt_isAutomaticAdvance */ true)
-    );
-    this.advancement_.addProgressListener((progress) =>
-      this.emitProgress_(progress)
-    );
+    this.setUpAdvancementConfig_();
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
@@ -327,28 +326,156 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Handles visibility state changes.
+   * @private
+   */
+  onVisibilityChanged_() {
+    const ampDoc = this.getAmpDoc();
+
+    const wasPreview = this.visibilityState_ === VisibilityState_Enum.PREVIEW;
+    const isPreviewToVisibleTransition = wasPreview && ampDoc.isVisible();
+    this.visibilityState_ = ampDoc.getVisibilityState();
+
+    if (ampDoc.isPreview() || ampDoc.isVisible()) {
+      // Preview mode and visible mode both have different advancement logic.
+      this.setUpAdvancementConfig_(isPreviewToVisibleTransition);
+    }
+  }
+
+  /**
+   * Sets up the advancement config depending upon the
+   * @param {boolean=} handlePreviewToVisibleTransition
+   * @private
+   */
+  setUpAdvancementConfig_(handlePreviewToVisibleTransition = false) {
+    if (this.getAmpDoc().isPreview()) {
+      this.setupAutoAdvanceForPreview_();
+      this.initializeAdvancementConfig_();
+    } else if (this.getAmpDoc().isVisible()) {
+      this.setupAutoAdvanceForVisible_();
+      this.maybeSetStoryNextUp_();
+      if (this.isActive() && handlePreviewToVisibleTransition) {
+        this.handlePreviewToVisibleTransition_();
+      } else {
+        this.initializeAdvancementConfig_();
+      }
+    }
+  }
+
+  /**
    * Configures the page to auto advance using preview-specific durations.
    * @private
    */
   setupAutoAdvanceForPreview_() {
-    const firstVideo = this.getFirstAmpVideo_();
-    const autoAdvanceDuration = firstVideo
-      ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-      : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
-    this.element.setAttribute('auto-advance-after', autoAdvanceDuration);
+    let previewSecondsPerPage = parseInt(
+      this.viewer_.getParam('previewSecondsPerPage'),
+      10
+    );
+    if (isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0) {
+      previewSecondsPerPage = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
+    }
+    this.element.setAttribute(
+      'auto-advance-after',
+      previewSecondsPerPage + 's'
+    );
 
+    const firstVideo = this.getFirstAmpVideo_();
     if (firstVideo) {
       whenUpgradedToCustomElement(firstVideo)
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
           this.loadPromise(firstVideo).then(() => {
             const duration = videoImpl.getDuration();
-            const tooShort = duration < VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S;
+            const tooShort = duration < previewSecondsPerPage;
             const videoEl = firstVideo.querySelector('video');
             videoEl.loop ||= tooShort;
           });
         });
     }
+  }
+
+  /**
+   * Configures the page to auto advance using default durations.
+   * @private
+   */
+  setupAutoAdvanceForVisible_() {
+    // The 'auto-advance-after' attribute value may have been altered if auto
+    // advance was set up for preview mode. We revert this alteration for
+    // visible mode, in accordance with any values specified by the publisher.
+    if (this.initialAutoAdvanceValue_) {
+      this.element.setAttribute(
+        'auto-advance-after',
+        this.initialAutoAdvanceValue_
+      );
+    } else {
+      this.element.removeAttribute('auto-advance-after');
+    }
+  }
+
+  /**
+   * Handles the transition between the `preview` and `visible` visibility
+   * states by reinitializing this page's advancement config.
+   *
+   * As long as this page has called `setupAutoAdvanceForVisible_()`, prior to
+   * this method, then the reinitialization will result in a new advancement
+   * config that aligns with the advancement logic specified by the publisher.
+   * @private
+   */
+  handlePreviewToVisibleTransition_() {
+    const advancementType = this.advancement_?.getType();
+    devAssert(
+      advancementType === AdvancementConfigType.TIME_BASED_ADVANCEMENT,
+      'The advancement is expected to be time-based in preview mode'
+    );
+
+    // Here, we store the progress values of the time-based advancement used
+    // during the preview. After the advancement is reinitialized below, we
+    // set its progress to the value that has already elapsed in preview mode,
+    // ensuring that the progress bar accurately reflects the page's progress.
+    const progress = this.advancement_.getProgress();
+    const progressMs = this.advancement_.getProgressMs();
+
+    this.initializeAdvancementConfig_();
+
+    switch (this.advancement_.getType()) {
+      case AdvancementConfigType.ADVANCEMENT_CONFIG:
+        // With this advancement, the progress bar should be full instead of
+        // gradually filling. We set the progress bar's progress to the 1.0
+        // because the bar would otherwise stagnate at a value between 0 & 1.
+        this.emitProgress_(1.0);
+        this.advancement_.start();
+        break;
+
+      case AdvancementConfigType.MEDIA_BASED_ADVANCEMENT:
+        // With this advancement, the progress bar should advance along with
+        // the video/audio playback progress. We ensure that the new
+        // advancement begins not at 0, but at the already-elapsed media
+        // playback time.
+        this.advancement_.start(progress);
+        break;
+
+      case AdvancementConfigType.TIME_BASED_ADVANCEMENT:
+        // With this advancement, the progress bar should advance along with
+        // time. We ensure that the new advancement begins not at 0, but at
+        // the already-elapsed time.
+        this.advancement_.start(progressMs / this.advancement_.getDelayMs());
+    }
+  }
+
+  /**
+   * Initialize this page's advancement config and set its listener callbacks.
+   * @private
+   */
+  initializeAdvancementConfig_() {
+    this.advancement_?.removeAllAddedListeners();
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    this.advancement_.addPreviousListener(() => this.previous());
+    this.advancement_.addAdvanceListener(() =>
+      this.next(/* opt_isAutomaticAdvance */ true)
+    );
+    this.advancement_.addProgressListener((progress) =>
+      this.emitProgress_(progress)
+    );
   }
 
   /**
