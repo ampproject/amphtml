@@ -1,6 +1,6 @@
 import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
-import stylePropertyUrl from '#core/dom/jsx/style-property-url';
+import {stylePropertyUrl} from '#core/dom/jsx/style-property-url';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';

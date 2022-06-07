@@ -66,7 +66,7 @@ module.exports = {
       }
       return fixer.insertTextBefore(
         firstImport,
-        `import ${wrapperFn} from '${moduleName}';\n`
+        `import {${wrapperFn}} from '${moduleName}';\n`
       );
     }
 

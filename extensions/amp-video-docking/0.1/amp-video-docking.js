@@ -1,7 +1,7 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import stylePropertyUrl from '#core/dom/jsx/style-property-url';
+import {stylePropertyUrl} from '#core/dom/jsx/style-property-url';
 import {applyFillContent} from '#core/dom/layout';
 import {layoutRectEquals, rectIntersection} from '#core/dom/layout/rect';
 import {scopedQuerySelector} from '#core/dom/query';

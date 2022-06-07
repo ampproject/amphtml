@@ -4,7 +4,7 @@
 import objStr from 'obj-str';
 
 import * as Preact from '#core/dom/jsx';
-import stylePropertyUrl from '#core/dom/jsx/style-property-url';
+import {stylePropertyUrl} from '#core/dom/jsx/style-property-url';
 import {scopedQuerySelector} from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getWin} from '#core/window';

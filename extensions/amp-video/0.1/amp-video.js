@@ -11,7 +11,7 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import stylePropertyUrl from '#core/dom/jsx/style-property-url';
+import {stylePropertyUrl} from '#core/dom/jsx/style-property-url';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {

@@ -1,6 +1,6 @@
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {removeElement} from '#core/dom';
-import stylePropertyUrl from '#core/dom/jsx/style-property-url';
+import {stylePropertyUrl} from '#core/dom/jsx/style-property-url';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyle, toggle} from '#core/dom/style';
 

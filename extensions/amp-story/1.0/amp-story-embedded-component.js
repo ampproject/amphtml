@@ -1,6 +1,6 @@
 import {toggleAttribute, tryFocus} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
-import stylePropertyUrl from '#core/dom/jsx/style-property-url';
+import {stylePropertyUrl} from '#core/dom/jsx/style-property-url';
 import {closest, matches} from '#core/dom/query';
 import {resetStyles, setImportantStyles} from '#core/dom/style';
 

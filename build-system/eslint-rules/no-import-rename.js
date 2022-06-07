@@ -19,6 +19,7 @@ const path = require('path');
 
 const imports = {
   '#core/dom/css-selectors': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
+  '#core/dom/jsx/style-property-url': ['stylePropertyUrl'],
   '#core/dom/query': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
   '#core/dom/static-template': ['htmlFor'],
   '#core/dom/style': [
