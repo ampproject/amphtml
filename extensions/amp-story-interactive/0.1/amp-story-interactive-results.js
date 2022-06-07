@@ -1,3 +1,4 @@
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {htmlFor} from '#core/dom/static-template';
 import {computedStyle, setStyle} from '#core/dom/style';
 
@@ -263,8 +264,8 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
         this.rootEl_.querySelector(
           '.i-amphtml-story-interactive-results-image'
         ),
-        'background',
-        'url(' + categorySelected.image + ')'
+        'background-image',
+        stylePropertyUrl(categorySelected.image)
       );
     }
     this.rootEl_.querySelector(

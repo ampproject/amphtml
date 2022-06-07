@@ -3,6 +3,7 @@ import objstr from 'obj-str';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {isJsonScriptTag} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {Layout_Enum} from '#core/dom/layout';
 import {
   childElementByTag,
@@ -62,7 +63,7 @@ const renderElement = (config, consentId, logoSrc) => (
         <div class="i-amphtml-story-consent-header">
           <div
             class="i-amphtml-story-consent-logo"
-            style={logoSrc && {backgroundImage: `url('${logoSrc}') !important`}}
+            style={logoSrc && {backgroundImage: stylePropertyUrl(logoSrc)}}
           />
         </div>
         <div class="i-amphtml-story-consent-content">

@@ -1,6 +1,7 @@
 import {devAssert} from '#core/assert';
 import {removeElement, toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {closest, closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {getHistoryState} from '#core/window/history';
@@ -275,7 +276,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       openImgAttr && openImgAttr !== 'none' ? (
         <div
           class="i-amphtml-story-page-attachment-remote-img"
-          style={{backgroundImage: `url(${openImgAttr}) !important`}}
+          style={{backgroundImage: stylePropertyUrl(openImgAttr)}}
         ></div>
       ) : (
         // Attach link icon SVG by default.

@@ -1,5 +1,6 @@
 import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {Layout_Enum} from '#core/dom/layout';
 import {
   childElementByTag,
@@ -204,8 +205,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
             class="i-amphtml-amp-story-shopping-tag-pill-image"
             style={
               this.tagData_['productIcon'] && {
-                backgroundImage:
-                  'url(' + this.tagData_['productIcon'] + ') !important',
+                backgroundImage: stylePropertyUrl(this.tagData_['productIcon']),
                 backgroundSize: 'cover !important',
               }
             }

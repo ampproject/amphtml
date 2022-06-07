@@ -1,3 +1,4 @@
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
@@ -124,7 +125,7 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
 
     if (e.option.image) {
       setImportantStyles(this.resultEls_[e.interactiveId].element, {
-        'background-image': 'url(' + e.option.image + ')',
+        'background-image': stylePropertyUrl(e.option.image),
       });
     } else {
       this.resultEls_[e.interactiveId].element.textContent = e.option.text;

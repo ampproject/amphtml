@@ -1,3 +1,4 @@
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
@@ -87,7 +88,7 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
       convertedOption.querySelector(
         '.i-amphtml-story-interactive-img-option-img'
       ),
-      {'background-image': 'url(' + option['image'] + ')'}
+      {'background-image': stylePropertyUrl(option['image'])}
     );
 
     convertedOption.setAttribute('aria-label', option['imagealt']);

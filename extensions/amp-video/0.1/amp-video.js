@@ -11,6 +11,7 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
@@ -861,7 +862,7 @@ export class AmpVideo extends AMP.BaseElement {
     const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     setInitialDisplay(poster, 'block');
     setStyles(poster, {
-      'background-image': `url(${src})`,
+      'background-image': stylePropertyUrl(src),
       'background-size': 'cover',
       'background-position': 'center',
     });

@@ -1,6 +1,7 @@
 import {toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
@@ -955,7 +956,7 @@ export class SystemLayer {
 
       if (control.backgroundImageUrl) {
         setImportantStyles(dev().assertElement(element), {
-          'background-image': `url('${control.backgroundImageUrl}')`,
+          'background-image': stylePropertyUrl(control.backgroundImageUrl),
         });
       }
 

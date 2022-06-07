@@ -1,5 +1,6 @@
 import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
@@ -513,10 +514,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"
                 style={{
-                  backgroundImage: `url("${relativeToSourceUrl(
-                    data['productImages'][0].url,
-                    this.element
-                  )}")`,
+                  backgroundImage: stylePropertyUrl(
+                    relativeToSourceUrl(
+                      data['productImages'][0].url,
+                      this.element
+                    )
+                  ),
                 }}
               ></div>
               {data['productBrand'] && (

@@ -207,6 +207,7 @@ module.exports = {
     'local/prefer-spread-props': 2,
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
+    'local/style-property-url': 2,
     'local/query-selector': 2,
     'local/restrict-this-access': [
       2,

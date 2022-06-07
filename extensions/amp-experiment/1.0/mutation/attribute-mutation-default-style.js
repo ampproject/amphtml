@@ -20,6 +20,7 @@ const SUPPORTED_STYLE_VALUE = {
   'display': /^none$/,
   'position': /^(static|relative|absolute|initial|inherit)$/,
   'font-size': ALL_VALUE_REGEX,
+  // eslint-disable-next-line local/style-property-url
   'background-image': ALL_VALUE_REGEX,
   'border-width': ALL_VALUE_REGEX,
   'border-style': ALL_VALUE_REGEX,

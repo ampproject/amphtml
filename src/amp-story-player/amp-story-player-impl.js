@@ -553,6 +553,10 @@ export class AmpStoryPlayer {
   buildIframeFor_(story) {
     const iframeEl = this.doc_.createElement('iframe');
     if (story.posterImage) {
+      // TODO(wg-stories): `story.posterImage` does not seem to be wrapped in
+      // `url()`. Figure out if it doesn't, and wrap in `stylePropertyUrl` if
+      // so.
+      // eslint-disable-next-line local/style-property-url
       setStyle(iframeEl, 'backgroundImage', story.posterImage);
     }
     iframeEl.classList.add('story-player-iframe');

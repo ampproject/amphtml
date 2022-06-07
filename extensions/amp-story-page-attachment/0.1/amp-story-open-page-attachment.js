@@ -4,6 +4,7 @@
 import objStr from 'obj-str';
 
 import * as Preact from '#core/dom/jsx';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {scopedQuerySelector} from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getWin} from '#core/window';
@@ -160,7 +161,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
           {openImgAttr && openImgAttr !== 'none' ? (
             <div
               class="i-amphtml-story-outlink-page-attachment-img"
-              style={{backgroundImage: `url(${openImgAttr}) !important`}}
+              style={{backgroundImage: stylePropertyUrl(openImgAttr)}}
             ></div>
           ) : openImgAttr ? null : (
             renderOutlinkLinkIconElement()
@@ -200,7 +201,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     return (
       <div
         class="i-amphtml-story-inline-page-attachment-img"
-        style={{backgroundImage: `url(${proxied}) !important`}}
+        style={{backgroundImage: stylePropertyUrl(proxied)}}
       ></div>
     );
   };

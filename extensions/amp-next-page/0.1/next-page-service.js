@@ -1,5 +1,6 @@
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {removeElement} from '#core/dom';
+import stylePropertyUrl from '#core/dom/jsx/style-property-url';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyle, toggle} from '#core/dom/style';
 
@@ -406,7 +407,7 @@ export class NextPageService {
         'i-amphtml-next-article-image',
         'amp-next-page-image'
       );
-      setStyle(imageElement, 'background-image', `url(${next.image})`);
+      setStyle(imageElement, 'background-image', stylePropertyUrl(next.image));
       articleHolder.appendChild(imageElement);
 
       const titleElement = doc.createElement('div');
