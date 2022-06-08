@@ -143,7 +143,7 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
  * NOTE: If udpated here, update in amp-story-player-impl.js
  * @private @const {string}
  */
-const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
