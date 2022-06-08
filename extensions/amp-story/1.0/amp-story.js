@@ -2812,10 +2812,10 @@ export class AmpStory extends AMP.BaseElement {
    */
   calculateIndexOfLastPageToPreview_() {
     const minPreviewPages =
-      parseInt(this.viewer_?.getParam('minPreviewPages'), 10) ??
+      parseInt(this.viewer_?.getParam('minPreviewPages'), 10) ||
       DEFAULT_MIN_PAGES_TO_PREVIEW;
     const pctPagesToPreview =
-      parseInt(this.viewer_?.getParam('pctPagesToPreview'), 10) ??
+      parseInt(this.viewer_?.getParam('pctPagesToPreview'), 10) ||
       DEFAULT_PCT_PAGES_TO_PREVIEW;
 
     // We calculate the number of preview pages by taking the larger of the two
