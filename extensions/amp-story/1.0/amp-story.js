@@ -2658,7 +2658,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
     this.fetchLocalizationStrings_(storyLanguages);
-    Services.performanceFor(this.win).addEnabledExperiment(
+    Services.performanceFor(this.win)?.addEnabledExperiment(
       'story-remote-localization'
     );
   }
