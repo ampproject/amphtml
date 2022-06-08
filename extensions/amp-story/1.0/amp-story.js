@@ -2834,10 +2834,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   sendMessageIfPreviewFinished_() {
-    const pageId = this.activePage_.element.id;
-    const lastPreviewPage = this.pages_[this.indexOfLastPageToPreview_];
-    const isLastPreviewPage = pageId === lastPreviewPage.element.id;
-    if (isLastPreviewPage) {
+    const activePageIdx = this.pages_.indexOf(this.activePage_);
+    const isPreviewFinished = activePageIdx >= this.indexOfLastPageToPreview_;
+    if (isPreviewFinished) {
       this.viewerMessagingHandler_?.send('storyPreviewFinished', {});
     }
   }
