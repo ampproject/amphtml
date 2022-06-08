@@ -17,11 +17,6 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 const presetValues = ['default', 'appear'];
 
 export class AmpStoryCaptions extends AMP.BaseElement {
-  /** @override  */
-  static previewAllowed() {
-    return true;
-  }
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
