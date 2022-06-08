@@ -176,7 +176,7 @@ const LOG_TYPE_ENUM = {
  * NOTE: If udpated here, update in amp-story.js
  * @private @const {number}
  */
-const PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+const PANEL_ASPECT_RATIO_THRESHOLD = 31 / 40;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
