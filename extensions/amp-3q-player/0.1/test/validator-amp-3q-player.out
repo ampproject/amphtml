@@ -77,6 +77,17 @@ FAIL
 |        }
 |      </style>
 |    </noscript>
+|    <style amp-boilerplate>
+>>   ^~~~~~~~~
+amp-3q-player/0.1/test/validator-amp-3q-player.html:79:2 The tag 'head > style[amp-boilerplate]' appears more than once in the document. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
+|      body {
+|        -webkit-animation: none;
+|        -moz-animation: none;
+|        -ms-animation: none;
+|        animation: none
+|      }
+|    </style>
+|    </noscript>
 |    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
@@ -90,7 +101,12 @@ FAIL
 |    <!-- invalid, needs data-id -->
 |    <amp-3q-player height=360 width=640 layout="responsive">
 >>   ^~~~~~~~~
-amp-3q-player/0.1/test/validator-amp-3q-player.html:90:2 The mandatory attribute 'data-id' is missing in tag 'amp-3q-player'. (see https://amp.dev/documentation/components/amp-3q-player)
+amp-3q-player/0.1/test/validator-amp-3q-player.html:99:2 The mandatory attribute 'data-id' is missing in tag 'amp-3q-player'. (see https://amp.dev/documentation/components/amp-3q-player)
+|    </amp-3q-player>
+|
+|    <h2>resize</h2>
+|    <amp-3q-player id="myVideo" data-id="7e3fc527-a9b5-11eb-b839-0cc47a188158" layout="responsive" height="110"
+|      width="640">
 |    </amp-3q-player>
 |  </body>
 |
