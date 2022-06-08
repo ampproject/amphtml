@@ -56,7 +56,7 @@ iframe.swg-dialog {
   margin-left: 0 !important;
 }
 
-@media(min-aspect-ratio: 3/4) {
+@media(min-aspect-ratio: 31/40) {
   amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper,
   iframe.swg-dialog  {
     width: var(--i-amphtml-story-desktop-one-panel-width) !important;
