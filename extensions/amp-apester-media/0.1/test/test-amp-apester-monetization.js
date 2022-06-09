@@ -25,6 +25,12 @@ describes.realWin(
     const queryAmpAdDisplaySelector = (myDoc) =>
       myDoc.querySelector('amp-ad[type=doubleclick]');
 
+    const testRtcConfig = {
+      vendors: {
+        'vendorA': {'SLOT_ID': '1'},
+      },
+    };
+
     beforeEach(() => {
       win = env.win;
       doc = win.document;
@@ -145,6 +151,24 @@ describes.realWin(
       await handleCompanionAds(media, baseElement);
       const bottomAd = queryAmpAdDisplaySelector(doc);
       expect(bottomAd).to.not.exist;
+    });
+    it('Should have rtc-config attribute if set in bottom ad', async () => {
+      const media = createCampaignData({
+        bottomAd: true,
+      });
+      media.campaignData.bottomAdOptions.rtcConfig = testRtcConfig;
+      await handleCompanionAds(media, baseElement);
+      const bottomAd = queryAmpAdDisplaySelector(doc);
+      expect(bottomAd.getAttribute('rtc-config')).to.exist;
+      expect(bottomAd).to.exist;
+    });
+    it('Should have rtc-config attribute if set companion display ad', async () => {
+      const media = createCampaignData({display: true});
+      media.campaignData.companionOptions.rtcConfig = testRtcConfig;
+      await handleCompanionAds(media, baseElement);
+      const displayAd = queryAmpAdDisplaySelector(doc);
+      expect(displayAd.getAttribute('rtc-config')).to.exist;
+      expect(displayAd).to.exist;
     });
   }
 );
