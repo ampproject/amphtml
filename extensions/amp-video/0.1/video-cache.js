@@ -2,6 +2,8 @@ import {createElementWithAttributes, removeElement} from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 
+import {isExperimentOn} from '#experiments';
+
 import {Services} from '#service';
 
 import {user} from '#utils/log';
@@ -49,7 +51,9 @@ export function fetchCachedSources(
   return requestCachedVideoSources(videoEl, ampdoc)
     .then((response) => {
       applySourcesToVideo(videoEl, response['sources'], maxBitrate);
-      applyAudioInfoToVideo(videoEl, response['has_audio']);
+      if (isExperimentOn(win, 'story-video-cache-apply-audio')) {
+        applyAudioInfoToVideo(videoEl, response['has_audio']);
+      }
       applyCaptionsTrackToVideo(videoEl, response['captions']);
     })
     .catch(() => {
