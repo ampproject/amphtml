@@ -57,32 +57,10 @@ import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {calculateExtensionFileUrl} from '#service/extension-script';
-import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
 
-import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs419 from './_locales/es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsFr from './_locales/fr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsHi from './_locales/hi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsId from './_locales/id.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsIt from './_locales/it.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsJa from './_locales/ja.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsKo from './_locales/ko.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsNl from './_locales/nl.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsNo from './_locales/no.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsPtBr from './_locales/pt-BR.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsPtPt from './_locales/pt-PT.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsRu from './_locales/ru.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
@@ -2711,41 +2689,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.maybeRegisterInlineLocalizationStrings_(storyLanguages[0])) {
       return;
     }
-    if (isExperimentOn(this.win, 'story-remote-localization')) {
-      this.fetchLocalizationStrings_(storyLanguages);
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'story-remote-localization'
-      );
-    } else {
-      getLocalizationService(this.element).registerLocalizedStringBundles({
-        'default': LocalizedStringsEn,
-        'ar': LocalizedStringsAr,
-        'de': LocalizedStringsDe,
-        'en': LocalizedStringsEn,
-        'en-GB': LocalizedStringsEnGb,
-        'es': LocalizedStringsEs,
-        'es-419': LocalizedStringsEs419,
-        'fr': LocalizedStringsFr,
-        'hi': LocalizedStringsHi,
-        'id': LocalizedStringsId,
-        'it': LocalizedStringsIt,
-        'ja': LocalizedStringsJa,
-        'ko': LocalizedStringsKo,
-        'nl': LocalizedStringsNl,
-        'no': LocalizedStringsNo,
-        'pt-PT': LocalizedStringsPtPt,
-        'pt-BR': LocalizedStringsPtBr,
-        'ru': LocalizedStringsRu,
-        'tr': LocalizedStringsTr,
-        'vi': LocalizedStringsVi,
-        'zh-CN': LocalizedStringsZhCn,
-        'zh-TW': LocalizedStringsZhTw,
-        'en-xa': createPseudoLocale(
-          LocalizedStringsEn,
-          (s) => `[${s} one two]`
-        ),
-      });
-    }
+    this.fetchLocalizationStrings_(storyLanguages);
   }
 
   /**
