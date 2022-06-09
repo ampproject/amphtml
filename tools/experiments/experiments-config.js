@@ -186,5 +186,6 @@ export const EXPERIMENTS = [
   {
     id: 'story-video-cache-apply-audio',
     name: 'Apply the hasAudio flag from cached videos on stories',
+    spec: 'https://github.com/ampproject/amphtml/pull/38285',
   },
 ];
