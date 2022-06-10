@@ -5,8 +5,8 @@
 ```html
 <amp-ad width="300" height="250"
     type="andbeyond"
-    data-siteid="40827"
-    data-slotpath="/103512698/AMP_COMPONENT_TEST_1"
+    data-siteid="9999"
+    data-slotpath="/1234/AMP_TEST"
     data-totalAmpSlots="1">
 </amp-ad>
 ```
