@@ -8,7 +8,7 @@ import {
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
 } from '#core/document/visibility';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
+import {rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
 import {isEnumValue} from '#core/types';
 import {map} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
@@ -48,6 +48,8 @@ const AmpDocSignals_Enum = {
   FIRST_VISIBLE: '-ampdoc-first-visible',
   // Signals when the document becomes visible the next time.
   NEXT_VISIBLE: '-ampdoc-next-visible',
+  // Signals the document has been previewed for the first time.
+  FIRST_PREVIEWED: '-ampdoc-first-previewed',
 };
 
 /**
@@ -356,7 +358,7 @@ export class AmpDoc {
     const metaEls = dev()
       .assertElement(this.win.document.head)
       .querySelectorAll('meta[name]');
-    iterateCursor(metaEls, (metaEl) => {
+    metaEls.forEach((metaEl) => {
       const name = metaEl.getAttribute('name');
       const content = metaEl.getAttribute('content');
       if (!name || content === null) {
@@ -644,9 +646,34 @@ export class AmpDoc {
       } else {
         this.signals_.reset(AmpDocSignals_Enum.NEXT_VISIBLE);
       }
+
+      if (visibilityState == VisibilityState_Enum.PREVIEW) {
+        this.signals_.signal(AmpDocSignals_Enum.FIRST_PREVIEWED);
+      }
+
       this.visibilityState_ = visibilityState;
       this.visibilityStateHandlers_.fire();
     }
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first reaches the `PREVIEW` visibility state.
+   * @return {!Promise}
+   */
+  whenFirstPreviewedOrVisible() {
+    return Promise.race([this.whenFirstPreviewed(), this.whenFirstVisible()]);
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first reaches the `PREVIEW` visibility state.
+   * @return {!Promise}
+   */
+  whenFirstPreviewed() {
+    return this.signals_
+      .whenSignal(AmpDocSignals_Enum.FIRST_PREVIEWED)
+      .then(() => undefined);
   }
 
   /**
@@ -698,6 +725,14 @@ export class AmpDoc {
    */
   getVisibilityState() {
     return devAssert(this.visibilityState_);
+  }
+
+  /**
+   * Whether the AMP document currently being previewed.
+   * @return {boolean}
+   */
+  isPreview() {
+    return this.visibilityState_ == VisibilityState_Enum.PREVIEW;
   }
 
   /**

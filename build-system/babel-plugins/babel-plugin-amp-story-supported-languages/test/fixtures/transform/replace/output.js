@@ -1,0 +1,7 @@
+let AMP_STORY_SUPPORTED_LANGUAGES;
+AMP_STORY_SUPPORTED_LANGUAGES = 'test';
+const a = ["af", "am", "ar", "bg", "bn", "bs", "ca", "cs", "da", "de", "el", "en-GB", "en", "es-419", "es", "et", "eu", "fa", "fi", "fil", "fr", "gl", "gu", "hi", "hr", "hu", "id", "is", "it", "iw", "ja", "ka", "km", "kn", "ko", "lo", "lt", "lv", "mk", "ml", "mn", "mr", "ms", "my", "ne", "nl", "no", "pa", "pl", "pt-BR", "pt-PT", "ro", "ru", "si", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tr", "uk", "ur", "vi", "zh-CN", "zh-TW", "zu"];
+
+if (["af", "am", "ar", "bg", "bn", "bs", "ca", "cs", "da", "de", "el", "en-GB", "en", "es-419", "es", "et", "eu", "fa", "fi", "fil", "fr", "gl", "gu", "hi", "hr", "hu", "id", "is", "it", "iw", "ja", "ka", "km", "kn", "ko", "lo", "lt", "lv", "mk", "ml", "mn", "mr", "ms", "my", "ne", "nl", "no", "pa", "pl", "pt-BR", "pt-PT", "ro", "ru", "si", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tr", "uk", "ur", "vi", "zh-CN", "zh-TW", "zu"].join(' ')) {
+  console.log(["af", "am", "ar", "bg", "bn", "bs", "ca", "cs", "da", "de", "el", "en-GB", "en", "es-419", "es", "et", "eu", "fa", "fi", "fil", "fr", "gl", "gu", "hi", "hr", "hu", "id", "is", "it", "iw", "ja", "ka", "km", "kn", "ko", "lo", "lt", "lv", "mk", "ml", "mn", "mr", "ms", "my", "ne", "nl", "no", "pa", "pl", "pt-BR", "pt-PT", "ro", "ru", "si", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tr", "uk", "ur", "vi", "zh-CN", "zh-TW", "zu"]);
+}

@@ -7,7 +7,7 @@ import {experimentToggles, isCanary} from '#experiments';
 
 import {Services} from '#service';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {getModeObject} from './mode-object';
 
 /**

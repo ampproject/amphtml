@@ -40,7 +40,10 @@ const {watch} = require('chokidar');
 const {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
+  getRemapBentoNpmPreactDependencies,
+  getRemapBentoNpmReactDependencies,
 } = require('../compile/bento-remap');
+const {findJsSourceFilename} = require('../common/fs');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -435,7 +438,6 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    await fs.mkdir('build/css', {recursive: true});
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -515,6 +517,7 @@ async function buildNpmBentoWebComponentCss(extDir, options) {
     await buildExtensionCss(extDir, options.name, options.version, options);
   }
   const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.ensureDir(path.dirname(destFilepath));
   await fs.copyFile(srcFilepath, destFilepath);
 }
 
@@ -645,13 +648,14 @@ async function buildNpmBinaries(extDir, name, options) {
         external: ['react', 'react-dom'],
         remap: {
           'preact': 'react',
-          '.*/preact/compat': 'react',
+          'preact/compat': 'react',
+          './src/preact/compat/internal.js': './src/preact/compat/external.js',
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
         wrapper: '',
       },
-      bento: {
+      standalone: {
         entryPoint: await getBentoBuildFilename(
           extDir,
           getBentoName(name),
@@ -668,13 +672,23 @@ async function buildNpmBinaries(extDir, name, options) {
     // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
     for (const mode in npm) {
       const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
-      const bentoRemaps = getRemapBentoNpmDependencies(fullEntryPoint);
+      const bentoRemaps =
+        mode === 'standalone'
+          ? getRemapBentoNpmDependencies(fullEntryPoint)
+          : mode === 'preact'
+          ? getRemapBentoNpmPreactDependencies(fullEntryPoint)
+          : mode === 'react'
+          ? getRemapBentoNpmReactDependencies(fullEntryPoint)
+          : {};
+
       const bentoExternals = Object.values(bentoRemaps);
       npm[mode].remap = {
         ...(npm[mode].remap || {}),
         ...bentoRemaps,
       };
-      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
+      npm[mode].external = [
+        ...new Set([...(npm[mode].external || []), ...bentoExternals]),
+      ];
     }
   }
   const binaries = Object.values(npm);
@@ -708,19 +722,6 @@ function buildBinaries(extDir, binaries, options) {
     });
   });
   return Promise.all(promises);
-}
-
-/**
- * @param {string} nameWithoutExtension
- * @param {?string|void} cwd
- * @return {Promise<string|undefined>}
- */
-async function findJsSourceFilename(nameWithoutExtension, cwd) {
-  const [filename] = await fastGlob(
-    `${nameWithoutExtension}.{js,ts,tsx}`,
-    cwd ? {cwd} : undefined
-  );
-  return filename;
 }
 
 /**
@@ -804,13 +805,18 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
     import {BaseElement} from '../base-element';
     import {defineBentoElement} from '${bentoCePath}';
 
-    function defineElement() {
-      defineBentoElement(__name__, BaseElement);
+    function defineElement(win) {
+      defineBentoElement(__name__, BaseElement, win);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
   `).replace('__name__', JSON.stringify(name));
 }
+
+/** @type {import('@babel/core').PluginItem[]} */
+const extensionBabelPlugins = [
+  './build-system/babel-plugins/babel-plugin-amp-config-urls',
+];
 
 /**
  * Build the JavaScript for the extension specified
@@ -823,7 +829,11 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
  */
 async function buildExtensionJs(dir, name, options) {
   const isLatest = legacyLatestVersions[options.name] === options.version;
-  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
+  const {
+    filename = await findJsSourceFilename(name, dir),
+    version,
+    wrapper = 'extension',
+  } = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {
@@ -843,6 +853,7 @@ async function buildExtensionJs(dir, name, options) {
     minifiedName: `${name}-${version}.js`,
     aliasName: isLatest ? `${name}-latest.js` : '',
     wrapper: resolvedWrapper,
+    babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
 
   // If an incremental watch build fails, simply return.

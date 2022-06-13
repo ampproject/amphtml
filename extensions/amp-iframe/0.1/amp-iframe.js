@@ -25,7 +25,7 @@ import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {user, userAssert} from '#utils/log';
 
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,

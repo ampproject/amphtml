@@ -23,6 +23,7 @@ const {watch} = require('chokidar');
 const {debug} = require('../compile/debug-compilation-lifecycle');
 const babel = require('@babel/core');
 const {
+  ampResolve,
   remapDependenciesPlugin,
 } = require('./remap-dependencies-plugin/remap-dependencies');
 
@@ -140,12 +141,36 @@ async function compileBentoRuntimeAndCore(options) {
       ...options,
       outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
     }),
-    // npm
+    // npm - standalone
     compileJs(srcDir, srcFilename, 'src/bento/core/dist', {
       ...options,
       toName: maybeToNpmEsmName('bento.core.max.js'),
       minifiedName: maybeToNpmEsmName('bento.core.js'),
       outputFormat: argv.esm ? 'esm' : 'cjs',
+    }),
+    // npm - preact
+    compileJs(srcDir, srcFilename, 'src/bento/core/preact/dist', {
+      ...options,
+      toName: maybeToNpmEsmName('bento-preact.core.max.js'),
+      minifiedName: maybeToNpmEsmName('bento-preact.core.js'),
+      outputFormat: argv.esm ? 'esm' : 'cjs',
+      remapDependencies: {'preact/dom': 'preact'},
+      externalDependencies: ['preact'],
+    }),
+    // npm - react
+    compileJs(srcDir, srcFilename, 'src/bento/core/react/dist', {
+      ...options,
+      toName: maybeToNpmEsmName('bento-react.core.max.js'),
+      minifiedName: maybeToNpmEsmName('bento-react.core.js'),
+      outputFormat: argv.esm ? 'esm' : 'cjs',
+      remapDependencies: {
+        'preact': 'react',
+        'preact/compat': 'react',
+        './src/preact/compat/internal.js': './src/preact/compat/external.js',
+        'preact/hooks': 'react',
+        'preact/dom': 'react-dom',
+      },
+      externalDependencies: ['react', 'react-dom'],
     }),
   ]);
 }
@@ -326,14 +351,18 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true
+    /* enableCache */ true,
+    {plugins: options.babelPlugins}
   );
   const plugins = [babelPlugin];
 
   if (options.remapDependencies) {
     const {externalDependencies: externals, remapDependencies: remaps} =
       options;
-    plugins.unshift(remapDependenciesPlugin({externals, remaps}));
+
+    plugins.unshift(
+      remapDependenciesPlugin({externals, remaps, resolve: ampResolve})
+    );
   }
 
   let result = null;

@@ -89,6 +89,9 @@ export function scopedQuerySelectorAll(root, selector) {
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
+  if (mode.isEsm()) {
+    return el./*OK*/ matches(selector);
+  }
   const matcher =
     el.matches ||
     el.webkitMatchesSelector ||
@@ -145,7 +148,7 @@ export function closestNode(node, callback) {
  * @return {?HTMLElement} closest ancestor if found.
  */
 export function closestAncestorElementBySelector(element, selector) {
-  return element.closest
+  return mode.isEsm() || element.closest
     ? element.closest(selector)
     : closest(element, (el) => matches(el, selector));
 }
@@ -410,4 +413,25 @@ export function querySelectorInSlot(slot, selector) {
     }
   }
   return null;
+}
+
+/**
+ * Finds a matching node inside an HTML template slot's children
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {HTMLElement[]}
+ */
+export function querySelectorAllInSlot(slot, selector) {
+  const nodes = /** @type {HTMLElement[] } */ (slot.assignedElements());
+
+  const list = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      list.push(node);
+    }
+    const children = scopedQuerySelectorAll(node, selector);
+    children.forEach((child) => list.push(child));
+  }
+  return list;
 }

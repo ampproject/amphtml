@@ -25,7 +25,8 @@ export class BentoDateCountdown extends BaseElement {
 
 /**
  * Registers `<bento-date-countdown>` component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function defineElement() {
-  defineBentoElement(TAG, BentoDateCountdown);
+export function defineElement(win) {
+  defineBentoElement(TAG, BentoDateCountdown, win);
 }

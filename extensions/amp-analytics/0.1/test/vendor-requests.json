@@ -150,12 +150,15 @@
     "event": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=action&hsrc=3"
   },
   "gfksensic": {
-    "base": "https://%21regionid-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&cid=_client_id(cid)_",
+    "base": "https://%21regionid-config%21environment.sensic.net/tp?p=!regionID&m=!mediaID&v=1.0.0&t=s2s-amp",
     "page_params": "<ignore for test>",
-    "client_params": "<ignore for test>",
-    "event_params": "<ignore for test>",
-    "audio-play": "https://%21regionid-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&cid=_client_id(cid)_&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&c=default&vt=1&sp=-1&st=_timestamp_&ty=PL&sn=_counter(play__page_view_id_!streamID)_",
-    "audio-stop": "https://%21regionid-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&cid=_client_id(cid)_&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&c=default&vt=1&sp=-1&st=_timestamp_&ty=ST&sn=_counter(stop__page_view_id_!streamID)_"
+    "user_params": "<ignore for test>",
+    "streaming_params": "<ignore for test>",
+    "impression_params": "<ignore for test>",
+    "custom_params": "<ignore for test>",
+    "impression": "<ignore for test>",
+    "audio-play": "https://%21regionid-config%21environment.sensic.net/tp?p=!regionID&m=!mediaID&v=1.0.0&t=s2s-amp&ty=PL&c=default&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&vt=1&sp=-1&st=_timestamp_&sn=_counter(play__page_view_id_!streamID)_&!custom_params&optin=!optin&gdpr=1&gdpr_consent=_consent_string_&ext_amp_cid=_client_id(cid)_&r=_ampdoc_host_&ua=_user_agent_&l=_browser_language_",
+    "audio-stop": "https://%21regionid-config%21environment.sensic.net/tp?p=!regionID&m=!mediaID&v=1.0.0&t=s2s-amp&ty=ST&c=default&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&vt=1&sp=-1&st=_timestamp_&sn=_counter(stop__page_view_id_!streamID)_"
   },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
@@ -240,7 +243,7 @@
     "ping": "https://pp.lp4.io/u?i=!id&u=_client_id(_lp4_u)_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=!type&s=!section&_t=amp&_r=_random_"
   },
   "lotame": {
-    "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y"
+    "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y&gdpr_consent=_consent_string_&gdpr=_if(_equals(_consent_metadata(gdprApplies)_%2Ctrue)_%2C1)__if(_equals(_consent_metadata(gdprApplies)_%2Cfalse)_%2C0)_"
   },
   "mapp_intelligence": {
     "trackURL": "https://!trackDomain/!trackId/wt",

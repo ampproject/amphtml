@@ -17,6 +17,7 @@ export {
   createContext,
   isValidElement,
 } from 'preact';
+
 export {
   useState,
   useRef,
@@ -26,6 +27,7 @@ export {
   useMemo,
   useCallback,
   useImperativeHandle,
+  useReducer,
 } from 'preact/hooks';
 
 /**

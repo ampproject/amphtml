@@ -162,6 +162,9 @@
     "string": "Form successfully submitted"
   },
   "101": {
-    "string": "Shop Now"
+    "string": "Shop now"
+  },
+  "110": {
+    "string": "Subscribe with Google"
   }
 }

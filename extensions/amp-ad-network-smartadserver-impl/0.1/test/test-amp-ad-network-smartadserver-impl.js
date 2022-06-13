@@ -19,6 +19,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
+import {createIframeWithMessageStub} from '#testing/iframe';
+
 import {XORIGIN_MODE} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkSmartadserverImpl} from '../amp-ad-network-smartadserver-impl';
 
@@ -59,6 +61,16 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       impl = new AmpAdNetworkSmartadserverImpl(element);
 
       expect(impl.isValidElement()).to.be.true;
+    });
+  });
+
+  describe('isXhrAllowed', () => {
+    it('should be not allowed', async () => {
+      impl = new AmpAdNetworkSmartadserverImpl(
+        createElementWithAttributes(doc, 'amp-ad', {})
+      );
+
+      expect(impl.isXhrAllowed()).to.be.false;
     });
   });
 
@@ -181,7 +193,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -217,7 +229,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -249,7 +261,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -272,7 +284,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve())
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -291,7 +303,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -309,7 +321,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&schain=some-sco-string&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&schain=some-sco-string&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
           );
         });
     });
@@ -327,7 +339,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
           );
         });
     });
@@ -348,45 +360,6 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
           element
         ).getNonAmpCreativeRenderingMethod()
       ).to.equal(XORIGIN_MODE.IFRAME_GET);
-    });
-  });
-
-  describe('sendXhrRequest', () => {
-    function mockXhrFor(response) {
-      return {
-        fetch: () =>
-          Promise.resolve({
-            text: () => Promise.resolve(response),
-          }),
-      };
-    }
-
-    it('should not collapse when ad response', async () => {
-      env.sandbox
-        .stub(Services, 'xhrFor')
-        .returns(
-          mockXhrFor('<html><body><div>advertisement</div></body></html>')
-        );
-
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
-      const stub = env.sandbox.stub(impl, 'collapse');
-
-      expect(stub.notCalled).to.equal(true);
-      await impl.sendXhrRequest();
-      expect(stub.notCalled).to.equal(true);
-    });
-
-    it('should collapse when no ad response', async () => {
-      env.sandbox
-        .stub(Services, 'xhrFor')
-        .returns(mockXhrFor('<html><head></head><body></body></html>'));
-
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
-      const stub = env.sandbox.stub(impl, 'collapse');
-
-      expect(stub.notCalled).to.equal(true);
-      await impl.sendXhrRequest();
-      expect(stub.calledOnce).to.equal(true);
     });
   });
 
@@ -471,6 +444,79 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
 
     it('should return empty object when falsy argument', async () => {
       expect(impl.getBestRtcCallout_(null)).to.deep.equal({});
+    });
+  });
+
+  describe('addListener', () => {
+    it('should collapse below viewport on collapse event', async () => {
+      const offset = createElementWithAttributes(doc, 'div');
+      offset.setAttribute('style', 'width:100%; height:10000px');
+      doc.body.appendChild(offset);
+
+      element = createElementWithAttributes(doc, 'amp-ad');
+      const iframe = createIframeWithMessageStub(win);
+      element.appendChild(iframe);
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkSmartadserverImpl(element, doc, win);
+
+      const attemptCollapse = env.sandbox
+        .stub(impl, 'attemptCollapse')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
+
+      const data = {
+        sentinel: impl.sentinel,
+        type: 'collapse',
+      };
+
+      expect(element.getBoundingClientRect().top).to.equal(10000);
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage('collapse', '*');
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage(
+        {
+          sentinel: 1234,
+          type: 'collapse',
+        },
+        '*'
+      );
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(attemptCollapse).to.be.calledOnce;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(attemptCollapse).to.be.calledOnce;
+    });
+
+    it('should not collapse in viewport on collapse event', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad');
+      const iframe = createIframeWithMessageStub(win);
+      element.appendChild(iframe);
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkSmartadserverImpl(element, doc, win);
+
+      const attemptCollapse = env.sandbox
+        .stub(impl, 'attemptCollapse')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
+
+      const data = {
+        sentinel: impl.sentinel,
+        type: 'collapse',
+      };
+
+      expect(element.getBoundingClientRect().top).to.equal(0);
+      expect(doc.body.getBoundingClientRect().height).to.be.lt(160);
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(attemptCollapse).to.be.calledOnce;
+      expect(element.getBoundingClientRect().height).to.be.gt(150);
     });
   });
 });

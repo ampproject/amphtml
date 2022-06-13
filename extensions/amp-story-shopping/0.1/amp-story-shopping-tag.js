@@ -8,6 +8,8 @@ import {
 
 import {Services} from '#service';
 
+import {HistoryState, setHistoryState} from 'extensions/amp-story/1.0/history';
+
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 import {CSS as shoppingSharedCSS} from '../../../build/amp-story-shopping-shared-0.1.css';
@@ -18,7 +20,9 @@ import {
   ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -58,6 +62,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.shoppingTagEl_ = null;
     /** @private {?Element} */
     this.pageEl_ = null;
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.variableService_ = Services.storyVariableService(this.win);
   }
 
   /** @override */
@@ -161,6 +171,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });
+
+    setHistoryState(this.win, HistoryState.SHOPPING_DATA, this.tagData_);
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+      this.tagData_.productId
+    );
+
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_TAG_CLICK);
   }
 
   /** @override */

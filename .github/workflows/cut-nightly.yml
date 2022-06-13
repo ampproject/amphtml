@@ -6,10 +6,14 @@ on:
   schedule:
     # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
     - cron: '0 8 * * 2-6'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   cut-nightly:
-    environment: release_tagger
+    environment: cut_nightly
     if: github.repository == 'ampproject/amphtml'
     name: Cut Nightly Branch
     runs-on: ubuntu-latest
@@ -35,3 +39,25 @@ jobs:
         run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: cut-nightly
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/release-on-duty'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

@@ -6,14 +6,17 @@ const {once} = require('../common/once');
 const {bentoBundles} = require('./bundles.config');
 const glob = require('globby');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
-const {posix} = require('path');
+const {posix, sep} = require('path');
+
+const formatPathLikeSource = (path) =>
+  path.startsWith('.') ? path : `.${sep}${path}`;
 
 /**
  * @param {string} path
  * @return {?string}
  */
 function resolveExactModuleFile(path) {
-  let unaliased = resolvePath(path);
+  let unaliased = path.startsWith('#') ? resolvePath(path) : path;
   try {
     if (lstatSync(unaliased).isDirectory()) {
       unaliased += '/index';
@@ -25,7 +28,7 @@ function resolveExactModuleFile(path) {
   if (result.length !== 1) {
     return null;
   }
-  return result[0];
+  return formatPathLikeSource(posix.join(...result[0].split(sep)));
 }
 
 /**
@@ -51,7 +54,7 @@ function getExportAll(filename) {
   return modules;
 }
 
-/** @typedef {{source: string, cdn?: string, npm?: string}} */
+/** @typedef {{source: string, cdn?: string, standalone?: string}} */
 let MappingEntryDef;
 
 /** @return {MappingEntryDef[]}}} */
@@ -63,12 +66,24 @@ const getAllRemappings = once(() => {
   const coreBentoRemappings = coreBentoModules.map((source) => ({
     source,
     cdn: '../bento.mjs',
-    npm: '@bentoproject/core',
+    standalone: '@bentoproject/core',
+    react: '@bentoproject/core/react',
+    preact: '@bentoproject/core/preact',
   }));
 
   // Allow component cross-dependency
   const componentRemappings = bentoBundles.map(({name, version}) => {
     const nameWithoutPrefix = getNameWithoutComponentPrefix(name);
+    // Special: NPM builds depend on `mustache` directly
+    const standalone =
+      nameWithoutPrefix === 'mustache'
+        ? 'mustache'
+        : `@bentoproject/${nameWithoutPrefix}`;
+    const [preact, react] = ['preact', 'react'].map((mode) =>
+      standalone.startsWith('@bentoproject')
+        ? `${standalone}/${mode}`
+        : standalone
+    );
     return {
       source: posix.join(
         '.',
@@ -80,20 +95,22 @@ const getAllRemappings = once(() => {
         name
       ),
       cdn: posix.join('.', `${name}-${version}.mjs`),
-      npm:
-        // Special: NPM builds depend on `mustache` directly
-        nameWithoutPrefix === 'mustache'
-          ? 'mustache'
-          : `@bentoproject/${nameWithoutPrefix}`,
+      standalone,
+      preact,
+      react,
     };
   });
 
   return /** @type {MappingEntryDef[]} */ (
     [...coreBentoRemappings, ...componentRemappings]
-      .map(({cdn, npm, source}) => {
+      .map(({cdn, source, ...rest}) => {
         const resolved = resolveExactModuleFile(source);
         if (resolved) {
-          return {source: resolved, cdn, npm};
+          return {
+            source: resolved,
+            cdn: formatPathLikeSource(cdn),
+            ...rest,
+          };
         }
       })
       .filter(Boolean)
@@ -101,14 +118,14 @@ const getAllRemappings = once(() => {
 });
 
 /**
- * @param {'npm'|'cdn'} type
+ * @param {'standalone'|'cdn'|'react'|'preact'} type
  * @param {?string|undefined} entryPoint
  *   Full path to entrypoint required to prevent it from mapping itself.
  * @return {{[string: string]: string}}
  */
 function getRemappings(type, entryPoint) {
   const entryPointFormattedLikeSource = entryPoint
-    ? `./${entryPoint.replace(/^\.\//, '')}`
+    ? formatPathLikeSource(entryPoint)
     : null;
   return /** @type {{[string: string]: string}} */ (
     Object.fromEntries(
@@ -149,10 +166,32 @@ function getRemapBentoDependencies(entryPoint, isMinified) {
  * @return {{[string: string]: string}}
  */
 function getRemapBentoNpmDependencies(entryPoint) {
-  return getRemappings('npm', entryPoint);
+  return getRemappings('standalone', entryPoint);
+}
+
+/**
+ * Remaps imports from source to externals on NPM builds.
+ * @param {?string|undefined} entryPoint
+ *   Full path to entrypoint required to prevent it from mapping itself.
+ * @return {{[string: string]: string}}
+ */
+function getRemapBentoNpmPreactDependencies(entryPoint) {
+  return getRemappings('preact', entryPoint);
+}
+
+/**
+ * Remaps imports from source to externals on NPM builds.
+ * @param {?string|undefined} entryPoint
+ *   Full path to entrypoint required to prevent it from mapping itself.
+ * @return {{[string: string]: string}}
+ */
+function getRemapBentoNpmReactDependencies(entryPoint) {
+  return getRemappings('react', entryPoint);
 }
 
 module.exports = {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
+  getRemapBentoNpmPreactDependencies,
+  getRemapBentoNpmReactDependencies,
 };

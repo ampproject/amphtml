@@ -6,35 +6,39 @@ const path = require('path');
 const {remapDependenciesPlugin} = require('./remap-dependencies');
 
 /**
- * slightly complex but mocks resolvePath() which is itself complex
- * handles resolving node modules by returning them back
+ * slightly complex but mocks ampResolve() which is itself complex
+ * handles resolving node modules by returning input
  * handles resolving local paths by
  *  ensuring it's prefixed with './'
  *  ensuring it resolves barrel files (ie. directory imports) by
  *    suffixing filepath with '/index' and appropriate file extension
  */
-const resolveMock = sinon.fake((s) => {
-  if (s.startsWith('node-mod-')) {
+const resolveMock = sinon.fake((s, resolveDir, unusedAbsRootDir) => {
+  if (s.startsWith('#')) {
+    // do nothing
+    // technically ampResolve handles aliased paths, but I'm not mocking it since this functionality isn't actually used in the remap-dependencies plugin
+    // esbuild should have already resolved path aliases because it adheres to tsconfig.compilerOptions.paths config (https://esbuild.github.io/content-types/#tsconfig-json)
+  } else if (s.startsWith('node-mod-')) {
     // return input if it's a node module (use special "node-mod-" prefix in tests to indicate node module)
+    // later we will assert that we resolved to the node-mod-
     return s;
   } else {
-    if (!s.startsWith('.')) {
-      // otherwise, assume local module,
-      // ensure local modules always have leading .
-      s = `./${s}`;
-    }
     // handle directory imports with barrel file and appropriate file extension to emulate behavior of resolvePath
-    if (s.match(/((js|jsx|ts|tsx)-)?dir\d?(\/index)?$/)) {
+    s = path.posix.join(resolveDir, s);
+    if (s.match(/((js|jsx|ts|tsx)-)?dir\d?\/?(index)?$/)) {
       // return barrel file if importing a directory (use special "dir" in tests to indicate path to directory)
       const [, , fileType, indexStr] = s.match(
-        /((js|jsx|ts|tsx)-)?dir\d?(\/index)?$/
+        /((js|jsx|ts|tsx)-)?dir\d?\/?(index)?$/
       );
-      s = `${s}${!!indexStr ? '' : '/index'}.${fileType || 'js'}`;
+      if (!indexStr) {
+        s = path.posix.join(s, '/index');
+      }
+      s += `.${fileType || 'js'}`;
     }
     // handle file imports with appropriate file extension to emulate behavior of resolvePath
     if (s.match(/\/((js|jsx|ts|tsx)-)?mod\d?$/)) {
       const fileType = s.match(/\/((js|jsx|ts|tsx)-)?mod\d?$/)[2];
-      s = `${s}.${fileType || 'js'}`;
+      s += `.${fileType || 'js'}`;
     }
     return s;
   }
@@ -62,6 +66,8 @@ test.afterEach(() => {
   // Restore the default sandbox here
   sinon.restore();
 });
+
+const rootDir = path.join(__dirname, '../../..');
 
 test('remap node modules to other node modules', (t) => {
   const onResolve = setup(['node-mod-A', 'node-mod-C'], {
@@ -142,8 +148,6 @@ test('remap local modules to node modules', (t) => {
     './src/4/dir/index': 'node-mod-B',
   });
 
-  const rootDir = path.join(__dirname, '../../..');
-
   // test various types of file imports
   const res1 = onResolve({resolveDir: rootDir, path: './mod1'});
   t.is(res1.path, 'node-mod-A');
@@ -217,4 +221,34 @@ test('remap local modules to node modules', (t) => {
   });
   t.is(resNoExtensionBundled.path, 'node-mod-B');
   t.is(resNoExtensionBundled.external, false);
+});
+
+test('remap local modules to local modules', (t) => {
+  const onResolve = setup([], {
+    // multiple mods => same external mod
+    './mod1': './mod2',
+    './js-dir/mod1.js': './mod2.js',
+    './jsx-dir/mod1.jsx': './mod2.jsx',
+    './ts-dir/mod1.ts': './mod2.ts',
+    './tsx-dir/mod1.tsx': './mod2.tsx',
+  });
+
+  const expectations = {
+    'mod1': 'mod2.js',
+    'js-dir/mod1.js': 'mod2.js',
+    'jsx-dir/mod1.jsx': 'mod2.jsx',
+    'ts-dir/mod1.ts': 'mod2.ts',
+    'tsx-dir/mod1.tsx': 'mod2.tsx',
+  };
+
+  for (const imp in expectations) {
+    const val = expectations[imp];
+    t.is(
+      `.${path.posix.sep}${path.posix.relative(
+        rootDir,
+        onResolve({path: `.${path.posix.sep}${imp}`, resolveDir: rootDir}).path
+      )}`,
+      `.${path.posix.sep}${val}`
+    );
+  }
 });
