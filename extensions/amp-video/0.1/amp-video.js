@@ -793,7 +793,6 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
-    console.log('onvideoloaded_');
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
@@ -981,20 +980,10 @@ export class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-   * Called when video is first loaded.
-   * @override
-   */
-  firstLayoutCompleted() {
-    console.log('firstLayoutCompleted');
-    
-  }
-
-  /**
    * See `createPosterForAndroidBug_`.
    * @private
    */
   removePosterForAndroidBug_() {
-    console.log('removePosterForAndroidBug_()');
     const poster = this.element.querySelector('i-amphtml-poster');
     if (!poster) {
       return;
