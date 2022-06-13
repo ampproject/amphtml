@@ -793,6 +793,11 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
+    console.log('onvideoloaded_');
+    if (!this.hideBlurryPlaceholder_()) {
+      this.togglePlaceholder(false);
+    }
+    this.removePosterForAndroidBug_();
     dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
   }
 
@@ -980,10 +985,8 @@ export class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstLayoutCompleted() {
-    if (!this.hideBlurryPlaceholder_()) {
-      this.togglePlaceholder(false);
-    }
-    this.removePosterForAndroidBug_();
+    console.log('firstLayoutCompleted');
+    
   }
 
   /**
@@ -991,6 +994,7 @@ export class AmpVideo extends AMP.BaseElement {
    * @private
    */
   removePosterForAndroidBug_() {
+    console.log('removePosterForAndroidBug_()');
     const poster = this.element.querySelector('i-amphtml-poster');
     if (!poster) {
       return;
