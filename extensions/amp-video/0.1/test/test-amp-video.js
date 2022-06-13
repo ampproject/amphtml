@@ -1043,7 +1043,7 @@ describes.realWin(
         let impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
-        impl.onVideoLoaded_();
+        impl.firstLayoutCompleted();
         let el = impl.element;
         let img = el.firstChild;
         expect(img.style.opacity).to.equal('0');
@@ -1052,7 +1052,7 @@ describes.realWin(
         impl = await getVideoWithBlur(true, false);
         impl.buildCallback();
         impl.layoutCallback();
-        impl.onVideoLoaded_();
+        impl.firstLayoutCompleted();
         el = impl.element;
         img = el.firstChild;
         expect(img.style.opacity).to.be.equal('');
@@ -1061,7 +1061,7 @@ describes.realWin(
         impl = await getVideoWithBlur(false, true);
         impl.buildCallback();
         impl.layoutCallback();
-        impl.onVideoLoaded_();
+        impl.firstLayoutCompleted();
         el = impl.element;
         img = el.firstChild;
         expect(img.style.opacity).to.be.equal('');
@@ -1070,7 +1070,7 @@ describes.realWin(
         impl = await getVideoWithBlur(false, false);
         impl.buildCallback();
         impl.layoutCallback();
-        impl.onVideoLoaded_();
+        impl.firstLayoutCompleted();
         el = impl.element;
         img = el.firstChild;
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
@@ -1080,7 +1080,7 @@ describes.realWin(
         const impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
-        impl.onVideoLoaded_();
+        impl.firstLayoutCompleted();
         const el = impl.element;
         const img = el.firstChild;
         expect(img.style.opacity).to.equal('0');

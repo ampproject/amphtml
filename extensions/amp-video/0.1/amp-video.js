@@ -793,11 +793,8 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
-    if (!this.hideBlurryPlaceholder_()) {
-      this.togglePlaceholder(false);
-    }
-    this.removePosterForAndroidBug_();
     dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
+    this.removePosterForAndroidBug_();
   }
 
   /** @override */
@@ -977,6 +974,16 @@ export class AmpVideo extends AMP.BaseElement {
       ranges.push([played.start(i), played.end(i)]);
     }
     return ranges;
+  }
+
+  /**
+   * Called when video is first loaded.
+   * @override
+   */
+  firstLayoutCompleted() {
+    if (!this.hideBlurryPlaceholder_()) {
+      this.togglePlaceholder(false);
+    }
   }
 
   /**
