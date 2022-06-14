@@ -12,7 +12,7 @@
   },
   "triggers": {
     "trackPageLoad": {
-      "on": "ini-load",
+      "on": "visible",
       "request": "onPageLoad"
     },
     "trackScroll": {
