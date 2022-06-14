@@ -40,6 +40,7 @@
     "domain": "${canonicalHost}",
     "url": "${canonicalUrl}",
     "referrer": "${documentReferrer}",
-    "user_agent": "${userAgent}"
+    "user_agent": "${userAgent}",
+    "verticalScrollBoundary": "${verticalScrollBoundary}"
   }
 }
