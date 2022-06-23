@@ -10,7 +10,7 @@ const {getMinifiedConfig} = require('./minified-config');
  */
 function getMinifiedSsrReadyConfig() {
   // We use the default `buildFor` which is preact.
-  return getMinifiedConfig('preact', {IS_SSR: true});
+  return getMinifiedConfig('preact', {IS_SSR_READY: true});
 }
 
 module.exports = {

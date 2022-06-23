@@ -1041,7 +1041,7 @@
     "options": {
       "hasCss": true,
       "destName": "amp-story-ssr",
-      "ssr": true
+      "ssrReady": true
     }
   },
   {

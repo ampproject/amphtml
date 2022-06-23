@@ -9,7 +9,7 @@ const {getUnminifiedConfig} = require('./unminified-config');
  * @return {!Object}
  */
 function getUnminifiedSsrReadyConfig() {
-  return getUnminifiedConfig('preact', {IS_SSR: true});
+  return getUnminifiedConfig('preact', {IS_SSR_READY: true});
 }
 
 module.exports = {
