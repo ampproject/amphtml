@@ -519,4 +519,49 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       expect(element.getBoundingClientRect().height).to.be.gt(150);
     });
   });
+
+  describe('modifyVendorResponse', () => {
+    beforeEach(() => {
+      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
+    });
+
+    it('should modifyVendorResponse', async () => {
+      const criteoExampleResponse = [
+        {
+          'response': {
+            'targeting': {
+              'crt_display_url':
+                'https%3A%2F%2Fads.eu.criteo.com%2Fdelivery%2Fr%2Fajs.php%3Fu%3D%257CyYP2Nxn%252BAmlnchiEQlOsuklsAFFZpGm3EU%252FjjuD0GOA%253D%257C%26c1%3D0n2XosTo5cmttfZ_Xo-xoRysCgATX3DvUOIjpsZKqJdm3eyNZdKRXiG1WaNgOl-yTgKu_JgyoYLHkIsbBRPK5MapBzXSKnuPUJPy0V6STkn6pelkbbtucKKReRNkE_d9ovu_dCN5_74mNyHExIWAhfzTHwsdk0ZdrYKbkuQzQjTaI46HGlSNLcJFInpzROSggbHvxVeN-leVzY818y-Ecu2pqHgq8_mGpyLWnL69l00EeuGdOORdpHGk5erc99iT74U7z9834rxtE6UZSB_dYOZjoHA5Asz33g3Siyu-N6woBaYGBqcaFWpH2t9dYbAvrSFo0dKG2zqyr16C0ls-qzk65I7WcFBBbyzxZ74My577ukVt_nluaBHHuougmq6czxQ3kiKBUMau_k7d_mnh1qN5s_2e3st-zYsJYUlQHjlpH0ENsWBk30Zdk3OTcAnD2I1StD3nkWPDZPKmJ4a0uV7bmrHqgKxkuVAQMaCs2no',
+              'crt_amp_rtc_pb': '0.81',
+              'crt_amp_rtc_format': '728x90',
+            },
+          },
+          'rtcTime': 97,
+          'callout': 'criteo',
+        },
+      ];
+      const res = impl.modifyVendorResponse(criteoExampleResponse);
+      expect(res[0].response.targeting.hb_pb).to.deep.equal(
+        criteoExampleResponse[0].response.targeting.crt_amp_rtc_pb
+      );
+      expect(res[0].response.targeting.width).to.deep.equal('728');
+      expect(res[0].response.targeting.height).to.deep.equal('90');
+      expect(res[0].response.targeting.hb_cache_path).to.deep.equal(
+        criteoExampleResponse[0].response.targeting.crt_display_url
+      );
+    });
+
+    it('parseFormatSize from string', async () => {
+      const res1 = impl.parseFormat('100x20');
+      const res2 = impl.parseFormat('100');
+      const res3 = impl.parseFormat('100x');
+      const res4 = impl.parseFormat('x20');
+      const res5 = impl.parseFormat('');
+      expect(res1).to.deep.equal({width: '100', height: '20'});
+      expect(res2).to.deep.equal({width: '100', height: undefined});
+      expect(res3).to.deep.equal({width: '100', height: ''});
+      expect(res4).to.deep.equal({width: '', height: '20'});
+      expect(res5).to.deep.equal({width: '', height: ''});
+    });
+  });
 });

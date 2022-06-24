@@ -63,6 +63,10 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
       return opt_rtcResponsesPromise.then((result) => {
         checkStillCurrent();
+        if (result) {
+          result = this.modifyVendorResponse(result);
+        }
+
         const rtc = this.getBestRtcCallout_(result);
         const urlParams = {};
 
@@ -73,8 +77,10 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
           urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
           urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
-          urlParams['hb_width'] = this.element.getAttribute('width');
-          urlParams['hb_height'] = this.element.getAttribute('height');
+          urlParams['hb_width'] =
+            this.element.getAttribute('width') || rtc.width;
+          urlParams['hb_height'] =
+            this.element.getAttribute('height') || rtc.height;
         }
 
         const schain = this.element.getAttribute('data-schain');
@@ -210,6 +216,53 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     });
 
     return highestOffer;
+  }
+
+  /**
+   *
+   * Modify the response from vendors to have one standart response
+   * @param {Object} vendorsResponses
+   * @return {*}
+   * @memberof AmpAdNetworkSmartadserverImpl
+   */
+  modifyVendorResponse(vendorsResponses) {
+    vendorsResponses.forEach((item) => {
+      switch (item.callout) {
+        case 'criteo':
+          const formatSize = this.parseFormat(
+            item.response.targeting.crt_amp_rtc_format
+          );
+          item.response.targeting.hb_bidder = item.callout;
+          item.response.targeting.hb_pb =
+            item.response.targeting.crt_amp_rtc_pb;
+          item.response.targeting.width = formatSize.width;
+          item.response.targeting.height = formatSize.height;
+          item.response.targeting.hb_cache_path =
+            item.response.targeting.crt_display_url;
+          break;
+        default:
+          return item;
+      }
+    });
+    return vendorsResponses;
+  }
+
+  /**
+   *
+   * Get width/height value from string value
+   * @param {string} formatString
+   * @return {*}
+   * @memberof AmpAdNetworkSmartadserverImpl
+   */
+  parseFormat(formatString) {
+    const formatSize = {width: '', height: ''};
+    if (!formatString) {
+      return formatSize;
+    }
+    const formatStringArray = formatString.split('x');
+    formatSize.width = formatStringArray[0];
+    formatSize.height = formatStringArray[1];
+    return formatSize;
   }
 }
 
