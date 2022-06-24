@@ -1198,7 +1198,9 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.pauseStoryUntilConsentIsResolved_();
+    this.getAmpDoc()
+      .whenFirstVisible()
+      .then(() => this.pauseStoryUntilConsentIsResolved_());
     this.validateConsent_(consentEl);
   }
 
