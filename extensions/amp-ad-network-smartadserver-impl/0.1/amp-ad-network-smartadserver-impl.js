@@ -232,12 +232,12 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           const formatSize = this.parseFormat(
             item.response.targeting.crt_amp_rtc_format
           );
-          item.response.targeting.hb_bidder = item.callout;
-          item.response.targeting.hb_pb =
+          item.response.targeting['hb_bidder'] = item.callout;
+          item.response.targeting['hb_pb'] =
             item.response.targeting.crt_amp_rtc_pb;
-          item.response.targeting.width = formatSize.width;
-          item.response.targeting.height = formatSize.height;
-          item.response.targeting.hb_cache_path =
+          item.response.targeting['width'] = formatSize.width;
+          item.response.targeting['height'] = formatSize.height;
+          item.response.targeting['hb_cache_path'] =
             item.response.targeting.crt_display_url;
           break;
         default:
