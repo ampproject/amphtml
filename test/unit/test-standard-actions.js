@@ -560,6 +560,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
       standardActions.handleToggleChecked_(invocation);
       expectCheckboxToHaveCheckedStateTrue(element);
     });
+
     it('should set checked property to false when checked property is true and args is null', () => {
       const element = createElement();
       element.type = 'checkbox';
