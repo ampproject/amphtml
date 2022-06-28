@@ -591,7 +591,7 @@ export class StandardActions {
     const {args} = invocation;
 
     this.mutator_.mutateElement(target, () => {
-      if (args['force'] === true || args['force'] === false) {
+      if (typeof args['force'] !== 'undefined') {
         // must be boolean, won't do type conversion
         const shouldForce = user().assertBoolean(
           args['force'],
