@@ -1012,7 +1012,7 @@ RecordValidated ShouldRecordTagspecValidated(
   // Unique and similar can introduce requirements, ie: there cannot be
   // another such tag. We don't want to introduce requirements for failing
   // tags.
-  if (tag.unique() || tag.unique_warning() || !tag.requires_condition().empty())
+  if (tag.unique() || tag.unique_warning() || !tag.requires().empty())
     return IF_PASSING;
   return NEVER;
 }
