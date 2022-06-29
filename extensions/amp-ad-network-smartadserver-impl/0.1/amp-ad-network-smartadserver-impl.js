@@ -78,6 +78,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
           urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
           urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
+          urlParams['hb_creative_url'] = rtc.hb_creative_url || '';
           urlParams['hb_width'] =
             this.element.getAttribute('width') || rtc.width;
           urlParams['hb_height'] =
@@ -230,6 +231,9 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     vendorsResponses.forEach((item) => {
       switch (item.callout) {
         case 'criteo':
+          if (item.response.targeting.crt_display_url === undefined) {
+            return;
+          }
           const formatSize = this.parseFormat(
             item.response.targeting.crt_amp_rtc_format
           );
@@ -238,7 +242,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
               JSON.parse(`"${item.response.targeting.crt_display_url}"`)
             )
           );
-
           const responseURL = new URL(item.response.targeting.crt_display_url);
           item.response.targeting['hb_bidder'] = item.callout;
           item.response.targeting['hb_pb'] =
@@ -249,6 +252,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           item.response.targeting['hb_cache_path'] = responseURL.pathname;
           item.response.targeting['hb_cache_id'] =
             '&' + responseURL.search.substring(1);
+          item.response.targeting['hb_creative_url'] = responseURL;
           break;
         default:
           return item;
