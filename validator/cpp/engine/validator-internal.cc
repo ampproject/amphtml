@@ -1012,7 +1012,7 @@ RecordValidated ShouldRecordTagspecValidated(
   // Unique and similar can introduce requirements, ie: there cannot be
   // another such tag. We don't want to introduce requirements for failing
   // tags.
-  if (tag.unique() || tag.unique_warning() || !tag.requires().empty())
+  if (tag.unique() || tag.unique_warning() || !tag.requires_condition().empty())
     return IF_PASSING;
   return NEVER;
 }
@@ -1085,8 +1085,8 @@ class ParsedTagSpec {
     SortAndUniquify(&mandatory_anyofs_);
     SortAndUniquify(&mandatory_attr_ids_);
     c_copy(spec->requires_extension(), std::back_inserter(requires_extension_));
-    c_copy(spec->requires(), std::back_inserter(requires_));
-    c_copy(spec->excludes(), std::back_inserter(excludes_));
+    c_copy(spec->requires_condition(), std::back_inserter(requires_condition_));
+    c_copy(spec->excludes_condition(), std::back_inserter(excludes_condition_));
     for (const std::string& tag_spec_name : spec->also_requires_tag_warning()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(tag_spec_name);
       CHECK(iter != tag_spec_ids_by_tag_spec_name.end());
@@ -1167,8 +1167,8 @@ class ParsedTagSpec {
   const vector<int32_t>& AlsoRequiresTagWarnings() const {
     return also_requires_tag_warnings_;
   }
-  const vector<std::string>& Requires() const { return requires_; }
-  const vector<std::string>& Excludes() const { return excludes_; }
+  const vector<std::string>& Requires() const { return requires_condition_; }
+  const vector<std::string>& Excludes() const { return excludes_condition_; }
 
   // Whether or not the tag should be recorded via
   // Context->RecordTagspecValidated if it was validated
@@ -1229,8 +1229,8 @@ class ParsedTagSpec {
   ParsedCdataSpec parsed_cdata_spec_;
   RecordValidated should_record_tagspec_validated_;
   bool attrs_can_satisfy_extension_ = false;
-  vector<std::string> requires_;
-  vector<std::string> excludes_;
+  vector<std::string> requires_condition_;
+  vector<std::string> excludes_condition_;
   vector<std::string> requires_extension_;
   vector<int32_t> also_requires_tag_warnings_;
   set<int32_t> implicit_attrspecs_;
@@ -2473,7 +2473,7 @@ class Context {
 
   // Record document-level conditions which have been satisfied by the tag spec.
   void SatisfyConditionsFromTagSpec(const ParsedTagSpec& parsed_tag_spec) {
-    c_copy(parsed_tag_spec.spec().satisfies(),
+    c_copy(parsed_tag_spec.spec().satisfies_condition(),
            std::inserter(conditions_satisfied_, conditions_satisfied_.end()));
   }
 
@@ -4806,8 +4806,9 @@ void ParsedValidatorRules::ExpandModuleExtensionSpec(
     TagSpec* tagspec, const string_view spec_name) const {
   tagspec->set_spec_name(StrCat(spec_name, " module extension script"));
   tagspec->set_descriptive_name(tagspec->spec_name());
-  tagspec->add_satisfies(tagspec->spec_name());
-  tagspec->add_requires(StrCat(spec_name, " nomodule extension script"));
+  tagspec->add_satisfies_condition(tagspec->spec_name());
+  tagspec->add_requires_condition(
+      StrCat(spec_name, " nomodule extension script"));
   AttrSpec* attr = tagspec->add_attrs();
   attr->set_name("crossorigin");
   attr->add_value("anonymous");
@@ -4824,8 +4825,9 @@ void ParsedValidatorRules::ExpandNomoduleExtensionSpec(
     TagSpec* tagspec, const string_view spec_name) const {
   tagspec->set_spec_name(StrCat(spec_name, " nomodule extension script"));
   tagspec->set_descriptive_name(tagspec->spec_name());
-  tagspec->add_satisfies(tagspec->spec_name());
-  tagspec->add_requires(StrCat(spec_name, " module extension script"));
+  tagspec->add_satisfies_condition(tagspec->spec_name());
+  tagspec->add_requires_condition(
+      StrCat(spec_name, " module extension script"));
   AttrSpec* attr = tagspec->add_attrs();
   attr->set_name("nomodule");
   attr->add_value("");
@@ -4850,7 +4852,7 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
     // This is satisfied by any of the `v0.js` variants:
-    tagspec->add_requires("amphtml javascript runtime (v0.js)");
+    tagspec->add_requires_condition("amphtml javascript runtime (v0.js)");
 
     if (extension_spec.deprecated_allow_duplicates()) {
       tagspec->set_unique_warning(true);
