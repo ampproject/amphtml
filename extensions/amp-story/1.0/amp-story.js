@@ -412,7 +412,8 @@ export class AmpStory extends AMP.BaseElement {
     }
     const performanceService = Services.performanceFor(this.win);
     if (
-      isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      /* isExperimentOn(this.win, 'story-disable-animations-first-page') // launched: true */
+      true ||
       isPreviewMode(this.win) ||
       prefersReducedMotion(this.win) ||
       isTransformed(this.getAmpDoc())
