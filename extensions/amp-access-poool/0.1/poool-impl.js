@@ -189,6 +189,7 @@ export class PooolVendor {
         'bi': this.pooolConfig_['bundleID'],
         'iid': this.pooolConfig_['itemID'],
         'ce': this.pooolConfig_['cookiesEnabled'],
+        'pt': this.pooolConfig_['pageType'],
         'd':
           typeof this.pooolConfig_['debug'] !== 'undefined' &&
           this.pooolConfig_['debug'] !== null
