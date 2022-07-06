@@ -162,6 +162,27 @@ See [documentation](https://dev.poool.tech/doc/sdk#locale) for more information.
 Override default or native contexts with a custom context value.
 See [documentation](https://dev.poool.tech/doc/sdk#context) for more information.
 
+### defaultWidget
+
+Used to defined a widget to display in case of network error.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#default_widget) for more information.
+
+### fallbackWidget
+
+Used to defined a fallback widget in case of error on advertising widgets.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#fallback_widget) for more information.
+
+### alternativeWidget
+
+Overrides default alternative action used by several widgets.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#alternative_widget) for more information.
+
+### consentRejectionWidget
+
+Allows to define the widget to display by default, if cookiesEnabled config option is false (cookies consent rejection).
+
+See [documentation](https://poool.dev/docs/javascript/access/configuration#consent_rejection_widget) for more information.
+
 ## Validation
 
 See [`amp-access-poool` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.
