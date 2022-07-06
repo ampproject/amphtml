@@ -34,6 +34,10 @@ const AUTHORIZATION_TIMEOUT = 3000;
  *   cookiesEnabled: boolean,
  *   locale: ?string,
  *   context: ?string,
+ *   defaultWidget: ?string,
+ *   alternativeWidget: ?string,
+ *   consentRejectionWidget: ?string,
+ *   fallbackWidget: ?string,
  * }}
  */
 let PooolConfigDef;
@@ -194,6 +198,10 @@ export class PooolVendor {
         'cs': this.pooolConfig_['customSegment'],
         'lo': this.pooolConfig_['locale'],
         'co': this.pooolConfig_['context'],
+        'aw': this.pooolConfig_['alternativeWidget'],
+        'dw': this.pooolConfig_['defaultWidget'],
+        'flw': this.pooolConfig_['fallbackWidget'],
+        'crw': this.pooolConfig_['consentRejectionWidget'],
       }),
       false
     );
