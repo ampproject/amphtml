@@ -19,7 +19,7 @@ As you'll know if you're familiar with how Poool works outside of AMP, you canno
 
 The `amp-access-poool` component does not require an authorization or pingback configuration because it is pre-configured to work with Poool.
 
-For more information about modes, check out our [SDK documentation](https://dev.poool.tech/doc/sdk#mode).
+For more information about modes, check out our [SDK documentation](https://poool.dev/docs/javascript/access/configuration#mode).
 
 ### Configurations
 
@@ -100,7 +100,7 @@ Configuration is similar to AMP Access, except no authorization, pingback or log
 </script>
 ```
 
-For more information about configuration variables, check out our [SDK documentation](https://dev.poool.tech/doc/sdk#configuration).
+For more information about configuration variables, check out our [SDK documentation](https://poool.dev/docs/javascript/access/configuration).
 
 ## Attributes
 
@@ -114,53 +114,53 @@ Your **unique** article ID.
 
 ### pageType (required)
 
-Used to tell Poool that a page has been visited by the current user.
-See [documentation](https://dev.poool.tech/doc/sdk#page_view) for more information.
+Used to tell Poool that a page has been visited by the current user. Default value is 'premium'.
+See [documentation](https://poool.dev/docs/javascript/audit/methods#page-view) to get possible values.
 
 ### debug
 
 Enable/disable debug mode.
-See [documentation](https://dev.poool.tech/doc/sdk#debug) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#debug) for more information.
 
 ### forceWidget
 
 Override current widget for user.
-See [documentation](https://dev.poool.tech/doc/sdk#force_widget) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#force_widget) for more information.
 
 ### loginButtonEnabled
 
 Enable/disable paywall "login" button.
-See [documentation](https://dev.poool.tech/doc/sdk#login_button_enabled) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#login_button_enabled) for more information.
 
 ### signatureEnabled
 
 Enable/disable paywall signature, shown under article content when the article has been unlocked.
-See [documentation](https://dev.poool.tech/doc/sdk#signature_enabled) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#signature_enabled) for more information.
 
 ### videoClient
 
 Set default video client (vast, googima) for video widget.
-See [documentation](https://dev.poool.tech/doc/sdk#video_client) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#video_client) for more information.
 
 ### customSegment
 
 Override native segments with a custom group/segment slug.
-See [documentation](https://dev.poool.tech/doc/sdk#custom_segment) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#custom_segment) for more information.
 
 ### cookiesEnabled
 
 Following latest GDPR requirements, we decided to disable cookies by default inside our paywall. You will have to explicitly set this attribute to reflect the user's consent.
-See [documentation](https://dev.poool.tech/doc/sdk#cookies_enabled) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#cookies_enabled) for more information.
 
 ### locale
 
 Set default locale for all texts inside the paywall.
-See [documentation](https://dev.poool.tech/doc/sdk#locale) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#locale) for more information.
 
 ### context
 
 Override default or native contexts with a custom context value.
-See [documentation](https://dev.poool.tech/doc/sdk#context) for more information.
+See [documentation](https://poool.dev/docs/javascript/access/configuration#context) for more information.
 
 ### defaultWidget
 
