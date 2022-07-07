@@ -2,6 +2,7 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 
+import {getLocalizationService} from 'extensions/amp-story/1.0/amp-story-localization-service';
 import {HistoryState} from 'extensions/amp-story/1.0/history';
 import * as history from 'extensions/amp-story/1.0/history';
 
@@ -10,6 +11,7 @@ import '../../../amp-story/1.0/amp-story-page';
 import '../amp-story-shopping';
 import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   Action,
   StateProperty,
@@ -100,6 +102,9 @@ describes.realWin(
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
+      });
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        en: LocalizedStringsEn,
       });
       env.sandbox.stub(win.history, 'replaceState');
       analytics = getAnalyticsService(win, win.document.body);

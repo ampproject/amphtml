@@ -56,6 +56,8 @@ describes.realWin(
     let replaceStateStub;
     let win;
     let localizationService;
+    let fetchJson = {};
+    let fetchStub;
 
     const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
@@ -145,6 +147,12 @@ describes.realWin(
       // Fakes the size of amp-story so it's not built/laid out until we call build/layoutCallbacks
       // allowing us to mock function calls before the lifecycle callbacks.
       setImportantStyles(win.document.documentElement, {'height': 'auto'});
+
+      fetchStub = env.sandbox
+        .stub(Services.xhrFor(env.win), 'fetchJson')
+        .resolves({
+          json: () => Promise.resolve(fetchJson),
+        });
     });
 
     afterEach(() => {
@@ -2122,23 +2130,6 @@ describes.realWin(
         env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
       });
 
-      it('should install the default english localizations', async () => {
-        await createStoryWithPages(1, ['cover']);
-
-        expect(
-          await localizationService.getLocalizedStringAsync('35')
-        ).to.be.equal('Swipe up');
-      });
-
-      it('should install the correct language localizations if specified', async () => {
-        env.win.document.body.parentElement.setAttribute('lang', 'es');
-        await createStoryWithPages(1, ['cover']);
-
-        expect(
-          await localizationService.getLocalizedStringAsync('35')
-        ).to.be.equal('Deslizar el dedo hacia arriba');
-      });
-
       it('should use the inlined amp-story strings when available', async () => {
         const inlinedStrings = win.document.createElement('script');
         inlinedStrings.setAttribute('amp-localization', 'amp-story');
@@ -2154,6 +2145,8 @@ describes.realWin(
       });
 
       it('should not use the inlined amp-story strings if incorrect RTV', async () => {
+        fetchJson = {'35': 'REMOTE-TEXT'};
+
         const inlinedStrings = win.document.createElement('script');
         inlinedStrings.setAttribute('amp-localization', 'amp-story');
         inlinedStrings.setAttribute('i-amphtml-version', '1234');
@@ -2164,7 +2157,7 @@ describes.realWin(
 
         expect(
           await localizationService.getLocalizedStringAsync('35')
-        ).to.be.equal('Swipe up');
+        ).to.be.equal('REMOTE-TEXT');
       });
 
       it('should use the inlined amp-story strings when available if the language is specified', async () => {
@@ -2183,38 +2176,8 @@ describes.realWin(
         ).to.be.equal('TEXTO-EN-LINEA');
       });
 
-      it('should use the default strings if inlined JSON is corrupted', async () => {
-        env.win.document.body.parentElement.setAttribute('lang', 'en');
-
-        const inlinedStrings = win.document.createElement('script');
-        inlinedStrings.setAttribute('amp-localization', 'amp-story');
-        inlinedStrings.setAttribute('i-amphtml-version', '123');
-        inlinedStrings.textContent = 'this: is not a JSON';
-        win.document.head.appendChild(inlinedStrings);
-
-        await createStoryWithPages(1, ['cover']);
-
-        expect(
-          await localizationService.getLocalizedStringAsync('35')
-        ).to.be.equal('Swipe up');
-      });
-
       describe('remote localization strings', () => {
-        beforeEach(() => {
-          toggleExperiment(env.win, 'story-remote-localization', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(env.win, 'story-remote-localization', false);
-        });
-
         it('should fetch the localization strings for the default language from the cdn', async () => {
-          const fetchStub = env.sandbox
-            .stub(Services.xhrFor(env.win), 'fetchJson')
-            .resolves({
-              json: () => Promise.resolve({}),
-            });
-
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.be.calledOnceWithExactly(
@@ -2225,12 +2188,6 @@ describes.realWin(
 
         it('should fetch the localization strings for the document language from the cdn', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
-
-          const fetchStub = env.sandbox
-            .stub(Services.xhrFor(env.win), 'fetchJson')
-            .resolves({
-              json: () => Promise.resolve({}),
-            });
 
           await createStoryWithPages(1, ['cover']);
 
@@ -2244,12 +2201,6 @@ describes.realWin(
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
           env.win.__AMP_MODE.localDev = true;
 
-          const fetchStub = env.sandbox
-            .stub(Services.xhrFor(env.win), 'fetchJson')
-            .resolves({
-              json: () => Promise.resolve({}),
-            });
-
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.have.been.calledOnceWithExactly(
@@ -2260,13 +2211,9 @@ describes.realWin(
 
         it('should use the remote localization strings', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
-
-          env.sandbox.stub(Services.xhrFor(env.win), 'fetchJson').resolves({
-            json: () =>
-              Promise.resolve({
-                '35': 'REMOTE-STRING',
-              }),
-          });
+          fetchJson = {
+            '35': 'REMOTE-STRING',
+          };
 
           await createStoryWithPages(1, ['cover']);
 

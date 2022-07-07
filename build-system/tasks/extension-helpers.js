@@ -97,6 +97,8 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
+ *   ssrReady?: boolean,
+ *   destName?: string
  * }}
  */
 const ExtensionOptionDef = {};
@@ -132,7 +134,13 @@ function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
-    extensionsObject[`${name}-${v}`] = {
+    // If a destName is given, make it as a part of the key as it is
+    // most likely needed to make the entry unique for instances where
+    // multiple entries share the same "entryPoint/name"  but have different
+    // destination name. This allows for a 1 to many relationship between
+    // entryPoint and output (1 -> *).
+    const key = options?.destName ?? name;
+    extensionsObject[`${key}-${v}`] = {
       name,
       version: v,
       ...defaultOptions,
@@ -847,11 +855,15 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
+  // Allow the extension entry to be able to override the destination
+  // filename. This allows for a single entry point to actually have multiple
+  // output destination compilation units.
+  const destName = options.destName ?? name;
   await compileJs(`${dir}/`, filename, './dist/v0', {
     ...options,
-    toName: `${name}-${version}.max.js`,
-    minifiedName: `${name}-${version}.js`,
-    aliasName: isLatest ? `${name}-latest.js` : '',
+    toName: `${destName}-${version}.max.js`,
+    minifiedName: `${destName}-${version}.js`,
+    aliasName: isLatest ? `${destName}-latest.js` : '',
     wrapper: resolvedWrapper,
     babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
@@ -867,10 +879,10 @@ async function buildExtensionJs(dir, name, options) {
   if (isAliased) {
     const {aliasedVersion} = aliasBundle;
     const src = maybeToEsmName(
-      `${name}-${version}${options.minify ? '' : '.max'}.js`
+      `${destName}-${version}${options.minify ? '' : '.max'}.js`
     );
     const dest = maybeToEsmName(
-      `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${destName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);

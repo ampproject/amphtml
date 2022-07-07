@@ -64,7 +64,9 @@ describes.realWin(
       });
       adElement = win.document.createElement('amp-story-auto-ads');
       storyElement = win.document.createElement('amp-story');
+      const pageElement = win.document.createElement('amp-story-page');
       win.document.body.appendChild(storyElement);
+      storyElement.appendChild(pageElement);
       storyElement.appendChild(adElement);
       story = new AmpStory(storyElement);
       autoAds = new AmpStoryAutoAds(adElement);

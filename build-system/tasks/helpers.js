@@ -63,7 +63,7 @@ const watchedTargets = new Map();
 /**
  * @param {!Object} jsBundles
  * @param {string} name
- * @param {?Object} extraOptions
+ * @param {!Object} extraOptions
  * @return {!Promise}
  */
 function doBuildJs(jsBundles, name, extraOptions) {
@@ -129,7 +129,7 @@ async function compileCoreRuntime(options) {
  * Outputs 2 scripts:
  * 1) for direct consumption in the browser
  * 2) for consumption by npm package users
- * @param {Object} options
+ * @param {!Object} options
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
@@ -183,9 +183,8 @@ async function compileBentoRuntimeAndCore(options) {
  * @return {!Promise}
  */
 async function compileAllJs(options) {
-  log(`Compiling ${cyan(options.minified ? 'minified' : 'unminified')} JS...`);
-
   const {minify} = options;
+  log(`Compiling ${cyan(minify ? 'minified' : 'unminified')} JS...`);
 
   const startTime = Date.now();
   await Promise.all([
@@ -312,7 +311,7 @@ async function finishBundle(destDir, destFilename, options, startTime) {
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
- * @param {?Object} options
+ * @param {!Object} options
  * @return {!Promise}
  */
 async function esbuildCompile(srcDir, srcFilename, destDir, options) {
@@ -321,6 +320,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const filename = options.minify
     ? options.minifiedName
     : options.toName ?? srcFilename;
+  // This guards against someone passing `minify: true` but no `minifiedName`.
+  if (!filename) {
+    throw new Error('No minifiedName provided for ' + srcFilename);
+  }
   const destFilename = maybeToEsmName(filename);
   const destFile = path.join(destDir, destFilename);
 
@@ -346,8 +349,14 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
-  const babelCaller =
+  let babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
+
+  // We read from the current binary configuration options if it is an
+  // SSR ready binary output. (ex. removes CSS installation, etc)
+  if (options.ssrReady) {
+    babelCaller += '-ssr-ready';
+  }
 
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
@@ -717,7 +726,12 @@ async function thirdPartyBootstrap(input, outputName, options) {
  * @return {Promise<Array<string>>}
  */
 async function getDependencies(entryPoint, options) {
-  const caller = options.minify ? 'minified' : 'unminified';
+  let caller = options.minify ? 'minified' : 'unminified';
+  // We read from the current binary configuration options if it is an
+  // SSR ready binary output. (ex. removes CSS installation, etc)
+  if (options.ssrReady) {
+    caller += '-ssr-ready';
+  }
   const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
   const result = await esbuild.build({
     entryPoints: [entryPoint],
