@@ -37,7 +37,6 @@ describes.fakeWin('LocalSubscriptionsNullPlatform', {amp: true}, (env) => {
       {
         'type': 'none',
         'serviceId': 'local',
-        'baseScore': 99,
       },
     ];
     localSubscriptionPlatform = localSubscriptionPlatformFactory(
@@ -57,6 +56,19 @@ describes.fakeWin('LocalSubscriptionsNullPlatform', {amp: true}, (env) => {
     ).to.be.instanceOf(LocalSubscriptionNullPlatform);
   });
 
+  it('should disallow additional options', () => {
+    serviceConfig.services[0]['baseScore'] = '1';
+    allowConsoleError(() => {
+      expect(() => {
+        localSubscriptionPlatformFactory(
+          ampdoc,
+          serviceConfig.services[0],
+          serviceAdapter
+        );
+      }).to.throw(/allowed/);
+    });
+  });
+
   it('initializeListeners_ should listen to clicks on rootNode', () => {
     const domStub = env.sandbox.stub(
       localSubscriptionPlatform.rootNode_.body,
@@ -68,8 +80,8 @@ describes.fakeWin('LocalSubscriptionsNullPlatform', {amp: true}, (env) => {
     expect(domStub.getCall(0).args[0]).to.be.equals('click');
   });
 
-  it('should return baseScore', () => {
-    expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
+  it('should always return baseScore of zero', () => {
+    expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(0);
   });
 
   it('Should not allow prerender', () => {

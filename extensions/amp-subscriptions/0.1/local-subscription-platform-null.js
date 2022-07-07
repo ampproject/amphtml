@@ -1,3 +1,5 @@
+import {userAssert} from '#utils/log';
+
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 
 /**
@@ -15,7 +17,13 @@ export class LocalSubscriptionNullPlatform extends LocalSubscriptionBasePlatform
   constructor(ampdoc, platformConfig, serviceAdapter) {
     super(ampdoc, platformConfig, serviceAdapter);
 
-    // Nothing to do here since this is a no-op stub
+    const configOpts = Object.keys(this.serviceConfig_);
+    userAssert(
+      configOpts.length == 2 &&
+        this.serviceConfig_['type'] &&
+        this.serviceConfig_['serviceId'],
+      'Only serviceId and type allowed when type is "none"'
+    );
   }
 
   /** @override */
