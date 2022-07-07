@@ -1,8 +1,8 @@
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 
 /**
- * Implments the remotel local subscriptions platform with stubbed auth urls which
- * allows for systems that only use another non-local sertvice eg amp-subscriptions-google
+ * Implments the null local subscriptions platform with stubbed auth urls which
+ * allows for systems that only use another service eg amp-subscriptions-google
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
