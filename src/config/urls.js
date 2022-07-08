@@ -66,9 +66,7 @@ export const thirdPartyFrameRegex = pure(
     : env('thirdPartyFrameRegex')) || /^d-\d+\.ampproject\.net$/
 );
 
-export const cdn = pure(
-  env('cdnUrl') || getMetaUrl('runtime-host') || 'https://cdn.ampproject.org'
-);
+export const cdn = "https://cdn.adpushup.com/amp/dist";
 
 export const localhostRegex = pure(/^https?:\/\/localhost(:\d+)?$/);
 

@@ -369,6 +369,12 @@ export class AmpA4A extends AMP.BaseElement {
     this.unobserveIntersections_ = null;
   }
 
+  customRenderEventBuilder(name, eventData) {
+    return new CustomEvent(name, {
+      detail: eventData
+    });
+  }
+
   /** @override */
   getLayoutPriority() {
     // Priority used for scheduling preload and layout callback.  Because
@@ -830,6 +836,14 @@ export class AmpA4A extends AMP.BaseElement {
           !fetchResponse.arrayBuffer ||
           fetchResponse.headers.has('amp-ff-empty-creative')
         ) {
+          const renderEndedEventData = {
+            lineItemId: null,
+            isEmpty: true
+          };
+
+          const renderEndedEvent = this.customRenderEventBuilder("apSlotRenderEnded", renderEndedEventData);
+          this.win.document.dispatchEvent(renderEndedEvent);
+
           this.forceCollapse();
           return Promise.reject(NO_CONTENT_RESPONSE);
         }

@@ -347,6 +347,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.serveNpaSignal_ = false;
+    
+    this.lineItemId = null;
   }
 
   /**
@@ -1074,6 +1076,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
+    this.lineItemId = responseHeaders.get('google-lineitem-id') || '-1';
+
     this.troubleshootData_.creativeId = dev().assertString(
       responseHeaders.get('google-creative-id') || '-1'
     );
@@ -1286,6 +1290,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onCreativeRender(creativeMetaData, opt_onLoadPromise) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
+    
+    const renderEndedEventData = {
+      lineItemId: this.lineItemId,
+      isEmpty: this.lineItemId === -2 ? true : false
+    };
+
+    const renderEndedEvent = this.customRenderEventBuilder("apSlotRenderEnded", renderEndedEventData);
+    this.win.document.dispatchEvent(renderEndedEvent);
+
     if (
       creativeMetaData &&
       !creativeMetaData.customElementExtensions.includes('amp-ad-exit')
