@@ -23,10 +23,6 @@ function pushBuildWorkflow() {
       'amp integration --nobuild --headless --coverage --report',
       'Integration tests failed!'
     );
-    timedExecOrThrow(
-      'amp codecov-upload',
-      'Failed to upload code coverage to Codecov!'
-    );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
