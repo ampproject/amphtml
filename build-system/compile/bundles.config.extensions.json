@@ -1036,6 +1036,15 @@
     }
   },
   {
+    "name": "amp-story",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": false,
+      "additionalSuffix": "ssr_css"
+    }
+  },
+  {
     "name": "amp-story-360",
     "version": "0.1",
     "latestVersion": "0.1",
