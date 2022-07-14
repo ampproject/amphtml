@@ -2787,6 +2787,7 @@ export class AmpStory extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
+  console/*OK*/.log('this is a test');
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
