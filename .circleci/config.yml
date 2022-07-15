@@ -302,6 +302,7 @@ jobs:
           command: node build-system/pr-check/unit-tests.js
       - codecov/upload:
           file: test/coverage/lcov-unit.info
+          flags: unit_tests
       - store_test_output
       - store_filelist
       - teardown_vm
@@ -316,6 +317,7 @@ jobs:
           command: node build-system/pr-check/unminified-tests.js
       - codecov/upload:
           file: test/coverage/lcov-integration.info
+          flags: integration_tests
       - store_test_output
       - teardown_vm
   nomodule_tests:
