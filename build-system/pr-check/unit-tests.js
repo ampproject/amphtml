@@ -27,10 +27,6 @@ function pushBuildWorkflow() {
       `amp unit --headless --coverage --report --filelist ${FILELIST_PATH}`,
       'Unit tests failed!'
     );
-    timedExecOrThrow(
-      'amp codecov-upload',
-      'Failed to upload code coverage to Codecov!'
-    );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
@@ -49,7 +45,6 @@ function prBuildWorkflow() {
     timedExecOrDie(
       `amp unit --headless --coverage --filelist ${FILELIST_PATH}`
     );
-    timedExecOrDie('amp codecov-upload');
   } else {
     skipDependentJobs(
       jobName,
