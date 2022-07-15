@@ -38,7 +38,6 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('amp integration --nobuild --headless --coverage');
-    timedExecOrDie('amp codecov-upload');
   } else {
     skipDependentJobs(
       jobName,

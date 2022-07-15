@@ -45,7 +45,6 @@ function prBuildWorkflow() {
     timedExecOrDie(
       `amp unit --headless --coverage --filelist ${FILELIST_PATH}`
     );
-    timedExecOrDie('amp codecov-upload');
   } else {
     skipDependentJobs(
       jobName,
