@@ -1209,7 +1209,7 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
     expect(attrSpec.name).not.toEqual('[style]');
   });
   if (attrSpec.valueUrl !== null) {
-    const protocolRegex = new RegExp('[a-z-]+');
+    const protocolRegex = new RegExp('^[a-z+-]+$');
     // UrlSpec protocol is matched against lowercased protocol names
     // so the rules *must* also be lower case.
     it('protocol must be lower case', () => {
@@ -1515,7 +1515,7 @@ describe('ValidatorRulesMakeSense', () => {
     });
     it('reference points must set descriptive_name', () => {
       if (tagSpec.tagName == '$REFERENCE_POINT') {
-        expect(tagSpec.descriptiveName !== null);
+        expect(tagSpec.descriptiveName).not.toBeNull();
       }
     });
     if ((tagSpec.enabledBy.length > 0) || (tagSpec.disabledBy.length > 0)) {
@@ -1760,6 +1760,9 @@ describe('ValidatorRulesMakeSense', () => {
       it('max_bytes are greater than or equal to -2', () => {
         expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-3);
       });
+      if (tagSpec.cdata.maxBytes === -1) {
+        usefulCdataSpec = true;
+      }
       if (tagSpec.cdata.maxBytes >= 0) {
         usefulCdataSpec = true;
         it('max_bytes > 0 must have max_bytes_spec_url defined', () => {
@@ -1768,8 +1771,8 @@ describe('ValidatorRulesMakeSense', () => {
       }
       // disallowed_cdata_regex
       for (const disallowedCdataRegex of tagSpec.cdata.disallowedCdataRegex) {
+        usefulCdataSpec = true;
         it('disallowed_cdata_regex valid and error_message defined', () => {
-          usefulCdataSpec = true;
 
           expect(disallowedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(disallowedCdataRegex.regex)).toBe(true);
@@ -1879,11 +1882,12 @@ describe('ValidatorRulesMakeSense', () => {
       }
       // cdata_regex and mandatory_cdata
       if ((tagSpec.cdata.cdataRegex !== null) ||
-          (tagSpec.cdata.mandatoryCdata !== null)) {
+          (tagSpec.cdata.mandatoryCdata !== null) ||
+          (tagSpec.cdata.whitespaceOnly !== null)) {
         usefulCdataSpec = true;
       }
-      it('a cdata spec must be defined', () => {
-        expect(usefulCdataSpec).toBeDefined();
+      it(`Tag spec '${tagSpec.specName}' must define a useful cdata spec`, () => {
+        expect(usefulCdataSpec).toBe(true);
       });
       it('cdata_regex must have unicode named groups', () => {
         const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
@@ -1913,13 +1917,13 @@ describe('ValidatorRulesMakeSense', () => {
   const allSatisfies = [];
   const allRequiresAndExcludes = [];
   for (const tagSpec of rules.tags) {
-    for (const condition of tagSpec.requires) {
+    for (const condition of tagSpec.requiresCondition) {
       allRequiresAndExcludes.push(condition);
     }
-    for (const condition of tagSpec.excludes) {
+    for (const condition of tagSpec.excludesCondition) {
       allRequiresAndExcludes.push(condition);
     }
-    for (const condition of tagSpec.satisfies) {
+    for (const condition of tagSpec.satisfiesCondition) {
       allSatisfies.push(condition);
     }
   }

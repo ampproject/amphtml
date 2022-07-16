@@ -28,8 +28,8 @@ describes.sandboxed('compile', {}, () => {
 
   it('should return compiled nodes', () => {
     const nodes = [
-      {tagid: 1, value: 'a', children: [], attributes: []},
-      {tagid: 7, value: 'b', children: [], attributes: []},
+      {tagid: 1, value: 'a'},
+      {tagid: 7, value: 'b'},
     ];
 
     // eslint-disable-next-line local/camelcase

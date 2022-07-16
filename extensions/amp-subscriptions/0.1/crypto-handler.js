@@ -1,13 +1,13 @@
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+import {padStart} from '#core/types/string';
+import {utf8Encode} from '#core/types/string/bytes';
+
 import {
   base64Decode,
   decryptAesGcmImpl,
   safeAesGcmImportKey,
 } from '#third_party/subscriptions-project/aes_gcm';
-import {iterateCursor} from '#core/dom';
-import {padStart} from '#core/types/string';
-import {toArray} from '#core/types/array';
-import {tryParseJson} from '#core/types/object/json';
-import {utf8Encode} from '#core/types/string/bytes';
 
 export class CryptoHandler {
   /**
@@ -110,7 +110,7 @@ export class CryptoHandler {
           .getRootNode()
           .querySelectorAll('script[ciphertext]');
         const promises = [];
-        iterateCursor(encryptedSections, (encryptedSection) => {
+        encryptedSections.forEach((encryptedSection) => {
           const text = encryptedSection.textContent.replace(/\s+/g, '');
           const contentBuffer = base64Decode(text).buffer;
           const iv = contentBuffer.slice(0, 12);

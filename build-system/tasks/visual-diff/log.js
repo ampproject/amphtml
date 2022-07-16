@@ -1,7 +1,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {green, red, yellow} = require('kleur/colors');
 const {log: logBase} = require('../../common/logging');
 

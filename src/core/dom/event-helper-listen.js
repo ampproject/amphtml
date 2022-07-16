@@ -18,9 +18,8 @@ let passiveSupported;
  * @property {undefined|boolean} [once]
  * @property {undefined|boolean} [passive]
  * @property {undefined|AbortSignal} [signal]
- * }}
+ * }} AddEventListenerOptsDef;
  */
-let AddEventListenerOptsDef;
 
 /**
  * Listens for the specified event on the element.
@@ -33,7 +32,7 @@ let AddEventListenerOptsDef;
  * @param {string} eventType
  * @param {function(Event):void} listener
  * @param {AddEventListenerOptsDef=} opt_evtListenerOpts
- * @return {UnlistenCallback}
+ * @return {import('#core/types/function/types').UnlistenCallback}
  */
 export function internalListenImplementation(
   element,

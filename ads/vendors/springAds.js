@@ -1,4 +1,5 @@
 import {computeInMasterFrame, loadScript} from '#3p/3p';
+
 import {parseJson} from '#core/types/object/json';
 
 /**

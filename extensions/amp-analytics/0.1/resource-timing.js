@@ -1,7 +1,9 @@
-import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {findIndex} from '#core/types/array';
 import {isObject} from '#core/types';
+import {findIndex} from '#core/types/array';
+
 import {user} from '#utils/log';
+
+import {ExpansionOptions, variableServiceForDoc} from './variables';
 
 /**
  * A user-supplied JSON object that defines a resource to be reported. It is

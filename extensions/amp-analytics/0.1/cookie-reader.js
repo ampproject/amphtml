@@ -1,6 +1,6 @@
 import {getCookie} from '../../../src/cookies';
-import {getMode} from '../../../src/mode';
 import {isInFie} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 
 /**

@@ -1,7 +1,9 @@
-import {Side} from './sidebar-config';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+
 import {useLayoutEffect, useRef} from '#preact';
 import {useValueRef} from '#preact/component';
+
+import {Side} from './sidebar-config';
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';

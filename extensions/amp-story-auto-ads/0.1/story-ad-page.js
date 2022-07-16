@@ -6,14 +6,11 @@ import {
 } from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {getExperimentBranch} from '#experiments';
-import {
-  BranchToTimeValues,
-  StoryAdSegmentExp,
-} from '#experiments/story-ad-progress-segment';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {getData, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
@@ -27,6 +24,8 @@ import {
   A4AVarNames,
   START_CTA_ANIMATION_ATTR,
   createCta,
+  getStoryAdMacroTags,
+  getStoryAdMetaTags,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
   maybeCreateAttribution,
@@ -40,7 +39,7 @@ import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -239,6 +238,7 @@ export class StoryAdPage {
       }
 
       const uiMetadata = map();
+      const metaTags = getStoryAdMetaTags(this.adDoc_ ?? this.adElement_);
 
       // Template Ads.
       if (!this.adDoc_) {
@@ -249,7 +249,7 @@ export class StoryAdPage {
       } else {
         Object.assign(
           uiMetadata,
-          getStoryAdMetadataFromDoc(this.adDoc_),
+          getStoryAdMetadataFromDoc(metaTags),
           // TODO(ccordry): Depricate when possible.
           this.readAmpAdExit_()
         );
@@ -265,14 +265,21 @@ export class StoryAdPage {
           this.localizationService_
         ) || uiMetadata[A4AVarNames.CTA_TYPE];
 
-      // Store the cta-type as an accesible var for any further pings.
-      this.analytics_.then((analytics) =>
+      this.analytics_.then((analytics) => {
+        // Store the cta-type as an accesible var for any further pings.
         analytics.setVar(
           this.index_, // adIndex
           AnalyticsVars.CTA_TYPE,
           uiMetadata[A4AVarNames.CTA_TYPE]
-        )
-      );
+        );
+
+        // Set meta tag based variables.
+        for (const [key, value] of Object.entries(
+          getStoryAdMacroTags(metaTags)
+        )) {
+          analytics.setVar(this.index_, `STORY_AD_META_${key}`, value);
+        }
+      });
 
       if (
         (this.adChoicesIcon_ = maybeCreateAttribution(
@@ -299,25 +306,23 @@ export class StoryAdPage {
    * @private
    */
   createPageElement_() {
-    const attributes = dict({
+    const attributes = {
       'ad': '',
+      'aria-hidden': true,
       'distance': '2',
       'i-amphtml-loading': '',
       'id': this.id_,
-    });
+    };
 
-    const segmentExpBranch = getExperimentBranch(
+    const storyAdSegmentBranch = getExperimentBranch(
       this.win_,
       StoryAdSegmentExp.ID
     );
-
     if (
-      segmentExpBranch &&
-      segmentExpBranch !== StoryAdSegmentExp.CONTROL &&
-      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_BOTH &&
-      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_AD
+      storyAdSegmentBranch &&
+      storyAdSegmentBranch != StoryAdSegmentExp.CONTROL
     ) {
-      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
+      attributes['auto-advance-after'] = '10s';
     }
 
     const page = createElementWithAttributes(
@@ -502,7 +507,7 @@ export class StoryAdPage {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed attribution icon.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -512,7 +517,7 @@ export class StoryAdPage {
 
     this.adChoicesIcon_.classList.toggle(
       DESKTOP_FULLBLEED_CLASS,
-      uiState === UIType.DESKTOP_FULLBLEED
+      uiState === UIType_Enum.DESKTOP_FULLBLEED
     );
   }
 

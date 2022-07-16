@@ -1,7 +1,9 @@
 import {hasOwn} from '#core/types/object';
-import {parseLinker} from './linker';
 import {parseQueryString} from '#core/types/string/url';
+
 import {user} from '#utils/log';
+
+import {parseLinker} from './linker';
 
 const TAG = 'amp-consent/linker-reader';
 

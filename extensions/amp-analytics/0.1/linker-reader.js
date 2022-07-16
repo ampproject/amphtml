@@ -1,10 +1,12 @@
-import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {hasOwn} from '#core/types/object';
-import {parseLinker} from './linker';
 import {parseQueryString} from '#core/types/string/url';
-import {removeParamsFromSearch} from '../../../src/url';
 
 import {user} from '#utils/log';
+
+import {parseLinker} from './linker';
+
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
+import {removeParamsFromSearch} from '../../../src/url';
 
 const TAG = 'amp-analytics/linker-reader';
 

@@ -14,7 +14,6 @@ const {
   esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
-  mkdirSync,
   watchDebounceDelay,
 } = require('./helpers');
 const {
@@ -38,6 +37,13 @@ const {parse: pathParse} = require('path');
 const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
+const {
+  getRemapBentoDependencies,
+  getRemapBentoNpmDependencies,
+  getRemapBentoNpmPreactDependencies,
+  getRemapBentoNpmReactDependencies,
+} = require('../compile/bento-remap');
+const {findJsSourceFilename} = require('../common/fs');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -88,10 +94,11 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   version?: string,
  *   hasCss?: boolean,
  *   loadPriority?: string,
- *   extraGlobs?: Array<string>,
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
+ *   ssrReady?: boolean,
+ *   destName?: string
  * }}
  */
 const ExtensionOptionDef = {};
@@ -109,7 +116,7 @@ const ExtensionOptionDef = {};
 const ExtensionBinaryDef = {};
 
 // All declared extensions.
-const extensions = {};
+const EXTENSIONS = {};
 
 // All extensions to build
 let extensionsToBuild = null;
@@ -127,7 +134,13 @@ function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
-    extensionsObject[`${name}-${v}`] = {
+    // If a destName is given, make it as a part of the key as it is
+    // most likely needed to make the entry unique for instances where
+    // multiple entries share the same "entryPoint/name"  but have different
+    // destination name. This allows for a 1 to many relationship between
+    // entryPoint and output (1 -> *).
+    const key = options?.destName ?? name;
+    extensionsObject[`${key}-${v}`] = {
       name,
       version: v,
       ...defaultOptions,
@@ -145,9 +158,9 @@ function declareExtension(name, version, options, extensionsObject) {
 /**
  * Initializes all extensions from build-system/compile/bundles.config.extensions.json
  * if not already done and populates the given extensions object.
- * @param {?Object} extensionsObject
+ * @param {Object} extensionsObject
  */
-function maybeInitializeExtensions(extensionsObject = extensions) {
+function maybeInitializeExtensions(extensionsObject) {
   if (Object.keys(extensionsObject).length === 0) {
     verifyExtensionBundles();
     extensionBundles.forEach((c) => {
@@ -203,8 +216,8 @@ function getExtensionsToBuild(preBuild = false) {
     !argv.core_runtime_only
   ) {
     const allExtensions = [];
-    for (const extension in extensions) {
-      allExtensions.push(extensions[extension].name);
+    for (const extension in EXTENSIONS) {
+      allExtensions.push(EXTENSIONS[extension].name);
     }
     extensionsToBuild = dedupe(extensionsToBuild.concat(allExtensions));
   }
@@ -333,15 +346,15 @@ function dedupe(arr) {
  */
 async function buildExtensions(options) {
   const startTime = Date.now();
-  maybeInitializeExtensions(extensions);
+  maybeInitializeExtensions(EXTENSIONS);
   const extensionsToBuild = getExtensionsToBuild();
   const results = [];
-  for (const extension in extensions) {
+  for (const extension in EXTENSIONS) {
     if (
       options.compileOnlyCss ||
-      extensionsToBuild.includes(extensions[extension].name)
+      extensionsToBuild.includes(EXTENSIONS[extension].name)
     ) {
-      results.push(doBuildExtension(extensions, extension, options));
+      results.push(doBuildExtension(EXTENSIONS, extension, options));
     }
   }
   await Promise.all(results);
@@ -365,7 +378,7 @@ async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
   let o = {...options};
   o = Object.assign(o, e);
-  await buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs);
+  await buildExtension(e.name, e.version, e.hasCss, o);
 }
 
 /**
@@ -417,12 +430,10 @@ async function watchExtension(extDir, name, version, hasCss, options) {
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @param {!Array=} extraGlobs
  * @return {!Promise<void>}
  */
-async function buildExtension(name, version, hasCss, options, extraGlobs) {
+async function buildExtension(name, version, hasCss, options) {
   options = options || {};
-  options.extraGlobs = extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
     return;
   }
@@ -435,8 +446,6 @@ async function buildExtension(name, version, hasCss, options, extraGlobs) {
   }
 
   if (hasCss) {
-    mkdirSync('build');
-    mkdirSync('build/css');
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -463,7 +472,7 @@ async function buildExtension(name, version, hasCss, options, extraGlobs) {
   }
 
   await Promise.all([
-    maybeBuildBentoExtensionJs(extDir, name, options),
+    options.bento && buildBentoExtensionJs(extDir, getBentoName(name), options),
     buildExtensionJs(extDir, name, {...options, bento: false}),
   ]);
 }
@@ -476,6 +485,20 @@ async function buildExtension(name, version, hasCss, options, extraGlobs) {
  * @return {Promise<void>}
  */
 async function buildNpmCss(extDir, options) {
+  await Promise.all([
+    buildNpmReactCss(extDir, options),
+    buildNpmBentoWebComponentCss(extDir, options),
+  ]);
+}
+
+/**
+ * Writes an extensions's CSS to its npm dist folder.
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmReactCss(extDir, options) {
   const startCssTime = Date.now();
   const filenames = await fastGlob(path.join(extDir, '**', '*.jss.js'));
   if (!filenames.length) {
@@ -488,19 +511,37 @@ async function buildNpmCss(extDir, options) {
   endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
 }
 
-/** @type {TransformCache} */
+/**
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmBentoWebComponentCss(extDir, options) {
+  const srcFilepath = path.resolve(
+    `build/css/${getBentoName(options.name)}-${options.version}.css`
+  );
+  if (!(await fs.pathExists(srcFilepath))) {
+    await buildExtensionCss(extDir, options.name, options.version, options);
+  }
+  const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.ensureDir(path.dirname(destFilepath));
+  await fs.copyFile(srcFilepath, destFilepath);
+}
+
+/** @type {TransformCache<string>} */
 let jssCache;
 
 /**
  * Returns the minified CSS for a .jss.js file.
  *
  * @param {string} jssFile
- * @return {Promise<string|Buffer>}
+ * @return {Promise<string>}
  */
 async function getCssForJssFile(jssFile) {
   // Lazily instantiate the TransformCache
   if (!jssCache) {
-    jssCache = new TransformCache('.jss-cache', '.css');
+    jssCache = new TransformCache('.jss-cache');
   }
 
   const {contents, hash} = await batchedRead(jssFile);
@@ -615,13 +656,14 @@ async function buildNpmBinaries(extDir, name, options) {
         external: ['react', 'react-dom'],
         remap: {
           'preact': 'react',
-          '.*/preact/compat': 'react',
+          'preact/compat': 'react',
+          './src/preact/compat/internal.js': './src/preact/compat/external.js',
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
         wrapper: '',
       },
-      bento: {
+      standalone: {
         entryPoint: await getBentoBuildFilename(
           extDir,
           getBentoName(name),
@@ -632,6 +674,30 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
     };
+
+    // for each bento mode, remap all shared modules and declare them as external
+    // remaps "core" modules to @bentoproject/core
+    // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
+    for (const mode in npm) {
+      const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
+      const bentoRemaps =
+        mode === 'standalone'
+          ? getRemapBentoNpmDependencies(fullEntryPoint)
+          : mode === 'preact'
+          ? getRemapBentoNpmPreactDependencies(fullEntryPoint)
+          : mode === 'react'
+          ? getRemapBentoNpmReactDependencies(fullEntryPoint)
+          : {};
+
+      const bentoExternals = Object.values(bentoRemaps);
+      npm[mode].remap = {
+        ...(npm[mode].remap || {}),
+        ...bentoRemaps,
+      };
+      npm[mode].external = [
+        ...new Set([...(npm[mode].external || []), ...bentoExternals]),
+      ];
+    }
   }
   const binaries = Object.values(npm);
   return buildBinaries(extDir, binaries, options);
@@ -644,13 +710,14 @@ async function buildNpmBinaries(extDir, name, options) {
  * @return {!Promise}
  */
 function buildBinaries(extDir, binaries, options) {
-  mkdirSync(`${extDir}/dist`);
+  // If outputPath is not defined, then use extDir
+  const {outputPath = extDir} = options;
 
   const promises = binaries.map((binary) => {
     const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+    return esbuildCompile(extDir + '/', entryPoint, `${outputPath}/dist`, {
       ...options,
       toName: maybeToNpmEsmName(`${name}.max.js`),
       minifiedName: maybeToNpmEsmName(`${name}.js`),
@@ -671,28 +738,19 @@ function buildBinaries(extDir, binaries, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function maybeBuildBentoExtensionJs(dir, name, options) {
-  if (!options.bento) {
-    return;
-  }
-  const bentoName = getBentoName(name);
-  return buildExtensionJs(dir, bentoName, {
+async function buildBentoExtensionJs(dir, name, options) {
+  const entryPoint = await findJsSourceFilename(path.join(dir, name));
+  const remapDependencies = getRemapBentoDependencies(
+    entryPoint,
+    options.minify
+  );
+  await buildExtensionJs(dir, name, {
     ...options,
-    // Use esbuild since Closure does not use a different babel config for
-    // Bento elements.
-    esbuild: true,
-    wrapper: 'bento',
-    babelCaller: options.minify
-      ? 'bento-element-minified'
-      : 'bento-element-unminified',
-    filename: await getBentoBuildFilename(
-      dir,
-      bentoName,
-      'standalone',
-      options
-    ),
-    // Include extension directory since our entrypoint may be elsewhere.
-    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
+    externalDependencies: [...new Set(Object.values(remapDependencies))],
+    remapDependencies,
+    wrapper: 'none',
+    outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
+    filename: await getBentoBuildFilename(dir, name, 'standalone', options),
   });
 }
 
@@ -728,31 +786,45 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = generateBentoEntryPointSource(name, toExport);
   const generatedFilename = `build/${filename}`;
-  fs.outputFileSync(`${dir}/${generatedFilename}`, generatedSource);
+  const generatedOutputFilename = `${dir}/${generatedFilename}`;
+  const generatedSource = generateBentoEntryPointSource(
+    name,
+    toExport,
+    generatedOutputFilename
+  );
+  fs.outputFileSync(generatedOutputFilename, generatedSource);
   return generatedFilename;
 }
 
 /**
  * @param {string} name
  * @param {string} toExport
+ * @param {string} outputFilename
  * @return {string}
  */
-function generateBentoEntryPointSource(name, toExport) {
+function generateBentoEntryPointSource(name, toExport, outputFilename) {
+  const bentoCePath = path.posix.relative(
+    path.posix.dirname(outputFilename),
+    'src/preact/bento-ce'
+  );
+
   return dedent(`
     import {BaseElement} from '../base-element';
+    import {defineBentoElement} from '${bentoCePath}';
 
-    function defineElement() {
-      customElements.define(
-        __name__,
-        BaseElement.CustomElement(BaseElement)
-      );
+    function defineElement(win) {
+      defineBentoElement(__name__, BaseElement, win);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
   `).replace('__name__', JSON.stringify(name));
 }
+
+/** @type {import('@babel/core').PluginItem[]} */
+const extensionBabelPlugins = [
+  './build-system/babel-plugins/babel-plugin-amp-config-urls',
+];
 
 /**
  * Build the JavaScript for the extension specified
@@ -765,7 +837,11 @@ function generateBentoEntryPointSource(name, toExport) {
  */
 async function buildExtensionJs(dir, name, options) {
   const isLatest = legacyLatestVersions[options.name] === options.version;
-  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
+  const {
+    filename = await findJsSourceFilename(name, dir),
+    version,
+    wrapper = 'extension',
+  } = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {
@@ -779,12 +855,17 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
+  // Allow the extension entry to be able to override the destination
+  // filename. This allows for a single entry point to actually have multiple
+  // output destination compilation units.
+  const destName = options.destName ?? name;
   await compileJs(`${dir}/`, filename, './dist/v0', {
     ...options,
-    toName: `${name}-${version}.max.js`,
-    minifiedName: `${name}-${version}.js`,
-    aliasName: isLatest ? `${name}-latest.js` : '',
+    toName: `${destName}-${version}.max.js`,
+    minifiedName: `${destName}-${version}.js`,
+    aliasName: isLatest ? `${destName}-latest.js` : '',
     wrapper: resolvedWrapper,
+    babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
 
   // If an incremental watch build fails, simply return.
@@ -798,10 +879,10 @@ async function buildExtensionJs(dir, name, options) {
   if (isAliased) {
     const {aliasedVersion} = aliasBundle;
     const src = maybeToEsmName(
-      `${name}-${version}${options.minify ? '' : '.max'}.js`
+      `${destName}-${version}${options.minify ? '' : '.max'}.js`
     );
     const dest = maybeToEsmName(
-      `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${destName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
@@ -908,11 +989,22 @@ async function copyWorkerDomResources(version) {
 }
 
 module.exports = {
+  buildBentoExtensionJs,
+  buildBinaries,
+  buildExtensionCss,
+  buildExtensionJs,
   buildExtensions,
+  buildNpmBinaries,
+  buildNpmCss,
+  declareExtension,
+  dedupe,
   doBuildExtension,
-  extensions,
+  EXTENSIONS,
+  getBentoBuildFilename,
+  getExtensionsFromArg,
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
   setExtensionsToBuildFromDocuments,
+  INABOX_EXTENSION_SET,
 };

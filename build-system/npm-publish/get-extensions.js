@@ -3,6 +3,6 @@
  * Logs Bento components to publish.
  */
 
-const {getExtensions} = require('./utils');
+const {getExtensionsAndComponents} = require('./utils');
 console /*OK*/
-  .log(JSON.stringify(getExtensions()));
+  .log(JSON.stringify(getExtensionsAndComponents()));

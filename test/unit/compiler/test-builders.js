@@ -1,6 +1,10 @@
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
+
 import {getBuilders} from '#compiler/builders';
 
 import {createElementWithAttributes} from '#core/dom';
+
+import {getDeterministicOuterHTML} from '#testing/helpers';
 
 describes.fakeWin('getBuilders', {}, (env) => {
   let doc;
@@ -51,6 +55,28 @@ describes.fakeWin('getBuilders', {}, (env) => {
       });
       builders.noop(elem);
       expect(elem.getAttribute('i-amphtml-layout')).equal('fixed');
+    });
+
+    it('wrapper should behave same in browser as in WorkerDOM', () => {
+      const browserDiv = createElementWithAttributes(doc, 'div', {
+        height: 100,
+        width: 100,
+      });
+      const workerDomDiv = createElementWithAttributes(
+        createWorkerDomDoc(),
+        'div',
+        {
+          height: 100,
+          width: 100,
+        }
+      );
+
+      builders.noop(browserDiv);
+      builders.noop(workerDomDiv);
+
+      const browserHtml = getDeterministicOuterHTML(browserDiv);
+      const workerHtml = getDeterministicOuterHTML(workerDomDiv);
+      expect(workerHtml).equal(browserHtml);
     });
   });
 });

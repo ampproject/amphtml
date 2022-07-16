@@ -1,14 +1,9 @@
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {
-  LayoutMarginsChangeDef,
-  cloneLayoutMarginsChangeDef,
-} from '#core/dom/layout/rect';
-import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -16,6 +11,8 @@ import {dev, user} from '#utils/log';
 
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {measurePageLayoutBox} from './measure-page-layout-box';
+
+/** @typedef {import('#core/dom/layout/rect').LayoutMarginsChangeDef} LayoutMarginsChangeDef */
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -269,18 +266,14 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({
-          'layout': width ? 'fixed' : 'fixed-height',
-          'height': '0',
-          'width': width ? width : 'auto',
-          'class': 'i-amphtml-layout-awaiting-size',
-        }),
-        baseAttributes,
-        this.attributes_
-      )
-    );
+    const attributes = /** @type {!JsonObject} */ ({
+      'layout': width ? 'fixed' : 'fixed-height',
+      'height': '0',
+      'width': width ? width : 'auto',
+      'class': 'i-amphtml-layout-awaiting-size',
+      ...baseAttributes,
+      ...this.attributes_,
+    });
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',
@@ -294,20 +287,16 @@ export class Placement {
    * @private
    */
   createFullWidthResponsiveAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({
-          'width': '100vw',
-          'height': '0',
-          'layout': 'fixed',
-          'class': 'i-amphtml-layout-awaiting-size',
-          'data-auto-format': 'rspv',
-          'data-full-width': '',
-        }),
-        baseAttributes,
-        this.attributes_
-      )
-    );
+    const attributes = /** @type {!JsonObject} */ ({
+      'width': '100vw',
+      'height': '0',
+      'layout': 'fixed',
+      'class': 'i-amphtml-layout-awaiting-size',
+      'data-auto-format': 'rspv',
+      'data-full-width': '',
+      ...baseAttributes,
+      ...this.attributes_,
+    });
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',

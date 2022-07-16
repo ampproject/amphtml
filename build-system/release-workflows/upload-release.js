@@ -8,7 +8,9 @@ const {bgWhite, cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
 const {Storage} = require('@google-cloud/storage');
+const {ApiError} = require('@google-cloud/common');
 const {timedExecOrDie} = require('../pr-check/utils');
+const zlib = require('zlib');
 
 /**
  * @fileoverview Script that uploads a release build.
@@ -75,20 +77,20 @@ function mergeFilesTxt_(flavor) {
 let printProgressReady = true;
 
 /**
- * Logs file upload progress every 1 second.
+ * Logs file processing progress every 1 second.
  *
  * @param {number} totalFiles
- * @param {number} uploadedFiles
+ * @param {number} processedFiles
  */
-function logProgress_(totalFiles, uploadedFiles) {
-  const percentage = Math.round((uploadedFiles / totalFiles) * PROGRESS_WIDTH);
-  if (printProgressReady || uploadedFiles === totalFiles) {
+function logProgress_(totalFiles, processedFiles) {
+  const percentage = Math.round((processedFiles / totalFiles) * PROGRESS_WIDTH);
+  if (printProgressReady || processedFiles === totalFiles) {
     log(
       '[' +
         bgWhite(' '.repeat(percentage)) +
         '.'.repeat(PROGRESS_WIDTH - percentage) +
         ']',
-      cyan(uploadedFiles),
+      cyan(processedFiles),
       '/',
       cyan(totalFiles)
     );
@@ -98,6 +100,76 @@ function logProgress_(totalFiles, uploadedFiles) {
       printProgressReady = true;
     }, 1000);
   }
+}
+
+/**
+ * Compresses a single file with Brotli and writes it to ${path}.br.
+ * @param {string} path
+ * @param {number} sizeHint
+ * @return {Promise<void>}
+ */
+async function brotliCompressFile_(path, sizeHint) {
+  const readStream = fs.createReadStream(path);
+  const writeStream = fs.createWriteStream(`${path}.br`);
+  const brotli = zlib.createBrotliCompress({
+    params: {
+      [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+      [zlib.constants.BROTLI_PARAM_SIZE_HINT]: sizeHint,
+    },
+  });
+
+  return new Promise((resolve, reject) => {
+    readStream
+      .pipe(brotli)
+      .pipe(writeStream)
+      .on('finish', resolve)
+      .on('error', reject);
+  });
+}
+
+/**
+ * Compresses all files with Brotli.
+ * @return {Promise<void>}
+ */
+async function brotliCompressAll_() {
+  let totalFiles = 0;
+  for await (const {stats} of klaw(DEST_DIR)) {
+    if (stats.isFile()) {
+      totalFiles++;
+    }
+  }
+
+  log('Brotli compression of', cyan(totalFiles), 'files:');
+  const compressPromises = [];
+  let compressedFiles = 0;
+  for await (const {path, stats} of klaw(DEST_DIR)) {
+    if (!stats.isFile()) {
+      continue;
+    }
+
+    compressPromises.push(
+      brotliCompressFile_(path, stats.size).then(() => {
+        logProgress_(totalFiles, ++compressedFiles);
+      })
+    );
+  }
+
+  await Promise.all(compressPromises);
+  log('Finished Brotli compression of all files.');
+}
+
+/**
+ * Rethrows an error, unless the error indicates that the upload failed because the file already exists in the storage bucket.
+ * @param {ApiError | Error} error
+ */
+function ignoreErrorWhenFileAlreadyExists_(error) {
+  if (
+    error instanceof ApiError &&
+    error.message.includes('does not have storage.objects.delete access')
+  ) {
+    return;
+  }
+  throw error;
 }
 
 /**
@@ -137,14 +209,19 @@ async function uploadFiles_() {
   const uploadsPromises = [];
   let uploadedFiles = 0;
   for await (const {path, stats} of klaw(DEST_DIR)) {
-    if (stats.isFile()) {
-      const destination = path.slice(DEST_DIR.length + 1);
-      uploadsPromises.push(
-        bucket.upload(path, {destination, resumable: false}).then(() => {
+    if (!stats.isFile()) {
+      continue;
+    }
+
+    const destination = path.slice(DEST_DIR.length + 1);
+    uploadsPromises.push(
+      bucket
+        .upload(path, {destination, resumable: false})
+        .catch(ignoreErrorWhenFileAlreadyExists_)
+        .then(() => {
           logProgress_(totalFiles, ++uploadedFiles);
         })
-      );
-    }
+    );
   }
 
   await Promise.all(uploadsPromises);
@@ -159,8 +236,15 @@ runReleaseJob(jobName, async () => {
     mergeFilesTxt_(flavor);
   }
 
+  await brotliCompressAll_();
   await uploadFiles_();
 
   log('Archiving releases to', cyan(ARTIFACT_FILE_NAME));
   timedExecOrDie(`cd ${DEST_DIR} && tar -czf ${ARTIFACT_FILE_NAME} *`);
+
+  log('Persisting AMP version number to workspace');
+  const [versionsFile] = fastGlob.sync(
+    path.join(DEST_DIR, 'org-cdn/rtv/01*/version.txt')
+  );
+  fs.copySync(versionsFile, '/tmp/workspace/AMP_VERSION');
 });

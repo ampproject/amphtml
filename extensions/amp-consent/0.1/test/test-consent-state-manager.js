@@ -1,3 +1,15 @@
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
 import {
   CONSENT_ITEM_STATE,
   PURPOSE_CONSENT_STATE,
@@ -5,15 +17,7 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
-import {Services} from '#service';
-import {dev} from '#utils/log';
-import {macroTask} from '#testing/helpers';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
 
 describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
   let win;

@@ -10,7 +10,7 @@
 
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
-#include "grammar/tablebuilder.h"
+#include "cpp/htmlparser/grammar/tablebuilder.h"
 
 ABSL_FLAG(std::string, input_grammar, "", "Options: url, json");
 
@@ -24,10 +24,10 @@ int main(int argc, char** argv) {
   std::string ifdef_guard;
   std::string output_file;
   if (grammar == "json") {
-    input_grammar = "data/jsongrammar.txt";
+    input_grammar = "cpp/htmlparser/data/jsongrammar.txt";
     cpp_namespace = "htmlparser::json";
-    ifdef_guard = "HTMLPARSER__JSON_STATES_H_";
-    output_file = "json/states.h";
+    ifdef_guard = "CPP_HTMLPARSER_JSON_STATES_H_";
+    output_file = "cpp/htmlparser/json/states.h";
   } else {
     std::cerr << "Invalid -input_grammar value: " << grammar;
     return -1;

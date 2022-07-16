@@ -241,7 +241,7 @@ tags: {
   spec_name: "link rel=manifest"
   descriptive_name: "link rel=manifest"
   mandatory_parent: "HEAD"
-  satisfies: "amp-app-banner data source"
+  satisfies_condition: "amp-app-banner data source"
   attrs: {
     name: "href"
     mandatory: true
@@ -532,7 +532,7 @@ tags: {
   tag_name: "META"
   spec_name: "meta name=apple-itunes-app"
   mandatory_parent: "HEAD"
-  satisfies: "amp-app-banner data source"
+  satisfies_condition: "amp-app-banner data source"
   attrs: {
     name: "content"
     mandatory: true
@@ -593,7 +593,7 @@ tags: {
   tag_name: "META"
   spec_name: "meta name=amp-consent-blocking"
   mandatory_parent: "HEAD"
-  satisfies: "meta name=amp-consent-blocking"
+  satisfies_condition: "meta name=amp-consent-blocking"
   unique: true
   attrs: {
     name: "content"
@@ -625,7 +625,7 @@ tags: {
   }
   # Disabled because there are no active origin experiments; uncomment when
   # there is at least one corresponding `requires` clause.
-  # satisfies: "amp-experiment-token"
+  # satisfies_condition: "amp-experiment-token"
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132
@@ -1377,6 +1377,8 @@ tags: {
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
+      # (https://docs.microsoft.com/en-us/windows/uwp/launch-resume/launch-default-app#microsoft-edge-uri-scheme)
+      protocol: "microsoft-edge"
       protocol: "skype"
       protocol: "sms"
       protocol: "snapchat"
@@ -1850,6 +1852,9 @@ tags: {
     name: "decoding"
     value_casei: "async"
   }
+  attrs: {
+    name: "sizes"
+  }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
 }
@@ -1899,6 +1904,9 @@ tags: {
   attrs: {
     name: "decoding"
     value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
   }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
@@ -2018,7 +2026,7 @@ tags: {
   spec_url: "https://amp.dev/documentation/components/amp-video/"
 }
 # 4.7.7 The audio element
-# Only allowed in noscript tags. Otherwise use amp-audio.
+# Allowed in noscript tags and inside amp-audio for server side rendering.
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "AUDIO"
@@ -2038,6 +2046,14 @@ tags: {
     }
     disallowed_value_regex: "__amp_source_origin"
   }
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
+}
+tags: {
+  html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
+  tag_name: "AUDIO"
+  mandatory_ancestor: "AMP-AUDIO"
+  spec_name: "amp-audio > audio"
+  attrs: { name: "controls" }
   spec_url: "https://amp.dev/documentation/components/amp-audio/"
 }
 # 4.7.7 The picture element
@@ -2572,6 +2588,7 @@ tags {  # <form method=POST ...>
     }
     disallowed_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "xssi-prefix" }
   attr_lists: "form-name-attr"
 }
 # AMP4EMAIL allows action-xhr and disallows action attribute. It also disallows
@@ -2934,6 +2951,35 @@ tags: {
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "INPUT [type=image]"
+  attrs: {
+    name: "type"
+    value_casei: "image"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[type]"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  mandatory_ancestor: "FORM [method=POST]"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
+}
 # 4.10.6 The button element
 tags: {
   html_format: AMP
@@ -2970,7 +3016,7 @@ tags: {
   html_format: AMP4ADS
   tag_name: "BUTTON"
   spec_name: "amp-app-banner button[open-button]"
-  satisfies: "amp-app-banner button[open-button]"
+  satisfies_condition: "amp-app-banner button[open-button]"
   mandatory_ancestor: "AMP-APP-BANNER"
   attrs: {
     name: "open-button"
@@ -3281,9 +3327,9 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script"
   descriptive_name: "amphtml engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
-  requires: "style[amp-boilerplate]"
-  requires: "noscript > style[amp-boilerplate]"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
+  requires_condition: "style[amp-boilerplate]"
+  requires_condition: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3310,7 +3356,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script (transformed)"
   descriptive_name: "amphtml engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3335,9 +3381,9 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script (LTS)"
   descriptive_name: "amphtml engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
-  requires: "style[amp-boilerplate]"
-  requires: "noscript > style[amp-boilerplate]"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
+  requires_condition: "style[amp-boilerplate]"
+  requires_condition: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3364,7 +3410,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script (LTS) (transformed)"
   descriptive_name: "amphtml engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3389,11 +3435,11 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml module engine script"
   descriptive_name: "amphtml module engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
-  satisfies: "amphtml module engine script"
-  requires: "amphtml nomodule engine script"
+  satisfies_condition: "amphtml module engine script"
+  requires_condition: "amphtml nomodule engine script"
   attr_lists: "nonce-attr"
   attr_lists: "amphtml-module-engine-attrs"
   attrs: {
@@ -3414,11 +3460,11 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml nomodule engine script"
   descriptive_name: "amphtml nomodule engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
-  satisfies: "amphtml nomodule engine script"
-  requires: "amphtml module engine script"
+  satisfies_condition: "amphtml nomodule engine script"
+  requires_condition: "amphtml module engine script"
   attr_lists: "nonce-attr"
   attr_lists: "amphtml-nomodule-engine-attrs"
   attrs: {
@@ -3439,11 +3485,11 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml module LTS engine script"
   descriptive_name: "amphtml module LTS engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
-  satisfies: "amphtml module LTS engine script"
-  requires: "amphtml nomodule LTS engine script"
+  satisfies_condition: "amphtml module LTS engine script"
+  requires_condition: "amphtml nomodule LTS engine script"
   attr_lists: "nonce-attr"
   attr_lists: "amphtml-module-engine-attrs"
   attrs: {
@@ -3464,11 +3510,11 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml nomodule LTS engine script"
   descriptive_name: "amphtml nomdule LTS engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
-  satisfies: "amphtml nomodule LTS engine script"
-  requires: "amphtml module LTS engine script"
+  satisfies_condition: "amphtml nomodule LTS engine script"
+  requires_condition: "amphtml module LTS engine script"
   attr_lists: "nonce-attr"
   attr_lists: "amphtml-nomodule-engine-attrs"
   attrs: {
@@ -3488,8 +3534,8 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script [AMP4EMAIL]"
   descriptive_name: "amphtml engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
-  requires: "style[amp-boilerplate]"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
+  requires_condition: "style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3514,8 +3560,8 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amp4ads engine script"
   descriptive_name: "amphtml engine script"
-  satisfies: "amphtml javascript runtime (v0.js)"
-  requires: "style[amp-boilerplate]"
+  satisfies_condition: "amphtml javascript runtime (v0.js)"
+  requires_condition: "style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3865,10 +3911,17 @@ tags: {  # <amp-img>
   tag_name: "AMP-IMG"
   # amp-img does not require a matching extension script, it's built in to v0.
   # js directly, so we explicitly list that dependency here.
-  requires: "amphtml javascript runtime (v0.js)"
+  requires_condition: "amphtml javascript runtime (v0.js)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "crossorigin" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -3900,7 +3953,7 @@ tags: {  # <amp-img i-amphtml-ssr>
   spec_name: "amp-img (transformed)"
   # amp-img does not require a matching extension script, it's built in to v0.
   # js directly, so we explicitly list that dependency here.
-  requires: "amphtml javascript runtime (v0.js)"
+  requires_condition: "amphtml javascript runtime (v0.js)"
   attrs: {
     dispatch_key: NAME_DISPATCH
     name: "i-amphtml-ssr"
@@ -3908,6 +3961,13 @@ tags: {  # <amp-img i-amphtml-ssr>
   }
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -3941,7 +4001,7 @@ tags: {  # <amp-img>
   # js directly, so we explicitly list that dependency here. This is redundant
   # for email since v0.js is still required, but we include to for consistency
   # and to future proof.
-  requires: "amphtml javascript runtime (v0.js)"
+  requires_condition: "amphtml javascript runtime (v0.js)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -3968,7 +4028,7 @@ tags: {  # <amp-layout>
   tag_name: "AMP-LAYOUT"
   # amp-pixel does not require a matching extension script, it's built in to v0.
   # js directly, so we explicitly list that dependency here.
-  requires: "amphtml javascript runtime (v0.js)"
+  requires_condition: "amphtml javascript runtime (v0.js)"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-layout/"
   amp_layout: {
@@ -3988,7 +4048,7 @@ tags: {  # <amp-pixel>
   tag_name: "AMP-PIXEL"
   # amp-pixel does not require a matching extension script, it's built in to v0.
   # js directly, so we explicitly list that dependency here.
-  requires: "amphtml javascript runtime (v0.js)"
+  requires_condition: "amphtml javascript runtime (v0.js)"
   attrs: { name: "allow-ssr-img" }
   attrs: {
     name: "referrerpolicy"
@@ -4108,6 +4168,13 @@ tags: {
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "height" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "referrerpolicy" }
@@ -5160,6 +5227,7 @@ attr_lists: {
   attrs: { name: "aria-labelledby" }
   attrs: { name: "aria-level" }
   attrs: { name: "aria-live" }
+  attrs: { name: "aria-modal" }
   attrs: { name: "aria-multiline" }
   attrs: { name: "aria-multiselectable" }
   attrs: { name: "aria-orientation" }

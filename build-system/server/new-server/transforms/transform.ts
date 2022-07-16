@@ -1,16 +1,15 @@
-
-
 import fs from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
-import transformModules from './modules/modules-transform';
+
 import transformCdnSrcs from './cdn/cdn-transform';
 import transformCss from './css/css-transform';
+import transformModules from './modules/modules-transform';
 
 const argv = minimist(process.argv.slice(2));
 const FOR_TESTING = argv._.includes('integration');
 // Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
-const PORT = FOR_TESTING ? 9876 : (argv.port ?? 8000);
+const PORT = FOR_TESTING ? 9876 : argv.port ?? 8000;
 const ESM = !!argv.esm;
 
 const defaultTransformConfig = {
@@ -20,15 +19,10 @@ const defaultTransformConfig = {
   useMaxNames: !argv.minified,
 };
 
-const transforms = [
-  transformCdnSrcs(defaultTransformConfig),
-];
+const transforms = [transformCdnSrcs(defaultTransformConfig)];
 
 if (ESM) {
-  transforms.unshift(
-    transformCss(),
-    transformModules(defaultTransformConfig),
-  );
+  transforms.unshift(transformCss(), transformModules(defaultTransformConfig));
 }
 
 export async function transform(fileLocation: string): Promise<string> {

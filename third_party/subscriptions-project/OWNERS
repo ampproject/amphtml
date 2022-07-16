@@ -5,11 +5,10 @@
   rules: [
     {
       owners: [
-        {name: 'chenshay'},
-        {name: 'chrisantaki'},
-        {name: 'dparikh'},
-        {name: 'dvoytenko'},
-        {name: 'jpettitt'},
+        {name: 'adolgachev'},
+        {name: 'alin04'},
+        {name: 'fikus'},
+        {name: 'jpettitt', notify: true},
       ],
     },
   ],

@@ -19,7 +19,6 @@ import {
 } from '#service/extensions-impl';
 
 import {
-  LogLevel_Enum, // eslint-disable-line no-unused-vars
   dev,
   initLogConstructor,
   overrideLogLevel,
@@ -28,7 +27,7 @@ import {
 
 import {BaseElement} from './base-element';
 import {startupChunk} from './chunk';
-import {config} from './config';
+import * as urls from './config/urls';
 import {reportErrorForWin} from './error-reporting';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
@@ -107,8 +106,38 @@ function adoptShared(global, callback) {
     };
   }
 
-  /** @const */
-  global.AMP.config = config;
+  /**
+   * @const {{
+   *   urls: {
+   *     thirdParty: string,
+   *     thirdPartyFrameHost: string,
+   *     thirdPartyFrameRegex: !RegExp,
+   *     cdn: string,
+   *     cdnProxyRegex: !RegExp,
+   *     localhostRegex: !RegExp,
+   *     errorReporting: string,
+   *     betaErrorReporting: string,
+   *     localDev: boolean,
+   *     trustedViewerHosts: !Array<!RegExp>,
+   *     geoApi: ?string,
+   *   }
+   * }}
+   */
+  global.AMP.config = {
+    urls: {
+      thirdParty: urls.thirdParty,
+      thirdPartyFrameHost: urls.thirdPartyFrameHost,
+      thirdPartyFrameRegex: urls.thirdPartyFrameRegex,
+      cdn: urls.cdn,
+      cdnProxyRegex: urls.cdnProxyRegex,
+      localhostRegex: urls.localhostRegex,
+      errorReporting: urls.errorReporting,
+      betaErrorReporting: urls.betaErrorReporting,
+      localDev: urls.localDev,
+      trustedViewerHosts: urls.trustedViewerHosts,
+      geoApi: urls.geoApi,
+    },
+  };
 
   global.AMP.BaseElement = BaseElement;
 
@@ -149,7 +178,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!LogLevel_Enum} level
+   * @param {import('#utils/log').LogLevel_Enum} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 

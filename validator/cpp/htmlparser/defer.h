@@ -43,8 +43,8 @@
 //   fd_counter++;
 // });
 
-#ifndef HTMLPARSER__DEFER_H_
-#define HTMLPARSER__DEFER_H_
+#ifndef CPP_HTMLPARSER_DEFER_H_
+#define CPP_HTMLPARSER_DEFER_H_
 
 #include <functional>
 
@@ -79,4 +79,4 @@ class Defer {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__DEFER_H_
+#endif  // CPP_HTMLPARSER_DEFER_H_

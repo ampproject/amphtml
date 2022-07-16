@@ -108,7 +108,7 @@ function create(context) {
 
     if (invalids.length) {
       const sourceCode = context.getSourceCode();
-      const {start} = template;
+      const [start] = template.range;
 
       for (const {offset, tag} of invalids) {
         const itemStart = start + offset;

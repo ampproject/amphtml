@@ -1,8 +1,8 @@
-import {LayoutRectDef, layoutRectLtwh} from './rect';
+import {layoutRectLtwh} from './rect';
 
 /**
  * @param {HTMLElement} element
- * @return {LayoutRectDef}
+ * @return {import('./rect').LayoutRectDef}
  */
 export function getPageLayoutBoxBlocking(element) {
   const stop = element.ownerDocument.body;

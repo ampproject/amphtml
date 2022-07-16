@@ -1,3 +1,4 @@
+import {Observable} from '#core/data-structures/observable';
 import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
@@ -7,7 +8,7 @@ import {
   // The LocalizedStringId_Enum type is imported even though it is not used because
   // the compiler does not output types for enums, but we want to distinguish
   // between LocalizedStringId_Enum enum values and any other strings.
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   LocalizedStringId_Enum,
 } from './strings';
 
@@ -89,14 +90,18 @@ export class LocalizationService {
      * @private @const {!Object<string, !LocalizedStringBundleDef>}
      */
     this.localizedStringBundles_ = {};
+
+    /** Fires when new language bundles are added.
+     * @private @const {!Observable<string>}
+     * */
+    this.bundleObserver_ = new Observable();
   }
 
   /**
    * @param {!Element} element
    * @return {!Array<string>}
-   * @private
    */
-  getLanguageCodesForElement_(element) {
+  getLanguageCodesForElement(element) {
     const languageEl = closest(element, (el) => el.hasAttribute('lang'));
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
     const languageCodesToUse = getLanguageCodesFromString(languageCode || '');
@@ -109,26 +114,28 @@ export class LocalizationService {
   }
 
   /**
-   * @param {string} languageCode The language code to associate with the
-   *     specified localized string bundle.
-   * @param {!LocalizedStringBundleDef} localizedStringBundle
+   * @param {!Object<string, !LocalizedStringBundleDef>} localizedStringBundles
    *     The localized string bundle to register.
-   * @return {!LocalizationService} For chaining.
+   * @public
    */
-  registerLocalizedStringBundle(languageCode, localizedStringBundle) {
-    const normalizedLangCode = languageCode.toLowerCase();
-    if (!this.localizedStringBundles_[normalizedLangCode]) {
-      this.localizedStringBundles_[normalizedLangCode] = {};
-    }
+  registerLocalizedStringBundles(localizedStringBundles) {
+    Object.keys(localizedStringBundles).forEach((languageCode) => {
+      const normalizedLangCode = languageCode.toLowerCase();
+      if (!this.localizedStringBundles_[normalizedLangCode]) {
+        this.localizedStringBundles_[normalizedLangCode] = {};
+      }
+      Object.assign(
+        this.localizedStringBundles_[normalizedLangCode],
+        localizedStringBundles[languageCode]
+      );
+    });
 
-    Object.assign(
-      this.localizedStringBundles_[normalizedLangCode],
-      localizedStringBundle
-    );
-    return this;
+    this.bundleObserver_.fire();
   }
 
   /**
+   * Retrieves the localized string synchronously, useful for strings bundled with a given extension.
+   *
    * @param {!LocalizedStringId_Enum} localizedStringId
    * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the
@@ -137,12 +144,44 @@ export class LocalizationService {
    * @return {?string}
    */
   getLocalizedString(localizedStringId, elementToUse = this.element_) {
-    const languageCodes = this.getLanguageCodesForElement_(elementToUse);
+    const languageCodes = this.getLanguageCodesForElement(elementToUse);
 
     return findLocalizedString(
       this.localizedStringBundles_,
       languageCodes,
       localizedStringId
     );
+  }
+
+  /**
+   * Resolves with the localized string when the registered bundles contain them.
+   * @param {!LocalizedStringId_Enum} localizedStringId
+   * @return {!Promise{?string}}
+   * @public
+   */
+  getLocalizedStringAsync(localizedStringId) {
+    const languageCodes = this.getLanguageCodesForElement(this.element_);
+
+    const localizedString = findLocalizedString(
+      this.localizedStringBundles_,
+      languageCodes,
+      localizedStringId
+    );
+    if (localizedString !== null) {
+      return Promise.resolve(localizedString);
+    }
+    return new Promise((res) => {
+      const remove = this.bundleObserver_.add(() => {
+        const localizedString = findLocalizedString(
+          this.localizedStringBundles_,
+          languageCodes,
+          localizedStringId
+        );
+        if (localizedString) {
+          remove();
+          res(localizedString);
+        }
+      });
+    });
   }
 }

@@ -10,7 +10,7 @@ describes.endtoend(
     /**
      * Attach an event listener to page to capture the 'slideChange' event.
      * If given a selector, click on it to fire the event being listened for.
-     * @return {!Promise}
+     * @return {Promise}
      */
     function slideChangeEventAfterClicking(opt_selector) {
       return controller.evaluate((opt_selector) => {

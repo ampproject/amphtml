@@ -1,3 +1,5 @@
+import {BUBBLE_MESSAGE_EVENTS} from '#bento/apis/video-iframe-api';
+
 import {Deferred} from '#core/data-structures/promise';
 import {
   dispatchCustomEvent,
@@ -9,7 +11,6 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -35,7 +36,6 @@ import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents_Enum,
 } from '../../../src/video-interface';
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -173,13 +173,13 @@ class AmpVideoIframe extends AMP.BaseElement {
     const rootNode = this.getAmpDoc().getRootNode();
     const {documentElement, title} = rootNode;
 
-    return dict({
+    return {
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
       'title': title || null,
       'lang': documentElement?.lang || null,
       'jsonLd': getJsonLd(rootNode),
-    });
+    };
   }
 
   /** @private */
@@ -367,14 +367,10 @@ class AmpVideoIframe extends AMP.BaseElement {
       ANALYTICS_EVENT_TYPE_PREFIX
     );
 
-    dispatchCustomEvent(
-      this.element,
-      VideoEvents_Enum.CUSTOM_TICK,
-      dict({
-        'eventType': eventType,
-        'vars': vars,
-      })
-    );
+    dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {
+      'eventType': eventType,
+      'vars': vars,
+    });
   }
 
   /**
@@ -392,15 +388,13 @@ class AmpVideoIframe extends AMP.BaseElement {
         ? 0
         : intersectionRatio;
 
-    this.postMessage_(
-      dict({
-        'id': messageId,
-        'args': {
-          'intersectionRatio': postedRatio,
-          'time': time,
-        },
-      })
-    );
+    this.postMessage_({
+      'id': messageId,
+      'args': {
+        'intersectionRatio': postedRatio,
+        'time': time,
+      },
+    });
   }
 
   /**
@@ -410,7 +404,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   postConsentData_(messageId) {
     getConsentDataToForward(this.element, this.getConsentPolicy()).then(
       (consentData) => {
-        this.postMessage_(dict({'id': messageId, 'args': consentData}));
+        this.postMessage_({'id': messageId, 'args': consentData});
       }
     );
   }
@@ -425,12 +419,10 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
     promise.then(() => {
-      this.postMessage_(
-        dict({
-          'event': 'method',
-          'method': method,
-        })
-      );
+      this.postMessage_({
+        'event': 'method',
+        'method': method,
+      });
     });
   }
 

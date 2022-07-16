@@ -1,3 +1,4 @@
+/** @type {undefined|Promise<void>}| */
 let resolved;
 
 /**
@@ -5,7 +6,7 @@ let resolved;
  * Babel converts direct calls to Promise.resolve() (with no arguments) into
  * calls to this.
  *
- * @return {Promise<undefined>}
+ * @return {Promise<void>}
  */
 export function resolvedPromise() {
   if (resolved) {
@@ -69,7 +70,7 @@ export function tryResolve(fn) {
 
 /**
  * Resolves with the result of the last promise added.
- * @implements {PromiseLike}
+ * @implements {PromiseLike<T>}
  * @template T
  */
 export class LastAddedResolver {

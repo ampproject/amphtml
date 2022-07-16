@@ -464,16 +464,7 @@ declaration_list {
   declaration: { name: "pitch" }
   declaration: { name: "pitch-range" }
   declaration: { name: "place-items" }
-  # CSS property `position` with values `fixed` and `sticky` are not allowed.
-  # From https://www.w3schools.com/cssref/pr_class_position.asp
-  declaration: {
-    name: "position"
-    value_casei: "absolute"
-    value_casei: "inherit"
-    value_casei: "initial"
-    value_casei: "relative"
-    value_casei: "static"
-  }
+  declaration: { name: "position" }
   declaration: { name: "quotes" }
   declaration: { name: "resize" }
   declaration: { name: "richness" }
@@ -1110,7 +1101,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP]
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
   descriptive_name: "head > style[amp-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1134,7 +1125,7 @@ tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
   tag_name: "STYLE"
   spec_name: "head > style[amp4ads-boilerplate]"
   descriptive_name: "head > style[amp4ads-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1159,7 +1150,7 @@ tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
   tag_name: "STYLE"
   spec_name: "head > style[amp4email-boilerplate]"
   descriptive_name: "head > style[amp4email-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1182,7 +1173,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP]
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
   descriptive_name: "noscript > style[amp-boilerplate]"
-  satisfies: "noscript > style[amp-boilerplate]"
+  satisfies_condition: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
@@ -1364,6 +1355,7 @@ tags: {  # <style amp-noscript>, [AMP]
     "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
 
     css_spec: {
+      allow_important: true
       at_rule_spec: {
          name: 'media'
          media_query_spec: {

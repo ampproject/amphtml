@@ -1,10 +1,8 @@
-
-
+import {extname, format, parse} from 'path';
 import posthtml from 'posthtml';
 import {URL} from 'url';
-import {extname} from 'path';
+
 import {VALID_CDN_ORIGIN} from './cdn';
-import {parse, format} from 'path';
 
 export interface ScriptNode extends posthtml.Node {
   tag: 'script';
@@ -20,7 +18,10 @@ function isValidScriptExtension(url: URL): boolean {
   return VALID_SCRIPT_EXTENSIONS.includes(extname(url.pathname));
 }
 
-export function isValidOrigin(url: URL,  looseOriginUrlCheck?: boolean): boolean {
+export function isValidOrigin(
+  url: URL,
+  looseOriginUrlCheck?: boolean
+): boolean {
   return looseOriginUrlCheck || url.origin === VALID_CDN_ORIGIN;
 }
 
@@ -29,7 +30,7 @@ export function getCdnUrlAttr(node: posthtml.Node): string | null {
     return 'src';
   }
   if (node.tag === 'link') {
-    return 'href'
+    return 'href';
   }
   return null;
 }
@@ -38,7 +39,10 @@ export function getCdnUrlAttr(node: posthtml.Node): string | null {
  * Determines if a Node is really a ScriptNode.
  * @param node
  */
-export function isValidScript(node: posthtml.Node, looseOriginUrlCheck?: boolean): node is ScriptNode {
+export function isValidScript(
+  node: posthtml.Node,
+  looseOriginUrlCheck?: boolean
+): node is ScriptNode {
   if (node.tag !== 'script') {
     return false;
   }
@@ -73,6 +77,10 @@ export function toExtension(url: URL, extension: string): URL {
  * This is a temporary measure to allow for a relaxed parsing of our
  * fixture files' src urls before they are all fixed accordingly.
  */
-export function tryGetUrl(src: string, host: string = '0.0.0.0', port: number = 8000): URL {
+export function tryGetUrl(
+  src: string,
+  host: string = '0.0.0.0',
+  port: number = 8000
+): URL {
   return new URL(src, `http://${host}:${port}`);
 }

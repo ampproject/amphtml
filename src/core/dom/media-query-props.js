@@ -16,10 +16,16 @@ export class MediaQueryProps {
     /** @private @const */
     this.callback_ = callback;
 
-    /** @private {Object<string, ExprDef>} */
+    /**
+     * @type {Object<string, ExprDef>}
+     * @private
+     */
     this.exprMap_ = {};
 
-    /** @private {?Object<string, ExprDef>} */
+    /**
+     * @type {?Object<string, ExprDef>}
+     * @private
+     */
     this.prevExprMap_ = null;
   }
 
@@ -86,8 +92,11 @@ export class MediaQueryProps {
     if (!exprString.trim()) {
       return emptyExprValue;
     }
-    let expr =
-      this.exprMap_[exprString] || devAssert(this.prevExprMap_)[exprString];
+    let expr = this.exprMap_[exprString];
+    if (!expr) {
+      devAssert(this.prevExprMap_);
+      expr = this.prevExprMap_[exprString];
+    }
     if (!expr) {
       expr = parser(this.win_, exprString);
       toggleOnChange(expr, this.callback_, true);

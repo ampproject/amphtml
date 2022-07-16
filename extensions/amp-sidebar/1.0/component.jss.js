@@ -58,6 +58,10 @@ const unmounted = {
   display: 'none',
 };
 
+const mounted = {
+  display: 'contents',
+};
+
 const JSS = {
   sidebar,
   defaultSidebarStyles,
@@ -66,6 +70,7 @@ const JSS = {
   backdrop,
   defaultBackdropStyles,
   backdropOverscrollBlocker,
+  mounted,
   unmounted,
 };
 

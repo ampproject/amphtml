@@ -4,9 +4,8 @@ import {isString} from './string';
 
 /**
  * Absolute time in milliseconds.
- * @typedef {number}
+ * @typedef {number} TimestampDef
  */
-export let TimestampDef;
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the

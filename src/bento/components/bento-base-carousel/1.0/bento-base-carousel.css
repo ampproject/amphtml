@@ -1,0 +1,17 @@
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+bento-base-carousel {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pre-upgrade: size-defining element - hide children. */
+bento-base-carousel:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
+  display: none;
+  content-visibility: hidden;
+}

@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 /**
@@ -14,7 +12,7 @@ import {Services} from '#service';
 export function triggerAnalyticsEvent(
   target,
   eventType,
-  vars = dict(),
+  vars = {},
   enableDataVars = true
 ) {
   Services.analyticsForDocOrNull(target).then((analytics) => {

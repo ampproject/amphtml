@@ -1,23 +1,15 @@
-import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
+import {BentoSoundcloud} from '#bento/components/bento-soundcloud/1.0/component';
 
 import * as Preact from '#preact';
 
 import {rgba2hex} from './converter';
 
-import {BentoSoundcloud} from '../component';
-
 export default {
   title: 'Soundcloud',
   component: BentoSoundcloud,
-  decorators: [withKnobs],
 };
 
-export const track = () => {
-  // Knobs
-  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
-  const trackid = text('Track ID', '864765493');
-  const visual = boolean('Visual', true);
-
+export const track = ({componentColor, trackId, ...args}) => {
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
@@ -26,18 +18,26 @@ export const track = () => {
     <BentoSoundcloud
       color={hex}
       style={{height: '240px'}}
-      trackId={trackid}
-      visual={visual}
+      trackId={trackId}
+      {...args}
     />
   );
 };
 
-export const playlist = () => {
-  // Knobs
-  const componentColor = color('color', 'RGBA(255, 85, 0, 1)');
-  const playlistid = text('Playlist ID', '151584683');
-  const visual = boolean('Visual', true);
+track.args = {
+  trackId: '864765493',
+  visual: true,
+};
 
+track.argTypes = {
+  componentColor: {
+    name: 'componentColor',
+    control: {type: 'color'},
+    defaultValue: 'RGBA(255, 85, 0, 1)',
+  },
+};
+
+export const playlist = ({componentColor, playlistId, ...args}) => {
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
@@ -46,8 +46,21 @@ export const playlist = () => {
     <BentoSoundcloud
       color={hex}
       style={{height: '240px'}}
-      playlistId={playlistid}
-      visual={visual}
+      playlistId={playlistId}
+      {...args}
     />
   );
+};
+
+playlist.args = {
+  playlistId: '151584683',
+  visual: true,
+};
+
+playlist.argTypes = {
+  componentColor: {
+    name: 'componentColor',
+    control: {type: 'color'},
+    defaultValue: 'RGBA(255, 85, 0, 1)',
+  },
 };

@@ -270,6 +270,13 @@
 .swg-button-dark:lang(uk):after {
   background-image: url("https://news.google.com/swg/js/v1/i18n/b-uk-dk.svg");
 }
+.swg-button:lang(zh-cn):after,
+.swg-button-light:lang(zh-cn):after {
+  background-image: url("https://news.google.com/swg/js/v1/i18n/b-zh-cn-lt.svg");
+}
+.swg-button-dark:lang(zh-cn):after {
+  background-image: url("https://news.google.com/swg/js/v1/i18n/b-zh-cn-dk.svg");
+}
 .swg-button:lang(zh-tw):after,
 .swg-button-light:lang(zh-tw):after {
   background-image: url("https://news.google.com/swg/js/v1/i18n/b-zh-tw-lt.svg");

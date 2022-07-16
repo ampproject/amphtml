@@ -650,7 +650,7 @@ function liveListInsert(liveList, node) {
      */
     const child = /** @type {*} */ (node.cloneNode(true));
     child.setAttribute('id', `list-item-${itemCtr++}`);
-    child.setAttribute('data-sort-time', Date.now());
+    child.setAttribute('data-sort-time', Date.now().toString());
     liveList.querySelector('[items]')?.appendChild(child);
   }
 }
@@ -1399,6 +1399,19 @@ app.get(
     next();
   }
 );
+
+/**
+ * Handle amp-story translation file requests with an rtv path.
+ * We need to make sure we only handle the amp-story requests since this
+ * can affect other tests with json requests.
+ */
+app.get('/dist/rtv/*/v0/amp-story*.json', async (req, _res, next) => {
+  const fileName = path.basename(req.path);
+  let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+  filePath = replaceUrls(SERVE_MODE, filePath);
+  req.url = filePath;
+  next();
+});
 
 if (argv.coverage === 'live') {
   app.get('/dist/amp.js', async (req, res) => {

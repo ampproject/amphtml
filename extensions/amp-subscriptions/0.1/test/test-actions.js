@@ -1,12 +1,12 @@
+import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
+import {Actions} from '../actions';
 import {
   Action,
   ActionStatus,
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
 } from '../analytics';
-import {Actions} from '../actions';
 import {UrlBuilder} from '../url-builder';
-import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
 
 const LOCAL = 'local';
 const LOCAL_OPTS = {serviceId: LOCAL};

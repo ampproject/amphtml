@@ -36,24 +36,22 @@ export const LayoutPriority_Enum = {
 
 /**
  * CSS Length type. E.g. "1px" or "20vh".
- * @typedef {string}
+ * @typedef {string} LengthDef;
  */
-export let LengthDef;
 
 /**
  * @typedef {{
  *   width: string,
  *   height: string
- * }}
+ * }} DimensionsDef;
  */
-export let DimensionsDef;
 
 /**
  * Elements that the progress can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
  * This list does not include video players which are found via regex later.
  * @enum {string}
- * @private  Visible for testing only
+ * @private Visible for testing only
  */
 export const LOADING_ELEMENTS_ENUM = {
   AMP_AD: 'AMP-AD',
@@ -190,11 +188,8 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  const m = userAssert(
-    /[a-z]+/i.exec(length ?? ''),
-    'Failed to read units from %s',
-    length
-  );
+  const m = /[a-z]+/i.exec(length ?? '');
+  userAssert(m, 'Failed to read units from %s', length);
   return m[0];
 }
 

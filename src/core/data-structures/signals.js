@@ -1,7 +1,8 @@
-import {TimestampDef} from '#core/types/date';
 import {map} from '#core/types/object';
 
 import {Deferred} from './promise';
+
+/** @typedef {import('#core/types/date').TimestampDef} TimestampDef */
 
 /**
  * This object tracts signals and allows blocking until a signal has been

@@ -13,7 +13,7 @@ const {printReport} = require('./print-report');
  * @return {!Promise<void>}
  */
 async function performance() {
-  let resolver = (..._) => {}; // eslint-disable-line no-unused-vars
+  let resolver = (..._) => {}; // eslint-disable-line @typescript-eslint/no-unused-vars
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });

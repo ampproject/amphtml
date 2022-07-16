@@ -1,7 +1,7 @@
 #include <vector>
 
-#include "json/parser.h"
-#include "json/states.h"
+#include "cpp/htmlparser/json/parser.h"
+#include "cpp/htmlparser/json/states.h"
 
 namespace htmlparser::json {
 

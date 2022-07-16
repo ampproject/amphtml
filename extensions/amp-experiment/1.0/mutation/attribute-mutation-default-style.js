@@ -1,6 +1,6 @@
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {dev, user} from '#utils/log';
 
@@ -53,7 +53,7 @@ export class AttributeMutationDefaultStyle {
     this.elements_ = elements;
 
     /** @private {!JsonObject} */
-    this.styles_ = dict({});
+    this.styles_ = {};
 
     /** @private {boolean} */
     this.hasAmpElement_ = false;

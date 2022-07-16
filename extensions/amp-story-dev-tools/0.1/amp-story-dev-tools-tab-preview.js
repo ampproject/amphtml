@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {observeContentSize} from '#core/dom/layout/size-observer';
 import {closest} from '#core/dom/query';
@@ -828,7 +829,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       const isEnabled =
         (currentDeviceSpaces + spaces <= MAX_DEVICE_SPACES) |
         !chipEl.hasAttribute('inactive');
-      chipEl.toggleAttribute('disabled', !isEnabled);
+      toggleAttribute(chipEl, 'disabled', !isEnabled);
     });
   }
 }

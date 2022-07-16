@@ -1,15 +1,17 @@
 import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {htmlFor} from '#core/dom/static-template';
-import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {listenFor} from '../../../src/iframe-helper';
 
 const TYPE = 'twitter';
 
 class AmpTwitter extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     return {

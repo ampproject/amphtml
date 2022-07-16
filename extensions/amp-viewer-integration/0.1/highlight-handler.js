@@ -2,7 +2,6 @@ import {whenDocumentReady} from '#core/document/ready';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
@@ -204,7 +203,7 @@ export class HighlightHandler {
    * @private
    */
   sendHighlightState_(state, opt_params) {
-    const params = dict({'state': state});
+    const params = {'state': state};
     for (const key in opt_params) {
       params[key] = opt_params[key];
     }
@@ -266,7 +265,7 @@ export class HighlightHandler {
       return;
     }
     const scrollTop = this.calcTopToCenterHighlightedNodes_();
-    this.sendHighlightState_('found', dict({'scroll': scrollTop}));
+    this.sendHighlightState_('found', {'scroll': scrollTop});
     if (highlightInfo.skipRendering) {
       return;
     }
@@ -382,7 +381,7 @@ export class HighlightHandler {
     if (current == newTop && current == oldTop) {
       return null;
     }
-    const shownParam = dict();
+    const shownParam = {};
     if (current != newTop) {
       this.viewport_.setScrollTop(newTop);
       shownParam[PARAM_NEW_TOP_DISCREPANCY] = current - newTop;

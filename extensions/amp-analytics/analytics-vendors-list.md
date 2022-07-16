@@ -65,7 +65,11 @@ Type attribute value: `amplitude`
 
 Type attribute value: `appsflyer`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for AppsFlyer. More details for adding AppsFlyer support can be found at [appsflyer.com](https://support.appsflyer.com/hc/en-us/articles/360001610038#amp-support)
+
+<!-- markdown-link-check-enable -->
 
 ### AT Internet
 
@@ -159,7 +163,11 @@ Adds support for comScore Unified Digital Measurement™ pageview analytics. Req
 
 Type attribute value: `cxense`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Cxense Insight analytics. Requires defining _var_ `siteId` with Cxense-provided _siteId_. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
+
+<!-- markdown-link-check-enable -->
 
 ### Deep.BI
 
@@ -421,7 +429,11 @@ Adds support for Nielsen Marketing Cloud. More details can be found at [Nielsen 
 
 Type attribute value: `oewa`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for [OEWA](http://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`. More details for adding OEWA support can be found [here](http://www.oewa.at/Implementierung).
+
+<!-- markdown-link-check-enable -->
 
 Additionally, the following variables must be defined:
 
@@ -462,8 +474,21 @@ Adds support for Permutive event collection. Additionally, the following `vars` 
 
 -   `namespace`: your Permutive AMP namespace
 -   `key`: your Permutive public API key
+    <!-- markdown-link-check-disable -->
+    Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](https://support.permutive.com/hc/en-us).
+    <!-- markdown-link-check-enable -->
 
-Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
+### Permutive-ampscript
+
+Type attribute value: `permutive-ampscript`
+
+Adds support for Permutive event collection via the Permutive SDK running inside `amp-script`. This is a newer version of the `Permutive` configuration mentioned above. It will soon replace the old configuration.
+
+<!-- markdown-link-check-disable -->
+
+To add additional properties to Permutive events use the `extraUrlParams` property and use the `customProperties` key to define any custom properties. The value should be a valid json object. Full configuration details can be found at [support.permutive.com](https://support.permutive.com/hc/en-us).
+
+<!-- markdown-link-check-enable -->
 
 ### Piano
 
@@ -523,8 +548,12 @@ Type attribute value: `retargetly`
 
 Type attribute value: `rudderstack`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for RudderStack page views and events.
 Find out more on the implementation check our documentation at [docs.rudderstack.com](https://docs.rudderstack.com/rudderstack-sdk-integration-guides/amp-analytics).
+
+<!-- markdown-link-check-enable -->
 
 ### Segment
 

@@ -1,4 +1,5 @@
 import {loadScript, validateData} from '#3p/3p';
+
 import {parseUrlDeprecated} from '../../src/url';
 
 /* global

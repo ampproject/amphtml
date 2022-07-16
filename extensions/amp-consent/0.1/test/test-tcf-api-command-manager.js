@@ -1,7 +1,9 @@
-import {TcfApiCommandManager} from '../tcf-api-command-manager';
+import {user} from '#utils/log';
+
 import {macroTask} from '#testing/helpers';
 import {mockWindowInterface} from '#testing/helpers/service';
-import {user} from '#utils/log';
+
+import {TcfApiCommandManager} from '../tcf-api-command-manager';
 
 describes.realWin(
   'tcf api commands',

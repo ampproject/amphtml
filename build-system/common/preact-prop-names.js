@@ -19,8 +19,7 @@ function objectFlip(obj) {
 
 const DOM_ATTRIBUTES_REACT_TO_PREACT = {
   className: 'class',
-  // TODO(wg-bento): Revert tabIndex with tabindex
-  tabindex: 'tabIndex',
+  tabIndex: 'tabindex',
 };
 
 /**

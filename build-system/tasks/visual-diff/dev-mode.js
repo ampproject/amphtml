@@ -2,7 +2,7 @@
 
 const inquirer = require('inquirer');
 const path = require('path');
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,

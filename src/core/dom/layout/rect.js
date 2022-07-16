@@ -20,9 +20,8 @@ let ViewportInterfaceDef;
  *   height: number,
  *   x: number,
  *   y: number
- * }}
+ * }} LayoutRectDef;
  */
-export let LayoutRectDef;
 
 /**
  * The structure that contains the size for an element. The exact
@@ -31,9 +30,8 @@ export let LayoutRectDef;
  * @typedef {{
  *   width: number,
  *   height: number,
- * }}
+ * }} LayoutSizeDef;
  */
-export let LayoutSizeDef;
 
 /**
  * The structure that represents the margins of an Element.
@@ -43,9 +41,8 @@ export let LayoutSizeDef;
  *   right: number,
  *   bottom: number,
  *   left: number
- * }}
+ * }} LayoutMarginsDef;
  */
-export let LayoutMarginsDef;
 
 /**
  * The structure that represents a requested change to the margins of an
@@ -57,9 +54,8 @@ export let LayoutMarginsDef;
  *   right: (number|undefined),
  *   bottom: (number|undefined),
  *   left: (number|undefined)
- * }}
+ * }} LayoutMarginsChangeDef;
  */
-export let LayoutMarginsChangeDef;
 
 /**
  * RelativePositions_Enum

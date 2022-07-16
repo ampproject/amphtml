@@ -1,10 +1,11 @@
-import * as st from '#core/dom/style';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev} from '#utils/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+import * as st from '#core/dom/style';
 import {propagateObjectFitStyles} from '#core/dom/style';
+
+import {dev} from '#utils/log';
 
 const TAG = 'amp-anim';
 const BUILD_ATTRIBUTES = [

@@ -1,9 +1,8 @@
 import {devAssert} from '#core/assert';
 import {Deferred} from '#core/data-structures/promise';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
-import {LayoutRectDef, layoutRectFromDomRect} from './rect';
+import {layoutRectFromDomRect} from './rect';
 import {createViewportObserver} from './viewport-observer';
 
 /** @type {undefined|WeakMap<Element, Deferred<IntersectionObserverEntry>>|undefined} */
@@ -80,18 +79,18 @@ export function measureIntersection(el) {
  * @return {JsonObject}
  */
 export function intersectionEntryToJson(entry) {
-  return dict({
+  return {
     'time': entry.time,
     'rootBounds': safeLayoutRectFromDomRect(entry.rootBounds),
     'boundingClientRect': safeLayoutRectFromDomRect(entry.boundingClientRect),
     'intersectionRect': safeLayoutRectFromDomRect(entry.intersectionRect),
     'intersectionRatio': entry.intersectionRatio,
-  });
+  };
 }
 
 /**
  * @param {?} rect
- * @return {?LayoutRectDef}
+ * @return {?import('./rect').LayoutRectDef}
  */
 function safeLayoutRectFromDomRect(rect) {
   if (rect === null) {

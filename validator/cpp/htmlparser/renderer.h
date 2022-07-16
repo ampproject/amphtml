@@ -23,12 +23,12 @@
 // Another example is that the programmatic equivalent of "a<head>b</head>c"
 // becomes "<html><head><head/><body>abc</body></html>".
 
-#ifndef HTMLPARSER__RENDERER_H_
-#define HTMLPARSER__RENDERER_H_
+#ifndef CPP_HTMLPARSER_RENDERER_H_
+#define CPP_HTMLPARSER_RENDERER_H_
 
 #include <sstream>
 
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 namespace htmlparser {
 
@@ -49,4 +49,4 @@ class Renderer {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__RENDERER_H_
+#endif  // CPP_HTMLPARSER_RENDERER_H_

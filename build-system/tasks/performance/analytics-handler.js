@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /**
  *

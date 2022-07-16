@@ -1,9 +1,11 @@
 import '../amp-facebook-comments';
-import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
-import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '#core/3p-frame-messaging';
+import {createElementWithAttributes} from '#core/dom';
+
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-facebook-comments',

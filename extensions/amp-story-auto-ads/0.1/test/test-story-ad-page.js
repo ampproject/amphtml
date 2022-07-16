@@ -7,7 +7,7 @@ import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
 import {
   Action,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {StoryAdAnalytics} from '../story-ad-analytics';
@@ -389,7 +389,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
     });
 
     it('propagates fullbleed state to attribution icon', async () => {
-      storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_FULLBLEED);
+      storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_FULLBLEED);
 
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
@@ -407,10 +407,10 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
       expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
 
-      storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+      storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.MOBILE);
       expect(attribution).not.to.have.class('i-amphtml-story-ad-fullbleed');
 
-      storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_FULLBLEED);
+      storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_FULLBLEED);
       expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
     });
 

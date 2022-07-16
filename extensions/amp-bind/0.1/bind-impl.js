@@ -3,14 +3,13 @@ import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {isAmp4Email} from '#core/document/format';
-import {iterateCursor} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {isFiniteNumber, isObject} from '#core/types';
 import {findIndex, isArray, remove, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
-import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
+import {deepMerge, getValueForExpr, map} from '#core/types/object';
 import {deepEquals, parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -292,7 +291,7 @@ export class Bind {
 
       this.signals_.signal('FIRST_MUTATE');
 
-      const scope = dict();
+      const scope = {};
       if (event && getDetail(/** @type {!Event} */ (event))) {
         scope['event'] = getDetail(/** @type {!Event} */ (event));
       }
@@ -400,10 +399,10 @@ export class Bind {
    * @return {!Promise<?JsonObject>}
    */
   getDataForHistory_() {
-    const data = dict({
-      'data': dict({'amp-bind': this.state_}),
+    const data = {
+      'data': {'amp-bind': this.state_},
       'title': this.localWin_.document.title,
-    });
+    };
     if (!this.viewer_.isEmbedded()) {
       // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
       return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
@@ -705,7 +704,7 @@ export class Bind {
     // created elements. Should do what <amp-state> does.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       const argumentNames = (element.getAttribute('arguments') || '')
         .split(',')
         .map((s) => s.trim());

@@ -1,8 +1,8 @@
 tags: {  # amp-selector 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-selector 1.0"
-  excludes: "amp-selector 0.1"
+  satisfies_condition: "amp-selector 1.0"
+  excludes_condition: "amp-selector 0.1"
   extension_spec: {
     name: "amp-selector"
     version_name: "v1.0"
@@ -15,8 +15,8 @@ tags: {  # amp-selector 0.1 and latest
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  satisfies: "amp-selector 0.1"
-  excludes: "amp-selector 1.0"
+  satisfies_condition: "amp-selector 0.1"
+  excludes_condition: "amp-selector 1.0"
   extension_spec: {
     name: "amp-selector"
     version_name: "v0.1"
@@ -99,6 +99,7 @@ tags: {
   html_format: AMP4EMAIL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
+  descriptive_name : "amp-selector [option] descendant"
   attrs: {
     name: "disabled"
     value: ""
@@ -119,6 +120,9 @@ tags: {
   html_format: AMP4EMAIL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
+  descriptive_name : "amp-selector child"
+  # This is used recursively so that the "AMP-SELECTOR option" can be any
+  # depth below the main <amp-sepector>:
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
   }

@@ -1,45 +1,4 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "noEmit": true,
-    "downlevelIteration": true,
-    "target": "es5",
-    "strictNullChecks": true,
-    "lib": ["dom", "esnext", "es6"],
-    "paths": {
-      "#core/assert": ["./assert"],
-      "#core/assert/*": ["./assert/*"],
-      "#core/constants": ["./constants"],
-      "#core/constants/*": ["./constants/*"],
-      "#core/data-structures": ["./data-structures"],
-      "#core/data-structures/*": ["./data-structures/*"],
-      "#core/document": ["./document"],
-      "#core/document/*": ["./document/*"],
-      "#core/dom": ["./dom"],
-      "#core/dom/*": ["./dom/*"],
-      "#core/error": ["./error"],
-      "#core/error/*": ["./error/*"],
-      "#core/mode": ["./mode"],
-      "#core/mode/*": ["./mode/*"],
-      "#core/types": ["./types"],
-      "#core/types/*": ["./types/*"],
-      "#core/window": ["./window"],
-      "#core/window/*": ["./window/*"]
-    }
-  },
-  "include": [
-    "*.js",
-    "assert/**/*.js",
-    "constants/**/*.js",
-    "data-structures/**/*.js",
-    "document/**/*.js",
-    "dom/**/*.js",
-    "error/**/*.js",
-    "mode/**/*.js",
-    "types/**/*.js",
-    "window/**/*.js",
-    "**/*.d.ts"
-  ],
-  "exclude": ["**/*.extern.js"]
+  "extends": "../../tsconfig.base.json",
+  "include": ["**/*.js", "**/*.d.ts"]
 }

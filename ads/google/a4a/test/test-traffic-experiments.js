@@ -1,13 +1,13 @@
 import {
-  AMP_EXPERIMENT_ATTRIBUTE,
-  EXPERIMENT_ATTRIBUTE,
-} from '#ads/google/a4a/utils';
-import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInExperiment,
   validateExperimentIds,
 } from '#ads/google/a4a/traffic-experiments';
+import {
+  AMP_EXPERIMENT_ATTRIBUTE,
+  EXPERIMENT_ATTRIBUTE,
+} from '#ads/google/a4a/utils';
 
 describes.sandboxed('all-traffic-experiments-tests', {}, () => {
   describe('#validateExperimentIds', () => {

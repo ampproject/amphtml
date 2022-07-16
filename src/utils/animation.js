@@ -1,6 +1,8 @@
-import {NormTimeDef, getCurve} from '#core/data-structures/curve';
+import {getCurve} from '#core/data-structures/curve';
 import {Deferred} from '#core/data-structures/promise';
-import {TimestampDef} from '#core/types/date';
+
+/** @typedef {import('#core/types/date').NormTimeDef} NormTimeDef */
+/** @typedef {import('#core/types/date').TimestampDef} TimestampDef */
 
 import {Services} from '#service';
 

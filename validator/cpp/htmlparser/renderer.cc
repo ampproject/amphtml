@@ -1,13 +1,13 @@
-#include "renderer.h"
+#include "cpp/htmlparser/renderer.h"
 
 #include <algorithm>
 #include <sstream>
 #include <stack>
 #include <tuple>
 
-#include "atomutil.h"
-#include "elements.h"
-#include "strings.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/elements.h"
+#include "cpp/htmlparser/strings.h"
 
 namespace htmlparser {
 

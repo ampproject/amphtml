@@ -1,5 +1,6 @@
-import {CarouselEvents} from './carousel-events';
 import {getDetail} from '#utils/event-helper';
+
+import {CarouselEvents} from './carousel-events';
 
 /**
  * @typedef {{

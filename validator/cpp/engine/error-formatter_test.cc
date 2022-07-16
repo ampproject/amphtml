@@ -1,7 +1,7 @@
 // AMP Validator client library to validate if given html is a valid AMP
 // document.
 
-#include "error-formatter.h"
+#include "cpp/engine/error-formatter.h"
 
 #include "gtest/gtest.h"
 

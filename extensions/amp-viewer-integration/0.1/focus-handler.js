@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {listen} from '#utils/event-helper';
 
 /**
@@ -40,7 +38,7 @@ export class FocusHandler {
     }
     this.messaging_.sendRequest(
       e.type,
-      dict({'focusTargetRect': e.target./*OK*/ getBoundingClientRect()}),
+      {'focusTargetRect': e.target./*OK*/ getBoundingClientRect()},
       /* awaitResponse */ false
     );
   }

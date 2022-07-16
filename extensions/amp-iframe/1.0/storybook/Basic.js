@@ -1,17 +1,25 @@
 import * as Preact from '#preact';
+
 import {BentoIframe} from '../component';
 
 export default {
   title: 'Iframe',
   component: BentoIframe,
+  argTypes: {
+    src: {
+      name: 'iframe src',
+      defaultValue: 'https://www.wikipedia.org/',
+      control: {type: 'text'},
+    },
+  },
 };
 
-export const _default = () => {
+export const _default = ({src}) => {
   return (
     <BentoIframe
       style={{width: 800, height: 600}}
       iframeStyle={{border: '1px solid black'}}
-      src="https://www.wikipedia.org/"
+      src={src}
       title="Wikipedia"
     ></BentoIframe>
   );
@@ -41,11 +49,10 @@ export const WithIntersectingIframe = () => {
   );
 };
 
-WithIntersectingIframe.storyName = 'Resizable iframe in viewport';
-
 export const WithResizableIframe = () => {
   return (
     <div>
+      <h1>Scroll down</h1>
       <div
         style={{
           width: '100%',
@@ -67,11 +74,10 @@ export const WithResizableIframe = () => {
   );
 };
 
-WithResizableIframe.storyName = 'Resizable iframe outside viewport';
-
 export const WithSendIntersectionsPostMessage = () => {
   return (
     <div>
+      <h1>Scroll down</h1>
       <div
         style={{
           width: '100%',
@@ -79,16 +85,14 @@ export const WithSendIntersectionsPostMessage = () => {
           backgroundColor: 'blue',
         }}
       ></div>
-      <Iframe
+      <BentoIframe
         style={{width: 500, height: 500}}
         iframeStyle={{border: '1px solid black'}}
         sandbox="allow-scripts allow-same-origin"
         src="/examples/bento/amp-iframe-send-intersections-example.html"
       >
         <div placeholder>Placeholder</div>
-      </Iframe>
+      </BentoIframe>
     </div>
   );
 };
-
-WithSendIntersectionsPostMessage.storyName = 'Send intersections';

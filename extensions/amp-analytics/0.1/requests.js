@@ -1,12 +1,14 @@
+import {isArray, isFiniteNumber, isObject} from '#core/types';
+
+import {Services} from '#service';
+
+import {devAssert, userAssert} from '#utils/log';
+
 import {AnalyticsEventType} from './events';
+import {getResourceTiming} from './resource-timing';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
-import {Services} from '#service';
-import {devAssert, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber, isObject} from '#core/types';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -152,11 +154,11 @@ export class RequestHandler {
       this.element_,
       this.allowlist_
     ).then((params) => {
-      return dict({
+      return {
         'trigger': trigger['on'],
         'timestamp': timestamp,
         'extraUrlParams': params,
-      });
+      };
     });
     this.batchSegmentPromises_.push(batchSegmentPromise);
     this.trigger_(isImportant || !this.batchInterval_);
@@ -422,7 +424,7 @@ export function expandPostMessage(
       element
     ).then((extraUrlParams) => {
       return defaultSerializer(expandedMsg, [
-        dict({'extraUrlParams': extraUrlParams}),
+        {'extraUrlParams': extraUrlParams},
       ]);
     });
   });

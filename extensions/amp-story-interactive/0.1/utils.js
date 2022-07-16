@@ -1,5 +1,6 @@
 import {htmlFor} from '#core/dom/static-template';
 import {map} from '#core/types/object';
+
 import {user} from '#utils/log';
 
 /** @private Whether ids are deduplicated or not */

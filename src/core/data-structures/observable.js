@@ -17,7 +17,7 @@ export class Observable {
   /**
    * Adds the observer to this instance.
    * @param {function(TYPE=):void} handler Observer's handler.
-   * @return {UnlistenCallback}
+   * @return {import('#core/types/function/types').UnlistenCallback}
    */
   add(handler) {
     if (!this.handlers_) {
@@ -58,7 +58,8 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    for (const handler of this.handlers_) {
+    // Iterate over copy of handlers_ in case handlers are removed inside.
+    for (const handler of this.handlers_.slice()) {
       handler(opt_event);
     }
   }

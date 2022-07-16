@@ -362,6 +362,7 @@ function createElementRules_() {
           'fb-messenger': true,
           'intent': true,
           'line': true,
+          'microsoft-edge': true,
           'skype': true,
           'sms': true,
           'snapchat': true,

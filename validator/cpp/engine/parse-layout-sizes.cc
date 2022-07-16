@@ -1,8 +1,8 @@
-#include "parse-layout-sizes.h"
+#include "cpp/engine/parse-layout-sizes.h"
 
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
 using absl::string_view;

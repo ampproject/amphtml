@@ -16,11 +16,11 @@
 #include <utility>
 #include <vector>
 
-#include "defer.h"
-#include "fileutil.h"
-#include "hash.h"
-#include "strings.h"
-#include "token.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/hash.h"
+#include "cpp/htmlparser/strings.h"
+#include "cpp/htmlparser/token.h"
 
 namespace htmlparser {
 
@@ -167,17 +167,17 @@ int main(int argc, char** argv) {
   };
 
   if (!(FileUtil::ReadFileLines(
-            options, "data/htmltags.txt", &all_names) &&
+            options, "cpp/htmlparser/data/htmltags.txt", &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/htmlattributes.txt",
+            options, "cpp/htmlparser/data/htmlattributes.txt",
             &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/javascriptevents.txt",
+            options, "cpp/htmlparser/data/javascriptevents.txt",
             &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/extras.txt", &all_names) &&
+            options, "cpp/htmlparser/data/extras.txt", &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/amptags.txt", &all_names))) {
+            options, "cpp/htmlparser/data/amptags.txt", &all_names))) {
     std::cerr << "Error reading input txt files." << std::endl;
     return EXIT_FAILURE;
   }
@@ -281,14 +281,14 @@ int main(int argc, char** argv) {
     nameToTextOffset[s] = static_cast<uint32_t>(offset << 8 | s.size());
   }
 
-  std::ofstream fd("atom.h");
+  std::ofstream fd("cpp/htmlparser/atom.h");
   Defer ____([&]() {fd.close();});
 
   fd << R"(// AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file see comments in bin/atomgen.cc
 
-#ifndef HTMLPARSER__ATOM_H_
-#define HTMLPARSER__ATOM_H_
+#ifndef CPP_HTMLPARSER_ATOM_H_
+#define CPP_HTMLPARSER_ATOM_H_
 
 #include <array>
 #include <string>
@@ -334,5 +334,5 @@ enum class Atom {
   fd << "inline constexpr std::string_view kAtomText(\""
      << text << "\");" << std::endl;
   fd << std::endl << "}  // namespace htmlparser." << std::endl;
-  fd << std::endl << "#endif  // HTMLPARSER__ATOM_H_" << std::endl;
+  fd << std::endl << "#endif  // CPP_HTMLPARSER_ATOM_H_" << std::endl;
 }

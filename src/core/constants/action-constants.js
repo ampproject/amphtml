@@ -12,14 +12,16 @@ import {devAssert} from '#core/assert';
  * See ./service/action-impl.ActionInfoDef
  * TODO(rcebulko): Revert to @see once type is available
  *
- * @const {string}
+ * @type {string}
+ * @const
  */
 export const RAW_OBJECT_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
 /**
  * Identifier for an element's default action.
  *
- * @const {string}
+ * @type {string}
+ * @const
  */
 export const DEFAULT_ACTION = 'activate';
 

@@ -1,13 +1,13 @@
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 #include <algorithm>
 #include <array>
 #include <functional>
 #include <sstream>
 #include <tuple>
-#include "casetable.h"
-#include "entity.h"
-#include "whitespacetable.h"
+#include "cpp/htmlparser/casetable.h"
+#include "cpp/htmlparser/entity.h"
+#include "cpp/htmlparser/whitespacetable.h"
 
 namespace htmlparser {
 

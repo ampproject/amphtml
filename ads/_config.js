@@ -62,6 +62,10 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://data.24smi.net',
   },
 
+  '4wmarketplace': {
+    renderStartImplemented: true,
+  },
+
   'a8': {
     prefetch: 'https://statics.a8.net/amp/ad.js',
     renderStartImplemented: true,
@@ -95,6 +99,10 @@ const adConfig = jsonConfiguration({
 
   'adbutler': {
     prefetch: 'https://servedbyadbutler.com/app.js',
+  },
+
+  'adenza': {
+    renderStartImplemented: true,
   },
 
   'adform': {},
@@ -165,6 +173,10 @@ const adConfig = jsonConfiguration({
   },
 
   'adreactor': {},
+
+  'ads2bid': {
+    renderStartImplemented: true,
+  },
 
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
@@ -439,6 +451,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'dex': {
+    renderStartImplemented: true,
+  },
+
   'digiteka': {
     renderStartImplemented: true,
   },
@@ -639,6 +655,19 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'insurads': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://tpc.googlesyndication.com',
+      'https://adservice.google.com',
+      'https://cdn.insurads.com',
+      'https://services.insurads.com',
+      'https://messaging.insurads.com',
+    ],
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,
@@ -664,7 +693,9 @@ const adConfig = jsonConfiguration({
   'kiosked': {
     renderStartImplemented: true,
   },
-
+  'jioads': {
+    renderStartImplemented: true,
+  },
   'jixie': {
     prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',
@@ -1025,6 +1056,7 @@ const adConfig = jsonConfiguration({
   'rcmwidget': {
     prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
+    clientIdScope: '__rcmw_amp',
   },
 
   'readmo': {
@@ -1220,8 +1252,20 @@ const adConfig = jsonConfiguration({
   },
 
   'sunmedia': {
-    prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
-    preconnect: 'https://static.addevweb.com',
+    preconnect: [
+      'https://static.sunmedia.tv',
+      'https://services.sunmedia.tv',
+      'https://creative.sunmedia.tv',
+      'https://vod.sunmedia.tv',
+      'https://mx-sunmedia.videoplaza.tv',
+      'https://es-sunicontent.videoplaza.tv',
+      'https://es-sunelespanol.videoplaza.tv',
+      'https://es-suncopperland.videoplaza.tv',
+      'https://search.spotxchange.com',
+      'https://tpc.googlesyndication.com',
+    ],
+    clientIdScope: 'AMP_ECID_SUNMEDIA',
+    fullWidthHeightRatio: 1 / 1,
     renderStartImplemented: true,
   },
 
@@ -1252,10 +1296,9 @@ const adConfig = jsonConfiguration({
   },
 
   'teads': {
-    prefetch: 'https://s8t.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
-      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],
@@ -1340,6 +1383,10 @@ const adConfig = jsonConfiguration({
   'vmfive': {
     prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
     preconnect: ['https://vawpro.vm5apis.com', 'https://vahfront.vm5apis.com'],
+    renderStartImplemented: true,
+  },
+
+  'vox': {
     renderStartImplemented: true,
   },
 

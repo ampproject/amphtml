@@ -66,15 +66,15 @@ function getEnvironmentHash() {
 }
 
 /**
- * Used to cache css transforms done by postcss.
- * @const {TransformCache}
- */
-let transformCache;
-
-/**
  * @typedef {{css: string, warnings: string[]}}:
  */
 let CssTransformResultDef;
+
+/**
+ * Used to cache css transforms done by postcss.
+ * @type {TransformCache<CssTransformResultDef>}
+ */
+let transformCache;
 
 /**
  * Transform a css string using postcss.
@@ -139,18 +139,15 @@ async function getCssImports(cssFile) {
  */
 async function transformCss(contents, hash, opt_filename) {
   if (!transformCache) {
-    transformCache = new TransformCache('.css-cache', '.css');
+    transformCache = new TransformCache('.css-cache');
   }
   const cached = transformCache.get(hash);
   if (cached) {
-    return JSON.parse((await cached).toString());
+    return cached;
   }
 
   const transformed = transform(contents, opt_filename);
-  transformCache.set(
-    hash,
-    transformed.then((r) => JSON.stringify(r))
-  );
+  transformCache.set(hash, transformed);
   return transformed;
 }
 

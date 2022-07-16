@@ -7,7 +7,10 @@
 
     // Enable JSON auto-formatting for these files.
     ".prettierrc": "json",
-    ".renovaterc.json": "json"
+    ".renovaterc.json": "json",
+
+    // Allow comments in JSON schema files.
+    "*.schema.json": "jsonc"
   },
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
@@ -41,18 +44,8 @@
       "url": "./build-system/json-schemas/caches.json"
     },
     {
-      "fileMatch": [
-        "build-system/global-configs/client-side-experiments-config.json"
-      ],
-      "url": "./build-system/json-schemas/client-side-experiments-config.json"
-    },
-    {
       "fileMatch": ["build-system/tasks/bundle-size/filesize.json"],
       "url": "./build-system/json-schemas/filesize.json"
-    },
-    {
-      "fileMatch": ["build-system/global-configs/versioning.json"],
-      "url": "./build-system/json-schemas/versioning.json"
     },
     {
       "fileMatch": ["test/visual-diff/visual-tests.jsonc"],

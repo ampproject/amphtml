@@ -1,3 +1,5 @@
+import {toArray} from '#core/types/array';
+
 import {
   LoadTask,
   MuteTask,
@@ -10,7 +12,6 @@ import {
   UpdateSourcesTask,
 } from '../media-tasks';
 import {Sources} from '../sources';
-import {toArray} from '#core/types/array';
 
 describes.realWin('media-tasks', {}, (env) => {
   let win;

@@ -1,8 +1,8 @@
 tags: {  # amp-iframe 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-iframe 1.0"
-  excludes: "amp-iframe 0.1"
+  satisfies_condition: "amp-iframe 1.0"
+  excludes_condition: "amp-iframe 0.1"
   extension_spec: {
     name: "amp-iframe"
     version_name: "v1.0"
@@ -15,8 +15,8 @@ tags: {  # amp-iframe 1.0
 tags: {  # amp-iframe 0.1 and latest
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "SCRIPT"
-  satisfies: "amp-iframe 0.1"
-  excludes: "amp-iframe 1.0"
+  satisfies_condition: "amp-iframe 0.1"
+  excludes_condition: "amp-iframe 1.0"
   extension_spec: {
     name: "amp-iframe"
     version_name: "v0.1"

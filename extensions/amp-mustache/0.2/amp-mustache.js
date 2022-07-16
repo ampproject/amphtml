@@ -1,11 +1,14 @@
-import {BaseTemplate} from '../../../src/base-template';
+import {templateContentClone} from '#core/dom';
+
 import {Purifier} from '#purifier';
-import {dict} from '#core/types/object';
-import {getService, registerServiceBuilder} from '../../../src/service-helpers';
-import {iterateCursor, templateContentClone} from '#core/dom';
-import {rewriteAttributeValue} from '../../../src/url-rewrite';
+
 import {user} from '#utils/log';
+
 import mustache from '#third_party/mustache/mustache';
+
+import {BaseTemplate} from '../../../src/base-template';
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
+import {rewriteAttributeValue} from '../../../src/url-rewrite';
 
 const TAG = 'amp-mustache';
 
@@ -24,7 +27,7 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     registerServiceBuilder(win, 'purifier', function () {
-      return new Purifier(win.document, dict(), rewriteAttributeValue);
+      return new Purifier(win.document, {}, rewriteAttributeValue);
     });
     /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
@@ -44,7 +47,7 @@ export class AmpMustache extends BaseTemplate {
       return;
     }
     /** @private @const {!JsonObject} */
-    this.nestedTemplates_ = dict();
+    this.nestedTemplates_ = {};
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
@@ -85,7 +88,7 @@ export class AmpMustache extends BaseTemplate {
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');
-    iterateCursor(templates, (template, index) => {
+    templates.forEach((template, index) => {
       const key = `__AMP_NESTED_TEMPLATE_${index}`;
 
       // Store the nested template markup, keyed by index.

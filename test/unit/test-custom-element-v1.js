@@ -625,6 +625,14 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       await element.buildInternal();
       await promise;
     });
+
+    it('should build if amp-bind mutation', async () => {
+      const element = new ElementClass();
+      builderMock.expects('scheduleAsap').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      element.mutatedAttributesCallback({});
+    });
   });
 
   describe('mount/unmount', () => {

@@ -1,13 +1,20 @@
 import '../amp-carousel';
-import {ActionService} from '#service/action-impl';
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {AmpSlideScroll} from '../slidescroll';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {user} from '#utils/log';
+
+import {getDeterministicOuterHTML} from '#testing/helpers';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {buildDom} from '../build-dom';
+import {AmpSlideScroll} from '../slidescroll';
 
 describes.realWin(
   'SlideScroll',
@@ -35,14 +42,16 @@ describes.realWin(
      * @param {boolean=} opt_attachToDom
      * @param {boolean=} opt_hasAutoplay
      * @param {boolean=} opt_autoplayLoops
-     * @return {!Element}
+     * @param {Document=} opt_doc
+     * @return {Element}
      */
     function getAmpSlideScroll(
       opt_hasLooping,
       opt_slideCount = 5,
       opt_attachToDom = true,
       opt_hasAutoplay = false,
-      opt_autoplayLoops
+      opt_autoplayLoops,
+      doc = env.win.document
     ) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -51,7 +60,7 @@ describes.realWin(
       ampSlideScroll.setAttribute('type', 'slides');
       ampSlideScroll.setAttribute('width', '400');
       ampSlideScroll.setAttribute('height', '300');
-      ampSlideScroll.style.position = 'relative';
+      ampSlideScroll.style.setProperty('position', 'relative');
       ampSlideScroll.setAttribute('controls', '');
       if (opt_hasLooping) {
         ampSlideScroll.setAttribute('loop', '');
@@ -70,7 +79,7 @@ describes.realWin(
         img.setAttribute('width', '400');
         img.setAttribute('height', '300');
         // See https://github.com/ampproject/amphtml/issues/3989
-        img.style.display = 'inline';
+        img.style.setProperty('display', 'inline');
         if (i == 0) {
           img.setAttribute('data-slide-id', 'slide-id');
         }
@@ -1483,6 +1492,28 @@ describes.realWin(
         buildDom(el2);
 
         expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      it('buildDom should behave same in browser and in WorkerDOM', async () => {
+        const browserCarousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        const workerCarousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false,
+          /* opt_hasAutoPlay */ undefined,
+          /* opt_autoplayLoops */ undefined,
+          createWorkerDomDoc()
+        );
+        buildDom(browserCarousel);
+        buildDom(workerCarousel);
+
+        const browserHtml = getDeterministicOuterHTML(browserCarousel);
+        const workerDomHtml = getDeterministicOuterHTML(workerCarousel);
+        expect(workerDomHtml).equal(browserHtml);
       });
 
       it('buildCallback should assign ivars even when server rendered', async () => {

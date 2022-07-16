@@ -6,13 +6,15 @@
  * impacts on click-throughs.
  */
 
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+
 import {
   AMP_EXPERIMENT_ATTRIBUTE,
   EXPERIMENT_ATTRIBUTE,
   mergeExperimentIds,
 } from './utils';
-import {Services} from '#service';
-import {parseQueryString} from '#core/types/string/url';
 
 /** @typedef {{
  *    control: string,

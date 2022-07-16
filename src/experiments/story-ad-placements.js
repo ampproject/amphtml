@@ -1,8 +1,9 @@
 import {randomlySelectUnsetExperiments} from '#experiments';
 
-import {ExperimentInfoDef} from './experiments.type';
-
-/** @const */
+/**
+ * @const
+ * @type {Object<string, string>}
+ */
 export const StoryAdPlacements = {
   ID: 'story-ad-placements',
   CONTROL: '31060567',
@@ -13,10 +14,10 @@ export const StoryAdPlacements = {
 
 /**
  * Choose which placement algorithm and density for given win.
- * @param {!Window} win
+ * @param {Window} win
  */
 export function divertStoryAdPlacements(win) {
-  /** @type {!ExperimentInfoDef} */
+  /** @type {import('./types.d').ExperimentInfo} */
   const experimentInfo = {
     experimentId: StoryAdPlacements.ID,
     isTrafficEligible: () => true,

@@ -1,7 +1,5 @@
-import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 import {getAddThisMode} from './addthis-utils/mode';
-
-import {dict} from '#core/types/object';
+import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 
 /**
  * Configuration request status enum.
@@ -124,7 +122,7 @@ export class ConfigManager {
     const pubData = this.dataForPubId_[pubId];
     const {config: dashboardConfig, requestStatus: configRequestStatus} =
       pubData;
-    const jsonToSend = dict({
+    const jsonToSend = {
       'event': CONFIGURATION_EVENT,
       'shareConfig': shareConfig,
       'atConfig': atConfig,
@@ -134,7 +132,7 @@ export class ConfigManager {
       'containerClassName': containerClassName,
       'configRequestStatus': configRequestStatus,
       'dashboardConfig': dashboardConfig,
-    });
+    };
 
     if (
       dashboardConfig &&

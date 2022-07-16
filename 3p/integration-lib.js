@@ -1,5 +1,4 @@
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
 
@@ -15,7 +14,7 @@ import {IntegrationAmpContext} from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 
-import {urls} from '../src/config';
+import * as urls from '../src/config/urls';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**
@@ -314,7 +313,7 @@ export function parseFragment(fragment) {
     if (json.startsWith('{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());
+    return /** @type {!JsonObject} */ (json ? parseJson(json) : {});
   } catch (err) {
     return null;
   }

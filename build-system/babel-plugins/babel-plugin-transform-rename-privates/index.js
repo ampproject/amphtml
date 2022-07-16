@@ -28,15 +28,16 @@ module.exports = function (babel) {
         return;
       }
 
-      const {name} = key.node;
+      const {node} = key;
+      const {name} = node;
       if (name.endsWith('_AMP_PRIVATE_')) {
         return;
       }
 
-      if (!name.endsWith('_')) {
+      if (!name.endsWith('_') || name === '__proto__') {
         return;
       }
-      key.replaceWith(t.identifier(`${name}AMP_PRIVATE_`));
+      key.replaceWith(t.inherits(t.identifier(`${name}AMP_PRIVATE_`), node));
     };
   }
 

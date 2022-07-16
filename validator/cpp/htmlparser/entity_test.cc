@@ -1,4 +1,4 @@
-#include "entity.h"
+#include "cpp/htmlparser/entity.h"
 
 #include "gtest/gtest.h"
 

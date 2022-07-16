@@ -1,9 +1,9 @@
-#ifndef HTMLPARSER__CSS_AMP4ADS_PARSE_CSS_H_
-#define HTMLPARSER__CSS_AMP4ADS_PARSE_CSS_H_
+#ifndef CPP_HTMLPARSER_CSS_AMP4ADS_PARSE_CSS_H_
+#define CPP_HTMLPARSER_CSS_AMP4ADS_PARSE_CSS_H_
 
 #include <string>
 #include <vector>
-#include "css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
 //
 // This is *not* meant to be a public API.
 //
@@ -22,4 +22,4 @@ void ValidateAmp4AdsCss(const Stylesheet& stylesheet,
                         std::vector<std::unique_ptr<ErrorToken>>* errors);
 }  // namespace htmlparser::css
 
-#endif  // HTMLPARSER__CSS_AMP4ADS_PARSE_CSS_H_
+#endif  // CPP_HTMLPARSER_CSS_AMP4ADS_PARSE_CSS_H_

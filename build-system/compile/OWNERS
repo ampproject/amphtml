@@ -24,10 +24,6 @@
       ],
     },
     {
-      pattern: '{closure-compile,compile}.js',
-      owners: [{name: 'rsimha', notify: true}],
-    },
-    {
       pattern: 'internal-version.js',
       owners: [{name: 'danielrozenberg', notify: true}],
     },

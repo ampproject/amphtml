@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /**
  * @fileoverview Registration and getter functions for AMP services.
  *

@@ -1,12 +1,14 @@
-#ifndef HTMLPARSER__DOCUMENT_H_
-#define HTMLPARSER__DOCUMENT_H_
+#ifndef CPP_HTMLPARSER_DOCUMENT_H_
+#define CPP_HTMLPARSER_DOCUMENT_H_
 
 #include <memory>
 #include <vector>
 
-#include "allocator.h"
-#include "node.h"
-#include "token.h"
+#include "absl/status/status.h"
+#include "cpp/htmlparser/allocator.h"
+#include "cpp/htmlparser/iterators.h"
+#include "cpp/htmlparser/node.h"
+#include "cpp/htmlparser/token.h"
 
 namespace htmlparser {
 
@@ -68,11 +70,21 @@ struct DocumentMetadata {
 // The document class is a wrapper for the DOM tree exposed with RootNode().
 // All the nodes inside the document are owned by document. The nodes are
 // destroyed when Document objects goes out of scope or deleted.
+//
+// Usage:
+// unique_ptr<Document> doc = parser.Parse(html);
+// if (!doc->status().ok()) {
+//   LOG(ERROR) << "Parsing failed. " << doc->status();
+//   return;
+// }
+//
+// Node* root_node = doc.RootNode();
+// ...
+//
 class Document {
  public:
   Document();
   ~Document() = default;
-
 
   const DocumentMetadata& Metadata() const { return metadata_; }
 
@@ -80,12 +92,26 @@ class Document {
   // document is destructed.
   Node* NewNode(NodeType node_type, Atom atom = Atom::UNKNOWN);
 
+  // Returns OK if Document is result of successful html parsing.
+  // Accessing any fields/methods when status() != OK is undefined behavior.
+  absl::Status status() const {
+    return status_;
+  }
+
   // Returns the root node of a DOM tree. Node* owned by document.
   Node* RootNode() const { return root_node_; }
 
   // Returns list of nodes parsed as a document fragment. All the Nodes are
   // owned by the document.
   const std::vector<Node*> FragmentNodes() const { return fragment_nodes_; }
+
+  using const_iterator = NodeIterator<true>;
+  using iterator = NodeIterator<false>;
+
+  iterator begin() { return iterator{root_node_}; }
+  iterator end() { return iterator{nullptr}; }
+  const_iterator cbegin() const { return const_iterator{root_node_}; }
+  const_iterator cend() const { return const_iterator{nullptr}; }
 
  private:
   // Returns a new node with the same type, data and attributes.
@@ -101,6 +127,8 @@ class Document {
   std::vector<Node*> fragment_nodes_{};
   std::size_t html_src_bytes_;
   DocumentMetadata metadata_;
+  // Document parsing status.
+  absl::Status status_ = absl::OkStatus();
 
   friend class Parser;
   friend std::unique_ptr<Document> Parse(std::string_view html);
@@ -117,4 +145,4 @@ class Document {
 }  // namespace htmlparser
 
 
-#endif  // HTMLPARSER__DOCUMENT_H_
+#endif  // CPP_HTMLPARSER_DOCUMENT_H_

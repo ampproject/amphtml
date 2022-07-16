@@ -1,10 +1,10 @@
-#include "parse-viewport.h"
+#include "cpp/engine/parse-viewport.h"
 
 #include <map>
 
 #include "absl/strings/ascii.h"
-#include "utf8-util.h"
-#include "strings.h"
+#include "cpp/engine/utf8-util.h"
+#include "cpp/htmlparser/strings.h"
 
 using std::map;
 

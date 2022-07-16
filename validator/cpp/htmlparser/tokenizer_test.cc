@@ -1,7 +1,7 @@
-#include "tokenizer.h"
+#include "cpp/htmlparser/tokenizer.h"
 
 #include "gtest/gtest.h"
-#include "token.h"
+#include "cpp/htmlparser/token.h"
 
 // TODO: Add more complex html not-well-formed documents to cover
 // complex tokenization scenarios. Eg. <html>><head><<body;>> etc..

@@ -1,3 +1,13 @@
+import {Deferred} from '#core/data-structures/promise';
+import {once} from '#core/types/function';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+import {getRandomString64} from '#service/cid-impl';
+
+import {dev, devAssert} from '#utils/log';
+
+import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
@@ -12,15 +22,9 @@ import {
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from './consent-info';
-import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert} from '#utils/log';
-import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
-import {hasOwn} from '#core/types/object';
-import {once} from '#core/types/function';
-import {getRandomString64} from '#service/cid-impl';
+
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 

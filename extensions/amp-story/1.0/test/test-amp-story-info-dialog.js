@@ -1,16 +1,18 @@
-import {
-  Action,
-  AmpStoryStoreService,
-  StateProperty,
-} from '../amp-story-store-service';
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   DIALOG_VISIBLE_CLASS,
   InfoDialog,
   MOREINFO_VISIBLE_CLASS,
 } from '../amp-story-info-dialog';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 
 describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   let moreInfoLinkUrl;
@@ -28,6 +30,9 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     embedded = true;

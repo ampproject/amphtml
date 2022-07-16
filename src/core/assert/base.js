@@ -100,7 +100,7 @@ function assertType_(
   if (isArray(opt_message)) {
     /** @type {AssertionFunctionArrayDef} */ (assertFn)(
       shouldBeTruthy,
-      /** @type {Array} */ (opt_message).concat([subject])
+      /** @type {Array<*>} */ (opt_message).concat([subject])
     );
   } else {
     /** @type {AssertionFunctionStringDef} */ (assertFn)(

@@ -1,7 +1,7 @@
+import {readFileSync} from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
-import {readFileSync} from 'fs';
-import {OptionSet} from '../utilities/option-set';
+
 import {Lazy} from '../utilities/lazy';
 
 const argv = minimist(process.argv.slice(2));
@@ -66,9 +66,7 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
 /**
  * Replace the src for every stories script tag.
  */
-export default function (
-  _options: OptionSet = {}
-): (tree: posthtml.Node) => void {
+export default function (): (tree: posthtml.Node) => void {
   return function (tree: posthtml.Node) {
     let isAmp = false;
     tree.match({tag: 'html'}, function (html: posthtml.Node): posthtml.Node {

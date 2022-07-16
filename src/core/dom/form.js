@@ -1,29 +1,20 @@
 import {iterateCursor} from '#core/dom';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
-/**
- * Stub type until an AmpForm interface is available in typechecked-land.
- * Should be satisfied by `#extensions/amp-form/0.1/amp-form.AmpForm`
- * @typedef {?}
- */
-let AmpFormDef;
-
-/** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
 
 /**
- * @param {Element} element
- * @return {AmpFormDef}
+ * @param {HTMLElement} element
+ * @return {AmpForm}
  */
 export function formOrNullForElement(element) {
   return element[FORM_PROP_] || null;
 }
 
 /**
- * @param {Element} element
- * @param {AmpFormDef} form
+ * @param {HTMLElement} element
+ * @param {AmpForm} form
  */
 export function setFormForElement(element, form) {
   element[FORM_PROP_] = form;
@@ -37,7 +28,7 @@ export function setFormForElement(element, form) {
  */
 export function getFormAsObject(form) {
   const {elements} = form;
-  const data = dict();
+  const data = /** @type {!JsonObject} */ ({});
   // <button> is handled separately
   const submittableTagsRegex = /^(?:input|select|textarea)$/i;
   // type=submit is handled separately

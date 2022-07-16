@@ -1,5 +1,6 @@
-import {ownProperty} from '#core/types/object';
 import {tryFocus} from '#core/dom';
+import {ownProperty} from '#core/types/object';
+
 import {userAssert} from '#utils/log';
 
 const TAG = 'amp-autocomplete';

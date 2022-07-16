@@ -28,10 +28,27 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
+ * @param {string} camelCase camel cased string
+ * @return {string} hyphen-cased string
+ */
+export function camelCaseToHyphenCase(camelCase) {
+  const hyphenated = camelCase.replace(
+    /[A-Z]/g,
+    (match) => '-' + match.toLowerCase()
+  );
+
+  // For o-foo or ms-foo, we need to convert to -o-foo and ms-foo
+  if (vendorPrefixes.some((prefix) => hyphenated.startsWith(prefix + '-'))) {
+    return `-${hyphenated}`;
+  }
+  return hyphenated;
+}
+
+/**
   Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {Object} style
+ * @param {Object<string, *>} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
@@ -49,7 +66,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @param {Object} style
+ * @param {*} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
@@ -60,6 +77,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
     // CSS vars are returned as is.
     return camelCase;
   }
+
   if (!propertyNameCache) {
     propertyNameCache = map();
   }
@@ -91,7 +109,7 @@ export function setImportantStyles(element, styles) {
   const {style} = element;
   for (const k in styles) {
     style.setProperty(
-      getVendorJsPropertyName(style, k),
+      camelCaseToHyphenCase(getVendorJsPropertyName(style, k)),
       String(styles[k]),
       'important'
     );
@@ -116,11 +134,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
     return;
   }
   const styleValue = opt_units ? value + opt_units : value;
-  if (isVar(propertyName)) {
-    element.style.setProperty(propertyName, styleValue);
-  } else {
-    element.style[propertyName] = styleValue;
-  }
+  element.style.setProperty(camelCaseToHyphenCase(propertyName), styleValue);
 }
 
 /**
@@ -142,7 +156,7 @@ export function getStyle(element, property, opt_bypassCache) {
   if (isVar(propertyName)) {
     return element.style.getPropertyValue(propertyName);
   }
-  return element.style[propertyName];
+  return /** @type {*} */ (element.style)[propertyName];
 }
 
 /**

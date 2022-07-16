@@ -1,6 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
 import {setStyle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 
@@ -32,7 +31,7 @@ export function renderCreativeIntoFriendlyFrame(
     createElementWithAttributes(
       /** @type {!Document} */ (element.ownerDocument),
       'iframe',
-      dict({
+      {
         // NOTE: It is possible for either width or height to be 'auto',
         // a non-numeric value.
         'height': size.height,
@@ -44,7 +43,7 @@ export function renderCreativeIntoFriendlyFrame(
         'role': 'region',
         'aria-label': 'Advertisement',
         'tabindex': '0',
-      })
+      }
     )
   );
   iframe.classList.add('i-amphtml-fill-content');

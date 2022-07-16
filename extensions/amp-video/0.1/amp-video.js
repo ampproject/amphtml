@@ -1,19 +1,4 @@
-import {tryPlay} from '#core/dom/video';
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents_Enum} from '../../../src/video-interface';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {
-  childElement,
-  childElementByTag,
-  childElementsByTag,
-  matches,
-} from '#core/dom/query';
-import {descendsFromStory} from '#utils/story';
-import {dev, devAssert, user} from '#utils/log';
 import {
   addAttributesToElement,
   dispatchCustomEvent,
@@ -21,27 +6,47 @@ import {
   removeElement,
 } from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {fetchCachedSources} from './video-cache';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getBitrateManager} from './flexible-bitrate';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isExperimentOn} from '#experiments';
-import {listen, listenOncePromise} from '#utils/event-helper';
-import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {
+  childElement,
+  childElementByTag,
+  childElementsByTag,
+  matches,
+} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
 } from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {listen, listenOncePromise} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+import {descendsFromStory} from '#utils/story';
+
+import {getBitrateManager} from './flexible-bitrate';
+import {fetchCachedSources} from './video-cache';
+
+import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {getMode} from '../../../src/mode';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-video';
 
@@ -114,7 +119,7 @@ export class AmpVideo extends AMP.BaseElement {
    * dependent on the value of `prerenderAllowed()`.
    *
    * @override
-   * @nocollapse
+   *
    */
   static prerenderAllowed(element) {
     // Only allow prerender if video sources are cached on CDN or remote video
@@ -163,6 +168,9 @@ export class AmpVideo extends AMP.BaseElement {
 
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {boolean} whether another element is in charge of the captions. */
+    this.hasCaptionsRenderer_ = false;
   }
 
   /**
@@ -382,7 +390,8 @@ export class AmpVideo extends AMP.BaseElement {
     // If not in prerender mode, propagate everything.
     let pendingOriginPromise;
     if (
-      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER ||
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PREVIEW
     ) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
@@ -768,6 +777,13 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsElement) {
       return;
     }
+    const ampdoc = this.getAmpDoc();
+    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      ampdoc,
+      'amp-story-captions',
+      '0.1'
+    );
+    this.hasCaptionsRenderer_ = true;
     captionsElement.getImpl().then((impl) => {
       if (impl.setVideoElement) {
         impl.setVideoElement(this.video_);
@@ -1027,6 +1043,23 @@ export class AmpVideo extends AMP.BaseElement {
   /** @override */
   seekTo(timeSeconds) {
     this.video_.currentTime = timeSeconds;
+  }
+
+  /**
+   * Shows or hides the captions.
+   * @param {boolean} captionsState
+   * @public
+   */
+  toggleCaptions(captionsState) {
+    toArray(this.video_.textTracks).forEach((track) => {
+      if (captionsState) {
+        // If a custom captions renderer is configured (e.g. amp-story-captions),
+        // enable captions but keep them hidden to avoid double rendering.
+        track.mode = this.hasCaptionsRenderer_ ? 'hidden' : 'showing';
+      } else {
+        track.mode = 'disabled';
+      }
+    });
   }
 }
 

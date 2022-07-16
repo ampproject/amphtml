@@ -1,12 +1,16 @@
-import * as ResourceTiming from '../resource-timing';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import * as log from '#utils/log';
-import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
-import {RequestHandler, expandPostMessage} from '../requests';
+
 import {Services} from '#service';
-import {installLinkerReaderService} from '../linker-reader';
-import {installSessionServiceForTesting} from '../session-manager';
+
+import * as log from '#utils/log';
+
 import {macroTask} from '#testing/helpers';
+
+import {installLinkerReaderService} from '../linker-reader';
+import {RequestHandler, expandPostMessage} from '../requests';
+import * as ResourceTiming from '../resource-timing';
+import {installSessionServiceForTesting} from '../session-manager';
+import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
 
 describes.realWin('Requests', {amp: 1}, (env) => {
   let ampdoc;

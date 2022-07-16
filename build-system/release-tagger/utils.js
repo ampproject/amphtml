@@ -4,7 +4,7 @@
  */
 
 const dedent = require('dedent');
-const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
+const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {Octokit} = require('@octokit/rest');
 
 // setup

@@ -10,14 +10,15 @@
  * </code>
  */
 
-import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {scopedQuerySelectorAll} from '#core/dom/query';
 import {
   assertDoesNotContainDisplay,
   setImportantStyles,
   setStyles,
 } from '#core/dom/style';
+
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {scopedQuerySelectorAll} from '#core/dom/query';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -58,9 +59,14 @@ export let PresetDetails;
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element.parentElement);
+  }
+
+  /** @override  */
+  static previewAllowed() {
+    return true;
   }
 
   /** @param {!AmpElement} element */
@@ -102,7 +108,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
     );
 
-    Array.prototype.forEach.call(elementsToUpgradeStyles, (element) => {
+    elementsToUpgradeStyles.forEach((element) => {
       this.setCssGridStyles_(element);
     });
   }

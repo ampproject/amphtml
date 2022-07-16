@@ -2,7 +2,9 @@ import {
   IframeTransportClient,
   IframeTransportContext,
 } from '#3p/iframe-transport-client';
+
 import {MessageType_Enum} from '#core/3p-frame-messaging';
+
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

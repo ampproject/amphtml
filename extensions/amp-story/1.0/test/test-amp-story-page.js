@@ -1,19 +1,26 @@
-import * as VideoUtils from '#core/dom/video';
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
+import {expect} from 'chai';
+
 import {Deferred} from '#core/data-structures/promise';
-import {LocalizationService} from '#service/localization';
-import {MediaType} from '../media-pool';
-import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
+import {scopedQuerySelectorAll} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
+import * as VideoUtils from '#core/dom/video';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {afterRenderPromise} from '#testing/helpers';
+
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {scopedQuerySelectorAll} from '#core/dom/query';
-import {afterRenderPromise} from '#testing/helpers';
+import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {MediaType_Enum} from '../media-pool';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -23,6 +30,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let html;
   let gridLayerEl;
   let page;
+  let story;
   let storeService;
   let isPerformanceTrackingOn;
 
@@ -37,8 +45,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
       getMaxMediaElementCounts: () => ({
-        [MediaType.VIDEO]: 8,
-        [MediaType.AUDIO]: 8,
+        [MediaType_Enum.VIDEO]: 8,
+        [MediaType_Enum.AUDIO]: 8,
       }),
     };
 
@@ -46,6 +54,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
@@ -58,7 +69,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       };
     });
 
-    const story = win.document.createElement('amp-story');
+    story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
     // Makes whenUpgradedToCustomElement() resolve immediately.
     story.createdCallback = Promise.resolve();
@@ -71,14 +82,17 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     element.appendChild(gridLayerEl);
     story.appendChild(element);
     win.document.body.appendChild(story);
-
-    page = new AmpStoryPage(element);
-    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
+    initializePageWithElement(element);
   });
 
   afterEach(() => {
     element.remove();
   });
+
+  function initializePageWithElement(el) {
+    page = new AmpStoryPage(el);
+    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
+  }
 
   it('should build a page', async () => {
     page.buildCallback();
@@ -138,13 +152,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     await page.layoutCallback();
     expect(spy).to.have.been.calledOnce;
-  });
-
-  it('should call renderOpenAttachmentUI_ in beforeVisible', async () => {
-    const spy = env.sandbox.spy(page, 'renderOpenAttachmentUI_');
-    page.buildCallback();
-    await page.layoutCallback();
-    expect(spy).to.have.been.calledTwice;
   });
 
   it('should mark page as loaded after media is loaded', async () => {
@@ -406,6 +413,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should use storyNextUp value as default for auto-advance-after', async () => {
+    initializePageWithElement(element);
     env.sandbox
       .stub(Services.viewerForDoc(element), 'getParam')
       .withArgs('storyNextUp')
@@ -417,23 +425,17 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should not use storyNextUp to override auto-advance-after value', async () => {
+    element.setAttribute('auto-advance-after', '20000ms');
+    // Reinitializing the AmpStoryPage because the auto-advance-after is used
+    // in its constructor.
+    initializePageWithElement(element);
     env.sandbox
       .stub(Services.viewerForDoc(element), 'getParam')
       .withArgs('storyNextUp')
       .returns('5s');
-    element.setAttribute('auto-advance-after', '20000ms');
     page.buildCallback();
 
     expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
-  });
-
-  it('should not use storyNextUp when in viewer control group', () => {
-    env.sandbox
-      .stub(Services.viewerForDoc(element), 'getParam')
-      .withArgs('storyNextUp')
-      .returns('999999ms');
-    page.buildCallback();
-    expect(element).not.to.have.attribute('auto-advance-after');
   });
 
   it('should stop the advancement when state becomes not active', async () => {
@@ -627,277 +629,26 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(playButtonEl.getAttribute('role')).to.eql('button');
   });
 
-  it('should not build the open attachment UI if no attachment', async () => {
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
+  it('should install the page-attachment extension if attachment', async () => {
+    const extensionSpy = env.sandbox.spy(
+      Services.extensionsFor(win),
+      'installExtensionForDoc'
     );
-    expect(openAttachmentEl).to.not.exist;
-  });
-
-  it('should build the open attachment UI if attachment', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
-    element.appendChild(attachmentEl);
+    page.element.appendChild(attachmentEl);
 
     page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
+    expect(extensionSpy).to.have.been.calledWith(
+      env.sandbox.match.any,
+      'amp-story-page-attachment',
+      '0.1'
     );
-    expect(openAttachmentEl).to.exist;
-  });
-
-  it('should build the legacy outlinking amp-story-page-attachment UI with target="_top" to navigate in top window. For viewers, this ensures the link will open in the parent window.', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('href', 'google.com');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
-  });
-
-  it('should build amp-story-page-outlink UI with target="_top" to navigate in top level browsing context. For viewers, this ensures the link will open in the parent window.', async () => {
-    const outlinkEl = win.document.createElement('amp-story-page-outlink');
-    outlinkEl.setAttribute('layout', 'nodisplay');
-    element.appendChild(outlinkEl);
-    const anchorEl = win.document.createElement('a');
-    outlinkEl.appendChild(anchorEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
-  });
-
-  it('should build the open outlink UI with same codepath as page attachment', async () => {
-    const outlinkEl = win.document.createElement('amp-story-page-outlink');
-    outlinkEl.setAttribute('layout', 'nodisplay');
-    element.appendChild(outlinkEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openoutlinkEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-    expect(openoutlinkEl).to.exist;
-  });
-
-  it('should build the amp-story-page-attachment UI with one image', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-image', 'nodisplay');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(
-      openAttachmentEl.querySelector(
-        '.i-amphtml-story-inline-page-attachment-img'
-      )
-    ).to.exist;
-  });
-
-  it('should build the amp-story-page-attachment UI with two images', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-image', 'nodisplay');
-    attachmentEl.setAttribute('cta-image-2', 'nodisplay');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(
-      openAttachmentEl.querySelectorAll(
-        '.i-amphtml-story-inline-page-attachment-img'
-      ).length
-    ).to.equal(2);
-  });
-
-  it('should NOT rewrite the amp-story-page-attachment UI images to a proxy URL', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-
-    const src = 'https://examples.com/foo.bar.png';
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-image', src);
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    const imgEl = openAttachmentEl.querySelector(
-      '.i-amphtml-story-inline-page-attachment-img'
-    );
-    expect(imgEl.getAttribute('style')).to.contain(src);
-  });
-
-  it('should build the amp-story-page-attachment with href (legacy) UI', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('href', 'www.google.com');
-    element.appendChild(attachmentEl);
-
-    await page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(
-      openAttachmentEl.querySelector(
-        '.i-amphtml-story-page-open-attachment-link-icon'
-      )
-    ).to.exist;
-  });
-
-  it('should build the amp-story-page-outlink UI', async () => {
-    const outlinkEl = win.document.createElement('amp-story-page-outlink');
-    outlinkEl.setAttribute('layout', 'nodisplay');
-    element.appendChild(outlinkEl);
-    const anchorChild = win.document.createElement('a');
-    outlinkEl.appendChild(anchorChild);
-
-    await page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(
-      openAttachmentEl.querySelector(
-        '.i-amphtml-story-page-open-attachment-link-icon'
-      )
-    ).to.exist;
-  });
-
-  it('should build the open attachment UI with custom text', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-text', 'Custom text');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentLabelEl = element.querySelector(
-      '.i-amphtml-story-page-attachment-label'
-    );
-    expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
-  });
-
-  it('should use cta-text attribute when data-cta-text also exist', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('cta-text', 'CTA text');
-    attachmentEl.setAttribute('data-cta-text', 'data CTA text');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentLabelEl = element.querySelector(
-      '.i-amphtml-story-page-attachment-label'
-    );
-
-    expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
-  });
-
-  it('should propogate the amp-story-page-attachment title attribute to the cta button', async () => {
-    const attachmentEl = win.document.createElement('amp-story-page-outlink');
-    attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('title', 'cta title');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
-  });
-
-  it('should propogate the amp-story-page-outlink title attribute to the cta button', async () => {
-    const outlinkEl = win.document.createElement('amp-story-page-outlink');
-    outlinkEl.setAttribute('layout', 'nodisplay');
-    element.appendChild(outlinkEl);
-
-    const anchorChild = win.document.createElement('a');
-    anchorChild.setAttribute('href', 'google.com');
-    anchorChild.setAttribute('title', 'cta title');
-    outlinkEl.appendChild(anchorChild);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
-    );
-
-    expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
   });
 
   it('should start tracking media performance when entering the page', async () => {
@@ -970,5 +721,88 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     expect(startMeasuringStub).to.not.have.been.called;
+  });
+
+  it('should only allow the prerender visibility state if it is the first page', async () => {
+    const pageElement2 = win.document.createElement('amp-story-page');
+    const pageElement3 = win.document.createElement('amp-story-page');
+    story.appendChild(pageElement2);
+    story.appendChild(pageElement3);
+
+    expect(AmpStoryPage.prerenderAllowed(element)).to.be.true;
+    expect(AmpStoryPage.prerenderAllowed(pageElement2)).to.be.false;
+    expect(AmpStoryPage.prerenderAllowed(pageElement3)).to.be.false;
+  });
+
+  it('should always allow the preview visibility state', async () => {
+    const pageElement2 = win.document.createElement('amp-story-page');
+    const pageElement3 = win.document.createElement('amp-story-page');
+    story.appendChild(pageElement2);
+    story.appendChild(pageElement3);
+
+    expect(AmpStoryPage.previewAllowed(element)).to.be.true;
+    expect(AmpStoryPage.previewAllowed(pageElement2)).to.be.true;
+    expect(AmpStoryPage.previewAllowed(pageElement3)).to.be.true;
+  });
+
+  describe('maybeConvertCtaLayerToPageOutlink_', () => {
+    it('should do nothing if amp-story-cta-layer has two anchor tags', () => {
+      page.element.appendChild(
+        <amp-story-cta-layer>
+          <a href="https://www.ampproject.org" class="button">
+            CTA Text!
+          </a>
+          <a>dummy anchor</a>
+        </amp-story-cta-layer>
+      );
+
+      page.buildCallback();
+
+      expect(page.element.querySelector('amp-story-cta-layer')).to.be.not.null;
+    });
+
+    it('should do nothing if the anchor tag in amp-story-cta-layer has no href attribute', () => {
+      page.element.appendChild(
+        <amp-story-cta-layer>
+          <a class="button">CTA Text!</a>
+        </amp-story-cta-layer>
+      );
+
+      page.buildCallback();
+
+      expect(page.element.querySelector('amp-story-cta-layer')).to.be.not.null;
+    });
+
+    describe('should convert cta layer to page outlink tag', async () => {
+      beforeEach(() => {
+        page.element.appendChild(
+          <amp-story-cta-layer>
+            <a href="https://www.ampproject.org" class="button">
+              CTA Text!
+            </a>
+          </amp-story-cta-layer>
+        );
+      });
+
+      it('should remove amp-story-cta-layer', () => {
+        page.buildCallback();
+
+        expect(page.element.querySelector('amp-story-cta-layer')).to.be.null;
+      });
+
+      it('should append amp-story-page-outlink', () => {
+        page.buildCallback();
+
+        const outlinkElAfterBuild = page.element.querySelector(
+          'amp-story-page-outlink'
+        );
+        const expectedOutlinkEl = (
+          <amp-story-page-outlink layout="nodisplay">
+            <a href="https://www.ampproject.org">CTA Text!</a>
+          </amp-story-page-outlink>
+        );
+        expect(outlinkElAfterBuild.isEqualNode(expectedOutlinkEl)).is.true;
+      });
+    });
   });
 });

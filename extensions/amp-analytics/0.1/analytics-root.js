@@ -1,21 +1,23 @@
-import {ScrollManager} from './scroll-manager';
-import {Services} from '#service';
+import {tryResolve} from '#core/data-structures/promise';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
 } from '#core/dom/query';
-import {dev, user, userAssert} from '#utils/log';
-import {getDataParamsFromAttributes} from '#core/dom';
-import {getMode} from '../../../src/mode';
 import {isArray} from '#core/types';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {map} from '#core/types/object';
 
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {ScrollManager} from './scroll-manager';
 import {provideVisibilityManager} from './visibility-manager';
 
-import {tryResolve} from '#core/data-structures/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
+import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-analytics/analytics-root';
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;

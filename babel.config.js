@@ -10,6 +10,7 @@
 'use strict';
 
 const {cyan, yellow} = require('kleur/colors');
+
 const {log} = require('./build-system/common/logging');
 
 /**
@@ -18,13 +19,12 @@ const {log} = require('./build-system/common/logging');
  */
 const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
-  ['post-closure', 'getPostClosureConfig'],
-  ['pre-closure', 'getPreClosureConfig'],
-  ['bento-element-minified', 'getBentoElementMinifiedConfig'],
-  ['bento-element-unminified', 'getBentoElementUnminifiedConfig'],
+  ['nomodule-loader', 'getNoModuleLoaderConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
+  ['unminified-ssr-ready', 'getUnminifiedSsrReadyConfig'],
   ['minified', 'getMinifiedConfig'],
+  ['minified-ssr-ready', 'getMinifiedSsrReadyConfig'],
   ['jss', 'getJssConfig'],
   ['@babel/eslint-parser', 'getEslintConfig'],
   ['is-enum-value', 'getEmptyConfig'],

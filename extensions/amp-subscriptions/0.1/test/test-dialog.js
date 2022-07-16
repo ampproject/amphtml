@@ -1,8 +1,10 @@
-import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
-import {Dialog} from '../dialog';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {installStylesForDoc} from '../../../../src/style-installer';
+import {Dialog} from '../dialog';
 
 describes.realWin('AmpSubscriptions Dialog', {amp: true}, (env) => {
   let win, doc, ampdoc;

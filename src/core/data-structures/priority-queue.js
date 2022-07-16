@@ -7,7 +7,10 @@ export class PriorityQueue {
    * Creates an instance of PriorityQueue.
    */
   constructor() {
-    /** @private @const {Array<{item: T, priority: number}>} */
+    /**
+     * @type {Array<{item: T, priority: number}>}
+     * @private
+     */
     this.queue_ = [];
   }
 
@@ -67,7 +70,7 @@ export class PriorityQueue {
   }
 
   /**
-   * @param {function(T):any} callback
+   * @param {function(T):*} callback
    */
   forEach(callback) {
     let index = this.length;
@@ -82,10 +85,11 @@ export class PriorityQueue {
    * @return {?T}
    */
   dequeue() {
-    if (!this.length) {
+    const lastItem = this.queue_.pop();
+    if (!lastItem) {
       return null;
     }
-    return this.queue_.pop().item;
+    return lastItem.item;
   }
 
   /**

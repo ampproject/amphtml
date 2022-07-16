@@ -22,23 +22,14 @@ const {cyan, green, yellow} = require('kleur/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {getStdout} = require('../common/process');
-const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
 const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const ARTIFACT_DIRECTORY = '/tmp/artifacts/';
-const ARTIFACT_FILE_NAME = `${ARTIFACT_DIRECTORY}/amp_nomodule_build.tar.gz`;
 const FILELIST_PATH = '/tmp/filelist.txt';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p', 'dist.tools'];
-const APP_SERVING_DIRS = [
-  ...BUILD_OUTPUT_DIRS,
-  'examples',
-  'test/manual',
-  'test/fixtures/e2e',
-];
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#create-a-git-branch';
@@ -244,8 +235,13 @@ function storeBuildToWorkspace_(containerDirectory) {
         );
       }
     }
-    // Bento components are compiled inside the extension source file.
-    for (const componentFile of fastGlob.sync('extensions/*/?.?/dist/*.js')) {
+
+    for (const componentFile of [
+      // Store Bento components compiled code from extensions
+      ...fastGlob.sync('extensions/*/?.?/dist/*.(js|css)'),
+      // Store Bento components compiled code from src/bento
+      ...fastGlob.sync('src/bento/components/*/1.0/dist/*.(js|css)'),
+    ]) {
       fs.ensureDirSync(
         `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
           componentFile
@@ -289,32 +285,6 @@ function storeExperimentBuildToWorkspace(exp) {
 }
 
 /**
- * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
- * @return {Promise<void>}
- */
-async function processAndStoreBuildToArtifacts() {
-  if (!isCircleciBuild()) {
-    return;
-  }
-
-  await replaceUrls('test/manual');
-  await replaceUrls('examples');
-
-  const loggingPrefix = getLoggingPrefix();
-
-  logWithoutTimestamp(
-    `\n${loggingPrefix} Compressing ` +
-      cyan(APP_SERVING_DIRS.join(', ')) +
-      ' into ' +
-      cyan(ARTIFACT_FILE_NAME) +
-      '...'
-  );
-  await fs.ensureDir(ARTIFACT_DIRECTORY);
-  execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
-  execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
-}
-
-/**
  * Generates a file with a comma-separated list of test file paths that CircleCI
  * should execute in a parallelized job shard.
  *
@@ -351,6 +321,5 @@ module.exports = {
   storeNomoduleBuildToWorkspace,
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
-  processAndStoreBuildToArtifacts,
   generateCircleCiShardTestFileList,
 };

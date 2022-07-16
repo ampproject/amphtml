@@ -27,23 +27,6 @@ export function map(opt_initial) {
 }
 
 /**
- * Return an empty JsonObject or makes the passed in object literal
- * an JsonObject.
- * The JsonObject type is just a simple object that is at-dict.
- * See
- * https://github.com/google/closure-compiler/wiki/@struct-and-@dict-Annotations
- * for what a dict is type-wise.
- * The linter enforces that the argument is, in fact, at-dict like.
- * @param {Object=} opt_initial
- * @return {JsonObject}
- */
-export function dict(opt_initial) {
-  // We do not copy. The linter enforces that the passed in object is a literal
-  // and thus the caller cannot have a reference to it.
-  return /** @type {JsonObject} */ (opt_initial || {});
-}
-
-/**
  * Checks if the given key is a property in the map.
  *
  * @param {T}  obj a map like property.
@@ -59,7 +42,7 @@ export function hasOwn(obj, key) {
  * Returns obj[key] iff key is obj's own property (is not inherited).
  * Otherwise, returns undefined.
  *
- * @param {Object} obj
+ * @param {Object<string, *>} obj
  * @param {string} key
  * @return {*}
  */
@@ -86,6 +69,7 @@ export function ownProperty(obj, key) {
  */
 export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.
+  /** @type {Object[]} */
   const seen = [];
 
   /** @type {DeepMergeTuple[]} */
@@ -107,39 +91,39 @@ export function deepMerge(target, source, depth = 10) {
       continue;
     }
     for (const key of Object.keys(s)) {
-      const newValue = s[key];
+      const newValue = /** @type {*} */ (s)[key];
       // Perform a deep merge IFF both target and source have the same key
       // whose corresponding values are objects.
       if (hasOwn(t, key)) {
-        const oldValue = t[key];
+        const oldValue = /** @type {*} */ (t)[key];
         if (isObject(newValue) && isObject(oldValue)) {
           queue.push({t: oldValue, s: newValue, d: d + 1});
           continue;
         }
       }
-      t[key] = newValue;
+      /** @type {*} */ (t)[key] = newValue;
     }
   }
   return target;
 }
 
 /**
- * @param {Object} o An object to remove properties from
+ * @param {Object<string, *>} o An object to remove properties from
  * @param {Array<string>} props A list of properties to remove from the Object
- * @return {Object} An object with the given properties removed
+ * @return {Object<string, *>} An object with the given properties removed
  */
 export function omit(o, props) {
   return Object.keys(o).reduce((acc, key) => {
     if (!props.includes(key)) {
-      acc[key] = o[key];
+      /** @type {*} */ (acc)[key] = o[key];
     }
     return acc;
   }, {});
 }
 
 /**
- * @param {Object|null|undefined} o1
- * @param {Object|null|undefined} o2
+ * @param {*} o1
+ * @param {*} o2
  * @return {boolean}
  */
 export function objectsEqualShallow(o1, o2) {
@@ -163,19 +147,52 @@ export function objectsEqualShallow(o1, o2) {
 }
 
 /**
- * @param {T} obj
+ * Deeply compares 2 objects, and returns `true` if they match.
+ * @param {*} o1
+ * @param {*} o2
+ * @return {boolean}
+ */
+export function objectsEqualDeep(o1, o2) {
+  if (o1 === o2) {
+    return true;
+  }
+  if (o1 && o2 && typeof o1 === 'object' && typeof o2 === 'object') {
+    // Deep array compare:
+    if (Array.isArray(o1)) {
+      return (
+        Array.isArray(o2) &&
+        o1.length === o2.length &&
+        o1.every((value, i) => objectsEqualDeep(value, o2[i]))
+      );
+    }
+
+    // Deep object compare:
+    const o1Keys = Object.keys(o1);
+    const o2Keys = Object.keys(o2);
+    return (
+      o1Keys.length === o2Keys.length &&
+      o1Keys.every((key) => o2Keys.includes(key)) &&
+      o1Keys.every((key) => objectsEqualDeep(o1[key], o2[key]))
+    );
+  }
+  return false;
+}
+
+/**
+ * @param {Object<string, R|undefined>} obj
  * @param {string} prop
- * @param {function(T, string):R} factory
+ * @param {function(Object<string, R|undefined>, string): R} factory
  * @return {R}
- * @template T,R
+ *
+ * @template R
  */
 export function memo(obj, prop, factory) {
-  let result = /** @type {undefined|R} */ (obj[prop]);
+  let result = obj[prop];
   if (result === undefined) {
     result = factory(obj, prop);
     obj[prop] = result;
   }
-  return /** @type {R} */ (result);
+  return result;
 }
 
 /**

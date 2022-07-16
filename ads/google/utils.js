@@ -1,10 +1,11 @@
+import {user} from '#utils/log';
+
 import {
   ExternalCorePubVars,
   MIN_PUB_CONTROL_WIDTH_OF_DESKTOP,
   getAutoConfig,
   getPubControlConfig,
 } from './a4a/shared/content-recommendation';
-import {user} from '#utils/log';
 
 /**
  * Approved height for AdSense full-width responsive ads.

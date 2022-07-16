@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__GRAMMAR_TABLEBUILDER_H_
-#define HTMLPARSER__GRAMMAR_TABLEBUILDER_H_
+#ifndef CPP_HTMLPARSER_GRAMMAR_TABLEBUILDER_H_
+#define CPP_HTMLPARSER_GRAMMAR_TABLEBUILDER_H_
 
 //
 // NOTE: This is very basic right now. No validation of grammer syntax. Lack of
@@ -100,4 +100,4 @@ class TableBuilder  {
 }  // namespace htmlparser::grammar
 
 
-#endif  // HTMLPARSER__GRAMMAR_TABLEBUILDER_H_
+#endif  // CPP_HTMLPARSER_GRAMMAR_TABLEBUILDER_H_

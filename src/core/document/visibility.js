@@ -12,14 +12,16 @@ export function getDocumentVisibilityState(doc) {
     'visibilityState',
     true
   );
-  if (doc[visibilityStateProp]) {
-    return doc[visibilityStateProp];
+  const visibilityStateValue = /** @type {*} */ (doc)[visibilityStateProp];
+  if (visibilityStateValue) {
+    return visibilityStateValue;
   }
 
   // Old API: `document.hidden` property.
   const hiddenProp = getVendorJsPropertyName(doc, 'hidden', true);
-  if (doc[hiddenProp]) {
-    return doc[hiddenProp]
+  if (hiddenProp in doc) {
+    const hiddenValue = /** @type {*} */ (doc)[hiddenProp];
+    return hiddenValue
       ? VisibilityState_Enum.HIDDEN
       : VisibilityState_Enum.VISIBLE;
   }
