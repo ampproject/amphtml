@@ -74,8 +74,8 @@ tags: {  # <section subscriptions-section="content" swg_amp_cache_nonce="NONCE">
   html_format: AMP
   tag_name: "SECTION"
   spec_name: "subscriptions-section content swg_amp_cache_nonce"
-  requires: "span swg_amp_cache_nonce"
-  satisfies: "subscriptions-section content swg_amp_cache_nonce"
+  requires_condition: "span swg_amp_cache_nonce"
+  satisfies_condition: "subscriptions-section content swg_amp_cache_nonce"
   mandatory_ancestor: "BODY"
   attrs: {
     name: "encrypted"
@@ -118,8 +118,8 @@ tags: {  # <span swg_amp_cache_nonce="NONCE">
   html_format: AMP
   tag_name: "SPAN"
   spec_name: "span swg_amp_cache_nonce"
-  requires: "subscriptions-section content swg_amp_cache_nonce"
-  satisfies: "span swg_amp_cache_nonce"
+  requires_condition: "subscriptions-section content swg_amp_cache_nonce"
+  satisfies_condition: "span swg_amp_cache_nonce"
   mandatory_ancestor: "BODY"
   requires_extension: "amp-subscriptions"
   attrs: {

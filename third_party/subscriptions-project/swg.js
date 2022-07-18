@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.221 */
+/** Version: 0.1.22.224 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -413,6 +413,9 @@ class AnalyticsContext {
       data[11 + base] == null || data[11 + base] == undefined
         ? null
         : new Timestamp(data[11 + base], includesLabel);
+
+    /** @private {?string} */
+    this.integrationVersion_ = data[12 + base] == null ? null : data[12 + base];
   }
 
   /**
@@ -584,6 +587,20 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {?string}
+   */
+  getIntegrationVersion() {
+    return this.integrationVersion_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setIntegrationVersion(value) {
+    this.integrationVersion_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -602,6 +619,7 @@ class AnalyticsContext {
         this.clientVersion_, // field 10 - client_version
         this.url_, // field 11 - url
         this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
+        this.integrationVersion_, // field 13 - integration_version
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -4997,7 +5015,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.221',
+    '_client': 'SwG 0.1.22.224',
   });
 }
 
@@ -6331,7 +6349,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.221',
+        '_client': 'SwG 0.1.22.224',
         'supportsEventManager': true,
       },
       args || {}
@@ -7259,7 +7277,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.221');
+    context.setClientVersion('SwG 0.1.22.224');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
