@@ -6,7 +6,7 @@ const fs = require('fs');
 const JSON5 = require('json5');
 const os = require('os');
 const path = require('path');
-const Percy = require('@percy/core');
+const PercyImportPromise = import('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
 const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
@@ -147,6 +147,7 @@ async function launchPercyAgent(browserFetcher) {
   }
 
   // @ts-ignore Type mismatch in library
+  const {Percy} = await PercyImportPromise;
   const percy = await Percy.start({
     token: process.env.PERCY_TOKEN,
     loglevel: argv.percy_agent_debug ? 'debug' : 'info',

@@ -42,6 +42,7 @@ import {
   toggle,
 } from '#core/dom/style';
 import {devError} from '#core/error';
+import {clamp} from '#core/math';
 import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
@@ -56,32 +57,10 @@ import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {calculateExtensionFileUrl} from '#service/extension-script';
-import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
 
-import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs419 from './_locales/es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsFr from './_locales/fr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsHi from './_locales/hi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsId from './_locales/id.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsIt from './_locales/it.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsJa from './_locales/ja.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsKo from './_locales/ko.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsNl from './_locales/nl.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsNo from './_locales/no.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsPtBr from './_locales/pt-BR.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsPtPt from './_locales/pt-PT.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsRu from './_locales/ru.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
@@ -143,7 +122,7 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
  * NOTE: If udpated here, update in amp-story-player-impl.js
  * @private @const {string}
  */
-const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
@@ -206,6 +185,20 @@ const TAG = 'amp-story';
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#202125';
+
+/**
+ * The default number of story pages that should be shown in preview mode
+ * before the preview is considered to be finished.
+ * @const {number}
+ */
+const DEFAULT_MIN_PAGES_TO_PREVIEW = 1;
+
+/**
+ * The default percentage of the total number of story pages that should be
+ * shown in preview mode before the preview is considered to be finished.
+ * @const {number}
+ */
+const DEFAULT_PCT_PAGES_TO_PREVIEW = 30;
 
 /*
  * @implements {./media-pool.MediaPoolRoot}
@@ -328,6 +321,12 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {!Deferred} a promise that is resolved once the subscriptions page index is extracted from amp-story-subscriptions. */
     this.subscriptionsPageIndexDeferred_ = new Deferred();
+
+    /**
+     * @private {?number} the index of the last page that should be shown in
+     *     preview mode.
+     */
+    this.indexOfLastPageToPreview_ = null;
   }
 
   /** @override */
@@ -346,6 +345,8 @@ export class AmpStory extends AMP.BaseElement {
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
+
+    this.indexOfLastPageToPreview_ = this.calculateIndexOfLastPageToPreview_();
 
     this.installLocalizationStrings_();
 
@@ -644,6 +645,14 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
+      // SWITCH_PAGE is fired with each page advancement in preview mode.
+      // Before advancing beyond the final page of a preview, we send the
+      // viewer a message that the preview has finished. In the SERP, this
+      // message can be used to advance to a subsequent story's preview.
+      if (this.getAmpDoc().isPreview()) {
+        this.sendMessageIfPreviewFinished_();
+      }
+
       this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
@@ -961,7 +970,8 @@ export class AmpStory extends AMP.BaseElement {
   layoutStory_() {
     const initialPageId = this.getInitialPageId_();
 
-    const shouldShowSystemLayer = !this.getAmpDoc().isPreview();
+    const shouldShowSystemLayer =
+      this.viewer_.getParam('hideProgressBar') !== '1';
     if (!shouldShowSystemLayer) {
       // The default value of `SYSTEM_UI_IS_VISIBLE_STATE` is `true`. We set it
       // to `false` here solely to ensure that a subsequent firing of the
@@ -2679,41 +2689,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.maybeRegisterInlineLocalizationStrings_(storyLanguages[0])) {
       return;
     }
-    if (isExperimentOn(this.win, 'story-remote-localization')) {
-      this.fetchLocalizationStrings_(storyLanguages);
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'story-remote-localization'
-      );
-    } else {
-      getLocalizationService(this.element).registerLocalizedStringBundles({
-        'default': LocalizedStringsEn,
-        'ar': LocalizedStringsAr,
-        'de': LocalizedStringsDe,
-        'en': LocalizedStringsEn,
-        'en-GB': LocalizedStringsEnGb,
-        'es': LocalizedStringsEs,
-        'es-419': LocalizedStringsEs419,
-        'fr': LocalizedStringsFr,
-        'hi': LocalizedStringsHi,
-        'id': LocalizedStringsId,
-        'it': LocalizedStringsIt,
-        'ja': LocalizedStringsJa,
-        'ko': LocalizedStringsKo,
-        'nl': LocalizedStringsNl,
-        'no': LocalizedStringsNo,
-        'pt-PT': LocalizedStringsPtPt,
-        'pt-BR': LocalizedStringsPtBr,
-        'ru': LocalizedStringsRu,
-        'tr': LocalizedStringsTr,
-        'vi': LocalizedStringsVi,
-        'zh-CN': LocalizedStringsZhCn,
-        'zh-TW': LocalizedStringsZhTw,
-        'en-xa': createPseudoLocale(
-          LocalizedStringsEn,
-          (s) => `[${s} one two]`
-        ),
-      });
-    }
+    this.fetchLocalizationStrings_(storyLanguages);
   }
 
   /**
@@ -2771,6 +2747,42 @@ export class AmpStory extends AMP.BaseElement {
       .catch((err) => {
         devError(TAG, err, 'Bundle not found for language ' + languageCode);
       });
+  }
+
+  /**
+   * @return {number} The index of the last page that should be shown in
+   *     preview mode.
+   * @private
+   */
+  calculateIndexOfLastPageToPreview_() {
+    const minPreviewPages =
+      parseInt(this.viewer_?.getParam('minPreviewPages'), 10) ||
+      DEFAULT_MIN_PAGES_TO_PREVIEW;
+    const pctPagesToPreview =
+      parseInt(this.viewer_?.getParam('pctPagesToPreview'), 10) ||
+      DEFAULT_PCT_PAGES_TO_PREVIEW;
+
+    // We calculate the number of preview pages by taking the larger of the two
+    // values: min # of preview pages vs the % of pages to show.
+    const numPages = this.element.querySelectorAll('amp-story-page').length;
+    let numPreviewPages = Math.ceil((pctPagesToPreview / 100) * numPages);
+    numPreviewPages = Math.max(minPreviewPages, numPreviewPages);
+    numPreviewPages = clamp(numPreviewPages, 1, numPages);
+
+    return numPreviewPages - 1;
+  }
+
+  /**
+   * Sends the 'storyPreviewFinished' viewer message if the active page is
+   * supposed to be the last page shown in the preview.
+   * @private
+   */
+  sendMessageIfPreviewFinished_() {
+    const activePageIdx = this.pages_.indexOf(this.activePage_);
+    const isPreviewFinished = activePageIdx >= this.indexOfLastPageToPreview_;
+    if (isPreviewFinished) {
+      this.viewerMessagingHandler_?.send('storyPreviewFinished', {});
+    }
   }
 }
 

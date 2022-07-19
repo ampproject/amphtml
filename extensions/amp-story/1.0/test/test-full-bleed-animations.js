@@ -52,6 +52,7 @@ describes.realWin(
       });
 
       storyEl = win.document.createElement('amp-story');
+      createPages(storyEl, 1, ['page-1']);
       win.document.body.appendChild(storyEl);
 
       AmpStory.isBrowserSupported = () => true;
@@ -114,7 +115,7 @@ describes.realWin(
       'Should add corresponding CSS class when a full bleed animation target is' +
         ' attached as a child of a grid layer with fill template.',
       async () => {
-        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageEls = ampStory.element.querySelectorAll('amp-story-page');
         const pageImpl = await pageEls[0].getImpl();
 
         // Append an image animated with a full-bleed animation inside a grid-
@@ -137,7 +138,7 @@ describes.realWin(
         'animation is used BUT the target is a child of a grid layer with a ' +
         'template other than `fill`.',
       async () => {
-        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageEls = ampStory.element.querySelectorAll('amp-story-page');
         const pageImpl = await pageEls[0].getImpl();
 
         // Append an image animated with a full-bleed animation inside a grid-
@@ -159,7 +160,7 @@ describes.realWin(
       'Should not add additional CSS class to the target when a non-full-bleed' +
         'animation is used.',
       async () => {
-        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageEls = ampStory.element.querySelectorAll('amp-story-page');
         const pageImpl = await pageEls[0].getImpl();
 
         // Append an image animated with a non-full-bleed animation.
