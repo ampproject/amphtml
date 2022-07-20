@@ -19,5 +19,5 @@ For additional details and support contact `suport@cleveradvertising.com`.
 
 ### Required parameters
 
-- `data-id`: the id of campaign
-- `data-hash`: MD5 hash of `data-id`
+-   `data-id`: the id of campaign
+-   `data-hash`: MD5 hash of `data-id`
