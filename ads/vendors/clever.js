@@ -14,7 +14,7 @@ export function clever(global, data) {
   const c = document.createElement("script");
 
   c.id = 'CleverCoreLoader' + data.id;
-  c.src = ''//scripts.cleverwebserver.com/' + data.hash + '.js';
+  c.src = '//scripts.cleverwebserver.com/' + data.hash + '.js';
   c.type = 'text/javascript';
   c.setAttribute('data-target', global.window.name);
   c.setAttribute('data-origin', domain);
