@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Fill this in with teaser text to improve SEO. Use the component description.
+  text: Allows publishers to integrate with the Fewcents micropayments platform.
 ---
 
 # amp-access-fewcents
@@ -58,10 +58,10 @@ The example below demonstrates `amp-access-fewcents` component in standalone use
 
 Element div with id `amp-access-fewcents-dialog` is where the paywall will going to show up when user don't have the access to the article.
 
-### The following resources provide further documentation on using LaterPay with AMP:
+### The following resources provide further documentation on using Fewcents with AMP:
 
 -   [`amp-access`](https://amp.dev/documentation/components/amp-access)
--   [LaterPay](https://www.fewcents.co/)
+-   [Fewcents](https://www.fewcents.co/)
 
 ## Configuration
 
@@ -95,7 +95,7 @@ Configuration is similar to `amp-access`, but no authorization, pingback and log
 
 ## Analytics
 
-Given that `amp-access-laterpay` is based on `amp-access` it supports all the [analytics events](../amp-access/amp-access.md) sent by `amp-access`.
+Given that `amp-access-fewcents` is based on `amp-access` it supports all the [analytics events](../amp-access/amp-access.md) sent by `amp-access`.
 
 Several analytics reports are sent to fewcents on user actions on the paywall.
 

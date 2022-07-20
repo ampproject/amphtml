@@ -326,6 +326,7 @@ export class ViewportImpl {
     if (this.size_.width == 0 || this.size_.height == 0) {
       // Only report when the visibility is "visible" or "prerender".
       const visibilityState = this.ampdoc.getVisibilityState();
+      // We do NOT want to report for PREVIEW mode.
       if (
         visibilityState == VisibilityState_Enum.PRERENDER ||
         visibilityState == VisibilityState_Enum.VISIBLE

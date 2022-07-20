@@ -45,7 +45,9 @@ export class AmpAutoAds extends AMP.BaseElement {
     this.configPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
-        return this.getConfig_(this.adNetwork_.getConfigUrl());
+        return this.adNetwork_.filterConfig(
+          this.getConfig_(this.adNetwork_.getConfigUrl())
+        );
       });
 
     if (!this.isAutoAdsLayoutCallbackExperimentOn_()) {

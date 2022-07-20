@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {iterateCursor, removeElement} from '#core/dom';
+import {removeElement} from '#core/dom';
 import {childElementsByTag} from '#core/dom/query';
 
 import {Services} from '#service';
@@ -330,8 +330,5 @@ export class DomWriterBulk {
  * @param {!Element} parent
  */
 export function removeNoScriptElements(parent) {
-  const noscriptElements = childElementsByTag(parent, 'noscript');
-  iterateCursor(noscriptElements, (element) => {
-    removeElement(element);
-  });
+  childElementsByTag(parent, 'noscript').forEach(removeElement);
 }

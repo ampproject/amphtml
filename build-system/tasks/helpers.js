@@ -20,9 +20,12 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
-const {resolvePath} = require('../babel-config/import-resolver');
 const {debug} = require('../compile/debug-compilation-lifecycle');
 const babel = require('@babel/core');
+const {
+  ampResolve,
+  remapDependenciesPlugin,
+} = require('./remap-dependencies-plugin/remap-dependencies');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -60,7 +63,7 @@ const watchedTargets = new Map();
 /**
  * @param {!Object} jsBundles
  * @param {string} name
- * @param {?Object} extraOptions
+ * @param {!Object} extraOptions
  * @return {!Promise}
  */
 function doBuildJs(jsBundles, name, extraOptions) {
@@ -126,7 +129,7 @@ async function compileCoreRuntime(options) {
  * Outputs 2 scripts:
  * 1) for direct consumption in the browser
  * 2) for consumption by npm package users
- * @param {Object} options
+ * @param {!Object} options
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
@@ -138,12 +141,36 @@ async function compileBentoRuntimeAndCore(options) {
       ...options,
       outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
     }),
-    // npm
+    // npm - standalone
     compileJs(srcDir, srcFilename, 'src/bento/core/dist', {
       ...options,
       toName: maybeToNpmEsmName('bento.core.max.js'),
       minifiedName: maybeToNpmEsmName('bento.core.js'),
       outputFormat: argv.esm ? 'esm' : 'cjs',
+    }),
+    // npm - preact
+    compileJs(srcDir, srcFilename, 'src/bento/core/preact/dist', {
+      ...options,
+      toName: maybeToNpmEsmName('bento-preact.core.max.js'),
+      minifiedName: maybeToNpmEsmName('bento-preact.core.js'),
+      outputFormat: argv.esm ? 'esm' : 'cjs',
+      remapDependencies: {'preact/dom': 'preact'},
+      externalDependencies: ['preact'],
+    }),
+    // npm - react
+    compileJs(srcDir, srcFilename, 'src/bento/core/react/dist', {
+      ...options,
+      toName: maybeToNpmEsmName('bento-react.core.max.js'),
+      minifiedName: maybeToNpmEsmName('bento-react.core.js'),
+      outputFormat: argv.esm ? 'esm' : 'cjs',
+      remapDependencies: {
+        'preact': 'react',
+        'preact/compat': 'react',
+        './src/preact/compat/internal.js': './src/preact/compat/external.js',
+        'preact/hooks': 'react',
+        'preact/dom': 'react-dom',
+      },
+      externalDependencies: ['react', 'react-dom'],
     }),
   ]);
 }
@@ -156,9 +183,8 @@ async function compileBentoRuntimeAndCore(options) {
  * @return {!Promise}
  */
 async function compileAllJs(options) {
-  log(`Compiling ${cyan(options.minified ? 'minified' : 'unminified')} JS...`);
-
   const {minify} = options;
+  log(`Compiling ${cyan(minify ? 'minified' : 'unminified')} JS...`);
 
   const startTime = Date.now();
   await Promise.all([
@@ -285,7 +311,7 @@ async function finishBundle(destDir, destFilename, options, startTime) {
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
- * @param {?Object} options
+ * @param {!Object} options
  * @return {!Promise}
  */
 async function esbuildCompile(srcDir, srcFilename, destDir, options) {
@@ -294,6 +320,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const filename = options.minify
     ? options.minifiedName
     : options.toName ?? srcFilename;
+  // This guards against someone passing `minify: true` but no `minifiedName`.
+  if (!filename) {
+    throw new Error('No minifiedName provided for ' + srcFilename);
+  }
   const destFilename = maybeToEsmName(filename);
   const destFile = path.join(destDir, destFilename);
 
@@ -319,17 +349,29 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
-  const babelCaller =
+  let babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
+
+  // We read from the current binary configuration options if it is an
+  // no css binary output. (removes CSS installation)
+  if (options.ssrCss) {
+    babelCaller += '-ssr-css';
+  }
 
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true
+    /* enableCache */ true,
+    {plugins: options.babelPlugins}
   );
   const plugins = [babelPlugin];
 
   if (options.remapDependencies) {
-    plugins.unshift(remapDependenciesPlugin());
+    const {externalDependencies: externals, remapDependencies: remaps} =
+      options;
+
+    plugins.unshift(
+      remapDependenciesPlugin({externals, remaps, resolve: ampResolve})
+    );
   }
 
   let result = null;
@@ -410,64 +452,13 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         destFile,
         `${code}\n//# sourceMappingURL=${destFilename}.map`
       ),
-      fs.outputJson(`${destFile}.map`, massageSourcemaps(mapChain, options)),
+      fs.outputJson(
+        `${destFile}.map`,
+        massageSourcemaps(mapChain, destFile, options)
+      ),
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
-  }
-
-  /**
-   * Generates a plugin to remap the dependencies of a JS bundle.
-   * @return {Object}
-   */
-  function remapDependenciesPlugin() {
-    const remaps = Object.entries(options.remapDependencies).map(
-      ([path, value]) => ({
-        regex: new RegExp(`^${path}(\.js|\.jsx|\.ts|\.tsx)?$`),
-        value,
-      })
-    );
-    const external = options.externalDependencies;
-    return {
-      name: 'remap-dependencies',
-      setup(build) {
-        build.onResolve({filter: /.*/}, (args) => {
-          const {resolveDir} = args;
-          let {path: importPath} = args;
-
-          // Convert directory imports -> explicit imports of the index file.
-          // Leave js/ts extension out to be lang-agnostic.
-          if (importPath === './') {
-            importPath = './index';
-          }
-
-          let dep;
-          // Use resolvePath() the path to normalize files/directories.
-          // If file, gets filepath; if directory, gets the index filepath
-          if (importPath.startsWith('.')) {
-            const absImportPath = path.posix.join(resolveDir, importPath);
-            const rootDir = process.cwd();
-            const rootRelativePath = path.posix.relative(
-              rootDir,
-              absImportPath
-            );
-            dep = resolvePath(rootRelativePath);
-          } else {
-            dep = importPath;
-          }
-          for (const {regex, value} of remaps) {
-            if (!regex.test(dep)) {
-              continue;
-            }
-            const isExternal = external.includes(value);
-            return {
-              path: isExternal ? value : resolvePath(value),
-              external: isExternal,
-            };
-          }
-        });
-      },
-    };
   }
 
   await build(startTime).catch((err) =>
@@ -726,21 +717,6 @@ async function thirdPartyBootstrap(input, outputName, options) {
 }
 
 /**
- *Creates directory in sync manner
- *
- * @param {string} path
- */
-function mkdirSync(path) {
-  try {
-    fs.mkdirSync(path);
-  } catch (e) {
-    if (e.code != 'EEXIST') {
-      throw e;
-    }
-  }
-}
-
-/**
  * Returns the list of dependencies for a given JS entrypoint by having esbuild
  * generate a metafile for it. Uses the set of babel plugins that would've been
  * used to compile the entrypoint.
@@ -750,7 +726,12 @@ function mkdirSync(path) {
  * @return {Promise<Array<string>>}
  */
 async function getDependencies(entryPoint, options) {
-  const caller = options.minify ? 'minified' : 'unminified';
+  let caller = options.minify ? 'minified' : 'unminified';
+  // We read from the current binary configuration options if it is an
+  // no css binary output. (removes CSS installation)
+  if (options.ssrCss) {
+    caller += '-ssr-css';
+  }
   const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
   const result = await esbuild.build({
     entryPoints: [entryPoint],
@@ -774,7 +755,6 @@ module.exports = {
   maybePrintCoverageMessage,
   maybeToEsmName,
   maybeToNpmEsmName,
-  mkdirSync,
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,

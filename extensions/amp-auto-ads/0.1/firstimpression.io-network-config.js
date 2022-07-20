@@ -102,6 +102,11 @@ export class FirstImpressionIoConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     const attributes = {
       'type': 'firstimpression',

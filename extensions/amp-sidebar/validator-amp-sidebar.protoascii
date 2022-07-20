@@ -1,8 +1,8 @@
 tags: {  # amp-sidebar
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-sidebar 1.0"
-  excludes: "amp-sidebar 0.1"
+  satisfies_condition: "amp-sidebar 1.0"
+  excludes_condition: "amp-sidebar 0.1"
   extension_spec: {
     name: "amp-sidebar"
     version_name: "v1.0"
@@ -14,8 +14,8 @@ tags: {  # amp-sidebar
 tags: {  # amp-sidebar
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-sidebar 0.1"
-  excludes: "amp-sidebar 1.0"
+  satisfies_condition: "amp-sidebar 0.1"
+  excludes_condition: "amp-sidebar 1.0"
   extension_spec: {
     name: "amp-sidebar"
     version_name: "v0.1"

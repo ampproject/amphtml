@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.206 */
+/** Version: 0.1.22.224 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -127,6 +127,7 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
+  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -412,6 +413,9 @@ class AnalyticsContext {
       data[11 + base] == null || data[11 + base] == undefined
         ? null
         : new Timestamp(data[11 + base], includesLabel);
+
+    /** @private {?string} */
+    this.integrationVersion_ = data[12 + base] == null ? null : data[12 + base];
   }
 
   /**
@@ -583,6 +587,20 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {?string}
+   */
+  getIntegrationVersion() {
+    return this.integrationVersion_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setIntegrationVersion(value) {
+    this.integrationVersion_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -601,6 +619,7 @@ class AnalyticsContext {
         this.clientVersion_, // field 10 - client_version
         this.url_, // field 11 - url
         this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
+        this.integrationVersion_, // field 13 - integration_version
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -3282,7 +3301,7 @@ class ActivityIframeView extends View {
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {string} src
-   * @param {!Object<string, ?>=} args
+   * @param {!Object<string, ?>=} args Additional data to be passed to the iframe.
    * @param {boolean=} shouldFadeBody
    * @param {boolean=} hasLoadingIndicator
    */
@@ -4672,9 +4691,6 @@ function defaultConfig() {
  * limitations under the License.
  */
 
-// NOTE: This regex was copied from SwG's AMP extension. https://github.com/ampproject/amphtml/blob/c23bf281f817a2ee5df73f6fd45e9f4b71bb68b6/extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js#L56
-const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
-
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
  * @type {HTMLAnchorElement}
@@ -4817,17 +4833,7 @@ function getCanonicalUrl(doc) {
 }
 
 const PARSED_URL = parseUrl(self.window.location.href);
-const PARSED_REFERRER = parseUrl(self.document.referrer);
-
-/**
- * True for Google domains
- * @param {LocationDef=} parsedUrl Defaults to the current page's URL
- * @return {boolean}
- */
-function isGoogleDomain(parsedUrl) {
-  parsedUrl = parsedUrl || PARSED_URL;
-  return GOOGLE_DOMAIN_RE.test(parsedUrl.hostname);
-}
+parseUrl(self.document.referrer);
 
 /**
  * True for HTTPS URLs
@@ -4837,17 +4843,6 @@ function isGoogleDomain(parsedUrl) {
 function isSecure(parsedUrl) {
   parsedUrl = parsedUrl || PARSED_URL;
   return parsedUrl.protocol === 'https' || parsedUrl.protocol === 'https:';
-}
-
-/**
- * True when the page is rendered within a secure Google application or
- * was linked to from a secure Google domain.
- * @param {LocationDef=} parsedReferrer Defaults to the current page's referrer
- * @return {boolean}
- */
-function wasReferredByGoogle(parsedReferrer) {
-  parsedReferrer = parsedReferrer || PARSED_REFERRER;
-  return isSecure(parsedReferrer) && isGoogleDomain(parsedReferrer);
 }
 
 /**
@@ -5020,7 +5015,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.206',
+    '_client': 'SwG 0.1.22.224',
   });
 }
 
@@ -5214,8 +5209,8 @@ class PayStartFlow {
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
-        // basic flow does not support native.
-        forceDisableNative: paySwgVersion == '2',
+        // SwG basic and TwG flows do not support native.
+        forceDisableNative: paySwgVersion == '2' || paySwgVersion == '3',
       }
     );
     return Promise.resolve();
@@ -5906,7 +5901,10 @@ class OffersFlow {
    */
   getDialogConfig_(clientConfig) {
     return clientConfig.useUpdatedOfferFlows
-      ? {desktopConfig: {isCenterPositioned: true, supportsWideScreen: true}}
+      ? {
+          desktopConfig: {isCenterPositioned: true, supportsWideScreen: true},
+          shouldDisableBodyScrolling: true,
+        }
       : {};
   }
 
@@ -5921,16 +5919,17 @@ class OffersFlow {
       return feUrl('/offersiframe');
     }
 
+    const params = {'publicationId': pageConfig.getPublicationId()};
+
     if (this.clientConfigManager_.shouldForceLangInIframes()) {
-      return feUrl('/subscriptionoffersiframe', {
-        'hl': this.clientConfigManager_.getLanguage(),
-        'publicationId': pageConfig.getPublicationId(),
-      });
+      params['hl'] = this.clientConfigManager_.getLanguage();
     }
 
-    return feUrl('/subscriptionoffersiframe', {
-      'publicationId': pageConfig.getPublicationId(),
-    });
+    if (clientConfig.uiPredicates?.purchaseUnavailableRegion) {
+      params['purchaseUnavailableRegion'] = 'true';
+    }
+
+    return feUrl('/subscriptionoffersiframe', params);
   }
 
   /**
@@ -6350,7 +6349,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.206',
+        '_client': 'SwG 0.1.22.224',
         'supportsEventManager': true,
       },
       args || {}
@@ -6381,7 +6380,22 @@ class ActivityPorts$1 {
     if (addDefaultArguments) {
       args = this.addDefaultArguments(args);
     }
-    return this.openActivityIframePort_(iframe, url, args);
+    return this.deps_
+      .storage()
+      .get(Constants$1.USER_TOKEN, /* useLocalStorage= */ true)
+      .then((swgUserToken) => {
+        const queryParams = new URL(url).searchParams;
+        if (swgUserToken && !queryParams.has('sut')) {
+          url = addQueryParam(url, 'sut', swgUserToken);
+        }
+
+        const pubId = this.deps_.pageConfig().getPublicationId();
+        if (pubId && !queryParams.has('publicationId')) {
+          url = addQueryParam(url, 'publicationId', pubId);
+        }
+
+        return this.openActivityIframePort_(iframe, url, args);
+      });
   }
 
   /**
@@ -7263,7 +7277,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.206');
+    context.setClientVersion('SwG 0.1.22.224');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7290,21 +7304,8 @@ class AnalyticsService {
       // context and that it may not contain experiments activated late during
       // the publishers code lifecycle.
       this.addLabels(getOnExperiments(this.doc_.getWin()));
-      this.serviceReady_ = this.deps_
-        .storage()
-        .get(Constants$1.USER_TOKEN)
-        .then((swgUserToken) => {
-          const pubId = this.deps_.pageConfig().getPublicationId();
-          const urlParams = swgUserToken
-            ? {sut: swgUserToken, publicationId: pubId}
-            : {publicationId: pubId};
-          return this.activityPorts_.openIframe(
-            this.iframe_,
-            feUrl('/serviceiframe', urlParams),
-            null,
-            true
-          );
-        })
+      this.serviceReady_ = this.activityPorts_
+        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
         .then(
           (port) => {
             // Register a listener for the logging to code indicate it is
@@ -7673,6 +7674,85 @@ const SWG_I18N_STRINGS = {
     'zh-cn': '您之前已注册。',
     'zh-hk': '您之前已訂閱。',
     'zh-tw': '你已經訂閱了。',
+  },
+  'REGWALL_ACCOUNT_CREATED_LANG_MAP': {
+    'en': 'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'ar': 'تم إنشاء حساب باستخدام <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'de': 'Konto bei <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> wurde erstellt',
+    'en-au':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'en-ca':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'en-gb':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'en-us':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'es': 'Has creado una cuenta con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'es-419':
+      'Se creó una cuenta con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'fr': 'A créé un compte avec <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'fr-ca':
+      'Un compte a été créé avec l\'adresse <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'hi': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> का इस्तेमाल करके, एक खाता बनाया गया',
+    'id': 'Membuat akun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'it': 'È stato creato un account con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でアカウントを作成しました',
+    'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 계정을 만들었습니다.',
+    'ms': 'Membuat akaun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'nl': 'Account gemaakt met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'no': 'Du har opprettet en konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pl': 'Utworzono konto za pomocą adresu <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pt': 'Criou uma conta com <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pt-br':
+      'Conta criada com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'ru': 'Вы зарегистрировали аккаунт на адрес <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'se': 'Du skapade ett konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'th': 'สร้างบัญชีด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'tr': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile bir hesap oluşturun',
+    'uk': 'Обліковий запис створено за допомогою електронної адреси <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'zh-cn': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 创建帐号',
+    'zh-hk': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 建立帳戶',
+    'zh-tw': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 建立帳戶',
+  },
+  'NEWSLETTER_SIGNED_UP_LANG_MAP': {
+    'en': 'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'ar': 'تم الاشتراك في النشرة الإخبارية باستخدام <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'de': 'Du hast dich für den Newsletter von <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> angemeldet',
+    'en-au':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'en-ca':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'en-gb':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'en-us':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'es': 'Te has suscrito a la newsletter con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'es-419':
+      'Te registraste con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> para recibir el boletín informativo',
+    'fr': 'S\'est abonné à la newsletter avec <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'fr-ca':
+      'Vous êtes inscrit au bulletin d\'information avec l\'adresse <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'hi': 'न्यूज़लेटर पाने के लिए, <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> से साइन अप किया गया',
+    'id': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk mendapatkan newsletter',
+    'it': 'Iscrizione alla newsletter con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> effettuata',
+    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でニュースレターを登録しました',
+    'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 뉴스레터에 가입했습니다.',
+    'ms': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk surat berita',
+    'nl': 'Aangemeld met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> voor de nieuwsbrief',
+    'no': 'Du har registrert deg for nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pl': 'Zapisano się na newsletter za pomocą adresu <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pt': 'Inscreveu-se com <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> no boletim informativo',
+    'pt-br':
+      'Inscrição na newsletter feita com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'ru': 'Вы подписались на новостную рассылку, используя аккаунт <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'se': 'Du registrerade dig för nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'th': 'ลงชื่อเข้าใช้ด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> สำหรับจดหมายข่าว',
+    'tr': 'Bülten için <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile kaydoldunuz',
+    'uk': 'Ви підписалися на інформаційні листи на електронну адресу <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'zh-cn': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 订阅简报',
+    'zh-hk': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 註冊通訊',
+    'zh-tw':
+      '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 訂閱電子報',
   },
 };
 
@@ -8208,6 +8288,7 @@ const CallbackId = {
   FLOW_STARTED: 7,
   FLOW_CANCELED: 8,
   PAY_CONFIRM_OPENED: 9,
+  OFFERS_FLOW_REQUEST: 10,
 };
 
 /**
@@ -8338,6 +8419,27 @@ class Callbacks {
    */
   hasSubscribeRequestCallback() {
     return !!this.callbacks_[CallbackId.SUBSCRIBE_REQUEST];
+  }
+
+  /**
+   * @param {function()} callback
+   */
+  setOnOffersFlowRequest(callback) {
+    this.setCallback_(CallbackId.OFFERS_FLOW_REQUEST, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerOffersFlowRequest() {
+    return this.trigger_(CallbackId.OFFERS_FLOW_REQUEST, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasOffersFlowRequestCallback() {
+    return !!this.callbacks_[CallbackId.OFFERS_FLOW_REQUEST];
   }
 
   /**
@@ -8546,26 +8648,32 @@ class AttributionParams {
  */
 class AutoPromptConfig {
   /**
-   * @param {number|undefined} maxImpressionsPerWeek
+   * @param {!AutoPromptConfigParams=} params
    */
-  constructor(
-    maxImpressionsPerWeek,
+  constructor({
     displayDelaySeconds,
-    backoffSeconds,
+    dismissalBackOffSeconds,
     maxDismissalsPerWeek,
-    maxDismissalsResultingHideSeconds
-  ) {
-    /** @const {number|undefined} */
-    this.maxImpressionsPerWeek = maxImpressionsPerWeek;
-
+    maxDismissalsResultingHideSeconds,
+    impressionBackOffSeconds,
+    maxImpressions,
+    maxImpressionsResultingHideSeconds,
+  } = {}) {
     /** @const {!ClientDisplayTrigger} */
     this.clientDisplayTrigger = new ClientDisplayTrigger(displayDelaySeconds);
 
     /** @const {!ExplicitDismissalConfig} */
     this.explicitDismissalConfig = new ExplicitDismissalConfig(
-      backoffSeconds,
+      dismissalBackOffSeconds,
       maxDismissalsPerWeek,
       maxDismissalsResultingHideSeconds
+    );
+
+    /** @const {!ImpressionConfig} */
+    this.impressionConfig = new ImpressionConfig(
+      impressionBackOffSeconds,
+      maxImpressions,
+      maxImpressionsResultingHideSeconds
     );
   }
 }
@@ -8588,17 +8696,17 @@ class ClientDisplayTrigger {
  */
 class ExplicitDismissalConfig {
   /**
-   * @param {number|undefined} backoffSeconds
+   * @param {number|undefined} backOffSeconds
    * @param {number|undefined} maxDismissalsPerWeek
    * @param {number|undefined} maxDismissalsResultingHideSeconds
    */
   constructor(
-    backoffSeconds,
+    backOffSeconds,
     maxDismissalsPerWeek,
     maxDismissalsResultingHideSeconds
   ) {
     /** @const {number|undefined} */
-    this.backoffSeconds = backoffSeconds;
+    this.backOffSeconds = backOffSeconds;
 
     /** @const {number|undefined} */
     this.maxDismissalsPerWeek = maxDismissalsPerWeek;
@@ -8609,19 +8717,28 @@ class ExplicitDismissalConfig {
 }
 
 /**
- * Predicates of whether or not to show button and prompt.
+ * Configuration of impression behavior and its effects.
  */
-class UiPredicates {
+class ImpressionConfig {
   /**
-   * @param {boolean|undefined} canDisplayAutoPrompt
-   * @param {boolean|undefined} canDisplayButton
+   * @param {number|undefined} backOffSeconds
+   * @param {number|undefined} maxImpressions
+   * @param {number|undefined} maxImpressionsResultingHideSeconds
    */
-  constructor(canDisplayAutoPrompt, canDisplayButton) {
-    /** @const {boolean|undefined} */
-    this.canDisplayAutoPrompt = canDisplayAutoPrompt;
+  constructor(
+    backOffSeconds,
+    maxImpressions,
+    maxImpressionsResultingHideSeconds
+  ) {
+    /** @const {number|undefined} */
+    this.backOffSeconds = backOffSeconds;
 
-    /** @const {boolean|undefined} */
-    this.canDisplayButton = canDisplayButton;
+    /** @const {number|undefined} */
+    this.maxImpressions = maxImpressions;
+
+    /** @const {number|undefined} */
+    this.maxImpressionsResultingHideSeconds =
+      maxImpressionsResultingHideSeconds;
   }
 }
 
@@ -8672,11 +8789,36 @@ class ClientConfig {
     /** @const {boolean} */
     this.skipAccountCreationScreen = skipAccountCreationScreen || false;
 
-    /** @const {./auto-prompt-config.UiPredicates|undefined} */
+    /** @const {UiPredicates|undefined} */
     this.uiPredicates = uiPredicates;
 
     /** @const {./attribution-params.AttributionParams|undefined} */
     this.attributionParams = attributionParams;
+  }
+}
+
+/**
+ * Predicates to control UI elements.
+ */
+class UiPredicates {
+  /**
+   * @param {boolean|undefined} canDisplayAutoPrompt
+   * @param {boolean|undefined} canDisplayButton
+   * @param {boolean|undefined} purchaseUnavailableRegion
+   */
+  constructor(
+    canDisplayAutoPrompt,
+    canDisplayButton,
+    purchaseUnavailableRegion
+  ) {
+    /** @const {boolean|undefined} */
+    this.canDisplayAutoPrompt = canDisplayAutoPrompt;
+
+    /** @const {boolean|undefined} */
+    this.canDisplayButton = canDisplayButton;
+
+    /** @const {boolean|undefined} */
+    this.purchaseUnavailableRegion = purchaseUnavailableRegion;
   }
 }
 
@@ -8888,13 +9030,23 @@ class ClientConfigManager {
     const autoPromptConfigJson = json['autoPromptConfig'];
     let autoPromptConfig = undefined;
     if (autoPromptConfigJson) {
-      autoPromptConfig = new AutoPromptConfig(
-        autoPromptConfigJson.maxImpressionsPerWeek,
-        autoPromptConfigJson.clientDisplayTrigger?.displayDelaySeconds,
-        autoPromptConfigJson.explicitDismissalConfig?.backoffSeconds,
-        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
-        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsResultingHideSeconds
-      );
+      autoPromptConfig = new AutoPromptConfig({
+        displayDelaySeconds:
+          autoPromptConfigJson.clientDisplayTrigger?.displayDelaySeconds,
+        dismissalBackOffSeconds:
+          autoPromptConfigJson.explicitDismissalConfig?.backOffSeconds,
+        maxDismissalsPerWeek:
+          autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
+        maxDismissalsResultingHideSeconds:
+          autoPromptConfigJson.explicitDismissalConfig
+            ?.maxDismissalsResultingHideSeconds,
+        impressionBackOffSeconds:
+          autoPromptConfigJson.impressionConfig?.backOffSeconds,
+        maxImpressions: autoPromptConfigJson.impressionConfig?.maxImpressions,
+        maxImpressionsResultingHideSeconds:
+          autoPromptConfigJson.impressionConfig
+            ?.maxImpressionsResultingHideSeconds,
+      });
     }
 
     const uiPredicatesJson = json['uiPredicates'];
@@ -8902,7 +9054,8 @@ class ClientConfigManager {
     if (uiPredicatesJson) {
       uiPredicates = new UiPredicates(
         uiPredicatesJson.canDisplayAutoPrompt,
-        uiPredicatesJson.canDisplayButton
+        uiPredicatesJson.canDisplayButton,
+        uiPredicatesJson.purchaseUnavailableRegion
       );
     }
 
@@ -9057,8 +9210,30 @@ class ContributionsFlow {
       );
       activityIframeView.on(SkuSelectedResponse, this.startPayFlow_.bind(this));
       this.activityIframeView_ = activityIframeView;
-      return this.dialogManager_.openView(this.activityIframeView_);
+      return this.clientConfigManager_
+        .getClientConfig()
+        .then((clientConfig) => {
+          if (!this.activityIframeView_) {
+            return;
+          }
+          return this.dialogManager_.openView(
+            this.activityIframeView_,
+            /* hidden */ false,
+            this.getDialogConfig_(clientConfig)
+          );
+        });
     });
+  }
+
+  /**
+   *
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {!../components/dialog.DialogConfig}
+   */
+  getDialogConfig_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? {shouldDisableBodyScrolling: true}
+      : {};
   }
 
   /**
@@ -9275,7 +9450,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:auto!important;margin-right:auto!important;width:560px!important}swg-loading-container.centered-on-desktop{border-radius:8px!important;height:120px!important;min-height:120px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -9935,6 +10110,10 @@ class Dialog {
     /** @const @private {boolean} */
     this.positionCenterOnDesktop_ = !!desktopDialogConfig.isCenterPositioned;
 
+    /** @const @private {boolean} */
+    this.shouldDisableBodyScrolling_ =
+      !!dialogConfig.shouldDisableBodyScrolling;
+
     /** @const @private {!MediaQueryList} */
     this.desktopMediaQuery_ = this.doc_
       .getWin()
@@ -10052,6 +10231,9 @@ class Dialog {
     } else {
       animating = Promise.resolve();
     }
+
+    this.doc_.getBody().classList.remove('swg-disable-scroll');
+
     return animating.then(() => {
       const iframeEl = this.iframe_.getElement();
       iframeEl.parentNode.removeChild(iframeEl);
@@ -10162,6 +10344,10 @@ class Dialog {
 
     this.view_ = view;
     this.getContainer().appendChild(view.getElement());
+
+    if (this.shouldDisableBodyScrolling_) {
+      this.doc_.getBody().classList.add('swg-disable-scroll');
+    }
 
     // If the current view should fade the parent document.
     if (view.shouldFadeBody() && !this.hidden_) {
@@ -10701,138 +10887,123 @@ class MeterToastApi {
           ? MeterType.UNKNOWN
           : MeterType.KNOWN;
     }
-    return this.deps_
-      .storage()
-      .get(Constants$1.USER_TOKEN, true)
-      .then((swgUserToken) => {
-        const iframeArgs =
-          this.activityPorts_.addDefaultArguments(additionalArguments);
+    const iframeArgs =
+      this.activityPorts_.addDefaultArguments(additionalArguments);
 
-        const iframeUrl =
-          IframeUrlByMeterClientType[
-            this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
-          ];
-        const iframeUrlParams = {
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'origin': parseUrl(this.win_.location.href).origin,
-        };
-        if (swgUserToken) {
-          iframeUrlParams['sut'] = swgUserToken;
-        }
+    const iframeUrl =
+      IframeUrlByMeterClientType[
+        this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
+      ];
 
-        /** @private @const {!ActivityIframeView} */
-        this.activityIframeView_ = new ActivityIframeView(
-          this.win_,
-          this.activityPorts_,
-          feUrl(iframeUrl, iframeUrlParams),
-          iframeArgs,
-          /* shouldFadeBody */ false
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl(iframeUrl, {'origin': parseUrl(this.win_.location.href).origin}),
+      iframeArgs,
+      /* shouldFadeBody */ false
+    );
+
+    /** @private @const {!function()} */
+    this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+      this.removeCloseEventListener();
+
+      this.deps_
+        .eventManager()
+        .logSwgEvent(
+          AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
+          true
         );
 
-        /** @private @const {!function()} */
-        this.sendCloseRequestFunction_ = () => {
-          const closeRequest = new ToastCloseRequest();
-          closeRequest.setClose(true);
-          this.activityIframeView_.execute(closeRequest);
-          this.removeCloseEventListener();
+      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+        this.onConsumeCallbackHandled_ = true;
+        this.onConsumeCallback_();
+      }
+    };
 
-          this.deps_
-            .eventManager()
-            .logSwgEvent(
-              AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
-              true
-            );
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+    this.activityIframeView_.on(
+      ViewSubscriptionsResponse,
+      this.startSubscriptionFlow_.bind(this)
+    );
+    if (
+      !this.deps_.callbacks().hasSubscribeRequestCallback() &&
+      !this.deps_.callbacks().hasOffersFlowRequestCallback()
+    ) {
+      const errorMessage =
+        '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
+        'before starting the metering flow, so users will not be able to ' +
+        'subscribe from the metering dialog directly. Please call ' +
+        '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
+        'before starting metering.';
+      warn(errorMessage);
+    }
 
-          if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-            this.onConsumeCallbackHandled_ = true;
-            this.onConsumeCallback_();
-          }
-        };
-
-        this.deps_
-          .callbacks()
-          .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
-        this.activityIframeView_.on(
-          ViewSubscriptionsResponse,
-          this.startNativeFlow_.bind(this)
-        );
-        if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
-          const errorMessage =
-            '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
-            'before starting the metering flow, so users will not be able to ' +
-            'subscribe from the metering dialog directly. Please call ' +
-            '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
-            'before starting metering.';
-          warn(errorMessage);
+    this.dialogManager_
+      .handleCancellations(this.activityIframeView_)
+      .catch((reason) => {
+        // Possibly call onConsumeCallback on all dialog cancellations to
+        // ensure unexpected dialog closures don't give access without a
+        // meter consumed.
+        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+          this.onConsumeCallbackHandled_ = true;
+          this.onConsumeCallback_();
         }
-
-        this.dialogManager_
-          .handleCancellations(this.activityIframeView_)
-          .catch((reason) => {
-            // Possibly call onConsumeCallback on all dialog cancellations to
-            // ensure unexpected dialog closures don't give access without a
-            // meter consumed.
-            if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-              this.onConsumeCallbackHandled_ = true;
-              this.onConsumeCallback_();
-            }
-            // Don't throw on cancel errors since they happen when a user closes
-            // the toast, which is expected.
-            if (!isCancelError(reason)) {
-              // eslint-disable-next-line no-console
-              console /*OK*/
-                .error(
-                  '[swg.js]: Error occurred during meter toast handling: ' +
-                    reason
-                );
-              throw reason;
-            }
-          });
-
-        return this.dialogManager_.openDialog().then((dialog) => {
-          this.setDialogBoxShadow_();
-          this.setLoadingViewWidth_();
-          return dialog.openView(this.activityIframeView_).then(() => {
-            // Allow closing of the iframe with any scroll or click event.
-            this.win_.addEventListener('click', this.sendCloseRequestFunction_);
-            this.win_.addEventListener(
-              'touchstart',
-              this.sendCloseRequestFunction_
+        // Don't throw on cancel errors since they happen when a user closes
+        // the toast, which is expected.
+        if (!isCancelError(reason)) {
+          // eslint-disable-next-line no-console
+          console /*OK*/
+            .error(
+              '[swg.js]: Error occurred during meter toast handling: ' + reason
             );
-            this.win_.addEventListener(
-              'mousedown',
-              this.sendCloseRequestFunction_
-            );
-            // Making body's overflow property 'hidden' to prevent scrolling
-            // while swiping on the iframe only on mobile.
-            if (this.isMobile_()) {
-              const $body = this.win_.document.body;
-              setStyle($body, 'overflow', 'hidden');
-            } else {
-              let start, scrollTimeout;
-              this.scrollEventListener_ = () => {
-                start = start || this.win_./*REVIEW*/ pageYOffset;
-                this.win_.clearTimeout(scrollTimeout);
-                scrollTimeout = this.win_.setTimeout(() => {
-                  // If the scroll is longer than 100, close the toast.
-                  if (
-                    Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100
-                  ) {
-                    this.sendCloseRequestFunction_();
-                  }
-                }, 100);
-              };
-              this.win_.addEventListener('scroll', this.scrollEventListener_);
-            }
-            this.deps_
-              .eventManager()
-              .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
-            this.deps_
-              .eventManager()
-              .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
-          });
-        });
+          throw reason;
+        }
       });
+
+    return this.dialogManager_.openDialog().then((dialog) => {
+      this.setDialogBoxShadow_();
+      this.setLoadingViewWidth_();
+      return dialog.openView(this.activityIframeView_).then(() => {
+        // Allow closing of the iframe with any scroll or click event.
+        this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+        this.win_.addEventListener(
+          'touchstart',
+          this.sendCloseRequestFunction_
+        );
+        this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
+        // Making body's overflow property 'hidden' to prevent scrolling
+        // while swiping on the iframe only on mobile.
+        if (this.isMobile_()) {
+          const $body = this.win_.document.body;
+          setStyle($body, 'overflow', 'hidden');
+        } else {
+          let start, scrollTimeout;
+          this.scrollEventListener_ = () => {
+            start = start || this.win_./*REVIEW*/ pageYOffset;
+            this.win_.clearTimeout(scrollTimeout);
+            scrollTimeout = this.win_.setTimeout(() => {
+              // If the scroll is longer than 100, close the toast.
+              if (Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100) {
+                this.sendCloseRequestFunction_();
+              }
+            }, 100);
+          };
+          this.win_.addEventListener('scroll', this.scrollEventListener_);
+        }
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+      });
+    });
   }
 
   /**
@@ -10902,12 +11073,14 @@ class MeterToastApi {
    * @param {ViewSubscriptionsResponse} response
    * @private
    */
-  startNativeFlow_(response) {
+  startSubscriptionFlow_(response) {
+    this.removeCloseEventListener();
+    // We shouldn't decrement the meter on redirects, so don't call onConsumeCallback.
+    this.onConsumeCallbackHandled_ = true;
     if (response.getNative()) {
-      this.removeCloseEventListener();
-      // We shouldn't decrement the meter on redirects, so don't call onConsumeCallback.
-      this.onConsumeCallbackHandled_ = true;
       this.deps_.callbacks().triggerSubscribeRequest();
+    } else {
+      this.deps_.callbacks().triggerOffersFlowRequest();
     }
   }
 
@@ -11254,6 +11427,30 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
       '',
       true
     ),
+  [AnalyticsEvent.IMPRESSION_NEWSLETTER_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_NEWSLETTER_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter signup',
+    'success',
+    false
+  ),
+  [AnalyticsEvent.IMPRESSION_REGWALL_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_REGWALL_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration',
+    'success',
+    false
+  ),
 };
 
 /** @const {!Object<?AnalyticsEvent,?Object>} */
@@ -11410,8 +11607,17 @@ class EntitlementsManager {
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!./deps.DepsDef} deps
+   * @param {!boolean} useArticleEndpoint
+   * @param {!boolean} enableDefaultMeteringHandler
    */
-  constructor(win, pageConfig, fetcher, deps, useArticleEndpoint) {
+  constructor(
+    win,
+    pageConfig,
+    fetcher,
+    deps,
+    useArticleEndpoint,
+    enableDefaultMeteringHandler
+  ) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -11474,6 +11680,9 @@ class EntitlementsManager {
 
     /** @private @const {boolean} */
     this.useArticleEndpoint_ = useArticleEndpoint;
+
+    /** @private @const {boolean} */
+    this.enableDefaultMeteringHandler_ = enableDefaultMeteringHandler;
 
     /** @private {?Article} */
     this.article_ = null;
@@ -12011,6 +12220,14 @@ class EntitlementsManager {
     this.deps_
       .callbacks()
       .triggerEntitlementsResponse(Promise.resolve(entitlements));
+
+    // Implementation of the default ability to always consume metered entitlements
+    // if they are provided in an entitlements response.
+    if (this.enableDefaultMeteringHandler_) {
+      if (entitlements.enablesThisWithGoogleMetering()) {
+        entitlements.consume();
+      }
+    }
 
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
@@ -12677,6 +12894,8 @@ class FetchResponseHeaders {
  * limitations under the License.
  */
 
+const jsonSaftyPrefix = /^(\)\]\}'\n)/;
+
 /**
  * @interface
  */
@@ -12732,7 +12951,7 @@ class XhrFetcher {
     return this.fetch(url, init).then((response) => {
       return response.text().then((text) => {
         // Remove "")]}'\n" XSSI prevention prefix in safe responses.
-        const cleanedText = text.replace(/^(\)\]\}'\n)/, '');
+        const cleanedText = text.replace(jsonSaftyPrefix, '');
         return parseJson(cleanedText);
       });
     });
@@ -12748,9 +12967,21 @@ class XhrFetcher {
       credentials: 'include',
       body: 'f.req=' + serializeProtoMessageForUrl(message),
     });
-    return this.fetch(url, init).then(
-      (response) => (response && response.json()) || {}
-    );
+    return this.fetch(url, init).then((response) => {
+      if (!response) {
+        return {};
+      }
+      return response.text().then((text) => {
+        try {
+          // Remove "")]}'\n" XSSI prevention prefix in safe responses.
+          const cleanedText = text.replace(jsonSaftyPrefix, '');
+          return parseJson(cleanedText);
+        } catch (e) {
+          ErrorUtils.throwAsync(e);
+          return {};
+        }
+      });
+    });
   }
 
   /** @override */
@@ -12816,8 +13047,11 @@ class GoogleAnalyticsEventListener {
    * @param {!../api/client-event-manager-api.ClientEvent} event
    */
   handleClientEvent_(event) {
-    // Bail immediately if ga function doesn't exist in Window.
-    if (typeof this.win_.ga != 'function') {
+    // Bail immediately if neither ga function (analytics.js) nor gtag function (gtag.js) exists in Window.
+    if (
+      typeof this.win_.ga !== 'function' &&
+      typeof this.win_.gtag !== 'function'
+    ) {
       return;
     }
     let subscriptionFlow = '';
@@ -12831,8 +13065,21 @@ class GoogleAnalyticsEventListener {
       event.eventType,
       subscriptionFlow
     );
-    if (gaEvent) {
+    if (!gaEvent) {
+      return;
+    }
+
+    // TODO(b/234825847): Remove it once universal analytics is deprecated in 2023.
+    if (typeof this.win_.ga === 'function') {
       this.win_.ga('send', 'event', gaEvent);
+    }
+
+    if (typeof this.win_.gtag === 'function') {
+      this.win_.gtag('event', gaEvent.eventAction, {
+        'event_category': gaEvent.eventCategory,
+        'event_label': gaEvent.eventLabel,
+        'non_interaction': gaEvent.nonInteraction,
+      });
     }
   }
 }
@@ -13170,6 +13417,10 @@ class LinkCompleteFlow {
     this.deps_
       .eventManager()
       .logSwgEvent(AnalyticsEvent.ACTION_GOOGLE_UPDATED_CLOSE, true);
+    const userToken = response['swgUserToken'];
+    if (userToken) {
+      this.deps_.storage().set(Constants$1.USER_TOKEN, userToken, true);
+    }
     this.callbacks_.triggerLinkComplete();
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
@@ -17571,7 +17822,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}body.swg-disable-scroll{height:100%!important}body.swg-disable-scroll,body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -17795,6 +18046,7 @@ class ConfiguredRuntime {
    *     fetcher: (!FetcherInterface|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
+   *     enableDefaultMeteringHandler: (boolean|undefined),
    *     useArticleEndpoint: (boolean|undefined)
    *   }=} integr
    * @param {!../api/subscriptions.Config=} config
@@ -17884,7 +18136,8 @@ class ConfiguredRuntime {
       this.pageConfig_,
       this.fetcher_,
       this, // See note about 'this' above
-      integr.useArticleEndpoint || false
+      integr.useArticleEndpoint || false,
+      integr.enableDefaultMeteringHandler || false
     );
 
     /** @private @const {!ClientConfigManager} */
@@ -18387,7 +18640,6 @@ class ConfiguredRuntime {
     if (
       !entitlement ||
       !isSecure(this.win().location) ||
-      !wasReferredByGoogle(parseUrl(this.win().document.referrer)) ||
       !queryStringHasFreshGaaParams(
         this.win().location.search,
         /*allowAllAccessTypes=*/ true

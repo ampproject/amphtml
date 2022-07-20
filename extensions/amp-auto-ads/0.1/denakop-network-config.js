@@ -59,6 +59,11 @@ export class DenakopNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     const attributes = {
       'data-multi-size-validation': 'false',

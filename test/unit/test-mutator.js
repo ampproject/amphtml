@@ -77,6 +77,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       getBoundingClientRect: () => rect,
       layoutCallback: () => Promise.resolve(),
       prerenderAllowed: () => true,
+      previewAllowed: () => true,
       renderOutsideViewport: () => false,
       unlayoutCallback: () => true,
       pause: () => {},
@@ -444,6 +445,27 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
         env.sandbox
           .stub(resources.ampdoc, 'getVisibilityState')
           .returns(VisibilityState_Enum.PRERENDER);
+        mutator.scheduleChangeSize_(
+          resource1,
+          111,
+          222,
+          undefined,
+          NO_EVENT,
+          false
+        );
+        resources.mutateWork_();
+        expect(resources.requestsChangeSize_).to.be.empty;
+        expect(resource1.changeSize).to.be.calledOnce;
+        expect(overflowCallbackSpy).to.be.calledOnce;
+        expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+      });
+
+    it.configure()
+      .skipSafari()
+      .run('should change size when document is in preview mode', () => {
+        env.sandbox
+          .stub(resources.ampdoc, 'getVisibilityState')
+          .returns(VisibilityState_Enum.PREVIEW);
         mutator.scheduleChangeSize_(
           resource1,
           111,
@@ -1383,6 +1405,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.getBoundingClientRect = () => rect;
     element.layoutCallback = () => Promise.resolve();
     element.prerenderAllowed = () => true;
+    element.previewAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;
     element.pause = () => {};

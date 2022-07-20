@@ -187,6 +187,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-audio",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "bento": true
+    }
+  },
+  {
     "name": "amp-auto-ads",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -217,9 +225,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -354,6 +360,16 @@
     }
   },
   {
+    "name": "amp-date-picker",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-delight-player",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -399,9 +415,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -551,6 +565,16 @@
     }
   },
   {
+    "name": "amp-image-slider",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-image-viewer",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -576,9 +600,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -599,9 +621,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -650,9 +670,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -668,9 +686,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -684,6 +700,15 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-list",
+    "version": "1.0",
+    "options": {
+      "hasCss": false,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -809,6 +834,14 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-pan-zoom",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
     }
   },
   {
@@ -960,9 +993,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -975,9 +1006,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -1004,6 +1033,15 @@
     "latestVersion": "1.0",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": false,
+      "additionalSuffix": "ssr_css"
     }
   },
   {
@@ -1180,9 +1218,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {

@@ -18,6 +18,8 @@ import {Slot, createSlot} from './slot';
  * The following combinations are allowed.
  * - `attr`, (optionally) `type`, and (optionally) `media` can be specified when
  *   an attribute maps to a component prop 1:1.
+ * - `parseAttr` can be specified to parse the `attr` value before passing it
+ *   into the component.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
  * - `attrMatches` and `parseAttrs` can be specified when multiple attributes
@@ -37,6 +39,7 @@ import {Slot, createSlot} from './slot';
  *   type?: string,
  *   attrMatches?: function(string):boolean,
  *   attrs: string[],
+ *   parseAttr?: function(string):*,
  *   parseAttrs?: function(Element):*,
  *   passthrough: boolean,
  *   passthroughNonEmpty: boolean,
@@ -245,7 +248,12 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
         ? null
         : [<Slot loading={Loading_Enum.LAZY} />];
     } else if (def.attr) {
-      value = element.getAttribute(def.attr);
+      const attr = element.getAttribute(def.attr);
+      if (attr && def.parseAttr) {
+        value = def.parseAttr(attr);
+      } else {
+        value = attr;
+      }
       if (def.media && value != null) {
         devAssert(mediaQueryProps);
         value = mediaQueryProps.resolveListQuery(String(value));

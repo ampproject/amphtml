@@ -4,13 +4,146 @@ Displays time data that you can render in your page. By providing specific [attr
 
 ## Web Component
 
-We don't support the web component version of `bento-date-display` since `<template>` support is still being designed. This effort can be tracked in this [issue](https://go.amp.dev/issue/36619).
+You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-<!--
-An older version of this file contains the removed section, though it's incorrect:
+### Example: Import via npm
 
-https://github.com/ampproject/amphtml/blob/422d171e87571c4d125a2bf956e78e92444c10e8/extensions/amp-date-display/1.0/README.md
--->
+Install via npm:
+
+```sh
+npm install @bentoproject/bento-date-display
+```
+
+```javascript
+import {defineElement as defineBentoDateDisplay} from '@bentoproject/bento-date-display';
+defineBentoDateDisplay();
+```
+
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<!-- Include bento-mustache.js to use mustache templates with this component -->
+<script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-date-display-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css" crossorigin="anonymous">
+```
+
+### Example
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-display-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-date-display
+      datetime="2021-09-09T16:02:08.494Z"
+      displayIn="utc"
+      locale="en-GB"
+    >
+      <template>
+        <div>ISO: {{iso}}; locale: {{localeString}}</div>
+      </template>
+    </bento-date-display>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+The Bento Date Display component does not have an imperative API. However, the Bento Date Display Web Component will render a mustache-template, provided by the consumer in a `<template>` tag with `type="amp-mustache"`. This template may interpolate date-related parameters. See the [Returned Time Parameters section](#returned-time-parameters) for a full list of all the available parameters.
+
+### Layout and style
+
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```html
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css">
+```
+
+Alternatively, you may also make the light-weight pre-upgrade styles available inline:
+
+```html
+<style data-bento-boilerplate>
+  bento-date-display {
+    display: block;
+    overflow: hidden;
+    position: relative;
+  }
+</style>
+```
+
+### Attributes
+
+#### `datetime`
+
+The `datetime` attribute specifies the date and time in a standard ISO 8601 date
+string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`,
+`bento-date-display` will use the time the page loaded to render its template.
+
+#### `timestamp-ms`
+
+The `timestamp-ms` attribute specifies the date and time using the number of
+milliseconds since 1970-01-01T0:00:00.000Z
+
+#### `timestamp-seconds`
+
+The `timestamp-seconds` attribute specifies the date and time using the number
+of seconds since 1970-01-01T0:00:00.000Z
+
+#### `locale` (optional)
+
+An internationalization language string for each timer unit. The default value
+is `en` (for English). This attribute supports all values that are supported by
+the user's browser.
+
+#### `display-in` (optional)
+
+If set to the value `utc`, the `display-in` attribute will convert the given
+date to UTC.
+
+#### `offset-seconds` (optional)
+
+The `offset-seconds` attribute specifies an integer number of seconds to shift
+the given date.
+
+#### `data-options-\*` (optional)
+
+The `data-options-*` supports all the options under [Intl.DateTimeFormat.options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters)
+parameter that specifies the formatting style to use for `localeString` format.
+Valid attributes include: `data-options-date-style`, `data-options-time-style`, etc.
+
+Note that if `display-in` attrubute is set to `utc`, the value of
+`data-options-time-zone` will automatically be converted to `UTC`.
+
+### Styling
+
+You may use the `bento-date-display` element selector to style the Bento Date Display component freely.
 
 ---
 
@@ -53,7 +186,7 @@ The Bento Date Display Preact/React component allows consumers to render their o
 
 #### `datetime`
 
-Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
+Required prop. Denotes the date and time as a Date, String, or Number. If String, must be a standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
 
 #### `displayIn`
 

@@ -118,19 +118,19 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   lotame: {
-    url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK/ma=MAX_AUDIENCES',
+    url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK/ma=MAX_AUDIENCE/gdpr_consent=CONSENT_STRING/gdpr=CONSENT_METADATA(gdprApplies)',
     macros: ['CLIENT_ID', 'AD_NETWORK', 'MAX_AUDIENCES'],
     disableKeyAppend: true,
   },
   medianet: {
-    url: 'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF&cste=CONSENT_STATE&cstr=CONSENT_STRING&adcid=ADCID&dmsv=ATTR(data-multi-size-validation)&ep=ELEMENT_POS&st=SCROLL_TOP&ph=PAGE_HEIGHT&bks=BKG_STATE&ref=REFERRER&dj=ATTR(data-json)',
+    url: 'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF&cste=CONSENT_STATE&cstr=CONSENT_STRING&adcid=ADCID&dmsv=ATTR(data-multi-size-validation)&ep=ELEMENT_POS&st=SCROLL_TOP&ph=PAGE_HEIGHT&bks=BKG_STATE&ref=REFERRER&dj=ATTR(data-json)&cst_type=CONSENT_METADATA(consentStringType)&gdpr_applies=CONSENT_METADATA(gdprApplies)',
     macros: ['CID'],
     errorReportingUrl:
       'https://qsearch-a.akamaihd.net/log?logid=kfk&evtid=projectevents&project=amprtc_error&error=ERROR_TYPE&rd=HREF',
     disableKeyAppend: true,
   },
   mediasquare: {
-    url: 'https://pbs-front.mediasquare.fr/msq_prebid?owner=OWNER&code=CODE&sizes=ATTR(data-multi-size)&adunit=ATTR(data-slot)&referer=HREF&gdpr_consent=CONSENT_STRING',
+    url: 'https://pbs-front.mediasquare.fr/msq_prebid?owner=OWNER&code=CODE&w=ATTR(width)&h=ATTR(height)&sizes=ATTR(data-multi-size)&adunit=ATTR(data-slot)&referer=HREF&gdpr_consent=CONSENT_STRING',
     macros: ['OWNER', 'CODE', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
@@ -160,7 +160,7 @@ const RTC_VENDORS = jsonConfiguration({
   },
   openwrap: {
     // PubMatic OpenWrap
-    url: 'https://ow.pubmatic.com/amp?v=1&w=ATTR(width)&h=ATTR(height)&ms=ATTR(data-multi-size)&auId=ATTR(data-slot)&purl=HREF&pubId=PUB_ID&profId=PROFILE_ID&consent_string=CONSENT_STRING&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
+    url: 'https://ow.pubmatic.com/amp?v=1&w=ATTR(width)&h=ATTR(height)&ms=ATTR(data-multi-size)&auId=ATTR(data-slot)&purl=HREF&pubId=PUB_ID&profId=PROFILE_ID&consent_string=CONSENT_STRING&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&curl=CANONICAL_URL&consent_type=CONSENT_METADATA(consentStringType)',
     macros: ['PUB_ID', 'PROFILE_ID', 'CONSENT_STRING'],
     errorReportingUrl: 'https://ow.pubmatic.com/amp_error?e=ERROR_TYPE&h=HREF',
     disableKeyAppend: true,
@@ -180,13 +180,18 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   prebidappnexus: {
-    url: 'https://prebid.adnxs.com/pbs/v1/openrtb2/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
+    url: 'https://prebid.adnxs.com/pbs/v1/openrtb2/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&consent_string=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)&pvid=PAGEVIEWID',
     macros: ['PLACEMENT_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   prebidappnexuspsp: {
-    url: 'https://ib.adnxs.com/prebid/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
+    url: 'https://ib.adnxs.com/prebid/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&consent_string=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)&pvid=PAGEVIEWID',
     macros: ['PLACEMENT_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
+    disableKeyAppend: true,
+  },
+  pubwise: {
+    url: 'https://pbs.pubwise.io/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   denakop: {
@@ -205,7 +210,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   prebidrubicon: {
-    url: 'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
+    url: 'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&consent_string=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)&pvid=PAGEVIEWID',
     macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
@@ -225,7 +230,7 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['PLACEMENT_ID', '_DIVIDER_'],
   },
   t13: {
-    url: 'https://s2s.t13.io/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    url: 'https://s2s.t13.io/openrtb2/amp?tag_id=TAG_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&consent_string=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
     macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
@@ -240,13 +245,18 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   yieldlab: {
-    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&consent=CONSENT_STRING&t=amp%3D1',
+    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&consent=CONSENT_STRING&t=amp%3D1&pubref=HREF',
     macros: ['ADSLOT_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   snigel: {
     url: 'https://adserv.snigelweb.com/bp/v1/openrtb2/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&consent_string=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
     macros: ['PLACEMENT_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
+    disableKeyAppend: true,
+  },
+  richaudience: {
+    url: 'https://shb.richaudience.com/amp?p=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&mref=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&targeting=TGT&consentString=CONSENT_STRING&gdpr=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
+    macros: ['PLACEMENT_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
 });

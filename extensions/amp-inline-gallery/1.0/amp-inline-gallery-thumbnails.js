@@ -1,10 +1,10 @@
+import {ThumbnailsBaseElement} from '#bento/components/bento-inline-gallery/1.0/thumbnails-base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
-
-import {ThumbnailsBaseElement} from './thumbnails-base-element';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';

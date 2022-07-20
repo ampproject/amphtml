@@ -145,6 +145,23 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to opt-in into being called to
+   * render when document itself is in preview mode.
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during preview mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
+   *
+   * Defaults to prerender behavior for most elements.
+   *
+   * @param {!AmpElement} element
+   * @return {boolean}
+   */
+  static previewAllowed(element) {
+    return this.prerenderAllowed(element);
+  }
+
+  /**
    * Subclasses can override this method to indicate that an element can load
    * network resources.
    *

@@ -292,6 +292,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(registerHandlerSpy).to.have.been.calledWith('touchmove');
     expect(registerHandlerSpy).to.have.been.calledWith('touchend');
     expect(registerHandlerSpy).to.have.been.calledWith('selectDocument');
+    expect(registerHandlerSpy).to.have.been.calledWith('storyContentLoaded');
     expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
   });
 

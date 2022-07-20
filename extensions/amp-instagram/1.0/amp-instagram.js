@@ -1,10 +1,10 @@
+import {BaseElement} from '#bento/components/bento-instagram/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-instagram-1.0.css';
 

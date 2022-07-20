@@ -252,7 +252,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       forceExperimentBranch(
         win,
         StoryAdSegmentExp.ID,
-        StoryAdSegmentExp.NO_ADVANCE_AD
+        StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA
       );
     });
 

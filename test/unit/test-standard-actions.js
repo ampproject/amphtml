@@ -561,6 +561,32 @@ describes.sandboxed('StandardActions', {}, (env) => {
       expectCheckboxToHaveCheckedStateTrue(element);
     });
 
+    it('should set checked property to false when checked property is true and args is null', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = true;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: null,
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
+    });
+
+    it('should set checked property to true when checked property is false and args is null', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = false;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: null,
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
     it('should set checked property to true when force=true', () => {
       const element = createElement();
       element.type = 'checkbox';

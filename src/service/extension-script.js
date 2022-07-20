@@ -1,7 +1,7 @@
 import {propagateNonce} from '#core/dom';
 import * as mode from '#core/mode';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
@@ -47,6 +47,25 @@ export function calculateExtensionScriptUrl(
   const rtv = getMode().rtvVersion;
   const extensionVersion = version ? '-' + version : '';
   return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
+}
+
+/**
+ * Calculate url for a file in the v0/ extension directory.
+ * @param {!Window} win The window
+ * @param {!Location} location The window's location
+ * @param {string} filename
+ * @param {boolean=} opt_isLocalDev
+ * @return {string}
+ */
+export function calculateExtensionFileUrl(
+  win,
+  location,
+  filename,
+  opt_isLocalDev
+) {
+  const base = calculateScriptBaseUrl(location, opt_isLocalDev);
+  const rtv = getMode(win).rtvVersion;
+  return `${base}/rtv/${rtv}/v0/${filename}`;
 }
 
 /**

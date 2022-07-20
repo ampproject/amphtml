@@ -1,9 +1,14 @@
-import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import '../amp-story-shopping';
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
+
+import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
+
+import * as history from 'extensions/amp-story/1.0/history';
+import {HistoryState} from 'extensions/amp-story/1.0/history';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
@@ -11,7 +16,10 @@ import {
   StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-
+import {
+  StoryAnalyticsEvent,
+  StoryAnalyticsService,
+} from '../../../amp-story/1.0/story-analytics';
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
   {
@@ -26,8 +34,7 @@ describes.realWin(
     let shoppingTag;
     let storeService;
     let localizationService;
-    let attachmentElement;
-    let pageEl;
+    let analytics;
 
     beforeEach(async () => {
       win = env.win;
@@ -36,33 +43,31 @@ describes.realWin(
         return storeService;
       });
 
+      analytics = new StoryAnalyticsService(win, win.document.body);
+      registerServiceBuilder(win, 'story-analytics', function () {
+        return analytics;
+      });
+
       storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
       localizationService = new LocalizationService(win.document.body);
       env.sandbox
-        .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
 
       await setUpStoryWithShoppingTag();
     });
 
     async function setUpStoryWithShoppingTag() {
-      pageEl = win.document.createElement('amp-story-page');
-      pageEl.id = 'page1';
-      tagEl = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-tag',
-        {'layout': 'container'}
+      tagEl = (
+        <amp-story-shopping-tag layout="container"></amp-story-shopping-tag>
       );
-      pageEl.appendChild(tagEl);
-
-      attachmentElement = win.document.createElement(
-        'amp-story-shopping-attachment'
+      env.win.document.body.appendChild(
+        <amp-story-page id="page1">
+          {tagEl}
+          <amp-story-shopping-attachment></amp-story-shopping-attachment>
+        </amp-story-page>
       );
-      const story = win.document.createElement('amp-story');
-      win.document.body.appendChild(story);
-      story.appendChild(pageEl);
-      pageEl.appendChild(attachmentElement);
       shoppingTag = await tagEl.getImpl();
     }
 
@@ -86,7 +91,7 @@ describes.realWin(
     });
 
     it('should not build shopping tag if page attachment is missing', async () => {
-      pageEl.removeChild(attachmentElement);
+      env.win.document.querySelector('amp-story-shopping-attachment').remove();
       await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
@@ -124,6 +129,31 @@ describes.realWin(
           storeService.get(StateProperty.SHOPPING_DATA['activeProductData'])
         ).to.deep.equal(tagData);
       });
+    });
+
+    it('should call analytics service on tag click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+      env.sandbox.stub(history, 'setHistoryState');
+      await setupShoppingTagAndData();
+      await shoppingTag.shoppingTagEl_.click();
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_TAG_CLICK
+      );
+    });
+
+    it('should call history service on tag click', async () => {
+      const tagData = {
+        'productTitle': 'Spectacular Spectacles',
+      };
+
+      const historyStub = env.sandbox.stub(history, 'setHistoryState');
+      await setupShoppingTagAndData();
+      await shoppingTag.shoppingTagEl_.click();
+      expect(historyStub).to.have.been.called.calledWith(
+        win,
+        HistoryState.SHOPPING_DATA,
+        tagData
+      );
     });
   }
 );

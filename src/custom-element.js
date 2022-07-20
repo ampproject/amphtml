@@ -1428,6 +1428,15 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
+     * Whether the element can preview.
+     * @return {boolean}
+     * @final
+     */
+    previewAllowed() {
+      return this.implClass_ ? this.implClass_.previewAllowed(this) : false;
+    }
+
+    /**
      * Whether the element has render-blocking service.
      * @return {boolean}
      * @final

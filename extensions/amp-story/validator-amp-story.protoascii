@@ -17,7 +17,7 @@ tags: {  # <amp-story>
   # TODO(gregable): This global requires/satisfies approach only works because
   # there is only one <amp-story standalone> in a document. We really want this
   # requirement to be expressed on the <amp-story> children, however.
-  requires: "amp-story-page"
+  requires_condition: "amp-story-page"
   attrs: {
     name: "background-audio"
     value_url: {
@@ -110,6 +110,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
     child_tag_name_oneof: "AMP-STORY-SOCIAL-SHARE"
+    child_tag_name_oneof: "AMP-STORY-SUBSCRIPTIONS"
   }
 }
 tags: {  # <amp-story-page>
@@ -117,7 +118,7 @@ tags: {  # <amp-story-page>
   tag_name: "AMP-STORY-PAGE"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
-  satisfies: "amp-story-page"
+  satisfies_condition: "amp-story-page"
   attrs: { name: "auto-advance-after" }
   attrs: {
     name: "background-audio"
@@ -137,6 +138,7 @@ tags: {  # <amp-story-page>
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
     child_tag_name_oneof: "AMP-STORY-PAGE-OUTLINK"
+    child_tag_name_oneof: "AMP-STORY-SHOPPING-ATTACHMENT"
     mandatory_min_num_child_tags: 1
   }
 }
@@ -268,6 +270,12 @@ tags: {
     value_regex_casei: "[0-9]+px"
   }
   attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
+  attrs: {
     name: "justify-content"
     value: "center"
     value: "end"
@@ -362,6 +370,12 @@ tags: {
     name: "translate-y"
     value_regex_casei: "[0-9]+px"
   }
+  attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -455,7 +469,7 @@ tags: {  # amp-story-consent (json)
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY-CONSENT"
   unique: true
-  satisfies: "amp-story-consent extension .json script"
+  satisfies_condition: "amp-story-consent extension .json script"
   attrs: {
     name: "type"
     mandatory: true
@@ -476,7 +490,7 @@ tags: {  # <amp-story-consent>
   requires_extension: "amp-consent"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-CONSENT"
-  requires: "amp-story-consent extension .json script"
+  requires_condition: "amp-story-consent extension .json script"
   attr_lists: "mandatory-id-attr"
   child_tags: {
     mandatory_num_child_tags: 1
@@ -565,6 +579,12 @@ tags: {
   attrs: {
     name: "translate-y"
     value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
   }
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
@@ -692,6 +712,7 @@ descendant_tag_list: {
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
+  tag: "AMP-BODYMOVIN-ANIMATION"
   tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-DATE-DISPLAY"
   tag: "AMP-EXPERIMENT"
@@ -715,6 +736,7 @@ descendant_tag_list: {
   tag: "AMP-STORY-INTERACTIVE-QUIZ"
   tag: "AMP-STORY-INTERACTIVE-RESULTS"
   tag: "AMP-STORY-PANNING-MEDIA"
+  tag: "AMP-STORY-SHOPPING-TAG"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
@@ -952,7 +974,7 @@ tags: {  # <amp-story-animation> <script>
   tag_name: "SCRIPT"
   spec_name: "amp-story-animation json script"
   mandatory_parent: "AMP-STORY-ANIMATION"
-  satisfies: "amp-story-animation json script"
+  satisfies_condition: "amp-story-animation json script"
   attrs: {
     name: "type"
     mandatory: true
@@ -972,7 +994,7 @@ tags: {  # <amp-story-animation>
   html_format: AMP
   tag_name: "AMP-STORY-ANIMATION"
   requires_extension: "amp-story"
-  requires: "amp-story-animation json script"
+  requires_condition: "amp-story-animation json script"
   mandatory_parent: "AMP-STORY-PAGE"
   attrs: { name: "animate-in-after" }
   attrs: {

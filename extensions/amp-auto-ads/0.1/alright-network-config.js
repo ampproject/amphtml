@@ -52,6 +52,11 @@ export class AlrightNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     const attributes = {
       'width': 300,

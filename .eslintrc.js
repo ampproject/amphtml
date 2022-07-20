@@ -52,10 +52,12 @@ module.exports = {
   'globals': {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
+    'IS_SSR_CSS': 'readonly',
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
     'IS_PROD': 'readonly',
     'INTERNAL_RUNTIME_VERSION': 'readonly',
+    'AMP_STORY_SUPPORTED_LANGUAGES': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',

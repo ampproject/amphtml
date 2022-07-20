@@ -8,9 +8,12 @@ const {getReplacePlugin} = require('./helpers');
 /**
  * Gets the config for minified babel transforms run, used by 3p vendors.
  *
+ * @param {'preact' | 'react'} buildFor
+ * @param {!Object=} opt_replacePluginOverrides
  * @return {!Object}
  */
-function getMinifiedConfig() {
+function getMinifiedConfig(buildFor = 'preact', opt_replacePluginOverrides) {
+  const isEsmBuild = argv.esm || argv.sxg;
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
@@ -21,13 +24,14 @@ function getMinifiedConfig() {
       useSpread: true,
     },
   ];
-  const replacePlugin = getReplacePlugin();
+  const replacePlugin = getReplacePlugin(opt_replacePluginOverrides);
 
   const plugins = [
     'optimize-objstr',
+    './build-system/babel-plugins/babel-plugin-deep-pure',
     './build-system/babel-plugins/babel-plugin-mangle-object-values',
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
-    getImportResolverPlugin(),
+    getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
@@ -36,7 +40,7 @@ function getMinifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-rename-privates',
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
-    (argv.esm || argv.sxg) &&
+    isEsmBuild &&
       './build-system/babel-plugins/babel-plugin-transform-dev-methods',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
@@ -47,6 +51,7 @@ function getMinifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
+    './build-system/babel-plugins/babel-plugin-amp-story-supported-languages',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     // TODO(erwinm, #28698): fix this in fixit week
@@ -58,15 +63,18 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       BUILD_CONSTANTS,
     ],
-    ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}],
+    !isEsmBuild
+      ? ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}]
+      : null,
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: false,
-      targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
+      targets: isEsmBuild ? {esmodules: true} : {ie: 11, chrome: 41},
       shippedProposals: true,
+      exclude: isEsmBuild ? ['@babel/plugin-transform-for-of'] : [],
     },
   ];
   const presetTypescript = [

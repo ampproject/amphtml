@@ -668,6 +668,14 @@ export class Resource {
   }
 
   /**
+   * Whether this element can be previewed.
+   * @return {boolean}
+   */
+  previewAllowed() {
+    return this.element.previewAllowed();
+  }
+
+  /**
    * Whether this element has render-blocking service.
    * @return {boolean}
    */

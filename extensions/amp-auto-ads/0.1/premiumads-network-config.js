@@ -35,6 +35,11 @@ export class PremiumadsNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     const data = this.autoAmpAdsElement_.dataset;
     return {

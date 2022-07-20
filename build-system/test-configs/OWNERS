@@ -15,7 +15,7 @@
     },
     {
       pattern: 'forbidden-terms.js',
-      owners: [{name: 'wg-components'}],
+      owners: [{name: 'ampproject/wg-components'}],
     },
   ],
 }

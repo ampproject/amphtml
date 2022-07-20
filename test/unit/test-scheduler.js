@@ -57,6 +57,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
     element.deferredMount = () => options.deferredMount || false;
     element.prerenderAllowed = () => options.prerenderAllowed || false;
+    element.previewAllowed = () => options.previewAllowed || false;
     element.getBuildPriority = () =>
       options.buildPriority || LayoutPriority_Enum.CONTENT;
     element.mountInternal = env.sandbox.stub();
@@ -203,112 +204,280 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
   });
 
   describe('wait for document visibility', () => {
-    beforeEach(async () => {
-      ampdoc.overrideVisibilityState('prerender');
-      await setAmpdocReady();
-    });
-
-    it('should build if prerenderAllowed', () => {
-      const element = createAmpElement({
-        deferredMount: false,
-        prerenderAllowed: true,
+    describe('visibility state: prerender', () => {
+      beforeEach(async () => {
+        ampdoc.overrideVisibilityState('prerender');
+        await setAmpdocReady();
       });
-      scheduler.schedule(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.be.calledOnce;
-    });
 
-    it('should build asap if prerenderAllowed', () => {
-      const element = createAmpElement({
-        deferredMount: true,
-        prerenderAllowed: true,
+      it('should build if prerenderAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: false,
+          prerenderAllowed: true,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
       });
-      scheduler.scheduleAsap(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.be.calledOnce;
-    });
 
-    it('should NOT build if not prerenderAllowed', () => {
-      const element = createAmpElement({
-        deferredMount: false,
-        prerenderAllowed: false,
+      it('should build asap if prerenderAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: true,
+          prerenderAllowed: true,
+        });
+        scheduler.scheduleAsap(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
       });
-      scheduler.schedule(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.be.not.called;
-    });
 
-    it('should NOT build asap if not prerenderAllowed', () => {
-      const element = createAmpElement({
-        deferredMount: true,
-        prerenderAllowed: false,
+      it('should NOT build if not prerenderAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: false,
+          prerenderAllowed: false,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.not.called;
       });
-      scheduler.scheduleAsap(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.be.not.called;
+
+      it('should NOT build asap if not prerenderAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: true,
+          prerenderAllowed: false,
+        });
+        scheduler.scheduleAsap(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.not.called;
+      });
+
+      it('should build when becomes preview if previewAllowed', () => {
+        const element = createAmpElement({
+          prerenderAllowed: false,
+          previewAllowed: true,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('preview');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
+
+      it('should NOT build when becomes preview if not previewAllowed', () => {
+        const element = createAmpElement({
+          prerenderAllowed: false,
+          previewAllowed: false,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('preview');
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+      });
+
+      it('should build when becomes visible', () => {
+        const element = createAmpElement({prerenderAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('visible');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
+
+      it('should build when becomes hidden', () => {
+        const element = createAmpElement({prerenderAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('hidden');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
+
+      it('should NOT build when becomes paused or inactive', () => {
+        const element = createAmpElement({prerenderAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('paused');
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('inactive');
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+      });
+
+      it('should NOT build when scheduled in paused', () => {
+        ampdoc.overrideVisibilityState('paused');
+
+        const element = createAmpElement({prerenderAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('visible');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
+
+      it('should NOT build when scheduled in inactive', () => {
+        ampdoc.overrideVisibilityState('inactive');
+
+        const element = createAmpElement({prerenderAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('visible');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
     });
 
-    it('should build when becomes visible', () => {
-      const element = createAmpElement({prerenderAllowed: false});
-      scheduler.schedule(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.not.be.called;
+    describe('visibility state: preview', () => {
+      beforeEach(async () => {
+        ampdoc.overrideVisibilityState('preview');
+        await setAmpdocReady();
+      });
 
-      ampdoc.overrideVisibilityState('visible');
-      clock.tick(1);
-      expect(element.mountInternal).to.be.calledOnce;
-    });
+      it('should build if previewAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: false,
+          previewAllowed: true,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
 
-    it('should build when becomes hidden', () => {
-      const element = createAmpElement({prerenderAllowed: false});
-      scheduler.schedule(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.not.be.called;
+      it('should build asap if previewAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: true,
+          previewAllowed: true,
+        });
+        scheduler.scheduleAsap(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
 
-      ampdoc.overrideVisibilityState('hidden');
-      clock.tick(1);
-      expect(element.mountInternal).to.be.calledOnce;
-    });
+      it('should NOT build if not previewAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: false,
+          previewAllowed: false,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.not.called;
+      });
 
-    it('should NOT build when becomes paused or inactive', () => {
-      const element = createAmpElement({prerenderAllowed: false});
-      scheduler.schedule(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.not.be.called;
+      it('should NOT build asap if not previewAllowed', () => {
+        const element = createAmpElement({
+          deferredMount: true,
+          previewAllowed: false,
+        });
+        scheduler.scheduleAsap(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.be.not.called;
+      });
 
-      ampdoc.overrideVisibilityState('paused');
-      clock.tick(1);
-      expect(element.mountInternal).to.not.be.called;
+      it('should build when becomes prerender if prerenderAllowed', () => {
+        const element = createAmpElement({
+          prerenderAllowed: true,
+          previewAllowed: false,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
 
-      ampdoc.overrideVisibilityState('inactive');
-      clock.tick(1);
-      expect(element.mountInternal).to.not.be.called;
-    });
+        ampdoc.overrideVisibilityState('prerender');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
 
-    it('should NOT build when scheduled in paused', () => {
-      ampdoc.overrideVisibilityState('paused');
+      it('should NOT build when becomes prerender if not prerenderAllowed', () => {
+        const element = createAmpElement({
+          prerenderAllowed: false,
+          previewAllowed: false,
+        });
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
 
-      const element = createAmpElement({prerenderAllowed: false});
-      scheduler.schedule(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.not.be.called;
+        ampdoc.overrideVisibilityState('prerender');
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+      });
 
-      ampdoc.overrideVisibilityState('visible');
-      clock.tick(1);
-      expect(element.mountInternal).to.be.calledOnce;
-    });
+      it('should build when becomes visible', () => {
+        const element = createAmpElement({previewAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
 
-    it('should NOT build when scheduled in inactive', () => {
-      ampdoc.overrideVisibilityState('inactive');
+        ampdoc.overrideVisibilityState('visible');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
 
-      const element = createAmpElement({prerenderAllowed: false});
-      scheduler.schedule(element);
-      clock.tick(1);
-      expect(element.mountInternal).to.not.be.called;
+      it('should build when becomes hidden', () => {
+        const element = createAmpElement({previewAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
 
-      ampdoc.overrideVisibilityState('visible');
-      clock.tick(1);
-      expect(element.mountInternal).to.be.calledOnce;
+        ampdoc.overrideVisibilityState('hidden');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
+
+      it('should NOT build when becomes paused or inactive', () => {
+        const element = createAmpElement({previewAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('paused');
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('inactive');
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+      });
+
+      it('should NOT build when scheduled in paused', () => {
+        ampdoc.overrideVisibilityState('paused');
+
+        const element = createAmpElement({previewAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('visible');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
+
+      it('should NOT build when scheduled in inactive', () => {
+        ampdoc.overrideVisibilityState('inactive');
+
+        const element = createAmpElement({previewAllowed: false});
+        scheduler.schedule(element);
+        clock.tick(1);
+        expect(element.mountInternal).to.not.be.called;
+
+        ampdoc.overrideVisibilityState('visible');
+        clock.tick(1);
+        expect(element.mountInternal).to.be.calledOnce;
+      });
     });
   });
 

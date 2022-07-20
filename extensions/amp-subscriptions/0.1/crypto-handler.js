@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import {toArray} from '#core/types/array';
 import {tryParseJson} from '#core/types/object/json';
 import {padStart} from '#core/types/string';
@@ -111,7 +110,7 @@ export class CryptoHandler {
           .getRootNode()
           .querySelectorAll('script[ciphertext]');
         const promises = [];
-        iterateCursor(encryptedSections, (encryptedSection) => {
+        encryptedSections.forEach((encryptedSection) => {
           const text = encryptedSection.textContent.replace(/\s+/g, '');
           const contentBuffer = base64Decode(text).buffer;
           const iv = contentBuffer.slice(0, 12);

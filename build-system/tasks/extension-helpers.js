@@ -14,7 +14,6 @@ const {
   esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
-  mkdirSync,
   watchDebounceDelay,
 } = require('./helpers');
 const {
@@ -41,7 +40,10 @@ const {watch} = require('chokidar');
 const {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
+  getRemapBentoNpmPreactDependencies,
+  getRemapBentoNpmReactDependencies,
 } = require('../compile/bento-remap');
+const {findJsSourceFilename} = require('../common/fs');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -95,6 +97,8 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
+ *   ssrCss?: boolean,
+ *   additionalSuffix?: string
  * }}
  */
 const ExtensionOptionDef = {};
@@ -129,8 +133,14 @@ const adVendors = [];
 function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
+  const suffix = options?.additionalSuffix ?? '';
   versions.forEach((v) => {
-    extensionsObject[`${name}-${v}`] = {
+    // If `additionalSuffix` is given, make it as a part of the key as it is
+    // most likely needed to make the entry unique for instances where
+    // multiple entries share the same "entryPoint/name"  but have different
+    // destination name. This allows for a 1 to many relationship between
+    // entryPoint and output (1 -> *).
+    extensionsObject[`${name}-${v}${suffix}`] = {
       name,
       version: v,
       ...defaultOptions,
@@ -436,8 +446,6 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    mkdirSync('build');
-    mkdirSync('build/css');
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -517,6 +525,7 @@ async function buildNpmBentoWebComponentCss(extDir, options) {
     await buildExtensionCss(extDir, options.name, options.version, options);
   }
   const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.ensureDir(path.dirname(destFilepath));
   await fs.copyFile(srcFilepath, destFilepath);
 }
 
@@ -647,13 +656,14 @@ async function buildNpmBinaries(extDir, name, options) {
         external: ['react', 'react-dom'],
         remap: {
           'preact': 'react',
-          '.*/preact/compat': 'react',
+          'preact/compat': 'react',
+          './src/preact/compat/internal.js': './src/preact/compat/external.js',
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
         wrapper: '',
       },
-      bento: {
+      standalone: {
         entryPoint: await getBentoBuildFilename(
           extDir,
           getBentoName(name),
@@ -664,10 +674,29 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
     };
-    if (options.useBentoCore) {
-      // remap all shared modules to the @bentoproject/core package and declare as external
-      npm.bento.remap = getRemapBentoNpmDependencies();
-      npm.bento.external = Object.values(npm.bento.remap);
+
+    // for each bento mode, remap all shared modules and declare them as external
+    // remaps "core" modules to @bentoproject/core
+    // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
+    for (const mode in npm) {
+      const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
+      const bentoRemaps =
+        mode === 'standalone'
+          ? getRemapBentoNpmDependencies(fullEntryPoint)
+          : mode === 'preact'
+          ? getRemapBentoNpmPreactDependencies(fullEntryPoint)
+          : mode === 'react'
+          ? getRemapBentoNpmReactDependencies(fullEntryPoint)
+          : {};
+
+      const bentoExternals = Object.values(bentoRemaps);
+      npm[mode].remap = {
+        ...(npm[mode].remap || {}),
+        ...bentoRemaps,
+      };
+      npm[mode].external = [
+        ...new Set([...(npm[mode].external || []), ...bentoExternals]),
+      ];
     }
   }
   const binaries = Object.values(npm);
@@ -681,13 +710,14 @@ async function buildNpmBinaries(extDir, name, options) {
  * @return {!Promise}
  */
 function buildBinaries(extDir, binaries, options) {
-  mkdirSync(`${extDir}/dist`);
+  // If outputPath is not defined, then use extDir
+  const {outputPath = extDir} = options;
 
   const promises = binaries.map((binary) => {
     const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+    return esbuildCompile(extDir + '/', entryPoint, `${outputPath}/dist`, {
       ...options,
       toName: maybeToNpmEsmName(`${name}.max.js`),
       minifiedName: maybeToNpmEsmName(`${name}.js`),
@@ -709,10 +739,14 @@ function buildBinaries(extDir, binaries, options) {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
-  const remapDependencies = getRemapBentoDependencies(options.minify);
+  const entryPoint = await findJsSourceFilename(path.join(dir, name));
+  const remapDependencies = getRemapBentoDependencies(
+    entryPoint,
+    options.minify
+  );
   await buildExtensionJs(dir, name, {
     ...options,
-    externalDependencies: Object.values(remapDependencies),
+    externalDependencies: [...new Set(Object.values(remapDependencies))],
     remapDependencies,
     wrapper: 'none',
     outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
@@ -779,13 +813,18 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
     import {BaseElement} from '../base-element';
     import {defineBentoElement} from '${bentoCePath}';
 
-    function defineElement() {
-      defineBentoElement(__name__, BaseElement);
+    function defineElement(win) {
+      defineBentoElement(__name__, BaseElement, win);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
   `).replace('__name__', JSON.stringify(name));
 }
+
+/** @type {import('@babel/core').PluginItem[]} */
+const extensionBabelPlugins = [
+  './build-system/babel-plugins/babel-plugin-amp-config-urls',
+];
 
 /**
  * Build the JavaScript for the extension specified
@@ -798,7 +837,11 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
  */
 async function buildExtensionJs(dir, name, options) {
   const isLatest = legacyLatestVersions[options.name] === options.version;
-  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
+  const {
+    filename = await findJsSourceFilename(name, dir),
+    version,
+    wrapper = 'extension',
+  } = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {
@@ -812,12 +855,16 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
+  const additionalSuffix = options.additionalSuffix
+    ? `.${options.additionalSuffix}`
+    : '';
   await compileJs(`${dir}/`, filename, './dist/v0', {
     ...options,
-    toName: `${name}-${version}.max.js`,
-    minifiedName: `${name}-${version}.js`,
-    aliasName: isLatest ? `${name}-latest.js` : '',
+    toName: `${name}-${version}.max${additionalSuffix}.js`,
+    minifiedName: `${name}-${version}${additionalSuffix}.js`,
+    aliasName: isLatest ? `${name}-latest${additionalSuffix}.js` : '',
     wrapper: resolvedWrapper,
+    babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
 
   // If an incremental watch build fails, simply return.
@@ -831,10 +878,12 @@ async function buildExtensionJs(dir, name, options) {
   if (isAliased) {
     const {aliasedVersion} = aliasBundle;
     const src = maybeToEsmName(
-      `${name}-${version}${options.minify ? '' : '.max'}.js`
+      `${name}-${version}${options.minify ? '' : '.max'}${additionalSuffix}.js`
     );
     const dest = maybeToEsmName(
-      `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${name}-${aliasedVersion}${
+        options.minify ? '' : '.max'
+      }${additionalSuffix}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
