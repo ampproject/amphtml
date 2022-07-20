@@ -11,7 +11,7 @@ export function clever(global, data) {
   }
 
   const domain = parseUrlDeprecated(global.context.sourceUrl).origin;
-  const c = document.createElement("script");
+  const c = document.createElement('script');
 
   c.id = 'CleverCoreLoader' + data.id;
   c.src = '//scripts.cleverwebserver.com/' + data.hash + '.js';
