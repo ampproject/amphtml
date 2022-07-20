@@ -1,4 +1,4 @@
-import {parseUrlDeprecated} from "../../src/url";
+import {parseUrlDeprecated} from '../../src/url';
 
 /**
  * @param {!Window} global
@@ -11,13 +11,13 @@ export function clever(global, data) {
   }
 
   const domain = parseUrlDeprecated(global.context.sourceUrl).origin;
-  let c = document.createElement("script");
+  const c = document.createElement("script");
 
-  c.id = "CleverCoreLoader" + data.id;
-  c.src = "//scripts.cleverwebserver.com/" + data.hash + ".js";
-  c.type = "text/javascript";
-  c.setAttribute("data-target", global.window.name);
-  c.setAttribute("data-origin", domain);
+  c.id = 'CleverCoreLoader' + data.id;
+  c.src = ''//scripts.cleverwebserver.com/' + data.hash + '.js';
+  c.type = 'text/javascript';
+  c.setAttribute('data-target', global.window.name);
+  c.setAttribute('data-origin', domain);
 
-  global.document.getElementsByTagName("body")[0].append(c);
+  global.document.getElementsByTagName('body')[0].append(c);
 }
