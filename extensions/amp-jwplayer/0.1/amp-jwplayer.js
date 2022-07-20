@@ -134,9 +134,15 @@ class AmpJWPlayer extends AMP.BaseElement {
   isInteractive() {
     if (
       this.element.hasAttribute('autoplay') &&
-      isAutoplaySupported(this.win) &&
       this.config_.controls === false
     ) {
+      // Enable controls if autoplay is not supported so user can begin playback
+      isAutoplaySupported(this.win).then((isAutoplaySupported) => {
+        if (!isAutoplaySupported) {
+          this.video.showControls();
+        }
+      });
+
       return false;
     }
 
