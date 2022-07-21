@@ -50,18 +50,21 @@ export class LocalSubscriptionBasePlatform {
     /** @protected @const {!./analytics.SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = serviceAdapter.getAnalytics();
 
-    userAssert(
-      this.serviceConfig_['actions'],
-      'Actions have not been defined in the service config'
-    );
+    // If we have no local serrvice we don't need to validate it's actions.
+    if (!this.serviceConfig_['type'] || this.serviceConfig_['type'] != 'none') {
+      userAssert(
+        this.serviceConfig_['actions'],
+        'Actions have not been defined in the service config'
+      );
 
-    /** @private @const {!Actions} */
-    this.actions_ = new Actions(
-      this.ampdoc_,
-      this.urlBuilder_,
-      this.subscriptionAnalytics_,
-      this.validateActionMap(this.serviceConfig_['actions'])
-    );
+      /** @private @const {!Actions} */
+      this.actions_ = new Actions(
+        this.ampdoc_,
+        this.urlBuilder_,
+        this.subscriptionAnalytics_,
+        this.validateActionMap(this.serviceConfig_['actions'])
+      );
+    }
 
     /** @private @const {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(

@@ -1,4 +1,5 @@
 import {LocalSubscriptionIframePlatform} from './local-subscription-platform-iframe';
+import {LocalSubscriptionNullPlatform} from './local-subscription-platform-null';
 import {LocalSubscriptionRemotePlatform} from './local-subscription-platform-remote';
 
 /**
@@ -13,17 +14,25 @@ export function localSubscriptionPlatformFactory(
   platformConfig,
   serviceAdapter
 ) {
-  /* Return the correxct platform based on the config */
-  if (platformConfig['type'] === 'iframe') {
-    return new LocalSubscriptionIframePlatform(
-      ampdoc,
-      platformConfig,
-      serviceAdapter
-    );
+  // Detct and render non-standard platforms.
+  switch (platformConfig['type']) {
+    case 'iframe':
+      return new LocalSubscriptionIframePlatform(
+        ampdoc,
+        platformConfig,
+        serviceAdapter
+      );
+    case 'none':
+      return new LocalSubscriptionNullPlatform(
+        ampdoc,
+        platformConfig,
+        serviceAdapter
+      );
+    default:
+      return new LocalSubscriptionRemotePlatform(
+        ampdoc,
+        platformConfig,
+        serviceAdapter
+      );
   }
-  return new LocalSubscriptionRemotePlatform(
-    ampdoc,
-    platformConfig,
-    serviceAdapter
-  );
 }
