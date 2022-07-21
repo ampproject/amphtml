@@ -442,6 +442,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  'clever': {
+    renderStartImplemented: true,
+  },
+
   'dable': {
     preconnect: [
       'https://static.dable.io',
