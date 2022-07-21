@@ -353,9 +353,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
   // We read from the current binary configuration options if it is an
-  // SSR ready binary output. (ex. removes CSS installation, etc)
-  if (options.ssrReady) {
-    babelCaller += '-ssr-ready';
+  // no css binary output. (removes CSS installation)
+  if (options.ssrCss) {
+    babelCaller += '-ssr-css';
   }
 
   const babelPlugin = getEsbuildBabelPlugin(
@@ -728,9 +728,9 @@ async function thirdPartyBootstrap(input, outputName, options) {
 async function getDependencies(entryPoint, options) {
   let caller = options.minify ? 'minified' : 'unminified';
   // We read from the current binary configuration options if it is an
-  // SSR ready binary output. (ex. removes CSS installation, etc)
-  if (options.ssrReady) {
-    caller += '-ssr-ready';
+  // no css binary output. (removes CSS installation)
+  if (options.ssrCss) {
+    caller += '-ssr-css';
   }
   const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
   const result = await esbuild.build({

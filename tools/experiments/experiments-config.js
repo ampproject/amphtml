@@ -188,4 +188,9 @@ export const EXPERIMENTS = [
     name: 'Apply the hasAudio flag from cached videos on stories',
     spec: 'https://github.com/ampproject/amphtml/pull/38285',
   },
+  {
+    id: 'amp-story-subscriptions',
+    name: 'Enable paywall experiences in web stories by turning on amp-story-subscriptions extension',
+    spec: 'https://github.com/ampproject/amphtml/pull/38179',
+  },
 ];
