@@ -303,6 +303,7 @@ jobs:
       - codecov/upload:
           file: test/coverage/lcov-unit.info
           flags: unit_tests
+          xtra_args: -c
       - store_test_output
       - store_filelist
       - teardown_vm
