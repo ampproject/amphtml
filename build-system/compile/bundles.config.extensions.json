@@ -1041,7 +1041,7 @@
     "latestVersion": "1.0",
     "options": {
       "hasCss": false,
-      "additionalSuffix": "ssr_css"
+      "additionalSuffix": "ssr-css"
     }
   },
   {
