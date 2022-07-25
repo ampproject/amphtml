@@ -183,9 +183,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     // Drag events.
     this.inputEl_.addEventListener(
       'touchmove',
-      (event) => {
-        event.stopPropagation();
-      },
+      (event) => event.stopPropagation(),
       true
     );
 
