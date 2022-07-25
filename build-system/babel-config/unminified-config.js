@@ -8,9 +8,10 @@ const {getReplacePlugin} = require('./helpers');
  * Gets the config for babel transforms run during `amp build`.
  *
  * @param {'preact' | 'react'} buildFor
+ * @param {!Object=} opt_replacePluginOverrides
  * @return {!Object}
  */
-function getUnminifiedConfig(buildFor = 'preact') {
+function getUnminifiedConfig(buildFor = 'preact', opt_replacePluginOverrides) {
   const isEsmBuild = argv.esm || argv.sxg;
 
   const reactJsxPlugin = [
@@ -37,7 +38,7 @@ function getUnminifiedConfig(buildFor = 'preact') {
     '@babel/preset-typescript',
     {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
   ];
-  const replacePlugin = getReplacePlugin();
+  const replacePlugin = getReplacePlugin(opt_replacePluginOverrides);
   const unminifiedPlugins = [
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(buildFor),

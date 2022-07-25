@@ -52,6 +52,7 @@ module.exports = {
   'globals': {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
+    'IS_SSR_CSS': 'readonly',
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
     'IS_PROD': 'readonly',

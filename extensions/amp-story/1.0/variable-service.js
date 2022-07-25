@@ -20,6 +20,7 @@ export const AnalyticsVariable = {
   STORY_IS_MUTED: 'storyIsMuted',
   STORY_PROGRESS: 'storyProgress',
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
+  STORY_PREVIOUS_PAGE_INDEX: 'storyPreviousPageIndex',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
   STORY_SHOPPING_PRODUCT_ID: 'storyShoppingProductId',
 };
@@ -65,6 +66,7 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.STORY_PROGRESS]: null,
       [AnalyticsVariable.STORY_IS_MUTED]: null,
       [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
+      [AnalyticsVariable.STORY_PREVIOUS_PAGE_INDEX]: null,
       [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
       [AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID]: null,
     };
@@ -118,6 +120,8 @@ export class AmpStoryVariableService {
     const adsBeforePage = pageIds
       .slice(0, pageIndex)
       .filter((id) => id.startsWith('i-amphtml-ad-')).length;
+    this.variables_[AnalyticsVariable.STORY_PREVIOUS_PAGE_INDEX] =
+      this.variables_[AnalyticsVariable.STORY_PAGE_INDEX];
     this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] =
       pageIndex - adsBeforePage;
 

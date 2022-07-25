@@ -442,6 +442,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  'clever': {
+    renderStartImplemented: true,
+  },
+
   'dable': {
     preconnect: [
       'https://static.dable.io',
@@ -1383,6 +1387,10 @@ const adConfig = jsonConfiguration({
   'vmfive': {
     prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
     preconnect: ['https://vawpro.vm5apis.com', 'https://vahfront.vm5apis.com'],
+    renderStartImplemented: true,
+  },
+
+  'vox': {
     renderStartImplemented: true,
   },
 

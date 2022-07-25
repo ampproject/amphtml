@@ -7,9 +7,9 @@ tags: {  # amp-smartlinks
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
-  satisfies: "amp-smartlinks"
-  excludes: "amp-link-rewriter"
-  excludes: "amp-skimlinks"
+  satisfies_condition: "amp-smartlinks"
+  excludes_condition: "amp-link-rewriter"
+  excludes_condition: "amp-skimlinks"
 }
 
 tags: {  # <amp-smartlinks>

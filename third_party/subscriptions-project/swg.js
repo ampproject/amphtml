@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.218 */
+/** Version: 0.1.22.227 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -127,6 +127,9 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
+  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
+  ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
+  ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -155,6 +158,7 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
   EVENT_REGWALL_OPTED_IN: 3023,
   EVENT_NEWSLETTER_OPTED_IN: 3024,
+  EVENT_SHOWCASE_METERING_INIT: 3025,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -412,6 +416,12 @@ class AnalyticsContext {
       data[11 + base] == null || data[11 + base] == undefined
         ? null
         : new Timestamp(data[11 + base], includesLabel);
+
+    /** @private {?ReaderSurfaceType} */
+    this.readerSurfaceType_ = data[12 + base] == null ? null : data[12 + base];
+
+    /** @private {?string} */
+    this.integrationVersion_ = data[13 + base] == null ? null : data[13 + base];
   }
 
   /**
@@ -583,6 +593,34 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {?ReaderSurfaceType}
+   */
+  getReaderSurfaceType() {
+    return this.readerSurfaceType_;
+  }
+
+  /**
+   * @param {!ReaderSurfaceType} value
+   */
+  setReaderSurfaceType(value) {
+    this.readerSurfaceType_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getIntegrationVersion() {
+    return this.integrationVersion_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setIntegrationVersion(value) {
+    this.integrationVersion_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -601,6 +639,8 @@ class AnalyticsContext {
         this.clientVersion_, // field 10 - client_version
         this.url_, // field 11 - url
         this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
+        this.readerSurfaceType_, // field 13 - reader_surface_type
+        this.integrationVersion_, // field 14 - integration_version
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -4996,7 +5036,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.218',
+    '_client': 'SwG 0.1.22.227',
   });
 }
 
@@ -6330,7 +6370,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.218',
+        '_client': 'SwG 0.1.22.227',
         'supportsEventManager': true,
       },
       args || {}
@@ -6361,7 +6401,22 @@ class ActivityPorts$1 {
     if (addDefaultArguments) {
       args = this.addDefaultArguments(args);
     }
-    return this.openActivityIframePort_(iframe, url, args);
+    return this.deps_
+      .storage()
+      .get(Constants$1.USER_TOKEN, /* useLocalStorage= */ true)
+      .then((swgUserToken) => {
+        const queryParams = new URL(url).searchParams;
+        if (swgUserToken && !queryParams.has('sut')) {
+          url = addQueryParam(url, 'sut', swgUserToken);
+        }
+
+        const pubId = this.deps_.pageConfig().getPublicationId();
+        if (pubId && !queryParams.has('publicationId')) {
+          url = addQueryParam(url, 'publicationId', pubId);
+        }
+
+        return this.openActivityIframePort_(iframe, url, args);
+      });
   }
 
   /**
@@ -7243,7 +7298,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.218');
+    context.setClientVersion('SwG 0.1.22.227');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7270,21 +7325,8 @@ class AnalyticsService {
       // context and that it may not contain experiments activated late during
       // the publishers code lifecycle.
       this.addLabels(getOnExperiments(this.doc_.getWin()));
-      this.serviceReady_ = this.deps_
-        .storage()
-        .get(Constants$1.USER_TOKEN)
-        .then((swgUserToken) => {
-          const pubId = this.deps_.pageConfig().getPublicationId();
-          const urlParams = swgUserToken
-            ? {sut: swgUserToken, publicationId: pubId}
-            : {publicationId: pubId};
-          return this.activityPorts_.openIframe(
-            this.iframe_,
-            feUrl('/serviceiframe', urlParams),
-            null,
-            true
-          );
-        })
+      this.serviceReady_ = this.activityPorts_
+        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
         .then(
           (port) => {
             // Register a listener for the logging to code indicate it is
@@ -10866,141 +10908,123 @@ class MeterToastApi {
           ? MeterType.UNKNOWN
           : MeterType.KNOWN;
     }
-    return this.deps_
-      .storage()
-      .get(Constants$1.USER_TOKEN, true)
-      .then((swgUserToken) => {
-        const iframeArgs =
-          this.activityPorts_.addDefaultArguments(additionalArguments);
+    const iframeArgs =
+      this.activityPorts_.addDefaultArguments(additionalArguments);
 
-        const iframeUrl =
-          IframeUrlByMeterClientType[
-            this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
-          ];
-        const iframeUrlParams = {
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'origin': parseUrl(this.win_.location.href).origin,
-        };
-        if (swgUserToken) {
-          iframeUrlParams['sut'] = swgUserToken;
-        }
+    const iframeUrl =
+      IframeUrlByMeterClientType[
+        this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
+      ];
 
-        /** @private @const {!ActivityIframeView} */
-        this.activityIframeView_ = new ActivityIframeView(
-          this.win_,
-          this.activityPorts_,
-          feUrl(iframeUrl, iframeUrlParams),
-          iframeArgs,
-          /* shouldFadeBody */ false
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl(iframeUrl, {'origin': parseUrl(this.win_.location.href).origin}),
+      iframeArgs,
+      /* shouldFadeBody */ false
+    );
+
+    /** @private @const {!function()} */
+    this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+      this.removeCloseEventListener();
+
+      this.deps_
+        .eventManager()
+        .logSwgEvent(
+          AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
+          true
         );
 
-        /** @private @const {!function()} */
-        this.sendCloseRequestFunction_ = () => {
-          const closeRequest = new ToastCloseRequest();
-          closeRequest.setClose(true);
-          this.activityIframeView_.execute(closeRequest);
-          this.removeCloseEventListener();
+      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+        this.onConsumeCallbackHandled_ = true;
+        this.onConsumeCallback_();
+      }
+    };
 
-          this.deps_
-            .eventManager()
-            .logSwgEvent(
-              AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
-              true
-            );
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+    this.activityIframeView_.on(
+      ViewSubscriptionsResponse,
+      this.startSubscriptionFlow_.bind(this)
+    );
+    if (
+      !this.deps_.callbacks().hasSubscribeRequestCallback() &&
+      !this.deps_.callbacks().hasOffersFlowRequestCallback()
+    ) {
+      const errorMessage =
+        '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
+        'before starting the metering flow, so users will not be able to ' +
+        'subscribe from the metering dialog directly. Please call ' +
+        '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
+        'before starting metering.';
+      warn(errorMessage);
+    }
 
-          if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-            this.onConsumeCallbackHandled_ = true;
-            this.onConsumeCallback_();
-          }
-        };
-
-        this.deps_
-          .callbacks()
-          .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
-        this.activityIframeView_.on(
-          ViewSubscriptionsResponse,
-          this.startSubscriptionFlow_.bind(this)
-        );
-        if (
-          !this.deps_.callbacks().hasSubscribeRequestCallback() &&
-          !this.deps_.callbacks().hasOffersFlowRequestCallback()
-        ) {
-          const errorMessage =
-            '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
-            'before starting the metering flow, so users will not be able to ' +
-            'subscribe from the metering dialog directly. Please call ' +
-            '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
-            'before starting metering.';
-          warn(errorMessage);
+    this.dialogManager_
+      .handleCancellations(this.activityIframeView_)
+      .catch((reason) => {
+        // Possibly call onConsumeCallback on all dialog cancellations to
+        // ensure unexpected dialog closures don't give access without a
+        // meter consumed.
+        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+          this.onConsumeCallbackHandled_ = true;
+          this.onConsumeCallback_();
         }
-
-        this.dialogManager_
-          .handleCancellations(this.activityIframeView_)
-          .catch((reason) => {
-            // Possibly call onConsumeCallback on all dialog cancellations to
-            // ensure unexpected dialog closures don't give access without a
-            // meter consumed.
-            if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-              this.onConsumeCallbackHandled_ = true;
-              this.onConsumeCallback_();
-            }
-            // Don't throw on cancel errors since they happen when a user closes
-            // the toast, which is expected.
-            if (!isCancelError(reason)) {
-              // eslint-disable-next-line no-console
-              console /*OK*/
-                .error(
-                  '[swg.js]: Error occurred during meter toast handling: ' +
-                    reason
-                );
-              throw reason;
-            }
-          });
-
-        return this.dialogManager_.openDialog().then((dialog) => {
-          this.setDialogBoxShadow_();
-          this.setLoadingViewWidth_();
-          return dialog.openView(this.activityIframeView_).then(() => {
-            // Allow closing of the iframe with any scroll or click event.
-            this.win_.addEventListener('click', this.sendCloseRequestFunction_);
-            this.win_.addEventListener(
-              'touchstart',
-              this.sendCloseRequestFunction_
+        // Don't throw on cancel errors since they happen when a user closes
+        // the toast, which is expected.
+        if (!isCancelError(reason)) {
+          // eslint-disable-next-line no-console
+          console /*OK*/
+            .error(
+              '[swg.js]: Error occurred during meter toast handling: ' + reason
             );
-            this.win_.addEventListener(
-              'mousedown',
-              this.sendCloseRequestFunction_
-            );
-            // Making body's overflow property 'hidden' to prevent scrolling
-            // while swiping on the iframe only on mobile.
-            if (this.isMobile_()) {
-              const $body = this.win_.document.body;
-              setStyle($body, 'overflow', 'hidden');
-            } else {
-              let start, scrollTimeout;
-              this.scrollEventListener_ = () => {
-                start = start || this.win_./*REVIEW*/ pageYOffset;
-                this.win_.clearTimeout(scrollTimeout);
-                scrollTimeout = this.win_.setTimeout(() => {
-                  // If the scroll is longer than 100, close the toast.
-                  if (
-                    Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100
-                  ) {
-                    this.sendCloseRequestFunction_();
-                  }
-                }, 100);
-              };
-              this.win_.addEventListener('scroll', this.scrollEventListener_);
-            }
-            this.deps_
-              .eventManager()
-              .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
-            this.deps_
-              .eventManager()
-              .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
-          });
-        });
+          throw reason;
+        }
       });
+
+    return this.dialogManager_.openDialog().then((dialog) => {
+      this.setDialogBoxShadow_();
+      this.setLoadingViewWidth_();
+      return dialog.openView(this.activityIframeView_).then(() => {
+        // Allow closing of the iframe with any scroll or click event.
+        this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+        this.win_.addEventListener(
+          'touchstart',
+          this.sendCloseRequestFunction_
+        );
+        this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
+        // Making body's overflow property 'hidden' to prevent scrolling
+        // while swiping on the iframe only on mobile.
+        if (this.isMobile_()) {
+          const $body = this.win_.document.body;
+          setStyle($body, 'overflow', 'hidden');
+        } else {
+          let start, scrollTimeout;
+          this.scrollEventListener_ = () => {
+            start = start || this.win_./*REVIEW*/ pageYOffset;
+            this.win_.clearTimeout(scrollTimeout);
+            scrollTimeout = this.win_.setTimeout(() => {
+              // If the scroll is longer than 100, close the toast.
+              if (Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100) {
+                this.sendCloseRequestFunction_();
+              }
+            }, 100);
+          };
+          this.win_.addEventListener('scroll', this.scrollEventListener_);
+        }
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+      });
+    });
   }
 
   /**
@@ -11604,8 +11628,17 @@ class EntitlementsManager {
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!./deps.DepsDef} deps
+   * @param {!boolean} useArticleEndpoint
+   * @param {!boolean} enableDefaultMeteringHandler
    */
-  constructor(win, pageConfig, fetcher, deps, useArticleEndpoint) {
+  constructor(
+    win,
+    pageConfig,
+    fetcher,
+    deps,
+    useArticleEndpoint,
+    enableDefaultMeteringHandler
+  ) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -11668,6 +11701,9 @@ class EntitlementsManager {
 
     /** @private @const {boolean} */
     this.useArticleEndpoint_ = useArticleEndpoint;
+
+    /** @private @const {boolean} */
+    this.enableDefaultMeteringHandler_ = enableDefaultMeteringHandler;
 
     /** @private {?Article} */
     this.article_ = null;
@@ -12205,6 +12241,14 @@ class EntitlementsManager {
     this.deps_
       .callbacks()
       .triggerEntitlementsResponse(Promise.resolve(entitlements));
+
+    // Implementation of the default ability to always consume metered entitlements
+    // if they are provided in an entitlements response.
+    if (this.enableDefaultMeteringHandler_) {
+      if (entitlements.enablesThisWithGoogleMetering()) {
+        entitlements.consume();
+      }
+    }
 
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
@@ -13024,8 +13068,11 @@ class GoogleAnalyticsEventListener {
    * @param {!../api/client-event-manager-api.ClientEvent} event
    */
   handleClientEvent_(event) {
-    // Bail immediately if ga function doesn't exist in Window.
-    if (typeof this.win_.ga != 'function') {
+    // Bail immediately if neither ga function (analytics.js) nor gtag function (gtag.js) exists in Window.
+    if (
+      typeof this.win_.ga !== 'function' &&
+      typeof this.win_.gtag !== 'function'
+    ) {
       return;
     }
     let subscriptionFlow = '';
@@ -13039,8 +13086,21 @@ class GoogleAnalyticsEventListener {
       event.eventType,
       subscriptionFlow
     );
-    if (gaEvent) {
+    if (!gaEvent) {
+      return;
+    }
+
+    // TODO(b/234825847): Remove it once universal analytics is deprecated in 2023.
+    if (typeof this.win_.ga === 'function') {
       this.win_.ga('send', 'event', gaEvent);
+    }
+
+    if (typeof this.win_.gtag === 'function') {
+      this.win_.gtag('event', gaEvent.eventAction, {
+        'event_category': gaEvent.eventCategory,
+        'event_label': gaEvent.eventLabel,
+        'non_interaction': gaEvent.nonInteraction,
+      });
     }
   }
 }
@@ -13378,6 +13438,10 @@ class LinkCompleteFlow {
     this.deps_
       .eventManager()
       .logSwgEvent(AnalyticsEvent.ACTION_GOOGLE_UPDATED_CLOSE, true);
+    const userToken = response['swgUserToken'];
+    if (userToken) {
+      this.deps_.storage().set(Constants$1.USER_TOKEN, userToken, true);
+    }
     this.callbacks_.triggerLinkComplete();
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
@@ -18003,6 +18067,7 @@ class ConfiguredRuntime {
    *     fetcher: (!FetcherInterface|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
+   *     enableDefaultMeteringHandler: (boolean|undefined),
    *     useArticleEndpoint: (boolean|undefined)
    *   }=} integr
    * @param {!../api/subscriptions.Config=} config
@@ -18092,7 +18157,8 @@ class ConfiguredRuntime {
       this.pageConfig_,
       this.fetcher_,
       this, // See note about 'this' above
-      integr.useArticleEndpoint || false
+      integr.useArticleEndpoint || false,
+      integr.enableDefaultMeteringHandler || false
     );
 
     /** @private @const {!ClientConfigManager} */

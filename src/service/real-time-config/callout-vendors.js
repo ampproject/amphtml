@@ -130,7 +130,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   mediasquare: {
-    url: 'https://pbs-front.mediasquare.fr/msq_prebid?owner=OWNER&code=CODE&sizes=ATTR(data-multi-size)&adunit=ATTR(data-slot)&referer=HREF&gdpr_consent=CONSENT_STRING',
+    url: 'https://pbs-front.mediasquare.fr/msq_prebid?owner=OWNER&code=CODE&w=ATTR(width)&h=ATTR(height)&sizes=ATTR(data-multi-size)&adunit=ATTR(data-slot)&referer=HREF&gdpr_consent=CONSENT_STRING',
     macros: ['OWNER', 'CODE', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
@@ -245,7 +245,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   yieldlab: {
-    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&consent=CONSENT_STRING&t=amp%3D1',
+    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&consent=CONSENT_STRING&t=amp%3D1&pubref=HREF',
     macros: ['ADSLOT_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },

@@ -333,7 +333,7 @@ amp-story-grid-layer amp-img img {
  * Prevents amp-video to layout until its element has been swapped by the media
  * pool. See #26718 for context.
  */
-amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound:not(.i-amphtml-layout) {
   display: none !important;
 }
 
@@ -727,4 +727,8 @@ amp-story .amp-video-eq,
 
 .i-amphtml-story-page-play-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4a20 20 0 1 0 0 40 20 20 0 0 0 0-40zm-4 29V15l12 9-12 9z"/></svg>') !important;
+}
+
+amp-bodymovin-animation, amp-bodymovin-animation * {
+  pointer-events: none !important;
 }
