@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.2.3
+  codecov: codecov/codecov@3.2.3
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -299,6 +300,9 @@ jobs:
       - run:
           name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
+      - codecov/upload:
+          file: test/coverage/lcov-unit.info
+          flags: unit_tests
       - store_test_output
       - store_filelist
       - teardown_vm
@@ -311,6 +315,9 @@ jobs:
       - run:
           name: '⭐ Unminified Tests ⭐'
           command: node build-system/pr-check/unminified-tests.js
+      - codecov/upload:
+          file: test/coverage/lcov-integration.info
+          flags: integration_tests
       - store_test_output
       - teardown_vm
   nomodule_tests:

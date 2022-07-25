@@ -320,6 +320,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [CA A.J.A. Infeed](../../ads/vendors/caajainfeed.md)
 -   [CA-ProFit-X](../../ads/vendors/caprofitx.md)
 -   [Cedato](../../ads/vendors/cedato.md)
+-   [Clever](../../ads/vendors/clever.md)
 -   [Colombia](../../ads/vendors/colombia.md)
 -   [Colombiafeed](../../ads/vendors/colombiafeed.md)
 -   [Connatix](../../ads/vendors/connatix.md)

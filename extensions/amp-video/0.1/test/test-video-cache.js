@@ -1,6 +1,8 @@
 import {createElementWithAttributes} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 
+import {toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
 import {installPerformanceService} from '#service/performance-impl';
 import {xhrServiceForTesting} from '#service/xhr-impl';
@@ -454,6 +456,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   });
 
   describe('has_audio field', async () => {
+    beforeEach(() => {
+      toggleExperiment(env.win, 'story-video-cache-apply-audio', true);
+    });
+
+    afterEach(() => {
+      toggleExperiment(env.win, 'story-video-cache-apply-audio', false);
+    });
     it('should set noaudio if the cache responds with has_audio: false', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>

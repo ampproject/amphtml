@@ -720,7 +720,7 @@ function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
   // Unique and similar can introduce requirements, ie: there cannot be
   // another such tag. We don't want to introduce requirements for failing
   // tags.
-  if (tag.unique || tag.requires.length > 0 || tag.uniqueWarning)
+  if (tag.unique || tag.requiresCondition.length > 0 || tag.uniqueWarning)
     return RecordValidated.IF_PASSING;
   return RecordValidated.NEVER;
 }
@@ -1036,8 +1036,8 @@ class ParsedTagSpec {
    * tag is present. This accessor returns the list of those conditions.
    * @return {!Array<number>}
    */
-  requires() {
-    return this.spec_.requires;
+  requiresCondition() {
+    return this.spec_.requiresCondition;
   }
 
   /**
@@ -1045,8 +1045,8 @@ class ParsedTagSpec {
    * the list of those tags.
    * @return {!Array<number>}
    */
-  excludes() {
-    return this.spec_.excludes;
+  excludesCondition() {
+    return this.spec_.excludesCondition;
   }
 
   /**
@@ -3113,7 +3113,7 @@ class Context {
    * @private
    */
   satisfyConditionsFromTagSpec_(parsedTagSpec) {
-    for (const condition of parsedTagSpec.getSpec().satisfies) {
+    for (const condition of parsedTagSpec.getSpec().satisfiesCondition) {
       this.conditionsSatisfied_[condition] = true;
     }
   }
@@ -6565,7 +6565,7 @@ class ParsedValidatorRules {
               context.getTypeIdentifiers())) {
         continue;
       }
-      for (const condition of parsedTagSpec.requires()) {
+      for (const condition of parsedTagSpec.requiresCondition()) {
         if (!context.satisfiesCondition(condition)) {
           context.addError(
               generated.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
@@ -6578,7 +6578,7 @@ class ParsedValidatorRules {
               getTagSpecUrl(parsedTagSpec), validationResult);
         }
       }
-      for (const condition of parsedTagSpec.excludes()) {
+      for (const condition of parsedTagSpec.excludesCondition()) {
         if (context.satisfiesCondition(condition)) {
           context.addError(
               generated.ValidationError.Code.TAG_EXCLUDED_BY_TAG,
