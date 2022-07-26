@@ -56,7 +56,7 @@ class Strings {
     std::string_view uri);
 
   // Returns hex string representation of a 4 byte codepoint.
-  static std::string ToHexString(char32_t c);
+  static std::string ToHexString(uint32_t c);
 
   // byte is in the range 0x41-0x5A or 0x61-0x7A (A-Z or a-z).
   static bool IsCharAlphabet(char c);
