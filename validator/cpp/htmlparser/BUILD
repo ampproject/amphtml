@@ -264,6 +264,25 @@ cc_library(
 )
 
 cc_library(
+    name = "document",
+    srcs = [
+        "document.cc",
+    ],
+    hdrs = [
+        "document.h",
+    ],
+    copts = ["-std=c++17"],
+    deps = [
+        ":allocator",
+        ":iterators",
+        ":node",
+        ":token",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_library(
     name = "htmlentities",
     hdrs = [
         "entity.h",
@@ -282,25 +301,6 @@ cc_test(
     deps = [
         ":htmlentities",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "document",
-    srcs = [
-        "document.cc",
-    ],
-    hdrs = [
-        "document.h",
-    ],
-    copts = ["-std=c++17"],
-    deps = [
-        ":allocator",
-        ":iterators",
-        ":node",
-        ":token",
-        "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/status",
     ],
 )
 
@@ -421,7 +421,6 @@ cc_library(
     deps = [
         ":casetable",
         ":htmlentities",
-        ":logging",
         ":whitespacetable",
     ],
 )
@@ -495,6 +494,23 @@ cc_test(
 )
 
 cc_library(
+    name = "utf8",
+    hdrs = ["utf8.h"],
+    copts = ["-std=c++17"],
+)
+
+cc_test(
+    name = "utf8_test",
+    srcs = [
+        "utf8_test.cc",
+    ],
+    deps = [
+        ":utf8",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "testconstants",
     hdrs = [
         "testconstants.h",
@@ -535,5 +551,6 @@ cc_test(
         ":testconstants",
         ":tokenizer",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/flags:flag",
     ],
 )
