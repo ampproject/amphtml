@@ -349,7 +349,6 @@ cc_library(
         ":node",
         ":strings",
         ":tokenizer",
-        "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/status",
     ],
@@ -424,7 +423,6 @@ cc_library(
         ":htmlentities",
         ":logging",
         ":whitespacetable",
-        "@com_google_absl//absl/base",
     ],
 )
 
@@ -465,7 +463,6 @@ cc_test(
         "tokenizer_test.cc",
     ],
     deps = [
-        ":parser",
         ":token",
         ":tokenizer",
         "@com_google_googletest//:gtest_main",
@@ -528,7 +525,6 @@ cc_test(
         ":html5lib_test_files",
     ],
     deps = [
-        ":atom",
         ":atomutil",
         ":defer",
         ":fileutil",
