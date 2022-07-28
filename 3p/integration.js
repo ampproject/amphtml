@@ -417,7 +417,6 @@ register('freewheel', freewheel);
 register('fusion', fusion);
 register('gecko', gecko);
 register('genieessp', genieessp);
-register('geozo', geozo);
 register('giraff', giraff);
 register('github', github);
 register('glomex', glomex);
