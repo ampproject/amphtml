@@ -132,7 +132,6 @@ import {freewheel} from '#ads/vendors/freewheel';
 import {fusion} from '#ads/vendors/fusion';
 import {gecko} from '#ads/vendors/gecko';
 import {genieessp} from '#ads/vendors/genieessp';
-import {geozo} from '#ads/vendors/geozo';
 import {giraff} from '#ads/vendors/giraff';
 import {glomex} from '#ads/vendors/glomex';
 import {gmossp} from '#ads/vendors/gmossp';
