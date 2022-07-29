@@ -281,7 +281,7 @@ cc_library(
         "//cpp/htmlparser/css:amp4ads-parse-css",
         "//cpp/htmlparser/css:parse-css",
         "//cpp/htmlparser/css:parse_css_cc_proto",
-        "//cpp/htmlparser/json:parser",
+        "//cpp/htmlparser/validators:json",
         "//:validator_cc_proto",
     ],
 )
