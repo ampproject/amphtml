@@ -337,8 +337,9 @@ amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound:not(
   display: none !important;
 }
 
-amp-story-grid-layer > * {
-  pointer-events: auto !important;
+/** Make clickable elements in light dom accept pointer events */
+amp-story-grid-layer a, amp-story-grid-layer amp-twitter {
+  pointer-events: all !important;
 }
 
 /** Ensure clicks inside anchor tags are handled by the tooltip. */
