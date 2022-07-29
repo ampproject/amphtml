@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/fileutil.h"
-#include "cpp/htmlparser/json/parser.h"
+#include "cpp/htmlparser/validators/json.h"
 
 void ParseAndValidateFile(std::string file_path) {
   std::ifstream fd(file_path);
@@ -22,7 +22,7 @@ void ParseAndValidateFile(std::string file_path) {
       buf.sputn(line.data(), line.size());
     });
   std::string json = buf.str();
-  auto v = htmlparser::json::JSONParser::Validate(json);
+  auto v = htmlparser::json::Validate(json);
   EXPECT_TRUE(v.first);
 }
 
