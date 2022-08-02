@@ -235,6 +235,7 @@ cc_library(
         ":error",
         ":logging",
         ":token",
+        "@com_google_absl//absl/string",
     ],
 )
 
