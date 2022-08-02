@@ -25,6 +25,7 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
 
 /** @const @type {!Object<string, boolean>} */
 const CONSENT_VARS_ALLOWED_LIST = {
+  'CANONICAL_URL': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
   'SOURCE_URL': true,
