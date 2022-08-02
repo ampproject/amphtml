@@ -28,7 +28,8 @@ router.get('/examples/*.html', async (req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', req.query.__amp_source_origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
-  res.end(transformedHTML);
+  res.send(transformedHTML);
+  next();
 });
 
 module.exports = router;
