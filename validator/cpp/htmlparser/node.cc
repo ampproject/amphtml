@@ -375,8 +375,8 @@ bool Node::IsBlockElementNode() {
 }
 
 std::string Node::InnerText() const {
-  static std::function<void(const Node*, std::string*)> output;
-  output = [](const Node* node, std::string* buf) {
+  static std::function<void(const Node*, std::string*)> output = [](
+      const Node* node, std::string* buf) {
     switch (node->Type()) {
       case NodeType::TEXT_NODE: {
         buf->append(node->Data());
