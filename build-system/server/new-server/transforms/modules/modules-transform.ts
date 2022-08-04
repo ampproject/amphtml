@@ -1,3 +1,4 @@
+import {parse} from 'path';
 import posthtml from 'posthtml';
 
 import {
@@ -6,6 +7,7 @@ import {
   isValidScript,
   toExtension,
   tryGetUrl,
+  toSsrCss,
 } from '../utilities/cdn-tag';
 import {OptionSet} from '../utilities/option-set';
 
@@ -65,6 +67,17 @@ export default function (
 
       if (!isValidScript(node, options.looseOriginUrlCheck)) {
         return node;
+      }
+
+      const {src = ''} = node.attrs || {};
+      const url = tryGetUrl(src);
+      const parsedPath = parse(url.pathname);
+      if (parsedPath.base == 'amp-story-1.0.js' || parsedPath.base == 'amp-story-1.0.mjs') {
+        console.log('erwinm actually trying');
+        console.log('erwinm actually trying');
+        console.log('erwinm actually trying');
+        console.log('erwinm actually trying');
+        toSsrCss(url, node);
       }
 
       // Mark the existing valid scripts with `nomodule` attributes.
