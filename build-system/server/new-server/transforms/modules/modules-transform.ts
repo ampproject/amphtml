@@ -6,8 +6,8 @@ import {
   isJsonScript,
   isValidScript,
   toExtension,
-  tryGetUrl,
   toSsrCss,
+  tryGetUrl,
 } from '../utilities/cdn-tag';
 import {OptionSet} from '../utilities/option-set';
 
@@ -72,11 +72,10 @@ export default function (
       const {src = ''} = node.attrs || {};
       const url = tryGetUrl(src);
       const parsedPath = parse(url.pathname);
-      if (parsedPath.base == 'amp-story-1.0.js' || parsedPath.base == 'amp-story-1.0.mjs') {
-        console.log('erwinm actually trying');
-        console.log('erwinm actually trying');
-        console.log('erwinm actually trying');
-        console.log('erwinm actually trying');
+      if (
+        parsedPath.base == 'amp-story-1.0.js' ||
+        parsedPath.base == 'amp-story-1.0.mjs'
+      ) {
         toSsrCss(url, node);
       }
 

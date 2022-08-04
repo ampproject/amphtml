@@ -13,9 +13,13 @@ const cwd = process.cwd();
 const cssPath = isTestMode
   ? `${cwd}/${testDir}/css.txt`
   : `${cwd}/build/css/v0.css`;
+const storyCssPath = isTestMode
+  ? `${cwd}/${testDir}/css.txt`
+  : `${cwd}/build/css/amp-story-1.0.css`;
 const versionPath = `${cwd}/${testDir}/version.txt`;
 
 const css = new Lazy(() => readFileSync(cssPath, 'utf8').toString().trim());
+const storyCss = new Lazy(() => readFileSync(storyCssPath, 'utf8').toString().trim());
 const version = new Lazy(() =>
   readFileSync(versionPath, 'utf8').toString().trim()
 );
@@ -24,8 +28,9 @@ interface StyleNode extends posthtml.Node {
   tag: 'style';
   attrs: {
     [key: string]: string | undefined;
-    'amp-runtime': string;
+    'amp-runtime'?: string;
     'i-amphtml-version': string;
+    'amp-extension'?: string;
   };
   content: string[];
 }
@@ -59,6 +64,19 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
     },
     content: [css.value],
   };
+
+  const storyStyleNode: StyleNode = {
+    walk: head.walk,
+    match: head.match,
+    tag: 'style',
+    attrs: {
+      'amp-extension': 'amp-story',
+      // Prefix 01 to simulate stable/prod version RTV prefix.
+      'i-amphtml-version': `01${version.value}`,
+    },
+    content: [storyCss.value],
+  };
+  content.unshift(storyStyleNode);
   content.unshift(styleNode);
   return {...head, content};
 }
