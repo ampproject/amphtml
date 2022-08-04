@@ -148,10 +148,7 @@ commands:
     steps:
       - run:
           name: 'Enable Safari Automation'
-          command: |
-            defaults write com.apple.Safari AllowRemoteAutomation 1
-            defaults write com.apple.Safari IncludeDevelopMenu 1
-            sudo safaridriver --enable
+          command: sudo /usr/bin/safaridriver --enable
   store_test_output:
     steps:
       - store_artifacts:
