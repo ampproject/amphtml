@@ -11,7 +11,15 @@ import {
   expandPolicyConfig,
 } from '../consent-config';
 
-describes.realWin('ConsentConfig', {amp: 1}, (env) => {
+const realWinConfig = {
+  amp: {
+    canonicalUrl: 'https://foobar.com/baz',
+    runtimeOn: true,
+    ampdoc: 'single',
+  },
+};
+
+describes.realWin('ConsentConfig', realWinConfig, (env) => {
   let doc;
   let element;
   let defaultConfig;
@@ -506,6 +514,8 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       const url = await expandConsentEndpointUrl(
         doc.body,
         'https://example.test?' +
+          // CANONICAL_URL is allowed
+          'canonicalurl=CANONICAL_URL&' +
           // CLIENT_ID is allowed
           'cid=CLIENT_ID&' +
           // PAGE_VIEW_ID is allowed
@@ -519,7 +529,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       );
 
       expect(url).to.match(
-        /cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&sourceurl=about%3Asrcdoc&r=RANDOM/
+        /canonicalurl=https%3A%2F%2Ffoobar.com%2Fbaz&cid=amp-.{22}&pid=[0-9]+&pid64=.{22}&sourceurl=about%3Asrcdoc&r=RANDOM/
       );
     });
 
