@@ -65,3 +65,11 @@ TEST(JSONParserTest, File9) {
 TEST(JSONParserTest, File10) {
   ParseAndValidateFile("cpp/htmlparser/json/testdata/10.json");
 }
+
+TEST(JsonParserTest, Twitter) {
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/twitter.json");
+}
+
+TEST(JsonParserTest, Canada) {
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/canada.json");
+}
