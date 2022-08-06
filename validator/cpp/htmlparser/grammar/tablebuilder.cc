@@ -148,6 +148,9 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
     callback_codes_.insert({c, ++callback_code_counter});
   }
 
+  // Special callback denoting the end of parsing.
+  callback_codes_.insert({"PARSE_END", ++callback_code_counter});
+
   for (auto& r : raw_rules_) {
     uint8_t code = state_codes_[r.state];
     auto value = ComputeState(r);
@@ -410,6 +413,11 @@ std::pair<bool, LineCol> Validate(std::string_view str, Callback callback) {
 
   if (state != StateCode::$) {
     return {false, line_col};
+  }
+
+  // Final callback denoting end of parsing.
+  if (callback) {
+    callback(CallbackCode::PARSE_END, state, str.size());
   }
 
   return {true, line_col};
