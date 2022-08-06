@@ -76,3 +76,26 @@ cc_test(
         "//cpp/htmlparser:fileutil",
     ],
 )
+
+cc_library(
+    name = "json",
+    srcs = ["json.cc"],
+    hdrs = ["json.h"],
+    deps = [
+        ":types",
+        "@com_google_absl//absl/strings",
+        "//cpp/htmlparser:logging",
+        "//cpp/htmlparser/validators:json",
+    ],
+)
+
+cc_test(
+    name = "json_test",
+    srcs = ["json_test.cc"],
+    data = [":json_testfiles"],
+    deps = [
+        ":json",
+        ":types",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
