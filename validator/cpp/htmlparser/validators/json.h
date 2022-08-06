@@ -66,6 +66,7 @@ enum class CallbackCode {
   FLOATING_POINT_T = 10,
   NULL_T = 11,
   NUMBER_T = 12,
+  PARSE_END = 23,
   ROOT_ARRAY = 13,
   ROOT_BOOL_FALSE = 14,
   ROOT_BOOL_TRUE = 15,
@@ -582,6 +583,11 @@ std::pair<bool, LineCol> Validate(std::string_view str, Callback callback) {
 
   if (state != StateCode::$) {
     return {false, line_col};
+  }
+
+  // Final callback denoting end of parsing.
+  if (callback) {
+    callback(CallbackCode::PARSE_END, state, str.size());
   }
 
   return {true, line_col};
