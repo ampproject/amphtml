@@ -8,7 +8,7 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 #
 # bazel build --repo_env=CC=clang --cxxopt='-std=c++17' <build_target>
 
-package(default_visibility = ["//visibility:private"])
+package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 

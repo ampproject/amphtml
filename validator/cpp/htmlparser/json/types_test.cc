@@ -167,6 +167,10 @@ TEST(TypesTest, GetAndAssignmentOperatorTest) {
   // int_value is now string.
   int_value = "Hello World!";
   EXPECT_EQ("Hello World!", *int_value.Get<std::string>());
+  std::string_view str = "Foo Bar";
+  str.remove_prefix(1);
+  int_value = str;
+  EXPECT_EQ("oo Bar", *int_value.Get<std::string_view>());
 }
 
 TEST(TypesTest, OverflowIntegerTest) {
