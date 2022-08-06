@@ -395,11 +395,9 @@ TEST(ParserTest, ArraysSHIFTScenarios) {
 
 TEST(ParserTest, CallbackTestArrayAllInt) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V("[1,     2, 3]", [&](CallbackCode cb_code, StateCode state_code,
                                  int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
@@ -413,11 +411,9 @@ TEST(ParserTest, CallbackTestArrayAllInt) {
 
 TEST(ParserTest, CallbackTestArrayAllString) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V(R"(["a", "b", "c"])",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
@@ -431,11 +427,9 @@ TEST(ParserTest, CallbackTestArrayAllString) {
 
 TEST(ParserTest, CallbackTestArrayAllBool) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V(R"([true, false, true])",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
@@ -449,11 +443,9 @@ TEST(ParserTest, CallbackTestArrayAllBool) {
 
 TEST(ParserTest, CallbackTestArrayAllNulls) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V(R"([null, null, null])",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
@@ -467,11 +459,9 @@ TEST(ParserTest, CallbackTestArrayAllNulls) {
 
 TEST(ParserTest, CallbackTestArrayAllFloatingPoints) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V(R"([0.2, 0.3, 0.4])",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
@@ -488,11 +478,9 @@ TEST(ParserTest, CallbackTestArrayAllFloatingPoints) {
 
 TEST(ParserTest, CallbackTestArrayAllNegativeNumbers) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V(R"([-1, -2, -3])",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
@@ -506,11 +494,9 @@ TEST(ParserTest, CallbackTestArrayAllNegativeNumbers) {
 
 TEST(ParserTest, CallbackTestArrayMixed) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V(R"([1, true, null, "a", 0.3, false])",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
@@ -531,107 +517,98 @@ TEST(ParserTest, CallbackTestArrayMixed) {
 
 TEST(ParserTest, CallbackPlainNumber) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V("1",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_NUMBER, 0)));
-  EXPECT_THAT(token_indexes, ::testing::ElementsAre(0));
 }
 
 TEST(ParserTest, CallbackPlainEmptyArray) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V("[]",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
       testing::Pair(CallbackCode::ARRAY_END, 1)));
-  EXPECT_THAT(token_indexes, ::testing::ElementsAre(0, 1));
 }
 
 TEST(ParserTest, CallbackPlainBoolTrue) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V("true",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_BOOL_TRUE, 0)));
-  EXPECT_THAT(token_indexes, ::testing::ElementsAre(0));
 }
 
 TEST(ParserTest, CallbackPlainBoolFalse) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V("false",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_BOOL_FALSE, 0)));
-  EXPECT_THAT(token_indexes, ::testing::ElementsAre(0));
 }
 
 TEST(ParserTest, CallbackPlainNull) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V("null",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_NULL_VAL, 0)));
-  EXPECT_THAT(token_indexes, ::testing::ElementsAre(0));
 }
 
 TEST(ParserTest, CallbackEmptyDictionary) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
   EXPECT_TRUE(V("{}",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
     callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_DICT, 0),
       testing::Pair(CallbackCode::DICT_END, 1)));
-  EXPECT_THAT(token_indexes, ::testing::ElementsAre(0, 1));
 }
 
 TEST(ParserTest, CallbackDictionary) {
   std::vector<std::pair<CallbackCode, int>> callbacks{};
-  std::vector<int> token_indexes;
-  EXPECT_TRUE(V(R"({"a": 1, "b": true, "c": "value"})",
+  EXPECT_TRUE(V(R"({"a": 1.0, "b": true, "c": "value"})",
                 [&](CallbackCode cb_code, StateCode state_code, int i) {
-    callbacks.push_back(std::make_pair(cb_code, i));
-    token_indexes.push_back(i);
-  }).first);
+                  callbacks.push_back(std::make_pair(cb_code, i));
+                }).first);
 
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
-      testing::Pair(CallbackCode::ROOT_DICT, 0),
-      testing::Pair(CallbackCode::DICT_KEY_BEGIN, 1),
-      testing::Pair(CallbackCode::DICT_KEY_END, 4),
-      testing::Pair(CallbackCode::NUMBER_T, 6),
-      testing::Pair(CallbackCode::DICT_VAL_END, 7),
-      testing::Pair(CallbackCode::DICT_KEY_BEGIN, 9),
-      testing::Pair(CallbackCode::DICT_KEY_END, 12),
-      testing::Pair(CallbackCode::TRUE_T, 14),
-      testing::Pair(CallbackCode::DICT_VAL_END, 18),
-      testing::Pair(CallbackCode::DICT_KEY_BEGIN, 20),
-      testing::Pair(CallbackCode::DICT_KEY_END, 23),
-      testing::Pair(CallbackCode::STRING_T, 25),
-      testing::Pair(CallbackCode::DICT_END, 32)));
+                             testing::Pair(CallbackCode::ROOT_DICT, 0),
+                             testing::Pair(CallbackCode::DICT_KEY_BEGIN, 1),
+                             testing::Pair(CallbackCode::DICT_KEY_END, 4),
+                             testing::Pair(CallbackCode::NUMBER_T, 6),
+                             testing::Pair(CallbackCode::FLOATING_POINT_T, 7),
+                             testing::Pair(CallbackCode::DICT_VAL_END, 9),
+                             testing::Pair(CallbackCode::DICT_KEY_BEGIN, 11),
+                             testing::Pair(CallbackCode::DICT_KEY_END, 14),
+                             testing::Pair(CallbackCode::TRUE_T, 16),
+                             testing::Pair(CallbackCode::DICT_VAL_END, 20),
+                             testing::Pair(CallbackCode::DICT_KEY_BEGIN, 22),
+                             testing::Pair(CallbackCode::DICT_KEY_END, 25),
+                             testing::Pair(CallbackCode::STRING_T, 27),
+                             testing::Pair(CallbackCode::DICT_END, 34)));
+}
+
+TEST(ParserTest, CallbackRootString) {
+  std::vector<std::pair<CallbackCode, int>> callbacks{};
+  EXPECT_TRUE(
+      V(R"("foobar")", [&](CallbackCode cb_code, StateCode state_code, int i) {
+        callbacks.push_back(std::make_pair(cb_code, i));
+      }).first);
+  EXPECT_THAT(callbacks, ::testing::ElementsAre(
+                             testing::Pair(CallbackCode::ROOT_STRING, 0)));
 }
 
 }  // namespace htmlparser::json
