@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.227 */
+/** Version: 0.1.22.228 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -623,9 +623,12 @@ const AnalyticsEvent = {
   ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
   ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
   ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
+  ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
+  EVENT_REGWALL_ALREADY_OPT_IN: 2003,
+  EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
