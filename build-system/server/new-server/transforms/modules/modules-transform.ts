@@ -74,13 +74,14 @@ export default function (
       const parsedPath = parse(url.pathname);
       if (
         parsedPath.base == 'amp-story-1.0.js' ||
-        parsedPath.base == 'amp-story-1.0.mjs'
+        parsedPath.base == 'amp-story-1.0.mjs' ||
+        parsedPath.base == 'amp-story-1.0.max.js'
       ) {
         toSsrCss(url, node);
       }
 
       // Mark the existing valid scripts with `nomodule` attributes.
-      node.attrs.nomodule = '';
+      //node.attrs.nomodule = '';
       scripts.push(node);
       return node;
     });

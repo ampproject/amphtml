@@ -104,8 +104,10 @@ export function parseExtensionUrl(scriptUrl) {
     return null;
   }
   // Note that the "(\.max)?" group only applies to local dev.
+  // Note that the "ssr-css" group only applies when we are server side
+  // rendering the amp-story css.
   const matches = scriptUrl.match(
-    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)(?:\?ssr-css=1)?$/i
   );
   const extensionId = matches ? matches[2] : undefined;
   const extensionVersion = matches ? matches[3] : undefined;

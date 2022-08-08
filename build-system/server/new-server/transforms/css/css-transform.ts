@@ -19,7 +19,9 @@ const storyCssPath = isTestMode
 const versionPath = `${cwd}/${testDir}/version.txt`;
 
 const css = new Lazy(() => readFileSync(cssPath, 'utf8').toString().trim());
-const storyCss = new Lazy(() => readFileSync(storyCssPath, 'utf8').toString().trim());
+const storyCss = new Lazy(() =>
+  readFileSync(storyCssPath, 'utf8').toString().trim()
+);
 const version = new Lazy(() =>
   readFileSync(versionPath, 'utf8').toString().trim()
 );
@@ -71,8 +73,6 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
     tag: 'style',
     attrs: {
       'amp-extension': 'amp-story',
-      // Prefix 01 to simulate stable/prod version RTV prefix.
-      'i-amphtml-version': `01${version.value}`,
     },
     content: [storyCss.value],
   };

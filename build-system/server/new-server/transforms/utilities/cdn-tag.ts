@@ -74,12 +74,7 @@ export function toExtension(url: URL, extension: string): URL {
 }
 
 export function toSsrCss(url: URL, node: posthtml.Node) {
-  const parsedPath = parse(url.pathname);
-  parsedPath.base = parsedPath.base.replace(
-    parsedPath.ext,
-    '.ssr-css' + parsedPath.ext
-  );
-  url.pathname = format(parsedPath);
+  url.searchParams.set('ssr-css', '1');
   if (node?.attrs?.src) {
     node.attrs.src = url.toString();
   }
