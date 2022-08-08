@@ -331,6 +331,17 @@ attr_lists: {
     }
   }
 }
+tags: {  # <amp-story-interactive-slider>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-SLIDER"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "option-1-text"
+    mandatory: false
+  }
+}
 attr_lists: {
   name: "interactive-options-img-attrs"
   attrs: {

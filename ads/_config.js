@@ -586,6 +586,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
 
+  'geozo': {
+    renderStartImplemented: true,
+  },
+
   'giraff': {
     renderStartImplemented: true,
   },

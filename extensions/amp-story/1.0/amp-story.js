@@ -200,6 +200,10 @@ const DEFAULT_MIN_PAGES_TO_PREVIEW = 1;
  */
 const DEFAULT_PCT_PAGES_TO_PREVIEW = 30;
 
+/** The targets that should not navigate when pressing keys.
+ * @const {string} */
+const IGNORE_KEYDOWN_EVENT_TARGET = 'amp-story-interactive-slider';
+
 /*
  * @implements {./media-pool.MediaPoolRoot}
  */
@@ -1681,6 +1685,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
+    if (matches(e.target, IGNORE_KEYDOWN_EVENT_TARGET)) {
+      return;
+    }
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE

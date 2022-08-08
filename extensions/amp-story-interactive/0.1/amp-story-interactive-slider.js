@@ -1,3 +1,4 @@
+import {Keys_Enum} from '#core/constants/key-codes';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 
@@ -154,15 +155,38 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       cancelAnimationFrame(this.currentRAF_);
       this.onDrag_();
     });
-    this.inputEl_.addEventListener('change', () => {
-      this.onRelease_();
-    });
 
+    // Release events.
+    ['mouseup', 'touchend'].forEach((action) => {
+      this.inputEl_.addEventListener(action, () => {
+        this.onRelease_();
+      });
+    });
+    this.inputEl_.addEventListener(
+      'keydown',
+      (event) => {
+        const rtlDelta = this.storeService_.get(StateProperty.RTL_STATE)
+          ? -1
+          : 1;
+        if (event.key === Keys_Enum.ENTER || event.key === Keys_Enum.SPACE) {
+          this.onRelease_();
+        } else if (event.key === Keys_Enum.LEFT_ARROW) {
+          this.shift_(-rtlDelta);
+          event.preventDefault();
+        } else if (event.key === Keys_Enum.RIGHT_ARROW) {
+          this.shift_(rtlDelta);
+          event.preventDefault();
+        }
+      },
+      true
+    );
+    // Drag events.
     this.inputEl_.addEventListener(
       'touchmove',
       (event) => event.stopPropagation(),
       true
     );
+
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
@@ -232,9 +256,22 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   }
 
   /**
+   * Move the slider by a given amount.
+   * @param {number} delta
+   */
+  shift_(delta) {
+    const value = parseFloat(this.inputEl_.value);
+    this.inputEl_.value = value + delta;
+    this.onDrag_();
+  }
+
+  /**
    * @private
    */
   onRelease_() {
+    if (this.hasUserSelection_) {
+      return;
+    }
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
     this.rootEl_.classList.remove(MID_SELECTION_CLASS);
