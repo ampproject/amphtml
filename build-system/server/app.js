@@ -974,6 +974,27 @@ app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, _res, next) => {
   setTimeout(next, sleep);
 });
 
+app.use('/dist/v0/amp-story*.(m?js)', (req, res, next) => {
+  const options = {
+    root: process.cwd(),
+    dotfiles: 'deny',
+    headers: {
+      'x-timestamp': Date.now(),
+      'x-sent': true
+    }
+  }
+  if (req.query['ssr-css'] === '1') {
+    const filename = '/dist/v0/amp-story-1.0.ssr-css.mjs';
+    res.sendFile(filename, options, function(err) {
+      if (err) {
+        next(err)
+      }
+    });
+  } else {
+    next();
+  }
+});
+
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
  */

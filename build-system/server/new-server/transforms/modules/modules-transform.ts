@@ -81,7 +81,7 @@ export default function (
       }
 
       // Mark the existing valid scripts with `nomodule` attributes.
-      //node.attrs.nomodule = '';
+      node.attrs.nomodule = '';
       scripts.push(node);
       return node;
     });
