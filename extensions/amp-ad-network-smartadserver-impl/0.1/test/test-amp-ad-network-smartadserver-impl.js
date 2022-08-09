@@ -193,7 +193,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -229,7 +229,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -261,7 +261,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -284,7 +284,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve())
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -303,7 +303,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -321,7 +321,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&schain=some-sco-string&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&schain=some-sco-string&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
           );
         });
     });
@@ -339,7 +339,78 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
+          );
+        });
+    });
+    it('should return proper url with isasync value when it is not setted', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': 10,
+        'data-format': '3',
+        'data-isasync': '',
+      });
+      doc.body.appendChild(element);
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, null)
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
+          );
+        });
+    });
+
+    it('should return proper url with isasync value when it is setted with not boolean value ', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': 10,
+        'data-format': '3',
+        'data-isasync': 'test',
+      });
+      doc.body.appendChild(element);
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, null)
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
+          );
+        });
+    });
+
+    it('should return proper url with isasync value when it is setted to false', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': 10,
+        'data-format': '3',
+        'data-isasync': 'false',
+      });
+      doc.body.appendChild(element);
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, null)
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&isasync=0&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
+          );
+        });
+    });
+
+    it('should return proper url with isasync value  when it is setted to true', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': '1',
+        'data-format': '22',
+        'data-isasync': 'true',
+      });
+      doc.body.appendChild(element);
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, null)
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
           );
         });
     });

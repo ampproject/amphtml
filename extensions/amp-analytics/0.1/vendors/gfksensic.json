@@ -1,5 +1,5 @@
 {
-  "requestOrigin": "https://${regionID}-config${environment}.sensic.net",
+  "requestOrigin": "https://pixel.${regionID}-config${environment}.sensic.net",
   "requests": {
     "base": "/tp?m=${mediaID}&v=${v}&t=s2s-amp",
     "page_params": "r=${r}&ua=${ua}&l=${l}",
