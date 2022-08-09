@@ -351,6 +351,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [FreeWheel](../../ads/vendors/freewheel.md)
 -   [Fusion](../../ads/vendors/fusion.md)
 -   [GenieeSSP](../../ads/vendors/genieessp.md)
+-   [Geozo](../../ads/vendors/geozo.md)
 -   [Giraff](../../ads/vendors/giraff.md)
 -   [Glomex](../../ads/vendors/glomex.md)
 -   [GMOSSP](../../ads/vendors/gmossp.md)
