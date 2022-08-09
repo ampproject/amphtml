@@ -40,6 +40,7 @@ const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
 const {red} = require('kleur/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
+const {format, parse} = require('path');
 
 /**
  * Respond with content received from a URL when SERVE_MODE is "cdn".
@@ -974,20 +975,30 @@ app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, _res, next) => {
   setTimeout(next, sleep);
 });
 
-app.use('/dist/v0/amp-story*.(m?js)', (req, res, next) => {
+// If any request to amp-story has a `ssr-css=1` send the ssr-css version
+// of the file as the response.
+app.get('/dist/v0/amp-story*.(m?js)', (req, res, next) => {
   const options = {
     root: process.cwd(),
     dotfiles: 'deny',
     headers: {
       'x-timestamp': Date.now(),
-      'x-sent': true
-    }
-  }
+      'x-sent': true,
+    },
+  };
   if (req.query['ssr-css'] === '1') {
-    const filename = '/dist/v0/amp-story-1.0.ssr-css.mjs';
-    res.sendFile(filename, options, function(err) {
+    const fullPath = `http://localhost:8000${req.url}`;
+    const url = new URL(fullPath);
+    const parsedPath = parse(url.pathname);
+    const originalExt = parsedPath.ext;
+    parsedPath.base = parsedPath.base.replace(
+      new RegExp(`\\${originalExt}$`),
+      `.ssr-css${originalExt}`
+    );
+    const fileName = format(parsedPath);
+    res.sendFile(fileName, options, function (err) {
       if (err) {
-        next(err)
+        next(err);
       }
     });
   } else {
