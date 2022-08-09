@@ -110,6 +110,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
     child_tag_name_oneof: "AMP-STORY-SOCIAL-SHARE"
+    child_tag_name_oneof: "AMP-STORY-SUBSCRIPTIONS"
   }
 }
 tags: {  # <amp-story-page>
@@ -734,6 +735,7 @@ descendant_tag_list: {
   tag: "AMP-STORY-INTERACTIVE-POLL"
   tag: "AMP-STORY-INTERACTIVE-QUIZ"
   tag: "AMP-STORY-INTERACTIVE-RESULTS"
+  tag: "AMP-STORY-INTERACTIVE-SLIDER"
   tag: "AMP-STORY-PANNING-MEDIA"
   tag: "AMP-STORY-SHOPPING-TAG"
   tag: "AMP-TIMEAGO"
