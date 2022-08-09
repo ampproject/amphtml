@@ -73,6 +73,13 @@ export function toExtension(url: URL, extension: string): URL {
   return url;
 }
 
+export function toSsrCss(url: URL, node: posthtml.Node) {
+  url.searchParams.set('ssr-css', '1');
+  if (node?.attrs?.src) {
+    node.attrs.src = url.toString();
+  }
+}
+
 /**
  * This is a temporary measure to allow for a relaxed parsing of our
  * fixture files' src urls before they are all fixed accordingly.

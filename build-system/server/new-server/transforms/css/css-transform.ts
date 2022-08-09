@@ -13,9 +13,15 @@ const cwd = process.cwd();
 const cssPath = isTestMode
   ? `${cwd}/${testDir}/css.txt`
   : `${cwd}/build/css/v0.css`;
+const storyCssPath = isTestMode
+  ? `${cwd}/${testDir}/css.txt`
+  : `${cwd}/build/css/amp-story-1.0.css`;
 const versionPath = `${cwd}/${testDir}/version.txt`;
 
 const css = new Lazy(() => readFileSync(cssPath, 'utf8').toString().trim());
+const storyCss = new Lazy(() =>
+  readFileSync(storyCssPath, 'utf8').toString().trim()
+);
 const version = new Lazy(() =>
   readFileSync(versionPath, 'utf8').toString().trim()
 );
@@ -24,8 +30,9 @@ interface StyleNode extends posthtml.Node {
   tag: 'style';
   attrs: {
     [key: string]: string | undefined;
-    'amp-runtime': string;
+    'amp-runtime'?: string;
     'i-amphtml-version': string;
+    'amp-extension'?: string;
   };
   content: string[];
 }
@@ -38,7 +45,10 @@ function isStyleNode(node: posthtml.Node | string): node is StyleNode {
   );
 }
 
-function prependAmpStyles(head: posthtml.Node): posthtml.Node {
+function prependAmpStyles(
+  isAmpStoryDoc: boolean,
+  head: posthtml.Node
+): posthtml.Node {
   const content = head.content || [];
 
   const firstStyleNode = content.filter(isStyleNode)[0];
@@ -59,6 +69,19 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
     },
     content: [css.value],
   };
+
+  if (isAmpStoryDoc) {
+    const storyStyleNode: StyleNode = {
+      walk: head.walk,
+      match: head.match,
+      tag: 'style',
+      attrs: {
+        'amp-extension': 'amp-story',
+      },
+      content: [storyCss.value],
+    };
+    content.unshift(storyStyleNode);
+  }
   content.unshift(styleNode);
   return {...head, content};
 }
@@ -69,14 +92,22 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
 export default function (): (tree: posthtml.Node) => void {
   return function (tree: posthtml.Node) {
     let isAmp = false;
+    let isAmpStoryDoc = false;
     tree.match({tag: 'html'}, function (html: posthtml.Node): posthtml.Node {
       if (html.attrs && ('amp' in html.attrs || '⚡' in html.attrs)) {
         isAmp = true;
       }
       return html;
     });
+    tree.match(
+      {tag: 'script', attrs: {'custom-element': 'amp-story'}},
+      function (script: posthtml.Node): posthtml.Node {
+        isAmpStoryDoc = true;
+        return script;
+      }
+    );
     if (isAmp) {
-      tree.match({tag: 'head'}, prependAmpStyles);
+      tree.match({tag: 'head'}, prependAmpStyles.bind(null, isAmpStoryDoc));
     }
   };
 }

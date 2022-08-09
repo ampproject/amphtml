@@ -1,3 +1,4 @@
+import {parse} from 'path';
 import posthtml from 'posthtml';
 
 import {
@@ -5,6 +6,7 @@ import {
   isJsonScript,
   isValidScript,
   toExtension,
+  toSsrCss,
   tryGetUrl,
 } from '../utilities/cdn-tag';
 import {OptionSet} from '../utilities/option-set';
@@ -65,6 +67,17 @@ export default function (
 
       if (!isValidScript(node, options.looseOriginUrlCheck)) {
         return node;
+      }
+
+      const {src = ''} = node.attrs || {};
+      const url = tryGetUrl(src);
+      const parsedPath = parse(url.pathname);
+      if (
+        parsedPath.base == 'amp-story-1.0.js' ||
+        parsedPath.base == 'amp-story-1.0.mjs' ||
+        parsedPath.base == 'amp-story-1.0.max.js'
+      ) {
+        toSsrCss(url, node);
       }
 
       // Mark the existing valid scripts with `nomodule` attributes.
