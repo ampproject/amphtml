@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "cpp/htmlparser/atomutil.h"
 #include "cpp/htmlparser/elements.h"
 #include "cpp/htmlparser/logging.h"
@@ -376,12 +377,13 @@ bool Node::IsBlockElementNode() {
 }
 
 std::string Node::InnerText() const {
-  static std::function<void(const Node*, std::vector<std::string_view>&)>
+  static std::function<void(const Node*, std::vector<absl::string_view>&)>
       output =
-          [](const Node* node, std::vector<std::string_view>& output_content) {
+          [](const Node* node, std::vector<absl::string_view>& output_content) {
             switch (node->Type()) {
               case NodeType::TEXT_NODE: {
-                output_content.push_back(node->Data());
+                output_content.push_back(absl::string_view(
+                    node->Data().data(), node->Data().size()));
                 return;
               }
               case NodeType::COMMENT_NODE: {
@@ -398,7 +400,7 @@ std::string Node::InnerText() const {
             }
           };
 
-  std::vector<std::string_view> buffer;
+  std::vector<absl::string_view> buffer;
   output(this, buffer);
 
   return absl::StrJoin(buffer, " ");
