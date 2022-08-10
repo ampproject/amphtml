@@ -406,7 +406,8 @@ TEST(ParserTest, CallbackTestArrayAllInt) {
       testing::Pair(CallbackCode::NUMBER_T, 8),
       testing::Pair(CallbackCode::ARRAY_VAL_END, 9),
       testing::Pair(CallbackCode::NUMBER_T, 11),
-      testing::Pair(CallbackCode::ARRAY_END, 12)));
+      testing::Pair(CallbackCode::ARRAY_END, 12),
+      testing::Pair(CallbackCode::PARSE_END, 13)));
 }
 
 TEST(ParserTest, CallbackTestArrayAllString) {
@@ -422,7 +423,8 @@ TEST(ParserTest, CallbackTestArrayAllString) {
       testing::Pair(CallbackCode::STRING_T, 6),
       testing::Pair(CallbackCode::ARRAY_VAL_END, 9),
       testing::Pair(CallbackCode::STRING_T, 11),
-      testing::Pair(CallbackCode::ARRAY_END, 14)));
+      testing::Pair(CallbackCode::ARRAY_END, 14),
+      testing::Pair(CallbackCode::PARSE_END, 15)));
 }
 
 TEST(ParserTest, CallbackTestArrayAllBool) {
@@ -438,7 +440,8 @@ TEST(ParserTest, CallbackTestArrayAllBool) {
       testing::Pair(CallbackCode::FALSE_T, 7),
       testing::Pair(CallbackCode::ARRAY_VAL_END, 12),
       testing::Pair(CallbackCode::TRUE_T, 14),
-      testing::Pair(CallbackCode::ARRAY_END, 18)));
+      testing::Pair(CallbackCode::ARRAY_END, 18),
+      testing::Pair(CallbackCode::PARSE_END, 19)));
 }
 
 TEST(ParserTest, CallbackTestArrayAllNulls) {
@@ -454,7 +457,8 @@ TEST(ParserTest, CallbackTestArrayAllNulls) {
       testing::Pair(CallbackCode::NULL_T, 7),
       testing::Pair(CallbackCode::ARRAY_VAL_END, 11),
       testing::Pair(CallbackCode::NULL_T, 13),
-      testing::Pair(CallbackCode::ARRAY_END, 17)));
+      testing::Pair(CallbackCode::ARRAY_END, 17),
+      testing::Pair(CallbackCode::PARSE_END, 18)));
 }
 
 TEST(ParserTest, CallbackTestArrayAllFloatingPoints) {
@@ -473,7 +477,8 @@ TEST(ParserTest, CallbackTestArrayAllFloatingPoints) {
       testing::Pair(CallbackCode::ARRAY_VAL_END, 9),
       testing::Pair(CallbackCode::NUMBER_T, 11),
       testing::Pair(CallbackCode::FLOATING_POINT_T, 12),
-      testing::Pair(CallbackCode::ARRAY_END, 14)));
+      testing::Pair(CallbackCode::ARRAY_END, 14),
+      testing::Pair(CallbackCode::PARSE_END, 15)));
 }
 
 TEST(ParserTest, CallbackTestArrayAllNegativeNumbers) {
@@ -489,7 +494,8 @@ TEST(ParserTest, CallbackTestArrayAllNegativeNumbers) {
       testing::Pair(CallbackCode::NUMBER_T, 5),
       testing::Pair(CallbackCode::ARRAY_VAL_END, 7),
       testing::Pair(CallbackCode::NUMBER_T, 9),
-      testing::Pair(CallbackCode::ARRAY_END, 11)));
+      testing::Pair(CallbackCode::ARRAY_END, 11),
+      testing::Pair(CallbackCode::PARSE_END, 12)));
 }
 
 TEST(ParserTest, CallbackTestArrayMixed) {
@@ -512,7 +518,8 @@ TEST(ParserTest, CallbackTestArrayMixed) {
       testing::Pair(CallbackCode::FLOATING_POINT_T, 22),
       testing::Pair(CallbackCode::ARRAY_VAL_END, 24),
       testing::Pair(CallbackCode::FALSE_T, 26),
-      testing::Pair(CallbackCode::ARRAY_END, 31)));
+      testing::Pair(CallbackCode::ARRAY_END, 31),
+      testing::Pair(CallbackCode::PARSE_END, 32)));
 }
 
 TEST(ParserTest, CallbackPlainNumber) {
@@ -522,7 +529,8 @@ TEST(ParserTest, CallbackPlainNumber) {
     callbacks.push_back(std::make_pair(cb_code, i));
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
-      testing::Pair(CallbackCode::ROOT_NUMBER, 0)));
+      testing::Pair(CallbackCode::ROOT_NUMBER, 0),
+      testing::Pair(CallbackCode::PARSE_END, 1)));
 }
 
 TEST(ParserTest, CallbackPlainEmptyArray) {
@@ -533,7 +541,8 @@ TEST(ParserTest, CallbackPlainEmptyArray) {
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_ARRAY, 0),
-      testing::Pair(CallbackCode::ARRAY_END, 1)));
+      testing::Pair(CallbackCode::ARRAY_END, 1),
+      testing::Pair(CallbackCode::PARSE_END, 2)));
 }
 
 TEST(ParserTest, CallbackPlainBoolTrue) {
@@ -543,7 +552,8 @@ TEST(ParserTest, CallbackPlainBoolTrue) {
     callbacks.push_back(std::make_pair(cb_code, i));
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
-      testing::Pair(CallbackCode::ROOT_BOOL_TRUE, 0)));
+      testing::Pair(CallbackCode::ROOT_BOOL_TRUE, 0),
+      testing::Pair(CallbackCode::PARSE_END, 4)));
 }
 
 TEST(ParserTest, CallbackPlainBoolFalse) {
@@ -553,7 +563,8 @@ TEST(ParserTest, CallbackPlainBoolFalse) {
     callbacks.push_back(std::make_pair(cb_code, i));
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
-      testing::Pair(CallbackCode::ROOT_BOOL_FALSE, 0)));
+      testing::Pair(CallbackCode::ROOT_BOOL_FALSE, 0),
+      testing::Pair(CallbackCode::PARSE_END, 5)));
 }
 
 TEST(ParserTest, CallbackPlainNull) {
@@ -563,7 +574,8 @@ TEST(ParserTest, CallbackPlainNull) {
     callbacks.push_back(std::make_pair(cb_code, i));
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
-      testing::Pair(CallbackCode::ROOT_NULL_VAL, 0)));
+      testing::Pair(CallbackCode::ROOT_NULL_VAL, 0),
+      testing::Pair(CallbackCode::PARSE_END, 4)));
 }
 
 TEST(ParserTest, CallbackEmptyDictionary) {
@@ -574,7 +586,8 @@ TEST(ParserTest, CallbackEmptyDictionary) {
   }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
       testing::Pair(CallbackCode::ROOT_DICT, 0),
-      testing::Pair(CallbackCode::DICT_END, 1)));
+      testing::Pair(CallbackCode::DICT_END, 1),
+      testing::Pair(CallbackCode::PARSE_END, 2)));
 }
 
 TEST(ParserTest, CallbackDictionary) {
@@ -598,7 +611,8 @@ TEST(ParserTest, CallbackDictionary) {
                              testing::Pair(CallbackCode::DICT_KEY_BEGIN, 22),
                              testing::Pair(CallbackCode::DICT_KEY_END, 25),
                              testing::Pair(CallbackCode::STRING_T, 27),
-                             testing::Pair(CallbackCode::DICT_END, 34)));
+                             testing::Pair(CallbackCode::DICT_END, 34),
+                             testing::Pair(CallbackCode::PARSE_END, 35)));
 }
 
 TEST(ParserTest, CallbackRootString) {
@@ -608,7 +622,8 @@ TEST(ParserTest, CallbackRootString) {
         callbacks.push_back(std::make_pair(cb_code, i));
       }).first);
   EXPECT_THAT(callbacks, ::testing::ElementsAre(
-                             testing::Pair(CallbackCode::ROOT_STRING, 0)));
+                             testing::Pair(CallbackCode::ROOT_STRING, 0),
+                             testing::Pair(CallbackCode::PARSE_END, 8)));
 }
 
 }  // namespace htmlparser::json
