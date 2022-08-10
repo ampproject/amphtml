@@ -8,6 +8,7 @@ const {bgWhite, cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
 const {Storage} = require('@google-cloud/storage');
+const {ApiError} = require('@google-cloud/common');
 const {timedExecOrDie} = require('../pr-check/utils');
 const zlib = require('zlib');
 
@@ -158,6 +159,20 @@ async function brotliCompressAll_() {
 }
 
 /**
+ * Rethrows an error, unless the error indicates that the upload failed because the file already exists in the storage bucket.
+ * @param {ApiError | Error} error
+ */
+function ignoreErrorWhenFileAlreadyExists_(error) {
+  if (
+    error instanceof ApiError &&
+    error.message.includes('does not have storage.objects.delete access')
+  ) {
+    return;
+  }
+  throw error;
+}
+
+/**
  * Uploads release files to Google Cloud Storage.
  * @return {Promise<void>}
  */
@@ -200,9 +215,12 @@ async function uploadFiles_() {
 
     const destination = path.slice(DEST_DIR.length + 1);
     uploadsPromises.push(
-      bucket.upload(path, {destination, resumable: false}).then(() => {
-        logProgress_(totalFiles, ++uploadedFiles);
-      })
+      bucket
+        .upload(path, {destination, resumable: false})
+        .catch(ignoreErrorWhenFileAlreadyExists_)
+        .then(() => {
+          logProgress_(totalFiles, ++uploadedFiles);
+        })
     );
   }
 

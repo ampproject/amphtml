@@ -47,6 +47,7 @@ Smartadserver largely uses the same tags as `<amp-ad>`. The following are requir
 These attributes are optional:
 
 -   `data-target`: Targeting string
+-   `data-isasync`: Is call to Smartadserver should be executed in sync or async mode
 -   `data-schain`: SupplyChain Object string
 -   `rtc-config`: Please refer to [RTC Documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md) for details
 
@@ -58,6 +59,7 @@ These attributes are optional:
   data-page="1410268"
   data-format="945"
   data-target="test=amp"
+  data-isasync="true"
   data-domain="https://www4.smartadserver.com">
 </amp-ad>
 ```
