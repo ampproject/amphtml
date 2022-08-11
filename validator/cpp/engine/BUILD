@@ -137,6 +137,7 @@ cc_library(
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
+        "//cpp/htmlparser:logging",
         "//cpp/htmlparser:strings",
     ],
 )
@@ -230,6 +231,7 @@ cc_binary(
         "@com_google_protobuf//:protobuf",
         "//cpp/htmlparser:defer",
         "//cpp/htmlparser:fileutil",
+        "//cpp/htmlparser:logging",
         "//:validator_cc_proto",
     ],
 )

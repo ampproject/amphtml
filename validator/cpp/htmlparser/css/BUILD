@@ -35,6 +35,7 @@ cc_library(
         "@com_google_absl//absl/types:variant",
         "//cpp/htmlparser:strings",
         "//cpp/htmlparser/json:types",
+        "//cpp/htmlparser:logging",
         "//:validator_cc_proto",
     ],
 )
