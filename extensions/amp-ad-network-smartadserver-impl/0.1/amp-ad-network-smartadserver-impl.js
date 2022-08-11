@@ -51,7 +51,10 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     super(element);
 
     this.useSafeframe = false;
-    if ('useSafeframe' in this.element.dataset) {
+    if (
+      'useSafeframe' in this.element.dataset &&
+      this.element.dataset['useSafeframe'] === 'true'
+    ) {
       this.useSafeframe = true;
     }
 
