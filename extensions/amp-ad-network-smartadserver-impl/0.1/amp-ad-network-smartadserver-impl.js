@@ -21,11 +21,12 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {dev} from '#utils/log';
+import {dev, devAssert} from '#utils/log';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getConsentPolicyInfo} from '../../../src/consent';
 import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
+import {SafeframeHostApi} from '../../amp-ad-network-doubleclick-impl/0.1/safeframe-host';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-smartadserver-impl';
@@ -57,6 +58,8 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     ) {
       this.useSafeframe = true;
     }
+
+    this.isFluidRequest_ = false;
 
     this.addListener();
   }
@@ -103,7 +106,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'fmtid': formatId,
             'tgt': this.element.getAttribute('data-target'),
             'tag': tagId,
-            'out': 'amp-hb',
+            'out': 'amp-hb1',
             ...urlParams,
             'gdpr_consent': consentString,
             'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
@@ -117,9 +120,38 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /** @override */
-  getSafeframePath() {
-    return 'https://demo.smartadserver.com/shared/jzych/safeframe/frame.html';
+  getAdditionalContextMetadata(isSafeFrame = false) {
+    if (!this.isFluidRequest_ && !isSafeFrame) {
+      return;
+    }
+    const creativeSize = this.getCreativeSize();
+    devAssert(creativeSize, 'this.getCreativeSize returned null');
+    if (this.isRefreshing) {
+      if (this.safeframeApi_) {
+        this.safeframeApi_.destroy();
+      }
+      this.safeframeApi_ = new SafeframeHostApi(
+        this,
+        this.isFluidRequest_,
+        /** @type {{height, width}} */ (creativeSize)
+      );
+    } else {
+      this.safeframeApi_ =
+        this.safeframeApi_ ||
+        new SafeframeHostApi(
+          this,
+          this.isFluidRequest_,
+          /** @type {{height, width}} */ (creativeSize)
+        );
+    }
+
+    return this.safeframeApi_.getSafeframeNameAttr();
   }
+
+  /** @override */
+  // getSafeframePath() {
+  //   return 'https://demo.smartadserver.com/shared/Smart/dodziomek/sf/frame.html';
+  // }
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
