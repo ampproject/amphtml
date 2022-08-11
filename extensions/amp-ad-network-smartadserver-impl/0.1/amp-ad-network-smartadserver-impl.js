@@ -117,6 +117,11 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /** @override */
+  getSafeframePath() {
+    return 'https://demo.smartadserver.com/shared/jzych/safeframe/frame.html';
+  }
+
+  /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (this.useSafeframe) {
       return XORIGIN_MODE.SAFEFRAME;
