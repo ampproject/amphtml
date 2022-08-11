@@ -49,6 +49,12 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    this.useSafeframe = false;
+    if ('useSafeframe' in this.element.dataset) {
+      this.useSafeframe = true;
+    }
+
     this.addListener();
   }
 
@@ -109,9 +115,13 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    return Services.platformFor(this.win).isIos()
-      ? XORIGIN_MODE.IFRAME_GET
-      : super.getNonAmpCreativeRenderingMethod(headerValue);
+    if (this.useSafeframe) {
+      return XORIGIN_MODE.SAFEFRAME;
+    } else {
+      return Services.platformFor(this.win).isIos()
+        ? XORIGIN_MODE.IFRAME_GET
+        : super.getNonAmpCreativeRenderingMethod(headerValue);
+    }
   }
 
   /** @override */
@@ -168,7 +178,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
   /** @override */
   isXhrAllowed() {
-    return false;
+    return this.useSafeframe ? true : false;
   }
 
   /**
