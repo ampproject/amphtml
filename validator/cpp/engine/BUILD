@@ -114,6 +114,7 @@ cc_library(
         ":utf8-util",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
+        "//cpp/htmlparser:logging",
         "//cpp/htmlparser:strings",
     ],
 )
