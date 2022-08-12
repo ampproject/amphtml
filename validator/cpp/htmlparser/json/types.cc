@@ -50,13 +50,13 @@ void AddIndentation(std::stringbuf* buf, int indent_columns) {
   }
 }
 
-std::string NullValue::ToString(int indent_columns) const {
+std::string JsonNull::ToString(int indent_columns) const {
   std::stringbuf buf;
   ToString(&buf, indent_columns);
   return buf.str();
 }
 
-void NullValue::ToString(std::stringbuf* buf, int indent_columns) const {
+void JsonNull::ToString(std::stringbuf* buf, int indent_columns) const {
   AddIndentation(buf, indent_columns);
   buf->sputn("null", 4);
 }
@@ -67,11 +67,20 @@ std::string JsonDict::ToString(int indent_columns) const {
   return buf.str();
 }
 
+JsonObject* JsonDict::Get(std::string_view key) {
+  for (auto iter = items_.rbegin(); iter != items_.rend(); ++iter) {
+    if (iter->first == key) {
+      return &iter->second;
+    }
+  }
+  return nullptr;
+}
+
 void JsonDict::ToString(std::stringbuf* buf, int indent_columns) const {
   bool first = true;
   buf->sputc('{');
   buf->sputc('\n');
-  for (auto& [k, v] : values_) {
+  for (auto& [k, v] : items_) {
     if (!first) {
       buf->sputc(',');
       buf->sputc('\n');
@@ -81,7 +90,7 @@ void JsonDict::ToString(std::stringbuf* buf, int indent_columns) const {
     buf->sputc('"');
     buf->sputn(k.c_str(), k.size());
     buf->sputn("\":", 2);
-    if (!v.Has<JsonArray, JsonDict>()) {
+    if (!v.Is<JsonArray, JsonDict>()) {
       v.ToString(buf, 1);
     } else {
       v.ToString(buf, indent_columns + 2);
@@ -173,19 +182,19 @@ void JsonObject::ToString(std::stringbuf* buf, int indent_columns) const {
             buf->sputn(str.c_str(), str.size());
             buf->sputc('"');
           },
-          [&](NullValue n) { buf->sputn("null", 4); },
+          [&](const std::string_view& str) {
+            buf->sputc('"');
+            buf->sputn(str.data(), str.size());
+            buf->sputc('"');
+          },
+          [&](JsonNull n) { buf->sputn("null", 4); },
           [&](const JsonArray& a) { a.ToString(buf, indent_columns); },
           [&](const JsonDict& d) { d.ToString(buf, indent_columns); },
-          [&](const Any<JsonArray>& a) {
-            a.ToString(buf, indent_columns);
-          },
-          [&](const Any<JsonDict>& a) {
-            a.ToString(buf, indent_columns);
-          },
-          [&](const Any<JsonObject>& a) {
-            a.ToString(buf, indent_columns);
-          },
-      }, v_);
+          [&](const Any<JsonArray>& a) { a.ToString(buf, indent_columns); },
+          [&](const Any<JsonDict>& a) { a.ToString(buf, indent_columns); },
+          [&](const Any<JsonObject>& a) { a.ToString(buf, indent_columns); },
+      },
+      v_);
 }
 
 }  // namespace htmlparser::json
