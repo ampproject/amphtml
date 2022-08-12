@@ -106,7 +106,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'fmtid': formatId,
             'tgt': this.element.getAttribute('data-target'),
             'tag': tagId,
-            'out': 'amp-hb1',
+            'out': this.useSafeframe ? 'amp-hb1' : 'amp-hb',
             ...urlParams,
             'gdpr_consent': consentString,
             'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
@@ -149,9 +149,11 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /** @override */
-  // getSafeframePath() {
-  //   return 'https://demo.smartadserver.com/shared/Smart/dodziomek/sf/frame.html';
-  // }
+  getSafeframePath() {
+    // return 'https://demo.smartadserver.com/shared/Smart/dodziomek/sf/frame.html';
+    // return 'https://demo.smartadserver.com/shared/jzych/safeframe/safeframe_container.html';
+    return 'https://demo.smartadserver.com/shared/Smart/dodziomek/sf/safeframe-google.html';
+  }
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
