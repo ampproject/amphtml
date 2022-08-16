@@ -19,7 +19,7 @@ tags: {  # <amp-google-read-aloud-player>
   attrs: {
     name: "data-tracking-ids"
     mandatory: true;
-    value_regex_casei: "^UA-\\d+-\\d+(\\s*,\\s*UA-\\d+-\\d+)*$";
+    value_regex_casei: "^((UA-\\d+-\\d+)|(G-\\w+))(\\s*,\\s*((UA-\\d+-\\d+)|(G-\\w+)))*$";
   }
   attrs: {
     name: "data-voice"

@@ -29,13 +29,13 @@ that were generated using the Google Cloud Console won’t work.
     <tr>
     <td width="20%"><strong>data-tracking-ids (required)</strong></td>
     <td>The list of the <a href="https://support.google.com/analytics/answer/7372977">
-Google Analytics tracking IDs</a> to send the player metrics to (comma separated).
+Google Analytics tracking IDs or measurement IDs</a> to send the player metrics to (comma separated).
 <br><br>
-You are required to have a Google Analytics tracking ID in order to use this player during the
-pilot period. The tracking ID will be provided to you by Google.
+You are required to have a Google Analytics tracking/measurement ID in order to use this player during 
+the pilot period. The tracking ID will be provided to you by Google.
 <br><br>
-If you want to send the player metrics also to your Google Analytics account, add your tracking ID 
-(or IDs) to this list.
+If you want to send the player metrics also to your Google Analytics account, add your 
+tracking/measurement ID (or IDs) to this list.
 </td>
   </tr>
   <tr>

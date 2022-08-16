@@ -92,8 +92,20 @@
     data-voice="en.some-voice">
   </amp-google-read-aloud-player>
 
-  <!-- Valid: Multiple values for data-tracking-ids -->
+  <!-- Valid: GA4 ID value for data-tracking-ids -->
+  <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="G-1XXXXXXX" data-voice="en.some-voice">
+  </amp-google-read-aloud-player>
+
+  <!-- Valid: Multiple UA values for data-tracking-ids -->
   <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1,UA-168915890-2" data-voice="en.some-voice">
+  </amp-google-read-aloud-player>
+
+  <!-- Valid: Multiple GA4 values for data-tracking-ids -->
+  <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="G-1XXXXXXX,G-2XXXXXXX" data-voice="en.some-voice">
+  </amp-google-read-aloud-player>
+
+  <!-- Valid: Mixed UA and GA4 values for data-tracking-ids -->
+  <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1,G-1XXXXXXX" data-voice="en.some-voice">
   </amp-google-read-aloud-player>
 
   <!-- Valid: Opposite digits sections for data-tracking-ids -->
