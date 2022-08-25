@@ -39,12 +39,12 @@
 #include "cpp/htmlparser/css/parse-css.pb.h"
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/elements.h"
-#include "cpp/htmlparser/json/parser.h"
 #include "cpp/htmlparser/logging.h"
 #include "cpp/htmlparser/node.h"
 #include "cpp/htmlparser/parser.h"
 #include "cpp/htmlparser/strings.h"
 #include "cpp/htmlparser/url.h"
+#include "cpp/htmlparser/validators/json.h"
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
@@ -5788,7 +5788,7 @@ class Validator {
               (htmlparser::Strings::EqualFold(attr.value, "application/json") ||
                htmlparser::Strings::EqualFold(attr.value,
                                               "application/ld+json"))) {
-            if (auto v = htmlparser::json::JSONParser::Validate(
+            if (auto v = htmlparser::json::Validate(
                     node->FirstChild()->Data());
                 !v.first) {
               std::pair<int, int> json_linecol{0, 0};
