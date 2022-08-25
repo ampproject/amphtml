@@ -97,13 +97,16 @@ describes.realWin(
           'c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
         );
         const iframe = player.querySelector('iframe');
+        const url =
+          'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158';
         expect(iframe).to.not.be.null;
+        expect(iframe.src).to.be(url);
         // expect(iframe.src).to.be.same(
         //   'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
         // );
-        expect(iframe.src).to.equal(
-          'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
-        );
+        // expect(iframe.src).to.equal(
+        //   'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
+        // );
       });
 
       it('requires data-id', () => {
