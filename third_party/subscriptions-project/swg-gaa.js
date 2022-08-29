@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.228 */
+/** Version: 0.1.22.231 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1503,6 +1503,9 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
 
+/** Delay used to log 3P button click before redirect */
+const REDIRECT_DELAY = 10;
+
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
  * The script creates a dialog based on this HTML.
@@ -2334,11 +2337,14 @@ class GaaMeteringRegwall {
     buttonEl.addEventListener('click', () => {
       // Track button clicks.
       logEvent({
-        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK,
         isFromUserAction: true,
       });
       // Redirect user using the parent window.
-      self.open(authorizationUrl, '_parent');
+      // TODO(b/242998655): Fix the downstream calls for logEvent to be chained to remove the need of delaying redirect.
+      self.setTimeout(() => {
+        self.open(authorizationUrl, '_parent');
+      }, REDIRECT_DELAY);
     });
 
     return buttonEl;

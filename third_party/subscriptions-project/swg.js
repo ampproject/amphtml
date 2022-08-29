@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.228 */
+/** Version: 0.1.22.231 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5070,7 +5070,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.228',
+    '_client': 'SwG 0.1.22.231',
   });
 }
 
@@ -6404,7 +6404,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.228',
+        '_client': 'SwG 0.1.22.231',
         'supportsEventManager': true,
       },
       args || {}
@@ -7348,7 +7348,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.228');
+    context.setClientVersion('SwG 0.1.22.231');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7745,6 +7745,12 @@ const SWG_I18N_STRINGS = {
     'zh-cn': '您之前已注册。',
     'zh-hk': '您之前已訂閱。',
     'zh-tw': '你已經訂閱了。',
+  },
+  'REGWALL_REGISTER_FAILED_LANG_MAP': {
+    'en': 'Registration failed. Try registering again.',
+  },
+  'NEWSLETTER_SIGN_UP_FAILED_LANG_MAP': {
+    'en': 'Signup failed. Try signing up again.',
   },
   'REGWALL_ACCOUNT_CREATED_LANG_MAP': {
     'en': 'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
