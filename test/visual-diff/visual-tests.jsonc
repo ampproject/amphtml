@@ -788,6 +788,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
     },
     {
+      "flaky": true,
+      // See https://percy.io/ampproject/amphtml/builds/20456391/changed/1146414036?browser=chrome&browser_ids=23&subcategories=unreviewed%2Cchanges_requested&viewLayout=side-by-side&viewMode=new&width=320&widths=320%2C400
       "url": "examples/visual-tests/amp-story/amp-story-shopping-rtl.html",
       "name": "amp-story-shopping UI RTL",
       "viewport": {"width": 320, "height": 900},
