@@ -30,7 +30,7 @@ import {
 const TOGGLE_THRESHOLD_PX = 50;
 
 /** @const {number} */
-const DRAWER_ANIMATE_IN_TIME = 250;
+const DRAWER_ANIMATE_IN_TIME = 400;
 
 /**
  * @enum {number}
