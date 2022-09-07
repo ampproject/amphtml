@@ -100,8 +100,8 @@ class JsonDict {
   std::size_t size() const { return items_.size(); }
   bool empty() const { return items_.empty(); }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf*, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 
   template <typename T>
   T* Get(std::string_view key);
@@ -142,8 +142,8 @@ class JsonArray {
   std::size_t size() const { return items_.size(); }
   bool empty() const { return items_.empty(); }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf*, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf*) const;
 
   // Facilitates range based for loop.
   // for (const auto& item : my_json_array) {
@@ -167,8 +167,8 @@ class JsonArray {
 
 class JsonNull {
  public:
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
-  std::string ToString(int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 };
 
 template <typename JsonType>
@@ -187,12 +187,12 @@ class Any {
     return *this;
   }
 
-  std::string ToString(int indent_columns = 0) const {
-    return wrapper_->ToJson().ToString(indent_columns);
+  std::string ToString() const {
+    return wrapper_->ToJson().ToString();
   }
 
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const {
-    wrapper_->ToJson().ToString(buf, indent_columns);
+  void ToString(std::stringbuf* buf) const {
+    wrapper_->ToJson().ToString(buf);
   }
 
  private:
@@ -289,8 +289,8 @@ class JsonObject {
     return (std::holds_alternative<Types>(v_) || ...);
   }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 
  private:
   std::variant<bool, int32_t, int64_t, double, float, std::string,
