@@ -137,7 +137,7 @@ void ParseInternal::PopulateDictionaryItem(std::size_t current_index) {
     auto key = DictKey();
     auto value = CurrentString(current_index);
     if (parse_options_.use_string_references) {
-      dict->Insert<std::string_view>(key, std::move(value));
+      dict->Insert<std::string_view>(key, value);
     } else {
       dict->Insert<std::string>(key, std::string(value));
     }
@@ -146,13 +146,13 @@ void ParseInternal::PopulateDictionaryItem(std::size_t current_index) {
     if (hints_ & FLOAT_T) {
       double num;
       if (absl::SimpleAtod(str, &num)) {
-        dict->Insert<double>(DictKey(), std::move(num));
+        dict->Insert<double>(DictKey(), num);
       }
       hints_ ^= FLOAT_T;
     } else {
       int64_t num;
       if (absl::SimpleAtoi(str, &num)) {
-        dict->Insert<int64_t>(DictKey(), std::move(num));
+        dict->Insert<int64_t>(DictKey(), num);
       }
     }
   } else if (hints_ & NULL_T) {
@@ -172,7 +172,7 @@ void ParseInternal::PopulateArrayItem(std::size_t current_index) {
   if (hints_ & STRING_T) {
     auto str = CurrentString(current_index);
     if (parse_options_.use_string_references) {
-      array->Append<std::string_view>(std::move(str));
+      array->Append<std::string_view>(str);
     } else {
       array->Append<std::string>(std::string(str));
     }
@@ -181,13 +181,13 @@ void ParseInternal::PopulateArrayItem(std::size_t current_index) {
     if (hints_ & FLOAT_T) {
       double num;
       if (absl::SimpleAtod(str, &num)) {
-        array->Append<double>(std::move(num));
+        array->Append<double>(num);
       }
       hints_ ^= FLOAT_T;
     } else {
       int64_t num;
       if (absl::SimpleAtoi(str, &num)) {
-        array->Append<int64_t>(std::move(num));
+        array->Append<int64_t>(num);
       }
     }
   } else if (hints_ & NULL_T) {

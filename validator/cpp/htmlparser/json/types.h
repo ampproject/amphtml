@@ -97,6 +97,11 @@ class JsonDict {
     items_.emplace_back(std::make_pair(key, std::forward<V>(value)));
   }
 
+  template <typename V>
+  void Insert(std::string_view key, const V& value) {
+    items_.emplace_back(std::make_pair(key, value));
+  }
+
   std::size_t size() const { return items_.size(); }
   bool empty() const { return items_.empty(); }
 
@@ -130,13 +135,23 @@ class JsonArray {
     items_.emplace_back(i);
   }
 
+  template <typename T>
+  void Append(T& i) {
+    items_.emplace_back(i);
+  }
+
   // Facilitates appending multiple items.
   // my_array.Append(1, 2, 3, 4, "hello", "world", true, true, false);
   // my_array contains:
   // [1, 2, 3, 4, "hello", "world", true, true, false];
   template <typename... Ts>
   void Append(Ts&&... items) {
-    int unused[] = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
+    auto unused = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
+  }
+
+  template <typename... Ts>
+  void Append(const Ts&... items) {
+    auto unused = {0, (items_.emplace_back(items), 0)...};
   }
 
   std::size_t size() const { return items_.size(); }
@@ -183,7 +198,9 @@ class Any {
   Any(Any&& from) { wrapper_ = std::move(from.wrapper_); }
 
   Any& operator=(const Any& from) {
-    wrapper_ = from.wrapper_->Clone();
+    if (&from != this) {
+      wrapper_ = from.wrapper_->Clone();
+    }
     return *this;
   }
 
@@ -250,7 +267,9 @@ class JsonObject {
   JsonObject(const JsonObject& from) { v_ = from.v_; }
 
   JsonObject& operator=(const JsonObject& from) {
-    v_ = from.v_;
+    if (&from != this) {
+      v_ = from.v_;
+    }
     return *this;
   }
 
