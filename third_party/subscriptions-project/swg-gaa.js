@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.231 */
+/** Version: 0.1.22.232 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -655,6 +655,7 @@ const AnalyticsEvent = {
   EVENT_REGWALL_OPTED_IN: 3023,
   EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SHOWCASE_METERING_INIT: 3025,
+  EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -1475,6 +1476,9 @@ const POST_MESSAGE_COMMAND_ERROR = 'error';
 /** Button click command for post messages. */
 const POST_MESSAGE_COMMAND_BUTTON_CLICK = 'button-click';
 
+/** 3P button click command for post messages. */
+const POST_MESSAGE_COMMAND_3P_BUTTON_CLICK = '3p-button-click';
+
 /** ID for the Google Sign-In iframe element. */
 const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
 
@@ -2238,6 +2242,17 @@ class GaaMeteringRegwall {
           isFromUserAction: true,
         });
       }
+      if (
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_3P_BUTTON_CLICK
+      ) {
+        // Log button click event.
+        logEvent({
+          analyticsEvent:
+            AnalyticsEvent.ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK,
+          isFromUserAction: true,
+        });
+      }
     });
   }
 
@@ -2602,7 +2617,17 @@ class GaaGoogle3pSignInButton {
     });
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
+      sendMessageToParentFnPromise.then((sendMessageToParent) => {
+        sendMessageToParent({
+          stamp: POST_MESSAGE_STAMP,
+          command: POST_MESSAGE_COMMAND_3P_BUTTON_CLICK,
+        });
+      });
       if (redirectMode) {
+        // TODO(b/242998655): Fix the downstream calls for logEvent to be chained to remove the need of delaying redirect.
+        self.setTimeout(() => {
+          self.open(authorizationUrl, '_parent');
+        }, REDIRECT_DELAY);
         self.open(authorizationUrl, '_parent');
       } else {
         self.open(authorizationUrl);
