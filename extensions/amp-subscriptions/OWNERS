@@ -7,7 +7,8 @@
       owners: [
         {name: 'alin04'},
         {name: 'fikus'},
-        {name: 'jpettitt'},
+        {name: 'hartmannr76'},
+        {name: 'jpettitt', notify: true},
       ],
     },
   ],
