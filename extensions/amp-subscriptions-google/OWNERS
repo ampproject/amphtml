@@ -5,9 +5,9 @@
   rules: [
     {
       owners: [
-        {name: 'chrisantaki'},
+        {name: 'alin04'},
+        {name: 'fikus'},
         {name: 'jpettitt'},
-        {name: 'mmmicedcoffee'},
       ],
     },
   ],
