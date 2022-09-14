@@ -27,7 +27,7 @@ import {Services} from '#service';
 import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {dev, user, userAssert} from '#utils/log';
 
-import {handleCompanionAds} from './monetization';
+import {handleAds} from './monetization';
 import {
   extractTags,
   getPlatform,
@@ -321,7 +321,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
-            handleCompanionAds(media, this.element);
+            handleAds(media, this.element);
           })
           .then(() => this.loadPromise(iframe))
           .then(() =>
