@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.232 */
+/** Version: 0.1.22.233 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5026,7 +5026,7 @@ function adsUrl(url) {
 function feUrl(
   url,
   params = {},
-  usePrefixedHostPath = false,
+  usePrefixedHostPath = true,
   prefix = ''
 ) {
   // Add cache param.
@@ -5071,7 +5071,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.232',
+    '_client': 'SwG 0.1.22.233',
   });
 }
 
@@ -6409,7 +6409,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.232',
+        '_client': 'SwG 0.1.22.233',
         'supportsEventManager': true,
       },
       args || {}
@@ -6850,7 +6850,7 @@ const ExperimentFlags = {
   /**
    * Experiment flag for disabling the miniprompt icon on desktop screens wider than 480px.
    */
-  DISABLE_DESKTOP_MINIPROMPT: 'disable_desktop_miniprompt',
+  DISABLE_DESKTOP_MINIPROMPT: 'disable-desktop-miniprompt',
 };
 
 /**
@@ -7358,7 +7358,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.232');
+    context.setClientVersion('SwG 0.1.22.233');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -9035,6 +9035,7 @@ class ClientConfigManager {
     /** @private @const {ClientConfig} */
     this.defaultConfig_ = new ClientConfig({
       skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
+      usePrefixedHostPath: true,
     });
   }
 
@@ -17994,7 +17995,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}body.swg-disable-scroll{height:100%!important}body.swg-disable-scroll,body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}html>body.swg-disable-scroll{height:100vh!important;overflow:hidden!important}html>body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
