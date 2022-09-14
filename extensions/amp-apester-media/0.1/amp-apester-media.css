@@ -70,3 +70,8 @@
   transform: translateX(-50%) !important;
   margin: 0 !important;
 }
+
+.i-amphtml-amp-apester-in-unit {
+  display: block;
+  margin: 10px auto;
+}
