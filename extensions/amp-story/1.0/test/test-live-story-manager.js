@@ -2,6 +2,7 @@ import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {addAttributesToElement} from '#core/dom';
 
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -36,6 +37,7 @@ describes.realWin(
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
+          page.getAmpDoc = () => new AmpDocSingle(win);
           const storyPage = new AmpStoryPage(page);
           env.sandbox.stub(storyPage, 'mutateElement').callsFake((fn) => fn());
           container.appendChild(page);
@@ -62,6 +64,7 @@ describes.realWin(
       });
 
       storyEl = win.document.createElement('amp-story');
+      createPages(storyEl, 2, ['cover', 'page-1']);
       win.document.body.appendChild(storyEl);
       addAttributesToElement(storyEl, {
         'id': 'testStory',
@@ -78,7 +81,6 @@ describes.realWin(
     });
 
     it('should build a dynamic live-list', async () => {
-      createPages(ampStory.element, 2, ['cover', 'page-1']);
       ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
@@ -90,7 +92,6 @@ describes.realWin(
     });
 
     it('live-list id should equal story id + dymanic-list combo', async () => {
-      createPages(ampStory.element, 2, ['cover', 'page-1']);
       ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
@@ -104,7 +105,6 @@ describes.realWin(
     });
 
     it('should throw if no story id is set', () => {
-      createPages(ampStory.element, 2, ['cover', 'page-1']);
       ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       ampStory.element.removeAttribute('id');
@@ -119,7 +119,6 @@ describes.realWin(
     });
 
     it('should append new page from server to client in update', async () => {
-      createPages(ampStory.element, 2, ['cover', 'page-1']);
       ampStory.buildCallback();
       expect(
         ampStory.element.querySelectorAll('amp-story-page').length

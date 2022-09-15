@@ -85,7 +85,7 @@ describes.realWin(
         .getRootElement()
         .querySelector('input[type="range"]');
       // simulates a change event, which is when the user releases the slider
-      slider.dispatchEvent(new CustomEvent('change'));
+      slider.dispatchEvent(new CustomEvent('mouseup'));
       expect(slider.hasAttribute('disabled')).to.be.true;
     });
 
@@ -140,7 +140,7 @@ describes.realWin(
         .getRootElement()
         .querySelector('input[type="range"]');
       // simulates a change event, which is when the user releases the slider
-      slider.dispatchEvent(new CustomEvent('change'));
+      slider.dispatchEvent(new CustomEvent('mouseup'));
       expect(ampStorySlider.getRootElement()).to.have.class(
         POST_SELECTION_CLASS
       );
@@ -179,7 +179,7 @@ describes.realWin(
       // simulates an input event, which is when the user drags the slider
       // simulates a change event, which is when the user releases the slider
       slider.dispatchEvent(new CustomEvent('input'));
-      slider.dispatchEvent(new CustomEvent('change'));
+      slider.dispatchEvent(new CustomEvent('mouseup'));
       expect(sliderBubble.textContent).to.be.equal('30%');
     });
 

@@ -1101,7 +1101,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP]
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
   descriptive_name: "head > style[amp-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1125,7 +1125,7 @@ tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
   tag_name: "STYLE"
   spec_name: "head > style[amp4ads-boilerplate]"
   descriptive_name: "head > style[amp4ads-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1150,7 +1150,7 @@ tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
   tag_name: "STYLE"
   spec_name: "head > style[amp4email-boilerplate]"
   descriptive_name: "head > style[amp4email-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1173,7 +1173,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP]
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
   descriptive_name: "noscript > style[amp-boilerplate]"
-  satisfies: "noscript > style[amp-boilerplate]"
+  satisfies_condition: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"

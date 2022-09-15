@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.218 */
+/** Version: 0.1.22.233 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -127,9 +127,15 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
+  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
+  ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
+  ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
+  ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
+  EVENT_REGWALL_ALREADY_OPT_IN: 2003,
+  EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -155,6 +161,8 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
   EVENT_REGWALL_OPTED_IN: 3023,
   EVENT_NEWSLETTER_OPTED_IN: 3024,
+  EVENT_SHOWCASE_METERING_INIT: 3025,
+  EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -412,6 +420,12 @@ class AnalyticsContext {
       data[11 + base] == null || data[11 + base] == undefined
         ? null
         : new Timestamp(data[11 + base], includesLabel);
+
+    /** @private {?ReaderSurfaceType} */
+    this.readerSurfaceType_ = data[12 + base] == null ? null : data[12 + base];
+
+    /** @private {?string} */
+    this.integrationVersion_ = data[13 + base] == null ? null : data[13 + base];
   }
 
   /**
@@ -583,6 +597,34 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {?ReaderSurfaceType}
+   */
+  getReaderSurfaceType() {
+    return this.readerSurfaceType_;
+  }
+
+  /**
+   * @param {!ReaderSurfaceType} value
+   */
+  setReaderSurfaceType(value) {
+    this.readerSurfaceType_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getIntegrationVersion() {
+    return this.integrationVersion_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setIntegrationVersion(value) {
+    this.integrationVersion_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -601,6 +643,8 @@ class AnalyticsContext {
         this.clientVersion_, // field 10 - client_version
         this.url_, // field 11 - url
         this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
+        this.readerSurfaceType_, // field 13 - reader_surface_type
+        this.integrationVersion_, // field 14 - integration_version
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -876,6 +920,9 @@ class CompleteAudienceActionResponse {
 
     /** @private {?string} */
     this.userEmail_ = data[2 + base] == null ? null : data[2 + base];
+
+    /** @private {?boolean} */
+    this.alreadyCompleted_ = data[3 + base] == null ? null : data[3 + base];
   }
 
   /**
@@ -921,6 +968,20 @@ class CompleteAudienceActionResponse {
   }
 
   /**
+   * @return {?boolean}
+   */
+  getAlreadyCompleted() {
+    return this.alreadyCompleted_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setAlreadyCompleted(value) {
+    this.alreadyCompleted_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -930,6 +991,7 @@ class CompleteAudienceActionResponse {
         this.swgUserToken_, // field 1 - swg_user_token
         this.actionCompleted_, // field 2 - action_completed
         this.userEmail_, // field 3 - user_email
+        this.alreadyCompleted_, // field 4 - already_completed
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -4937,6 +4999,13 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
+  // Allows us to make API calls with enabled experiments.
+  const query = parseQueryString(self.location.hash);
+  const experiments = query['swg.experiments'];
+  if (experiments !== undefined) {
+    url = addQueryParam(url, 'e', experiments);
+  }
+
   return `${getSwgMode().frontEnd}/swg/_/api/v1` + url;
 }
 
@@ -4957,7 +5026,7 @@ function adsUrl(url) {
 function feUrl(
   url,
   params = {},
-  usePrefixedHostPath = false,
+  usePrefixedHostPath = true,
   prefix = ''
 ) {
   // Add cache param.
@@ -4973,6 +5042,12 @@ function feUrl(
   const boqJsMode = query['swg.boqjsmode'];
   if (boqJsMode !== undefined) {
     url = addQueryParam(url, 'jsmode', boqJsMode);
+  }
+
+  // Allows us to open iframes with enabled experiments.
+  const experiments = query['swg.experiments'];
+  if (experiments !== undefined) {
+    url = addQueryParam(url, 'e', experiments);
   }
 
   for (const param in params) {
@@ -4996,7 +5071,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.218',
+    '_client': 'SwG 0.1.22.233',
   });
 }
 
@@ -5854,7 +5929,10 @@ class OffersFlow {
           return this.dialogManager_.openView(
             this.activityIframeView_,
             /* hidden */ false,
-            this.getDialogConfig_(clientConfig)
+            this.getDialogConfig_(
+              clientConfig,
+              this.clientConfigManager_.shouldAllowScroll()
+            )
           );
         });
       });
@@ -5876,15 +5954,16 @@ class OffersFlow {
   /**
    * Gets display configuration options for the opened dialog. Uses the
    * responsive desktop design properties if the updated offer flows UI (for
-   * SwG Basic) is enabled.
+   * SwG Basic) is enabled. Permits override to allow scrolling.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {boolean} shouldAllowScroll
    * @return {!../components/dialog.DialogConfig}
    */
-  getDialogConfig_(clientConfig) {
+  getDialogConfig_(clientConfig, shouldAllowScroll) {
     return clientConfig.useUpdatedOfferFlows
       ? {
           desktopConfig: {isCenterPositioned: true, supportsWideScreen: true},
-          shouldDisableBodyScrolling: true,
+          shouldDisableBodyScrolling: !shouldAllowScroll,
         }
       : {};
   }
@@ -6330,7 +6409,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.218',
+        '_client': 'SwG 0.1.22.233',
         'supportsEventManager': true,
       },
       args || {}
@@ -6361,7 +6440,22 @@ class ActivityPorts$1 {
     if (addDefaultArguments) {
       args = this.addDefaultArguments(args);
     }
-    return this.openActivityIframePort_(iframe, url, args);
+    return this.deps_
+      .storage()
+      .get(Constants$1.USER_TOKEN, /* useLocalStorage= */ true)
+      .then((swgUserToken) => {
+        const queryParams = new URL(url).searchParams;
+        if (swgUserToken && !queryParams.has('sut')) {
+          url = addQueryParam(url, 'sut', swgUserToken);
+        }
+
+        const pubId = this.deps_.pageConfig().getPublicationId();
+        if (pubId && !queryParams.has('publicationId')) {
+          url = addQueryParam(url, 'publicationId', pubId);
+        }
+
+        return this.openActivityIframePort_(iframe, url, args);
+      });
   }
 
   /**
@@ -6752,6 +6846,11 @@ const ExperimentFlags = {
    * Experiment flag for swapping the location of the counter and the main CTA in Amplio blogs.
    */
   TWG_SWAP_COUNTER_AND_CTA: 'counter_cta_swap_enable_experiment',
+
+  /**
+   * Experiment flag for disabling the miniprompt icon on desktop screens wider than 480px.
+   */
+  DISABLE_DESKTOP_MINIPROMPT: 'disable-desktop-miniprompt',
 };
 
 /**
@@ -6794,6 +6893,22 @@ const ExperimentFlags = {
  *    control. In this case, 20% of the impressions will be split into two
  *    categories: experiment and control. Notice, a control can be requested
  *    only for the fraction under 20%.
+ *
+ * Server-side experiments in SwG.
+ *
+ * These are only observed at runtime via the `#swg.experiments=${experimentsString}`
+ * parameter in the URL's fragment.
+ *
+ * The `${experimentsString}` follows the convention of comma separated
+ * experiment ID's, optionally prefixed with hyphen (`-`) indicating you want
+ * the experiment to be disabled.
+ *
+ * An example would look like:
+ *  - `MyExperiment,-OtherExperiment` - indicates that you would like `MyExperiment`
+ * to be enabled and `OtherExperiment` to be disabled.
+ *
+ * Due to restrictions, server flags can only be enabled following the
+ * internal policy; otherwise they are ignored.
  */
 
 /**
@@ -7243,7 +7358,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.218');
+    context.setClientVersion('SwG 0.1.22.233');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7270,21 +7385,8 @@ class AnalyticsService {
       // context and that it may not contain experiments activated late during
       // the publishers code lifecycle.
       this.addLabels(getOnExperiments(this.doc_.getWin()));
-      this.serviceReady_ = this.deps_
-        .storage()
-        .get(Constants$1.USER_TOKEN)
-        .then((swgUserToken) => {
-          const pubId = this.deps_.pageConfig().getPublicationId();
-          const urlParams = swgUserToken
-            ? {sut: swgUserToken, publicationId: pubId}
-            : {publicationId: pubId};
-          return this.activityPorts_.openIframe(
-            this.iframe_,
-            feUrl('/serviceiframe', urlParams),
-            null,
-            true
-          );
-        })
+      this.serviceReady_ = this.activityPorts_
+        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
         .then(
           (port) => {
             // Register a listener for the logging to code indicate it is
@@ -7653,6 +7755,70 @@ const SWG_I18N_STRINGS = {
     'zh-cn': '您之前已注册。',
     'zh-hk': '您之前已訂閱。',
     'zh-tw': '你已經訂閱了。',
+  },
+  'REGWALL_REGISTER_FAILED_LANG_MAP': {
+    'en': 'Registration failed. Try registering again.',
+    'ar': 'تعذَّرت عملية التسجيل. يُرجى إعادة المحاولة.',
+    'de': 'Registrierung fehlgeschlagen. Versuche es noch einmal.',
+    'en-au': 'Registration failed. Try registering again.',
+    'en-ca': 'Registration failed. Try registering again.',
+    'en-gb': 'Registration failed. Try registering again.',
+    'en-us': 'Registration failed. Try registering again.',
+    'es': 'No se ha podido completar el registro. Prueba a registrarte de nuevo.',
+    'es-419': 'No se pudo completar el registro. Vuelve a intentarlo.',
+    'fr': "Échec de l'enregistrement. Réessayez.",
+    'fr-ca': "Échec de l'inscription. Essayez de vous inscrire à nouveau.",
+    'hi': 'रजिस्ट्रेशन नहीं हो सका. फिर से रजिस्टर करने की कोशिश करें.',
+    'id': 'Pendaftaran gagal. Coba daftar lagi.',
+    'it': 'Registrazione non riuscita. Prova a registrarti di nuovo.',
+    'jp': '登録できませんでした。もう一度お試しください。',
+    'ko': '등록에 실패했습니다. 다시 등록해 보세요.',
+    'ms': 'Pendaftaran gagal. Cuba mendaftar lagi.',
+    'nl': 'Registratie mislukt. Probeer opnieuw te registreren.',
+    'no': 'Registreringen mislyktes. Prøv å registrere deg på nytt.',
+    'pl': 'Rejestracja się nie udała. Spróbuj jeszcze raz się zarejestrować.',
+    'pt': 'Falha no registo. Tente registar-se novamente.',
+    'pt-br': 'Não foi possível fazer o registro. Tente novamente.',
+    'ru': 'Ошибка регистрации. Повторите попытку.',
+    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'th': 'ลงทะเบียนไม่สำเร็จ ลองลงทะเบียนอีกครั้ง',
+    'tr': 'Kayıt işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
+    'uk': 'Помилка реєстрації. Повторіть спробу.',
+    'zh-cn': '注册失败。请尝试重新注册。',
+    'zh-hk': '註冊失敗。請嘗試重新註冊。',
+    'zh-tw': '註冊失敗，請再試一次。',
+  },
+  'NEWSLETTER_SIGN_UP_FAILED_LANG_MAP': {
+    'en': 'Signup failed. Try signing up again.',
+    'ar': 'تعذَّرت عملية الاشتراك. يُرجى إعادة المحاولة.',
+    'de': 'Anmeldung fehlgeschlagen. Versuche es noch einmal.',
+    'en-au': 'Sign-up failed. Try signing up again.',
+    'en-ca': 'Sign-up failed. Try signing up again.',
+    'en-gb': 'Sign-up failed. Try signing up again.',
+    'en-us': 'Sign-up failed. Try signing up again.',
+    'es': 'No se ha podido completar la suscripción. Prueba a suscribirte de nuevo.',
+    'es-419': 'Se produjo un error de registro. Vuelve a intentarlo.',
+    'fr': "Échec de l'inscription. Réessayez.",
+    'fr-ca': "Échec de l'inscription. Essayez de vous inscrire à nouveau.",
+    'hi': 'साइन अप नहीं किया जा सका. फिर से साइन अप करने की कोशिश करें.',
+    'id': 'Pendaftaran gagal. Coba daftar lagi.',
+    'it': 'Iscrizione non riuscita. Prova a iscriverti di nuovo.',
+    'jp': '登録できませんでした。もう一度お試しください。',
+    'ko': '가입에 실패했습니다. 다시 가입해 보세요.',
+    'ms': 'Daftar gagal. Cuba daftar lagi.',
+    'nl': 'Aanmelding mislukt. Probeer opnieuw aan te melden.',
+    'no': 'Registreringen mislyktes. Prøv å registrere deg på nytt.',
+    'pl': 'Rejestracja się nie udała. Spróbuj jeszcze raz się zarejestrować.',
+    'pt': 'Falha na inscrição. Tente inscrever-se novamente.',
+    'pt-br': 'Não foi possível se inscrever. Tente novamente.',
+    'ru': 'Не удалось зарегистрироваться. Повторите попытку.',
+    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'th': 'ลงชื่อสมัครใช้ไม่สำเร็จ ลองลงชื่อสมัครใช้อีกครั้ง',
+    'tr': 'Kaydolma işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
+    'uk': 'Помилка реєстрації. Повторіть спробу.',
+    'zh-cn': '注册失败。请尝试重新注册。',
+    'zh-hk': '申請失敗。請嘗試重新申請。',
+    'zh-tw': '訂閱失敗，請再試一次。',
   },
   'REGWALL_ACCOUNT_CREATED_LANG_MAP': {
     'en': 'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -8869,6 +9035,7 @@ class ClientConfigManager {
     /** @private @const {ClientConfig} */
     this.defaultConfig_ = new ClientConfig({
       skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
+      usePrefixedHostPath: true,
     });
   }
 
@@ -8928,6 +9095,15 @@ class ClientConfigManager {
    */
   getTheme() {
     return this.clientOptions_.theme || ClientTheme.LIGHT;
+  }
+
+  /**
+   * Returns whether scrolling on main page should be allowed when
+   * subscription or contribution dialog is displayed.
+   * @return {boolean}
+   */
+  shouldAllowScroll() {
+    return !!this.clientOptions_.allowScroll;
   }
 
   /**
@@ -9198,19 +9374,25 @@ class ContributionsFlow {
           return this.dialogManager_.openView(
             this.activityIframeView_,
             /* hidden */ false,
-            this.getDialogConfig_(clientConfig)
+            this.getDialogConfig_(
+              clientConfig,
+              this.clientConfigManager_.shouldAllowScroll()
+            )
           );
         });
     });
   }
 
   /**
-   *
+   * Gets display configuration options for the opened dialog. Uses the
+   * responsive desktop design properties if the updated offer flows UI (for
+   * SwG Basic) is enabled. Permits override to allow scrolling.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {boolean} shouldAllowScroll
    * @return {!../components/dialog.DialogConfig}
    */
-  getDialogConfig_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
+  getDialogConfig_(clientConfig, shouldAllowScroll) {
+    return clientConfig.useUpdatedOfferFlows && !shouldAllowScroll
       ? {shouldDisableBodyScrolling: true}
       : {};
   }
@@ -10866,141 +11048,123 @@ class MeterToastApi {
           ? MeterType.UNKNOWN
           : MeterType.KNOWN;
     }
-    return this.deps_
-      .storage()
-      .get(Constants$1.USER_TOKEN, true)
-      .then((swgUserToken) => {
-        const iframeArgs =
-          this.activityPorts_.addDefaultArguments(additionalArguments);
+    const iframeArgs =
+      this.activityPorts_.addDefaultArguments(additionalArguments);
 
-        const iframeUrl =
-          IframeUrlByMeterClientType[
-            this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
-          ];
-        const iframeUrlParams = {
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'origin': parseUrl(this.win_.location.href).origin,
-        };
-        if (swgUserToken) {
-          iframeUrlParams['sut'] = swgUserToken;
-        }
+    const iframeUrl =
+      IframeUrlByMeterClientType[
+        this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
+      ];
 
-        /** @private @const {!ActivityIframeView} */
-        this.activityIframeView_ = new ActivityIframeView(
-          this.win_,
-          this.activityPorts_,
-          feUrl(iframeUrl, iframeUrlParams),
-          iframeArgs,
-          /* shouldFadeBody */ false
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl(iframeUrl, {'origin': parseUrl(this.win_.location.href).origin}),
+      iframeArgs,
+      /* shouldFadeBody */ false
+    );
+
+    /** @private @const {!function()} */
+    this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+      this.removeCloseEventListener();
+
+      this.deps_
+        .eventManager()
+        .logSwgEvent(
+          AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
+          true
         );
 
-        /** @private @const {!function()} */
-        this.sendCloseRequestFunction_ = () => {
-          const closeRequest = new ToastCloseRequest();
-          closeRequest.setClose(true);
-          this.activityIframeView_.execute(closeRequest);
-          this.removeCloseEventListener();
+      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+        this.onConsumeCallbackHandled_ = true;
+        this.onConsumeCallback_();
+      }
+    };
 
-          this.deps_
-            .eventManager()
-            .logSwgEvent(
-              AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
-              true
-            );
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+    this.activityIframeView_.on(
+      ViewSubscriptionsResponse,
+      this.startSubscriptionFlow_.bind(this)
+    );
+    if (
+      !this.deps_.callbacks().hasSubscribeRequestCallback() &&
+      !this.deps_.callbacks().hasOffersFlowRequestCallback()
+    ) {
+      const errorMessage =
+        '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
+        'before starting the metering flow, so users will not be able to ' +
+        'subscribe from the metering dialog directly. Please call ' +
+        '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
+        'before starting metering.';
+      warn(errorMessage);
+    }
 
-          if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-            this.onConsumeCallbackHandled_ = true;
-            this.onConsumeCallback_();
-          }
-        };
-
-        this.deps_
-          .callbacks()
-          .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
-        this.activityIframeView_.on(
-          ViewSubscriptionsResponse,
-          this.startSubscriptionFlow_.bind(this)
-        );
-        if (
-          !this.deps_.callbacks().hasSubscribeRequestCallback() &&
-          !this.deps_.callbacks().hasOffersFlowRequestCallback()
-        ) {
-          const errorMessage =
-            '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
-            'before starting the metering flow, so users will not be able to ' +
-            'subscribe from the metering dialog directly. Please call ' +
-            '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
-            'before starting metering.';
-          warn(errorMessage);
+    this.dialogManager_
+      .handleCancellations(this.activityIframeView_)
+      .catch((reason) => {
+        // Possibly call onConsumeCallback on all dialog cancellations to
+        // ensure unexpected dialog closures don't give access without a
+        // meter consumed.
+        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+          this.onConsumeCallbackHandled_ = true;
+          this.onConsumeCallback_();
         }
-
-        this.dialogManager_
-          .handleCancellations(this.activityIframeView_)
-          .catch((reason) => {
-            // Possibly call onConsumeCallback on all dialog cancellations to
-            // ensure unexpected dialog closures don't give access without a
-            // meter consumed.
-            if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-              this.onConsumeCallbackHandled_ = true;
-              this.onConsumeCallback_();
-            }
-            // Don't throw on cancel errors since they happen when a user closes
-            // the toast, which is expected.
-            if (!isCancelError(reason)) {
-              // eslint-disable-next-line no-console
-              console /*OK*/
-                .error(
-                  '[swg.js]: Error occurred during meter toast handling: ' +
-                    reason
-                );
-              throw reason;
-            }
-          });
-
-        return this.dialogManager_.openDialog().then((dialog) => {
-          this.setDialogBoxShadow_();
-          this.setLoadingViewWidth_();
-          return dialog.openView(this.activityIframeView_).then(() => {
-            // Allow closing of the iframe with any scroll or click event.
-            this.win_.addEventListener('click', this.sendCloseRequestFunction_);
-            this.win_.addEventListener(
-              'touchstart',
-              this.sendCloseRequestFunction_
+        // Don't throw on cancel errors since they happen when a user closes
+        // the toast, which is expected.
+        if (!isCancelError(reason)) {
+          // eslint-disable-next-line no-console
+          console /*OK*/
+            .error(
+              '[swg.js]: Error occurred during meter toast handling: ' + reason
             );
-            this.win_.addEventListener(
-              'mousedown',
-              this.sendCloseRequestFunction_
-            );
-            // Making body's overflow property 'hidden' to prevent scrolling
-            // while swiping on the iframe only on mobile.
-            if (this.isMobile_()) {
-              const $body = this.win_.document.body;
-              setStyle($body, 'overflow', 'hidden');
-            } else {
-              let start, scrollTimeout;
-              this.scrollEventListener_ = () => {
-                start = start || this.win_./*REVIEW*/ pageYOffset;
-                this.win_.clearTimeout(scrollTimeout);
-                scrollTimeout = this.win_.setTimeout(() => {
-                  // If the scroll is longer than 100, close the toast.
-                  if (
-                    Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100
-                  ) {
-                    this.sendCloseRequestFunction_();
-                  }
-                }, 100);
-              };
-              this.win_.addEventListener('scroll', this.scrollEventListener_);
-            }
-            this.deps_
-              .eventManager()
-              .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
-            this.deps_
-              .eventManager()
-              .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
-          });
-        });
+          throw reason;
+        }
       });
+
+    return this.dialogManager_.openDialog().then((dialog) => {
+      this.setDialogBoxShadow_();
+      this.setLoadingViewWidth_();
+      return dialog.openView(this.activityIframeView_).then(() => {
+        // Allow closing of the iframe with any scroll or click event.
+        this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+        this.win_.addEventListener(
+          'touchstart',
+          this.sendCloseRequestFunction_
+        );
+        this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
+        // Making body's overflow property 'hidden' to prevent scrolling
+        // while swiping on the iframe only on mobile.
+        if (this.isMobile_()) {
+          const $body = this.win_.document.body;
+          setStyle($body, 'overflow', 'hidden');
+        } else {
+          let start, scrollTimeout;
+          this.scrollEventListener_ = () => {
+            start = start || this.win_./*REVIEW*/ pageYOffset;
+            this.win_.clearTimeout(scrollTimeout);
+            scrollTimeout = this.win_.setTimeout(() => {
+              // If the scroll is longer than 100, close the toast.
+              if (Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100) {
+                this.sendCloseRequestFunction_();
+              }
+            }, 100);
+          };
+          this.win_.addEventListener('scroll', this.scrollEventListener_);
+        }
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+      });
+    });
   }
 
   /**
@@ -11604,8 +11768,17 @@ class EntitlementsManager {
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!./deps.DepsDef} deps
+   * @param {!boolean} useArticleEndpoint
+   * @param {!boolean} enableDefaultMeteringHandler
    */
-  constructor(win, pageConfig, fetcher, deps, useArticleEndpoint) {
+  constructor(
+    win,
+    pageConfig,
+    fetcher,
+    deps,
+    useArticleEndpoint,
+    enableDefaultMeteringHandler
+  ) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -11668,6 +11841,9 @@ class EntitlementsManager {
 
     /** @private @const {boolean} */
     this.useArticleEndpoint_ = useArticleEndpoint;
+
+    /** @private @const {boolean} */
+    this.enableDefaultMeteringHandler_ = enableDefaultMeteringHandler;
 
     /** @private {?Article} */
     this.article_ = null;
@@ -12206,6 +12382,14 @@ class EntitlementsManager {
       .callbacks()
       .triggerEntitlementsResponse(Promise.resolve(entitlements));
 
+    // Implementation of the default ability to always consume metered entitlements
+    // if they are provided in an entitlements response.
+    if (this.enableDefaultMeteringHandler_) {
+      if (entitlements.enablesThisWithGoogleMetering()) {
+        entitlements.consume();
+      }
+    }
+
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
       this.deps_
@@ -12354,6 +12538,18 @@ class EntitlementsManager {
         // Add swgUserToken param.
         if (swgUserToken) {
           url = addQueryParam(url, 'sut', swgUserToken);
+        }
+        // Add publisherProvidedId param for swg-basic.
+        if (this.config_.publisherProvidedId) {
+          url = addQueryParam(url, 'ppid', this.config_.publisherProvidedId);
+        }
+        // Add publisherProvidedId param for swg-classic.
+        else if (
+          params?.publisherProvidedId &&
+          typeof params.publisherProvidedId === 'string' &&
+          params.publisherProvidedId.length > 0
+        ) {
+          url = addQueryParam(url, 'ppid', params.publisherProvidedId);
         }
 
         /** @type {!GetEntitlementsParamsInternalDef|undefined} */
@@ -13024,8 +13220,11 @@ class GoogleAnalyticsEventListener {
    * @param {!../api/client-event-manager-api.ClientEvent} event
    */
   handleClientEvent_(event) {
-    // Bail immediately if ga function doesn't exist in Window.
-    if (typeof this.win_.ga != 'function') {
+    // Bail immediately if neither ga function (analytics.js) nor gtag function (gtag.js) exists in Window.
+    if (
+      typeof this.win_.ga !== 'function' &&
+      typeof this.win_.gtag !== 'function'
+    ) {
       return;
     }
     let subscriptionFlow = '';
@@ -13039,8 +13238,21 @@ class GoogleAnalyticsEventListener {
       event.eventType,
       subscriptionFlow
     );
-    if (gaEvent) {
+    if (!gaEvent) {
+      return;
+    }
+
+    // TODO(b/234825847): Remove it once universal analytics is deprecated in 2023.
+    if (typeof this.win_.ga === 'function') {
       this.win_.ga('send', 'event', gaEvent);
+    }
+
+    if (typeof this.win_.gtag === 'function') {
+      this.win_.gtag('event', gaEvent.eventAction, {
+        'event_category': gaEvent.eventCategory,
+        'event_label': gaEvent.eventLabel,
+        'non_interaction': gaEvent.nonInteraction,
+      });
     }
   }
 }
@@ -13378,6 +13590,10 @@ class LinkCompleteFlow {
     this.deps_
       .eventManager()
       .logSwgEvent(AnalyticsEvent.ACTION_GOOGLE_UPDATED_CLOSE, true);
+    const userToken = response['swgUserToken'];
+    if (userToken) {
+      this.deps_.storage().set(Constants$1.USER_TOKEN, userToken, true);
+    }
     this.callbacks_.triggerLinkComplete();
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
@@ -17779,7 +17995,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}body.swg-disable-scroll{height:100%!important}body.swg-disable-scroll,body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}html>body.swg-disable-scroll{height:100vh!important;overflow:hidden!important}html>body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -18003,6 +18219,7 @@ class ConfiguredRuntime {
    *     fetcher: (!FetcherInterface|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
+   *     enableDefaultMeteringHandler: (boolean|undefined),
    *     useArticleEndpoint: (boolean|undefined)
    *   }=} integr
    * @param {!../api/subscriptions.Config=} config
@@ -18063,6 +18280,9 @@ class ConfiguredRuntime {
     /** @private {?ContributionsFlow} */
     this.lastContributionsFlow_ = null;
 
+    /** @private {string|undefined} */
+    this.publisherProvidedId_ = undefined;
+
     // Start listening to Google Analytics events, if applicable.
     if (integr.enableGoogleAnalytics) {
       /** @private @const {!GoogleAnalyticsEventListener} */
@@ -18092,7 +18312,8 @@ class ConfiguredRuntime {
       this.pageConfig_,
       this.fetcher_,
       this, // See note about 'this' above
-      integr.useArticleEndpoint || false
+      integr.useArticleEndpoint || false,
+      integr.enableDefaultMeteringHandler || false
     );
 
     /** @private @const {!ClientConfigManager} */
@@ -18263,6 +18484,14 @@ class ConfiguredRuntime {
             error = 'Unknown skipAccountCreationScreen value: ' + value;
           }
           break;
+        case 'publisherProvidedId':
+          if (
+            value != undefined &&
+            !(typeof value === 'string' && value != '')
+          ) {
+            error = 'publisherProvidedId must be a string, value: ' + value;
+          }
+          break;
         default:
           error = 'Unknown config property: ' + key;
       }
@@ -18306,6 +18535,9 @@ class ConfiguredRuntime {
 
   /** @override */
   getEntitlements(params) {
+    if (params?.publisherProvidedId) {
+      params.publisherProvidedId = this.publisherProvidedId_;
+    }
     return this.entitlementsManager_
       .getEntitlements(params)
       .then((entitlements) => {
@@ -18631,6 +18863,11 @@ class ConfiguredRuntime {
   /** @override */
   showBestAudienceAction() {
     warn('Not implemented yet');
+  }
+
+  /** @override */
+  setPublisherProvidedId(publisherProvidedId) {
+    this.publisherProvidedId_ = publisherProvidedId;
   }
 }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.218 */
+/** Version: 0.1.22.233 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -620,9 +620,15 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
+  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
+  ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
+  ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
+  ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
+  EVENT_REGWALL_ALREADY_OPT_IN: 2003,
+  EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -648,6 +654,8 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
   EVENT_REGWALL_OPTED_IN: 3023,
   EVENT_NEWSLETTER_OPTED_IN: 3024,
+  EVENT_SHOWCASE_METERING_INIT: 3025,
+  EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -1468,6 +1476,9 @@ const POST_MESSAGE_COMMAND_ERROR = 'error';
 /** Button click command for post messages. */
 const POST_MESSAGE_COMMAND_BUTTON_CLICK = 'button-click';
 
+/** 3P button click command for post messages. */
+const POST_MESSAGE_COMMAND_3P_BUTTON_CLICK = '3p-button-click';
+
 /** ID for the Google Sign-In iframe element. */
 const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
 
@@ -1495,6 +1506,9 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
+
+/** Delay used to log 3P button click before redirect */
+const REDIRECT_DELAY = 10;
 
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
@@ -2228,6 +2242,17 @@ class GaaMeteringRegwall {
           isFromUserAction: true,
         });
       }
+      if (
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_3P_BUTTON_CLICK
+      ) {
+        // Log button click event.
+        logEvent({
+          analyticsEvent:
+            AnalyticsEvent.ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK,
+          isFromUserAction: true,
+        });
+      }
     });
   }
 
@@ -2280,7 +2305,7 @@ class GaaMeteringRegwall {
     // Track button clicks.
     buttonEl.addEventListener('click', () => {
       logEvent({
-        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SWIG_CLICK,
         isFromUserAction: true,
       });
     });
@@ -2327,11 +2352,14 @@ class GaaMeteringRegwall {
     buttonEl.addEventListener('click', () => {
       // Track button clicks.
       logEvent({
-        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK,
         isFromUserAction: true,
       });
       // Redirect user using the parent window.
-      self.open(authorizationUrl, '_parent');
+      // TODO(b/242998655): Fix the downstream calls for logEvent to be chained to remove the need of delaying redirect.
+      self.setTimeout(() => {
+        self.open(authorizationUrl, '_parent');
+      }, REDIRECT_DELAY);
     });
 
     return buttonEl;
@@ -2589,7 +2617,17 @@ class GaaGoogle3pSignInButton {
     });
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
+      sendMessageToParentFnPromise.then((sendMessageToParent) => {
+        sendMessageToParent({
+          stamp: POST_MESSAGE_STAMP,
+          command: POST_MESSAGE_COMMAND_3P_BUTTON_CLICK,
+        });
+      });
       if (redirectMode) {
+        // TODO(b/242998655): Fix the downstream calls for logEvent to be chained to remove the need of delaying redirect.
+        self.setTimeout(() => {
+          self.open(authorizationUrl, '_parent');
+        }, REDIRECT_DELAY);
         self.open(authorizationUrl, '_parent');
       } else {
         self.open(authorizationUrl);

@@ -183,4 +183,14 @@ export const EXPERIMENTS = [
     name: 'Load inactive pages outside the viewport to prevent them from counting towards LCP when invisible',
     spec: 'https://github.com/ampproject/amphtml/pull/35323',
   },
+  {
+    id: 'story-video-cache-apply-audio',
+    name: 'Apply the hasAudio flag from cached videos on stories',
+    spec: 'https://github.com/ampproject/amphtml/pull/38285',
+  },
+  {
+    id: 'amp-story-subscriptions',
+    name: 'Enable paywall experiences in web stories by turning on amp-story-subscriptions extension',
+    spec: 'https://github.com/ampproject/amphtml/pull/38179',
+  },
 ];

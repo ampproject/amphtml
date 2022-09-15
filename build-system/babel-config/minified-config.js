@@ -9,9 +9,10 @@ const {getReplacePlugin} = require('./helpers');
  * Gets the config for minified babel transforms run, used by 3p vendors.
  *
  * @param {'preact' | 'react'} buildFor
+ * @param {!Object=} opt_replacePluginOverrides
  * @return {!Object}
  */
-function getMinifiedConfig(buildFor = 'preact') {
+function getMinifiedConfig(buildFor = 'preact', opt_replacePluginOverrides) {
   const isEsmBuild = argv.esm || argv.sxg;
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
@@ -23,7 +24,7 @@ function getMinifiedConfig(buildFor = 'preact') {
       useSpread: true,
     },
   ];
-  const replacePlugin = getReplacePlugin();
+  const replacePlugin = getReplacePlugin(opt_replacePluginOverrides);
 
   const plugins = [
     'optimize-objstr',
