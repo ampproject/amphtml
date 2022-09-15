@@ -17,6 +17,7 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import {hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
@@ -75,14 +76,19 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_bid'] = rtc.hb_bidder || '';
           urlParams['hb_cpm'] = rtc.hb_pb;
           urlParams['hb_ccy'] = 'USD';
-          urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
-          urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
-          urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
           urlParams['hb_creative_url'] = rtc.hb_creative_url || '';
+          if (hasOwn(rtc, 'hb_cache_url')) {
+            urlParams['hb_cache_url'] = rtc.hb_cache_url;
+          } else {
+            urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
+            urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
+            urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
+          }
           urlParams['hb_width'] =
             this.element.getAttribute('width') || rtc.width;
           urlParams['hb_height'] =
             this.element.getAttribute('height') || rtc.height;
+          urlParams['hb_cache_content_type'] = rtc.hb_cache_content_type;
         }
 
         const schain = this.element.getAttribute('data-schain');
@@ -222,7 +228,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
   /**
    *
-   * Modify the response from vendors to have one standart response
+   * Modify the response from vendors to have one standard response
    * @param {Object} vendorsResponses
    * @return {*}
    * @memberof AmpAdNetworkSmartadserverImpl
@@ -237,22 +243,23 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           const formatSize = this.parseFormat(
             item.response.targeting.crt_amp_rtc_format
           );
-          item.response.targeting['crt_display_url'] = tryDecodeUriComponent(
+          const responseURL = new URL(
             tryDecodeUriComponent(
-              JSON.parse(`"${item.response.targeting.crt_display_url}"`)
+              tryDecodeUriComponent(
+                JSON.parse(`"${item.response.targeting.crt_display_url}"`)
+              )
             )
           );
-          const responseURL = new URL(item.response.targeting.crt_display_url);
           item.response.targeting['hb_bidder'] = item.callout;
           item.response.targeting['hb_pb'] =
             item.response.targeting.crt_amp_rtc_pb;
           item.response.targeting['width'] = formatSize.width;
           item.response.targeting['height'] = formatSize.height;
-          item.response.targeting['hb_cache_host'] = responseURL.host;
-          item.response.targeting['hb_cache_path'] = responseURL.pathname;
-          item.response.targeting['hb_cache_id'] =
-            '&' + responseURL.search.substring(1);
+          item.response.targeting['hb_cache_url'] =
+            item.response.targeting.crt_display_url;
           item.response.targeting['hb_creative_url'] = responseURL;
+          item.response.targeting['hb_cache_content_type'] =
+            'application/javascript';
           break;
         default:
           return item;
