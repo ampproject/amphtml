@@ -19,7 +19,6 @@ import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
-import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {Services} from '#service';
 
@@ -244,13 +243,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           const formatSize = this.parseFormat(
             item.response.targeting.crt_amp_rtc_format
           );
-          const responseURL = new URL(
-            tryDecodeUriComponent(
-              tryDecodeUriComponent(
-                JSON.parse(`"${item.response.targeting.crt_display_url}"`)
-              )
-            )
-          );
           item.response.targeting['hb_bidder'] = item.callout;
           item.response.targeting['hb_pb'] =
             item.response.targeting.crt_amp_rtc_pb;
@@ -258,7 +250,8 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           item.response.targeting['height'] = formatSize.height;
           item.response.targeting['hb_cache_url'] =
             item.response.targeting.crt_display_url;
-          item.response.targeting['hb_creative_url'] = responseURL;
+          item.response.targeting['hb_creative_url'] =
+            item.response.targeting.crt_display_url;
           item.response.targeting['hb_cache_content_type'] =
             'application/javascript';
           break;
