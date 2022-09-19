@@ -23,6 +23,7 @@ import {createIframeWithMessageStub} from '#testing/iframe';
 
 import {XORIGIN_MODE} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkSmartadserverImpl} from '../amp-ad-network-smartadserver-impl';
+import { expect } from 'chai';
 
 const realWinConfig = {
   amp: {
@@ -158,7 +159,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
   });
 
   describe('getAdUrl', () => {
-    it('should return proper url with vendor data', async () => {
+    it('should return proper url with vendor(default) data', async () => {
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': 300,
         'height': 250,
@@ -194,6 +195,58 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .then((url) => {
           expect(url).to.match(
             /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+          );
+        });
+    });
+
+    it('should return proper url with Criteo vendor data', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': 728,
+        'height': 90,
+        'data-site': 111,
+        'data-page': 121,
+        'data-format': 222,
+        'type': 'smartadserver',
+        'rtc-config': JSON.stringify(rtcConfig),
+      });
+      doc.body.appendChild(element);
+
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+
+      const rtcResponseArray = [
+        {
+          response: {
+            targeting: {
+              'hb_bidder': 'appnexus',
+              'hb_cache_host': 'prebid.ams1.adnxs-simple.com',
+              'hb_cache_id': '0cb22b3e-aa2d-4936-9039-0ec93ff67de5',
+              'hb_cache_path': '/pbc/v1/cache',
+              'hb_pb': '1.7',
+              'hb_size': '300x250',
+            },
+          },
+          rtcTime: 210,
+        },
+        {
+          response: {
+            targeting: {
+              'crt_display_url':
+                'http://test.test',
+              'crt_amp_rtc_pb': '2.6',
+              'crt_amp_rtc_format': '728x90',
+            },
+          },
+          rtcTime: 97,
+          callout: 'criteo',
+        },
+      ];
+
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, Promise.resolve(rtcResponseArray))
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=criteo&hb_cpm=2.6&hb_ccy=USD&hb_creative_url=http%3A%2F%2Ftest.test%2F&hb_cache_url=http%3A%2F%2Ftest.test&hb_width=728&hb_height=90&hb_cache_content_type=application%2Fjavascript&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -611,15 +664,19 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
           'callout': 'criteo',
         },
       ];
-      const res = impl.modifyVendorResponse(criteoExampleResponse);
+      let res = impl.modifyVendorResponse(criteoExampleResponse);
       expect(res[0].response.targeting.hb_pb).to.deep.equal(
         criteoExampleResponse[0].response.targeting.crt_amp_rtc_pb
       );
       expect(res[0].response.targeting.width).to.deep.equal('728');
       expect(res[0].response.targeting.height).to.deep.equal('90');
-      expect(res[0].response.targeting.hb_cache_path).to.deep.equal(
+      expect(res[0].response.targeting.hb_cache_content_type).to.deep.equal('application/javascript');
+      expect(res[0].response.targeting.hb_cache_url).to.deep.equal(
         criteoExampleResponse[0].response.targeting.crt_display_url
       );
+      criteoExampleResponse[0].response.targeting.crt_display_url=undefined;
+      res = impl.modifyVendorResponse(criteoExampleResponse);
+      expect(res[0]).to.deep.equal(criteoExampleResponse[0])
     });
 
     it('parseFormatSize from string', async () => {
