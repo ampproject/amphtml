@@ -246,7 +246,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=criteo&hb_cpm=2.6&hb_ccy=USD&hb_creative_url=http%3A%2F%2Ftest.test%2F&hb_cache_url=http%3A%2F%2Ftest.test&hb_width=728&hb_height=90&hb_cache_content_type=application%2Fjavascript&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=criteo&hb_cpm=2.6&hb_ccy=USD&hb_creative_url=http%3A%2F%2Ftest.test&hb_cache_url=http%3A%2F%2Ftest.test&hb_width=728&hb_height=90&hb_cache_content_type=application%2Fjavascript&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
