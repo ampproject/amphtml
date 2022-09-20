@@ -75,7 +75,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_bid'] = rtc.hb_bidder || '';
           urlParams['hb_cpm'] = rtc.hb_pb;
           urlParams['hb_ccy'] = 'USD';
-          urlParams['hb_creative_url'] = rtc.hb_creative_url || '';
           if (hasOwn(rtc, 'hb_cache_url')) {
             urlParams['hb_cache_url'] = rtc.hb_cache_url;
           } else {
@@ -249,8 +248,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           item.response.targeting['width'] = formatSize.width;
           item.response.targeting['height'] = formatSize.height;
           item.response.targeting['hb_cache_url'] =
-            item.response.targeting.crt_display_url;
-          item.response.targeting['hb_creative_url'] =
             item.response.targeting.crt_display_url;
           item.response.targeting['hb_cache_content_type'] =
             'application/javascript';
