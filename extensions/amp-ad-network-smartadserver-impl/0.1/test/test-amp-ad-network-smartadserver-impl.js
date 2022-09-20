@@ -15,6 +15,8 @@
  */
 
 import '../../../amp-ad/0.1/amp-ad';
+import {expect} from 'chai';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
@@ -23,7 +25,6 @@ import {createIframeWithMessageStub} from '#testing/iframe';
 
 import {XORIGIN_MODE} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkSmartadserverImpl} from '../amp-ad-network-smartadserver-impl';
-import { expect } from 'chai';
 
 const realWinConfig = {
   amp: {
@@ -231,8 +232,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         {
           response: {
             targeting: {
-              'crt_display_url':
-                'http://test.test',
+              'crt_display_url': 'http://test.test',
               'crt_amp_rtc_pb': '2.6',
               'crt_amp_rtc_format': '728x90',
             },
@@ -670,13 +670,16 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       );
       expect(res[0].response.targeting.width).to.deep.equal('728');
       expect(res[0].response.targeting.height).to.deep.equal('90');
-      expect(res[0].response.targeting.hb_cache_content_type).to.deep.equal('application/javascript');
+      expect(res[0].response.targeting.hb_cache_content_type).to.deep.equal(
+        'application/javascript'
+      );
       expect(res[0].response.targeting.hb_cache_url).to.deep.equal(
         criteoExampleResponse[0].response.targeting.crt_display_url
       );
-      criteoExampleResponse[0].response.targeting.crt_display_url=undefined;
+      criteoExampleResponse[0].response.targeting['crt_display_url'] =
+        undefined;
       res = impl.modifyVendorResponse(criteoExampleResponse);
-      expect(res[0]).to.deep.equal(criteoExampleResponse[0])
+      expect(res[0]).to.deep.equal(criteoExampleResponse[0]);
     });
 
     it('parseFormatSize from string', async () => {
