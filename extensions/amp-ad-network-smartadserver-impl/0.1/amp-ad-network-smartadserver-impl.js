@@ -82,10 +82,8 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
             urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
           }
-          urlParams['hb_width'] =
-            this.element.getAttribute('width') || rtc.width;
-          urlParams['hb_height'] =
-            this.element.getAttribute('height') || rtc.height;
+          urlParams['hb_width'] = this.element.getAttribute('width');
+          urlParams['hb_height'] = this.element.getAttribute('height');
           urlParams['hb_cache_content_type'] = rtc.hb_cache_content_type;
         }
 
@@ -239,14 +237,9 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           if (item.response.targeting.crt_display_url === undefined) {
             return;
           }
-          const formatSize = this.parseFormat(
-            item.response.targeting.crt_amp_rtc_format
-          );
           item.response.targeting['hb_bidder'] = item.callout;
           item.response.targeting['hb_pb'] =
             item.response.targeting.crt_amp_rtc_pb;
-          item.response.targeting['width'] = formatSize.width;
-          item.response.targeting['height'] = formatSize.height;
           item.response.targeting['hb_cache_url'] =
             item.response.targeting.crt_display_url;
           item.response.targeting['hb_cache_content_type'] =
@@ -257,24 +250,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
       }
     });
     return vendorsResponses;
-  }
-
-  /**
-   *
-   * Get width/height value from string value
-   * @param {string} formatString
-   * @return {*}
-   * @memberof AmpAdNetworkSmartadserverImpl
-   */
-  parseFormat(formatString) {
-    const formatSize = {width: '', height: ''};
-    if (!formatString) {
-      return formatSize;
-    }
-    const formatStringArray = formatString.split('x');
-    formatSize.width = formatStringArray[0];
-    formatSize.height = formatStringArray[1];
-    return formatSize;
   }
 }
 
