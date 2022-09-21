@@ -450,7 +450,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         });
     });
 
-    it('should return proper url with isasync value  when it is setted to true', async () => {
+    it('should return proper url when isasync is true', async () => {
       element = createElementWithAttributes(doc, 'amp-ad', {
         'data-site': '1',
         'data-format': '22',
@@ -668,8 +668,6 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       expect(res[0].response.targeting.hb_pb).to.deep.equal(
         criteoExampleResponse[0].response.targeting.crt_amp_rtc_pb
       );
-      expect(res[0].response.targeting.width).to.deep.equal('728');
-      expect(res[0].response.targeting.height).to.deep.equal('90');
       expect(res[0].response.targeting.hb_cache_content_type).to.deep.equal(
         'application/javascript'
       );
@@ -680,19 +678,6 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         undefined;
       res = impl.modifyVendorResponse(criteoExampleResponse);
       expect(res[0]).to.deep.equal(criteoExampleResponse[0]);
-    });
-
-    it('parseFormatSize from string', async () => {
-      const res1 = impl.parseFormat('100x20');
-      const res2 = impl.parseFormat('100');
-      const res3 = impl.parseFormat('100x');
-      const res4 = impl.parseFormat('x20');
-      const res5 = impl.parseFormat('');
-      expect(res1).to.deep.equal({width: '100', height: '20'});
-      expect(res2).to.deep.equal({width: '100', height: undefined});
-      expect(res3).to.deep.equal({width: '100', height: ''});
-      expect(res4).to.deep.equal({width: '', height: '20'});
-      expect(res5).to.deep.equal({width: '', height: ''});
     });
   });
 });
