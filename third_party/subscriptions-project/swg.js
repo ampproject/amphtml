@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.227 */
+/** Version: 0.1.22.233 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -130,9 +130,12 @@ const AnalyticsEvent = {
   ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
   ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
   ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
+  ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
+  EVENT_REGWALL_ALREADY_OPT_IN: 2003,
+  EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -159,6 +162,7 @@ const AnalyticsEvent = {
   EVENT_REGWALL_OPTED_IN: 3023,
   EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SHOWCASE_METERING_INIT: 3025,
+  EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -916,6 +920,9 @@ class CompleteAudienceActionResponse {
 
     /** @private {?string} */
     this.userEmail_ = data[2 + base] == null ? null : data[2 + base];
+
+    /** @private {?boolean} */
+    this.alreadyCompleted_ = data[3 + base] == null ? null : data[3 + base];
   }
 
   /**
@@ -961,6 +968,20 @@ class CompleteAudienceActionResponse {
   }
 
   /**
+   * @return {?boolean}
+   */
+  getAlreadyCompleted() {
+    return this.alreadyCompleted_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setAlreadyCompleted(value) {
+    this.alreadyCompleted_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -970,6 +991,7 @@ class CompleteAudienceActionResponse {
         this.swgUserToken_, // field 1 - swg_user_token
         this.actionCompleted_, // field 2 - action_completed
         this.userEmail_, // field 3 - user_email
+        this.alreadyCompleted_, // field 4 - already_completed
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -4977,6 +4999,13 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
+  // Allows us to make API calls with enabled experiments.
+  const query = parseQueryString(self.location.hash);
+  const experiments = query['swg.experiments'];
+  if (experiments !== undefined) {
+    url = addQueryParam(url, 'e', experiments);
+  }
+
   return `${getSwgMode().frontEnd}/swg/_/api/v1` + url;
 }
 
@@ -4997,7 +5026,7 @@ function adsUrl(url) {
 function feUrl(
   url,
   params = {},
-  usePrefixedHostPath = false,
+  usePrefixedHostPath = true,
   prefix = ''
 ) {
   // Add cache param.
@@ -5013,6 +5042,12 @@ function feUrl(
   const boqJsMode = query['swg.boqjsmode'];
   if (boqJsMode !== undefined) {
     url = addQueryParam(url, 'jsmode', boqJsMode);
+  }
+
+  // Allows us to open iframes with enabled experiments.
+  const experiments = query['swg.experiments'];
+  if (experiments !== undefined) {
+    url = addQueryParam(url, 'e', experiments);
   }
 
   for (const param in params) {
@@ -5036,7 +5071,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.227',
+    '_client': 'SwG 0.1.22.233',
   });
 }
 
@@ -5894,7 +5929,10 @@ class OffersFlow {
           return this.dialogManager_.openView(
             this.activityIframeView_,
             /* hidden */ false,
-            this.getDialogConfig_(clientConfig)
+            this.getDialogConfig_(
+              clientConfig,
+              this.clientConfigManager_.shouldAllowScroll()
+            )
           );
         });
       });
@@ -5916,15 +5954,16 @@ class OffersFlow {
   /**
    * Gets display configuration options for the opened dialog. Uses the
    * responsive desktop design properties if the updated offer flows UI (for
-   * SwG Basic) is enabled.
+   * SwG Basic) is enabled. Permits override to allow scrolling.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {boolean} shouldAllowScroll
    * @return {!../components/dialog.DialogConfig}
    */
-  getDialogConfig_(clientConfig) {
+  getDialogConfig_(clientConfig, shouldAllowScroll) {
     return clientConfig.useUpdatedOfferFlows
       ? {
           desktopConfig: {isCenterPositioned: true, supportsWideScreen: true},
-          shouldDisableBodyScrolling: true,
+          shouldDisableBodyScrolling: !shouldAllowScroll,
         }
       : {};
   }
@@ -6370,7 +6409,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.227',
+        '_client': 'SwG 0.1.22.233',
         'supportsEventManager': true,
       },
       args || {}
@@ -6807,6 +6846,11 @@ const ExperimentFlags = {
    * Experiment flag for swapping the location of the counter and the main CTA in Amplio blogs.
    */
   TWG_SWAP_COUNTER_AND_CTA: 'counter_cta_swap_enable_experiment',
+
+  /**
+   * Experiment flag for disabling the miniprompt icon on desktop screens wider than 480px.
+   */
+  DISABLE_DESKTOP_MINIPROMPT: 'disable-desktop-miniprompt',
 };
 
 /**
@@ -6849,6 +6893,22 @@ const ExperimentFlags = {
  *    control. In this case, 20% of the impressions will be split into two
  *    categories: experiment and control. Notice, a control can be requested
  *    only for the fraction under 20%.
+ *
+ * Server-side experiments in SwG.
+ *
+ * These are only observed at runtime via the `#swg.experiments=${experimentsString}`
+ * parameter in the URL's fragment.
+ *
+ * The `${experimentsString}` follows the convention of comma separated
+ * experiment ID's, optionally prefixed with hyphen (`-`) indicating you want
+ * the experiment to be disabled.
+ *
+ * An example would look like:
+ *  - `MyExperiment,-OtherExperiment` - indicates that you would like `MyExperiment`
+ * to be enabled and `OtherExperiment` to be disabled.
+ *
+ * Due to restrictions, server flags can only be enabled following the
+ * internal policy; otherwise they are ignored.
  */
 
 /**
@@ -7298,7 +7358,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.227');
+    context.setClientVersion('SwG 0.1.22.233');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7695,6 +7755,70 @@ const SWG_I18N_STRINGS = {
     'zh-cn': '您之前已注册。',
     'zh-hk': '您之前已訂閱。',
     'zh-tw': '你已經訂閱了。',
+  },
+  'REGWALL_REGISTER_FAILED_LANG_MAP': {
+    'en': 'Registration failed. Try registering again.',
+    'ar': 'تعذَّرت عملية التسجيل. يُرجى إعادة المحاولة.',
+    'de': 'Registrierung fehlgeschlagen. Versuche es noch einmal.',
+    'en-au': 'Registration failed. Try registering again.',
+    'en-ca': 'Registration failed. Try registering again.',
+    'en-gb': 'Registration failed. Try registering again.',
+    'en-us': 'Registration failed. Try registering again.',
+    'es': 'No se ha podido completar el registro. Prueba a registrarte de nuevo.',
+    'es-419': 'No se pudo completar el registro. Vuelve a intentarlo.',
+    'fr': "Échec de l'enregistrement. Réessayez.",
+    'fr-ca': "Échec de l'inscription. Essayez de vous inscrire à nouveau.",
+    'hi': 'रजिस्ट्रेशन नहीं हो सका. फिर से रजिस्टर करने की कोशिश करें.',
+    'id': 'Pendaftaran gagal. Coba daftar lagi.',
+    'it': 'Registrazione non riuscita. Prova a registrarti di nuovo.',
+    'jp': '登録できませんでした。もう一度お試しください。',
+    'ko': '등록에 실패했습니다. 다시 등록해 보세요.',
+    'ms': 'Pendaftaran gagal. Cuba mendaftar lagi.',
+    'nl': 'Registratie mislukt. Probeer opnieuw te registreren.',
+    'no': 'Registreringen mislyktes. Prøv å registrere deg på nytt.',
+    'pl': 'Rejestracja się nie udała. Spróbuj jeszcze raz się zarejestrować.',
+    'pt': 'Falha no registo. Tente registar-se novamente.',
+    'pt-br': 'Não foi possível fazer o registro. Tente novamente.',
+    'ru': 'Ошибка регистрации. Повторите попытку.',
+    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'th': 'ลงทะเบียนไม่สำเร็จ ลองลงทะเบียนอีกครั้ง',
+    'tr': 'Kayıt işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
+    'uk': 'Помилка реєстрації. Повторіть спробу.',
+    'zh-cn': '注册失败。请尝试重新注册。',
+    'zh-hk': '註冊失敗。請嘗試重新註冊。',
+    'zh-tw': '註冊失敗，請再試一次。',
+  },
+  'NEWSLETTER_SIGN_UP_FAILED_LANG_MAP': {
+    'en': 'Signup failed. Try signing up again.',
+    'ar': 'تعذَّرت عملية الاشتراك. يُرجى إعادة المحاولة.',
+    'de': 'Anmeldung fehlgeschlagen. Versuche es noch einmal.',
+    'en-au': 'Sign-up failed. Try signing up again.',
+    'en-ca': 'Sign-up failed. Try signing up again.',
+    'en-gb': 'Sign-up failed. Try signing up again.',
+    'en-us': 'Sign-up failed. Try signing up again.',
+    'es': 'No se ha podido completar la suscripción. Prueba a suscribirte de nuevo.',
+    'es-419': 'Se produjo un error de registro. Vuelve a intentarlo.',
+    'fr': "Échec de l'inscription. Réessayez.",
+    'fr-ca': "Échec de l'inscription. Essayez de vous inscrire à nouveau.",
+    'hi': 'साइन अप नहीं किया जा सका. फिर से साइन अप करने की कोशिश करें.',
+    'id': 'Pendaftaran gagal. Coba daftar lagi.',
+    'it': 'Iscrizione non riuscita. Prova a iscriverti di nuovo.',
+    'jp': '登録できませんでした。もう一度お試しください。',
+    'ko': '가입에 실패했습니다. 다시 가입해 보세요.',
+    'ms': 'Daftar gagal. Cuba daftar lagi.',
+    'nl': 'Aanmelding mislukt. Probeer opnieuw aan te melden.',
+    'no': 'Registreringen mislyktes. Prøv å registrere deg på nytt.',
+    'pl': 'Rejestracja się nie udała. Spróbuj jeszcze raz się zarejestrować.',
+    'pt': 'Falha na inscrição. Tente inscrever-se novamente.',
+    'pt-br': 'Não foi possível se inscrever. Tente novamente.',
+    'ru': 'Не удалось зарегистрироваться. Повторите попытку.',
+    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'th': 'ลงชื่อสมัครใช้ไม่สำเร็จ ลองลงชื่อสมัครใช้อีกครั้ง',
+    'tr': 'Kaydolma işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
+    'uk': 'Помилка реєстрації. Повторіть спробу.',
+    'zh-cn': '注册失败。请尝试重新注册。',
+    'zh-hk': '申請失敗。請嘗試重新申請。',
+    'zh-tw': '訂閱失敗，請再試一次。',
   },
   'REGWALL_ACCOUNT_CREATED_LANG_MAP': {
     'en': 'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -8911,6 +9035,7 @@ class ClientConfigManager {
     /** @private @const {ClientConfig} */
     this.defaultConfig_ = new ClientConfig({
       skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
+      usePrefixedHostPath: true,
     });
   }
 
@@ -8970,6 +9095,15 @@ class ClientConfigManager {
    */
   getTheme() {
     return this.clientOptions_.theme || ClientTheme.LIGHT;
+  }
+
+  /**
+   * Returns whether scrolling on main page should be allowed when
+   * subscription or contribution dialog is displayed.
+   * @return {boolean}
+   */
+  shouldAllowScroll() {
+    return !!this.clientOptions_.allowScroll;
   }
 
   /**
@@ -9240,19 +9374,25 @@ class ContributionsFlow {
           return this.dialogManager_.openView(
             this.activityIframeView_,
             /* hidden */ false,
-            this.getDialogConfig_(clientConfig)
+            this.getDialogConfig_(
+              clientConfig,
+              this.clientConfigManager_.shouldAllowScroll()
+            )
           );
         });
     });
   }
 
   /**
-   *
+   * Gets display configuration options for the opened dialog. Uses the
+   * responsive desktop design properties if the updated offer flows UI (for
+   * SwG Basic) is enabled. Permits override to allow scrolling.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {boolean} shouldAllowScroll
    * @return {!../components/dialog.DialogConfig}
    */
-  getDialogConfig_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
+  getDialogConfig_(clientConfig, shouldAllowScroll) {
+    return clientConfig.useUpdatedOfferFlows && !shouldAllowScroll
       ? {shouldDisableBodyScrolling: true}
       : {};
   }
@@ -12398,6 +12538,18 @@ class EntitlementsManager {
         // Add swgUserToken param.
         if (swgUserToken) {
           url = addQueryParam(url, 'sut', swgUserToken);
+        }
+        // Add publisherProvidedId param for swg-basic.
+        if (this.config_.publisherProvidedId) {
+          url = addQueryParam(url, 'ppid', this.config_.publisherProvidedId);
+        }
+        // Add publisherProvidedId param for swg-classic.
+        else if (
+          params?.publisherProvidedId &&
+          typeof params.publisherProvidedId === 'string' &&
+          params.publisherProvidedId.length > 0
+        ) {
+          url = addQueryParam(url, 'ppid', params.publisherProvidedId);
         }
 
         /** @type {!GetEntitlementsParamsInternalDef|undefined} */
@@ -17843,7 +17995,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}body.swg-disable-scroll{height:100%!important}body.swg-disable-scroll,body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}html>body.swg-disable-scroll{height:100vh!important;overflow:hidden!important}html>body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -18128,6 +18280,9 @@ class ConfiguredRuntime {
     /** @private {?ContributionsFlow} */
     this.lastContributionsFlow_ = null;
 
+    /** @private {string|undefined} */
+    this.publisherProvidedId_ = undefined;
+
     // Start listening to Google Analytics events, if applicable.
     if (integr.enableGoogleAnalytics) {
       /** @private @const {!GoogleAnalyticsEventListener} */
@@ -18329,6 +18484,14 @@ class ConfiguredRuntime {
             error = 'Unknown skipAccountCreationScreen value: ' + value;
           }
           break;
+        case 'publisherProvidedId':
+          if (
+            value != undefined &&
+            !(typeof value === 'string' && value != '')
+          ) {
+            error = 'publisherProvidedId must be a string, value: ' + value;
+          }
+          break;
         default:
           error = 'Unknown config property: ' + key;
       }
@@ -18372,6 +18535,9 @@ class ConfiguredRuntime {
 
   /** @override */
   getEntitlements(params) {
+    if (params?.publisherProvidedId) {
+      params.publisherProvidedId = this.publisherProvidedId_;
+    }
     return this.entitlementsManager_
       .getEntitlements(params)
       .then((entitlements) => {
@@ -18697,6 +18863,11 @@ class ConfiguredRuntime {
   /** @override */
   showBestAudienceAction() {
     warn('Not implemented yet');
+  }
+
+  /** @override */
+  setPublisherProvidedId(publisherProvidedId) {
+    this.publisherProvidedId_ = publisherProvidedId;
   }
 }
 

@@ -81,7 +81,8 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         if (schain) {
           urlParams['schain'] = schain;
         }
-
+        urlParams['isasync'] =
+          this.element.getAttribute('data-isasync') === 'false' ? 0 : 1;
         const formatId = this.element.getAttribute('data-format');
         const tagId = 'sas_' + formatId;
         return buildUrl(
