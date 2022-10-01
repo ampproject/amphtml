@@ -1,26 +1,13 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
  * @fileoverview Some unit tests of the internal carousel implementation.
  */
 
+import {setInitialDisplay, setStyle, setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {dev} from '#utils/log';
+
 import {Carousel} from '../carousel';
-import {dev} from '../../../../src/log';
-import {setInitialDisplay, setStyle, setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
 
 describes.realWin('carousel implementation', {}, (env) => {
   let win;
@@ -69,15 +56,21 @@ describes.realWin('carousel implementation', {}, (env) => {
    *  forwards: boolean,
    * }} options
    */
-  async function createCarousel({slideCount, loop, forwards = true}) {
+  async function createCarousel({
+    forwards = true,
+    initialIndex,
+    loop,
+    slideCount,
+  }) {
     const carousel = new Carousel({
       win,
       element,
       scrollContainer,
       runMutate,
+      initialIndex,
     });
-    carousel.updateSlides(setSlides(slideCount));
     carousel.updateLoop(loop);
+    carousel.updateSlides(setSlides(slideCount));
     carousel.updateForwards(forwards);
     await runMutate(() => {});
 
@@ -276,5 +269,75 @@ describes.realWin('carousel implementation', {}, (env) => {
       loop: false,
     });
     expect(warnSpy).to.not.be.called;
+  });
+
+  describe('initialIndex', () => {
+    it('should start at slide 1 with initialIndex set to 1', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 1,
+      });
+      expect(carousel.isAtStart()).to.be.false;
+    });
+
+    it('should start at slide 0 with negative initialIndex', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: -1,
+      });
+      expect(carousel.isAtStart()).to.be.true;
+    });
+
+    it('should clamp to last index with initialIndex that is greater than last slide index', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 4,
+      });
+      expect(carousel.isAtEnd()).to.be.true;
+    });
+
+    it('should start at slide 0 with invalid initialIndex', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: NaN,
+      });
+      expect(carousel.isAtStart()).to.be.true;
+    });
+
+    it('should start at slide 1 with initialIndex set to 1', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 1,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(1);
+    });
+
+    it('should normalize slide with negative initialIndex when looping', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: -1,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(2);
+    });
+
+    it('should normalize slide with initialIndex that is greater than last slide index when looping', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 4,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(1);
+    });
+
+    it('should start at slide 0 with invalid initialIndex when looping', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: NaN,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(0);
+    });
   });
 });

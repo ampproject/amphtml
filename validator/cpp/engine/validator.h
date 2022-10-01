@@ -1,18 +1,3 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
 // AMP Validator client library to validate if given html is a valid AMP
 // document.
 //
@@ -35,12 +20,18 @@
 //
 //   - See scripts/basic_validator_example.cc for a working example.
 
-#ifndef AMPVALIDATOR__VALIDATOR_H_
-#define AMPVALIDATOR__VALIDATOR_H_
+#ifndef CPP_ENGINE_VALIDATOR_H_
+#define CPP_ENGINE_VALIDATOR_H_
 
+#include "cpp/htmlparser/css/parse-css.h"
+#include "cpp/htmlparser/document.h"
 #include "validator.pb.h"
 
 namespace amp::validator {
+
+ValidationResult Validate(const htmlparser::Document& document,
+                          HtmlFormat_Code html_format = HtmlFormat::AMP,
+                          int max_errors = -1);
 
 ValidationResult Validate(std::string_view html,
                           HtmlFormat_Code html_format = HtmlFormat::AMP,
@@ -48,7 +39,8 @@ ValidationResult Validate(std::string_view html,
 
 int RulesSpecVersion();
 int ValidatorVersion();
+htmlparser::css::CssParsingConfig GenCssParsingConfig();
 
 }  // namespace amp::validator
 
-#endif  // AMPVALIDATOR__VALIDATOR_H_
+#endif  // CPP_ENGINE_VALIDATOR_H_

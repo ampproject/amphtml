@@ -1,21 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
 
 import {getCarousel, getScrollingElement, getSlide} from './helpers';
-import {useStyles} from '../base-carousel.jss';
 
 const pageWidth = 800;
 const pageHeight = 600;
@@ -25,16 +10,15 @@ const pivotIndex = Math.floor(slideCount / 2);
 const expectedScrollPosition = (pageWidth / advanceCount) * pivotIndex;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - grouping',
+  'amp-base-carousel - grouping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
-      'grouping-move-by-2.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/grouping-move-by-2.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single'],
   },
-  async (env) => {
+  (env) => {
     let controller, btnPrev, btnNext;
 
     const styles = useStyles();
@@ -72,7 +56,7 @@ describes.endtoend(
       await expect(prop(slide6, 'offsetLeft')).to.equal(expectedScrollPosition);
     });
 
-    it('should move backwards by the advance-count', async () => {
+    it.skip('should move backwards by the advance-count', async () => {
       const el = await getScrollingElement(styles, controller);
       await expect(prop(el, 'scrollLeft')).to.equal(expectedScrollPosition);
 

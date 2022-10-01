@@ -1,33 +1,18 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Tests full-bleed animations like panning and zooming.
  */
 
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStory} from '../amp-story';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
+import {presets} from '../animation-presets';
 import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
 } from '../animation-presets-utils';
-import {presets} from '../animation-presets';
-import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
   'amp-story-full-bleed-animations',
@@ -44,9 +29,6 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-
-      // Required by the bookend code.
-      win.document.title = 'Story';
 
       env.sandbox.stub(win.history, 'replaceState');
 
@@ -70,6 +52,7 @@ describes.realWin(
       });
 
       storyEl = win.document.createElement('amp-story');
+      createPages(storyEl, 1, ['page-1']);
       win.document.body.appendChild(storyEl);
 
       AmpStory.isBrowserSupported = () => true;
@@ -132,7 +115,7 @@ describes.realWin(
       'Should add corresponding CSS class when a full bleed animation target is' +
         ' attached as a child of a grid layer with fill template.',
       async () => {
-        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageEls = ampStory.element.querySelectorAll('amp-story-page');
         const pageImpl = await pageEls[0].getImpl();
 
         // Append an image animated with a full-bleed animation inside a grid-
@@ -155,7 +138,7 @@ describes.realWin(
         'animation is used BUT the target is a child of a grid layer with a ' +
         'template other than `fill`.',
       async () => {
-        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageEls = ampStory.element.querySelectorAll('amp-story-page');
         const pageImpl = await pageEls[0].getImpl();
 
         // Append an image animated with a full-bleed animation inside a grid-
@@ -177,7 +160,7 @@ describes.realWin(
       'Should not add additional CSS class to the target when a non-full-bleed' +
         'animation is used.',
       async () => {
-        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageEls = ampStory.element.querySelectorAll('amp-story-page');
         const pageImpl = await pageEls[0].getImpl();
 
         // Append an image animated with a non-full-bleed animation.
@@ -242,17 +225,17 @@ describes.realWin(
       const dimensions = setDimensions(380, 580, 360, 580);
       expect(targetFitsWithinPage(dimensions)).to.be.true;
 
-      const factorThatWillMakeTargetFitPage = 380 / 360;
+      const factorThatWillMakeTargetFitPage =
+        dimensions.pageWidth / dimensions.targetWidth;
       const factor = factorThatWillMakeTargetFitPage * 1.25;
       expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
-      const calculatedKeyframes = presets['pan-up'];
-      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(
+      const calculatedKeyframes = presets['pan-up'].keyframes(
         dimensions,
         /* options */ {}
       );
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       const expectedKeyframes = [
@@ -266,7 +249,46 @@ describes.realWin(
         },
       ];
 
-      expect(calculatedKeyframes.keyframes).to.deep.equal(expectedKeyframes);
+      expect(calculatedKeyframes).to.deep.equal(expectedKeyframes);
+    });
+
+    ['pan-up', 'pan-down', 'pan-right', 'pan-left'].forEach((panAnimation) => {
+      it(`Should scale the target for ${panAnimation}.`, () => {
+        const dimensions = setDimensions(380, 580, 360, 580);
+        expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+        const factorThatWillMakeTargetFitPage =
+          dimensions.pageWidth / dimensions.targetWidth;
+        const factor = factorThatWillMakeTargetFitPage * 1.25;
+        expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
+
+        const calculatedKeyframes = presets[panAnimation].keyframes(
+          dimensions,
+          /* options */ {}
+        );
+
+        const expectedScaleFactorStr = `scale(${factor})`;
+        calculatedKeyframes.forEach((keyframe) => {
+          expect(keyframe.transform).to.contain(expectedScaleFactorStr);
+        });
+      });
+
+      it(`Should not scale the target if scaling factor is set for ${panAnimation}.`, () => {
+        const scalingFactor = 2;
+
+        const dimensions = setDimensions(380, 580, 360, 580);
+        expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+        const calculatedKeyframes = presets[panAnimation].keyframes(
+          dimensions,
+          /* options */ {'pan-scaling-factor': scalingFactor}
+        );
+
+        const expectedScaleFactorStr = `scale(${scalingFactor})`;
+        calculatedKeyframes.forEach((keyframe) => {
+          expect(keyframe.transform).to.contain(expectedScaleFactorStr);
+        });
+      });
     });
   }
 );

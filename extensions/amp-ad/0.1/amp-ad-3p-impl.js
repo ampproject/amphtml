@@ -1,64 +1,46 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {adConfig} from '#ads/_config';
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
+} from '#ads/google/utils';
+
+import {
+  CONSENT_POLICY_STATE, // eslint-disable-line @typescript-eslint/no-unused-vars
+} from '#core/constants/consent-state';
+import {
+  LayoutPriority_Enum,
+  Layout_Enum, // eslint-disable-line @typescript-eslint/no-unused-vars
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {moveLayoutRect} from '#core/dom/layout/rect';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {computedStyle, setStyle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
-import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
-import {
-  Layout, // eslint-disable-line no-unused-vars
-  LayoutPriority,
-  isLayoutSizeDefined,
-} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAdCid} from '../../../src/ad-cid';
-import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
 } from './concurrent-load';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {getAdCid} from '../../../src/ad-cid';
+import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '../../../src/utils/intersection';
-import {isExperimentOn} from '../../../src/experiments';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -149,6 +131,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -156,7 +141,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -170,7 +155,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @override
    */
   isLayoutSupported(layout) {
@@ -208,6 +193,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     userAssert(this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
+    this.uiHandler.validateStickyAd();
+
+    // For sticky ad only: must wait for scrolling event before loading the ad
+    this.uiHandler
+      .getScrollPromiseForStickyAd()
+      .then(() => this.uiHandler.maybeInitStickyAd());
+
+    if (this.uiHandler.isStickyAd()) {
+      chunk(this.element, () => this.layoutCallback(), ChunkPriority_Enum.LOW);
+    }
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 
@@ -248,12 +243,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(
-      this.win,
-      this.getAmpDoc(),
-      preconnect,
-      this.config.remoteHTMLDisabled
-    );
+    preloadBootstrap(this.win, this.type_, this.getAmpDoc(), preconnect);
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -347,9 +337,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+      devAssert(this.iframeLayoutBox_)
+    );
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -376,9 +366,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
-
-    // For sticky ad only: must wait for scrolling event before loading the ad
-    const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
+    const pageViewId64Promise = Services.documentInfoForDoc(
+      this.element
+    ).pageViewId64;
 
     this.layoutPromise_ = Promise.all([
       getAdCid(this),
@@ -386,11 +376,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       sharedDataPromise,
       consentStringPromise,
       consentMetadataPromise,
-      scrollPromise,
+      pageViewId64Promise,
     ])
       .then((consents) => {
-        this.uiHandler.maybeInitStickyAd();
-
         // Use JsonObject to preserve field names so that ampContext can access
         // values with name
         // ampcontext.js and this file are compiled in different compilation unit
@@ -399,45 +387,39 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // perserved name to extern. We are doing both right now.
         // Please also add new introduced variable
         // name to the extern list.
-        const opt_context = dict({
+        const opt_context = {
           'clientId': consents[0] || null,
           'container': this.container_,
           'initialConsentState': consents[1],
           'consentSharedData': consents[2],
           'initialConsentValue': consents[3],
           'initialConsentMetadata': consents[4],
-        });
+          'pageViewId64': consents[5],
+        };
 
         // In this path, the request and render start events are entangled,
         // because both happen inside a cross-domain iframe.  Separating them
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
-        const asyncIntersection = isExperimentOn(
-          this.win,
-          'ads-initialIntersection'
+
+        const intersection = this.element.getIntersectionChangeEntry();
+        const iframe = getIframe(
+          getWin(this.element),
+          this.element,
+          this.type_,
+          opt_context,
+          {
+            initialIntersection: intersectionEntryToJson(intersection),
+          }
         );
-        const intersectionPromise = asyncIntersection
-          ? measureIntersection(this.element)
-          : Promise.resolve(this.element.getIntersectionChangeEntry());
-        return intersectionPromise.then((intersection) => {
-          const iframe = getIframe(
-            toWin(this.element.ownerDocument.defaultView),
-            this.element,
-            this.type_,
-            opt_context,
-            {
-              disallowCustom: this.config.remoteHTMLDisabled,
-              initialIntersection: intersectionEntryToJson(intersection),
-            }
-          );
-          iframe.title = this.element.title || 'Advertisement';
-          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-          return this.xOriginIframeHandler_.init(iframe);
-        });
+        iframe.title = this.element.title || 'Advertisement';
+        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+        return this.xOriginIframeHandler_.init(iframe);
       })
       .then(() => {
-        observeWithSharedInOb(this.element, (inViewport) =>
-          this.viewportCallback_(inViewport)
+        this.unobserveIntersections_ = observeIntersections(
+          this.element,
+          ({isIntersecting}) => this.viewportCallback_(isIntersecting)
         );
       });
     incrementLoadingAds(this.win, this.layoutPromise_);
@@ -463,7 +445,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   unlayoutCallback() {
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
 
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();

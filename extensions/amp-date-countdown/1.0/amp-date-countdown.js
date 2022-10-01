@@ -1,35 +1,22 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
-import {DateCountdown} from './date-countdown';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {parseDate} from '../../../src/utils/date';
+import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {Services} from '#service';
+
+import {dev, userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
 
-/** @const {number} */
-const MILLISECONDS_IN_SECOND = 1000;
-
-class AmpDateCountdown extends PreactBaseElement {
+class AmpDateCountdown extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -54,7 +41,8 @@ class AmpDateCountdown extends PreactBaseElement {
   /** @override */
   checkPropsPostMutations() {
     const templates =
-      this.templates_ || (this.templates_ = Services.templatesFor(this.win));
+      this.templates_ ||
+      (this.templates_ = Services.templatesForDoc(this.element));
     const template = templates.maybeFindTemplate(this.element);
     if (template === this.template_) {
       return;
@@ -67,18 +55,18 @@ class AmpDateCountdown extends PreactBaseElement {
           // A new template has been set while the old one was initializing.
           return;
         }
-        this.mutateProps(
-          dict({
-            'render': (data) => {
-              return templates
-                .renderTemplateAsString(dev().assertElement(template), data)
-                .then((html) => dict({'__html': html}));
-            },
-          })
-        );
+        this.mutateProps({
+          'render': (data) => {
+            return templates
+              .renderTemplateAsString(dev().assertElement(template), data)
+              .then((html) => ({
+                '__html': html,
+              }));
+          },
+        });
       });
     } else {
-      this.mutateProps(dict({'render': null}));
+      this.mutateProps({'render': null});
     }
   }
 
@@ -90,79 +78,6 @@ class AmpDateCountdown extends PreactBaseElement {
     }
     return true;
   }
-}
-
-/** @override */
-AmpDateCountdown['Component'] = DateCountdown;
-
-/** @override */
-AmpDateCountdown['layoutSizeDefined'] = true;
-
-/** @override */
-AmpDateCountdown['lightDomTag'] = 'div';
-
-/** @override */
-AmpDateCountdown['usesTemplate'] = true;
-
-/** @override */
-AmpDateCountdown['props'] = {
-  'datetime': {
-    attrs: [
-      'end-date',
-      'timeleft-ms',
-      'timestamp-ms',
-      'timestamp-seconds',
-      'offset-seconds',
-    ],
-    parseAttrs: parseDateAttrs,
-  },
-
-  'whenEnded': {attr: 'when-ended', type: 'string'},
-  'locale': {attr: 'locale', type: 'string'},
-  'biggestUnit': {attr: 'biggest-unit', type: 'string'},
-  'countUp': {attr: 'data-count-up', type: 'boolean'},
-};
-
-/**
- * @param {!Element} element
- * @return {?number}
- * @visibleForTesting
- */
-export function parseDateAttrs(element) {
-  const epoch = userAssert(
-    parseEpoch(element),
-    `One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds ` +
-      `is required. ${TAG}`
-  );
-
-  const offsetMs =
-    (Number(element.getAttribute('offset-seconds')) || 0) *
-    MILLISECONDS_IN_SECOND;
-  return epoch + offsetMs;
-}
-
-/**
- * @param {!Element} element
- * @return {?number}
- */
-function parseEpoch(element) {
-  const endDate = element.getAttribute('end-date');
-  if (endDate) {
-    return userAssert(parseDate(endDate), 'Invalid date: %s', endDate);
-  }
-  const timeleftMs = element.getAttribute('timeleft-ms');
-  if (timeleftMs) {
-    return Date.now() + Number(timeleftMs);
-  }
-  const timestampMs = element.getAttribute('timestamp-ms');
-  if (timestampMs) {
-    return Number(timestampMs);
-  }
-  const timestampSeconds = element.getAttribute('timestamp-seconds');
-  if (timestampSeconds) {
-    return Number(timestampSeconds) * 1000;
-  }
-  return null;
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

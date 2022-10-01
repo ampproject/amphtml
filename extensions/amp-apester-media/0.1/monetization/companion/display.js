@@ -1,24 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {getValueForExpr} from '#core/types/object';
 
-import {Services} from '../../../../../src/services';
-import {createElementWithAttributes} from '../../../../../src/dom';
-import {getValueForExpr} from '../../../../../src/json';
+import {Services} from '#service';
 const ALLOWED_AD_PROVIDER = 'gdt';
-import {dict} from '../../../../../src/utils/object';
 
 /**
  * @param {!JsonObject} media
@@ -40,6 +24,10 @@ export function handleCompanionDisplay(media, apesterElement) {
     /**@type {!JsonObject}*/ (companionOptions),
     'settings'
   );
+  const rtcConfig = getValueForExpr(
+    /**@type {!JsonObject}*/ (companionOptions),
+    'rtcConfig'
+  );
 
   if (
     enabledDisplayAd &&
@@ -47,9 +35,17 @@ export function handleCompanionDisplay(media, apesterElement) {
     settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
   ) {
     const slot = settings['slot'];
+    const refreshInterval =
+      settings['options']['autoRefreshTime'] === 60000 ? 60 : 30;
     const defaultBannerSizes = [[300, 250]];
     const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
-    constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
+    constructCompanionDisplayAd(
+      slot,
+      bannerSizes,
+      apesterElement,
+      refreshInterval,
+      rtcConfig
+    );
   }
 }
 
@@ -57,9 +53,17 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @param {string} slot
  * @param {Array} bannerSizes
  * @param {!AmpElement} apesterElement
+ * @param {number} refreshInterval
+ * @param {!JsonObject} rtcConfig
  * @return {!Element}
  */
-function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
+function constructCompanionDisplayAd(
+  slot,
+  bannerSizes,
+  apesterElement,
+  refreshInterval,
+  rtcConfig
+) {
   const maxWidth = Math.max.apply(
     null,
     bannerSizes.map((s) => s[0])
@@ -73,17 +77,21 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': `${maxWidth}`,
-      'height': '0',
+      'height': `${maxHeight}`,
       'type': 'doubleclick',
       'layout': 'fixed',
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
       'data-multi-size': multiSizeData,
-    })
+      'data-enable-refresh': `${refreshInterval}`,
+    }
   );
-  ampAd.classList.add('amp-apester-companion');
+  if (rtcConfig) {
+    ampAd.setAttribute('rtc-config', JSON.stringify(rtcConfig));
+  }
+  ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
   Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAd,

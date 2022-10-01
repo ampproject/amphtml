@@ -1,21 +1,7 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {px} from '#core/dom/style';
 
-import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
-import {StoryAnimationPresetDef} from './animation-types';
+import {userAssert} from '#utils/log';
+
 import {
   calculateTargetScalingFactor,
   rotateAndTranslate,
@@ -23,13 +9,10 @@ import {
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
-import {px} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {StoryAnimationPresetDef} from './animation-types';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';
-/** @const {string} */
-const FILL_TEMPLATE_LAYOUT = 'fill';
 /** @const {number} */
 const SCALE_HIGH_DEFAULT = 3;
 /** @const {number} */
@@ -39,6 +22,8 @@ const SCALE_LOW_DEFAULT = 1;
 const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
 /** @const {string} */
 const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
+/** @const {string} */
+const PAN_SCALING_FACTOR_ATTRIBUTE_NAME = 'pan-scaling-factor';
 /** @const {string} */
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
@@ -50,6 +35,7 @@ const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
 export const PRESET_OPTION_ATTRIBUTES = [
   SCALE_START_ATTRIBUTE_NAME,
   SCALE_END_ATTRIBUTE_NAME,
+  PAN_SCALING_FACTOR_ATTRIBUTE_NAME,
   TRANSLATE_X_ATTRIBUTE_NAME,
   TRANSLATE_Y_ATTRIBUTE_NAME,
 ];
@@ -85,15 +71,6 @@ export function setStyleForPreset(el, presetName) {
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
-    if (
-      parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      )
-    ) {
-      parent.classList.remove(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      );
-    }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
 }
@@ -311,7 +288,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -332,8 +311,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -354,11 +334,13 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) * 0.5;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(
@@ -375,11 +357,13 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) * 0.5;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(

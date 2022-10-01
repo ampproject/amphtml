@@ -1,3 +1,3 @@
-self.addEventListener('fetch', e => {
+self.addEventListener('fetch', (e) => {
   return fetch(e.request);
 });

@@ -1,26 +1,33 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {containsNotSelf} from '#core/dom';
+import {rethrowAsync} from '#core/error';
+import {pushIfNotExist, removeItem} from '#core/types/array';
 
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {pushIfNotExist, removeItem} from './array';
-import {rethrowAsync} from '../log';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 
 const SERVICE_ID = 'DisplayObserver';
 
 const DISPLAY_THRESHOLD = 0.51;
+
+const CUSTOM_CONTAINER_OFFSET = 2;
+
+/**
+ * @typedef {function(boolean, !Element)}
+ */
+let ObserverCallbackDef;
+
+/**
+ * @typedef {{
+ *   container: ?Element,
+ *   root: ?Element,
+ *   contains: function(!Element):boolean,
+ *   io: ?IntersectionObserver,
+ * }}
+ */
+let ObserverDef;
 
 /**
  * Observes whether the specified target is displayable. The initial observation
@@ -37,7 +44,7 @@ const DISPLAY_THRESHOLD = 0.51;
  *    not in the viewport, it's considered to be "displayable".
  *
  * @param {!Element} target
- * @param {function(boolean)} callback
+ * @param {!ObserverCallbackDef} callback
  */
 export function observeDisplay(target, callback) {
   getObserver(target).observe(target, callback);
@@ -67,6 +74,27 @@ export function measureDisplay(target) {
 }
 
 /**
+ * Registers the container to provide additional display intersection info
+ * for other targets. Mainly aimed for fixed and/or scrollable containers
+ * that can provide display information in addition to the document flow.
+ *
+ * @param {!Element} container
+ * @param {?Element=} opt_root The subelement inside the container to be
+ * used as an intersection root. If not specified, the container will be
+ * used as an intersection root.
+ */
+export function registerContainer(container, opt_root) {
+  getObserver(container).registerContainer(container, opt_root);
+}
+
+/**
+ * @param {!Element} container
+ */
+export function unregisterContainer(container) {
+  getObserver(container).unregisterContainer(container);
+}
+
+/**
  * @implements {Disposable}
  * @visibleForTesting
  * @package
@@ -76,37 +104,53 @@ export class DisplayObserver {
    * @param {!AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    const {win} = ampdoc;
+    /** @private @const */
+    this.ampdoc_ = ampdoc;
 
-    /** @private @const {!Array<!IntersectionObserver>} */
+    const {win} = ampdoc;
+    const body = ampdoc.getBody();
+
+    this.observed_ = this.observed_.bind(this);
+    this.containerObserved_ = this.containerObserved_.bind(this);
+
+    /** @private @const {!Array<!ObserverDef>} */
     this.observers_ = [];
-    const boundObserved = this.observed_.bind(this);
-    this.observers_.push(
-      new win.IntersectionObserver(boundObserved, {
-        root: ampdoc.getBody(),
-        threshold: DISPLAY_THRESHOLD,
-      })
-    );
+
     // Viewport observer is only needed because `postion:fixed` elements
     // are not observable by a documentElement or body's root.
-    this.observers_.push(
-      new win.IntersectionObserver(boundObserved, {
+    this.observers_.push({
+      container: null,
+      root: null,
+      contains: () => true,
+      io: new win.IntersectionObserver(this.observed_, {
         threshold: DISPLAY_THRESHOLD,
-      })
-    );
+      }),
+    });
+
+    // Body observer: very close to `display:none` observer.
+    this.observers_.push({
+      container: body,
+      root: body,
+      contains: () => true,
+      io: new win.IntersectionObserver(this.observed_, {
+        root: body,
+        threshold: DISPLAY_THRESHOLD,
+      }),
+    });
 
     /** @private {boolean} */
-    this.isDocVisible_ = ampdoc.isVisible();
+    this.isDocDisplay_ = computeDocIsDisplayed(ampdoc.getVisibilityState());
 
     /** @private {?UnlistenDef} */
     this.visibilityUnlisten_ = ampdoc.onVisibilityChanged(() => {
-      if (ampdoc.isVisible() !== this.isDocVisible_) {
-        this.isDocVisible_ = ampdoc.isVisible();
+      const display = computeDocIsDisplayed(ampdoc.getVisibilityState());
+      if (display !== this.isDocDisplay_) {
+        this.isDocDisplay_ = display;
         this.docVisibilityChanged_();
       }
     });
 
-    /** @private @const {!Map<!Element, !Array<function(boolean)>>} */
+    /** @private @const {!Map<!Element, !Array<!ObserverCallbackDef>>} */
     this.targetObserverCallbacks_ = new Map();
 
     /** @private @const {!Map<!Element, !Array<boolean>>} */
@@ -115,7 +159,12 @@ export class DisplayObserver {
 
   /** @override */
   dispose() {
-    this.observers_.forEach((observer) => observer.disconnect());
+    this.observers_.forEach((observer) => {
+      if (observer.io) {
+        observer.io.disconnect();
+      }
+    });
+    this.observers_.length = 0;
     this.visibilityUnlisten_();
     this.visibilityUnlisten_ = null;
     this.targetObserverCallbacks_.clear();
@@ -123,16 +172,90 @@ export class DisplayObserver {
   }
 
   /**
+   * @param {!Element} container
+   * @param {?Element=} opt_root
+   */
+  registerContainer(container, opt_root) {
+    const existing = findObserverByContainer(this.observers_, container);
+    if (existing != -1) {
+      return;
+    }
+
+    /** @type {!ObserverDef} */
+    const observer = {
+      container,
+      root: opt_root || container,
+      contains: (target) => containsNotSelf(container, target),
+      // Start with null as IntersectionObserver. Will be initialized when
+      // the container itself becomes displayed.
+      io: null,
+    };
+    const index = this.observers_.length;
+    this.observers_.push(observer);
+    this.observe(container, this.containerObserved_);
+
+    this.targetObserverCallbacks_.forEach((_, target) => {
+      // Reset observation to `null` and wait for the actual measurement.
+      const value = observer.contains(target) ? null : false;
+      this.setObservation_(target, index, value, /* callbacks */ null);
+    });
+  }
+
+  /**
+   * @param {!Element} container
+   */
+  unregisterContainer(container) {
+    const index = findObserverByContainer(this.observers_, container);
+    if (index < CUSTOM_CONTAINER_OFFSET) {
+      // The container has been unregistered already.
+      return;
+    }
+
+    // Remove observer.
+    const observer = this.observers_[index];
+    this.observers_.splice(index, 1);
+    if (observer.io) {
+      observer.io.disconnect();
+    }
+
+    // Unobserve the container itself.
+    this.unobserve(container, this.containerObserved_);
+
+    // Remove observations.
+    this.targetObserverCallbacks_.forEach((callbacks, target) => {
+      const observations = this.targetObservations_.get(target);
+      if (!observations || observations.length <= index) {
+        return;
+      }
+      const oldDisplay = computeDisplay(observations, this.isDocDisplay_);
+      observations.splice(index, 1);
+      const newDisplay = computeDisplay(observations, this.isDocDisplay_);
+      notifyIfChanged(callbacks, target, newDisplay, oldDisplay);
+    });
+  }
+
+  /**
    * @param {!Element} target
-   * @param {function(boolean)} callback
+   * @param {!ObserverCallbackDef} callback
    */
   observe(target, callback) {
     let callbacks = this.targetObserverCallbacks_.get(target);
     if (!callbacks) {
       callbacks = [];
       this.targetObserverCallbacks_.set(target, callbacks);
+
+      // Subscribe observers.
       for (let i = 0; i < this.observers_.length; i++) {
-        this.observers_[i].observe(target);
+        const observer = this.observers_[i];
+        if (observer.io && observer.contains(target)) {
+          // Reset observation to `null` and wait for the actual measurement.
+          this.setObservation_(target, i, null, /* callbacks */ null);
+          observer.io.observe(target);
+        } else {
+          // The `false` value will essentially ignore this observe when
+          // computing the display value.
+          this.setObservation_(target, i, false, /* callbacks */ null);
+        }
       }
     }
     if (pushIfNotExist(callbacks, callback)) {
@@ -141,10 +264,10 @@ export class DisplayObserver {
         setTimeout(() => {
           const display = computeDisplay(
             this.targetObservations_.get(target),
-            this.isDocVisible_
+            this.isDocDisplay_
           );
           if (display != null) {
-            callCallbackNoInline(callback, display);
+            callCallbackNoInline(callback, target, display);
           }
         });
       }
@@ -153,7 +276,7 @@ export class DisplayObserver {
 
   /**
    * @param {!Element} target
-   * @param {function()} callback
+   * @param {!ObserverCallbackDef} callback
    */
   unobserve(target, callback) {
     const callbacks = this.targetObserverCallbacks_.get(target);
@@ -165,7 +288,10 @@ export class DisplayObserver {
       this.targetObserverCallbacks_.delete(target);
       this.targetObservations_.delete(target);
       for (let i = 0; i < this.observers_.length; i++) {
-        this.observers_[i].unobserve(target);
+        const observer = this.observers_[i];
+        if (observer.io) {
+          observer.io.unobserve(target);
+        }
       }
     }
   }
@@ -174,39 +300,99 @@ export class DisplayObserver {
   docVisibilityChanged_() {
     this.targetObserverCallbacks_.forEach((callbacks, target) => {
       const observations = this.targetObservations_.get(target);
-      const oldDisplay = computeDisplay(observations, !this.isDocVisible_);
-      const newDisplay = computeDisplay(observations, this.isDocVisible_);
-      notifyIfChanged(callbacks, newDisplay, oldDisplay);
+      const oldDisplay = computeDisplay(observations, !this.isDocDisplay_);
+      const newDisplay = computeDisplay(observations, this.isDocDisplay_);
+      notifyIfChanged(callbacks, target, newDisplay, oldDisplay);
+    });
+  }
+
+  /**
+   * @param {boolean} isDisplayed
+   * @param {!Element} container
+   * @private
+   */
+  containerObserved_(isDisplayed, container) {
+    const index = findObserverByContainer(this.observers_, container);
+    if (index < CUSTOM_CONTAINER_OFFSET) {
+      // The container has been unregistered already.
+      return;
+    }
+
+    const observer = this.observers_[index];
+    if (isDisplayed && observer.io) {
+      // Has already been initialized.
+      return;
+    }
+
+    if (isDisplayed) {
+      const {win} = this.ampdoc_;
+      observer.io = new win.IntersectionObserver(this.observed_, {
+        root: observer.root,
+        threshold: DISPLAY_THRESHOLD,
+      });
+    } else if (observer.io) {
+      observer.io.disconnect();
+      observer.io = null;
+    }
+
+    this.targetObserverCallbacks_.forEach((callbacks, target) => {
+      if (observer.io && observer.contains(target)) {
+        // Reset observation to `null` and wait for the actual measurement.
+        this.setObservation_(target, index, null, callbacks);
+        observer.io.observe(target);
+      } else {
+        this.setObservation_(target, index, false, callbacks);
+      }
     });
   }
 
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
-   * @param {!IntersectionObserver} observer
+   * @param {!IntersectionObserver} io
    * @private
    */
-  observed_(entries, observer) {
+  observed_(entries, io) {
     const seen = new Set();
     for (let i = entries.length - 1; i >= 0; i--) {
-      const {target, isIntersecting} = entries[i];
+      const {isIntersecting, target} = entries[i];
       if (seen.has(target)) {
         continue;
       }
       seen.add(target);
       const callbacks = this.targetObserverCallbacks_.get(target);
-      if (!callbacks) {
+      const index = findObserverByIo(this.observers_, io);
+      if (!callbacks || index == -1) {
         continue;
       }
-      let observations = this.targetObservations_.get(target);
-      if (!observations) {
-        observations = emptyObservations(this.observers_.length);
-        this.targetObservations_.set(target, observations);
+      this.setObservation_(target, index, isIntersecting, callbacks);
+    }
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {number} index
+   * @param {?boolean} value
+   * @param {?Array<!ObserverCallbackDef>} callbacks
+   * @private
+   */
+  setObservation_(target, index, value, callbacks) {
+    let observations = this.targetObservations_.get(target);
+    if (!observations) {
+      const observers = this.observers_;
+      observations = new Array(observers.length);
+      for (let i = 0; i < observers.length; i++) {
+        observations[i] = observers[i].io ? null : false;
       }
-      const oldDisplay = computeDisplay(observations, this.isDocVisible_);
-      const index = this.observers_.indexOf(observer);
-      observations[index] = isIntersecting;
-      const newDisplay = computeDisplay(observations, this.isDocVisible_);
-      notifyIfChanged(callbacks, newDisplay, oldDisplay);
+      this.targetObservations_.set(target, observations);
+    }
+
+    if (callbacks) {
+      const oldDisplay = computeDisplay(observations, this.isDocDisplay_);
+      observations[index] = value;
+      const newDisplay = computeDisplay(observations, this.isDocDisplay_);
+      notifyIfChanged(callbacks, target, newDisplay, oldDisplay);
+    } else {
+      observations[index] = value;
     }
   }
 }
@@ -221,31 +407,33 @@ function getObserver(target) {
 }
 
 /**
- * @param {number} length
- * @return {!Array<number>}
- */
-function emptyObservations(length) {
-  const result = new Array(length);
-  for (let i = 0; i < length; i++) {
-    result[i] = null;
-  }
-  return result;
-}
-
-/**
  * @param {?Array<boolean>} observations
- * @param {boolean} isDocVisible
+ * @param {boolean} isDocDisplay
  * @return {?boolean}
  */
-function computeDisplay(observations, isDocVisible) {
-  if (!isDocVisible) {
+function computeDisplay(observations, isDocDisplay) {
+  if (!isDocDisplay) {
     return false;
   }
-  if (!observations) {
+  if (!observations || observations.length == 0) {
     // Unknown yet.
     return null;
   }
   return observations.reduce(displayReducer);
+}
+
+/**
+ * @param {!VisibilityState_Enum} visibilityState
+ * @return {boolean}
+ */
+function computeDocIsDisplayed(visibilityState) {
+  return (
+    visibilityState == VisibilityState_Enum.VISIBLE ||
+    // The document is still considered "displayed" or at least "displayable"
+    // when it's hidden (tab is switched). Only prerender/paused/inactive
+    // states require pause of resources.
+    visibilityState == VisibilityState_Enum.HIDDEN
+  );
 }
 
 /**
@@ -267,25 +455,55 @@ function displayReducer(acc, value) {
 }
 
 /**
+ * @param {!Array<!ObserverDef>} observers
+ * @param {!IntersectionObserver} io
+ * @return {number}
+ */
+function findObserverByIo(observers, io) {
+  for (let i = 0; i < observers.length; i++) {
+    if (observers[i].io === io) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * @param {!Array<!ObserverDef>} observers
+ * @param {!Element} container
+ * @return {number}
+ */
+function findObserverByContainer(observers, container) {
+  for (let i = 0; i < observers.length; i++) {
+    if (observers[i].container === container) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
  * @param {!Array<function(boolean)>} callbacks
+ * @param {!Element} target
  * @param {boolean} newDisplay
  * @param {boolean} oldDisplay
  */
-function notifyIfChanged(callbacks, newDisplay, oldDisplay) {
+function notifyIfChanged(callbacks, target, newDisplay, oldDisplay) {
   if (newDisplay != null && newDisplay !== oldDisplay) {
     for (let i = 0; i < callbacks.length; i++) {
-      callCallbackNoInline(callbacks[i], newDisplay);
+      callCallbackNoInline(callbacks[i], target, newDisplay);
     }
   }
 }
 
 /**
  * @param {!ObserverCallbackDef} callback
- * @param {../layout-rect.LayoutSizeDef} size
+ * @param {!Element} target
+ * @param {boolean} isDisplayed
  */
-function callCallbackNoInline(callback, size) {
+function callCallbackNoInline(callback, target, isDisplayed) {
   try {
-    callback(size);
+    callback(isDisplayed, target);
   } catch (e) {
     rethrowAsync(e);
   }

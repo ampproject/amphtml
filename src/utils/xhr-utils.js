@@ -1,23 +1,15 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssert, userAssert} from '#core/assert';
+import {fromIterator, isArray} from '#core/types/array';
+import {isObject, map} from '#core/types/object';
 
-import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
-import {dict, map} from './object';
-import {fromIterator} from './array';
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {getMode} from '../mode';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -25,10 +17,6 @@ import {
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
-import {getMode} from '../mode';
-import {isArray, isObject} from '../types';
-import {isExperimentOn} from '../experiments';
-import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -69,7 +57,8 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  * `ArrayBuffer` and `Blob` are already supported by the structured clone
  * algorithm. Other serialization-needing types such as `URLSearchParams`
  * (which is not supported in IE and Safari) and `FederatedCredentials` are
- * not used in AMP runtime.
+ * not used in AMP runtime. `init.body` can also be a string
+ * (application/x-www-form-urlencoded) but that doesn't require serialization.
  *
  * @param {string} input The URL of the XHR to convert to structured
  *     cloneable.
@@ -79,7 +68,7 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable request.
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = {...init};
+  const newInit = /** @type {!FetchInitDef} */ ({...init});
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -157,9 +146,8 @@ export function fromStructuredCloneable(response, responseType) {
       /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     }
     if (init.status) {
@@ -228,9 +216,9 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       ) {
         return;
       }
-      const messagePayload = dict({
+      const messagePayload = {
         'originalRequest': toStructuredCloneable(input, init),
-      });
+      };
       return viewer
         .sendMessageAwaitResponse('xhr', messagePayload)
         .then((response) =>
@@ -275,7 +263,7 @@ export function setupInit(opt_init, opt_accept) {
   );
 
   init.method = normalizeMethod_(init.method);
-  init.headers = init.headers || dict({});
+  init.headers = init.headers || {};
   if (opt_accept) {
     init.headers['Accept'] = opt_accept;
   }
@@ -382,10 +370,10 @@ export function assertSuccess(response) {
 
     const {status} = response;
     const err = user().createError(`HTTP error ${status}`);
-    err.retriable = isRetriable(status);
+    err['retriable'] = isRetriable(status);
     // TODO(@jridgewell, #9448): Callers who need the response should
     // skip processing.
-    err.response = response;
+    err['response'] = response;
     throw err;
   });
 }

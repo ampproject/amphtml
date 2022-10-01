@@ -1,33 +1,24 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../utils/promise';
-import {Layout} from '../layout';
-import {Services} from '../services';
-import {cancellation, isBlockedByConsent, reportError} from '../error';
-import {computedStyle, toggle} from '../style';
-import {dev, devAssert} from '../log';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
   layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
-} from '../layout-rect';
-import {toWin} from '../types';
+} from '#core/dom/layout/rect';
+import {computedStyle, toggle} from '#core/dom/style';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
+import {
+  cancellation,
+  isBlockedByConsent,
+  reportError,
+} from '../error-reporting';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -38,7 +29,7 @@ const OWNER_PROP_ = '__AMP__OWNER';
  *
  * @enum {number}
  */
-export const ResourceState = {
+export const ResourceState_Enum = {
   /**
    * The resource has not been built yet. Measures, layouts, preloads or
    * viewport signals are not allowed.
@@ -88,11 +79,13 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return /** @type {!Resource} */ (devAssert(
-      Resource.forElementOptional(element),
-      'Missing resource prop on %s',
-      element
-    ));
+    return /** @type {!Resource} */ (
+      devAssert(
+        Resource.forElementOptional(element),
+        'Missing resource prop on %s',
+        element
+      )
+    );
   }
 
   /**
@@ -137,10 +130,10 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /** @export @const {!AmpElement} */
+    /** @const {!AmpElement} */
     this.element = element;
 
-    /** @export @const {string} */
+    /** @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */
@@ -158,15 +151,15 @@ export class Resource {
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
-    /** @private {!ResourceState} */
+    /** @private {!ResourceState_Enum} */
     this.state_ = element.isBuilt()
-      ? ResourceState.NOT_LAID_OUT
-      : ResourceState.NOT_BUILT;
+      ? ResourceState_Enum.NOT_LAID_OUT
+      : ResourceState_Enum.NOT_BUILT;
 
     // Race condition: if an element is reparented while building, it'll
     // receive a newly constructed Resource. Make sure this Resource's
     // internal state is also "building".
-    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+    if (this.state_ == ResourceState_Enum.NOT_BUILT && element.isBuilding()) {
       this.build();
     }
 
@@ -222,18 +215,9 @@ export class Resource {
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
 
-    /** @const @private {boolean} */
-    this.intersect_ = resources.isIntersectionExperimentOn();
-
     // TODO(#30620): remove isInViewport_ and whenWithinViewport.
     /** @const @private {boolean} */
     this.isInViewport_ = false;
-
-    /**
-     * A client rect that was "premeasured" by an IntersectionObserver.
-     * @private {?ClientRect}
-     */
-    this.premeasuredRect_ = null;
   }
 
   /**
@@ -299,8 +283,8 @@ export class Resource {
   }
 
   /**
-   * Returns the resource's state. See {@link ResourceState} for details.
-   * @return {!ResourceState}
+   * Returns the resource's state. See {@link ResourceState_Enum} for details.
+   * @return {!ResourceState_Enum}
    */
   getState() {
     return this.state_;
@@ -341,23 +325,10 @@ export class Resource {
       return null;
     }
     this.isBuilding_ = true;
-    return this.element.build().then(
+    return this.element.buildInternal().then(
       () => {
         this.isBuilding_ = false;
-        // With IntersectionObserver, measure can happen before build
-        // so check if we're "ready for layout" (measured and built) here.
-        if (this.intersect_ && this.hasBeenMeasured()) {
-          this.state_ = ResourceState.READY_FOR_LAYOUT;
-          // The InOb premeasurement couldn't account for fixed position since
-          // implementation wasn't loaded yet. Perform a remeasure now that we know it
-          // is fixed.
-          if (this.element.isAlwaysFixed() && !this.isFixed_) {
-            this.requestMeasure();
-          }
-          this.element.onMeasure(/* sizeChanged */ true);
-        } else {
-          this.state_ = ResourceState.NOT_LAID_OUT;
-        }
+        this.state_ = ResourceState_Enum.NOT_LAID_OUT;
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
       },
@@ -444,28 +415,10 @@ export class Resource {
   }
 
   /**
-   * Stores a client rect that was "premeasured" by an IntersectionObserver.
-   * Should only be used in IntersectionObserver mode.
-   * @param {!ClientRect} clientRect
-   */
-  premeasure(clientRect) {
-    devAssert(this.intersect_);
-    this.premeasuredRect_ = clientRect;
-  }
-
-  /** Removes the premeasured rect, likely forcing a manual measure. */
-  invalidatePremeasurementAndRequestMeasure() {
-    this.premeasuredRect_ = null;
-    this.requestMeasure();
-  }
-
-  /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
-   * @param {boolean} usePremeasuredRect If true, consumes the previously
-   *    premeasured ClientRect instead of calling getBoundingClientRect().
    */
-  measure(usePremeasuredRect = false) {
+  measure() {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -489,40 +442,35 @@ export class Resource {
       // Most likely this is an element who's window has just been destroyed.
       // This is an issue with FIE embeds destruction. Such elements will be
       // considered "not displayable" until they are GC'ed.
-      this.state_ = ResourceState.NOT_LAID_OUT;
+      this.state_ = ResourceState_Enum.NOT_LAID_OUT;
       return;
     }
 
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    if (usePremeasuredRect) {
-      this.computeMeasurements_(devAssert(this.premeasuredRect_));
-    } else {
-      this.computeMeasurements_();
-    }
-    this.premeasuredRect_ = null;
+    this.computeMeasurements_();
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
     if (
-      this.state_ == ResourceState.NOT_LAID_OUT ||
+      this.state_ == ResourceState_Enum.NOT_LAID_OUT ||
       oldBox.top != newBox.top ||
       sizeChanges
     ) {
       if (this.element.isUpgraded()) {
-        if (this.state_ == ResourceState.NOT_LAID_OUT) {
+        if (this.state_ == ResourceState_Enum.NOT_LAID_OUT) {
           // If the element isn't laid out yet, then we're now ready for layout.
-          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
         } else if (
-          (this.state_ == ResourceState.LAYOUT_COMPLETE ||
-            this.state_ == ResourceState.LAYOUT_FAILED) &&
+          (this.state_ == ResourceState_Enum.LAYOUT_COMPLETE ||
+            this.state_ == ResourceState_Enum.LAYOUT_FAILED) &&
           this.element.isRelayoutNeeded()
         ) {
           // If the element was already laid out and we need to relayout, then
           // go back to ready for layout.
-          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
         }
       }
     }
@@ -547,12 +495,11 @@ export class Resource {
 
   /**
    * Computes the current layout box and position-fixed state of the element.
-   * @param {!ClientRect=} opt_premeasuredRect
    * @private
    */
-  computeMeasurements_(opt_premeasuredRect) {
+  computeMeasurements_() {
     const viewport = Services.viewportForDoc(this.element);
-    this.layoutBox_ = viewport.getLayoutRect(this.element, opt_premeasuredRect);
+    this.layoutBox_ = viewport.getLayoutRect(this.element);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -632,14 +579,6 @@ export class Resource {
   }
 
   /**
-   * @return {boolean}
-   */
-  hasBeenPremeasured() {
-    devAssert(this.intersect_);
-    return !!this.premeasuredRect_;
-  }
-
-  /**
    * Requests the element to be remeasured on the next pass.
    */
   requestMeasure() {
@@ -689,21 +628,16 @@ export class Resource {
   /**
    * Whether the resource is displayed, i.e. if it has non-zero width and
    * height.
-   * @param {boolean} usePremeasuredRect If true and a premeasured rect is
-   *     available, use it. Otherwise, use the cached layout box.
    * @return {boolean}
    */
-  isDisplayed(usePremeasuredRect = false) {
+  isDisplayed() {
     const isConnected =
       this.element.ownerDocument && this.element.ownerDocument.defaultView;
     if (!isConnected) {
       return false;
     }
-    devAssert(!usePremeasuredRect || this.intersect_);
-    const isFluid = this.element.getLayout() == Layout.FLUID;
-    const box = usePremeasuredRect
-      ? devAssert(this.premeasuredRect_)
-      : this.getLayoutBox();
+    const isFluid = this.element.getLayout() == Layout_Enum.FLUID;
+    const box = this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return isFluid || hasNonZeroSize;
   }
@@ -731,6 +665,14 @@ export class Resource {
    */
   prerenderAllowed() {
     return this.element.prerenderAllowed();
+  }
+
+  /**
+   * Whether this element can be previewed.
+   * @return {boolean}
+   */
+  previewAllowed() {
+    return this.element.previewAllowed();
   }
 
   /**
@@ -877,7 +819,7 @@ export class Resource {
    * @param {number} scheduleTime The time at which layout was scheduled.
    */
   layoutScheduled(scheduleTime) {
-    this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     this.element.layoutScheduleTime = scheduleTime;
   }
 
@@ -886,8 +828,8 @@ export class Resource {
    */
   layoutCanceled() {
     this.state_ = this.hasBeenMeasured()
-      ? ResourceState.READY_FOR_LAYOUT
-      : ResourceState.NOT_LAID_OUT;
+      ? ResourceState_Enum.READY_FOR_LAYOUT
+      : ResourceState_Enum.NOT_LAID_OUT;
   }
 
   /**
@@ -900,29 +842,28 @@ export class Resource {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    if (this.state_ == ResourceState.LAYOUT_COMPLETE) {
+    if (this.state_ == ResourceState_Enum.LAYOUT_COMPLETE) {
       return Promise.resolve();
     }
-    if (this.state_ == ResourceState.LAYOUT_FAILED) {
+    if (this.state_ == ResourceState_Enum.LAYOUT_FAILED) {
       return Promise.reject(this.lastLayoutError_);
     }
 
     devAssert(
-      this.state_ != ResourceState.NOT_BUILT,
+      this.state_ != ResourceState_Enum.NOT_BUILT,
       'Not ready to start layout: %s (%s)',
       this.debugid,
       this.state_
     );
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
-    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
-      const err = dev().createError(
+    if (this.state_ != ResourceState_Enum.LAYOUT_SCHEDULED) {
+      const err = dev().createExpectedError(
         'startLayout called but not LAYOUT_SCHEDULED',
         'currently: ',
         this.state_
       );
-      err.associatedElement = this.element;
-      reportError(err);
+      reportError(err, this.element);
       return Promise.reject(err);
     }
 
@@ -934,13 +875,13 @@ export class Resource {
         this.debugid,
         this.state_
       );
-      this.state_ = ResourceState.LAYOUT_COMPLETE;
+      this.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
     dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
-    this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     this.abortController_ = new AbortController();
     const {signal} = this.abortController_;
 
@@ -986,8 +927,8 @@ export class Resource {
     }
     this.layoutPromise_ = null;
     this.state_ = success
-      ? ResourceState.LAYOUT_COMPLETE
-      : ResourceState.LAYOUT_FAILED;
+      ? ResourceState_Enum.LAYOUT_COMPLETE
+      : ResourceState_Enum.LAYOUT_FAILED;
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
@@ -1003,8 +944,8 @@ export class Resource {
    */
   isLayoutPending() {
     return (
-      this.state_ != ResourceState.LAYOUT_COMPLETE &&
-      this.state_ != ResourceState.LAYOUT_FAILED
+      this.state_ != ResourceState_Enum.LAYOUT_COMPLETE &&
+      this.state_ != ResourceState_Enum.LAYOUT_FAILED
     );
   }
 
@@ -1016,6 +957,9 @@ export class Resource {
    * @return {!Promise}
    */
   loadedOnce() {
+    if (this.element.R1()) {
+      return this.element.whenLoaded();
+    }
     return this.loadPromise_;
   }
 
@@ -1044,9 +988,9 @@ export class Resource {
    */
   unlayout() {
     if (
-      this.state_ == ResourceState.NOT_BUILT ||
-      this.state_ == ResourceState.NOT_LAID_OUT ||
-      this.state_ == ResourceState.READY_FOR_LAYOUT
+      this.state_ == ResourceState_Enum.NOT_BUILT ||
+      this.state_ == ResourceState_Enum.NOT_LAID_OUT ||
+      this.state_ == ResourceState_Enum.READY_FOR_LAYOUT
     ) {
       return;
     }
@@ -1057,13 +1001,7 @@ export class Resource {
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
-      // With IntersectionObserver, the element won't receive another
-      // measurement if/when the document becomes active again.
-      // Therefore, its post-unlayout state must be READY_FOR_LAYOUT
-      // (built and measured) to become eligible for relayout later.
-      this.state_ = this.intersect_
-        ? ResourceState.READY_FOR_LAYOUT
-        : ResourceState.NOT_LAID_OUT;
+      this.state_ = ResourceState_Enum.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
     }
@@ -1082,32 +1020,28 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pause() {
-    this.element.pauseCallback();
-    if (this.element.unlayoutOnPause()) {
-      this.unlayout();
-    }
+    this.element.pause();
   }
 
   /**
    * Calls element's pauseCallback callback.
    */
   pauseOnRemove() {
-    this.element.pauseCallback();
+    this.element.pause();
   }
 
   /**
    * Calls element's resumeCallback callback.
    */
   resume() {
-    this.element.resumeCallback();
+    this.element.resume();
   }
 
   /**
    * Called when a previously visible element is no longer displayed.
    */
   unload() {
-    this.pause();
-    this.unlayout();
+    this.element.unmount();
   }
 
   /**

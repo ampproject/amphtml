@@ -1,25 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {clamp, sum} from '#core/math';
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {clamp, sum} from '../../../src/utils/math';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 
 const TAG = 'amp-orientation-observer';
 /**
@@ -142,7 +127,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       const {screen} = this.win;
 
       const {alpha} = event;
-      let {gamma, beta} = event;
+      let {beta, gamma} = event;
 
       // Detect the implementation of orientation angle
       const angle =
@@ -178,9 +163,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
               /** @type {number} */ (currentValue[axis])
             );
           } else {
-            this.computedValue_[axis] = /** @type {number} */ (currentValue[
-              axis
-            ]);
+            this.computedValue_[axis] = /** @type {number} */ (
+              currentValue[axis]
+            );
           }
           this.triggerEvent_(
             axis,
@@ -226,15 +211,11 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       eventRange[0] < 0
         ? eventValue.toFixed() - eventRange[0]
         : eventValue.toFixed();
-    const event = createCustomEvent(
-      this.win,
-      `${TAG}.${eventName}`,
-      dict({
-        'angle': clamp(eventValue, eventRange[0], eventRange[1]).toFixed(),
-        'percent': percentValue / (eventRange[1] - eventRange[0]),
-      })
-    );
-    this.action_.trigger(this.element, eventName, event, ActionTrust.LOW);
+    const event = createCustomEvent(this.win, `${TAG}.${eventName}`, {
+      'angle': clamp(eventValue, eventRange[0], eventRange[1]).toFixed(),
+      'percent': percentValue / (eventRange[1] - eventRange[0]),
+    });
+    this.action_.trigger(this.element, eventName, event, ActionTrust_Enum.LOW);
   }
 }
 AMP.extension(TAG, '0.1', (AMP) => {

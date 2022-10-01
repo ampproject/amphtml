@@ -1,28 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+
+import {devAssert, user, userAssert} from '#utils/log';
+
+import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
 
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
-import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
+
+import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {JwtHelper} from '../../amp-access/0.1/jwt';
 
 /**
  * This implements the methods to interact with viewer subscription platform.
@@ -85,11 +72,11 @@ export class ViewerSubscriptionPlatform {
     devAssert(this.currentProductId_, 'Current product is not set');
 
     /** @type {JsonObject} */
-    const authRequest = dict({
+    const authRequest = {
       'publicationId': this.publicationId_,
       'productId': this.currentProductId_,
       'origin': this.origin_,
-    });
+    };
 
     // Defaulting to google.com for now.
     // TODO(@elijahsoria): Remove google.com and only rely on what is returned
@@ -111,34 +98,36 @@ export class ViewerSubscriptionPlatform {
       authRequest['encryptedDocumentKey'] = encryptedDocumentKey;
     }
 
-    return /** @type {!Promise<Entitlement>} */ (this.timer_
-      .timeoutPromise(
-        ENTITLEMENTS_REQUEST_TIMEOUT,
-        this.viewer_.sendMessageAwaitResponse('auth', authRequest)
-      )
-      .then((entitlementData) => {
-        entitlementData = entitlementData || {};
+    return /** @type {!Promise<Entitlement>} */ (
+      this.timer_
+        .timeoutPromise(
+          ENTITLEMENTS_REQUEST_TIMEOUT,
+          this.viewer_.sendMessageAwaitResponse('auth', authRequest)
+        )
+        .then((entitlementData) => {
+          entitlementData = entitlementData || {};
 
-        /** Note to devs: Send error at top level of postMessage instead. */
-        const deprecatedError = entitlementData['error'];
-        const authData = entitlementData['authorization'];
-        const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
+          /** Note to devs: Send error at top level of postMessage instead. */
+          const deprecatedError = entitlementData['error'];
+          const authData = entitlementData['authorization'];
+          const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
 
-        if (deprecatedError) {
-          throw new Error(deprecatedError.message);
-        }
-
-        if (!authData) {
-          return Entitlement.empty('local');
-        }
-
-        return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
-          (reason) => {
-            this.sendAuthTokenErrorToViewer_(reason.message);
-            throw reason;
+          if (deprecatedError) {
+            throw new Error(deprecatedError.message);
           }
-        );
-      }));
+
+          if (!authData) {
+            return Entitlement.empty('local');
+          }
+
+          return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
+            (reason) => {
+              this.sendAuthTokenErrorToViewer_(reason.message);
+              throw reason;
+            }
+          );
+        })
+    );
   }
 
   /**
@@ -153,10 +142,9 @@ export class ViewerSubscriptionPlatform {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
-      const currentProductId = /** @type {string} */ (userAssert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-      ));
+      const currentProductId = /** @type {string} */ (
+        userAssert(this.pageConfig_.getProductId(), 'Product id is null')
+      );
       if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
         throw user().createError(
           `The mismatching "aud" field: ${decodedData['aud']}`
@@ -223,17 +211,14 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   sendAuthTokenErrorToViewer_(errorString) {
-    this.viewer_.sendMessage(
-      'auth-rejected',
-      dict({
-        'reason': errorString,
-      })
-    );
+    this.viewer_.sendMessage('auth-rejected', {
+      'reason': errorString,
+    });
   }
 
   /** @override */
-  getServiceId() {
-    return this.platform_.getServiceId();
+  getPlatformKey() {
+    return this.platform_.getPlatformKey();
   }
 
   /** @override */

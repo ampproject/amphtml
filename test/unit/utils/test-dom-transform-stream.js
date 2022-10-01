@@ -1,21 +1,6 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {DomTransformStream} from '#utils/dom-tranform-stream';
 
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
-import {macroTask} from '../../../testing/yield';
+import {macroTask} from '#testing/helpers';
 
 describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   async function flush() {
@@ -117,6 +102,28 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
 
       expect(body.querySelector('child-one')).to.exist;
       expect(body.querySelector('child-two')).to.exist;
+    });
+
+    it('should transfer <body> attributes to target body element', async () => {
+      const {body} = win.document;
+      detachedDoc.write(`
+        <!doctype html>
+          <html ⚡>
+          <head>
+            <script async src="https://cdn.ampproject.org/v0.js"></script>
+          </head>
+          <body marginwidth="0" marginheight="0" class="amp-cats" style="opacity: 1;">
+            <child-one></child-one>
+            <child-two></child-two>
+     `);
+      transformer.onChunk(detachedDoc);
+      transformer.transferBody(body /* targetBody */);
+      await flush();
+
+      expect(body.getAttribute('marginwidth')).to.equal('0');
+      expect(body.getAttribute('marginheight')).to.equal('0');
+      expect(body.getAttribute('style')).to.equal('opacity: 1;');
+      expect(body).to.have.class('amp-cats');
     });
 
     it('should keep transferring new chunks after call', async () => {

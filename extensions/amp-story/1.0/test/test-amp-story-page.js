@@ -1,43 +1,36 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {expect} from 'chai';
 
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
-import {Deferred} from '../../../../src/utils/promise';
-import {LocalizationService} from '../../../../src/service/localization';
-import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-  scopedQuerySelectorAll,
-} from '../../../../src/dom';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import * as VideoUtils from '#core/dom/video';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {afterRenderPromise} from '#testing/helpers';
+
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {MediaType_Enum} from '../media-pool';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
 describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let win;
   let element;
+  let html;
   let gridLayerEl;
   let page;
+  let story;
   let storeService;
   let isPerformanceTrackingOn;
 
@@ -47,11 +40,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     win = env.win;
     isPerformanceTrackingOn = false;
 
+    html = htmlFor(win.document);
+
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
       getMaxMediaElementCounts: () => ({
-        [MediaType.VIDEO]: 8,
-        [MediaType.AUDIO]: 8,
+        [MediaType_Enum.VIDEO]: 8,
+        [MediaType_Enum.AUDIO]: 8,
       }),
     };
 
@@ -59,6 +54,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
@@ -71,7 +69,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       };
     });
 
-    const story = win.document.createElement('amp-story');
+    story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
     // Makes whenUpgradedToCustomElement() resolve immediately.
     story.createdCallback = Promise.resolve();
@@ -84,14 +82,17 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     element.appendChild(gridLayerEl);
     story.appendChild(element);
     win.document.body.appendChild(story);
-
-    page = new AmpStoryPage(element);
-    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
+    initializePageWithElement(element);
   });
 
   afterEach(() => {
     element.remove();
   });
+
+  function initializePageWithElement(el) {
+    page = new AmpStoryPage(el);
+    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
+  }
 
   it('should build a page', async () => {
     page.buildCallback();
@@ -105,9 +106,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should build the animation manager if an element is animated', async () => {
-    // Adding an element that has to be animated.
-    const animatedEl = win.document.createElement('div');
-    animatedEl.setAttribute('animate-in', 'fade-in');
+    const animatedEl = html`<div animate-in="fade-in"></div>`;
+
     element.appendChild(animatedEl);
     element.getAmpDoc = () => new AmpDocSingle(win);
 
@@ -163,9 +163,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should start the animations if needed when state becomes active', async () => {
-    // Adding an element that has to be animated.
-    const animatedEl = win.document.createElement('div');
-    animatedEl.setAttribute('animate-in', 'fade-in');
+    const animatedEl = html`<div animate-in="fade-in"></div>`;
     element.appendChild(animatedEl);
 
     page.buildCallback();
@@ -190,7 +188,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
@@ -207,10 +205,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -229,7 +226,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('preload').resolves();
         mediaPoolMock.expects('play').resolves();
@@ -237,10 +234,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
         page.setState(PageState.PLAYING);
 
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -249,6 +245,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
+      extensions: [],
     });
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
@@ -262,7 +259,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       page
         .layoutCallback()
         .then(() => page.mediaPoolPromise_)
-        .then((mediaPool) => {
+        .then(async (mediaPool) => {
           mediaPoolMock = env.sandbox.mock(mediaPool);
           mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
@@ -279,10 +276,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
           // `setState` runs code that creates subtasks (Promise callbacks).
           // Waits for the next frame to make sure all the subtasks are
           // already executed when we run the assertions.
-          win.requestAnimationFrame(() => {
-            mediaPoolMock.verify();
-            done();
-          });
+          await afterRenderPromise();
+          mediaPoolMock.verify();
+          done();
         });
     });
   });
@@ -324,7 +320,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.element.querySelector('amp-story-grid-layer').appendChild(ampAudioEl);
 
     new AmpAudio(ampAudioEl);
-    ampAudioEl.build();
+    ampAudioEl.buildInternal();
     page.buildCallback();
 
     const mediaPool = await page.mediaPoolPromise_;
@@ -416,6 +412,32 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(mediaPoolRegister).to.not.have.been.called;
   });
 
+  it('should use storyNextUp value as default for auto-advance-after', async () => {
+    initializePageWithElement(element);
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    expect(element.getAttribute('auto-advance-after')).to.be.equal(null);
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('5s');
+  });
+
+  it('should not use storyNextUp to override auto-advance-after value', async () => {
+    element.setAttribute('auto-advance-after', '20000ms');
+    // Reinitializing the AmpStoryPage because the auto-advance-after is used
+    // in its constructor.
+    initializePageWithElement(element);
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
+  });
+
   it('should stop the advancement when state becomes not active', async () => {
     page.buildCallback();
     const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
@@ -426,9 +448,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should stop the animations when state becomes not active', async () => {
-    // Adding an element that has to be animated.
-    const animatedEl = win.document.createElement('div');
-    animatedEl.setAttribute('animate-in', 'fade-in');
+    const animatedEl = html`<div animate-in="fade-in"></div>`;
     element.appendChild(animatedEl);
 
     page.buildCallback();
@@ -451,7 +471,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
@@ -463,10 +483,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -483,16 +502,15 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('mute').withExactArgs(videoEl).once();
 
         page.setState(PageState.NOT_ACTIVE);
 
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -516,7 +534,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then((mediaPool) => {
+      .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
@@ -528,10 +546,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
-        win.requestAnimationFrame(() => {
-          mediaPoolMock.verify();
-          done();
-        });
+        await afterRenderPromise();
+        mediaPoolMock.verify();
+        done();
       });
   });
 
@@ -588,48 +605,50 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(actions[0]).to.be.equal('pageId');
   });
 
-  it('should not build the open attachment UI if no attachment', async () => {
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
+  it('play message should have role="button" to prevent story page navigation', async () => {
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
+    env.sandbox.stub(VideoUtils, 'isAutoplaySupported').resolves(false);
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp4');
+    gridLayerEl.appendChild(videoEl);
 
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolPlay = env.sandbox.stub(mediaPool, 'play');
+    mediaPoolPlay.returns(Promise.reject());
+
+    page.layoutCallback();
+
+    page.setState(PageState.PLAYING);
+    await nextTick();
+
+    const playButtonEl = element.querySelector(
+      '.i-amphtml-story-page-play-button'
     );
-    expect(openAttachmentEl).to.not.exist;
+
+    expect(playButtonEl.getAttribute('role')).to.eql('button');
   });
 
-  it('should build the open attachment UI if attachment', async () => {
+  it('should install the page-attachment extension if attachment', async () => {
+    const extensionSpy = env.sandbox.spy(
+      Services.extensionsFor(win),
+      'installExtensionForDoc'
+    );
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
-    element.appendChild(attachmentEl);
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    page.element.appendChild(attachmentEl);
 
     page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment'
+    expect(extensionSpy).to.have.been.calledWith(
+      env.sandbox.match.any,
+      'amp-story-page-attachment',
+      '0.1'
     );
-    expect(openAttachmentEl).to.exist;
-  });
-
-  it('should build the open attachment UI with custom CTA label', async () => {
-    const attachmentEl = win.document.createElement(
-      'amp-story-page-attachment'
-    );
-    attachmentEl.setAttribute('data-cta-text', 'Custom label');
-    element.appendChild(attachmentEl);
-
-    page.buildCallback();
-    await page.layoutCallback();
-    page.setState(PageState.PLAYING);
-
-    const openAttachmentLabelEl = element.querySelector(
-      '.i-amphtml-story-page-open-attachment-label'
-    );
-    expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
   });
 
   it('should start tracking media performance when entering the page', async () => {
@@ -702,5 +721,88 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     expect(startMeasuringStub).to.not.have.been.called;
+  });
+
+  it('should only allow the prerender visibility state if it is the first page', async () => {
+    const pageElement2 = win.document.createElement('amp-story-page');
+    const pageElement3 = win.document.createElement('amp-story-page');
+    story.appendChild(pageElement2);
+    story.appendChild(pageElement3);
+
+    expect(AmpStoryPage.prerenderAllowed(element)).to.be.true;
+    expect(AmpStoryPage.prerenderAllowed(pageElement2)).to.be.false;
+    expect(AmpStoryPage.prerenderAllowed(pageElement3)).to.be.false;
+  });
+
+  it('should always allow the preview visibility state', async () => {
+    const pageElement2 = win.document.createElement('amp-story-page');
+    const pageElement3 = win.document.createElement('amp-story-page');
+    story.appendChild(pageElement2);
+    story.appendChild(pageElement3);
+
+    expect(AmpStoryPage.previewAllowed(element)).to.be.true;
+    expect(AmpStoryPage.previewAllowed(pageElement2)).to.be.true;
+    expect(AmpStoryPage.previewAllowed(pageElement3)).to.be.true;
+  });
+
+  describe('maybeConvertCtaLayerToPageOutlink_', () => {
+    it('should do nothing if amp-story-cta-layer has two anchor tags', () => {
+      page.element.appendChild(
+        <amp-story-cta-layer>
+          <a href="https://www.ampproject.org" class="button">
+            CTA Text!
+          </a>
+          <a>dummy anchor</a>
+        </amp-story-cta-layer>
+      );
+
+      page.buildCallback();
+
+      expect(page.element.querySelector('amp-story-cta-layer')).to.be.not.null;
+    });
+
+    it('should do nothing if the anchor tag in amp-story-cta-layer has no href attribute', () => {
+      page.element.appendChild(
+        <amp-story-cta-layer>
+          <a class="button">CTA Text!</a>
+        </amp-story-cta-layer>
+      );
+
+      page.buildCallback();
+
+      expect(page.element.querySelector('amp-story-cta-layer')).to.be.not.null;
+    });
+
+    describe('should convert cta layer to page outlink tag', async () => {
+      beforeEach(() => {
+        page.element.appendChild(
+          <amp-story-cta-layer>
+            <a href="https://www.ampproject.org" class="button">
+              CTA Text!
+            </a>
+          </amp-story-cta-layer>
+        );
+      });
+
+      it('should remove amp-story-cta-layer', () => {
+        page.buildCallback();
+
+        expect(page.element.querySelector('amp-story-cta-layer')).to.be.null;
+      });
+
+      it('should append amp-story-page-outlink', () => {
+        page.buildCallback();
+
+        const outlinkElAfterBuild = page.element.querySelector(
+          'amp-story-page-outlink'
+        );
+        const expectedOutlinkEl = (
+          <amp-story-page-outlink layout="nodisplay">
+            <a href="https://www.ampproject.org">CTA Text!</a>
+          </amp-story-page-outlink>
+        );
+        expect(outlinkElAfterBuild.isEqualNode(expectedOutlinkEl)).is.true;
+      });
+    });
   });
 });

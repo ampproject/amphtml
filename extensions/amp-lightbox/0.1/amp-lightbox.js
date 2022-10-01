@@ -1,27 +1,12 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
-import {CSS} from '../../../build/amp-lightbox-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {Deferred} from '#core/data-structures/promise';
+import {tryFocus} from '#core/dom';
+import {applyFillContent} from '#core/dom/layout';
+import {realChildElements} from '#core/dom/query';
+import {unmountAll} from '#core/dom/resource-container-helper';
+import {htmlFor} from '#core/dom/static-template';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -31,16 +16,22 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../../../src/style';
-import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
+} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {debounce} from '#core/types/function';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {CloseWatcherImpl} from '#utils/close-watcher-impl';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
+import {CSS} from '../../../build/amp-lightbox-0.1.css';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {isInFie} from '../../../src/iframe-helper';
-import {toArray} from '../../../src/types';
-import {tryFocus} from '../../../src/dom';
+import {getMode} from '../../../src/mode';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -63,18 +54,18 @@ let AnimationPresetDef;
 /** @private @const {!Object<string, !AnimationPresetDef>} */
 const AnimationPresets = {
   'fade-in': {
-    openStyle: dict({'opacity': 1}),
-    closedStyle: dict({'opacity': 0}),
+    openStyle: {'opacity': 1},
+    closedStyle: {'opacity': 0},
     durationSeconds: 0.1,
   },
   'fly-in-bottom': {
-    openStyle: dict({'transform': 'translate(0, 0)'}),
-    closedStyle: dict({'transform': 'translate(0, 100%)'}),
+    openStyle: {'transform': 'translate(0, 0)'},
+    closedStyle: {'transform': 'translate(0, 100%)'},
     durationSeconds: 0.2,
   },
   'fly-in-top': {
-    openStyle: dict({'transform': 'translate(0, 0)'}),
-    closedStyle: dict({'transform': 'translate(0, -100%)'}),
+    openStyle: {'transform': 'translate(0, 0)'},
+    closedStyle: {'transform': 'translate(0, -100%)'},
     durationSeconds: 0.2,
   },
 };
@@ -112,14 +103,11 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {number} */
-    this.historyId_ = -1;
+    /** @private {?CloseWatcherImpl} */
+    this.closeWatcher_ = null;
 
     /** @private {boolean} */
     this.active_ = false;
-
-    /**  @private {?function(this:AmpLightbox, Event)}*/
-    this.boundCloseOnEscape_ = null;
 
     /**  @private {?function(this:AmpLightbox, Event)}*/
     this.boundCloseOnEnter_ = null;
@@ -231,11 +219,11 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.isScrollable_ = element.hasAttribute('scrollable');
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     this.container_ = element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
-      this.applyFillContent(this.container_);
+      applyFillContent(this.container_);
     }
     element.appendChild(this.container_);
 
@@ -250,7 +238,7 @@ class AmpLightbox extends AMP.BaseElement {
 
       element.classList.add('i-amphtml-scrollable');
 
-      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      element.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
         this.updateChildrenInViewport_(this.pos_);
       });
@@ -274,8 +262,9 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {?Element} openerElement
+   * @return {!Promise}
    * @private
    */
   open_(trust, openerElement) {
@@ -283,16 +272,9 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.initialize_();
-    this.boundCloseOnEscape_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEscape_.bind(
-      this
-    ));
-    this.document_.documentElement.addEventListener(
-      'keydown',
-      this.boundCloseOnEscape_
+    this.boundFocusin_ = /** @type {?function(this:AmpLightbox)} */ (
+      this.onFocusin_.bind(this)
     );
-    this.boundFocusin_ = /** @type {?function(this:AmpLightbox)} */ (this.onFocusin_.bind(
-      this
-    ));
     this.document_.documentElement.addEventListener(
       'focusin',
       this.boundFocusin_
@@ -303,7 +285,7 @@ class AmpLightbox extends AMP.BaseElement {
     }
 
     const {promise, resolve} = new Deferred();
-    this.getViewport()
+    return this.getViewport()
       .enterLightboxMode(this.element, promise)
       .then(() => this.finalizeOpen_(resolve, trust));
   }
@@ -315,9 +297,9 @@ class AmpLightbox extends AMP.BaseElement {
       // Mutations via AMP.setState() require default trust.
       if (open) {
         // This suppose that the element that trigered the open is where the focus currently is
-        this.open_(ActionTrust.DEFAULT, document.activeElement);
+        this.open_(ActionTrust_Enum.DEFAULT, document.activeElement);
       } else {
-        this.close(ActionTrust.DEFAULT);
+        this.close(ActionTrust_Enum.DEFAULT);
       }
     }
   }
@@ -336,17 +318,14 @@ class AmpLightbox extends AMP.BaseElement {
 
   /**
    * @param {!Function} callback Called when open animation completes.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   finalizeOpen_(callback, trust) {
     const {element} = this;
 
-    const {
-      durationSeconds,
-      openStyle,
-      closedStyle,
-    } = this.getAnimationPresetDef_();
+    const {closedStyle, durationSeconds, openStyle} =
+      this.getAnimationPresetDef_();
 
     const props = Object.keys(openStyle);
 
@@ -391,6 +370,8 @@ class AmpLightbox extends AMP.BaseElement {
     element.addEventListener('transitionend', onAnimationEnd);
     element.addEventListener('animationend', onAnimationEnd);
 
+    this.setAsContainer();
+
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
     const owners = Services.ownersForDoc(this.element);
@@ -398,11 +379,9 @@ class AmpLightbox extends AMP.BaseElement {
     owners.scheduleResume(this.element, container);
     this.triggerEvent_(LightboxEvents.OPEN, trust);
 
-    this.getHistory_()
-      .push((unused) => this.close(trust))
-      .then((historyId) => {
-        this.historyId_ = historyId;
-      });
+    this.closeWatcher_ = new CloseWatcherImpl(this.getAmpDoc(), () =>
+      this.close(ActionTrust_Enum.HIGH)
+    );
 
     this.maybeRenderCloseButtonHeader_();
     this.focusInModal_();
@@ -435,9 +414,10 @@ class AmpLightbox extends AMP.BaseElement {
     }
 
     // click event doesn't work with enter on i-amphtml-ad-close-header
-    this.boundCloseOnEnter_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEnter_.bind(
-      this
-    ));
+    this.boundCloseOnEnter_ =
+      /** @type {?function(this:AmpLightbox, Event)} */ (
+        this.closeOnEnter_.bind(this)
+      );
     this.closeButtonHeader_.addEventListener(
       'keydown',
       this.boundCloseOnEnter_
@@ -446,8 +426,8 @@ class AmpLightbox extends AMP.BaseElement {
     let headerHeight;
     this.measureMutateElement(
       () => {
-        headerHeight = this.closeButtonHeader_./*OK*/ getBoundingClientRect()
-          .height;
+        headerHeight =
+          this.closeButtonHeader_./*OK*/ getBoundingClientRect().height;
       },
       () => {
         // Done in vsync in order to apply transition.
@@ -477,9 +457,9 @@ class AmpLightbox extends AMP.BaseElement {
     if (!this.closeButtonSR_ && !this.closeButtonHeader_) {
       return;
     }
-    this.boundClose_ = /** @type {?function(this:AmpLightbox)} */ (this.closeOnClick_.bind(
-      this
-    ));
+    this.boundClose_ = /** @type {?function(this:AmpLightbox)} */ (
+      this.closeOnClick_.bind(this)
+    );
     this.closeButton_.addEventListener('click', this.boundClose_);
   }
 
@@ -518,20 +498,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnClick_() {
-    this.close(ActionTrust.HIGH);
-  }
-
-  /**
-   * Handles closing the lightbox when the ESC key is pressed.
-   * @param {!Event} event
-   * @private
-   */
-  closeOnEscape_(event) {
-    if (event.key == Keys.ESCAPE) {
-      event.preventDefault();
-      // Keypress gesture is high trust.
-      this.close(ActionTrust.HIGH);
-    }
+    this.close(ActionTrust_Enum.HIGH);
   }
 
   /**
@@ -541,17 +508,17 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEnter_(event) {
-    if (event.key == Keys.ENTER) {
+    if (event.key == Keys_Enum.ENTER) {
       event.preventDefault();
       // Keypress gesture is high trust.
-      this.close(ActionTrust.HIGH);
+      this.close(ActionTrust_Enum.HIGH);
     }
   }
 
   /**
    * Closes the lightbox.
    *
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   close(trust) {
     if (!this.active_) {
@@ -569,7 +536,7 @@ class AmpLightbox extends AMP.BaseElement {
   /**
    * Clean up when closing lightbox.
    *
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   finalizeClose_(trust) {
@@ -599,14 +566,10 @@ class AmpLightbox extends AMP.BaseElement {
       assertDoesNotContainDisplay(this.getAnimationPresetDef_().closedStyle)
     );
 
-    if (this.historyId_ != -1) {
-      this.getHistory_().pop(this.historyId_);
+    if (this.closeWatcher_) {
+      this.closeWatcher_.destroy();
+      this.closeWatcher_ = null;
     }
-    this.document_.documentElement.removeEventListener(
-      'keydown',
-      this.boundCloseOnEscape_
-    );
-    this.boundCloseOnEscape_ = null;
 
     this.document_.documentElement.removeEventListener(
       'focusin',
@@ -615,6 +578,12 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundFocusin_ = null;
 
     this.untieCloseButton_();
+
+    this.removeAsContainer();
+
+    // Unmount all children when the lightbox is closed. They will automatically
+    // remount when the lightbox is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
 
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
@@ -655,7 +624,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   onFocusin_() {
     if (!this.hasCurrentFocus_()) {
-      this.close(ActionTrust.HIGH);
+      this.close(ActionTrust_Enum.HIGH);
     }
   }
 
@@ -772,28 +741,28 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   waitForScroll_(startingScrollTop) {
-    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      if (Math.abs(startingScrollTop - this.pos_) < 30) {
-        dev().fine(
-          TAG,
-          'slow scrolling: %s - %s',
-          startingScrollTop,
-          this.pos_
-        );
-        this.scrollTimerId_ = null;
-        this.update_(this.pos_);
-      } else {
-        dev().fine(
-          TAG,
-          'fast scrolling: %s - %s',
-          startingScrollTop,
-          this.pos_
-        );
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100));
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        if (Math.abs(startingScrollTop - this.pos_) < 30) {
+          dev().fine(
+            TAG,
+            'slow scrolling: %s - %s',
+            startingScrollTop,
+            this.pos_
+          );
+          this.scrollTimerId_ = null;
+          this.update_(this.pos_);
+        } else {
+          dev().fine(
+            TAG,
+            'fast scrolling: %s - %s',
+            startingScrollTop,
+            this.pos_
+          );
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100)
+    );
   }
 
   /**
@@ -869,15 +838,6 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
-   * Returns the history for the ampdoc.
-   *
-   * @return {!../../../src/service/history-impl.History}
-   */
-  getHistory_() {
-    return Services.historyForDoc(this.getAmpDoc());
-  }
-
-  /**
    * Sets the document body to transparent to allow for frame "merging" if the
    * element is under FIE.
    * The module-level execution of setTransparentBody() only works on inabox,
@@ -885,7 +845,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    const {win, element} = this;
+    const {element, win} = this;
     if (!isInFie(element)) {
       return;
     }
@@ -897,11 +857,11 @@ class AmpLightbox extends AMP.BaseElement {
    * Triggeres event to window.
    *
    * @param {string} name
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerEvent_(name, trust) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, trust);
   }
 }

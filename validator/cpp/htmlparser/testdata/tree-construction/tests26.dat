@@ -269,9 +269,6 @@
 (1,12): unexpected-character-after-solidus-in-tag
 (1,21): unexpected-end-tag
 (2,0): expected-closing-tag-but-got-eof
-#new-errors
-(1:11) unexpected-character-in-attribute-name
-(1:13) unexpected-solidus-in-tag
 #document
 | <html>
 |   <head>
@@ -367,8 +364,6 @@
 #errors
 (1,28): expected-dashes-or-doctype
 (1,34): expected-closing-tag-but-got-eof
-#new-errors
-(1:29) incorrectly-opened-comment
 #document
 | <!DOCTYPE html>
 | <html>

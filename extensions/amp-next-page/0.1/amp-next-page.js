@@ -1,42 +1,30 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {Layout} from '../../../src/layout';
-import {NextPageService} from './next-page-service';
-import {Services} from '../../../src/services';
-import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {assertConfig} from './config';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {isJsonScriptTag, removeElement} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   childElementsByAttr,
   childElementsByTag,
   elementByTag,
-  isJsonScriptTag,
-  removeElement,
-} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
-import {fetchDocument} from '../../../src/document-fetcher';
+} from '#core/dom/query';
+import {parseJson, tryParseJson} from '#core/types/object/json';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {assertConfig} from './config';
+import {NextPageService} from './next-page-service';
+
+import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {
+  UrlReplacementPolicy_Enum,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseJson, tryParseJson} from '../../../src/json';
+import {fetchDocument} from '../../../src/document-fetcher';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-next-page';
 
@@ -47,7 +35,7 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -271,7 +259,7 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   fetchConfig_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
   }
 
@@ -292,10 +280,9 @@ export class AmpNextPage extends AMP.BaseElement {
  * @return {!Promise<!NextPageService>}
  */
 function nextPageServiceForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!NextPageService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    SERVICE_ID
-  ));
+  return /** @type {!Promise<!NextPageService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID)
+  );
 }
 
 /**

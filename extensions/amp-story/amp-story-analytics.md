@@ -1,19 +1,3 @@
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # AMP Story and Analytics
 
 This document details triggers associated with AMP Stories. If you're looking for a guide to setting up analytics for your AMP pages, see [this blog post](https://blog.amp.dev/2019/08/28/analytics-for-your-amp-stories/)
@@ -121,27 +105,37 @@ Example:
 
 The `story-open` trigger is fired when opening a drawer or dialog inside a story. The components that are currently trackable by this are:
 
--   Page attachment
--   Bookend
--   Share dialog
--   Info dialog
--   Sidebar
+-   Page attachment (`<amp-story-page-attachment>`)
+-   Share dialog (`<amp-story-share-menu>`)
+-   Info dialog (`<amp-story-info-dialog>`)
+
+To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
+
+Example:
+
+```
+<amp-analytics id="my-analytics">
+  <script type="application/json">
+    {
+      "requests": {
+        "base": "https://example.com/my-endpoint"
+      },
+      "triggers": {
+        "trackShareOpen": {
+          "on": "story-open",
+          "tagName": "amp-story-share-menu",
+          "request": "base"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+
+```
 
 ### Story close trigger (`"on": "story-close"`)
 
 The `story-close` trigger is fired when closing a drawer or dialog inside a story. The components that are currently trackable by this are the same as the [`story-open` trigger](#Story-open-trigger-"on":-"story-open").
-
-### Bookend enter trigger (`"on": "story-bookend-enter"`)
-
-The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.
-
-### Bookend exit trigger (`"on": "story-bookend-exit"`)
-
-The `story-bookend-exit` trigger is fired when the bookend is dismissed by the user.
-
-### Bookend click trigger (`"on": "story-bookend-click"`)
-
-The `story-bookend-click` trigger is fired when a user clicks a link inside the bookend. This trigger can be tracked with the accompanying variables: [`storyBookendComponentPosition`](#storyBookendComponentPosition), [`storyBookendComponentType`](#storyBookendComponentType), and [`storyBookendTargetHref`](#storyBookendTargetHref) listed below.
 
 ### Mute trigger (`"on": "story-audio-muted"`)
 
@@ -158,6 +152,29 @@ The `story-page-attachment-enter` trigger is fired when a page attachment is ope
 ### Page attachment exit trigger (`"on": "story-page-attachment-exit"`)
 
 The `story-page-attachment-exit` trigger is fired when a page attachment is dismissed by the user.
+
+### Story shopping product listing page view trigger (`"on": "story-shopping-plp-view"`)
+
+The `story-shopping-plp-view` trigger is fired when whenever `amp-story-shopping-attachment` displays the Product Listing Page without an active product.
+it will not fire when the Product Listing Page is viewed within the context of a Product Details Page.
+The event label will be the active page since there is no product associated with the Product Listing Page.
+
+event action: story_shopping_plp_view
+event label: active page id
+
+### Story shopping product details page view trigger (`"on": "story-shopping-pdp-view"`)
+
+The `story-shopping-pdp-view` trigger is fired when whenever the `amp-story-shopping-attachment` displays the Product Details Page.
+
+event action: story_shopping_pdp_view
+event label: active product id
+
+### Story shopping “Buy now” CTA button click trigger (`"on": "story-shopping-buy-now-click"`)
+
+The `story-shopping-buy-now-click` trigger is fired when whenever the “Buy now” cta button in the Product Description Page is clicked.
+
+event action: story_shopping_buy_now_click
+event label: active product id
 
 ## Variables as data attribute
 
@@ -229,18 +246,6 @@ The user's progress through the story, as a decimal in the range [0...1]. This r
 ### `storyIsMuted`
 
 A boolean representing whether the story was muted when the accompanying trigger was fired.
-
-### `storyBookendComponentPosition`
-
-A number representing the index of the bookend component that the user clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
-
-### `storyBookendComponentType`
-
-The type of component in the bookend that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
-
-### `storyBookendTargetHref`
-
-The url of the bookend component that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
 
 ### Additional Vars
 

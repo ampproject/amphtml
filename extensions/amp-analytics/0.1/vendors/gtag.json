@@ -18,7 +18,7 @@
   },
   "vars": {
     "eventValue": "0",
-    "clientId": "CLIENT_ID(AMP_ECID_GOOGLE,,_ga)",
+    "clientId": "CLIENT_ID(AMP_ECID_GOOGLE,,_ga,true)",
     "dataSource": "AMP",
     "anonymizeIP": "aip",
     "errorParam": "${errorName}-${errorMessage}"

@@ -1,52 +1,45 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const atob = require('atob');
 const fs = require('fs');
 const JSON5 = require('json5');
+const os = require('os');
 const path = require('path');
+const PercyImportPromise = import('@percy/core');
+const percySnapshot = require('@percy/puppeteer');
+const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {
-  escapeHtml,
-  log,
-  waitForPageLoad,
-  verifySelectorsInvisible,
-  verifySelectorsVisible,
-  sleep,
-} = require('./helpers');
-const {
   gitBranchName,
+  gitCiMainBaseline,
   gitCommitterEmail,
-  gitCiMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {buildRuntime, installPackages} = require('../../common/utils');
-const {cyan, yellow} = require('ansi-colors');
-const {execScriptAsync} = require('../../common/exec');
+const {
+  PUPPETEER_CHROMIUM_REVISION,
+  launchBrowser,
+  loadBrowserFetcher,
+  newPage,
+  resetPage,
+} = require('./browser');
+const {
+  verifySelectorsInvisible,
+  verifySelectorsVisible,
+  waitForPageLoad,
+} = require('./verifiers');
+const {BASE_TEST_FUNCTION, HOST, PORT} = require('./consts');
+const {cyan, green, red, yellow} = require('kleur/colors');
+const {devMode} = require('./dev-mode');
+const {drawBoxes, log} = require('./log');
+const {escapeHtml, sleep} = require('./helpers');
 const {isCiBuild} = require('../../common/ci');
+const {isPercyEnabled} = require('@percy/sdk-utils');
 const {startServer, stopServer} = require('../serve');
-const {waitUntilUsed} = require('tcp-port-used');
-
-// optional dependencies for local development (outside of visual diff tests)
-let puppeteer;
-let percySnapshot;
+const {TestErrorDef, WebpageDef} = require('./types');
 
 // CSS injected in every page tested.
 // Normally, as in https://docs.percy.io/docs/percy-specific-css
@@ -60,16 +53,12 @@ const percyCss = [
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
 };
-const VIEWPORT_WIDTH = 1400;
-const VIEWPORT_HEIGHT = 100000;
-const HOST = 'localhost';
-const PORT = 8000;
 const PERCY_AGENT_PORT = 5338;
-const PERCY_AGENT_RETRY_MS = 100;
-const PERCY_AGENT_TIMEOUT_MS = 5000;
-const NAVIGATE_TIMEOUT_MS = 30000;
-const MAX_PARALLEL_TABS = 5;
 const WAIT_FOR_TABS_MS = 1000;
+const WAIT_FOR_AGENT_MS = 5000;
+
+// Multiple tabs speed up the performance of the visual diff tests.
+const MAX_PARALLEL_TABS = os.cpus().length;
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
@@ -82,26 +71,31 @@ const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/remove-amp-scripts.js'),
   'utf8'
 );
-const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
-  path.resolve(__dirname, 'snippets/freeze-form-values.js'),
-  'utf8'
-);
 const FREEZE_CANVAS_IMAGE_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/freeze-canvas-image.js'),
   'utf8'
 );
-
+const REMOVE_NO_SCRIPT_ELEMENT_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/remove-no-script.js'),
+  'utf8'
+);
 // HTML snippet to create an error page snapshot.
 const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/snapshot-error.html'),
   'utf8'
 );
 
-let browser_;
-let percyAgentProcess_;
+/**
+ * Decode the write-only Percy token during CI builds.
+ */
+function decodePercyTokenForCi() {
+  if (isCiBuild()) {
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED || '');
+  }
+}
 
 /**
- * Override PERCY_* environment variables if passed via gulp task parameters.
+ * Override PERCY_* environment variables if passed via amp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
   ['percy_token', 'percy_branch'].forEach((variable) => {
@@ -117,7 +111,7 @@ function maybeOverridePercyEnvironmentVariables() {
  * as baselines for future builds.
  */
 function setPercyBranch() {
-  if (!process.env['PERCY_BRANCH'] && (!argv.master || !isCiBuild())) {
+  if (!process.env['PERCY_BRANCH'] && (!argv.main || !isCiBuild())) {
     const userName = gitCommitterEmail();
     const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
@@ -130,157 +124,81 @@ function setPercyBranch() {
  * This will let Percy determine which build to use as the baseline for this new
  * build.
  *
- * Only does something during CI, and for non-master branches, since master
+ * Only does something during CI, and for non-main branches, since main branch
  * builds are always built on top of the previous commit (we use the squash and
  * merge method for pull requests.)
  */
 function setPercyTargetCommit() {
-  if (isCiBuild() && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitCiMasterBaseline();
+  if (isCiBuild() && !argv.main) {
+    process.env['PERCY_TARGET_COMMIT'] = gitCiMainBaseline();
   }
 }
 
 /**
- * Launches a @percy/agent instance.
+ * Launches a @percy/cli instance.
+ *
+ * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
+ *     manager.
+ * @return {Promise<Percy|undefined>} percy agent instance.
  */
-async function launchPercyAgent() {
+async function launchPercyAgent(browserFetcher) {
   if (argv.percy_disabled) {
     return;
   }
 
-  const env = argv.percy_agent_debug ? {LOG_LEVEL: 'debug'} : {};
-  percyAgentProcess_ = execScriptAsync(
-    `npx percy start --port ${PERCY_AGENT_PORT}`,
-    {
-      cwd: __dirname,
-      env: Object.assign(env, process.env),
-      stdio: ['ignore', process.stdout, process.stderr],
-    }
-  );
-  await waitUntilUsed(
-    PERCY_AGENT_PORT,
-    PERCY_AGENT_RETRY_MS,
-    PERCY_AGENT_TIMEOUT_MS
-  );
-  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
-}
+  // @ts-ignore Type mismatch in library
+  const {Percy} = await PercyImportPromise;
+  const percy = await Percy.start({
+    token: process.env.PERCY_TOKEN,
+    loglevel: argv.percy_agent_debug ? 'debug' : 'info',
+    port: PERCY_AGENT_PORT,
+    config: path.join(__dirname, '.percy.yaml'),
+    discovery: {
+      launchOptions: {
+        executable: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
+          .executablePath,
+      },
+    },
+  });
 
-/**
- * Launches an AMP webserver for minified js.
- */
-async function launchWebServer() {
-  await startServer(
-    {host: HOST, port: PORT},
-    {quiet: !argv.webserver_debug},
-    {compiled: true}
-  );
-}
+  await new Promise((resolve, reject) => {
+    const percyIsEnabledTimeout = setTimeout(() => {
+      log('fatal', 'Percy agent is unreachable after', WAIT_FOR_AGENT_MS, 'ms');
+      reject(false);
+    }, WAIT_FOR_AGENT_MS);
 
-/**
- * Launches a Puppeteer controlled browser.
- *
- * Waits until the browser is up and reachable, and ties its lifecycle to this
- * process's lifecycle.
- *
- * @return {!puppeteer.Browser} a Puppeteer controlled browser.
- */
-async function launchBrowser() {
-  const browserOptions = {
-    args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
-    dumpio: argv.chrome_debug,
-    headless: true,
-  };
-
-  try {
-    browser_ = await puppeteer.launch(browserOptions);
-  } catch (error) {
-    log('fatal', error);
-  }
-
-  return browser_;
-}
-
-/**
- * Opens a new browser tab, resizes its viewport, and returns a Page handler.
- *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {JsonObject} viewport optional viewport size object with numeric
- *     fields `width` and `height`.
- * @return {!Promise<!Puppeteer.Page>}
- */
-async function newPage(browser, viewport = null) {
-  log('verbose', 'Creating new tab');
-
-  const page = await browser.newPage();
-  page.setDefaultNavigationTimeout(0);
-  await page.setJavaScriptEnabled(true);
-  await page.setRequestInterception(true);
-  page.on('request', (interceptedRequest) => {
-    const requestUrl = new URL(interceptedRequest.url());
-    const mockedFilepath = path.join(
-      path.dirname(__filename),
-      'network-mocks',
-      requestUrl.hostname,
-      encodeURIComponent(
-        `${requestUrl.pathname.substr(1)}${requestUrl.search}`
-      ).replace(/%2F/g, '/')
-    );
-
-    if (
-      requestUrl.protocol === 'data:' ||
-      requestUrl.hostname === HOST ||
-      requestUrl.hostname.endsWith(`.${HOST}`)
-    ) {
-      return interceptedRequest.continue();
-    } else if (fs.existsSync(mockedFilepath)) {
-      log(
-        'verbose',
-        'Mocked network request for',
-        yellow(requestUrl.href),
-        'with file',
-        cyan(mockedFilepath)
-      );
-      return interceptedRequest.respond(fs.readFileSync(mockedFilepath));
-    } else {
-      log(
-        'verbose',
-        'Blocked external network request for',
-        yellow(requestUrl.href)
-      );
-      return interceptedRequest.abort('blockedbyclient');
+    while (true) {
+      try {
+        if (isPercyEnabled()) {
+          clearTimeout(percyIsEnabledTimeout);
+          log(
+            'info',
+            'Percy agent is enabled and reachable on port',
+            PERCY_AGENT_PORT
+          );
+          return resolve(true);
+        }
+      } catch {
+        // Ignore transient errors. Promise will reject after WAIT_FOR_AGENT_MS.
+      }
     }
   });
-  await resetPage(page, viewport);
-  return page;
-}
 
-/**
- * Resets the size of a tab and loads about:blank.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {JsonObject} viewport optional viewport size object with numeric
- *     fields `width` and `height`.
- */
-async function resetPage(page, viewport = null) {
-  const width = viewport ? viewport.width : VIEWPORT_WIDTH;
-  const height = viewport ? viewport.height : VIEWPORT_HEIGHT;
+  if (process.env['PERCY_TARGET_COMMIT']) {
+    log(
+      'info',
+      'The Percy build is baselined on top of commit',
+      cyan(shortSha(process.env['PERCY_TARGET_COMMIT']))
+    );
+  }
 
-  log(
-    'verbose',
-    'Resetting tab to',
-    yellow('about:blank'),
-    'with size',
-    yellow(`${width}×${height}`)
-  );
-
-  await page.goto('about:blank');
-  await page.setViewport({width, height});
+  return percy;
 }
 
 /**
  * Adds a test error and logs it if running locally (not as part of CI).
  *
- * @param {!Array<!JsonObject>} testErrors array of testError objects.
+ * @param {!Array<!TestErrorDef>} testErrors array of testError objects.
  * @param {string} name full name of the test.
  * @param {string} message extra information about the failure.
  * @param {Error} error error object with stack trace.
@@ -298,7 +216,7 @@ function addTestError(testErrors, name, message, error, consoleMessages) {
 /**
  * Logs a test error (regardless of where it's running).
  *
- * @param {!JsonObject} testError object as created by addTestError.
+ * @param {!TestErrorDef} testError object as created by addTestError.
  */
 function logTestError(testError) {
   log(
@@ -323,33 +241,14 @@ function logTestError(testError) {
 }
 
 /**
- * Runs the visual tests.
- *
- * @param {!Array<JsonObject>} webpages an array of JSON objects containing
- *     details about the pages to snapshot.
- */
-async function runVisualTests(webpages) {
-  // Create a Percy client and start a build.
-  if (process.env['PERCY_TARGET_COMMIT']) {
-    log(
-      'info',
-      'The Percy build is baselined on top of commit',
-      cyan(shortSha(process.env['PERCY_TARGET_COMMIT']))
-    );
-  }
-
-  // Take the snapshots.
-  await generateSnapshots(webpages);
-}
-
-/**
  * Sets the AMP config, launches a server, and generates Percy snapshots for a
  * set of given webpages.
  *
- * @param {!Array<JsonObject>} webpages an array of JSON objects containing
- *     details about the pages to snapshot.
+ * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ * @param {!Array<!WebpageDef>} webpages details about the pages to snapshot.
+ * @return {Promise<void>}
  */
-async function generateSnapshots(webpages) {
+async function runVisualTests(browser, webpages) {
   const numUnfilteredPages = webpages.length;
   webpages = webpages.filter((webpage) => !webpage.flaky);
   if (numUnfilteredPages != webpages.length) {
@@ -377,7 +276,7 @@ async function generateSnapshots(webpages) {
   for (const webpage of webpages) {
     webpage.tests_ = {};
     if (!webpage.no_base_test) {
-      webpage.tests_[''] = async () => {};
+      webpage.tests_[''] = BASE_TEST_FUNCTION;
     }
     if (webpage.interactive_tests) {
       try {
@@ -416,18 +315,23 @@ async function generateSnapshots(webpages) {
     );
   }
 
-  const browser = await launchBrowser();
-  if (argv.master) {
+  if (argv.main) {
     const page = await newPage(browser);
     await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
     );
+    // @ts-ignore Type mismatch in library
     await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
 
-  log('info', 'Generating snapshots...');
-  if (!(await snapshotWebpages(browser, webpages))) {
-    log('fatal', 'Some tests have failed locally.');
+  if (argv.dev) {
+    log('info', 'Running development mode...');
+    await devMode(browser, webpages);
+  } else {
+    log('info', 'Generating snapshots...');
+    if (!(await snapshotWebpages(browser, webpages))) {
+      log('fatal', 'Some tests have failed locally.');
+    }
   }
 }
 
@@ -435,10 +339,10 @@ async function generateSnapshots(webpages) {
  * Generates Percy snapshots for a set of given webpages.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
+ * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
  *     details about the webpages to snapshot.
- * @return {boolean} true if all tests passed locally (does not indicate whether
- *     the tests passed on Percy).
+ * @return {Promise<boolean>} true if all tests passed locally (does not
+ *     indicate whether the tests passed on Percy).
  */
 async function snapshotWebpages(browser, webpages) {
   const availablePages = [];
@@ -455,7 +359,7 @@ async function snapshotWebpages(browser, webpages) {
   const testErrors = [];
   let testNumber = 0;
   for (const webpage of webpages) {
-    const {viewport, name: pageName} = webpage;
+    const {name: pageName, viewport} = webpage;
     let hasWarnings = false;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
       // Chrome supports redirecting <anything>.localhost to localhost, while
@@ -467,15 +371,15 @@ async function snapshotWebpages(browser, webpages) {
       while (availablePages.length == 0) {
         await sleep(WAIT_FOR_TABS_MS);
       }
-      const page = availablePages.shift();
+      const [page] = availablePages;
+      availablePages.shift();
 
       const name = testName ? `${pageName} (${testName})` : pageName;
       log(
         'info',
+        drawBoxes(allPages, availablePages, page, yellow('▄')),
         'Starting test',
-        yellow(name),
-        'on tab',
-        yellow(`#${allPages.indexOf(page) + 1}`)
+        yellow(name)
       );
 
       await resetPage(page, viewport);
@@ -486,44 +390,10 @@ async function snapshotWebpages(browser, webpages) {
       };
       page.on('console', consoleLogger);
 
-      // Puppeteer is flaky when it comes to catching navigation requests, so
-      // retry the page navigation up to NAVIGATE_RETRIES times and eventually
-      // ignore a final timeout. If this ends up being a real non-loading page
-      // error, this will be caught in the resulting Percy build. Also attempt
-      // to wait until there are no more network requests. This method is flaky
-      // since Puppeteer doesn't always understand Chrome's network activity, so
-      // ignore timeouts again.
       const pagePromise = (async () => {
         try {
-          const responseWatcher = new Promise((resolve, reject) => {
-            const responseTimeout = setTimeout(() => {
-              reject(
-                new puppeteer.TimeoutError(
-                  `Response was not received in test ${testName} for page ` +
-                    `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
-                )
-              );
-            }, NAVIGATE_TIMEOUT_MS);
-
-            page.once('response', (response) => {
-              log(
-                'verbose',
-                'Response for url',
-                yellow(response.url()),
-                'with status',
-                cyan(response.status()),
-                cyan(response.statusText())
-              );
-              clearTimeout(responseTimeout);
-              resolve();
-            });
-          });
-
           log('verbose', 'Navigating to page', yellow(webpage.url));
-          await Promise.all([
-            responseWatcher,
-            page.goto(fullUrl, {waitUntil: 'networkidle2'}),
-          ]);
+          await page.goto(fullUrl, {waitUntil: 'networkidle0'});
 
           log(
             'verbose',
@@ -603,6 +473,7 @@ async function snapshotWebpages(browser, webpages) {
               .replace('__TEST_ERROR__', testError)
               .replace('__HTML_SNAPSHOT__', escapeHtml(htmlSnapshot))
           );
+          // @ts-ignore Type mismatch in library
           await percySnapshot(page, name, SNAPSHOT_SINGLE_BUILD_OPTIONS);
         }
 
@@ -612,8 +483,8 @@ async function snapshotWebpages(browser, webpages) {
             // prepare it for snapshotting on Percy. See comments inside the
             // snippet files for description of each.
             await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
-            await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
             await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
+            await page.evaluate(REMOVE_NO_SCRIPT_ELEMENT_SNIPPET);
 
             // Create a default set of snapshot options for Percy and modify
             // them based on the test's configuration.
@@ -623,18 +494,20 @@ async function snapshotWebpages(browser, webpages) {
             }
 
             if (viewport) {
-              snapshotOptions.widths = [viewport.width];
+              const {height, width} = viewport;
+              snapshotOptions.widths = [width];
               log('verbose', 'Wrapping viewport-constrained page in an iframe');
               await page.evaluate(
-                WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
-                  .replace(/__HEIGHT__/g, viewport.height)
+                WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, width.toString())
+                  .replace(/__HEIGHT__/g, height.toString())
                   .replace(/__PERCY_CSS__/g, percyCss)
               );
             } else {
-              snapshotOptions.percyCss = percyCss;
+              snapshotOptions.percyCSS = percyCss;
             }
 
             // Finally, send the snapshot to percy.
+            // @ts-ignore Type mismatch in library
             await percySnapshot(page, name, snapshotOptions);
           } catch (snapshotError) {
             addTestError(
@@ -649,12 +522,18 @@ async function snapshotWebpages(browser, webpages) {
         }
 
         log(
-          hasWarnings ? 'warning' : 'info',
+          'info',
+          drawBoxes(
+            allPages,
+            availablePages,
+            page,
+            (hasWarnings ? red : green)('▀')
+          ),
           'Finished test',
           yellow(name),
           hasWarnings ? 'with warnings' : ''
         );
-        page.removeListener('console', consoleLogger);
+        page.off('console', consoleLogger);
         availablePages.push(page);
       })();
       pagePromises.push(pagePromise);
@@ -687,11 +566,13 @@ function setDebuggingLevel() {
  *
  * Enables us to require percy checks on GitHub, and yet, not have to do a full
  * build for every PR.
+ *
+ * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ * @return {Promise<void>}
  */
-async function createEmptyBuild() {
+async function createEmptyBuild(browser) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
 
-  const browser = await launchBrowser();
   const page = await newPage(browser);
 
   try {
@@ -702,18 +583,25 @@ async function createEmptyBuild() {
     // Ignore failures
   }
 
+  // @ts-ignore Type mismatch in library
   await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
 }
 
 /**
  * Runs the AMP visual diff tests.
- * @return {!Promise}
+ * @return {Promise<void>}
  */
 async function visualDiff() {
+  if (!PUPPETEER_CHROMIUM_REVISION) {
+    throw new Error(
+      `${cyan('amp visual-diff')} is only available on Linux, Mac, and Windows`
+    );
+  }
+
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
-  installPercy_();
-  setupCleanup_();
+  const browserFetcher = await loadBrowserFetcher();
+  decodePercyTokenForCi();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
   setPercyTargetCommit();
@@ -722,130 +610,110 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
-  await performVisualTests();
-  await cleanup_();
+  if (argv.dev) {
+    argv['percy_disabled'] = true;
+  }
+
+  if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
+    log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
+  }
+
+  const percy = await launchPercyAgent(browserFetcher);
+  try {
+    await performVisualTests(browserFetcher);
+  } finally {
+    // @ts-ignore Type mismatch in library
+    await percy?.stop();
+  }
   exitCtrlcHandler(handlerProcess);
 }
 
 /**
  * Runs the AMP visual diff tests.
+ *
+ * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
+ *     manager.
+ * @return {Promise<void>}
  */
-async function performVisualTests() {
+async function performVisualTests(browserFetcher) {
   setDebuggingLevel();
-  if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
-    log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
-  } else {
-    try {
-      await launchPercyAgent();
-    } catch (reason) {
-      log('fatal', `Failed to start the Percy agent: ${reason}`);
-    }
-  }
 
-  // Launch a local web server.
+  const browser = await launchBrowser(browserFetcher);
+  const handlerProcess = createCtrlcHandler(
+    'visual-diff:browser',
+    browser.process()?.pid
+  );
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.webserver_debug},
+    {minified: true}
+  );
+
   try {
-    await launchWebServer();
-  } catch (reason) {
-    log('fatal', `Failed to start a web server: ${reason}`);
-  }
-
-  if (argv.empty) {
-    await createEmptyBuild();
-  } else {
-    // Load and parse the config. Use JSON5 due to JSON comments in file.
-    const visualTestsConfig = JSON5.parse(
-      fs.readFileSync(
-        path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
-        'utf8'
-      )
-    );
-    await runVisualTests(visualTestsConfig.webpages);
+    if (argv.empty) {
+      await createEmptyBuild(browser);
+    } else {
+      // Load and parse the config. Use JSON5 due to JSON comments in file.
+      const visualTestsConfig = JSON5.parse(
+        fs.readFileSync(
+          path.resolve(
+            __dirname,
+            '../../../test/visual-diff/visual-tests.jsonc'
+          ),
+          'utf8'
+        )
+      );
+      await runVisualTests(browser, visualTestsConfig.webpages);
+    }
+  } finally {
+    await browser.close();
+    exitCtrlcHandler(handlerProcess);
+    await stopServer();
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function ensureOrBuildAmpRuntimeInTestMode_() {
   if (argv.empty) {
     return;
   }
 
-  if (argv.nobuild) {
-    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
+  const isBuiltInTestMode =
+    fs.existsSync('dist/v0.js') &&
+    /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
       fs.readFileSync('dist/v0.js', 'utf8')
     );
-    if (!isInTestMode) {
-      log(
-        'fatal',
-        'The AMP runtime was not built in test mode. Run',
-        cyan('gulp dist --fortesting'),
-        'or remove the',
-        cyan('--nobuild'),
-        'option from this command'
-      );
-    }
-  } else {
-    await buildRuntime(/* opt_compiled */ true);
+  if (!isBuiltInTestMode) {
+    log(
+      'fatal',
+      'The AMP runtime was not built or not build in test mode. Run',
+      cyan('amp dist --fortesting'),
+      'before executing visual diff tests.'
+    );
   }
-}
-
-function installPercy_() {
-  if (!argv.noinstall) {
-    installPackages(__dirname);
-  }
-
-  puppeteer = require('puppeteer');
-  percySnapshot = require('@percy/puppeteer').percySnapshot;
-}
-
-function setupCleanup_() {
-  process.on('exit', cleanup_);
-  process.on('SIGINT', cleanup_);
-  process.on('uncaughtException', cleanup_);
-  process.on('unhandledRejection', cleanup_);
-}
-
-async function exitPercyAgent_() {
-  if (percyAgentProcess_ && !percyAgentProcess_.killed) {
-    let resolver;
-    const percyAgentExited_ = new Promise((resolverIn) => {
-      resolver = resolverIn;
-    });
-    percyAgentProcess_.on('exit', () => {
-      resolver();
-    });
-    // Explicitly exit the process by "Ctrl+C"-ing it.
-    await percyAgentProcess_.kill('SIGINT');
-    await percyAgentExited_;
-  }
-}
-
-async function cleanup_() {
-  if (browser_) {
-    await browser_.close();
-  }
-  await stopServer();
-  await exitPercyAgent_();
 }
 
 module.exports = {
   visualDiff,
 };
 
-visualDiff.description = 'Runs the AMP visual diff tests.';
+visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {
-  'master': '  Includes a blank snapshot (baseline for skipped builds)',
-  'empty': '  Creates a dummy Percy build with only a blank snapshot',
-  'config':
-    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'chrome_debug': '  Prints debug info from Chrome',
-  'webserver_debug': '  Prints debug info from the local gulp webserver',
-  'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
-  'debug': '  Sets all debugging flags',
-  'verbose': '  Prints verbose log statements',
-  'grep': '  Runs tests that match the pattern',
-  'percy_token': '  Override the PERCY_TOKEN environment variable',
-  'percy_branch': '  Override the PERCY_BRANCH environment variable',
+  'main': 'Include a blank snapshot (baseline for skipped builds)',
+  'empty': 'Create a dummy Percy build with only a blank snapshot',
+  'esm': 'uses the typescript server transforms which will serve the mjs files',
+  'chrome_debug': 'Print debug info from Chrome',
+  'webserver_debug': 'Print debug info from the local amp webserver',
+  'percy_agent_debug': 'Print debug info from the @percy/agent instance',
+  'debug': 'Set all debugging flags',
+  'verbose': 'Print verbose log statements',
+  'grep': 'Run tests that match the pattern',
+  'minified': 'Serve minified JS',
+  'percy_token': 'Override the PERCY_TOKEN environment variable',
+  'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
-    '  Disables Percy integration (for testing local changes only)',
-  'nobuild': '  Skip build',
-  'noinstall': '  Skip installing npm dependencies',
+    'Disable Percy integration (for testing local changes only)',
+  'dev': 'Developer mode for creating and debugging tests',
 };

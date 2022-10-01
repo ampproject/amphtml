@@ -1,50 +1,39 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isExperimentOn} from '#experiments';
 
-import {CSS as COMPONENT_CSS} from './sidebar.jss';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {Services} from '#service/';
+
+import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Sidebar} from './sidebar';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
-class AmpSidebar extends PreactBaseElement {
-  /** @param {!AmpElement} element */
+class AmpSidebar extends setSuperClass(BaseElement, AmpPreactBaseElement) {
+  /** @override */
   constructor(element) {
     super(element);
 
-    /** @private {boolean} */
-    this.open_ = false;
+    /** @private {!../../../src/service/history-impl.History} */
+    this.history_ = null;
+
+    /** @private {number|null} */
+    this.historyId_ = null;
   }
 
   /** @override */
   init() {
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
+
     this.registerApiAction('toggle', (api) => api./*OK*/ toggle());
     this.registerApiAction('open', (api) => api./*OK*/ open());
     this.registerApiAction('close', (api) => api./*OK*/ close());
 
-    return dict({
-      'onBeforeOpen': this.beforeOpen_.bind(this),
-      'onAfterClose': this.afterClose_.bind(this),
-    });
+    return super.init();
   }
 
   /** @override */
@@ -62,36 +51,6 @@ class AmpSidebar extends PreactBaseElement {
     }
   }
 
-  /**
-   * Setting hidden to false
-   * @private
-   */
-  beforeOpen_() {
-    this.open_ = true;
-    toggle(this.element, true);
-    this.element.setAttribute('open', '');
-  }
-
-  /**
-   * Setting hidden to true
-   * @private
-   */
-  afterClose_() {
-    this.open_ = false;
-    toggle(this.element, false);
-    this.element.removeAttribute('open');
-  }
-
-  /** @override */
-  mutationObserverCallback() {
-    const open = this.element.hasAttribute('open');
-    if (open === this.open_) {
-      return;
-    }
-    this.open_ = open;
-    open ? this.api().open() : this.api().close();
-  }
-
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
@@ -101,21 +60,34 @@ class AmpSidebar extends PreactBaseElement {
     );
     return true;
   }
+
+  /** @override */
+  afterOpen() {
+    super.afterOpen();
+    const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
+    this.setAsContainer?.(sidebar);
+
+    this.history_
+      .push(() => this.api().close())
+      .then((historyId) => (this.historyId_ = historyId));
+  }
+
+  /** @override */
+  afterClose() {
+    super.afterClose();
+    this.removeAsContainer?.();
+
+    if (this.historyId_ != null) {
+      this.history_.pop(this.historyId_);
+      this.historyId_ = null;
+    }
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer?.();
+  }
 }
-
-/** @override */
-AmpSidebar['Component'] = Sidebar;
-
-/** @override */
-AmpSidebar['passthrough'] = true;
-
-/** @override */
-AmpSidebar['shadowCss'] = COMPONENT_CSS;
-
-/** @override */
-AmpSidebar['props'] = {
-  'side': {attr: 'side', type: 'string'},
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSidebar, CSS);

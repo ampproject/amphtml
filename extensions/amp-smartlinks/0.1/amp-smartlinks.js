@@ -1,29 +1,15 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
-import {CommonSignals} from '../../../src/common-signals';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {getData} from './../../../src/event-helper';
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
 
 import {ENDPOINTS} from './constants';
-import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
+
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
+import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 
 const TAG = 'amp-smartlinks';
 
@@ -102,7 +88,9 @@ export class AmpSmartlinks extends AMP.BaseElement {
         /** @type {!../../../src/service/xhr-impl.Xhr} */
         (this.xhr_),
         /** @type {!Object} */
-        (this.linkmateOptions_)
+        (this.linkmateOptions_),
+        /** @type {!Object} */
+        (this.win)
       );
       this.smartLinkRewriter_ = this.initLinkRewriter_();
 
@@ -152,21 +140,19 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   postPageImpression_() {
     // When using layout='nodisplay' manually trigger CustomEventReporterBuilder
-    this.signals().signal(CommonSignals.LOAD_START);
+    this.signals().signal(CommonSignals_Enum.LOAD_START);
     const payload = this.buildPageImpressionPayload_();
 
     const builder = new CustomEventReporterBuilder(this.element);
 
     builder.track('page-impression', ENDPOINTS.PAGE_IMPRESSION_ENDPOINT);
 
-    builder.setTransportConfig(
-      dict({
-        'beacon': true,
-        'image': false,
-        'xhrpost': true,
-        'useBody': true,
-      })
-    );
+    builder.setTransportConfig({
+      'beacon': true,
+      'image': false,
+      'xhrpost': true,
+      'useBody': true,
+    });
 
     builder.setExtraUrlParams(payload);
     const reporter = builder.build();
@@ -197,17 +183,26 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   buildPageImpressionPayload_() {
-    return /** @type {!JsonObject} */ (dict({
+    return {
       'events': [{'is_amp': true}],
       'organization_id': this.linkmateOptions_.publisherID,
       'organization_type': 'publisher',
       'user': {
         'page_session_uuid': this.generateUUID_(),
-        'source_url': this.ampDoc_.getUrl(),
+        'source_url': this.getLocationHref_(),
         'previous_url': this.referrer_,
         'user_agent': this.ampDoc_.win.navigator.userAgent,
       },
-    }));
+    };
+  }
+
+  /**
+   * Retrieve url of the current doc.
+   * @return {string}
+   * @private
+   */
+  getLocationHref_() {
+    return this.win.location.href;
   }
 
   /**

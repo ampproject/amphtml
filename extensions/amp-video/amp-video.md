@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-video
 
 ## Usage
@@ -35,7 +19,7 @@ The `amp-video` component loads the video resource specified by its `src` attrib
 The `amp-video` component accepts up to four unique types of HTML nodes as children:
 
 -   `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
--   `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
+-   `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag. Whenever the video has narration or important audio information, make sure to include subtitles/captions for users who may not be able to hear it or have their sound turned off.
 -   a placeholder for before the video starts
 -   a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
@@ -59,6 +43,112 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 [/example]
 
+#### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+#### Interactivity and API usage
+
+Bento components are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+
+The `amp-video` component API is accessible by including the following script tag in your document:
+
+```js
+await customElements.whenDefined('amp-video');
+const videoHandle = await video.getApi();
+```
+
+##### Actions
+
+The `amp-video` API allows you to perform the following actions:
+
+##### `play()`
+
+Plays the video.
+
+```js
+videoHandle.play();
+```
+
+##### `pause()`
+
+Pauses the video.
+
+```js
+videoHandle.pause();
+```
+
+##### `mute()`
+
+Mutes the video.
+
+```js
+videoHandle.mute();
+```
+
+##### `unmute()`
+
+Unmutes the video.
+
+```js
+videoHandle.unmute();
+```
+
+##### `requestFullscreen()`
+
+Expands the video to fullscreen when possible.
+
+```js
+videoHandle.requestFullscreen();
+```
+
+#### Properties
+
+It also exposes the following read-only properties:
+
+##### `currentTime` (`number`)
+
+The current playback time in seconds.
+
+```js
+console.log(videoHandle.currentTime);
+```
+
+##### `duration` (`number`)
+
+The video's duration in seconds, when it's known (e.g. is not a livestream).
+
+```js
+console.log(videoHandle.duration);
+```
+
+##### `autoplay` (`boolean`)
+
+Whether the video autoplays.
+
+```js
+console.log(videoHandle.autoplay);
+```
+
+##### `controls` (`boolean`)
+
+Whether the video shows controls.
+
+```js
+console.log(videoHandle.controls);
+```
+
+##### `loop` (`boolean`)
+
+Whether the video loops.
+
+```js
+console.log(videoHandle.loop);
+```
+
 ## Attributes
 
 ### src
@@ -76,7 +166,7 @@ Alternatively, you can present a click-to-play overlay.
 
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, [which are outlined in the Video in AMP spec](../../spec/amp-video-interface.md#autoplay).
+to be played, [which are outlined in the Video in AMP spec](../../docs/spec/amp-video-interface.md#autoplay).
 
 ### controls
 
@@ -104,12 +194,17 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 
 ### noaudio
 
-Annotates the video as having no audio. This hides the equalizer icon that is displayed
-when the video has autoplay.
+Annotates the video as having no audio. This has the following effects:
+
+-   An equalizer icon will **not** be drawn when setting [`autoplay`](#autoplay).
+
+-   An `<amp-story>` that includes this video will **not** draw an unnecessary mute button.
 
 ### rotate-to-fullscreen
 
-If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../spec/amp-video-interface.md#rotate-to-fullscreen).
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../docs/spec/amp-video-interface.md#rotate-to-fullscreen).
+
+This attribute can be configured to based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### common attributes
 

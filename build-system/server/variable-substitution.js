@@ -1,23 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 let url;
 let variableSubstitution;
 let variables;
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ */
 function saveVariables(req, res) {
   const requestVariables = {};
   // For when a JSON is entered
@@ -30,7 +18,7 @@ function saveVariables(req, res) {
       <html>
       <head>
           <title>AMP Analytics</title>
-      </head> 
+      </head>
       <body>
       <p>Error:</p>
       ${e}
@@ -52,6 +40,10 @@ function saveVariables(req, res) {
   return;
 }
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ */
 function runVariableSubstitution(req, res) {
   variables = variables || {};
   // Don't include the incremented number sent in to make a new request
@@ -70,9 +62,9 @@ function runVariableSubstitution(req, res) {
       <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
       <script async src="https://cdn.ampproject.org/v0.js"></script>
       <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-    </head> 
+    </head>
     <body>
-    
+
     <h3>'<amp-analytics>' request: </h3>
       ${
         testParameters
@@ -105,6 +97,10 @@ function runVariableSubstitution(req, res) {
     </html>`);
 }
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ */
 function saveVariableRequest(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -114,7 +110,11 @@ function saveVariableRequest(req, res) {
   url = req.originalUrl;
 }
 
-function getVariableRequest(req, res) {
+/**
+ * @param {*} _req require('express').Request
+ * @param {*} res require('express').Response
+ */
+function getVariableRequest(_req, res) {
   res.json({'Results': variableSubstitution, 'URL': url});
   return;
 }

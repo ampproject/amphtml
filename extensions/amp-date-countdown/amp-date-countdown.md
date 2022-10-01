@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!--
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-date-countdown
 
 ## Usage
@@ -95,7 +79,16 @@ This table provides examples of formatted values specified in a Mustache templat
 
 ### Migrating from 0.1
 
-The experimental `1.0` version of `amp-date-countdown` does not support the `data-count-up` attribute. This means the `1.0` component is unable to count in the opposite direction.
+The experimental `1.0` version of `amp-date-countdown` uses the attribute name `count-up` instead of `data-count-up` as in `0.1` to support the "count up" feature. See the `count-up` section under `Attributes` below for more details.
+
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-date-countdown`, see [**`bento-date-countdown`**](./1.0/README.md).
 
 ## Attributes
 
@@ -169,9 +162,13 @@ on the specified `biggest-unit` value. For example, assume there are `50 days 10
 -   Supported values: `days`, `hours`, `minutes`, `seconds`
 -   Default: `days`
 
-### data-count-up (optional)
+### count-up (optional)
 
 Include this attribute to reverse the direction of the countdown to count up instead. This is useful to display the time elapsed since a target date in the past. To continue the countdown when the target date is in the past, be sure to include the `when-ended` attribute with the `continue` value. If the target date is in the future, `amp-date-countdown` will display a decrementing (toward 0) negative value.
+
+[tip type="important"]
+Please note that the attribute name is different than `0.1` which uses the `data-count-up` attribute to toggle this feature. The behavior of the feature is otherwise identical to `0.1`.
+[/tip]
 
 ## Events
 

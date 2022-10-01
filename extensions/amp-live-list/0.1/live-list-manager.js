@@ -1,27 +1,14 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {extensionScriptsInNode} from '#service/extension-script';
+
+import {userAssert} from '#utils/log';
 
 import {Poller} from './poller';
-import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
+
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {toArray} from '../../../src/types';
-import {userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {addParamToUrl} from '../../../src/url';
 
 /** @const {string} */
 export const SERVICE_ID = 'liveListManager';
@@ -120,10 +107,9 @@ export class LiveListManager {
    * @return {!Promise<!LiveListManager>}
    */
   static forDoc(element) {
-    return /** @type {!Promise<!LiveListManager>} */ (getServicePromiseForDoc(
-      element,
-      SERVICE_ID
-    ));
+    return /** @type {!Promise<!LiveListManager>} */ (
+      getServicePromiseForDoc(element, SERVICE_ID)
+    );
   }
 
   /**
@@ -217,9 +203,8 @@ export class LiveListManager {
     );
 
     return liveListsWithCustomSlots.map((id) => {
-      const customSlotId = this.liveLists_[id].element[
-        AMP_LIVE_LIST_CUSTOM_SLOT_ID
-      ];
+      const customSlotId =
+        this.liveLists_[id].element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
       return doc.getElementById(customSlotId);
     });
   }
@@ -312,16 +297,15 @@ export class LiveListManager {
    * @param {!Document} doc
    */
   installExtensionsForDoc_(doc) {
-    const extensions = toArray(
-      doc.querySelectorAll('script[custom-element], script[custom-template]')
-    );
-    extensions.forEach((script) => {
-      const extensionName =
-        script.getAttribute('custom-element') ||
-        script.getAttribute('custom-template');
+    const extensions = extensionScriptsInNode(doc);
+    extensions.forEach(({extensionId, extensionVersion}) => {
       // This is a cheap operation if extension is already installed so no need
       // to over optimize checks.
-      this.extensions_.installExtensionForDoc(this.ampdoc, extensionName);
+      this.extensions_.installExtensionForDoc(
+        this.ampdoc,
+        extensionId,
+        extensionVersion
+      );
     });
   }
 

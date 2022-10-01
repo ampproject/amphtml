@@ -6,22 +6,6 @@ teaser:
   text: Allows users to subscribe to web push notifications.
 ---
 
-<!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-web-push
 
 ## Usage
@@ -115,7 +99,7 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
         This service worker runs in the background and subscribes and unsubscribes the user from notifications.
       </p>
       <p>
-         If you develop a custom push solution, <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/0.1/amp-web-push.service-worker.js">see this example on how to make your service worker compatible with amp-web-push</a>.
+         If you develop a custom push solution, <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-web-push/0.1/amp-web-push.service-worker.js">see this example on how to make your service worker compatible with amp-web-push</a>.
        </p>
     </td>
   </tr>
@@ -139,4 +123,4 @@ Widgets are initially hidden while the user's subscription state is computed.
 
 ## Validation
 
-See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.
+See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.

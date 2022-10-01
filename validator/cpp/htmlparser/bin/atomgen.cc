@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 // To regenerate atom.h file, run:
 // bazel build htmlparser/bin:atomgen
 // bazel-bin/htmlparser/bin/atomgen
@@ -32,11 +16,11 @@
 #include <utility>
 #include <vector>
 
-#include "defer.h"
-#include "fileutil.h"
-#include "hash.h"
-#include "strings.h"
-#include "token.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/hash.h"
+#include "cpp/htmlparser/strings.h"
+#include "cpp/htmlparser/token.h"
 
 namespace htmlparser {
 
@@ -183,17 +167,17 @@ int main(int argc, char** argv) {
   };
 
   if (!(FileUtil::ReadFileLines(
-            options, "data/htmltags.txt", &all_names) &&
+            options, "cpp/htmlparser/data/htmltags.txt", &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/htmlattributes.txt",
+            options, "cpp/htmlparser/data/htmlattributes.txt",
             &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/javascriptevents.txt",
+            options, "cpp/htmlparser/data/javascriptevents.txt",
             &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/extras.txt", &all_names) &&
+            options, "cpp/htmlparser/data/extras.txt", &all_names) &&
         FileUtil::ReadFileLines(
-            options, "data/amptags.txt", &all_names))) {
+            options, "cpp/htmlparser/data/amptags.txt", &all_names))) {
     std::cerr << "Error reading input txt files." << std::endl;
     return EXIT_FAILURE;
   }
@@ -297,30 +281,14 @@ int main(int argc, char** argv) {
     nameToTextOffset[s] = static_cast<uint32_t>(offset << 8 | s.size());
   }
 
-  std::ofstream fd("atom.h");
+  std::ofstream fd("cpp/htmlparser/atom.h");
   Defer ____([&]() {fd.close();});
 
-  fd << R"(//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-// AUTO GENERATED; DO NOT EDIT.
+  fd << R"(// AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file see comments in bin/atomgen.cc
 
-#ifndef HTMLPARSER__ATOM_H_
-#define HTMLPARSER__ATOM_H_
+#ifndef CPP_HTMLPARSER_ATOM_H_
+#define CPP_HTMLPARSER_ATOM_H_
 
 #include <array>
 #include <string>
@@ -366,5 +334,5 @@ enum class Atom {
   fd << "inline constexpr std::string_view kAtomText(\""
      << text << "\");" << std::endl;
   fd << std::endl << "}  // namespace htmlparser." << std::endl;
-  fd << std::endl << "#endif  // HTMLPARSER__ATOM_H_" << std::endl;
+  fd << std::endl << "#endif  // CPP_HTMLPARSER_ATOM_H_" << std::endl;
 }

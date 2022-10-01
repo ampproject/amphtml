@@ -1,0 +1,27 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the amp-story-player transformed.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="self;v=1">
+|  <head>
+|    <meta charset="utf-8">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-story-player" src="https://cdn.ampproject.org/v0/amp-story-player-0.1.js"></script>
+|    <title>My Story</title>
+|    <meta name="description" content="Get started with amp-story-player">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link rel="canonical" href="validator-amp-story-player.html">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-runtime i-amphtml-version="123456789012345"></style>
+|  </head>
+|  <body>
+|    <amp-story-player width="360" height="600" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+|      <i-amphtml-sizer class="i-amphtml-sizer">
+|          <img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjYwMCIgd2lkdGg9IjM2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4=">
+|      </i-amphtml-sizer>
+|      <a href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp" data-amp-original-style="--story-player-poster: url(https://amp.dev/static/samples/img/story_dog2_portrait.jpg)" class="amp-wp-77421fc"> Stories in AMP – Hello World </a>
+|  </amp-story-player>
+|  </body>
+|  </html>

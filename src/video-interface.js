@@ -1,21 +1,5 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {dev} from './log';
-import {whenUpgradedToCustomElement} from './dom';
+import {devAssertElement} from '#core/assert';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 
@@ -34,6 +18,25 @@ export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
  * @interface
  */
 export class VideoInterface {
+  /** @return {!AmpElement} */
+  get element() {}
+
+  /** @return {!Window} */
+  get win() {}
+
+  /**
+   * See `BaseElement`.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {}
+
+  /**
+   * See `BaseElement`.
+   * @param {function()} unusedMutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(unusedMutator) {}
+
   /**
    * Whether the component supports video playback in the current platform.
    * If false, component will be not treated as a video component.
@@ -163,7 +166,7 @@ export class VideoInterface {
    * implementation of fullscreen (flash for example) then check
    * if Services.platformFor(this.win).isSafari is true and use the internal
    * implementation instead. If not, it is recommended to take the iframe
-   * to fullscreen using fullscreenEnter from dom.js
+   * to fullscreen using fullscreenEnter from src/core/dom/fullscreen.js
    */
   fullscreenEnter() {}
 
@@ -191,9 +194,9 @@ export class VideoInterface {
  * Components implementing the VideoInterface are expected to support
  * the following attributes.
  *
- * @const {!Object<string, string>}
+ * @enum {string}
  */
-export const VideoAttributes = {
+export const VideoAttributes_Enum = {
   /**
    * autoplay
    *
@@ -249,9 +252,9 @@ export const VideoAttributes = {
  * Components implementing the VideoInterface are expected to dispatch
  * the following DOM events.
  *
- * @const {!Object<string, string>}
+ * @enum {string}
  */
-export const VideoEvents = {
+export const VideoEvents_Enum = {
   /**
    * registered
    *
@@ -411,9 +414,9 @@ export let PlayingStateDef;
  * Internal playing states used to distinguish between video playing on user's
  * command and videos playing automatically
  *
- * @const {!Object<string, PlayingStateDef>}
+ * @enum {string}
  */
-export const PlayingStates = {
+export const PlayingStates_Enum = {
   /**
    * playing_manual
    *
@@ -444,7 +447,7 @@ export const PlayingStates = {
 };
 
 /** @enum {string} */
-export const VideoAnalyticsEvents = {
+export const VideoAnalyticsEvents_Enum = {
   /**
    * video-ended
    *
@@ -560,25 +563,25 @@ export let VideoOrBaseElementDef;
  * @return {boolean}
  */
 export function isDockable(element) {
-  return element.hasAttribute(VideoAttributes.DOCK);
+  return element.hasAttribute(VideoAttributes_Enum.DOCK);
 }
 
 /** @enum {string} */
-export const VideoServiceSignals = {
+export const VideoServiceSignals_Enum = {
   USER_INTERACTED: 'user-interacted',
   PLAYBACK_DELEGATED: 'playback-delegated',
 };
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
-  whenUpgradedToCustomElement(dev().assertElement(video)).then((el) => {
-    el.signals().signal(VideoServiceSignals.PLAYBACK_DELEGATED);
+  whenUpgradedToCustomElement(devAssertElement(video)).then((el) => {
+    el.signals().signal(VideoServiceSignals_Enum.PLAYBACK_DELEGATED);
   });
 }
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function userInteractedWith(video) {
-  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+  video.signals().signal(VideoServiceSignals_Enum.USER_INTERACTED);
 }
 
 /**

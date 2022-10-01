@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    [
+      "../../../.."
+    ]
+  ],
+  "sourceType": "module",
+  "filenameRelative": "node_modules/foo.js"
+}

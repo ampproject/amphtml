@@ -1,20 +1,4 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#include "parse-layout.h"
+#include "cpp/engine/parse-layout.h"
 
 #include <string>
 #include <unordered_map>
@@ -63,7 +47,9 @@ CssLength::CssLength()
       is_fluid(false),
       numeral(std::numeric_limits<double>::quiet_NaN()),
       unit(kUnitPx) {}
-CssLength::CssLength(string_view input, bool allow_auto, bool allow_fluid)
+CssLength::CssLength(
+    re2::StringPiece input,
+    bool allow_auto, bool allow_fluid)
     : is_valid(false),
       is_set(false),
       is_auto(false),
@@ -113,22 +99,21 @@ CssLength::CssLength(string_view input, bool allow_auto, bool allow_fluid)
 }
 
 AmpLayout::Layout ParseLayout(string_view layout) {
-  static unordered_map<std::string, AmpLayout::Layout>* layouts_by_attr_val =
-      [] {
-        auto result = new unordered_map<std::string, AmpLayout::Layout>();
-        auto descriptor =
-            protocolbuffer::GetEnumDescriptor<AmpLayout::Layout>();
-        for (int i = 0; i < descriptor->value_count(); ++i) {
-          auto l = descriptor->value(i);
-          (*result)[StrReplaceAll(AsciiStrToLower(
-              l->name()),  {{"_", "-"}})] =
-              static_cast<AmpLayout::Layout>(l->number());
-        }
-        return result;
-      }();
+  static unordered_map<std::string, AmpLayout::Layout> layouts_by_attr_val({
+      {"container", AmpLayout::CONTAINER},
+      {"fill", AmpLayout::FILL},
+      {"fixed", AmpLayout::FIXED},
+      {"fixed-height", AmpLayout::FIXED_HEIGHT},
+      {"flex-item", AmpLayout::FLEX_ITEM},
+      {"fluid", AmpLayout::FLUID},
+      {"intrinsic", AmpLayout::INTRINSIC},
+      {"nodisplay", AmpLayout::NODISPLAY},
+      {"responsive", AmpLayout::RESPONSIVE},
+      {"unknown", AmpLayout::UNKNOWN},
+  });
   if (layout.empty()) return AmpLayout::UNKNOWN;
-  auto it = layouts_by_attr_val->find(std::string(layout));
-  return (it == layouts_by_attr_val->end()) ? AmpLayout::UNKNOWN : it->second;
+  auto it = layouts_by_attr_val.find(std::string(layout));
+  return (it == layouts_by_attr_val.end()) ? AmpLayout::UNKNOWN : it->second;
 }
 
 AmpLayout::Layout ParseAndCalculateLayout(string_view layout, string_view width,
@@ -161,7 +146,7 @@ CssLength CalculateWidth(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED) &&
       !input_width.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/layout.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).
@@ -189,7 +174,7 @@ CssLength CalculateHeight(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED_HEIGHT) &&
       !input_height.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/layout.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).
@@ -203,12 +188,10 @@ CssLength CalculateHeight(AmpLayout::Layout input_layout,
 
 CssLength CalculateHeight(const AmpLayout& spec, AmpLayout::Layout input_layout,
                           const CssLength& input_height) {
-  static const auto kOne =
-      new CssLength("1", /*allow_auto=*/false, /*allow_fluid=*/false);
   if ((input_layout == AmpLayout::UNKNOWN || input_layout == AmpLayout::FIXED ||
        input_layout == AmpLayout::FIXED_HEIGHT) &&
       !input_height.is_set && spec.defines_default_height())
-    return *kOne;
+    return *kOnePx;
   return input_height;
 }
 
@@ -236,23 +219,22 @@ std::string GetCssLengthStyle(const CssLength& length,
 }
 
 std::string GetLayoutClass(AmpLayout::Layout layout) {
-  static unordered_map<AmpLayout::Layout, std::string>* classes_by_layout = [] {
-    auto result = new unordered_map<AmpLayout::Layout, std::string>();
-    auto descriptor =
-        protocolbuffer::GetEnumDescriptor<AmpLayout::Layout>();
-    for (int i = 0; i < descriptor->value_count(); ++i) {
-      auto l = descriptor->value(i);
-      (*result)[static_cast<AmpLayout::Layout>(l->number())] =
-          StrCat("i-amphtml-layout-",
-                 StrReplaceAll(AsciiStrToLower(l->name()),
-                               {{"_", "-"}}));
-    }
-    return result;
-  }();
+  static unordered_map<AmpLayout::Layout, std::string> classes_by_layout({
+      {AmpLayout::CONTAINER, "i-amphtml-layout-container"},
+      {AmpLayout::FILL, "i-amphtml-layout-fill"},
+      {AmpLayout::FIXED, "i-amphtml-layout-fixed"},
+      {AmpLayout::FIXED_HEIGHT, "i-amphtml-layout-fixed-height"},
+      {AmpLayout::FLEX_ITEM, "i-amphtml-layout-flex-item"},
+      {AmpLayout::FLUID, "i-amphtml-layout-fluid"},
+      {AmpLayout::INTRINSIC, "i-amphtml-layout-intrinsic"},
+      {AmpLayout::NODISPLAY, "i-amphtml-layout-nodisplay"},
+      {AmpLayout::RESPONSIVE, "i-amphtml-layout-responsive"},
+      {AmpLayout::UNKNOWN, "i-amphtml-layout-unknown"},
+  });
   if (layout == AmpLayout::UNKNOWN) return "";
 
-  if (auto iter = classes_by_layout->find(layout);
-      iter != classes_by_layout->end()) {
+  if (auto iter = classes_by_layout.find(layout);
+      iter != classes_by_layout.end()) {
     return iter->second;
   }
 
@@ -260,22 +242,21 @@ std::string GetLayoutClass(AmpLayout::Layout layout) {
 }
 
 std::string GetLayoutName(AmpLayout::Layout layout) {
-  static unordered_map<AmpLayout::Layout, std::string>* classes_by_layout = [] {
-    auto result = new unordered_map<AmpLayout::Layout, std::string>();
-    auto descriptor =
-        protocolbuffer::GetEnumDescriptor<AmpLayout::Layout>();
-    for (int i = 0; i < descriptor->value_count(); ++i) {
-      auto l = descriptor->value(i);
-      (*result)[static_cast<AmpLayout::Layout>(l->number())] =
-          StrReplaceAll(AsciiStrToLower(l->name()),
-                        {{"_", "-"}});
-    }
-    return result;
-  }();
+  static unordered_map<AmpLayout::Layout, std::string> names_by_layout({
+      {AmpLayout::CONTAINER, "container"},
+      {AmpLayout::FILL, "fill"},
+      {AmpLayout::FIXED, "fixed"},
+      {AmpLayout::FIXED_HEIGHT, "fixed-height"},
+      {AmpLayout::FLEX_ITEM, "flex-item"},
+      {AmpLayout::FLUID, "fluid"},
+      {AmpLayout::INTRINSIC, "intrinsic"},
+      {AmpLayout::NODISPLAY, "nodisplay"},
+      {AmpLayout::RESPONSIVE, "responsive"},
+      {AmpLayout::UNKNOWN, "unknown"},
+  });
   if (layout == AmpLayout::UNKNOWN) return "";
 
-  if (auto iter = classes_by_layout->find(layout);
-      iter != classes_by_layout->end()) {
+  if (auto iter = names_by_layout.find(layout); iter != names_by_layout.end()) {
     return iter->second;
   }
 
@@ -291,6 +272,8 @@ std::string GetLayoutStyle(AmpLayout::Layout layout, const CssLength& width,
                     GetCssLengthStyle(height, "height"));
     case AmpLayout::FIXED_HEIGHT:
       return GetCssLengthStyle(height, "height");
+    case AmpLayout::FLUID:
+      return "width:100%;height:0;";
     case AmpLayout::NODISPLAY:
     case AmpLayout::RESPONSIVE:
     case AmpLayout::FILL:
@@ -317,8 +300,16 @@ bool IsLayoutSizeDefined(AmpLayout::Layout layout) {
           layout == AmpLayout::INTRINSIC);
 }
 
+bool IsLayoutAwaitingSize(AmpLayout::Layout layout) {
+  return layout == AmpLayout::FLUID;
+}
+
 std::string GetLayoutSizeDefinedClass() {
   return "i-amphtml-layout-size-defined";
+}
+
+std::string GetLayoutAwaitingSizeClass() {
+  return "i-amphtml-layout-awaiting-size";
 }
 
 }  // namespace amp::validator::parse_layout

@@ -6,22 +6,6 @@ teaser:
   text: Displays an AirBnB Bodymovin animation player.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-bodymovin-animation
 
 ## Usage
@@ -61,14 +45,14 @@ for an action to start playing.
 
 ### `renderer` (optional)
 
-By default, this component uses the SVG renderer, this uses a light version of
-the Bodymovin animation player. However, if developers feel that they need the
-full player and want to use an HTML renderer they may do so by specifying the
-`renderer` attribute to be `html`.
+Multiple [renderers](https://airbnb.io/lottie/#/web?id=usage) are supported and
+can be specified:
 
-This attribute only accepts the values `html` and `svg`.
+-   `canvas`
+-   `html`
+-   `svg` (default)
 
-### title (optional)
+### `title` (optional)
 
 Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Airbnb BodyMovin animation"`.
 

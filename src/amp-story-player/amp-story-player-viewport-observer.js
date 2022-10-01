@@ -1,20 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '#core/types/function';
 
 /** @const {number} */
 const SCROLL_THROTTLE_MS = 500;
@@ -27,23 +11,19 @@ export class AmpStoryPlayerViewportObserver {
   /**
    * @param {!Window} win
    * @param {!Element} element
-   * @param {function} viewportCb
-   * @param {number} distance Minimum of viewports away for triggering viewportCb
+   * @param {function():void} viewportCb
    */
-  constructor(win, element, viewportCb, distance = 0) {
+  constructor(win, element, viewportCb) {
     /** @private {!Window} */
     this.win_ = win;
 
     /** @private {!Element} */
     this.element_ = element;
 
-    /** @private {function} */
+    /** @private {function():void} */
     this.cb_ = viewportCb;
 
-    /** @private {number} */
-    this.viewportDistance_ = distance;
-
-    /** @private {?function} */
+    /** @private {?function():void} */
     this.scrollHandler_ = null;
 
     this.initializeInObOrFallback_();
@@ -74,16 +54,14 @@ export class AmpStoryPlayerViewportObserver {
       });
     };
 
-    const observer = new this.win_.IntersectionObserver(inObCallback, {
-      rootMargin: `${this.viewportDistance_ * 100}%`,
-    });
+    const observer = new this.win_.IntersectionObserver(inObCallback);
 
     observer.observe(this.element_);
   }
 
   /**
    * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the element when it is close to the viewport.
+   * layoutPlayer on the element when it is close to the viewport.
    * @private
    */
   createInObFallback_() {
@@ -106,9 +84,8 @@ export class AmpStoryPlayerViewportObserver {
   checkIfVisibleFallback_() {
     const elTop = this.element_./*OK*/ getBoundingClientRect().top;
     const winInnerHeight = this.win_./*OK*/ innerHeight;
-    const multiplier = this.viewportDistance_ > 0 ? this.viewportDistance_ : 1;
 
-    if (winInnerHeight * multiplier > elTop) {
+    if (winInnerHeight > elTop) {
       this.cb_();
       this.win_.removeEventListener('scroll', this.scrollHandler_);
     }

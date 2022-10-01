@@ -1,25 +1,10 @@
 FAIL
 |  <!--
-|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests for the amp-call-tracking tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -37,13 +22,13 @@ FAIL
 |    <!-- Invalid: no <A> tag -->
 |    <amp-call-tracking config="https://example.com/calltracking.json">
 >>   ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:37:2 Tag 'amp-call-tracking' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-call-tracking/)
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:22:2 Tag 'amp-call-tracking' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-call-tracking/)
 |    </amp-call-tracking>
 |
 |    <!-- Invalid: more than one <A> tag -->
 |    <amp-call-tracking config="https://example.com/calltracking.json">
 >>   ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:41:2 Tag 'amp-call-tracking' must have 1 child tags - saw 2 child tags. (see https://amp.dev/documentation/components/amp-call-tracking/)
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:26:2 Tag 'amp-call-tracking' must have 1 child tags - saw 2 child tags. (see https://amp.dev/documentation/components/amp-call-tracking/)
 |      <a href="tel:12345678">+1 (23) 45-678</a>
 |      <a href="tel:98765432">(987) 654-321</a>
 |    </amp-call-tracking>
@@ -51,7 +36,7 @@ amp-call-tracking/0.1/test/validator-amp-call-tracking.html:41:2 Tag 'amp-call-t
 |    <!-- Invalid: no "config" attribute -->
 |    <amp-call-tracking>
 >>   ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:47:2 The mandatory attribute 'config' is missing in tag 'amp-call-tracking'. (see https://amp.dev/documentation/components/amp-call-tracking/)
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:32:2 The mandatory attribute 'config' is missing in tag 'amp-call-tracking'. (see https://amp.dev/documentation/components/amp-call-tracking/)
 |      <a href="tel:12345678">+1 (23) 45-678</a>
 |    </amp-call-tracking>
 |
@@ -59,7 +44,7 @@ amp-call-tracking/0.1/test/validator-amp-call-tracking.html:47:2 The mandatory a
 |    <amp-call-tracking config="https://example.com/calltracking.json">
 |      <div></div>
 >>     ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:53:4 Tag 'div' is disallowed as child of tag 'amp-call-tracking'. Child tag must be one of ['a']. (see https://amp.dev/documentation/components/amp-call-tracking/)
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:38:4 Tag 'div' is disallowed as child of tag 'amp-call-tracking'. Child tag must be one of ['a']. (see https://amp.dev/documentation/components/amp-call-tracking/)
 |    </amp-call-tracking>
 |  </body>
 |  </html>

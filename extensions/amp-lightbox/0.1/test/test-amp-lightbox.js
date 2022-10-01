@@ -1,26 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-lightbox';
-import * as dom from '../../../../src/dom';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {Keys} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import * as dom from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-lightbox component',
@@ -84,7 +70,14 @@ describes.realWin(
       const element = createLightbox();
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias');
-      await dom.whenUpgradedToCustomElement(element);
+      await whenUpgradedToCustomElement(element);
+      const impl = await element.getImpl(true);
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
 
       ['open', 'close'].forEach((method) => {
         action.execute(
@@ -94,8 +87,9 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
+        expect(element.enqueAction.callCount).to.be.above(0);
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
             actionEventType: '?',
@@ -105,39 +99,32 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ActionTrust.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });
     });
 
-    it('should close on ESC', () => {
+    it('should close on close-watcher signal', async () => {
       const lightbox = createLightbox();
-      const impl = lightbox.implementation_;
-      impl.getHistory_ = () => {
-        return {
-          pop: () => {},
-          push: () => Promise.resolve(11),
-        };
-      };
+      const impl = await lightbox.getImpl(true);
 
       const sourceElement = createOpeningButton('openBtn');
       const setupCloseSpy = env.sandbox.spy(impl, 'close');
 
-      impl.open_({caller: sourceElement});
-      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ENTER}));
-      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ESCAPE}));
-      expect(setupCloseSpy).to.be.calledOnce;
+      await impl.open_({caller: sourceElement});
+      impl.closeWatcher_.signalClosed();
+      expect(setupCloseSpy).to.be.called;
     });
 
-    it('should not change focus or create a button if a focus has been made in the modal', () => {
+    it('should not change focus or create a button if a focus has been made in the modal', async () => {
       const openButton = createOpeningButton('openingButton');
       const lightbox = createLightbox();
       const myLink = createLink('randomLink');
       myLink.setAttribute('autofocus', '');
       lightbox.appendChild(myLink);
 
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(true);
       impl.getHistory_ = () => {
         return {
           pop: () => {},
@@ -160,11 +147,11 @@ describes.realWin(
       });
     });
 
-    it('should focus on close button if no handmade focus but has close button', () => {
+    it('should focus on close button if no handmade focus but has close button', async () => {
       const lightbox = createLightbox();
       const closeButton = createCloseButton();
       lightbox.appendChild(closeButton);
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(true);
 
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
@@ -193,10 +180,10 @@ describes.realWin(
       });
     });
 
-    it('should create close button and focus on it if no handmade focus and no close button', () => {
+    it('should create close button and focus on it if no handmade focus and no close button', async () => {
       const lightbox = createLightbox();
+      const impl = await lightbox.getImpl(true);
 
-      const impl = lightbox.implementation_;
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
       const createCloseButtonSpy = env.sandbox.spy(
@@ -224,11 +211,11 @@ describes.realWin(
       });
     });
 
-    it('should stay in modal if focus stays in modal and close if outside', () => {
+    it('should stay in modal if focus stays in modal and close if outside', async () => {
       const lightbox = createLightbox();
       const insideLink = createLink('insideLink');
       lightbox.appendChild(insideLink);
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(true);
 
       const outsideLink = createLink('outsideLink');
       doc.body.appendChild(outsideLink);
@@ -264,12 +251,12 @@ describes.realWin(
       });
     });
 
-    it('should return focus to source element after close', () => {
+    it('should return focus to source element after close', async () => {
       const openButton = createOpeningButton('openingButton');
       const lightbox = createLightbox();
       const closeButton = createCloseButton();
       lightbox.appendChild(closeButton);
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(true);
 
       const openSpy = env.sandbox.spy(impl, 'finalizeOpen_');
       const closeSpy = env.sandbox.spy(impl, 'finalizeClose_');
@@ -289,10 +276,10 @@ describes.realWin(
       });
     });
 
-    it('should create `i-amphtml-ad-close-header` but no close button if param then focus on it', () => {
+    it('should create `i-amphtml-ad-close-header` but no close button if param then focus on it', async () => {
       const lightbox = createLightbox();
       lightbox.setAttribute('close-button', '');
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(true);
 
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
@@ -321,6 +308,74 @@ describes.realWin(
         expect(tieSpy).to.be.calledOnce;
         expect(tryFocusSpy).to.be.calledWith(impl.closeButtonHeader_);
       });
+    });
+
+    it('should set itself as a container when fully opened', async () => {
+      const lightbox = createLightbox();
+      const impl = await lightbox.getImpl(true);
+      env.sandbox.stub(lightbox, 'setAsContainerInternal');
+
+      const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
+
+      const args = {};
+      const openInvocation = {
+        method: 'open',
+        args,
+        satisfiesTrust: () => true,
+      };
+      impl.executeAction(openInvocation);
+
+      expect(lightbox.setAsContainerInternal).to.not.be.called;
+
+      await whenCalled(finalizeSpy);
+
+      expect(lightbox.setAsContainerInternal).to.be.calledOnce;
+    });
+
+    it('should set and remove itself as a container and unmount children', async () => {
+      const lightbox = createLightbox();
+
+      // Lightbox has a child.
+      const child = dom.createElementWithAttributes(doc, 'amp-img', {
+        layout: 'nodisplay',
+      });
+      lightbox.appendChild(child);
+      env.sandbox.stub(child, 'unmount');
+
+      const openButton = createOpeningButton('openingButton');
+      const closeButton = createCloseButton();
+      lightbox.appendChild(closeButton);
+
+      const impl = await lightbox.getImpl(true);
+      env.sandbox.stub(lightbox, 'setAsContainerInternal');
+      env.sandbox.stub(lightbox, 'removeAsContainerInternal');
+
+      const openSpy = env.sandbox.spy(impl, 'finalizeOpen_');
+      const closeSpy = env.sandbox.spy(impl, 'finalizeClose_');
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
+        };
+      };
+
+      openButton.click();
+      expect(lightbox.setAsContainerInternal).to.not.be.called;
+      await whenCalled(openSpy);
+      expect(lightbox.setAsContainerInternal).to.be.calledOnce;
+
+      closeButton.click();
+      expect(lightbox.removeAsContainerInternal).to.not.be.called;
+      expect(child.unmount).to.not.be.called;
+      await whenCalled(closeSpy);
+      expect(lightbox.removeAsContainerInternal).to.be.calledOnce;
+      expect(child.unmount).to.be.calledOnce;
     });
   }
 );

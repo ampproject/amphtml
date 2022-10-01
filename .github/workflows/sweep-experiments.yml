@@ -1,4 +1,4 @@
-# Executes `gulp sweep-experiments` on a schedule.
+# Executes `amp sweep-experiments` on a schedule.
 # If experiments are swept, a PR is created.
 
 name: Sweep Experiments
@@ -8,8 +8,16 @@ on:
     # First day of the month at 00:00:00
     - cron: '0 0 1 * *'
 
+permissions:
+  contents: read
+
 jobs:
   sweep-experiments:
+    permissions:
+      contents: write # for peter-evans/create-pull-request to create branch
+      issues: write # for peter-evans/create-or-update-comment to create or update comment
+      pull-requests: write # for peter-evans/create-pull-request to create a PR
+    if: github.repository == 'ampproject/amphtml'
     name: Sweep Experiments
     runs-on: ubuntu-latest
 
@@ -20,13 +28,12 @@ jobs:
           fetch-depth: 0
 
       - name: Set Up Node
-        uses: actions/setup-node@v2.1.4
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
       - name: Set Up Environment
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-
-      - name: Install Gulp CLI
-        run: npm install --global --force gulp-cli
 
       - name: Install Dependencies
         run: npm ci
@@ -37,7 +44,7 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-          gulp sweep-experiments
+          amp sweep-experiments
 
           title=$(git log -1 --format=%s)
           title="${title//'%'/'%25'}"
@@ -77,3 +84,32 @@ jobs:
             ```
             git checkout -t upstream/${{ steps.sweep.outputs.branch }}
             ```
+
+            If you're a repository collaborator, you may push to the branch associated with this pull request.
+
+      - name: Cleanup Branches
+        if: ${{ steps.pull-request.outputs.pull-request-number }}
+        run: |
+          node build-system/tasks/sweep-experiments/cleanup-branches.js --except="${{ steps.sweep.outputs.branch }}"
+
+  create-issue-on-error:
+    if: failure()
+    needs: sweep-experiments
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

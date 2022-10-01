@@ -1,23 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-nexxtv-player';
-import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {createElementWithAttributes} from '#core/dom';
+
+import {listenOncePromise} from '#utils/event-helper';
+
+import * as consent from '../../../../src/consent';
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-nexxtv-player',
@@ -44,10 +31,11 @@ describes.realWin(
         'data-origin': `http://localhost:${location.port}/test/fixtures/served/blank.html#`,
       });
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const iframe = element.querySelector('iframe');
-      element.implementation_.handleNexxMessage_({
+      impl.handleNexxMessage_({
         origin: 'https://embed.nexx.cloud',
         source: iframe.contentWindow,
         data: JSON.stringify({cmd: 'onload'}),
@@ -59,6 +47,7 @@ describes.realWin(
       const element = await getNexxtvPlayer({
         'data-mediaid': '71QQG852413DU7J',
         'data-client': '761',
+        'data-streamtype': 'video',
       });
       const playerIframe = element.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -69,7 +58,7 @@ describes.realWin(
             element.getAttribute('data-client') +
               '/video/' +
               element.getAttribute('data-mediaid') +
-              '\\?dataMode=static&platform=amp' +
+              '\\?platform=amp' +
               '$' // suffix
           )
         );
@@ -83,7 +72,7 @@ describes.realWin(
       const playerIframe = nexxtv.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
 
-      const obj = nexxtv.implementation_;
+      const obj = await nexxtv.getImpl(false);
       obj.unlayoutCallback();
       expect(nexxtv.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
@@ -96,22 +85,37 @@ describes.realWin(
       });
       const iframe = nexxtv.querySelector('iframe');
       await Promise.resolve();
-      const p1 = listenOncePromise(nexxtv, VideoEvents.PLAYING);
-      sendFakeMessage(nexxtv, iframe, {event: 'play'});
+      const p1 = listenOncePromise(nexxtv, VideoEvents_Enum.PLAYING);
+      await sendFakeMessage(nexxtv, iframe, {event: 'play'});
       await p1;
-      const p2 = listenOncePromise(nexxtv, VideoEvents.MUTED);
-      sendFakeMessage(nexxtv, iframe, {event: 'mute'});
+      const p2 = listenOncePromise(nexxtv, VideoEvents_Enum.MUTED);
+      await sendFakeMessage(nexxtv, iframe, {event: 'mute'});
       await p2;
-      const p3 = listenOncePromise(nexxtv, VideoEvents.PAUSE);
-      sendFakeMessage(nexxtv, iframe, {event: 'pause'});
+      const p3 = listenOncePromise(nexxtv, VideoEvents_Enum.PAUSE);
+      await sendFakeMessage(nexxtv, iframe, {event: 'pause'});
       await p3;
-      const p4 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
-      sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
+      const p4 = listenOncePromise(nexxtv, VideoEvents_Enum.UNMUTED);
+      await sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
       return p4;
     });
 
-    function sendFakeMessage(nexxtv, iframe, command) {
-      nexxtv.implementation_.handleNexxMessage_({
+    it('should pass consent value to iframe', () => {
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('testinfo');
+
+      return getNexxtvPlayer({
+        'data-mediaid': '71QQG852413DU7J',
+        'data-client': '761',
+        'data-block-on-consent': '_till_accepted',
+      }).then((nexxplayer) => {
+        const iframe = nexxplayer.querySelector('iframe');
+
+        expect(iframe.src).to.contain('consentString=testinfo');
+      });
+    });
+
+    async function sendFakeMessage(nexxtv, iframe, command) {
+      const impl = await nexxtv.getImpl(false);
+      impl.handleNexxMessage_({
         origin: 'https://embed.nexx.cloud',
         source: iframe.contentWindow,
         data: command,

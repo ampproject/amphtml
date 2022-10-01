@@ -1,21 +1,5 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-twitter';
-import {cleanupTweetId_, twitter} from '../../../../3p/twitter';
+import {cleanupTweetId_, twitter} from '#3p/twitter';
 
 describes.realWin(
   'amp-twitter',
@@ -40,7 +24,7 @@ describes.realWin(
       ampTwitter.setAttribute('width', '111');
       ampTwitter.setAttribute('height', '222');
       doc.body.appendChild(ampTwitter);
-      await ampTwitter.build();
+      await ampTwitter.buildInternal();
       await ampTwitter.layoutCallback();
       return ampTwitter;
     }
@@ -116,9 +100,9 @@ describes.realWin(
 
     it('removes iframe after unlayoutCallback', async () => {
       const ampTwitter = await getAmpTwitter(tweetId);
+      const obj = await ampTwitter.getImpl(false);
       const iframe = ampTwitter.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      const obj = ampTwitter.implementation_;
       obj.unlayoutCallback();
       expect(ampTwitter.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
@@ -128,7 +112,8 @@ describes.realWin(
     it('should replace iframe after tweetid mutation', async () => {
       const newTweetId = '638793490521001985';
       const ampTwitter = await getAmpTwitter(tweetId);
-      const spy = env.sandbox.spy(ampTwitter.implementation_, 'toggleLoading');
+      const impl = await ampTwitter.getImpl(false);
+      const spy = env.sandbox.spy(impl, 'toggleLoading');
       const iframe = ampTwitter.querySelector('iframe');
       ampTwitter.setAttribute('data-tweetid', newTweetId);
       ampTwitter.mutatedAttributesCallback({'data-tweetid': newTweetId});

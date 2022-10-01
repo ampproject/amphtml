@@ -1,28 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as Preact from '#preact';
+import {useRef, useState} from '#preact';
 
-import * as Preact from '../../../../src/preact';
-import {Option, Selector} from '../selector';
-import {select, withKnobs} from '@storybook/addon-knobs';
-import {useState} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
+import '../component.jss';
+
+import {BentoSelector, BentoSelectorOption} from '../component';
+
 export default {
   title: 'Selector',
-  component: Selector,
-  decorators: [withA11y, withKnobs],
+  component: BentoSelector,
 };
 
 const imgStyle = {
@@ -47,16 +32,16 @@ function SelectorWithActions(props) {
       <button onClick={() => setShow(!show)}>
         toggle option 2.5 visibility
       </button>
-      <Selector ref={ref} {...props}>
+      <BentoSelector ref={ref} {...props}>
         {props.children.slice(0, 2)}
         {show && (
-          <Option as="div" option="2.5" index={2}>
+          <BentoSelectorOption as="div" option="2.5" index={2}>
             Option 2.5
-          </Option>
+          </BentoSelectorOption>
         )}
         <br />
         {props.children.slice(2)}
-      </Selector>
+      </BentoSelector>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current./*OK*/ toggle('2')}>
           toggle(option "2")
@@ -82,21 +67,16 @@ function SelectorWithActions(props) {
   );
 }
 
-export const actionsAndOrder = () => {
-  const keyboardSelectMode = select(
-    'keyboard select mode',
-    ['none', 'focus', 'select'],
-    'select'
-  );
+export const actionsAndOrder = (args) => {
   return (
     <form>
       <SelectorWithActions
-        keyboardSelectMode={keyboardSelectMode}
         multiple
         name="poll"
         aria-label="Image menu"
+        {...args}
       >
-        <Option
+        <BentoSelectorOption
           as="img"
           alt="Sea landscape"
           style={imgStyle}
@@ -104,63 +84,82 @@ export const actionsAndOrder = () => {
           option="1"
           index={0}
           disabled
-        ></Option>
-        <Option
+        ></BentoSelectorOption>
+        <BentoSelectorOption
           as="img"
           alt="Desert landscape"
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
           option="2"
           index={1}
-        ></Option>
+        ></BentoSelectorOption>
         <br />
-        <Option
+        <BentoSelectorOption
           as="img"
           alt="Ship landscape"
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
           option="3"
           index={3}
-        ></Option>
-        <Option
+        ></BentoSelectorOption>
+        <BentoSelectorOption
           as="img"
           alt="Village landscape"
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
           option="4"
           index={4}
-        ></Option>
+        ></BentoSelectorOption>
       </SelectorWithActions>
     </form>
   );
 };
 
-export const optionItems = () => {
+actionsAndOrder.argTypes = {
+  'keyboard-select-mode': {
+    name: 'keyboard-select-mode',
+    defaultValue: 'select',
+    options: ['none', 'focus', 'select'],
+    control: {type: 'select'},
+  },
+};
+
+export const OptionItems = () => {
+  const ref = useRef(null);
   return (
-    <Selector aria-label="Option menu">
-      <Option option="1">Option 1</Option>
-      <Option option="2">Option 2</Option>
-      <Option option="3">Option 3</Option>
-      <Option option="4">Option 4</Option>
-    </Selector>
+    <>
+      <button onClick={() => ref.current.toggle('1')}>toggle1</button>
+      <button onClick={() => ref.current.toggle('2')}>toggle2</button>
+      <BentoSelector ref={ref} aria-label="Option menu">
+        <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
+        <BentoSelectorOption option="2">Option 2</BentoSelectorOption>
+        <BentoSelectorOption option="3">Option 3</BentoSelectorOption>
+        <BentoSelectorOption option="4">Option 4</BentoSelectorOption>
+      </BentoSelector>
+    </>
   );
 };
 
 export const multiselect = () => {
   return (
-    <Selector as="ul" multiple aria-label="Multiselect menu">
-      <Option as="li" option="1">
+    <BentoSelector
+      as="ul"
+      multiple
+      aria-label="Multiselect menu"
+      defaultValue={['2']}
+    >
+      <BentoSelectorOption as="li" option="1">
         Option 1
-      </Option>
-      <Option as="li" disabled option="2">
+      </BentoSelectorOption>
+      <BentoSelectorOption as="li" disabled option="2">
         Option 2 (disabled)
-      </Option>
-      <Option as="li" option="3">
+      </BentoSelectorOption>
+      <BentoSelectorOption as="li" option="3">
         Option 3
-      </Option>
-      <Option as="li" option="4">
+      </BentoSelectorOption>
+      <BentoSelectorOption as="li" option="4">
         Option 4
-      </Option>
-    </Selector>
+      </BentoSelectorOption>
+    </BentoSelector>
   );
 };

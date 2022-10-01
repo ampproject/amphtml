@@ -1,23 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-social-share';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor, whenCalled} from '../../../../testing/test-helper.js';
-import {waitForChildPromise} from '../../../../src/dom';
+import {waitForChildPromise} from '#core/dom';
+
+import {toggleExperiment} from '#experiments';
+
+import {waitFor, whenCalled} from '#testing/helpers/service';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
@@ -47,7 +33,8 @@ describes.realWin(
     // Waits for the type change to propagate to within the shadowDOM
     const waitForTypeChange = async (el, type) => {
       await waitFor(
-        () => el.shadowRoot.querySelector('svg').getAttribute('type') === type,
+        () =>
+          el.shadowRoot.querySelector('svg').getAttribute('data-type') === type,
         'type attribute is updated'
       );
     };
@@ -224,6 +211,39 @@ describes.realWin(
       expect(
         element.shadowRoot.querySelector('svg').style.backgroundColor
       ).to.be.equal('inherit');
+    });
+
+    it('should focus on the host when an element in the shadow DOM receives focus', async () => {
+      element = win.document.createElement('amp-social-share');
+      element.setAttribute('type', 'email');
+      win.document.body.appendChild(element);
+      await waitForRender();
+
+      // element is not focused and does not have focus indication styles
+      expect(win.document.activeElement).to.not.equal(element);
+
+      // focus the button within the shadow DOM
+      const button = element.shadowRoot.querySelector("[part='button']");
+      button.focus();
+
+      // host receives focus
+      expect(win.document.activeElement).to.equal(element);
+    });
+
+    it('should allow focus directly on the host', async () => {
+      element = win.document.createElement('amp-social-share');
+      element.setAttribute('type', 'email');
+      win.document.body.appendChild(element);
+      await waitForRender();
+
+      // element is not focused and does not have focus indication styles
+      expect(win.document.activeElement).to.not.equal(element);
+
+      // focus the host
+      element.focus();
+
+      // host receives focus
+      expect(win.document.activeElement).to.equal(element);
     });
 
     describe('dynamically update attributes', () => {

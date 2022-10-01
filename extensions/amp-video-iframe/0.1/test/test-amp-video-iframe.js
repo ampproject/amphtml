@@ -1,29 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-video-iframe';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '../../../../testing/yield';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {listenOncePromise} from '#utils/event-helper';
+
+import {macroTask} from '#testing/helpers';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-video-iframe',
@@ -38,6 +24,7 @@ describes.realWin(
     let win;
     let doc;
     let videoManagerStub;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
@@ -50,6 +37,7 @@ describes.realWin(
       env.sandbox
         .stub(Services, 'videoManagerForDoc')
         .returns(videoManagerStub);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     function getIframeSrc(fixture = null) {
@@ -69,22 +57,24 @@ describes.realWin(
           };
 
     function createVideoIframe(attrs = {}, opt_size) {
-      const el = createElementWithAttributes(doc, 'amp-video-iframe', attrs);
-      const {src = getIframeSrc(), poster = 'foo.png'} = attrs;
-      addAttributesToElement(el, {src, poster});
-      addAttributesToElement(el, layoutConfigAttrs(opt_size));
+      const {src = getIframeSrc(), ...rest} = attrs;
+      const el = createElementWithAttributes(doc, 'amp-video-iframe', {
+        src,
+        ...rest,
+        ...layoutConfigAttrs(opt_size),
+      });
       doc.body.appendChild(el);
       return el;
     }
 
-    function acceptMockedMessages(videoIframe) {
-      env.sandbox
-        ./*OK*/ stub(videoIframe.implementation_, 'originMatches_')
-        .returns(true);
+    async function acceptMockedMessages(videoIframe) {
+      const impl = await videoIframe.getImpl(false);
+      env.sandbox./*OK*/ stub(impl, 'originMatches_').returns(true);
     }
 
     async function layoutAndLoad(element) {
       await whenUpgradedToCustomElement(element);
+      const impl = await element.getImpl(false);
       // getLayoutSize() affects looksLikeTrackingIframe().
       // Use default width/height of 100 since element is not sized
       // as expected in test fixture.
@@ -92,15 +82,13 @@ describes.realWin(
         width: Number(element.getAttribute('width')) || 100,
         height: Number(element.getAttribute('height')) || 100,
       });
-      element.implementation_.layoutCallback();
-      return listenOncePromise(element, VideoEvents.LOAD);
+      impl.layoutCallback();
+      return listenOncePromise(element, VideoEvents_Enum.LOAD);
     }
 
-    function stubPostMessage(videoIframe) {
-      return env.sandbox./*OK*/ stub(
-        videoIframe.implementation_,
-        'postMessage_'
-      );
+    async function stubPostMessage(videoIframe) {
+      const impl = await videoIframe.getImpl(false);
+      return env.sandbox./*OK*/ stub(impl, 'postMessage_');
     }
 
     function stubMeasureIntersection(target, time, intersectionRatio) {
@@ -150,6 +138,42 @@ describes.realWin(
           sourceUrl,
           title,
           lang,
+          jsonLd: null,
+        });
+      });
+
+      it('sets metadata in iframe name — with jsonLd', async () => {
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
+        const title = 'My test title';
+        const lang = 'es';
+
+        env.sandbox.stub(win.document, 'title').value(title);
+        env.sandbox.stub(win.document.documentElement, 'lang').value(lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
+
+        const jsonLd = {jsonLd: 'blah'};
+        const jsonLdScript = win.document.createElement('script');
+        jsonLdScript.type = 'application/ld+json';
+        jsonLdScript.text = JSON.stringify(jsonLd);
+
+        win.document.head.appendChild(jsonLdScript);
+
+        const videoIframe = createVideoIframe();
+
+        await layoutAndLoad(videoIframe);
+
+        const iframe = videoIframe.querySelector('iframe');
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+          jsonLd,
         });
       });
 
@@ -189,34 +213,103 @@ describes.realWin(
           [1, 1],
         ];
 
-        trackingSizes.forEach((size) => {
-          const {implementation_} = createVideoIframe({}, size);
-          allowConsoleError(() => {
-            expect(() => implementation_.layoutCallback()).to.throw();
-          });
+        return Promise.all(
+          trackingSizes.map(async (size) => {
+            const videoIframe = createVideoIframe({}, size);
+            const impl = await videoIframe.getImpl(false);
+            allowConsoleError(() => {
+              expect(() => impl.layoutCallback()).to.throw();
+            });
+          })
+        );
+      });
+    });
+
+    describe('pause', () => {
+      let player, impl;
+      let postMessageSpy;
+
+      beforeEach(async () => {
+        player = createVideoIframe();
+        await layoutAndLoad(player);
+        await acceptMockedMessages(player);
+        env.sandbox.stub(player, 'isBuilt').returns(true);
+        impl = await player.getImpl(false);
+        postMessageSpy = await stubPostMessage(player);
+      });
+
+      it('should auto-pause when playing and no size', async () => {
+        impl.onMessage_({data: {event: VideoEvents_Enum.PLAYING}});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
         });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        await macroTask();
+        expect(
+          postMessageSpy.withArgs(
+            env.sandbox.match({
+              event: 'method',
+              method: 'pause',
+            })
+          )
+        ).to.be.calledOnce;
+      });
+
+      it('should NOT auto-pause when not playing', async () => {
+        impl.onMessage_({data: {event: VideoEvents_Enum.PLAYING}});
+        impl.onMessage_({data: {event: VideoEvents_Enum.PAUSE}});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: player,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        await macroTask();
+        expect(
+          postMessageSpy.withArgs(
+            env.sandbox.match({
+              event: 'method',
+              method: 'pause',
+            })
+          )
+        ).to.not.be.called;
       });
     });
 
     describe('#createPlaceholderCallback', () => {
+      it('does not create placeholder without poster attribute', () => {
+        const placeholder = createVideoIframe().createPlaceholder();
+        expect(placeholder).to.be.null;
+      });
+
       it('creates an amp-img with the poster as src', () => {
         const poster = 'foo.bar';
         const placeholder = createVideoIframe({poster}).createPlaceholder();
         expect(placeholder).to.have.attribute('placeholder');
-        expect(placeholder.tagName.toLowerCase()).to.equal('amp-img');
-        expect(placeholder.getAttribute('layout')).to.equal('fill');
+        expect(placeholder.tagName.toLowerCase()).to.equal('img');
+        expect(placeholder).to.have.class('i-amphtml-fill-content');
+        expect(placeholder.getAttribute('loading')).to.equal('lazy');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
       it("uses data-param-* in the poster's src", () => {
         expect(
           createVideoIframe({
+            poster: 'foo.png',
             'data-param-my-poster-param': 'my param',
             'data-param-another': 'value',
           })
             .createPlaceholder()
             .getAttribute('src')
-        ).to.match(/\?myPosterParam=my%20param&another=value$/);
+        ).to.match(/foo\.png\?myPosterParam=my%20param&another=value$/);
       });
     });
 
@@ -225,10 +318,9 @@ describes.realWin(
         // Fixture inside frame triggers `canplay`.
         const videoIframe = createVideoIframe();
         await layoutAndLoad(videoIframe);
+        const impl = await videoIframe.getImpl(false);
 
-        const register = videoManagerStub.register.withArgs(
-          videoIframe.implementation_
-        );
+        const register = videoManagerStub.register.withArgs(impl);
 
         expect(register).to.have.been.calledOnce;
       });
@@ -237,13 +329,14 @@ describes.realWin(
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
+        const impl = await videoIframe.getImpl(false);
 
         const invalidEvents = 'tacos al pastor'.split(' ');
 
         invalidEvents.forEach((event) => {
           const spy = env.sandbox.spy();
           videoIframe.addEventListener(event, spy);
-          videoIframe.implementation_.onMessage_({data: {event}});
+          impl.onMessage_({data: {event}});
           expect(spy).to.not.have.been.called;
         });
       });
@@ -253,23 +346,25 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
+
+        const impl = await videoIframe.getImpl(false);
 
         const validEvents = [
-          VideoEvents.PLAYING,
-          VideoEvents.PAUSE,
-          VideoEvents.ENDED,
-          VideoEvents.MUTED,
-          VideoEvents.UNMUTED,
-          VideoEvents.AD_START,
-          VideoEvents.AD_END,
+          VideoEvents_Enum.PLAYING,
+          VideoEvents_Enum.PAUSE,
+          VideoEvents_Enum.ENDED,
+          VideoEvents_Enum.MUTED,
+          VideoEvents_Enum.UNMUTED,
+          VideoEvents_Enum.AD_START,
+          VideoEvents_Enum.AD_END,
         ];
 
         for (let i = 0; i < validEvents.length; i++) {
           const event = validEvents[i];
           const spy = env.sandbox.spy();
           videoIframe.addEventListener(event, spy);
-          videoIframe.implementation_.onMessage_({data: {event}});
+          impl.onMessage_({data: {event}});
           expect(spy).to.have.been.calledOnce;
         }
       });
@@ -295,11 +390,12 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const postMessage = stubPostMessage(videoIframe);
+        const postMessage = await stubPostMessage(videoIframe);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
 
-        videoIframe.implementation_.onMessage_({
+        const impl = await videoIframe.getImpl(false);
+        impl.onMessage_({
           data: {id, method: 'getConsentData'},
         });
 
@@ -327,16 +423,17 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const postMessage = stubPostMessage(videoIframe);
+        const postMessage = await stubPostMessage(videoIframe);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
 
         const message = {data: {id, method: 'getIntersection'}};
 
         stubMeasureIntersection(videoIframe, time, intersectionRatio);
         const expectedResponseMessage = {id, args: {time, intersectionRatio}};
 
-        await videoIframe.implementation_.onMessage_(message);
+        const impl = await videoIframe.getImpl(false);
+        await impl.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -352,11 +449,11 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const postMessage = stubPostMessage(videoIframe);
+        const postMessage = await stubPostMessage(videoIframe);
 
         stubMeasureIntersection(videoIframe, time, intersectionRatio);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
 
         const message = {data: {id, method: 'getIntersection'}};
 
@@ -368,7 +465,8 @@ describes.realWin(
           },
         };
 
-        await videoIframe.implementation_.onMessage_(message);
+        const impl = await videoIframe.getImpl(false);
+        await impl.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -393,17 +491,17 @@ describes.realWin(
           eventType: 'tacos al pastor',
           sufix: 'with invalid event name',
         },
-      ].forEach(({sufix, eventType, vars, accept}) => {
+      ].forEach(({accept, eventType, sufix, vars}) => {
         const verb = accept ? 'dispatch' : 'reject';
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {
           const videoIframe = createVideoIframe();
           const eventSpy = env.sandbox.spy();
-          videoIframe.addEventListener(VideoEvents.CUSTOM_TICK, eventSpy);
+          videoIframe.addEventListener(VideoEvents_Enum.CUSTOM_TICK, eventSpy);
 
           await layoutAndLoad(videoIframe);
 
-          acceptMockedMessages(videoIframe);
+          await acceptMockedMessages(videoIframe);
 
           const data = {
             event: 'analytics',
@@ -416,18 +514,18 @@ describes.realWin(
             Object.assign(data.analytics, {vars});
           }
 
-          const {implementation_} = videoIframe;
+          const impl = await videoIframe.getImpl(false);
 
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
-            implementation_.onMessage_({data});
+            impl.onMessage_({data});
             expect(eventSpy).to.be.calledOnce;
             const eventData = eventSpy.firstCall.firstArg.data;
             expect(eventData.eventType).to.equal(expectedEventVars.eventType);
             expect(eventData.vars).to.deep.equal(expectedEventVars.vars);
           } else {
             allowConsoleError(() => {
-              expect(() => implementation_.onMessage_({data})).to.throw();
+              expect(() => impl.onMessage_({data})).to.throw();
             });
             expect(eventSpy).to.not.have.been.called;
           }
@@ -439,11 +537,11 @@ describes.realWin(
       it('updates src', async () => {
         const defaultSrc = getIframeSrc(defaultFixture);
         const videoIframe = createVideoIframe({src: defaultSrc});
-        const {implementation_} = videoIframe;
+        const impl = await videoIframe.getImpl(false);
 
         await layoutAndLoad(videoIframe);
 
-        const {iframe_} = implementation_;
+        const {iframe_} = impl;
 
         expect(iframe_.src).to.match(new RegExp(`^${defaultSrc}#`));
 
@@ -451,7 +549,7 @@ describes.realWin(
 
         videoIframe.setAttribute('src', newSrc);
 
-        implementation_.mutatedAttributesCallback({'src': true});
+        impl.mutatedAttributesCallback({'src': true});
 
         expect(iframe_.src).to.match(new RegExp(`^${newSrc}#`));
       });
@@ -477,9 +575,10 @@ describes.realWin(
 
           await layoutAndLoad(videoIframe);
 
-          const postMessage = stubPostMessage(videoIframe);
+          const postMessage = await stubPostMessage(videoIframe);
 
-          videoIframe.implementation_[method]();
+          const impl = await videoIframe.getImpl(false);
+          impl[method]();
 
           await macroTask();
 

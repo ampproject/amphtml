@@ -1,18 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {Priority_Enum} from '#service/navigation';
+
+import {mockWindowInterface} from '#testing/helpers/service';
 
 import * as Cookies from '../../../../src/cookies';
 import {
@@ -20,14 +9,12 @@ import {
   areFriendlyDomains,
   isWildCardMatch,
 } from '../linker-manager';
-import {Priority} from '../../../../src/service/navigation';
-import {Services} from '../../../../src/services';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {installSessionServiceForTesting} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
-import {mockWindowInterface} from '../../../../testing/test-helper';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, (env) => {
@@ -63,12 +50,12 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
     navigateToHandlers = [];
     env.sandbox.stub(Services, 'navigationForDoc').returns({
       registerAnchorMutator: (callback, priority) => {
-        if (priority === Priority.ANALYTICS_LINKER) {
+        if (priority === Priority_Enum.ANALYTICS_LINKER) {
           anchorClickHandlers.push(callback);
         }
       },
       registerNavigateToMutator: (callback, priority) => {
-        if (priority === Priority.ANALYTICS_LINKER) {
+        if (priority === Priority_Enum.ANALYTICS_LINKER) {
           navigateToHandlers.push(callback);
         }
       },
@@ -78,6 +65,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
     });
     windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
     installVariableServiceForTesting(env.ampdoc);
+    installSessionServiceForTesting(env.ampdoc);
     installLinkerReaderService(win);
   });
 
@@ -290,8 +278,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
 
       windowInterface.history = {replaceState: () => {}};
       windowInterface.location = {
-        href:
-          'https://www.source.test/dest?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
+        href: 'https://www.source.test/dest?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
         search: '?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
         origin: 'https://www.source.test',
         pathname: '/dest',
@@ -318,13 +305,15 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
             ids: {
               id: '222',
             },
-            destinationDomains: ['foo.com', 'bar.com'],
+            destinationDomains: ['foo.com', 'bar.com', 'testdomain.com'],
           },
         },
       };
 
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
+        windowInterface.getHostname.returns('testdomain.com');
+
         // testLinker1 should apply to both canonical and source
         // testLinker2 should not
         const canonicalDomainUrl = clickAnchor(
@@ -346,7 +335,37 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         const barDomainUrl = clickAnchor('https://bar.com/path');
         expect(barDomainUrl).to.not.contain('testLinker1=');
         expect(barDomainUrl).to.contain('testLinker2=');
+
+        // When the window host name matches the target,
+        // the linker should not be applied.
+        const localDomainUrl = clickAnchor('https://testdomain.com/path');
+        expect(localDomainUrl).to.not.contain('testLinker1=');
+        expect(localDomainUrl).to.not.contain('testLinker2=');
       });
+    });
+
+    it('should only allow same domain matching when opt in', async () => {
+      const config = {
+        linkers: {
+          enabled: true,
+          testLinker: {
+            ids: {
+              id: '222',
+            },
+            sameDomainEnabled: true,
+            destinationDomains: ['testdomain.com'],
+          },
+        },
+      };
+
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      await lm.init();
+      windowInterface.getHostname.returns('testdomain.com');
+      // When the window host name matches the target,
+      // the linker should not be applied.
+      const localDomainUrl = clickAnchor('https://testdomain.com/path');
+      expect(localDomainUrl).to.not.contain('testLinker1=');
+      expect(localDomainUrl).to.not.contain('testLinker2=');
     });
 
     it('should respect default destinationDomains config', () => {
@@ -626,7 +645,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
       });
     });
 
-    it('should add linker if same domain is in destination domains', () => {
+    it('should not add linker if same domain is in destination domains', () => {
       const config = {
         linkers: {
           testLinker: {
@@ -642,7 +661,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
         const url = clickAnchor('https://amp.source.test/');
-        expect(url).to.contain('testLinker');
+        expect(url).not.to.contain('testLinker');
       });
     });
 
@@ -651,6 +670,19 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
       return lm.init().then(() => {
         const a = {
           href: '#hello',
+          hostname: 'amp.source.test',
+        };
+        anchorClickHandlers.forEach((handler) => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
+    });
+
+    it('should not add linker if protocol is not http/https', () => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        const a = {
+          href: '123132111',
+          protocol: 'tel:',
           hostname: 'amp.source.test',
         };
         anchorClickHandlers.forEach((handler) => handler(a, {type: 'click'}));
@@ -1050,7 +1082,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
   });
 });
 
-describe('areFriendlyDomains', () => {
+describes.sandboxed('areFriendlyDomains', {}, () => {
   it('should work', () => {
     expect(areFriendlyDomains('amp.source.test', 'www.source.test')).to.be.true;
     expect(areFriendlyDomains('m.source.test', 'www.source.test')).to.be.true;
@@ -1065,7 +1097,7 @@ describe('areFriendlyDomains', () => {
   });
 });
 
-describe('wildcard matching', () => {
+describes.sandboxed('wildcard matching', {}, () => {
   const testCases = [
     {
       hostname: 'amp.foo.com',
@@ -1104,7 +1136,7 @@ describe('wildcard matching', () => {
     },
   ];
   testCases.forEach((test) => {
-    const {hostname, domain, result} = test;
+    const {domain, hostname, result} = test;
     it(`wildcard test: ${hostname}, ${domain}, ${result}`, () => {
       expect(isWildCardMatch(hostname, domain)).to.equal(result);
     });

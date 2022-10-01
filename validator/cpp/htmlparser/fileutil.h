@@ -1,21 +1,5 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#ifndef HTMLPARSER__FILEUTIL_H_
-#define HTMLPARSER__FILEUTIL_H_
+#ifndef CPP_HTMLPARSER_FILEUTIL_H_
+#define CPP_HTMLPARSER_FILEUTIL_H_
 
 #include <climits>
 #include <functional>
@@ -51,19 +35,18 @@ struct FileReadOptions {
   bool ignore_comments = false;
 
   // Comments character. Ignores lines starting with this character.
-  // TODO: Add support for // style comments.
   char comments_char = '#';
 
   // Converts case of the file content.
-  std::variant<std::monostate,
-               LineTransforms::LowerCase,
-               LineTransforms::UpperCase> case_transform;
+  std::variant<std::monostate, LineTransforms::LowerCase,
+               LineTransforms::UpperCase>
+      case_transform;
 
   // Strips whitespaces.
-  std::variant<std::monostate,
-               LineTransforms::StripWhitespace,
+  std::variant<std::monostate, LineTransforms::StripWhitespace,
                LineTransforms::StripWhitespaceLeft,
-               LineTransforms::StripWhitespaceRight> white_space_transform;
+               LineTransforms::StripWhitespaceRight>
+      white_space_transform;
 
   // Allowed chars per line predicate. If any char that this predicate doesn't
   // allow file line reader returns error.
@@ -82,18 +65,14 @@ class FileUtil {
   static bool ReadFileLines(const FileReadOptions& options,
                             std::string_view filepath,
                             std::vector<std::string>* output);
-  static bool ReadFileLines(const FileReadOptions& options,
-                            std::istream& fd,
+  static bool ReadFileLines(const FileReadOptions& options, std::istream& fd,
                             std::vector<std::string>* output);
 
   // 2) Reads line by line to provided callback.
   static bool ReadFileLines(const FileReadOptions& options,
-                            std::string_view filepath,
+                            std::string_view filepath, LineCallback callback);
+  static bool ReadFileLines(const FileReadOptions& options, std::istream& fd,
                             LineCallback callback);
-  static bool ReadFileLines(const FileReadOptions& options,
-                            std::istream& fd,
-                            LineCallback callback);
-
 
   // 3) Lookup of single row of key/value multi-line data (separated by a marker
   // or EOF)
@@ -123,8 +102,7 @@ class FileUtil {
   // }
   template <std::size_t RowPrefixNumLines = ULONG_MAX - 1>
   static std::optional<std::string> RowLookup(
-      std::istream& fd,
-      std::string_view marker,
+      std::istream& fd, std::string_view marker,
       std::function<int(std::string_view)> comparator) {
     if (!fd.good()) return std::nullopt;
 
@@ -215,22 +193,20 @@ class FileUtil {
   // into custom datatype T.
   template <typename T = std::string_view>
   static bool ReadFileDataAtMarker(
-      const FileReadOptions& options,
-      std::string_view filepath,
-      std::string_view marker,
-      std::function<void(T)> callback,
-      std::function<T (std::string_view)> post_processing) {
+      const FileReadOptions& options, std::string_view filepath,
+      std::string_view marker, std::function<void(T)> callback,
+      std::function<T(std::string_view)> post_processing) {
     std::stringbuf data_buffer;
-    auto result = ReadFileLines(options, filepath, [&](std::string_view line,
-                                                       int line_number) {
-      if (marker.compare(line) == 0) {
-        callback(post_processing(data_buffer.str()));
-        data_buffer.str("");
-      } else {
-        data_buffer.sputn(line.data(), line.size());
-        data_buffer.sputc('\n');
-      }
-    });
+    auto result = ReadFileLines(
+        options, filepath, [&](std::string_view line, int line_number) {
+          if (marker.compare(line) == 0) {
+            callback(post_processing(data_buffer.str()));
+            data_buffer.str("");
+          } else {
+            data_buffer.sputn(line.data(), line.size());
+            data_buffer.sputc('\n');
+          }
+        });
 
     callback(post_processing(data_buffer.str()));
     return result;
@@ -238,22 +214,20 @@ class FileUtil {
 
   template <typename T = std::string_view>
   static bool ReadFileDataAtMarker(
-      const FileReadOptions& options,
-      std::istream& fd,
-      std::string_view marker,
+      const FileReadOptions& options, std::istream& fd, std::string_view marker,
       std::function<void(T)> callback,
-      std::function<T (std::string_view)> post_processing) {
+      std::function<T(std::string_view)> post_processing) {
     std::stringbuf data_buffer;
-    auto result = ReadFileLines(options, fd, [&](std::string_view line,
-                                                 int line_number) {
-      if (marker.compare(line) == 0) {
-        callback(post_processing(data_buffer.str()));
-        data_buffer.str("");
-      } else {
-        data_buffer.sputn(line.data(), line.size());
-        data_buffer.sputc('\n');
-      }
-    });
+    auto result =
+        ReadFileLines(options, fd, [&](std::string_view line, int line_number) {
+          if (marker.compare(line) == 0) {
+            callback(post_processing(data_buffer.str()));
+            data_buffer.str("");
+          } else {
+            data_buffer.sputn(line.data(), line.size());
+            data_buffer.sputc('\n');
+          }
+        });
 
     // Last record.
     callback(post_processing(data_buffer.str()));
@@ -267,4 +241,4 @@ class FileUtil {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__FILEUTIL_H_
+#endif  // CPP_HTMLPARSER_FILEUTIL_H_

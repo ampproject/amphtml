@@ -1,20 +1,4 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 #include <string>
 
@@ -311,6 +295,34 @@ TEST(StringsTest, EscapeUnescapeTest) {
   std::string unescapedquotes("hello\"world\"");
   EXPECT_EQ(htmlparser::Strings::EscapeString(unescapedquotes),
             "hello&#34;world&#34;");
+
+  // The unescaped character size is bigger than the escaped entity name.
+  // Example: "&nGt;" = "\xe2\x89\xab\xe2\x83\x92"
+  // 5 character vs. 6 bytes.
+  std::string str1 = "&nGt;cdef";
+  std::string str2 = "&gt;cdef";
+  std::string str3 = "abc&nGt;cdef";
+  std::string str4 = "&abc;def";
+  std::string str5 = "&amp;num;";
+  std::string str6 = "&amp;num";
+  std::string str7 = "&num";
+  std::string str8 = "&num;";
+  htmlparser::Strings::UnescapeString(&str1);
+  htmlparser::Strings::UnescapeString(&str2);
+  htmlparser::Strings::UnescapeString(&str3);
+  htmlparser::Strings::UnescapeString(&str4);
+  htmlparser::Strings::UnescapeString(&str5);
+  htmlparser::Strings::UnescapeString(&str6);
+  htmlparser::Strings::UnescapeString(&str7);
+  htmlparser::Strings::UnescapeString(&str8);
+  EXPECT_EQ(str1, "≫⃒cdef");
+  EXPECT_EQ(str2, ">cdef");
+  EXPECT_EQ(str3, "abc≫⃒cdef");
+  EXPECT_EQ(str4, "&abc;def");
+  EXPECT_EQ(str5, "&num;");
+  EXPECT_EQ(str6, "&num");
+  EXPECT_EQ(str7, "&num");
+  EXPECT_EQ(str8, "#");
 }
 
 TEST(StringsTest, EncodingTest) {
@@ -653,5 +665,18 @@ TEST(StringsTest, DecodePercentEncodedURLTest) {
   // char code 128.
   EXPECT_FALSE(htmlparser::Strings::DecodePercentEncodedURL(
       "example-%80.com").has_value());
+}
+
+TEST(StringsTest, CountTermsTest) {
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("hello world"));
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("hello world\n"));
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("   hello world\n"));
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("\r\nhello world\n"));
+  EXPECT_EQ(0, htmlparser::Strings::CountTerms("        \n         "));
+  EXPECT_EQ(4, htmlparser::Strings::CountTerms(
+      "  hello world \nbye\r\n bye"));
+  EXPECT_EQ(10, htmlparser::Strings::CountTerms(
+      "Accept: application/signed-exchange;v=b3\nAMP-Cache-Transform: "
+      "google\n"));
 }
 

@@ -1,97 +1,119 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
  * @fileoverview Script that runs various checks during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
-const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp check-exact-versions');
-  timedExecOrDie('gulp lint');
-  timedExecOrDie('gulp prettify');
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp ava');
-  timedExecOrDie('gulp babel-plugin-tests');
-  timedExecOrDie('gulp caches-json');
-  timedExecOrDie('gulp dev-dashboard-tests');
-  timedExecOrDie('gulp check-renovate-config');
-  timedExecOrDie('gulp server-tests');
-  timedExecOrDie('gulp dep-check');
-  timedExecOrDie('gulp check-types');
-  timedExecOrDie('gulp check-sourcemaps');
-  timedExecOrDie('gulp performance-urls');
+  timedExecOrDie('amp presubmit');
+  timedExecOrDie('amp check-invalid-whitespaces');
+  timedExecOrDie('amp lint');
+  timedExecOrDie('amp prettify');
+  timedExecOrDie('amp check-json-schemas');
+  timedExecOrDie('amp ava');
+  timedExecOrDie('amp check-build-system');
+  timedExecOrDie('amp check-ignore-lists');
+  timedExecOrDie('amp babel-plugin-tests');
+  timedExecOrDie('amp check-exact-versions');
+  timedExecOrDie('amp check-renovate-config');
+  timedExecOrDie('amp server-tests');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup');
+  timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
+  timedExecOrDie('amp dep-check');
+  timedExecOrDie('amp check-types');
+  timedExecOrDie('amp check-sourcemaps');
+  timedExecOrDie('amp performance-urls');
+  timedExecOrDie('amp check-analytics-vendors-list');
+  timedExecOrDie('amp check-video-interface-list');
+  timedExecOrDie('amp get-zindex');
+  timedExecOrDie('amp markdown-toc');
 }
 
-async function prBuildWorkflow() {
-  await reportAllExpectedTests();
-  timedExecOrDie('gulp update-packages');
+/**
+ * Steps to run during PR builds.
+ */
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.PRESUBMIT)) {
+    timedExecOrDie('amp presubmit');
+  }
 
-  timedExecOrDie('gulp check-exact-versions');
-  timedExecOrDie('gulp lint');
-  timedExecOrDie('gulp prettify');
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp performance-urls');
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    timedExecOrDie('amp check-invalid-whitespaces');
+  }
+
+  if (buildTargetsInclude(Targets.IGNORE_LIST)) {
+    timedExecOrDie(`amp check-ignore-lists`);
+  }
+
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
+    timedExecOrDie('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
+    timedExecOrDie('amp lint --local_changes');
+  }
+
+  if (buildTargetsInclude(Targets.PRETTIFY)) {
+    timedExecOrDie('amp prettify');
+  }
+
+  if (buildTargetsInclude(Targets.JSON_FILES)) {
+    timedExecOrDie('amp check-json-schemas');
+  }
 
   if (buildTargetsInclude(Targets.AVA)) {
-    timedExecOrDie('gulp ava');
+    timedExecOrDie('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    timedExecOrDie('amp check-build-system');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
-    timedExecOrDie('gulp babel-plugin-tests');
+    timedExecOrDie('amp babel-plugin-tests');
   }
 
-  if (buildTargetsInclude(Targets.CACHES_JSON)) {
-    timedExecOrDie('gulp caches-json');
-  }
-
-  // Check document links only for PR builds.
   if (buildTargetsInclude(Targets.DOCS)) {
-    timedExecOrDie('gulp check-links --local_changes');
+    timedExecOrDie('amp check-links --local_changes'); // only for PR builds
+    timedExecOrDie('amp markdown-toc');
   }
 
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    timedExecOrDie('gulp dev-dashboard-tests');
-  }
-
-  // Validate owners syntax only for PR builds.
   if (buildTargetsInclude(Targets.OWNERS)) {
-    timedExecOrDie('gulp check-owners --local_changes');
+    timedExecOrDie('amp check-owners --local_changes'); // only for PR builds
+  }
+
+  if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
+    timedExecOrDie('amp check-exact-versions');
   }
 
   if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
-    timedExecOrDie('gulp check-renovate-config');
+    timedExecOrDie('amp check-renovate-config');
   }
 
   if (buildTargetsInclude(Targets.SERVER)) {
-    timedExecOrDie('gulp server-tests');
+    timedExecOrDie('amp server-tests');
+  }
+
+  if (buildTargetsInclude(Targets.AVA, Targets.RUNTIME)) {
+    timedExecOrDie('amp make-extension --name=t --test --cleanup');
+    timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME)) {
-    timedExecOrDie('gulp dep-check');
-    timedExecOrDie('gulp check-types');
-    timedExecOrDie('gulp check-sourcemaps');
+    timedExecOrDie('amp dep-check');
+    timedExecOrDie('amp check-types');
+    timedExecOrDie('amp check-sourcemaps');
+    timedExecOrDie('amp performance-urls');
+    timedExecOrDie('amp check-analytics-vendors-list');
+    timedExecOrDie('amp check-video-interface-list');
+    timedExecOrDie('amp get-zindex');
   }
 }
 

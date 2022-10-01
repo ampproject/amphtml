@@ -42,7 +42,7 @@ embed_data = rule(
             cfg = "host",
             allow_files = True,
             default = Label(
-                "//scripts:filecontents_to_cpp_header",
+                "//cpp/engine/scripts:filecontents_to_cpp_header",
             ),
         ),
     },

@@ -1,29 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import * as service from '../../src/service';
-import {createIframePromise} from '../../testing/iframe';
+
+import {macroTask} from '#testing/helpers';
+import {createIframePromise} from '#testing/iframe';
+
 import {
   hasRenderDelayingServices,
   waitForServices,
 } from '../../src/render-delaying-services';
-import {macroTask} from '../../testing/yield';
+import * as service from '../../src/service-helpers';
 
-describe('waitForServices', () => {
+describes.sandboxed('waitForServices', {}, (env) => {
   let win;
   let clock;
   let dynamicCssResolve;
@@ -33,17 +19,21 @@ describe('waitForServices', () => {
   let variantStub;
 
   beforeEach(() => {
-    const getService = window.sandbox.stub(service, 'getServicePromise');
-    dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
-    experimentResolve = waitForService(getService, 'amp-experiment');
+    const getService = env.sandbox.stub(service, 'getServicePromise');
+    dynamicCssResolve = waitForService(
+      env,
+      getService,
+      'amp-dynamic-css-classes'
+    );
+    experimentResolve = waitForService(env, getService, 'amp-experiment');
 
     variantService = {
       whenReady: () => {
         throw new Error('whenReady should be stubbed');
       },
     };
-    variantResolve = waitForService(getService, 'variant', variantService);
-    variantStub = window.sandbox
+    variantResolve = waitForService(env, getService, 'variant', variantService);
+    variantStub = env.sandbox
       .stub(variantService, 'whenReady')
       .returns(Promise.resolve());
 
@@ -123,9 +113,9 @@ describe('waitForServices', () => {
   });
 });
 
-function waitForService(getService, serviceId, service) {
+function waitForService(env, getService, serviceId, service) {
   let resolve = null;
-  getService.withArgs(window.sandbox.match.any, serviceId).returns(
+  getService.withArgs(env.sandbox.match.any, serviceId).returns(
     new Promise((r) => {
       resolve = r.bind(this, service);
     })

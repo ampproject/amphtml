@@ -1,32 +1,18 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CSS} from '../../../build/amp-nested-menu-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {isRTL, tryFocus} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   closest,
   closestAncestorElementBySelector,
-  isRTL,
   scopedQuerySelector,
-  tryFocus,
-} from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
-import {toArray} from '../../../src/types';
+} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {dev, userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-nested-menu-0.1.css';
 
 const TAG = 'amp-nested-menu';
 
@@ -40,6 +26,11 @@ const Side = {
 const ANIMATION_TIMEOUT = 350;
 
 export class AmpNestedMenu extends AMP.BaseElement {
+  /** @override  */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -117,12 +108,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
   isLayoutSupported(layout) {
     // If support is added for other layouts, we should ensure that
     // lazy loading by sidebar does not cause FOUC when sidebar first opens.
-    return layout == Layout.FILL;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
+    return layout == Layout_Enum.FILL;
   }
 
   /**
@@ -277,18 +263,18 @@ export class AmpNestedMenu extends AMP.BaseElement {
       return;
     }
     switch (e.key) {
-      case Keys.ENTER: /* fallthrough */
-      case Keys.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         this.handleClick_(e);
         return;
-      case Keys.LEFT_ARROW: /* fallthrough */
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.LEFT_ARROW: /* fallthrough */
+      case Keys_Enum.RIGHT_ARROW:
         this.handleMenuNavigation_(e);
         break;
-      case Keys.UP_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW:
-      case Keys.HOME:
-      case Keys.END:
+      case Keys_Enum.UP_ARROW: /* fallthrough */
+      case Keys_Enum.DOWN_ARROW:
+      case Keys_Enum.HOME:
+      case Keys_Enum.END:
         this.handleMenuItemNavigation_(e);
         break;
     }
@@ -300,7 +286,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @private
    */
   handleMenuNavigation_(e) {
-    let back = e.key == Keys.LEFT_ARROW;
+    let back = e.key == Keys_Enum.LEFT_ARROW;
     // Press right arrow key to go back if submenu opened from left.
     if (this.side_ == Side.LEFT) {
       back = !back;
@@ -331,13 +317,13 @@ export class AmpNestedMenu extends AMP.BaseElement {
     }
 
     let nextItem;
-    if (e.key === Keys.UP_ARROW) {
+    if (e.key === Keys_Enum.UP_ARROW) {
       nextItem = item.previousElementSibling;
-    } else if (e.key === Keys.DOWN_ARROW) {
+    } else if (e.key === Keys_Enum.DOWN_ARROW) {
       nextItem = item.nextElementSibling;
-    } else if (e.key === Keys.HOME) {
+    } else if (e.key === Keys_Enum.HOME) {
       nextItem = item.parentElement.firstElementChild;
-    } else if (e.key === Keys.END) {
+    } else if (e.key === Keys_Enum.END) {
       nextItem = item.parentElement.lastElementChild;
     } else {
       // not a recognized key

@@ -7,22 +7,6 @@ teaser:
   text: Displays multiple similar pieces of content along a horizontal axis.
 ---
 
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-carousel
 
 ## Usage
@@ -86,6 +70,8 @@ navigation arrow.
     structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
     targeting internal elements such as `amp-carousel > div`. Any selectors using
     the `.amp-class-name` format should still work.
+-   **NOTE**: Support for `amp-carousel-0.1` is limited, with the intent to
+    deprecate in the future.
 
 ### Advancing to a specific slide
 

@@ -1,20 +1,11 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isIframed} from '#core/dom';
 
-import {FixedLayer} from '../../../src/service/fixed-layer';
+import {Services} from '#service';
+import {FixedLayer} from '#service/fixed-layer';
+
+import {getData, listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -27,14 +18,10 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
-import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {getData, listen, listenOnce} from '../../../src/event-helper';
+
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getSourceUrl} from '../../../src/url';
-import {isIframed} from '../../../src/dom';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -187,10 +174,10 @@ export class AmpViewerIntegration {
     return messaging
       .sendRequest(
         RequestNames.CHANNEL_OPEN,
-        dict({
+        {
           'url': ampdocUrl,
           'sourceUrl': srcUrl,
-        }),
+        },
         true /* awaitResponse */
       )
       .then(() => {
@@ -248,7 +235,7 @@ export class AmpViewerIntegration {
    * @private
    */
   handleUnload_(messaging) {
-    return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
+    return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
   }
 
   /**

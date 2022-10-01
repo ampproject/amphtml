@@ -1,77 +1,35 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
 import {
-  addParamToUrl,
-  addParamsToUrl,
-  parseQueryString,
-} from '../../../src/url';
+  DailymotionEvents,
+  getDailymotionIframeSrc,
+  makeDailymotionMessage,
+} from '#bento/apis/dailymotion-api';
+
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, getDataParamsFromAttributes} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  getDataParamsFromAttributes,
-  isFullscreenElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-dailymotion';
-
-/**
- * Player events reverse-engineered from the Dailymotion API
- * NOTE: 'unstarted' isn't part of the API, just a placeholder
- * as an initial state
- *
- * @enum {string}
- * @private
- */
-const DailymotionEvents = {
-  UNSTARTED: 'unstarted',
-  API_READY: 'apiready',
-  // Events fired for both the original content or ads
-  START: 'start',
-  PLAY: 'play',
-  PAUSE: 'pause',
-  END: 'end',
-  // Events fired only for ads
-  AD_START: 'ad_start',
-  AD_PLAY: 'ad_play',
-  AD_PAUSE: 'ad_pause',
-  AD_END: 'ad_end',
-  // Events fired only for the original content
-  VIDEO_START: 'video_start',
-  VIDEO_END: 'video_end',
-  // Other events
-  VOLUMECHANGE: 'volumechange',
-  STARTED_BUFFERING: 'progress',
-  FULLSCREEN_CHANGE: 'fullscreenchange',
-};
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -106,6 +64,9 @@ class AmpDailymotion extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isFullscreen_ = false;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -176,6 +137,17 @@ class AmpDailymotion extends AMP.BaseElement {
     return this.loadPromise(this.iframe_);
   }
 
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
+  }
+
   /**
    * @param {!Event} event
    * @private
@@ -194,10 +166,10 @@ class AmpDailymotion extends AMP.BaseElement {
     }
 
     redispatch(this.element, data['event'], {
-      [DailymotionEvents.API_READY]: VideoEvents.LOAD,
-      [DailymotionEvents.END]: [VideoEvents.ENDED, VideoEvents.PAUSE],
-      [DailymotionEvents.PAUSE]: VideoEvents.PAUSE,
-      [DailymotionEvents.PLAY]: VideoEvents.PLAYING,
+      [DailymotionEvents.API_READY]: VideoEvents_Enum.LOAD,
+      [DailymotionEvents.END]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
+      [DailymotionEvents.PAUSE]: VideoEvents_Enum.PAUSE,
+      [DailymotionEvents.PLAY]: VideoEvents_Enum.PLAYING,
     });
 
     switch (data['event']) {
@@ -205,13 +177,19 @@ class AmpDailymotion extends AMP.BaseElement {
         this.playerReadyResolver_(true);
         break;
 
-      case DailymotionEvents.END:
-        this.playerState_ = DailymotionEvents.PAUSE;
+      case DailymotionEvents.PLAY:
+        this.playerState_ = data['event'];
+        this.pauseHelper_.updatePlaying(true);
         break;
 
       case DailymotionEvents.PAUSE:
-      case DailymotionEvents.PLAY:
         this.playerState_ = data['event'];
+        this.pauseHelper_.updatePlaying(false);
+        break;
+
+      case DailymotionEvents.END:
+        this.playerState_ = DailymotionEvents.PAUSE;
+        this.pauseHelper_.updatePlaying(false);
         break;
 
       case DailymotionEvents.VOLUMECHANGE:
@@ -240,52 +218,46 @@ class AmpDailymotion extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Array<boolean>=} opt_args
+   * @param {boolean} opt_arg
    * @private
    */
-  sendCommand_(command, opt_args) {
+  sendCommand_(command, opt_arg) {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'command': command,
-            'parameters': opt_args || [],
-          })
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          makeDailymotionMessage(command, opt_arg),
+          endpoint
         );
-        this.iframe_.contentWindow./*OK*/ postMessage(message, endpoint);
       }
     });
   }
 
   /** @private */
   getIframeSrc_() {
-    let iframeSrc =
-      'https://www.dailymotion.com/embed/video/' +
-      encodeURIComponent(this.videoid_ || '') +
-      '?api=1&html=1&app=amp';
+    const {
+      'endscreenEnable': endscreenEnable,
+      'info': info,
+      'mute': mute,
+      'sharingEnable': sharingEnable,
+      'start': start,
+      'uiHighlight': uiHighlight,
+      'uiLogo': uiLogo,
+    } = this.element.dataset;
 
-    const explicitParamsAttributes = [
-      'mute',
-      'endscreen-enable',
-      'sharing-enable',
-      'start',
-      'ui-highlight',
-      'ui-logo',
-      'info',
-    ];
-
-    explicitParamsAttributes.forEach((explicitParam) => {
-      const val = this.element.getAttribute(`data-${explicitParam}`);
-      if (val) {
-        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
-      }
-    });
-
-    const implicitParams = getDataParamsFromAttributes(this.element);
-    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
-
-    return iframeSrc;
+    return getDailymotionIframeSrc(
+      this.win,
+      this.videoid_,
+      this.element.hasAttribute('autoplay'),
+      endscreenEnable !== 'false',
+      info !== 'false',
+      mute === 'true',
+      sharingEnable !== 'false',
+      start,
+      uiHighlight,
+      uiLogo !== 'false',
+      getDataParamsFromAttributes(this.element)
+    );
   }
 
   /** @override */
@@ -322,7 +294,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.MUTED);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.MUTED);
       this.muted_ = true;
     });
   }
@@ -335,7 +307,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.UNMUTED);
       this.muted_ = false;
     });
   }

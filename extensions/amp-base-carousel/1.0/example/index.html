@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>bento-base-carousel</title>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+    />
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
+    <style>
+      body {
+        margin: 0;
+      }
+      bento-base-carousel {
+        height: 100vh;
+        width: 100vw;
+      }
+      bento-base-carousel > img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-base-carousel id="my-carousel">
+      <img
+        height="700"
+        width="1037"
+        src="banana.jpg"
+        alt="Example image: banana "
+      />
+      <img
+        height="700"
+        width="1037"
+        src="bentobox.jpg"
+        alt="Example image: bento box"
+      />
+      <img
+        height="700"
+        width="1037"
+        src="avocado.jpg"
+        alt="Example image: avocado"
+      />
+    </bento-base-carousel>
+    <script>
+      (async () => {
+        const carousel = document.querySelector('#my-carousel');
+        await customElements.whenDefined('bento-base-carousel');
+        const api = await carousel.getApi();
+
+        // programatically advance to next slide
+        api.next();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,25 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-stream-gallery';
+import {setStyle, setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {toggleExperiment} from '#experiments';
+
+import {getDetail, listenOncePromise} from '#utils/event-helper';
+
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
-import {getDetail, listenOncePromise} from '../../../../src/event-helper';
-import {setStyle, setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
-import {toggleExperiment} from '../../../../src/experiments';
 
 /**
  * @fileoverview Some simple tests for amp-stream-gallery. Most of the
@@ -34,8 +21,9 @@ import {toggleExperiment} from '../../../../src/experiments';
  */
 async function afterIndexUpdate(el, index) {
   const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
-  await el.implementation_.mutateElement(() => {});
-  await el.implementation_.mutateElement(() => {});
+  const impl = await el.getImpl(false);
+  await impl.mutateElement(() => {});
+  await impl.mutateElement(() => {});
 
   if (index != undefined && getDetail(event)['index'] != index) {
     return afterIndexUpdate(el, index);
@@ -168,7 +156,7 @@ describes.realWin(
 
       container.appendChild(el);
 
-      await el.build();
+      await el.buildInternal();
       await el.layoutCallback();
       await afterIndexUpdate(el);
 

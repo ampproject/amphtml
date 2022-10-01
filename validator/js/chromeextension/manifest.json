@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "1.1.8",
+  "version": "1.2.0",
   "default_locale": "en",
   "description": "__MSG_extensionDescription__",
   "icons": {
@@ -25,8 +25,8 @@
       "run_at": "document_start"
     }
   ],
-  "content_security_policy": "script-src 'self' https://cdn.ampproject.org; object-src 'self'",
-  "homepage_url": "https://www.ampproject.org",
+  "content_security_policy": "script-src 'self' https://cdn.ampproject.org 'wasm-eval'; object-src 'self'",
+  "homepage_url": "https://amp.dev",
   "permissions": [
     "tabs",
     "webRequest",

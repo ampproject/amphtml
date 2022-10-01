@@ -1,46 +1,20 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   pollForLayout,
-} from '../../testing/iframe.js';
+} from '#testing/iframe';
 
-describe('released components: ', function () {
+describes.sandboxed('released components: ', {}, function () {
   runTest.call(this, false);
 });
 
-describe('released components with polyfills: ', function () {
-  runTest.call(this, true);
-});
-
-function runTest(shouldKillPolyfillableApis) {
+function runTest() {
   describe('Rendering of released components', function () {
     this.timeout(5000);
     let fixture;
-    beforeEach(() => {
+    beforeEach(async () => {
       this.timeout(3100);
-      return createFixtureIframe('test/fixtures/released.html', 3000, (win) => {
-        if (shouldKillPolyfillableApis) {
-          win.Promise = undefined;
-        }
-      }).then((f) => {
-        fixture = f;
-      });
+      fixture = await createFixtureIframe('test/fixtures/released.html', 3000);
     });
 
     // There is really weird behavior when running this test in FF during

@@ -1,19 +1,3 @@
-<!--
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Publisher served ads
 
 This is an option for publishers who would like to place single page ads amidst
@@ -42,7 +26,7 @@ A few important things to note:
 -   An element ID is required, so that the template can be referenced by the ad response.
 -   The selected template ID will be set as an attribute of `amp-ad`: `<amp-ad template="template-1">`
 -   The content inside a template should strictly follow the
-    [rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) of `amp-story-grid-layer`
+    [rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/validator-amp-story.protoascii) of `amp-story-grid-layer`
 -   Be aware of the [restrictions](../amp-mustache/amp-mustache.md#restrictions) of `amp-mustache`.
 -   Ads that use different templates can be styled separately using CSS attribute selector:
 
@@ -89,7 +73,7 @@ A server endpoint needs to provide ad responses in the following JSON format:
 #### Response headers
 
 The ad request is an AMP CORS request, hence a couple of custom response headers are needed.
-See [AMP CORS spec](../../spec/amp-cors-requests.md) for details.
+See [AMP CORS spec](../../docs/spec/amp-cors-requests.md) for details.
 
 ### Tagging
 

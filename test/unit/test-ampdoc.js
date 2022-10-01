@@ -1,41 +1,28 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Signals} from '#core/data-structures/signals';
+import * as docready from '#core/document/ready';
+import * as dom from '#core/dom';
+import {
+  ShadowDomVersion_Enum,
+  getShadowDomSupportedVersion,
+  isShadowDomSupported,
+  setShadowDomSupportedVersionForTesting,
+} from '#core/dom/web-components';
 
-import * as docready from '../../src/document-ready';
-import * as dom from '../../src/dom';
 import {
   AmpDocFie,
   AmpDocService,
   AmpDocShadow,
   AmpDocSingle,
-} from '../../src/service/ampdoc-impl';
-import {
-  ShadowDomVersion,
-  getShadowDomSupportedVersion,
-  isShadowDomSupported,
-  setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
-import {Signals} from '../../src/utils/signals';
-import {createShadowRoot} from '../../src/shadow-embed';
+} from '#service/ampdoc-impl';
+
+import {waitFor} from '#testing/helpers/service';
+
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   setParentWindow,
-} from '../../src/service';
-import {waitFor} from '../../testing/test-helper';
+} from '../../src/service-helpers';
+import {createShadowRoot} from '../../src/shadow-embed';
 
 describes.realWin('AmpDocService', {}, (env) => {
   let doc, win;
@@ -124,7 +111,7 @@ describes.realWin('AmpDocService', {}, (env) => {
         host = doc.createElement('div');
         setShadowDomSupportedVersionForTesting(undefined);
         if (isShadowDomSupported()) {
-          if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
             shadowRoot = host.attachShadow({mode: 'open'});
           } else {
             shadowRoot = host.createShadowRoot();
@@ -178,7 +165,7 @@ describes.realWin('AmpDocService', {}, (env) => {
       host = doc.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot = host.attachShadow({mode: 'open'});
         } else {
           shadowRoot = host.createShadowRoot();
@@ -288,7 +275,7 @@ describes.realWin('AmpDocService', {}, (env) => {
 
       let shadowRoot2;
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot2 = host2.attachShadow({mode: 'open'});
         } else {
           shadowRoot2 = host2.createShadowRoot();
@@ -318,7 +305,7 @@ describes.realWin('AmpDocService', {}, (env) => {
       host = doc.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot = host.attachShadow({mode: 'open'});
         } else {
           shadowRoot = host.createShadowRoot();
@@ -414,7 +401,7 @@ describes.realWin('AmpDocService', {}, (env) => {
 
       let shadowRoot2;
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot2 = host2.attachShadow({mode: 'open'});
         } else {
           shadowRoot2 = host2.createShadowRoot();
@@ -452,7 +439,13 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
       addEventListener: env.sandbox.spy(),
       removeEventListener: env.sandbox.spy(),
     };
-    win = {document: doc};
+    win = {
+      document: doc,
+      performance: {
+        now: performance.now,
+        timeOrigin: 1,
+      },
+    };
 
     childDoc = {
       body: null,
@@ -460,7 +453,13 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
       addEventListener: env.sandbox.spy(),
       removeEventListener: env.sandbox.spy(),
     };
-    childWin = {document: childDoc};
+    childWin = {
+      document: childDoc,
+      performance: {
+        now: performance.now,
+        timeOrigin: 2,
+      },
+    };
 
     top = new AmpDocSingle(win);
     embedSameWindow = new AmpDocFie(win, EMBED_URL, top);
@@ -537,6 +536,37 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(disposableService.dispose).to.be.calledOnce;
   });
 
+  describe('firstVisibleTime', () => {
+    it('should prefer timeOrigin doc initialized to visible', () => {
+      // Move page load time to 2021-01-01T12:30Z
+      win.performance.timeOrigin = 1609504200000;
+      // Page has been active for 30min
+      env.sandbox.stub(win.performance, 'now').returns(30 * 60 * 1000);
+      // Move epoch time to 2021-01-01T13:00Z
+      clock.tick(1609506000000 - Date.now());
+      top = new AmpDocSingle(win, {visibilityState: 'visible'});
+
+      expect(top.getFirstVisibleTime()).to.equal(win.performance.timeOrigin);
+      expect(top.getFirstVisibleTime()).not.to.equal(Date.now());
+    });
+
+    it('should wait for visible', () => {
+      // Move page load time to 2021-01-01T12:30Z
+      win.performance.timeOrigin = 1609504200000;
+      // Page has been active for 30min
+      env.sandbox.stub(win.performance, 'now').returns(30 * 60 * 1000);
+      // Move epoch time to 2021-01-01T13:00Z
+      clock.tick(1609506000000 - Date.now());
+      top = new AmpDocSingle(win, {visibilityState: 'prerender'});
+
+      expect(top.getFirstVisibleTime()).to.equal(null);
+
+      top.overrideVisibilityState('visible');
+      expect(top.getFirstVisibleTime()).to.equal(1609506000000);
+      expect(top.getFirstVisibleTime()).to.equal(Date.now());
+    });
+  });
+
   it('should be visible by default', () => {
     expect(top.getVisibilityState()).to.equal('visible');
     expect(embedSameWindow.getVisibilityState()).to.equal('visible');
@@ -550,13 +580,13 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
 
     expect(top.getFirstVisibleTime()).to.equal(1);
     expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
-    expect(embedChild.getFirstVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
+    expect(embedChild.getFirstVisibleTime()).to.equal(2);
 
     expect(top.getLastVisibleTime()).to.equal(1);
     expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedChild.getLastVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(2);
+    expect(embedChild.getLastVisibleTime()).to.equal(2);
 
     return Promise.all([
       top.whenFirstVisible(),
@@ -648,15 +678,19 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(embedOtherWindow.isVisible()).to.be.true;
     expect(embedChild.isVisible()).to.be.true;
 
-    expect(top.getFirstVisibleTime()).to.equal(2);
-    expect(embedSameWindow.getFirstVisibleTime()).to.equal(2);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
-    expect(embedChild.getFirstVisibleTime()).to.equal(2);
+    const epoch = win.performance.timeOrigin + performance.now();
+    const childEpoch = childWin.performance.timeOrigin + performance.now();
+    expect(epoch).to.equal(3);
+    expect(childEpoch).to.equal(4);
+    expect(top.getFirstVisibleTime()).to.equal(epoch);
+    expect(embedSameWindow.getFirstVisibleTime()).to.equal(epoch);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(childEpoch);
+    expect(embedChild.getFirstVisibleTime()).to.equal(childEpoch);
 
-    expect(top.getLastVisibleTime()).to.equal(2);
-    expect(embedSameWindow.getLastVisibleTime()).to.equal(2);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(2);
-    expect(embedChild.getLastVisibleTime()).to.equal(2);
+    expect(top.getLastVisibleTime()).to.equal(epoch);
+    expect(embedSameWindow.getLastVisibleTime()).to.equal(epoch);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(childEpoch);
+    expect(embedChild.getLastVisibleTime()).to.equal(childEpoch);
 
     return Promise.all([
       top.whenFirstVisible(),
@@ -696,8 +730,10 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
     expect(embedChild.getVisibilityState()).to.equal('visible');
 
+    const epoch = win.performance.timeOrigin + performance.now();
+    expect(epoch).to.equal(4);
     expect(top.getFirstVisibleTime()).to.equal(1);
-    expect(top.getLastVisibleTime()).to.equal(3);
+    expect(top.getLastVisibleTime()).to.equal(epoch);
   });
 
   it('should update visibility in children', () => {
@@ -713,10 +749,10 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(top.getLastVisibleTime()).to.equal(1);
     expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
     expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedChild.getFirstVisibleTime()).to.equal(1);
-    expect(embedChild.getLastVisibleTime()).to.equal(1);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(2);
+    expect(embedChild.getFirstVisibleTime()).to.equal(2);
+    expect(embedChild.getLastVisibleTime()).to.equal(2);
 
     clock.tick(1);
     embedOtherWindow.overrideVisibilityState('visible');
@@ -728,10 +764,10 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(top.getLastVisibleTime()).to.equal(1);
     expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
     expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(1);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(3);
-    expect(embedChild.getFirstVisibleTime()).to.equal(1);
-    expect(embedChild.getLastVisibleTime()).to.equal(3);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(5);
+    expect(embedChild.getFirstVisibleTime()).to.equal(2);
+    expect(embedChild.getLastVisibleTime()).to.equal(5);
   });
 
   it('should update when document visibility changes', () => {
@@ -865,7 +901,10 @@ describes.realWin('AmpDocSingle', {}, (env) => {
       addEventListener: function () {},
       removeEventListener: function () {},
     };
-    const win = {document: doc};
+    const win = {
+      document: doc,
+      performance: env.win.performance,
+    };
 
     let bodyCallback;
     env.sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
@@ -910,26 +949,34 @@ describes.realWin('AmpDocSingle', {}, (env) => {
 
   it('should declare extension', () => {
     expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.false;
     expect(ampdoc.declaresExtension('ext2')).to.be.false;
-    ampdoc.declareExtension('ext1');
+    ampdoc.declareExtension('ext1', '0.2');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.true;
+    expect(ampdoc.declaresExtension('ext1', '0.1')).to.be.false;
     expect(ampdoc.declaresExtension('ext2')).to.be.false;
 
-    ampdoc.declareExtension('ext2');
+    ampdoc.declareExtension('ext2', '0.3');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
     expect(ampdoc.declaresExtension('ext2')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2', '0.3')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2', '0.1')).to.be.false;
   });
 
   it('should ignore duplicate extensions', () => {
     expect(ampdoc.declaresExtension('ext1')).to.be.false;
-    ampdoc.declareExtension('ext1');
+    ampdoc.declareExtension('ext1', '0.2');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
-    expect(ampdoc.declaredExtensions_).to.have.length(1);
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.true;
 
     // Repeat.
-    ampdoc.declareExtension('ext1');
-    expect(ampdoc.declaredExtensions_).to.have.length(1);
+    ampdoc.declareExtension('ext1', '0.2');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.true;
+
+    // A different version is not allowed.
+    expect(() => ampdoc.declareExtension('ext1', '0.1')).to.throw();
   });
 });
 

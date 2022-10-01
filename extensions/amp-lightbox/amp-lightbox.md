@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-lightbox
 
 ## Usage
@@ -43,13 +27,14 @@ component. To show a gallery of images in a lightbox, you can use
 
 [/tip]
 
-### Migrating from 0.1
+### Standalone use outside valid AMP documents
 
-The experimental `1.0` version of `amp-lightbox` employs the following differences from version `0.1`:
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
--   This component does not currently support modifying browser history state.
--   `data-close-button-aria-label` is not supported and will soon be replaced with support for `slot="close-button"`.
--   `animate-in` has been renamed to `animation`.
+To find the standalone version of `amp-lightbox`, see [**`bento-lightbox`**](./1.0/README.md).
 
 ## Attributes
 
@@ -57,24 +42,23 @@ The experimental `1.0` version of `amp-lightbox` employs the following differenc
 
 A unique identifier for the lightbox.
 
-### `layout`
+### `layout` (required)
 
 Must be set to `nodisplay`.
 
-### `animation` (optional)
+### `animation`
 
 Defines the style of animation for opening the lightbox. By default, this will
 be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 `fly-in-top`.
 
-[tip type="important"]
+This attribute can be configured to use different
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
-The `fly-in-top` and `fly-in-bottom` animation presets modify the `transform`
-property of the `amp-lightbox` element. Do not rely on transforming the
-`amp-lightbox` element directly. If you need to apply a transform, set it on a
-nested element instead.
+### `scrollable`
 
-[/tip]
+When the `scrollable` attribute is present, the content of the lightbox can
+scroll when overflowing the height of the lightbox.
 
 ## Actions
 
@@ -113,3 +97,11 @@ attribute value, will be created and focused on.
   <button on="tap:quote-lb.close">Nice!</button>
 </amp-lightbox>
 ```
+
+## Version notes
+
+The experimental `1.0` version of `amp-lightbox` employs the following differences from version `0.1`:
+
+-   This component does not currently support modifying browser history state.
+-   `data-close-button-aria-label` is not supported and will soon be replaced with support for `slot="close-button"`.
+-   `animate-in` has been renamed to `animation`.

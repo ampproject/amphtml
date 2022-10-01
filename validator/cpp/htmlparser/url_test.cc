@@ -1,20 +1,5 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
+#include "cpp/htmlparser/url.h"
 
-#include "url.h"
 #include "gtest/gtest.h"
 
 namespace htmlparser {
@@ -86,14 +71,12 @@ TEST(URLTest, BasicTests) {
   URL invalid_protocol("h||p://www.google.com");
   EXPECT_FALSE(invalid_protocol.has_protocol());
   EXPECT_TRUE(invalid_protocol.is_valid());
-  EXPECT_EQ(invalid_protocol.protocol(),
-            "https" /* default to https */);
+  EXPECT_EQ(invalid_protocol.protocol(), "https" /* default to https */);
 
   URL invalid_protocol2("foo bar:baz");
   EXPECT_FALSE(invalid_protocol2.has_protocol());
   EXPECT_TRUE(invalid_protocol2.is_valid());
-  EXPECT_EQ(invalid_protocol2.protocol(),
-            "https" /* default to https */);
+  EXPECT_EQ(invalid_protocol2.protocol(), "https" /* default to https */);
 
   // Unrecognized protocol.
   URL unrecognized("telnet://1.2.3.4");
@@ -154,7 +137,6 @@ TEST(URLTest, BasicTests) {
   // Accepts utf-8 chars in hostname.
   EXPECT_TRUE(URL("http://⚡.com").is_valid());
   EXPECT_TRUE(URL("http://⚡").is_valid());
-
 
   // Empty host is invalid.
   EXPECT_FALSE(URL("http:///").is_valid());
@@ -242,16 +224,16 @@ TEST(URLTest, PortNumbers) {
 }
 
 TEST(URLTest, UserInfoFields) {
-  EXPECT_TRUE(URL("http://foo:bar@google.com").is_valid());
+  EXPECT_TRUE(URL("http://foo:bar@example.site").is_valid());
 
   // Can contain any character including space.
-  EXPECT_TRUE(URL("http://foo bar:baz@google.com").is_valid());
+  EXPECT_TRUE(URL("http://foo bar:baz@example.site").is_valid());
 
   // Both userinfo and port.
-  EXPECT_TRUE(URL("http://foo:bar@google.com:9000/").is_valid());
+  EXPECT_TRUE(URL("http://foo:bar@example.site:9000/").is_valid());
   // Empty password in userinfo.
-  EXPECT_TRUE(URL("http://foo:@google.com:12345/").is_valid());
-  EXPECT_TRUE(URL("http://foo@google.com:12345/").is_valid());
+  EXPECT_TRUE(URL("http://foo:@example.site:12345/").is_valid());
+  EXPECT_TRUE(URL("http://foo@example.site:12345/").is_valid());
 }
 
 }  // namespace htmlparser

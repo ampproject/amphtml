@@ -1,44 +1,33 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {WindowInterface} from '#core/window/interface';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {PageConfig} from '#third_party/subscriptions-project/config';
+import {
+  ConfiguredRuntime,
+  Entitlements,
+  SubscribeResponse,
+  Entitlement as SwgEntitlement,
+} from '#third_party/subscriptions-project/swg';
+import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 
 import {
   Action,
   ActionStatus,
   SubscriptionAnalytics,
 } from '../../../amp-subscriptions/0.1/analytics';
-import {
-  AmpFetcher,
-  GoogleSubscriptionsPlatform,
-} from '../amp-subscriptions-google';
-import {
-  ConfiguredRuntime,
-  Entitlements,
-  SubscribeResponse,
-  Entitlement as SwgEntitlement,
-} from '../../../../third_party/subscriptions-project/swg';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
-import {Services} from '../../../../src/services';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
-import {WindowInterface} from '../../../../src/window-interface';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  AmpFetcher,
+  GoogleSubscriptionsPlatform,
+} from '../amp-subscriptions-google';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
@@ -119,6 +108,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let entitlementResponse;
   let rtcButtonElement;
   let win;
+  let subscriptionService;
 
   beforeEach(() => {
     win = env.win;
@@ -131,7 +121,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
     ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
-    serviceAdapter = new ServiceAdapter(null);
+    subscriptionService = {};
+    serviceAdapter = new ServiceAdapter(subscriptionService);
     serviceAdapterMock = env.sandbox.mock(serviceAdapter);
     env.sandbox
       .stub(serviceAdapter, 'getPageConfig')
@@ -191,6 +182,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         'showAbbrvOffer'
       ),
       linkAccount: env.sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
+      consumeShowcaseEntitlementJwt: env.sandbox.stub(
+        ConfiguredRuntime.prototype,
+        'consumeShowcaseEntitlementJwt'
+      ),
     };
     ackStub = env.sandbox.stub(Entitlements.prototype, 'ack');
     toggleExperiment(win, 'swg-gpay-api', true);
@@ -203,6 +198,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     analyticsMock.verify();
     toggleExperiment(win, 'swg-gpay-api', false);
   });
+
+  /** Awaits N times. Allows promises to resolve. */
+  async function flush(n = 100) {
+    for (let i = 0; i < n; i++) {
+      await 'tick';
+    }
+  }
 
   function callback(stub) {
     return stub.args[0][0];
@@ -299,7 +301,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       serviceAdapter
     );
 
-    env.sandbox.stub(platform, 'getLAAParams_').returns({
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
       'gaa_ts': (Date.now() / 1000 - 10).toString(16),
       'gaa_at': 'la',
       'gaa_sig': 'signature',
@@ -327,7 +329,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       {enableLAA: true},
       serviceAdapter
     );
-    env.sandbox.stub(platform, 'getLAAParams_').returns({
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
       'gaa_at': 'la',
       'gaa_sig': 'signature',
@@ -357,7 +359,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       serviceAdapter
     );
     ampdoc.win.__AMP_MODE.localDev = false;
-    env.sandbox.stub(platform, 'getLAAParams_').returns({
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
       'gaa_at': 'la',
       'gaa_sig': 'signature',
@@ -387,7 +389,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       serviceAdapter
     );
     ampdoc.win.__AMP_MODE.localDev = false;
-    env.sandbox.stub(platform, 'getLAAParams_').returns({
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
       'gaa_ts': (Date.now() / 1000 + 10).toString(16),
       'gaa_at': 'la',
       'gaa_sig': 'signature',
@@ -405,6 +407,49 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const ents = await platform.getEntitlements();
     expect(ents).to.be.null;
     expect(fetchStub).to.not.be.called;
+  });
+
+  it('requests entitlements with metering params if URL params are present and timestamp is valid', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 3600).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    env.sandbox
+      .stub(serviceAdapter, 'loadMeteringState')
+      .resolves({id: 'abc123'});
+    const getEntitlementsStub = env.sandbox
+      .stub(platform.runtime_, 'getEntitlements')
+      .resolves(
+        new Entitlements(
+          'platformKey',
+          'rawEntitlement',
+          [
+            new SwgEntitlement(
+              'google:metering',
+              ['example.org:basic'],
+              'tok1'
+            ),
+          ],
+          'example.org:basic'
+        )
+      );
+
+    const ents = await platform.getEntitlements();
+    expect(ents.service).to.not.be.null;
+    expect(ents.source).to.equal('google:metering');
+
+    const requestParams = getEntitlementsStub.getCall(0).args[0];
+    expect(requestParams.metering).to.eql({state: {id: 'abc123'}});
   });
 
   it('should proxy fetch via AMP fetcher', async () => {
@@ -504,15 +549,17 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
-  it('should show offers on activate when not granted', () => {
+  it('should show offers on activate when not granted', async () => {
     platform.activate(new Entitlement({service: PLATFORM_ID, granted: false}));
+    await flush();
+
     expect(methods.showOffers).to.be.calledOnce.calledWithExactly({
       list: 'amp',
     });
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
-  it('should show abbrv offer on activate when granted non-subscriber', () => {
+  it('should show abbrv offer on activate when granted non-subscriber', async () => {
     platform.activate(
       new Entitlement({
         service: PLATFORM_ID,
@@ -520,6 +567,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         grantReason: GrantReason.METERING,
       })
     );
+    await flush();
+
     expect(methods.showAbbrvOffer).to.be.calledOnce.calledWithExactly({
       list: 'amp',
     });
@@ -538,7 +587,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
-  it('should override show offers with the grant non-subscriber', () => {
+  it('should override show offers with the grant non-subscriber', async () => {
     const entitlement = new Entitlement({service: PLATFORM_ID, granted: false});
     const grantEntitlement = new Entitlement({
       service: 'local',
@@ -546,8 +595,61 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       grantReason: GrantReason.METERING,
     });
     platform.activate(entitlement, grantEntitlement);
+    await flush();
+
     expect(methods.showOffers).to.not.be.called;
     expect(methods.showAbbrvOffer).to.be.calledOnce;
+  });
+
+  it('should consume showcase entitlement, if appropriate', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: true});
+    const grantEntitlement = new Entitlement({
+      service: 'local',
+      granted: true,
+      grantReason: GrantReason.METERING,
+    });
+    platform.activate(entitlement, grantEntitlement);
+    await flush();
+
+    expect(methods.consumeShowcaseEntitlementJwt).to.be.called;
+  });
+
+  it('should show showcase regwall, if appropriate', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    env.sandbox.stub(serviceAdapter, 'loadMeteringState').resolves(null);
+    env.sandbox.stub(platform.fetcher_, 'sendPostToPublisher').resolves();
+    env.sandbox.stub(GaaMeteringRegwall, 'show').resolves();
+    env.sandbox.stub(serviceAdapter, 'saveMeteringState').resolves();
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: false});
+    const continueSpy = env.sandbox.spy();
+    platform.activate(entitlement, entitlement, continueSpy);
+    await flush();
+
+    expect(platform.fetcher_.sendPostToPublisher).to.be.calledOnce;
+    expect(GaaMeteringRegwall.show).to.be.calledOnce;
+    expect(serviceAdapter.saveMeteringState).to.be.calledOnce;
+    expect(continueSpy).to.be.calledOnce;
   });
 
   it('should start linking flow when requested', async () => {
@@ -640,7 +742,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   describe('should reauthorize on complete subscribe', () => {
     let productId;
     let entitlements;
-    const serviceId = 'serviceId';
+    const platformKey = 'platformKey';
 
     afterEach(() => {
       analyticsMock
@@ -678,7 +780,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     it('should work with poorly formatted entitlements', () => {
       productId = 'unknown subscriptionToken';
       entitlements = new Entitlements(
-        serviceId,
+        platformKey,
         null,
         [new SwgEntitlement(null, [productId], null)],
         productId
@@ -691,7 +793,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         productId,
       });
       entitlements = new Entitlements(
-        serviceId,
+        platformKey,
         null,
         [new SwgEntitlement('google', [productId], token)],
         productId

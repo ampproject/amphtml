@@ -1,18 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package main
 
 import (
@@ -53,7 +38,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			w.Header().Set("Content-type", "text/html")
-			if *validator_js != "https://cdn.ampproject.org/v0/validator.js" {
+			if r.FormValue("experimental_wasm") == "1" {
+				bytes = []byte(strings.Replace(string(bytes),
+					"https://cdn.ampproject.org/v0/validator.js", "https://cdn.ampproject.org/v0/validator_wasm.js", -1))
+			} else if *validator_js != "https://cdn.ampproject.org/v0/validator.js" {
 				bytes = []byte(strings.Replace(string(bytes),
 					"https://cdn.ampproject.org/v0/validator.js", "/validator.js", -1))
 			}
@@ -84,6 +72,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			}
 			w.Header().Set("Content-type", "text/javascript")
 			w.Write(bytes)
+			return
 		}
 		// Look up any other resources relative to node_modules or webui.
 		relative_path := r.RequestURI[1:] // Strip leading "/".

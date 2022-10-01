@@ -1,29 +1,17 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {isObject} from '#core/types';
+import {hasOwn} from '#core/types/object';
 
-import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
-import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
-import {SameSite, setCookie} from '../../../src/cookies';
-import {Services} from '../../../src/services';
-import {hasOwn} from '../../../src/utils/object';
+import {Services} from '#service';
+import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
+
+import {user} from '#utils/log';
+
 import {isCookieAllowed} from './cookie-reader';
-import {isObject} from '../../../src/types';
-import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
+
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
+import {SameSite_Enum, setCookie} from '../../../src/cookies';
 
 const TAG = 'amp-analytics/cookie-writer';
 
@@ -75,7 +63,7 @@ export class CookieWriter {
         this.writeDeferred_.resolve(this.init_());
       };
       // CookieWriter is not supported in inabox ad. Always chunk
-      chunk(this.element_, task, ChunkPriority.LOW);
+      chunk(this.element_, task, ChunkPriority_Enum.LOW);
     }
     return this.writeDeferred_.promise;
   }
@@ -219,7 +207,7 @@ export class CookieWriter {
    * @param {string} cookieName
    * @param {string} cookieValue
    * @param {number} cookieExpireDateMs
-   * @param {!SameSite=} sameSite
+   * @param {!SameSite_Enum=} sameSite
    * @return {!Promise}
    */
   expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs, sameSite) {
@@ -234,7 +222,7 @@ export class CookieWriter {
           const expireDate = Date.now() + cookieExpireDateMs;
           // SameSite=None must be secure as per
           // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
-          const secure = sameSite === SameSite.NONE;
+          const secure = sameSite === SameSite_Enum.NONE;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
             sameSite,
@@ -248,18 +236,18 @@ export class CookieWriter {
   }
 
   /**
-   * Converts SameSite string to SameSite type.
+   * Converts SameSite string to SameSite_Enum type.
    * @param {string=} sameSite
-   * @return {SameSite|undefined}
+   * @return {SameSite_Enum|undefined}
    */
   getSameSiteType_(sameSite) {
     switch (sameSite) {
       case 'Strict':
-        return SameSite.STRICT;
+        return SameSite_Enum.STRICT;
       case 'Lax':
-        return SameSite.LAX;
+        return SameSite_Enum.LAX;
       case 'None':
-        return SameSite.NONE;
+        return SameSite_Enum.NONE;
       default:
         return;
     }

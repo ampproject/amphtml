@@ -1,20 +1,13 @@
-//
-// Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
 syntax = "proto2";
 
+// TODO(b/188065554) Deprecate automatic generation of validator.pb.go.
+option go_package = "./validator.proto;amp_validator";
+
+// Package defines Validator protobuffers. This is a package comment required by
+// Golint for validator.pb.go, but Golint still fails with an error "Package
+// amp_validator (defined in [validator.pb.go]) should have a package comment".
+// This happens because protoc adds an extra line after the comment. Ignore the
+// error.
 package amp.validator;
 
 // Used for validating attributes that require another attribute for some
@@ -347,7 +340,7 @@ message CdataSpec {
 // Specifies which AMP Layouts are supported by a given element.
 // For the purpose of the validator, this specifies which
 // values for layout, height, and width attributes are allowed. Also see
-// https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+// https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
 // TODO(johannes): Make the error messages around layouts better. This
 // may require revamping the documentation for elements and/or the above spec,
 // so that a user gets more clearly informed about which layouts are
@@ -357,22 +350,22 @@ message CdataSpec {
 message AmpLayout {
   // NEXT AVAILABLE TAG: 10
   enum Layout {
-    UNKNOWN = 0;
-    NODISPLAY = 1;
-    FIXED = 2;
-    FIXED_HEIGHT = 3;
-    RESPONSIVE = 4;
     CONTAINER = 5;
     FILL = 6;
+    FIXED = 2;
+    FIXED_HEIGHT = 3;
     FLEX_ITEM = 7;
     FLUID = 8;
     INTRINSIC = 9;
+    NODISPLAY = 1;
+    RESPONSIVE = 4;
+    UNKNOWN = 0;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
   // Specifies whether this element has default dimensions. This corresponds
   // to being allowlisted in naturalDimensions_ in
-  // https://github.com/ampproject/amphtml/blob/master/src/layout.js.
+  // https://github.com/ampproject/amphtml/blob/main/src/static-layout.js.
   optional bool defines_default_width = 2;
   optional bool defines_default_height = 3;
 }
@@ -455,7 +448,7 @@ message ReferencePoint {
 
 // Specs specific to AMP Extensions. This is a field within TagSpec that
 // replaces the standard tagspec list of attributes, requirements, etc.
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 11
 message ExtensionSpec {
   // e.g. "amp-video". This is used both as the attribute value for the
   // 'custom-element' attribute value as well as part of the 'src' attribute
@@ -463,9 +456,16 @@ message ExtensionSpec {
   optional string name = 1;
   // e.g. "0.1", "1.0", "latest".
   repeated string version = 2;
+  // If multiple TagSpecs for the same extension exist, separated by version,
+  // specify a version_name string to disambiguate their spec_names. For
+  // example, "v1.0" or "v0.1-0.2". This string will become part of the name
+  // used for referring to this extension in validator error messages.
+  optional string version_name = 9;
   // deprecated_version must be a strict subset of version. If the version
   // matches a deprecated_version, validation will emit a warning.
   repeated string deprecated_version = 3;
+  // Bento supported versions (e.g. "1.0").
+  repeated string bento_supported_version = 10;
 
   // Most extensions are custom-elements. For custom-template extensions, this
   // value needs to be set true. E.g: amp-mustache.
@@ -635,14 +635,14 @@ message TagSpec {
   repeated string also_requires_tag_warning = 22;
   // Expresses a generic condition which is satisfied if this tag is found. Used
   // in combination with the `requires` attribute on a different tag.
-  repeated string satisfies = 23;
+  repeated string satisfies_condition = 23;
   // Expresses a generic condition which must be satisfied if this tag is found.
   // Used in combination with the `satisfies` attributes on a different tag.
-  repeated string requires = 24;
+  repeated string requires_condition = 24;
   // The excludes field is a generic condition, which must not be satisfied if
   // this tag is found. Otherwise a TAG_EXCLUDED_BY_TAG error will be generated.
   // Used in combination with the `satisfies` attributes on a different tag.
-  repeated string excludes = 32;
+  repeated string excludes_condition = 32;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -761,11 +761,9 @@ message DocCssSpec {
   // If provided, a URL linking to a section / sentence in the AMP HTML spec.
   optional string max_bytes_spec_url = 8;
 
-  // Declaration allow-lists were added when style attribute validation was
-  // implementented. Therefore older style tags do not enforce an allowlist
-  // of declarations. If true, all declarations are allowed in style tags,
-  // regardless of the contents of the `declaration` list.
-  optional bool allow_all_declaration_in_style_tag = 10 [default = false];
+  // If true, all declarations are allowed in style tags and inline style
+  // attributes, regardless of the contents of the `declaration` list.
+  optional bool allow_all_declaration_in_style = 10 [default = false];
   // If true, all variants of declarations that are vendor prefixes are allowed.
   // for example, if `gradient` is an allowed declaration and this is true, then
   // `-webkit-gradient` is also an allowed declaration.
@@ -796,9 +794,9 @@ message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
   // The min file revision for validator.cc which can digest this file.
-  optional int32 min_validator_revision_required = 4;
+  optional int32 min_validator_revision_required = 4 [deprecated = true];
   // See comment in validator.protoascii.
-  optional int32 spec_file_revision = 6 [default = -1];
+  optional int32 spec_file_revision = 6 [deprecated = true, default = -1];
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
@@ -829,7 +827,9 @@ message ValidatorRules {
 // on this in new code.
 // TODO(#25188): Remove ErrorCategory completely.
 message ErrorCategory {
-  enum Code { UNKNOWN = 0; }
+  enum Code {
+    UNKNOWN = 0;
+  }
 }
 
 // We record validation errors in a structured form, so that they can be
@@ -851,7 +851,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 120
+  // NEXT AVAILABLE TAG: 124
   enum Code {
     UNKNOWN_CODE = 0;
     INVALID_DOCTYPE_HTML = 111;
@@ -862,9 +862,12 @@ message ValidationError {
     WARNING_EXTENSION_UNUSED = 79;
     EXTENSION_UNUSED = 84;
     WARNING_EXTENSION_DEPRECATED_VERSION = 80;
+    INVALID_EXTENSION_VERSION = 122;
+    INVALID_EXTENSION_PATH = 123;
     NON_LTS_SCRIPT_AFTER_LTS = 112;
     LTS_SCRIPT_AFTER_NON_LTS = 113;
     INCORRECT_SCRIPT_RELEASE_VERSION = 119;
+    DISALLOWED_AMP_DOMAIN = 121;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
@@ -932,6 +935,7 @@ message ValidationError {
     INVALID_UTF8 = 96;
     DOCUMENT_SIZE_LIMIT_EXCEEDED = 108;
     DEV_MODE_ONLY = 109;
+    AMP_EMAIL_MISSING_STRICT_CSS_ATTR = 120;
     VALUE_SET_MISMATCH = 110;
 
     CSS_SYNTAX_INVALID_AT_RULE = 29;
@@ -1047,8 +1051,8 @@ message ValidationResult {
   repeated ValidationError errors = 1;
   // The following field is deprecated and can return any value. Do not depend
   // on this.
-  optional int32 validator_revision = 3 [default = -1];
-  optional int32 spec_file_revision = 4 [default = -1];
+  optional int32 validator_revision = 3 [deprecated = true, default = -1];
+  optional int32 spec_file_revision = 4 [deprecated = true, default = -1];
   // If the AMP document is a transformed AMP document, then this is the
   // version of the transformers that were used to transform it. If the document
   // is not transformed, then the transformer_version's value will be 0.

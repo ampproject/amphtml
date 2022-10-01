@@ -1,39 +1,26 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {createElementWithAttributes} from '#core/dom';
+import {isFiniteNumber} from '#core/types';
+
+import {Services} from '#service';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
-} from '../../src/service/real-time-config/real-time-config-impl';
-import {Services} from '../../src/services';
-import {Xhr} from '../../src/service/xhr-impl';
-import {cancellation} from '../../src/error';
-import {createElementWithAttributes} from '../../src/dom';
-import {dev, user} from '../../src/log';
-import {isFiniteNumber} from '../../src/types';
+} from '#service/real-time-config/real-time-config-impl';
+import {Xhr} from '#service/xhr-impl';
+
+import {dev, user} from '#utils/log';
+
+import {cancellation} from '../../src/error-reporting';
 
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;
   let fetchJsonStub;
-  let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
+  let getCalloutParam_, execute_, validateRtcConfig_;
   let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
   let rtc;
 
@@ -61,7 +48,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       .returns(urlReplacements);
 
     rtc = new RealTimeConfigManager(doc);
-    maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
+    execute_ = rtc.execute.bind(rtc);
     getCalloutParam_ = rtc.getCalloutParam_.bind(rtc);
     validateRtcConfig_ = rtc.validateRtcConfig_.bind(rtc);
     truncUrl_ = rtc.truncUrl_.bind(rtc);
@@ -122,18 +109,18 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
   });
 
-  describe('#maybeExecuteRealTimeConfig_', () => {
+  describe('#execute_', () => {
     function executeTest(args) {
       const {
+        calloutCount,
+        expectedCalloutUrls,
+        expectedRtcArray,
+        failXhr,
+        responseIsString,
+        rtcCalloutResponses,
+        timeoutMillis,
         urls,
         vendors,
-        timeoutMillis,
-        rtcCalloutResponses,
-        expectedCalloutUrls,
-        responseIsString,
-        failXhr,
-        expectedRtcArray,
-        calloutCount,
       } = args;
       setRtcConfig({urls, vendors, timeoutMillis});
       (expectedCalloutUrls || []).forEach((expectedUrl, i) => {
@@ -145,7 +132,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         );
       });
       const customMacros = args['customMacros'] || {};
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(
+      const rtcResponsePromiseArray = execute_(
         element,
         customMacros,
         /* consentState */ undefined,
@@ -302,6 +289,30 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         expectedRtcArray,
       });
     });
+
+    it('should fetch RTC from amp-script URIs', async () => {
+      const ampScriptFetch = env.sandbox.stub();
+      ampScriptFetch.returns(Promise.resolve({targeting: ['sports']}));
+      env.sandbox
+        .stub(Services, 'scriptForDocOrNull')
+        .returns(Promise.resolve({fetch: ampScriptFetch}));
+
+      const urls = ['amp-script:scriptId.functionName'];
+      setRtcConfig({urls, vendors: {}, timeoutMillis: 500});
+      const rtcResponse = await execute_(
+        element,
+        /* customMacros */ {},
+        /* consentState */ undefined,
+        /* consentString */ undefined,
+        /* consentMetadata */ undefined,
+        () => {}
+      );
+      expect(ampScriptFetch).calledWithExactly(
+        'amp-script:scriptId.functionName'
+      );
+      expect(rtcResponse[0].response).deep.equal({targeting: ['sports']});
+    });
+
     it('should send RTC callouts to inflated vendor URLs', () => {
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2},
@@ -608,7 +619,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     for (const consentState in CONSENT_POLICY_STATE) {
       it(`should handle consentState ${consentState}`, () => {
         setRtcConfig({urls: ['https://foo.com']});
-        const rtcResult = maybeExecuteRealTimeConfig_(
+        const rtcResult = execute_(
           element,
           {},
           CONSENT_POLICY_STATE[consentState],
@@ -779,7 +790,13 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
 
     it('should expand globally allowed macros', async () => {
-      const url = 'https://www.foo.example/?cid=CLIENT_ID(foo)';
+      /**
+       * todo(keshavvi):
+       * This test conflicts with `should resolve element dependent vars and macros` in test-linker-manager.js
+       * Both save and retrieve to a cookie named `foo`. They should be isolated and the cookies should not be shared.
+       * But, for some reason they are. So, for now use a cookie called bar here.
+       */
+      const url = 'https://www.foo.example/?cid=CLIENT_ID(bar)';
       rtc.rtcConfig_ = {
         timeoutMillis: 1000,
       };

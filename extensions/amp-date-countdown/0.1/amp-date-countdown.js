@@ -1,24 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {removeChildren} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
+import {Services} from '#service';
+
+import {user, userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
@@ -73,8 +59,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @const {function(!Element)} */
     this.boundRendered_ = this.rendered_.bind(this);
@@ -103,7 +89,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {string} */
     this.biggestUnit_ = '';
 
-    /** @private {!Object|null} */
+    /** @private {?Object} */
     this.localeWordList_ = null;
 
     /** @private {?number} */
@@ -115,6 +101,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
@@ -154,7 +142,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
       this.element.getAttribute('biggest-unit') || DEFAULT_BIGGEST_UNIT
     ).toUpperCase();
 
-    /** @private {!Object|null} */
+    /** @private {?Object} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
     /** @private {boolean} */
@@ -207,7 +195,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
         this.element,
         'timeout',
         null,
-        ActionTrust.LOW
+        ActionTrust_Enum.LOW
       );
       this.win.clearInterval(this.countDownTimer_);
     }

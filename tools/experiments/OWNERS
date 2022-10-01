@@ -1,5 +1,5 @@
 // For an explanation of the OWNERS rules and syntax, see:
-// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
   rules: [
@@ -11,7 +11,10 @@
     },
     {
       pattern: 'experiments-config.js',
-      owners: [{name: 'ampproject/working-groups'}],
+      owners: [
+        {name: 'ampproject/working-groups'},
+        {name: 'alanorozco', requestReviews: false},
+      ],
     },
   ],
 }

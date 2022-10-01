@@ -1,22 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {InaboxMessagingHost} from '#ads/inabox/inabox-messaging-host';
 
-import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
-import {deserializeMessage} from '../../../src/3p-frame-messaging';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {deserializeMessage} from '#core/3p-frame-messaging';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 describes.realWin('inabox-host:messaging', {}, (env) => {
   let win;
@@ -327,7 +312,8 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
     let iframePostMessageSpy;
 
     beforeEach(() => {
-      iframe1.contentWindow.postMessage = iframePostMessageSpy = env.sandbox.stub();
+      iframe1.contentWindow.postMessage = iframePostMessageSpy =
+        env.sandbox.stub();
     });
 
     it('should accept request and expand', () => {
@@ -441,7 +427,8 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
     it('should return correct frame when many iframes at same level', () => {
       const {source} = createNestedIframeMocks(6, 3);
       const expectedMeasureableWin = source.parent.parent;
-      const correctFrame = expectedMeasureableWin.parent.document.querySelectorAll()[0];
+      const correctFrame =
+        expectedMeasureableWin.parent.document.querySelectorAll()[0];
       expectedMeasureableWin.parent.document.querySelectorAll = () => {
         const f1 = {};
         const f2 = {};

@@ -1,51 +1,41 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Deferred} from '../../../src/utils/promise';
+import {BUBBLE_MESSAGE_EVENTS} from '#bento/apis/video-iframe-api';
+
+import {Deferred} from '#core/data-structures/promise';
 import {
-  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoEvents,
-} from '../../../src/video-interface';
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {isFullscreenElement} from '#core/dom/fullscreen';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {once} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {getConsentDataToForward} from '../../../src/consent';
 import {
-  SandboxOptions,
+  disableScrollingOnIframe,
+  looksLikeTrackingIframe,
+} from '../../../src/iframe-helper';
+import {
+  SandboxOptions_Enum,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {
-  createElementWithAttributes,
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  disableScrollingOnIframe,
-  looksLikeTrackingIframe,
-} from '../../../src/iframe-helper';
-import {getConsentDataToForward} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {measureIntersection} from '../../../src/utils/intersection';
-import {once} from '../../../src/utils/function';
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -55,25 +45,11 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @private @const */
 const SANDBOX = [
-  SandboxOptions.ALLOW_SCRIPTS,
-  SandboxOptions.ALLOW_SAME_ORIGIN,
-  SandboxOptions.ALLOW_POPUPS,
-  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
-  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
-];
-
-/**
- * Events allowed to be dispatched from messages.
- * @private @const
- */
-const ALLOWED_EVENTS = [
-  VideoEvents.PLAYING,
-  VideoEvents.PAUSE,
-  VideoEvents.ENDED,
-  VideoEvents.MUTED,
-  VideoEvents.UNMUTED,
-  VideoEvents.AD_START,
-  VideoEvents.AD_END,
+  SandboxOptions_Enum.ALLOW_SCRIPTS,
+  SandboxOptions_Enum.ALLOW_SAME_ORIGIN,
+  SandboxOptions_Enum.ALLOW_POPUPS,
+  SandboxOptions_Enum.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SandboxOptions_Enum.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /**
@@ -104,6 +80,15 @@ function maybeAddAmpFragment(src) {
   return `${src}#amp=1`;
 }
 
+/**
+ * @param {!Node} root
+ * @return {?JsonObject}
+ */
+export function getJsonLd(root) {
+  const scriptTag = root.querySelector('script[type="application/ld+json"]');
+  return scriptTag && tryParseJson(scriptTag.textContent);
+}
+
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVideoIframe extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -113,7 +98,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenFrame_ = null;
 
     /** @private {?Deferred} */
@@ -128,6 +113,9 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -181,46 +169,46 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   getMetadata_() {
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const {title, documentElement} = this.getAmpDoc().getRootNode();
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
+    const rootNode = this.getAmpDoc().getRootNode();
+    const {documentElement, title} = rootNode;
 
-    return dict({
+    return {
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
       'title': title || null,
       'lang': documentElement?.lang || null,
-    });
+      'jsonLd': getJsonLd(rootNode),
+    };
   }
 
   /** @private */
   onReady_() {
     const {element} = this;
     Services.videoManagerForDoc(element).register(this);
-    dispatchCustomEvent(element, VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
   }
 
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const src = addDataParamsToUrl(
-      user().assertString(element.getAttribute('poster')),
-      element
-    );
-    return createElementWithAttributes(
-      devAssert(element.ownerDocument),
-      'amp-img',
-      dict({
-        'src': src,
-        'layout': 'fill',
-        'placeholder': '',
-      })
-    );
+    const poster = element.getAttribute('poster');
+    if (!poster) {
+      return null;
+    }
+    const img = new Image();
+    img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute('placeholder', '');
+    applyFillContent(img);
+    return img;
   }
 
   /** @override */
   unlayoutCallback() {
     this.canPlay_ = false;
     this.removeIframe_();
+    this.pauseHelper_.updatePlaying(false);
     return true; // layout again.
   }
 
@@ -350,7 +338,17 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
 
-    if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
+    switch (eventReceived) {
+      case 'playing':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'ended':
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
+
+    if (BUBBLE_MESSAGE_EVENTS.indexOf(eventReceived) > -1) {
       dispatchCustomEvent(this.element, eventReceived);
       return;
     }
@@ -369,14 +367,10 @@ class AmpVideoIframe extends AMP.BaseElement {
       ANALYTICS_EVENT_TYPE_PREFIX
     );
 
-    dispatchCustomEvent(
-      this.element,
-      VideoEvents.CUSTOM_TICK,
-      dict({
-        'eventType': eventType,
-        'vars': vars,
-      })
-    );
+    dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {
+      'eventType': eventType,
+      'vars': vars,
+    });
   }
 
   /**
@@ -394,15 +388,13 @@ class AmpVideoIframe extends AMP.BaseElement {
         ? 0
         : intersectionRatio;
 
-    this.postMessage_(
-      dict({
-        'id': messageId,
-        'args': {
-          'intersectionRatio': postedRatio,
-          'time': time,
-        },
-      })
-    );
+    this.postMessage_({
+      'id': messageId,
+      'args': {
+        'intersectionRatio': postedRatio,
+        'time': time,
+      },
+    });
   }
 
   /**
@@ -412,7 +404,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   postConsentData_(messageId) {
     getConsentDataToForward(this.element, this.getConsentPolicy()).then(
       (consentData) => {
-        this.postMessage_(dict({'id': messageId, 'args': consentData}));
+        this.postMessage_({'id': messageId, 'args': consentData});
       }
     );
   }
@@ -427,12 +419,10 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
     promise.then(() => {
-      this.postMessage_(
-        dict({
-          'event': 'method',
-          'method': method,
-        })
-      );
+      this.postMessage_({
+        'event': 'method',
+        'method': method,
+      });
     });
   }
 

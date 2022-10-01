@@ -1,45 +1,30 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {isAmp4Email} from '#core/document/format';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {isFiniteNumber, isObject} from '#core/types';
+import {findIndex, isArray, remove, toArray} from '#core/types/array';
+import {debounce} from '#core/types/function';
+import {deepMerge, getValueForExpr, map} from '#core/types/object';
+import {deepEquals, parseJson} from '#core/types/object/json';
 
-import {AmpEvents} from '../../../src/amp-events';
+import {Services} from '#service';
+
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
-import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
-import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {Signals} from '../../../src/utils/signals';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
-import {deepMerge, dict, map} from '../../../src/utils/object';
-import {dev, devAssert, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, remove} from '../../../src/utils/array';
+
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
+import {reportError} from '../../../src/error-reporting';
 import {getMode} from '../../../src/mode';
-import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
+import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 
 /** @const {string} */
 const TAG = 'amp-bind';
@@ -91,6 +76,15 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
+ * The options bag for binding application.
+ *
+ * @typedef {Record} ApplyOptionsDef
+ * @property {boolean=} skipAmpState If true, skips <amp-state> elements.
+ * @property {Array<!Element>=} constrain If provided, restricts application to children of the provided elements.
+ * @property {boolean=} evaluateOnly If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
+ */
+
+/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -106,7 +100,7 @@ const BIND_ONLY_ATTRIBUTES = map({
  * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
  * @const {!Array<string>}
  */
-const FAST_RESCAN_TAGS = ['AMP-LIST'];
+const FAST_RESCAN_TAGS = ['AMP-LIST', 'AMP-RENDER'];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
@@ -297,7 +291,7 @@ export class Bind {
 
       this.signals_.signal('FIRST_MUTATE');
 
-      const scope = dict();
+      const scope = {};
       if (event && getDetail(/** @type {!Event} */ (event))) {
         scope['event'] = getDetail(/** @type {!Event} */ (event));
       }
@@ -405,10 +399,10 @@ export class Bind {
    * @return {!Promise<?JsonObject>}
    */
   getDataForHistory_() {
-    const data = dict({
-      'data': dict({'amp-bind': this.state_}),
+    const data = {
+      'data': {'amp-bind': this.state_},
       'title': this.localWin_.document.title,
-    });
+    };
     if (!this.viewer_.isEmbedded()) {
       // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
       return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
@@ -556,7 +550,7 @@ export class Bind {
         `#${escapeCssSelectorIdent(stateId)}`
       );
       if (!ampStateEl) {
-        throw new Error(`#${stateId} does not exist.`);
+        throw user().createError(TAG, `#${stateId} does not exist.`);
       }
 
       return whenUpgradedToCustomElement(ampStateEl)
@@ -606,7 +600,7 @@ export class Bind {
       })
       .then(() => {
         // Listen for DOM updates (e.g. template render) to rescan for bindings.
-        root.addEventListener(AmpEvents.DOM_UPDATE, (e) =>
+        root.addEventListener(AmpEvents_Enum.DOM_UPDATE, (e) =>
           this.onDomUpdate_(e)
         );
       })
@@ -710,7 +704,7 @@ export class Bind {
     // created elements. Should do what <amp-state> does.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       const argumentNames = (element.getAttribute('arguments') || '')
         .split(',')
         .map((s) => s.trim());
@@ -878,26 +872,13 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    const doc = devAssert(
-      node.nodeType == Node.DOCUMENT_NODE ? node : node.ownerDocument,
-      'ownerDocument is null.'
-    );
-    // Third and fourth params of `createTreeWalker` are not optional on IE11.
-    const walker = doc.createTreeWalker(
-      node,
-      NodeFilter.SHOW_ELEMENT,
-      null,
-      /* entityReferenceExpansion */ false
-    );
+    const walker = new BindWalker(node);
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
       const node = walker.currentNode;
-      if (!node) {
-        return true;
-      }
       // If `node` is a Document, it will be scanned first (despite
       // NodeFilter.SHOW_ELEMENT). Skip it.
       if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -912,7 +893,7 @@ export class Bind {
       // rescan() with {fast: true} for better performance. Note that only
       // children are opted-out (e.g. amp-list children, not amp-list itself).
       const next = FAST_RESCAN_TAGS.includes(node.nodeName)
-        ? this.skipSubtree_(walker)
+        ? walker.skipSubtree()
         : walker.nextNode();
       return !next || limitExceeded;
     };
@@ -938,28 +919,11 @@ export class Bind {
         if (completed) {
           resolve({bindings, limitExceeded});
         } else {
-          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+          chunk(this.ampdoc, chunktion, ChunkPriority_Enum.LOW);
         }
       };
-      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+      chunk(this.ampdoc, chunktion, ChunkPriority_Enum.LOW);
     });
-  }
-
-  /**
-   * Skips the subtree at the walker's current node and returns the next node
-   * in document order, if any. Otherwise, returns null.
-   * @param {!TreeWalker} walker
-   * @return {?Node}
-   * @private
-   */
-  skipSubtree_(walker) {
-    for (let n = walker.currentNode; n; n = walker.parentNode()) {
-      const sibling = walker.nextSibling();
-      if (sibling) {
-        return sibling;
-      }
-    }
-    return null;
   }
 
   /**
@@ -983,7 +947,7 @@ export class Bind {
     }
     const {tagName} = element;
     boundProperties.forEach((boundProperty) => {
-      const {property, expressionString} = boundProperty;
+      const {expressionString, property} = boundProperty;
       outBindings.push({tagName, property, expressionString});
       if (!this.expressionToElements_[expressionString]) {
         this.expressionToElements_[expressionString] = [];
@@ -1065,7 +1029,7 @@ export class Bind {
         return this.ww_('bind.evaluateExpression', [expression, scope]);
       })
       .then((returnValue) => {
-        const {result, error} = returnValue;
+        const {error, result} = returnValue;
         if (error) {
           // Throw to reject promise.
           throw this.reportWorkerError_(
@@ -1086,7 +1050,7 @@ export class Bind {
   evaluate_() {
     const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
     return evaluatePromise.then((returnValue) => {
-      const {results, errors} = returnValue;
+      const {errors, results} = returnValue;
       // Report evaluation errors.
       Object.keys(errors).forEach((expressionString) => {
         const elements = this.expressionToElements_[expressionString];
@@ -1123,7 +1087,7 @@ export class Bind {
     const mismatches = {};
 
     this.boundElements_.forEach((boundElement) => {
-      const {element, boundProperties} = boundElement;
+      const {boundProperties, element} = boundElement;
 
       // If provided, filter elements that are _not_ children of `opt_elements`.
       if (elements && !this.elementsContains_(elements, element)) {
@@ -1140,8 +1104,8 @@ export class Bind {
           return;
         }
         const {tagName} = element;
-        const {property, expressionString} = boundProperty;
-        const {expected, actual} = mismatch;
+        const {expressionString, property} = boundProperty;
+        const {actual, expected} = mismatch;
 
         // Only store unique mismatches (dupes possible when rendering an array
         // of data to a template).
@@ -1211,12 +1175,7 @@ export class Bind {
    * Applies expression results to elements in the document.
    *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {!Object} opts
-   * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
-   * @param {Array<!Element>=} opts.constrain If provided, restricts application
-   *   to children of the provided elements.
-   * @param {boolean=} opts.evaluateOnly If provided, caches the evaluated
-   *   result on each bound element and skips the actual DOM updates.
+   * @param {!ApplyOptionsDef} opts
    * @return {!Promise}
    * @private
    */
@@ -1239,7 +1198,7 @@ export class Bind {
         return;
       }
 
-      const {element, boundProperties} = boundElement;
+      const {boundProperties, element} = boundElement;
       const updates = this.calculateUpdates_(boundProperties, results);
       // If this is a "evaluate only" application, skip the DOM mutations.
       if (opts.evaluateOnly) {
@@ -1307,7 +1266,7 @@ export class Bind {
   }
 
   /**
-   * Dispatches an `AmpEvents.FORM_VALUE_CHANGE` if the element's changed
+   * Dispatches an `AmpEvents_Enum.FORM_VALUE_CHANGE` if the element's changed
    * property represents the value of a form field.
    * @param {!Element} element
    * @param {string} property
@@ -1328,7 +1287,7 @@ export class Bind {
     if (dispatchAt) {
       const ampValueChangeEvent = createCustomEvent(
         this.localWin_,
-        AmpEvents.FORM_VALUE_CHANGE,
+        AmpEvents_Enum.FORM_VALUE_CHANGE,
         /* detail */ null,
         {bubbles: true}
       );
@@ -1811,5 +1770,105 @@ export class Bind {
       }
       this.localWin_.dispatchEvent(event);
     }
+  }
+}
+
+class BindWalker {
+  /**
+   * @param {!Node} root
+   */
+  constructor(root) {
+    const doc = devAssert(
+      root.nodeType == Node.DOCUMENT_NODE ? root : root.ownerDocument,
+      'ownerDocument is null.'
+    );
+
+    const useQuerySelector =
+      doc.documentElement.hasAttribute('i-amphtml-binding');
+    /** @private @const {boolean} */
+    this.useQuerySelector_ = useQuerySelector;
+
+    /** @type {!Node} */
+    this.currentNode = root;
+
+    /** @private {number} */
+    this.index_ = 0;
+
+    /** @private @const {!Array<!Element>} */
+    this.nodeList_ = useQuerySelector
+      ? toArray(root.querySelectorAll('[i-amphtml-binding]'))
+      : [];
+
+    // Confusingly, the old TreeWalker hit the root node. We need to match that behavior.
+    if (
+      useQuerySelector &&
+      root.nodeType === Node.ELEMENT_NODE &&
+      root.hasAttribute('i-amphtml-binding')
+    ) {
+      this.nodeList_.unshift(root);
+    }
+
+    /**
+     * Third and fourth params of `createTreeWalker` are not optional on IE11.
+     * @private @const {?TreeWalker}
+     */
+    this.treeWalker_ = useQuerySelector
+      ? null
+      : doc.createTreeWalker(
+          root,
+          NodeFilter.SHOW_ELEMENT,
+          null,
+          /* entityReferenceExpansion */ false
+        );
+  }
+
+  /**
+   * Finds the next node in document order, if it exists. Returns that node, or null if it doesn't exist.
+   * Updates currentNode, if it exists, else currentNode stays the same.
+   *
+   * @return {?Node}
+   */
+  nextNode() {
+    if (this.useQuerySelector_) {
+      if (this.index_ == this.nodeList_.length) {
+        return null;
+      }
+      const next = this.nodeList_[this.index_++];
+      this.currentNode = next;
+      return next;
+    }
+
+    const walker = this.treeWalker_;
+    const next = walker.nextNode();
+    // This matches the TreeWalker's behavior.
+    if (next !== null) {
+      this.currentNode = next;
+    }
+    return next;
+  }
+
+  /**
+   * Skips the remaining sibling nodes in the current parent. Returns the next node in document order.
+   * @return {?Node}
+   */
+  skipSubtree() {
+    if (this.useQuerySelector_) {
+      const {currentNode} = this;
+      let next = null;
+      do {
+        next = this.nextNode();
+      } while (next !== null && currentNode.contains(next));
+      return next;
+    }
+
+    const walker = this.treeWalker_;
+    for (let n = walker.currentNode; n; n = walker.parentNode()) {
+      const sibling = walker.nextSibling();
+      if (sibling !== null) {
+        this.currentNode = sibling;
+        return sibling;
+      }
+    }
+    return null;
   }
 }

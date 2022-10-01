@@ -1,35 +1,23 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {isArray} from '#core/types';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
 
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
-import {Services} from '../../../src/services';
+
+import {fetchDocument} from '../../../src/document-fetcher';
+import {getMode} from '../../../src/mode';
 import {
   assertHttpsUrl,
   isProxyOrigin,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';
@@ -315,13 +303,11 @@ export class AccessServerJwtAdapter {
     return this.fetchJwt_().then((resp) => {
       const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
-      const request = serializeQueryString(
-        dict({
-          'url': removeFragment(this.ampdoc.win.location.href),
-          'state': this.serverState_,
-          'jwt': encoded,
-        })
-      );
+      const request = serializeQueryString({
+        'url': removeFragment(this.ampdoc.win.location.href),
+        'state': this.serverState_,
+        'jwt': encoded,
+      });
       dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       dev().fine(TAG, '- access data: ', accessData);
       // Note that `application/x-www-form-urlencoded` is used to avoid
@@ -332,9 +318,9 @@ export class AccessServerJwtAdapter {
           fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: request,
-            headers: dict({
+            headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
-            }),
+            },
           })
         )
         .then((response) => {

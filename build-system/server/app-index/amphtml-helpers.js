@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /* eslint-disable local/html-template */
 
 const assert = require('assert');
@@ -32,7 +16,7 @@ const containsByRegex = (str, re) => str.search(re) > -1;
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
 
-const ExtensionScript = ({name, version, isTemplate}) =>
+const ExtensionScript = ({isTemplate, name, version}) =>
   html`
     <script
       async
@@ -49,19 +33,23 @@ const AmpState = (id, state) => html`
   </amp-state>
 `;
 
-const ternaryExpr = (condition, onTrue, onFalse) =>
-  `${condition} ? ${onTrue} : ${onFalse}`;
-
-const containsExpr = (haystack, needle, onTrue, onFalse) =>
-  ternaryExpr(`${haystack}.indexOf(${needle}) > -1`, onTrue, onFalse);
-
 const ampStateKey = (...keys) => keys.join('.');
 
-const AmpDoc = ({body, css, head, canonical}) => {
+/**
+ *
+ * @param {{
+ *  body: string,
+ *  canonical: string,
+ *  css?: string,
+ *  head?: string,
+ * }} param0
+ * @return {string}
+ */
+const AmpDoc = ({body, canonical, css, head}) => {
   assert(canonical);
   return html`
     <!DOCTYPE html>
-    <html ⚡>
+    <html ⚡ lang="en">
       <head>
         <title>AMP Dev Server</title>
         <meta charset="utf-8" />
@@ -95,6 +83,14 @@ const componentExtensionNameMapping = {
 const componentExtensionName = (tagName) =>
   componentExtensionNameMapping[tagName] || tagName;
 
+/**
+ *
+ * @param {string} docStr
+ * @param {{
+ *  'amp-mustache': {version: string}
+ * }=} extensionConf
+ * @return {string}
+ */
 const addRequiredExtensionsToHead = (
   docStr,
   extensionConf = {
@@ -110,11 +106,11 @@ const addRequiredExtensionsToHead = (
     addExtension(name, {isTemplate: true, ...defaultConf});
 
   Array.from(matchIterator(componentTagNameRegex, docStr))
-    .map(([unusedFullMatch, tagName]) => componentExtensionName(tagName))
+    .map(([, tagName]) => componentExtensionName(tagName))
     .forEach(addExtension);
 
   Array.from(matchIterator(templateTagTypeRegex, docStr))
-    .map(([unusedFullMatch, type]) => type)
+    .map(([, type]) => type)
     .forEach(addTemplate);
 
   // TODO(alanorozco): Too greedy. Parse "on" attributes instead.
@@ -138,6 +134,4 @@ module.exports = {
   AmpState,
   addRequiredExtensionsToHead,
   ampStateKey,
-  containsExpr,
-  ternaryExpr,
 };

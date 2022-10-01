@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Action, getStoreService} from '../amp-story-store-service';
 import {AdvancementMode} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
@@ -68,5 +52,53 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
 
     const variables = variableService.get();
     expect(variables['storyProgress']).to.equal(0);
+  });
+
+  describe('with ads', () => {
+    it('should calculate correct pageIndex and pageId on change without regards to ads', () => {
+      storeService.dispatch(Action.SET_PAGE_IDS, [
+        'a',
+        'b',
+        'c',
+        'i-amphtml-ad-page-0',
+        'd',
+        'e',
+      ]);
+      storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'c',
+        index: 2,
+      });
+
+      const variablesBeforeAds = variableService.get();
+      expect(variablesBeforeAds['storyPageIndex']).to.equal(2);
+      expect(variablesBeforeAds['storyPageId']).to.equal('c');
+
+      storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'd',
+        index: 4,
+      });
+
+      const variablesAfterAds = variableService.get();
+      expect(variablesAfterAds['storyPageIndex']).to.equal(3);
+      expect(variablesAfterAds['storyPageId']).to.equal('d');
+    });
+
+    it('should calculate correct storyProgress correctly on change', () => {
+      storeService.dispatch(Action.SET_PAGE_IDS, [
+        'a',
+        'b',
+        'c',
+        'i-amphtml-ad-page-0',
+        'd',
+        'e',
+      ]);
+      storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'd',
+        index: 4,
+      });
+
+      const variables = variableService.get();
+      expect(variables['storyProgress']).to.equal(0.75);
+    });
   });
 });

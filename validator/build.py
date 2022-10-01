@@ -1,19 +1,5 @@
 #!/usr/bin/env python
 #
-# Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
 """A build script which (thus far) works on Ubuntu 14."""
 
 from __future__ import print_function
@@ -47,7 +33,10 @@ def EnsureNodeJsIsInstalled():
       return
   except (subprocess.CalledProcessError, OSError):
     pass
-  Die('Node.js not found. Try "apt-get install nodejs" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
+  Die('Node.js not found. Try "apt-get install nodejs" or follow the install'
+      'instructions at'
+      'https://github.com/ampproject/amphtml/blob/main/validator/README.md#installation'
+     )
 
 
 def CheckPrereqs():
@@ -73,7 +62,10 @@ def CheckPrereqs():
   try:
     libprotoc_version = subprocess.check_output(['protoc', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation.')
+    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" '
+        'or follow the install instructions at '
+        'https://github.com/ampproject/amphtml/blob/main/validator/README.md#installation.'
+       )
 
   # Ensure 'libprotoc 2.5.0' or newer.
   m = re.search(b'^(\\w+) (\\d+)\\.(\\d+)\\.(\\d+)', libprotoc_version)
@@ -90,18 +82,21 @@ def CheckPrereqs():
       # Python3 needs pip3. Python 2 needs pip.
       if sys.version_info < (3, 0):
         Die('%s not found. Try "pip install protobuf" or follow the install '
-            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'instructions at https://github.com/ampproject/amphtml/blob/main/'
             'validator/README.md#installation' % module)
       else:
         Die('%s not found. Try "pip3 install protobuf" or follow the install '
-            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'instructions at https://github.com/ampproject/amphtml/blob/main/'
             'validator/README.md#installation' % module)
 
   # Ensure JVM installed. TODO: Check for version?
   try:
     subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
   except (subprocess.CalledProcessError, OSError):
-    Die('Java missing. Try "apt-get install openjdk-7-jre" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
+    Die('Java missing. Try "apt-get install openjdk-7-jre" or follow the'
+        'install instructions at'
+        'https://github.com/ampproject/amphtml/blob/main/validator/README.md#installation'
+       )
   logging.info('... done')
 
 
@@ -166,6 +161,7 @@ def GenValidatorProtoascii(out_dir):
 
   protoascii_segments = [open('validator-main.protoascii').read()]
   protoascii_segments.append(open('validator-css.protoascii').read())
+  protoascii_segments.append(open('validator-svg.protoascii').read())
   extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
@@ -266,7 +262,7 @@ def GenValidatorGeneratedJs(out_dir):
 
 
 def CompileWithClosure(js_files, definitions, entry_points, output_file):
-  """Compiles the arguments with the Closure compiler for transpilation to ES5.
+  """Compiles the arguments with AMP's Closure compiler for transpilation to ES5.
 
   Args:
     js_files: list of files to compile
@@ -276,17 +272,18 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
   """
 
   cmd = [
-      'java', '-jar', 'node_modules/google-closure-compiler-java/compiler.jar',
+      'java', '-jar',
+      './node_modules/google-closure-compiler-java/compiler.jar',
       '--language_out=ES5_STRICT', '--dependency_mode=PRUNE',
       '--js_output_file=%s' % output_file
   ]
   cmd += ['--entry_point=%s' % e for e in entry_points]
   cmd += ['--output_manifest=%s' % ('%s.manifest' % output_file)]
   cmd += [
-      'node_modules/google-closure-library/closure/**.js',
-      '!node_modules/google-closure-library/closure/**_test.js',
-      'node_modules/google-closure-library/third_party/closure/**.js',
-      '!node_modules/google-closure-library/third_party/closure/**_test.js'
+      '../node_modules/google-closure-library/closure/**.js',
+      '!../node_modules/google-closure-library/closure/**_test.js',
+      '../node_modules/google-closure-library/third_party/closure/**.js',
+      '!../node_modules/google-closure-library/third_party/closure/**_test.js'
   ]
   cmd += js_files
   cmd += definitions
@@ -327,14 +324,13 @@ def RunSmokeTest(out_dir):
   """
   logging.info('entering ...')
   # Run cli.js on the minimum valid amp and observe that it passes.
-  p = subprocess.Popen(
-      [
-          'node', 'js/nodejs/cli.js', '--validator_js',
-          '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
-      ],
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE)
+  p = subprocess.Popen([
+      'node', 'js/nodejs/cli.js', '--validator_js',
+      '%s/validator_minified.js' % out_dir,
+      'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
+  ],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if (b'testdata/feature_tests/minimum_valid_amp.html: PASS\n', b'',
       p.returncode) != (stdout, stderr, 0):
@@ -342,14 +338,13 @@ def RunSmokeTest(out_dir):
         (p.returncode, stdout, stderr))
 
   # Run cli.js on an empty file and observe that it fails.
-  p = subprocess.Popen(
-      [
-          'node', 'js/nodejs/cli.js', '--validator_js',
-          '%s/validator_minified.js' % out_dir,
-          'testdata/feature_tests/empty.html', '--format=text'
-      ],
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE)
+  p = subprocess.Popen([
+      'node', 'js/nodejs/cli.js', '--validator_js',
+      '%s/validator_minified.js' % out_dir, 'testdata/feature_tests/empty.html',
+      '--format=text'
+  ],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
@@ -363,11 +358,10 @@ def RunIndexTest():
   """Runs the index_test.js, which tests the NodeJS API.
   """
   logging.info('entering ...')
-  p = subprocess.Popen(
-      ['node', './index_test.js'],
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE,
-      cwd='js/nodejs')
+  p = subprocess.Popen(['node', './index_test.js'],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE,
+                       cwd='js/nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
@@ -476,7 +470,8 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
           'js/engine/definitions.js', 'js/engine/amp4ads-parse-css_test.js',
           'js/engine/parse-css.js', 'js/engine/parse-url.js',
           'js/engine/amp4ads-parse-css.js', 'js/engine/tokenize-css.js',
-          'js/engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
+          'js/engine/json-testutil.js',
+          '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -498,7 +493,8 @@ def CompileKeyframesParseCssTestMinified(out_dir):
           'js/engine/definitions.js', 'js/engine/keyframes-parse-css_test.js',
           'js/engine/parse-css.js', 'js/engine/parse-url.js',
           'js/engine/keyframes-parse-css.js', 'js/engine/tokenize-css.js',
-          'js/engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
+          'js/engine/json-testutil.js',
+          '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],

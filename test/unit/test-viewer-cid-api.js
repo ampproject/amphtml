@@ -1,22 +1,6 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ViewerCidApi} from '#service/viewer-cid-api';
 
-import {ViewerCidApi} from '../../src/service/viewer-cid-api';
-import {dict} from '../../src/utils/object';
-import {mockServiceForDoc} from '../../testing/test-helper';
+import {mockServiceForDoc} from '#testing/helpers/service';
 
 describes.realWin('viewerCidApi', {amp: true}, (env) => {
   let ampdoc;
@@ -63,11 +47,11 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
         .getScopedCid(used ? 'api-key' : undefined, 'AMP_ECID_GOOGLE')
         .then((cid) => {
           expect(cid).to.equal('client-id-from-viewer');
-          const payload = dict({
+          const payload = {
             'scope': 'AMP_ECID_GOOGLE',
             'clientIdApi': used,
             'canonicalOrigin': 'http://localhost:9876',
-          });
+          };
           if (used) {
             payload['apiKey'] = 'api-key';
           }
@@ -88,14 +72,11 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
 
     it('should not use client ID API if scope not allowlisted', () => {
       viewerMock.sendMessageAwaitResponse
-        .withArgs(
-          'cid',
-          dict({
-            'scope': 'NON_ALLOWLISTED_SCOPE',
-            'clientIdApi': false,
-            'canonicalOrigin': 'http://localhost:9876',
-          })
-        )
+        .withArgs('cid', {
+          'scope': 'NON_ALLOWLISTED_SCOPE',
+          'clientIdApi': false,
+          'canonicalOrigin': 'http://localhost:9876',
+        })
         .returns(Promise.resolve('client-id-from-viewer'));
       return expect(
         api.getScopedCid(undefined, 'NON_ALLOWLISTED_SCOPE')

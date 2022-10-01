@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const fs = require('fs');
 const {CONTROL, maybeCopyImageToCache, urlToCachePath} = require('./helpers');
 const {JSDOM} = require('jsdom');
@@ -22,8 +6,9 @@ const {JSDOM} = require('jsdom');
  * Lookup URL from cache. Inspect tags that could use images.
  *
  * @param {string} url
+ * @return {Promise<void>}
  */
-function copyImagesFromTags(url) {
+async function copyImagesFromTags(url) {
   const cachePath = urlToCachePath(url, CONTROL);
   const document = fs.readFileSync(cachePath);
   const dom = new JSDOM(document);
@@ -36,7 +21,7 @@ function copyImagesFromTags(url) {
  * Copy locally stored images found in the amp-img tags
  * from src and srcset to cache.
  *
- * @param {url} url
+ * @param {string} url
  * @param {JSDOM} dom
  */
 function copyImagesFromAmpImg(url, dom) {
@@ -60,7 +45,7 @@ function copyImagesFromAmpImg(url, dom) {
  * Copy locally stored images found in the amp-video tags
  * from artwork to cache.
  *
- * @param {url} url
+ * @param {string} url
  * @param {JSDOM} dom
  */
 function copyImagesFromAmpVideo(url, dom) {
@@ -79,9 +64,10 @@ function copyImagesFromAmpVideo(url, dom) {
  * Copy locally stored images found in the markup to cache.
  *
  * @param {!Array<string>} urls
+ * @return {Promise<void>}
  */
-function copyLocalImages(urls) {
-  urls.forEach(copyImagesFromTags);
+async function copyLocalImages(urls) {
+  await Promise.all(urls.map(copyImagesFromTags));
 }
 
 module.exports = copyLocalImages;

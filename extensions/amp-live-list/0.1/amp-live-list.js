@@ -1,29 +1,16 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Layout_Enum} from '#core/dom/layout';
+import {childElementByAttr} from '#core/dom/query';
+
+import {user, userAssert} from '#utils/log';
 
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
   SERVICE_ID,
 } from './live-list-manager';
-import {AmpEvents} from '../../../src/amp-events';
+
 import {CSS} from '../../../build/amp-live-list-0.1.css';
-import {Layout} from '../../../src/layout';
-import {childElementByAttr} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
 
 /**
  * @enum {string}
@@ -185,7 +172,9 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || layout == Layout.FIXED_HEIGHT;
+    return (
+      layout == Layout_Enum.CONTAINER || layout == Layout_Enum.FIXED_HEIGHT
+    );
   }
 
   /** @override */
@@ -1026,7 +1015,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
-    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
+    event.initEvent(AmpEvents_Enum.DOM_UPDATE, true, true);
     this.itemsSlot_.dispatchEvent(event);
   }
 }

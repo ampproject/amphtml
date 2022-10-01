@@ -6,22 +6,6 @@ teaser:
   text: Runs custom JavaScript in a Web Worker.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 ## Usage
 
 The `amp-script` component allows you to run custom JavaScript. To maintain AMP's performance guarantees, your code runs in a Web Worker, and certain restrictions apply.
@@ -107,6 +91,8 @@ You can also include your JavaScript inline, in a `script` tag. You must:
 
 [tip type="default"]
 For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#calculating-the-script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
+
+If your page contains multiple `amp-script` elements, each requiring a [script hash](#calculating-the-script-hash), include each as a whitespace-delimited list in a single `<meta name="amp-script-src" content="...">` tag (see [examples/amp-script/example.amp.html](https://github.com/ampproject/amphtml/blob/main/examples/amp-script/example.amp.html) for an example with multiple script hashes).
 [/tip]
 
 ### How does it work?
@@ -143,13 +129,13 @@ Supported DOM APIs include:
 -   Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
 -   And many more.
 
-For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md).
+For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/main/web_compat_table.md).
 
 `querySelector()` is supported for simple selectors - element, id, class, and attribute. So, `document.querySelector('.class')` will work, but `document.querySelector('.class1 .class2')` will not. [See the code](https://github.com/ampproject/worker-dom/blob/main/src/worker-thread/dom/Element.ts#L159) for details.
 
 `amp-script` supports common Web APIs like `Fetch`, `WebSockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
 
-`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
+`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new/choose) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md).
 
 [tip type="default"]
 For a set of samples showing `amp-script` in use, [see here](https://amp.dev/documentation/examples/components/amp-script/).
@@ -256,6 +242,7 @@ In order to maintain AMP's guarantees of performance and layout stability, `amp-
 
 -   Each inline script can contain up to 10,000 bytes
 -   The scripts on a page can contain a total of up to 150,000 bytes
+-   The scripts running in sandboxed mode on a page can contain a total of up to 300,000 bytes
 
 ### User gestures
 
@@ -330,7 +317,7 @@ const crypto = require('crypto');
 const hash = crypto.createHash('sha384');
 
 function generateCSPHash(script) {
-  const data = hash.update(script, 'utf-8');
+  const data = hash.update(script, 'utf8');
   return (
     'sha384-' +
     data
@@ -425,6 +412,12 @@ If you don't publish signed exchanges, `max-age` does nothing.
 
 The optional `nodom` attribute optimizes `<amp-script>` for use as a data-layer rather than as a UI layer. It removes the ability for the `<amp-script>` to make DOM modifications, in favor of a signficantly smaller bundle size and therefore better performance. It also automatically hides the `<amp-script>`, so you may omit the height and width attributes.
 
+### sandboxed
+
+Note: Not to be confused with the **sandbox** attribute.
+
+If set, this will signal that worker-dom should activate sandboxed mode. In this mode the Worker lives in its own crossorigin iframe, creating a strong security boundary. It also forces **nodom** mode. Because of the strong security boundary, sandboxed scripts do not need to provide a script hash.
+
 ### common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
@@ -439,7 +432,9 @@ No inline script can exceed 10,000 bytes. See [Size of JavaScript code](#size-of
 
 **Maximum total script size exceeded (...)**
 
-The total of all scripts used by a page cannot exceed 150,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above.
+The total of all non-sandboxed scripts used by a page cannot exceed 150,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above.
+
+The total of all sandboxed scripts (see [Sandboxed Mode](#sandboxed)) used by a page cannot exceed 300,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above.
 
 **Script hash not found.**
 
@@ -448,6 +443,8 @@ For local scripts and cross-origin scripts, you need to add a [script hash](#cal
 **(...) must have "sha384-(...)" in meta[name="amp-script-src"]**
 
 Again, you need the [script hash](#calculating-the-script-hash). Simply copy the value in this error into your `<meta>` tag.
+
+**JavaScript script hash requirements are disabled in sandboxed mode.**
 
 **JavaScript size and script hash requirements are disabled in development mode.**
 

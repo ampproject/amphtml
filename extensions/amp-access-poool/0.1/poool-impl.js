@@ -1,25 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from '../../../src/services';
-import {addParamToUrl, addParamsToUrl} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
 import {listenFor} from '../../../src/iframe-helper';
-import {resetStyles, setStyle, setStyles} from '../../../src/style';
+import {getMode} from '../../../src/mode';
+import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 
 const TAG = 'amp-access-poool';
 
@@ -38,15 +25,15 @@ const AUTHORIZATION_TIMEOUT = 3000;
 /**
  * @typedef {{
  *   appId: string,
- *   pageType: (string),
- *   debug: (boolean|null),
- *   forceWidget: (string|null),
- *   loginButtonEnabled: (boolean),
- *   videoClient: (string|null),
- *   customSegment: (string|null),
- *   cookiesEnabled: (boolean),
- *   locale: (string|null),
- *   context: (string|null),
+ *   pageType: string,
+ *   debug: ?boolean,
+ *   forceWidget: ?string,
+ *   loginButtonEnabled: boolean,
+ *   videoClient: ?string,
+ *   customSegment: ?string,
+ *   cookiesEnabled: boolean,
+ *   locale: ?string,
+ *   context: ?string,
  * }}
  */
 let PooolConfigDef;
@@ -194,23 +181,20 @@ export class PooolVendor {
   renderPoool_() {
     const pooolContainer = this.getContainer_();
     const urlPromise = this.accessSource_.buildUrl(
-      addParamsToUrl(
-        this.iframeUrl_,
-        dict({
-          'bi': this.pooolConfig_['bundleID'],
-          'iid': this.pooolConfig_['itemID'],
-          'ce': this.pooolConfig_['cookiesEnabled'],
-          'd':
-            typeof this.pooolConfig_['debug'] !== 'undefined' &&
-            this.pooolConfig_['debug'] !== null
-              ? this.pooolConfig_['debug']
-              : getMode().development || getMode().localDev,
-          'fw': this.pooolConfig_['forceWidget'],
-          'cs': this.pooolConfig_['customSegment'],
-          'lo': this.pooolConfig_['locale'],
-          'co': this.pooolConfig_['context'],
-        })
-      ),
+      addParamsToUrl(this.iframeUrl_, {
+        'bi': this.pooolConfig_['bundleID'],
+        'iid': this.pooolConfig_['itemID'],
+        'ce': this.pooolConfig_['cookiesEnabled'],
+        'd':
+          typeof this.pooolConfig_['debug'] !== 'undefined' &&
+          this.pooolConfig_['debug'] !== null
+            ? this.pooolConfig_['debug']
+            : getMode().development || getMode().localDev,
+        'fw': this.pooolConfig_['forceWidget'],
+        'cs': this.pooolConfig_['customSegment'],
+        'lo': this.pooolConfig_['locale'],
+        'co': this.pooolConfig_['context'],
+      }),
       false
     );
 

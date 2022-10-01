@@ -1,0 +1,122 @@
+<!-- Imports the story prestyle CSS so it can be laid out before the JS loads -->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="lcp.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <title>Boilerplate test</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src ="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-story-1.0.css">
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <style amp-custom>
+    amp-story-page {
+      font-family: 'Poppins', sans-serif;
+      color: black;
+      background-color: white;
+    }
+    h1 {
+      color: black;
+      font-size: 2em;
+    }
+    h1.preset {
+      font-size: 0.5em;
+    }
+    [preset="2021-foreground"] {
+      align-content: end;
+      padding: .5em;
+    }
+    p {
+      font-size: 1em;
+    }
+    [preset="2021-foreground"] p {
+      font-size: 0.25em;
+    }
+    html {
+      background: red;
+    }
+    body {
+      background: blue;
+    }
+  </style>
+</head>
+  <body>
+    <amp-story standalone id="cats"
+        title="LCP test" publisher="The AMP team"
+        publisher-logo-src="./img/amplogo.png"
+        poster-portrait-src="./img/overview.jpg">
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?fit=crop&w=720&h=1280&q=30&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world">Story Prestyle + JS</h1>
+          <p>This is how a story looks with the prestyle+JS<br></p>
+          <p style="color: dimgray">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground">
+          <p style="color: dimgray">This text is positioned with an aspect-ratio layer</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="second">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?fit=crop&w=720&h=1280&q=30&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world" style="color: white">This page should not be visible</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="third">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1634295912158-9c847b6b3a40?fit=crop&w=720&h=1280&q=30&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world" style="color: white">This page should not be visible</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="forth">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1634154369165-cadcd9af7100?fit=crop&w=720&h=1280&q=30&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world" style="color: white">This page should not be visible and should not load</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

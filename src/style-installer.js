@@ -1,28 +1,16 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {TickLabel_Enum} from '#core/constants/enums';
+import {insertAfterOrAtStart, waitForBodyOpenPromise} from '#core/dom';
+import {setStyles} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import {map} from '#core/types/object';
 
-import {CommonSignals} from './common-signals';
-import {Services} from './services';
-import {TickLabel} from './enums';
-import {dev, devAssert, rethrowAsync} from './log';
-import {getAmpdoc} from './service';
-import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
-import {map} from './utils/object';
-import {setStyles} from './style';
+import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
 import {waitForServices} from './render-delaying-services';
+import {getAmpdoc} from './service-helpers';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
@@ -107,8 +95,13 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   // Check if it has already been created or discovered.
   if (key) {
     const existing = getExistingStyleElement(cssRoot, styleMap, key);
+    // If we find a `link[rel=stylesheet]` to an extensions css, it is
+    // prioritized and not overwritten as the document would most likely
+    // be a transformed document and that the extension will also most likely
+    // be an extension without a CSS to install for optimization.
     if (existing) {
-      if (existing.textContent !== cssText) {
+      // Only overwrite the textContent if it is a `style` tag.
+      if (existing.tagName == 'STYLE' && existing.textContent !== cssText) {
         existing.textContent = cssText;
       }
       return existing;
@@ -154,7 +147,7 @@ function getExistingStyleElement(cssRoot, styleMap, key) {
     return styleMap[key];
   }
   // Check if the style has already been added by the server layout.
-  const existing = cssRoot./*OK*/ querySelector(`style[${key}]`);
+  const existing = cssRoot./*OK*/ querySelector(`style[${key}], link[${key}]`);
   if (existing) {
     styleMap[key] = existing;
     return existing;
@@ -213,16 +206,22 @@ export function makeBodyVisible(doc) {
     })
     .then((services) => {
       bodyMadeVisible = true;
+      if (INI_LOAD_INOB) {
+        // Force sync measurement to ensure that style recalc is complete
+        // before showing body, which would trigger FCP. This should reduce
+        // make it less likely that a CLS would be triggered after FCP.
+        doc.body./*OK*/ getBoundingClientRect();
+      }
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);
-      ampdoc.signals().signal(CommonSignals.RENDER_START);
+      ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
       if (services.length > 0) {
         const resources = Services.resourcesForDoc(doc.documentElement);
         resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
       }
       try {
         const perf = Services.performanceFor(win);
-        perf.tick(TickLabel.MAKE_BODY_VISIBLE);
+        perf.tick(TickLabel_Enum.MAKE_BODY_VISIBLE);
         perf.flush();
       } catch (e) {}
     });
@@ -273,6 +272,8 @@ function styleLoaded(doc, style) {
   const sheets = doc.styleSheets;
   for (let i = 0; i < sheets.length; i++) {
     const sheet = sheets[i];
+    // The `style` param here can be an instance of a `link[rel=stylesheet]` or
+    // a `style` element. Both can be an "ownerNode" of a CSSStyleSheet
     if (sheet.ownerNode == style) {
       return true;
     }

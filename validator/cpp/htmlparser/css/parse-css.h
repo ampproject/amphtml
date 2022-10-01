@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 // A C++ port of third_party/parse_css/parse-css.js, the original
 // Javascript implementation came from https://github.com/tabatkins/parse-css.
 // This library aims to implement the CSS3 syntax module. Some of the original
@@ -33,16 +17,9 @@
 // Token, which in a sane world would be in a distinct
 // hierarchy. However the parsing routines sometimes instantiate a
 // temporary TokenStream and put some AST nodes into there.
-//
-// TODO:
-// - Sufficient accessor methods to make this useful (for now, using
-//   JSON only tests).
-// - Parsing numbers (right now unlike the Javascript this library leaves
-//   numbers as strings).
-// - Higher level concepts e.g. selectors?
 
-#ifndef HTMLPARSER__CSS_PARSE_CSS_H_
-#define HTMLPARSER__CSS_PARSE_CSS_H_
+#ifndef CPP_HTMLPARSER_CSS_PARSE_CSS_H_
+#define CPP_HTMLPARSER_CSS_PARSE_CSS_H_
 
 #include <memory>
 #include <string>
@@ -51,11 +28,13 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
-#include "css/parse-css.pb.h"
-#include "json/types.h"
+#include "absl/strings/strip.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
+#include "cpp/htmlparser/json/types.h"
 #include "validator.pb.h"
 
 namespace htmlparser::css {
+
 // Implements 3.3. Preprocessing the input stream.
 // http://www.w3.org/TR/css-syntax-3/#input-preprocessing
 void Preprocess(std::vector<char32_t>* codepoints);
@@ -461,13 +440,41 @@ class ErrorToken : public Token {
   const std::vector<std::string> params_;
 };
 
-// Strips the prefix 'min-' or 'max-' from the start of a media feature
-// identifier, if present. E.g., "min-width" -> "width".
-std::string_view StripMinMaxPrefix(std::string_view prefixed_string);
+namespace internal {
+
+std::string_view StripVendorPrefix(absl::string_view prefixed_string);
+std::string_view StripMinMaxPrefix(absl::string_view prefixed_string);
+
+// Macro to generate method that may accept any string parameter of type
+// absl::string_view, std::string_view, std::string, char* and const char*
+#define TEMPLATED_METHOD_FOR_STRING_TYPES(PUBLIC_METHOD, INTERNAL_IMPL)\
+    /* absl::string_view specialization */\
+template<class T, \
+         typename std::enable_if<std::is_same<T, absl::string_view>::value, \
+                                              bool>::type = true>\
+std::string_view PUBLIC_METHOD(T prefixed_string) {\
+  return INTERNAL_IMPL(prefixed_string);\
+}\
+\
+    /* std::string, char* specialization */\
+template<class T, typename std::enable_if<\
+    std::is_same<T, std::string>::value || \
+    std::is_same<char const*, typename std::decay<T>::type>::value || \
+    std::is_same<char*, typename std::decay<T>::type>::value, \
+    bool>::type = true>\
+std::string_view PUBLIC_METHOD(const T& str) {\
+  absl::string_view prefixed_string(str);\
+  return INTERNAL_IMPL(prefixed_string);\
+}
+
+}  // namespace internal
 
 // Strips vendor prefixes from identifiers, e.g. property names or names
 // of at rules. E.g., "-moz-keyframes" -> "keyframes".
-std::string_view StripVendorPrefix(std::string_view prefixed_string);
+TEMPLATED_METHOD_FOR_STRING_TYPES(StripVendorPrefix,
+                                  internal::StripVendorPrefix);
+TEMPLATED_METHOD_FOR_STRING_TYPES(StripMinMaxPrefix,
+                                  internal::StripMinMaxPrefix);
 
 class RuleVisitor;
 
@@ -476,7 +483,6 @@ class RuleVisitor;
 class Rule : public Token {
  public:
   explicit Rule(TokenType::Code type) : Token(type) {}
-  std::unique_ptr<Token> Clone() const final;
 
   // Accept will first dispatch to the appropriate
   // visitor->VisitRuleType method, then recurse into the children of
@@ -1004,4 +1010,4 @@ class SelectorVisitor : public RuleVisitor {
 };
 }  // namespace htmlparser::css
 
-#endif  // HTMLPARSER__CSS_PARSE_CSS_H_
+#endif  // CPP_HTMLPARSER_CSS_PARSE_CSS_H_

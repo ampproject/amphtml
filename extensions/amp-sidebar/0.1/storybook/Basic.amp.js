@@ -1,32 +1,19 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // To do: how to add CSS
 //import '!style-loader!css-loader!./Basic-styles.css';
-import * as Preact from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-sidebar-0_1',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-sidebar', version: 0.1}],
+  },
+
+  args: {
+    minWidth: 500,
   },
 };
 
@@ -56,14 +43,13 @@ export const BasicSidebar = () => {
   );
 };
 
-export const Toolbar = () => {
+export const Toolbar = (minWidth) => {
   /*
    * The toolbar feature allows elements within the amp-sidebar to be
    * displayed within the main body of the article. In this example two
    * Navigational Elements from the sidebar will be displayed under the
    * Toolbar Target when the width of the page is 500px or more.
    */
-  const minWidth = 500;
   const mediaQuery = `(min-width: ${minWidth}px)`;
   return (
     <div>

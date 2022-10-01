@@ -1,20 +1,4 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#include "allocator.h"
+#include "cpp/htmlparser/allocator.h"
 
 #include "gtest/gtest.h"
 
@@ -30,8 +14,8 @@ TEST(AllocatorTest, BasicTest) {
     std::string c;
     short d;
     Data() {}
-    Data(int32_t a_, int64_t b_, std::string c_, short d_) :
-      a(a_), b(b_), c(c_), d(d_) {}
+    Data(int32_t a_, int64_t b_, std::string c_, short d_)
+        : a(a_), b(b_), c(c_), d(d_) {}
   };
 
   Allocator<Data> alloc(4096);
@@ -57,8 +41,8 @@ TEST(AllocatorTest, AlignmentTest) {
     int32_t b;
     int32_t c;
     int32_t d;
-    DataA4(int32_t a_, int32_t b_, int32_t c_, int32_t d_) :
-      a(a_), b(b_), c(c_), d(d_) {}
+    DataA4(int32_t a_, int32_t b_, int32_t c_, int32_t d_)
+        : a(a_), b(b_), c(c_), d(d_) {}
   };
 
   // Size: 16, alignment 8.
@@ -82,9 +66,6 @@ TEST(AllocatorTest, AlignmentTest) {
   std::vector<const DataA4*> data4A;
   std::vector<const DataA8*> data8A;
   std::vector<DataA1*> data1A;
-  // TODO(amaltas): Why declaring these as std::size_t fails EQ below.
-  // Basically EQ(size_t, int) crashes.
-  // Is this go/totw/159 happening here?
   int s4 = sizeof(DataA4);
   int s8 = sizeof(DataA8);
   int s1 = sizeof(DataA1);
@@ -121,7 +102,7 @@ TEST(AllocatorTest, AlignmentTest) {
 
 TEST(AllocatorTest, LargeNumberOfObjects) {
   struct Array1k {
-    std::array<int, 1000> a {0};
+    std::array<int, 1000> a{0};
   };
 
   EXPECT_EQ(sizeof(Array1k), 4000);
@@ -144,7 +125,7 @@ TEST(AllocatorTest, DestructorCalled) {
   struct Data {
    public:
     Data(Stats* stats) : stats_(stats) {}
-    ~Data() { stats_->destructor_counter++;}
+    ~Data() { stats_->destructor_counter++; }
     Stats* stats_;
   };
 
@@ -212,7 +193,8 @@ TEST(AllocatorTest, VectorContainer) {
       // One short string (so that its allocated at stack and one long string so
       // it is allocated on heap.
       if (j % 2 == 0) {
-        data.s = R"STR("dsfjkldsfjldsajfdlsjfldsjflkdsjfkadsjfkdjsfkjdskfljdsafljdskfjdsfjdsafjdaskfjdsfdsfdsfljadskfljdskfjdsklfjkldsjfkldsjfkljdskfjdsklfjadsljfdsajfkldsjfkljdsfjjsdfsdfjdslfjdlsfjlkdsjflksdjfldsjflkjdslfjsdklfjlksdjfkldsjfklsdjfldsjflksdjfldskjflkdsjflkdsjflkdsjflkdsjflkdsjflkjsdfkljdslfkjdslkfjsdlkfjdslkfjdslkfjldskfjklsdjflksdjflsdjfldsjfsdkjflsdjflksdjflksdjfdslfjdslfj)STR";
+        data.s =
+            R"STR("dsfjkldsfjldsajfdlsjfldsjflkdsjfkadsjfkdjsfkjdskfljdsafljdskfjdsfjdsafjdaskfjdsfdsfdsfljadskfljdskfjdsklfjkldsjfkldsjfkljdskfjdsklfjadsljfdsajfkldsjfkljdsfjjsdfsdfjdslfjdlsfjlkdsjflksdjfldsjflkjdslfjsdklfjlksdjfkldsjfklsdjfldsjflksdjfldskjflkdsjflkdsjflkdsjflkdsjflkdsjflkjsdfkljdslfkjdslkfjsdlkfjdslkfjdslkfjldskfjklsdjflksdjflsdjfldsjfsdkjflsdjflksdjflksdjfdslfjdslfj)STR";
       } else {
         data.s = "foobar";
       }

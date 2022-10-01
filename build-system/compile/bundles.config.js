@@ -1,24 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
-
-const argv = require('minimist')(process.argv.slice(2));
+const bentoBundles = require('./bundles.config.bento.json');
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('ansi-colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -29,9 +13,22 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
 exports.jsBundles = {
   'polyfills.js': {
     srcDir: './src/',
-    srcFilename: 'polyfills.js',
+    srcFilename: 'polyfills/index.js',
     destDir: './build/',
     minifiedDestDir: './build/',
+  },
+  'bento.js': {
+    srcDir: './src/bento',
+    srcFilename: 'bento.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      includePolyfills: false,
+      toName: 'bento.max.js',
+      minifiedName: 'bento.js',
+      // For backwards-compat:
+      aliasName: 'custom-elements-polyfill.js',
+    },
   },
   'alp.max.js': {
     srcDir: './ads/alp/',
@@ -42,17 +39,6 @@ exports.jsBundles = {
       toName: 'alp.max.js',
       includePolyfills: true,
       minifiedName: 'alp.js',
-    },
-  },
-  'examiner.max.js': {
-    srcDir: './src/examiner/',
-    srcFilename: 'examiner.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      toName: 'examiner.max.js',
-      includePolyfills: true,
-      minifiedName: 'examiner.js',
     },
   },
   'ww.max.js': {
@@ -90,6 +76,17 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  'amp-script-proxy-iframe.js': {
+    srcDir: './3p/',
+    srcFilename: 'amp-script-proxy-iframe.js',
+    destDir: './dist.3p/current',
+    minifiedDestDir: './dist.3p/' + internalRuntimeVersion,
+    options: {
+      minifiedName: 'amp-script-proxy-iframe.js',
+      include3pDirectories: true,
+      includePolyfills: false,
+    },
+  },
   'iframe-transport-client-lib.js': {
     srcDir: './3p/',
     srcFilename: 'iframe-transport-client-lib.js',
@@ -123,7 +120,6 @@ exports.jsBundles = {
       toName: 'amp-viewer-host.max.js',
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
-      extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
       skipUnknownDepsCheck: true,
     },
   },
@@ -177,7 +173,6 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      esmPassCompilation: argv.esm || argv.sxg,
     },
   },
   'amp-shadow.js': {
@@ -199,7 +194,6 @@ exports.jsBundles = {
       toName: 'amp-inabox.js',
       minifiedName: 'amp4ads-v0.js',
       includePolyfills: true,
-      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
     },
   },
 };
@@ -208,6 +202,11 @@ exports.jsBundles = {
  * Used to generate extension build targets
  */
 exports.extensionBundles = extensionBundles;
+
+/**
+ * Used to generate component build targets
+ */
+exports.bentoBundles = bentoBundles;
 
 /**
  * Used to alias a version of an extension to an older deprecated version.
@@ -261,24 +260,32 @@ exports.verifyExtensionBundles = function () {
       bundle.name,
       bundleString
     );
+  });
+};
+
+exports.verifyBentoBundles = function () {
+  bentoBundles.forEach((bundle, i) => {
+    const bundleString = JSON.stringify(bundle, null, 2);
     verifyBundle_(
-      'latestVersion' in bundle,
-      'latestVersion',
+      'name' in bundle,
+      'name',
       'is missing from',
+      '',
+      bundleString
+    );
+    verifyBundle_(
+      i === 0 || bundle.name.localeCompare(bentoBundles[i - 1].name) >= 0,
+      'name',
+      'is out of order. bentoBundles should be alphabetically sorted by name.',
       bundle.name,
       bundleString
     );
-    const duplicates = exports.extensionBundles.filter(
-      (duplicate) => duplicate.name === bundle.name
-    );
     verifyBundle_(
-      duplicates.every(
-        (duplicate) => duplicate.latestVersion === bundle.latestVersion
-      ),
-      'latestVersion',
-      'is not the same for all versions of',
+      'version' in bundle,
+      'version',
+      'is missing from',
       bundle.name,
-      JSON.stringify(duplicates, null, 2)
+      bundleString
     );
   });
 };

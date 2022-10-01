@@ -1,28 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import {getStyle, setStyles} from '#core/dom/style';
+import {throttle} from '#core/types/function';
+import {hasOwn} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '../../../src/services';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
-import {getStyle, setStyles} from '../../../src/style';
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import {parseUrlDeprecated} from '../../../src/url';
-import {throttle} from '../../../src/utils/rate-limit';
-import {tryParseJson} from '../../../src/json';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -204,7 +191,7 @@ export class SafeframeHostApi {
    * Returns true if the given window matches the Safeframe's content window.
    * Comparing to a null window will always return false.
    *
-   * @param {Window|null} otherWindow
+   * @param {?Window} otherWindow
    * @return {boolean}
    */
   equalsSafeframeContentWindow(otherWindow) {
@@ -219,33 +206,29 @@ export class SafeframeHostApi {
    * @return {!JsonObject}
    */
   getSafeframeNameAttr() {
-    const attributes = dict({});
+    const attributes = {};
     attributes['uid'] = this.uid_;
     attributes['hostPeerName'] = this.win_.location.origin;
     attributes['initialGeometry'] = this.getInitialGeometry();
-    attributes['permissions'] = JSON.stringify(
-      dict({
-        'expandByOverlay': this.expandByOverlay_,
-        'expandByPush': this.expandByPush_,
-        'readCookie': false,
-        'writeCookie': false,
-      })
-    );
-    attributes['metadata'] = JSON.stringify(
-      dict({
-        'shared': {
-          'sf_ver': this.baseInstance_.safeframeVersion,
-          'ck_on': 1,
-          'flash_ver': '26.0.0',
-          // Once GPT Safeframe is updated to look in amp object,
-          // remove this canonical_url here.
+    attributes['permissions'] = JSON.stringify({
+      'expandByOverlay': this.expandByOverlay_,
+      'expandByPush': this.expandByPush_,
+      'readCookie': false,
+      'writeCookie': false,
+    });
+    attributes['metadata'] = JSON.stringify({
+      'shared': {
+        'sf_ver': this.baseInstance_.safeframeVersion,
+        'ck_on': 1,
+        'flash_ver': '26.0.0',
+        // Once GPT Safeframe is updated to look in amp object,
+        // remove this canonical_url here.
+        'canonical_url': this.maybeGetCanonicalUrl(),
+        'amp': {
           'canonical_url': this.maybeGetCanonicalUrl(),
-          'amp': {
-            'canonical_url': this.maybeGetCanonicalUrl(),
-          },
         },
-      })
-    );
+      },
+    });
     attributes['reportCreativeGeometry'] = this.isFluid_;
     attributes['isDifferentSourceWindow'] = false;
     attributes['sentinel'] = this.sentinel_;
@@ -462,7 +445,7 @@ export class SafeframeHostApi {
       dev().expectedError(TAG, 'Frame contentWindow unavailable.');
       return;
     }
-    const message = dict();
+    const message = {};
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(
       /** @type {!JsonObject} */ (payload)
@@ -751,7 +734,7 @@ export class SafeframeHostApi {
       })
       .catch((err) => {
         user().warn(TAG, err);
-        const {width, height} = this.baseInstance_.getSlotSize();
+        const {height, width} = this.baseInstance_.getSlotSize();
         if (width && height) {
           this.onFluidResize_(height);
         }
@@ -776,7 +759,7 @@ export class SafeframeHostApi {
       return;
     }
     this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
+      JSON.stringify({'message': 'resize-complete', 'c': this.channel}),
       '*'
     );
   }

@@ -1,25 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {PriorityQueue} from '#core/data-structures/priority-queue';
 
-import {Services} from './services';
-import {dev} from './log';
-import {getData} from './event-helper';
-import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from './service-helpers';
 import {makeBodyVisibleRecovery} from './style-installer';
-import PriorityQueue from './utils/priority-queue';
 
 /**
  * @const {string}
@@ -86,7 +76,7 @@ export function startupChunk(doc, fn, opt_makesBodyVisible) {
  *
  * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {function(?IdleDeadline)} fn
- * @param {ChunkPriority} priority
+ * @param {ChunkPriority_Enum} priority
  */
 export function chunk(elementOrAmpDoc, fn, priority) {
   if (deactivated) {
@@ -157,14 +147,14 @@ export function runChunksForTesting(elementOrAmpDoc) {
  * The priority of a chunk task. Higher priority tasks have higher values.
  * @enum {number}
  */
-export const ChunkPriority = {
+export const ChunkPriority_Enum = {
   HIGH: 20,
   LOW: 10,
   BACKGROUND: 0,
 };
 
 /** @enum {string} */
-const TaskState = {
+const TaskState_Enum = {
   NOT_RUN: 'not_run',
   RUN: 'run',
 };
@@ -178,8 +168,8 @@ class Task {
    * @param {function(?IdleDeadline)} fn
    */
   constructor(fn) {
-    /** @public {TaskState} */
-    this.state = TaskState.NOT_RUN;
+    /** @public {TaskState_Enum} */
+    this.state = TaskState_Enum.NOT_RUN;
 
     /** @private @const {!function(?IdleDeadline)} */
     this.fn_ = fn;
@@ -192,10 +182,10 @@ class Task {
    * @protected
    */
   runTask_(idleDeadline) {
-    if (this.state == TaskState.RUN) {
+    if (this.state == TaskState_Enum.RUN) {
       return;
     }
-    this.state = TaskState.RUN;
+    this.state = TaskState_Enum.RUN;
     try {
       this.fn_(idleDeadline);
     } catch (e) {
@@ -388,7 +378,7 @@ class Chunks {
   nextTask_(opt_dequeue) {
     let t = this.tasks_.peek();
     // Dequeue tasks until we find one that hasn't been run yet.
-    while (t && t.state !== TaskState.NOT_RUN) {
+    while (t && t.state !== TaskState_Enum.NOT_RUN) {
       this.tasks_.dequeue();
       t = this.tasks_.peek();
     }
@@ -462,8 +452,9 @@ class Chunks {
       !allowLongTasks &&
       this.bodyIsVisible_ &&
       (this.supportsInputPending_
-        ? /** @type {!{scheduling: {isInputPending: Function}}} */ (this.win_
-            .navigator).scheduling.isInputPending()
+        ? /** @type {!{scheduling: {isInputPending: Function}}} */ (
+            this.win_.navigator
+          ).scheduling.isInputPending()
         : this.durationOfLastExecution_ > 5)
     ) {
       this.durationOfLastExecution_ = 0;

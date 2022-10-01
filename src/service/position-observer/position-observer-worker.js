@@ -1,30 +1,16 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Services} from '../../services';
-import {devAssert} from '../../log';
 import {
   layoutRectEquals,
   layoutRectLtwh,
   layoutRectsRelativePos,
   rectsOverlap,
-} from '../../layout-rect';
+} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
+
+import {devAssert} from '#utils/log';
 
 /** @enum {number} */
-export const PositionObserverFidelity = {
+export const PositionObserverFidelity_Enum = {
   HIGH: 1,
   LOW: 0,
 };
@@ -40,7 +26,7 @@ const LOW_FIDELITY_FRAME_COUNT = 4;
  * @typedef {{
  *  positionRect: ?../../layout-rect.LayoutRectDef,
  *  viewportRect: !../../layout-rect.LayoutRectDef,
- *  relativePos: ?../../layout-rect.RelativePositions,
+ *  relativePos: ?../../layout-rect.RelativePositions_Enum,
  * }}
  */
 export let PositionInViewportEntryDef;
@@ -49,7 +35,7 @@ export class PositionObserverWorker {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
-   * @param {!PositionObserverFidelity} fidelity
+   * @param {!PositionObserverFidelity_Enum} fidelity
    * @param {function(?PositionInViewportEntryDef)} handler
    */
   constructor(ampdoc, element, fidelity, handler) {
@@ -59,12 +45,12 @@ export class PositionObserverWorker {
     /** @const {function(?PositionInViewportEntryDef)} */
     this.handler_ = handler;
 
-    /** @type {!PositionObserverFidelity} */
+    /** @type {!PositionObserverFidelity_Enum} */
     this.fidelity = fidelity;
 
     /** @type {number} */
     this.turn =
-      fidelity == PositionObserverFidelity.LOW
+      fidelity == PositionObserverFidelity_Enum.LOW
         ? Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT)
         : 0;
 
@@ -95,7 +81,9 @@ export class PositionObserverWorker {
       position.positionRect,
       'PositionObserver should always trigger entry with clientRect'
     );
-    const positionRect = /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
+    const positionRect = /** @type {!../../layout-rect.LayoutRectDef} */ (
+      position.positionRect
+    );
     // Add the relative position of the element to its viewport
     position.relativePos = layoutRectsRelativePos(
       positionRect,
@@ -128,7 +116,7 @@ export class PositionObserverWorker {
         return;
       }
 
-      if (this.fidelity == PositionObserverFidelity.LOW) {
+      if (this.fidelity == PositionObserverFidelity_Enum.LOW) {
         this.turn = LOW_FIDELITY_FRAME_COUNT;
       }
     }

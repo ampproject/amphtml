@@ -1,20 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {registerServiceBuilder} from '../service';
+import {registerServiceBuilder} from '../service-helpers';
 
 /**
  * A helper class that provides information about device/OS/browser currently
@@ -33,7 +17,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current platform an Android device.
+   * Whether the current platform is an Android device.
    * @return {boolean}
    */
   isAndroid() {
@@ -41,7 +25,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current platform an iOS device.
+   * Whether the current platform is an iOS device.
    * @return {boolean}
    */
   isIos() {
@@ -56,7 +40,6 @@ export class Platform {
     return (
       /Safari/i.test(this.navigator_.userAgent) &&
       !this.isChrome() &&
-      !this.isIe() &&
       !this.isEdge() &&
       !this.isFirefox() &&
       !this.isOpera()
@@ -96,17 +79,6 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is a IE browser.
-   * @return {boolean}
-   */
-  isIe() {
-    if (IS_ESM) {
-      return false;
-    }
-    return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
-  }
-
-  /**
    * Whether the current browser is an Edge browser.
    * @return {boolean}
    */
@@ -131,7 +103,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is isStandalone.
+   * Whether the current browser is standalone.
    * @return {boolean}
    */
   isStandalone() {
@@ -169,9 +141,6 @@ export class Platform {
     if (this.isOpera()) {
       return this.evalMajorVersion_(/(OPR|Opera|OPiOS)\/(\d+)/, 2);
     }
-    if (this.isIe()) {
-      return this.evalMajorVersion_(/MSIE\s(\d+)/, 1);
-    }
     if (this.isEdge()) {
       return this.evalMajorVersion_(/Edge\/(\d+)/, 1);
     }
@@ -202,20 +171,14 @@ export class Platform {
    * @return {string}
    */
   getIosVersionString() {
-    if (!this.navigator_.userAgent) {
-      return '';
-    }
     if (!this.isIos()) {
       return '';
     }
-    let version = this.navigator_.userAgent.match(
-      /OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/
+    return (
+      this.navigator_.userAgent
+        ?.match(/OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/)?.[1]
+        ?.replace(/_/g, '.') || ''
     );
-    if (!version) {
-      return '';
-    }
-    version = version[1].replace(/_/g, '.');
-    return version;
   }
 
   /**

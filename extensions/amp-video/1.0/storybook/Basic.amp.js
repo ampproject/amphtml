@@ -1,27 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
+
+import {VideoElementWithActions} from './_helpers';
 
 export default {
   title: 'amp-video-1_0',
-  decorators: [withA11y, withKnobs, withAmp],
+  decorators: [withAmp],
   parameters: {
     extensions: [
       {name: 'amp-video', version: '1.0'},
@@ -29,37 +14,23 @@ export default {
     ],
     experiments: ['bento'],
   },
-};
-
-const AmpVideoWithKnobs = ({i, ...rest}) => {
-  const group = i ? `Player ${i + 1}` : undefined;
-
-  const width = text('width', '640px', group);
-  const height = text('height', '360px', group);
-
-  const ariaLabel = text('aria-label', 'Video Player', group);
-  const autoplay = boolean('autoplay', true, group);
-  const controls = boolean('controls', true, group);
-  const mediasession = boolean('mediasession', true, group);
-  const noaudio = boolean('noaudio', false, group);
-  const loop = boolean('loop', false, group);
-  const poster = text(
-    'poster',
-    'https://amp.dev/static/inline-examples/images/kitten-playing.png',
-    group
-  );
-
-  const artist = text('artist', '', group);
-  const album = text('album', '', group);
-  const artwork = text('artwork', '', group);
-  const title = text('title', '', group);
-
-  const sources = object(
-    'sources',
-    [
+  args: {
+    width: '640px',
+    height: '360px',
+    ariaLabel: 'Video Player',
+    autoplay: true,
+    controls: true,
+    mediasession: true,
+    noaudio: false,
+    loop: false,
+    poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
+    artist: '',
+    album: '',
+    artwork: '',
+    title: '',
+    sources: [
       {
-        src:
-          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
       },
       {
@@ -67,27 +38,14 @@ const AmpVideoWithKnobs = ({i, ...rest}) => {
         type: 'video/mp4',
       },
     ],
-    group
-  );
+  },
+};
+
+const AmpVideoWithControls = ({ariaLabel, i, sources, ...args}) => {
+  const group = i ? `Player ${i + 1}` : undefined;
 
   return (
-    <amp-video
-      {...rest}
-      ariaLabel={ariaLabel}
-      autoplay={autoplay}
-      controls={controls}
-      mediasession={mediasession}
-      noaudio={noaudio}
-      loop={loop}
-      poster={poster}
-      artist={artist}
-      album={album}
-      artwork={artwork}
-      title={title}
-      layout="responsive"
-      width={width}
-      height={height}
-    >
+    <amp-video aria-label={ariaLabel} layout="responsive" id={group} {...args}>
       {sources.map((props) => (
         <source {...props}></source>
       ))}
@@ -107,15 +65,16 @@ const Spacer = ({height}) => {
   );
 };
 
-export const Default = () => {
-  const amount = number('Amount', 1, {}, 'Page');
-  const spacerHeight = text('Space', '80vh', 'Page');
-  const spaceAbove = boolean('Space above', false, 'Page');
-  const spaceBelow = boolean('Space below', false, 'Page');
-
+export const Default = ({
+  amount,
+  spaceAbove,
+  spaceBelow,
+  spacerHeight,
+  ...args
+}) => {
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<AmpVideoWithKnobs key={i} i={i} />);
+    players.push(<AmpVideoWithControls key={i} i={i} {...args} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -130,49 +89,29 @@ export const Default = () => {
   );
 };
 
-const ActionButton = ({children, ...props}) => (
-  <button style={{flex: 1, margin: '0 4px'}} {...props}>
-    {children}
-  </button>
-);
+Default.args = {
+  amount: 1,
+  spacerHeight: '80vh',
+  spacerAbove: false,
+  spacerBelow: false,
+};
 
-export const Actions = () => {
+export const Actions = ({...args}) => {
+  const id = 'player';
   return (
-    <div style="max-width: 800px">
-      <AmpVideoWithKnobs id="player" />
-      <div
-        style={{
-          margin: '12px 0',
-          display: 'flex',
-        }}
-      >
-        <ActionButton on="tap:player.play">Play</ActionButton>
-        <ActionButton on="tap:player.pause">Pause</ActionButton>
-        <ActionButton on="tap:player.mute">Mute</ActionButton>
-        <ActionButton on="tap:player.unmute">Unmute</ActionButton>
-        <ActionButton on="tap:player.fullscreen">Fullscreen</ActionButton>
-      </div>
-    </div>
+    <VideoElementWithActions id={id}>
+      <AmpVideoWithControls id={id} {...args} />
+    </VideoElementWithActions>
   );
 };
 
-export const InsideAccordion = () => {
-  const width = number('width', 320);
-  const height = number('height', 180);
-  const autoplay = boolean('autoplay', false);
-
+export const InsideAccordion = ({...args}) => {
   return (
     <amp-accordion expand-single-section>
       <section expanded>
         <h2>Video</h2>
         <div>
-          <amp-video
-            autoplay={autoplay}
-            controls
-            loop
-            width={width}
-            height={height}
-          >
+          <amp-video controls loop {...args}>
             <source
               type="video/mp4"
               src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
@@ -182,4 +121,30 @@ export const InsideAccordion = () => {
       </section>
     </amp-accordion>
   );
+};
+
+InsideAccordion.args = {
+  width: 320,
+  height: 180,
+  autoplay: false,
+};
+
+export const InsideDetails = ({...args}) => {
+  return (
+    <details open>
+      <summary>Video</summary>
+      <amp-video controls loop {...args}>
+        <source
+          type="video/mp4"
+          src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+        ></source>
+      </amp-video>
+    </details>
+  );
+};
+
+InsideDetails.args = {
+  width: 320,
+  height: 180,
+  autoplay: false,
 };

@@ -1,5 +1,5 @@
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
     <meta charset="utf-8">
     <title>Input masking examples in AMP</title>
@@ -29,13 +29,13 @@
           on="change:AMP.setState({maskedValue: event.value})"
           name="statemask"
           mask="000-000-000"
-          mask-output="alphanumeric" 
+          mask-output="alphanumeric"
           placeholder="Type some numbers..."
       /></label>
       <input type="submit">
       <div submit-success>
         <template type="amp-mustache">
-          {{statemask}}, 
+          {{statemask}},
           {{statemask-unmasked}}
         </template>
       </div>

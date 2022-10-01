@@ -1,39 +1,24 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Service for recaptcha components
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+import * as mode from '#core/mode';
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
-import {internalRuntimeVersion} from '../../../src/internal-version';
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import * as urls from '../../../src/config/urls';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
-import {urls} from '../../../src/config';
+import {getMode} from '../../../src/mode';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {getSourceOrigin} from '../../../src/url';
+import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 /**
  * @fileoverview
@@ -164,10 +149,10 @@ export class AmpRecaptchaService {
       reject: executePromise.reject,
     };
     this.recaptchaApiReady_.promise.then(() => {
-      const message = dict({
+      const message = {
         'id': messageId,
         'action': 'amp_' + action,
-      });
+      };
 
       // Send the message
       this.postMessageToIframe_(
@@ -240,13 +225,11 @@ export class AmpRecaptchaService {
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute(
         'name',
-        JSON.stringify(
-          dict({
-            'sitekey': this.sitekey_,
-            'sentinel': 'amp-recaptcha',
-            'global': this.global_,
-          })
-        )
+        JSON.stringify({
+          'sitekey': this.sitekey_,
+          'sentinel': 'amp-recaptcha',
+          'global': this.global_,
+        })
       );
       iframe.classList.add('i-amphtml-recaptcha-iframe');
       setStyle(iframe, 'border', 'none');
@@ -299,8 +282,8 @@ export class AmpRecaptchaService {
             '.recaptcha.' +
             winLocation.host +
             '/dist.3p/' +
-            (getMode().minified
-              ? `${internalRuntimeVersion()}/recaptcha`
+            (mode.isMinified()
+              ? `${mode.version()}/recaptcha`
               : 'current/recaptcha.max') +
             '.html'
           );
@@ -328,7 +311,7 @@ export class AmpRecaptchaService {
       const recaptchaFrameSrc =
         'https://' +
         curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${mode.version()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });
@@ -410,8 +393,7 @@ export class AmpRecaptchaService {
  * @return {!Promise<!AmpRecaptchaService>}
  */
 export function recaptchaServiceForDoc(element) {
-  return /** @type {!Promise<!AmpRecaptchaService>} */ (getServicePromiseForDoc(
-    element,
-    'amp-recaptcha'
-  ));
+  return /** @type {!Promise<!AmpRecaptchaService>} */ (
+    getServicePromiseForDoc(element, 'amp-recaptcha')
+  );
 }

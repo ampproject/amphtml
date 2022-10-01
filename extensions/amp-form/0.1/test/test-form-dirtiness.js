@@ -1,24 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {Services} from '#service';
+
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
-import {Services} from '../../../../src/services';
-import {closestAncestorElementBySelector} from '../../../../src/dom';
-import {createCustomEvent, getDetail} from '../../../../src/event-helper';
 
 function getForm(doc) {
   const form = doc.createElement('form');
@@ -62,7 +49,7 @@ function dispatchInputEvent(element) {
 function dispatchFormValueChangeEvent(element, win) {
   const ampValueChangeEvent = createCustomEvent(
     win,
-    AmpEvents.FORM_VALUE_CHANGE,
+    AmpEvents_Enum.FORM_VALUE_CHANGE,
     /* detail */ null,
     {bubbles: true}
   );
@@ -407,7 +394,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
     });
   });
 
-  describe('AmpEvents.FORM_DIRTINESS_CHANGE', () => {
+  describe('AmpEvents_Enum.FORM_DIRTINESS_CHANGE', () => {
     let input;
 
     beforeEach(() => {
@@ -418,7 +405,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
     it('dispatches an event when the form transitions from clean to dirty', () => {
       const changeToDirty = () => changeInput(input, 'changed');
       const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
+        AmpEvents_Enum.FORM_DIRTINESS_CHANGE,
         form,
         changeToDirty
       );
@@ -432,7 +419,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
 
       const changeToClean = () => changeInput(input, '');
       const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
+        AmpEvents_Enum.FORM_DIRTINESS_CHANGE,
         form,
         changeToClean
       );
@@ -446,7 +433,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
 
       const remainDirty = () => changeInput(input, 'still dirty');
       const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
+        AmpEvents_Enum.FORM_DIRTINESS_CHANGE,
         form,
         remainDirty
       );

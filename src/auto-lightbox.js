@@ -1,27 +1,14 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isAmphtml} from '#core/document/format';
 
-import {ChunkPriority, chunk} from './chunk';
-import {Services} from './services';
-import {dev} from './log';
-import {isAmphtml} from './format';
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
+
+import {ChunkPriority_Enum, chunk} from './chunk';
 import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */
-export const AutoLightboxEvents = {
+export const AutoLightboxEvents_Enum = {
   // Triggered when the lightbox attribute is newly set on an item in order to
   // process by the renderer extension (e.g. amp-lightbox-gallery).
   NEWLY_SET: 'amp-auto-lightbox:newly-set',
@@ -40,7 +27,13 @@ export const AutoLightboxEvents = {
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
   // Only enabled on single documents tagged as <html amp> or <html ⚡>.
-  if (!isAmphtml(win.document) || !ampdoc.isSingleDoc()) {
+  if (
+    !isAmphtml(win.document) ||
+    !ampdoc.isSingleDoc() ||
+    // Prevent loading auto lightbox when disabled using 'data-amp-auto-lightbox-disable' attribute (#37854)
+    // Check if HTML Tag has 'data-amp-auto-lightbox-disable' attribute
+    win.document.documentElement.hasAttribute('data-amp-auto-lightbox-disable')
+  ) {
     return;
   }
   chunk(
@@ -57,7 +50,7 @@ export function installAutoLightboxExtension(ampdoc) {
         );
       });
     },
-    ChunkPriority.LOW
+    ChunkPriority_Enum.LOW
   );
 }
 

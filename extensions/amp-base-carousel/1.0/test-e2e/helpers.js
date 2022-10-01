@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const TAG_NAME = 'amp-base-carousel';
 const SLIDE_CLASS = 'slideElement';
 const SCROLLER_CLASS = 'hideScrollbar';
@@ -66,6 +50,23 @@ export async function getNextArrow(styles, controller) {
   );
 }
 
-export function sleep(ms) {
-  return new Promise((res) => setTimeout(res, ms));
+export async function isElementInViewport(element, controller) {
+  const rect = await controller.getElementRect(element);
+  const [width, height] = await controller.getWindowRect();
+
+  await expect(rect.top).to.be.above(0);
+  await expect(rect.bottom).to.be.below(Number(height));
+  await expect(rect.left).to.be.above(0);
+  await expect(rect.right).to.be.below(Number(width));
+}
+
+export async function isElementOutOfViewport(element, controller) {
+  const winRect = await controller.getWindowRect();
+  const width = Number(winRect[0]);
+  const height = Number(winRect[1]);
+
+  await expect(controller.getElementRect(element)).to.satisfy(
+    ({bottom, left, right, top}) =>
+      top < 0 || bottom > height || left < 0 || right > width
+  );
 }

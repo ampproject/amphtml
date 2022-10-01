@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 if (!window.context) {
   // window.context doesn't exist yet, must perform steps to create it
   // before using it
@@ -14,17 +16,21 @@ function intersectionCallback(changes) {
   // Code below is simply an example.
   var latestChange = changes[changes.length - 1];
 
-  // Amp-ad width and height.
-  var w = latestChange.boundingClientRect.width;
-  var h = latestChange.boundingClientRect.height;
+  var {
+    // Amp-ad width and height.
+    height: h,
+    width: w,
 
-  // Visible width and height.
-  var vw = latestChange.intersectionRect.width;
-  var vh = latestChange.intersectionRect.height;
+    // Position in the viewport.
+    x: vx,
+    y: vy,
+  } = latestChange.boundingClientRect;
 
-  // Position in the viewport.
-  var vx = latestChange.boundingClientRect.x;
-  var vy = latestChange.boundingClientRect.y;
+  var {
+    // Visible width and height.
+    height: vh,
+    width: vw,
+  } = latestChange.intersectionRect;
 
   // Viewable percentage.
   var viewablePerc = ((vw * vh) / (w * h)) * 100;

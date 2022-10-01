@@ -7,22 +7,6 @@ teaser:
   text: Provides fuzzy timestamps by formatting dates as time ago (for example, 3 hours ago).
 ---
 
-<!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-timeago
 
 ## Usage
@@ -67,40 +51,47 @@ The local default is `en`. Add the `locale` attribute and specify one of the fol
 -   `ar` (Arabic)
 -   `be` (Belarusian)
 -   `bg` (Bulgarian)
+-   `bn-IN` (Bangla)
 -   `ca` (Catalan)
+-   `cs` (Czech)
 -   `da` (Danish)
 -   `de` (German)
 -   `el` (Greek)
 -   `en` (English)
--   `enShort` (English - short)
+-   `en-short` (English - short)
 -   `es` (Spanish)
 -   `eu` (Basque)
+-   `fa` (Persian - Farsi)
 -   `fi` (Finnish)
 -   `fr` (French)
+-   `gl` (Galician)
 -   `he` (Hebrew)
+-   `hi-IN` (Hindi)
 -   `hu` (Hungarian)
--   `inBG` (Bangla)
--   `inHI` (Hindi)
--   `inID` (Malay)
+-   `id-ID` (Malay)
 -   `it` (Italian)
 -   `ja` (Japanese)
+-   `ka` (Georgian)
 -   `ko` (Korean)
 -   `ml` (Malayalam)
--   `nbNO` (Norwegian Bokmål)
+-   `my` (Burmese - Myanmar)
+-   `nb-NO` (Norwegian Bokmål)
 -   `nl` (Dutch)
--   `nnNO` (Norwegian Nynorsk)
+-   `nn-NO` (Norwegian Nynorsk)
 -   `pl` (Polish)
--   `ptBR` (Portuguese)
+-   `pt-BR` (Portuguese)
 -   `ro` (Romanian)
 -   `ru` (Russian)
+-   `sq` (Albanian)
+-   `sr` (Serbian)
 -   `sv` (Swedish)
 -   `ta` (Tamil)
 -   `th` (Thai)
 -   `tr` (Turkish)
 -   `uk` (Ukrainian)
 -   `vi` (Vietnamese)
--   `zhCN` (Chinese)
--   `zhTW` (Taiwanese)
+-   `zh-CN` (Chinese)
+-   `zh-TW` (Taiwanese)
 
 ### `cutoff`
 
@@ -112,4 +103,4 @@ The AMP provided set of [common attributes](https://amp.dev/documentation/guides
 
 ## Validation
 
-See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/validator-amp-timeago.protoascii) in the AMP validator specification.
+See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-timeago/validator-amp-timeago.protoascii) in the AMP validator specification.

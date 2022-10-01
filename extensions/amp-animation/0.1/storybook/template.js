@@ -1,30 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as Preact from '#preact';
 
-import * as Preact from '../../../../src/preact';
-import {button, number, select, text} from '@storybook/addon-knobs';
-
-const FILL_OPTIONS = {
+export const FILL_OPTIONS = {
   none: 'none',
   forwards: 'forwards',
   backwards: 'backwards',
   both: 'both',
 };
 
-const DIRECTION_OPTIONS = {
+export const DIRECTION_OPTIONS = {
   normal: 'normal',
   reverse: 'reverse',
   alternate: 'alternate',
@@ -53,29 +36,32 @@ const INFO_STYLE = {
   overflow: 'auto',
 };
 
+export const animationFillArgType = {
+  name: 'fill',
+  options: FILL_OPTIONS,
+  control: {type: 'select'},
+  defaultValue: 'both',
+};
+
+export const animationDirectionArgType = {
+  name: 'duration',
+  options: DIRECTION_OPTIONS,
+  control: {type: 'select'},
+  defaultValue: 'alternate',
+};
+
 /**
  * @param {!Object} props
  * @return {!Object}
  */
 export function AnimationTemplate(props) {
-  const {spec, children} = props;
-  const duration = text('Duration', '1s');
-  const iterations = number('Iterations', 2);
-  const fill = select('Fill', FILL_OPTIONS, 'both');
-  const direction = select('Direction', DIRECTION_OPTIONS, 'alternate');
-  const fullSpec = {
-    duration,
-    iterations,
-    fill,
-    direction,
-    ...spec,
-  };
+  const {children, spec} = props;
   return (
     <main>
       <amp-animation id="anim1" layout="nodisplay">
         <script
           type="application/json"
-          dangerouslySetInnerHTML={{__html: JSON.stringify(fullSpec)}}
+          dangerouslySetInnerHTML={{__html: JSON.stringify(spec)}}
         />
       </amp-animation>
 
@@ -89,7 +75,7 @@ export function AnimationTemplate(props) {
         <button on="tap:anim1.cancel">Cancel</button>
       </div>
       <div style={CONTAINER_STYLE}>
-        <pre style={INFO_STYLE}>{JSON.stringify(fullSpec, null, 2)}</pre>
+        <pre style={INFO_STYLE}>{JSON.stringify(spec, null, 2)}</pre>
 
         {children}
       </div>

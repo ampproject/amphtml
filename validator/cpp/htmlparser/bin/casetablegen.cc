@@ -1,61 +1,22 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-// To regenerate casetable.h file, run:
-// bazel build htmlparser/bin:casetablegen
-// bazel-bin/htmlparser/bin/casetablegen
-//
-// TODO: Add a genrule to auto generate the header file every time
-// library/software is built.
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <utility>
 
-#include "defer.h"
-#include "fileutil.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
 
 const char kFileHeader[] =
-    R"HEADER(//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-// AUTO GENERATED; DO NOT EDIT.
+    R"HEADER(// AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file, see comments in bin/casetable.cc
 
-#ifndef HTMLPARSER__CASETABLE_H_
-#define HTMLPARSER__CASETABLE_H_
+#ifndef CPP_HTMLPARSER_CASETABLE_H_
+#define CPP_HTMLPARSER_CASETABLE_H_
 
 #include <algorithm>
 #include <utility>
 
-#include "comparators.h"
+#include "cpp/htmlparser/comparators.h"
 
 namespace htmlparser {
 
@@ -109,7 +70,7 @@ inline char32_t ToUpperChar(char32_t c) {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__CASETABLE_H_
+#endif  // CPP_HTMLPARSER_CASETABLE_H_
 )FOOTER";
 
 namespace htmlparser {
@@ -170,24 +131,24 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::ofstream fd("casetable.h");
-  htmlparser::Defer __([&]() {fd.close();});
+  std::ofstream fd("cpp/htmlparser/casetable.h");
+  htmlparser::Defer __([&]() { fd.close(); });
 
   fd << kFileHeader;
   fd << "inline constexpr std::pair<char32_t, char32_t> "
-     "kUppercaseToLowerTable[] {" << std::endl;
+        "kUppercaseToLowerTable[] {"
+     << std::endl;
   for (auto& entry : upper_to_lower) {
-    fd << "    {0x" << entry.upper_case
-       << ", 0x" << entry.lower_case << "},  // "
-       << entry.description << std::endl;
+    fd << "    {0x" << entry.upper_case << ", 0x" << entry.lower_case
+       << "},  // " << entry.description << std::endl;
   }
   fd << "};" << std::endl;
 
   fd << "inline constexpr std::pair<char32_t, char32_t> "
-     "kLowercaseToUpperTable[] {" << std::endl;
+        "kLowercaseToUpperTable[] {"
+     << std::endl;
   for (auto& entry : upper_to_lower) {
-    fd << "    {0x" << entry.lower_case
-       << ", 0x" << entry.upper_case
+    fd << "    {0x" << entry.lower_case << ", 0x" << entry.upper_case
        << "},  // " << entry.description << std::endl;
   }
   fd << "};" << std::endl;

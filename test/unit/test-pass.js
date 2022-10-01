@@ -1,29 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
 import {Pass} from '../../src/pass';
-import {Services} from '../../src/services';
 
-describe('Pass', () => {
+describes.sandboxed('Pass', {}, (env) => {
   let pass;
   let timerMock;
   let handlerCalled;
 
   beforeEach(() => {
-    timerMock = window.sandbox.mock(Services.timerFor(window));
+    timerMock = env.sandbox.mock(Services.timerFor(window));
     handlerCalled = 0;
     pass = new Pass(window, () => {
       handlerCalled++;
@@ -40,7 +25,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        window.sandbox.match((value) => {
+        env.sandbox.match((value) => {
           delayedFunc = value;
           return true;
         }),
@@ -62,7 +47,7 @@ describe('Pass', () => {
   it('schedule no delay', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(window.sandbox.match.func, 0)
+      .withExactArgs(env.sandbox.match.func, 0)
       .returns(1)
       .once();
     timerMock.expects('cancel').never();
@@ -72,7 +57,7 @@ describe('Pass', () => {
   it('schedule with delay', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(window.sandbox.match.func, 111)
+      .withExactArgs(env.sandbox.match.func, 111)
       .returns(1)
       .once();
     timerMock.expects('cancel').never();
@@ -82,7 +67,7 @@ describe('Pass', () => {
   it('schedule later', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(window.sandbox.match.func, 111)
+      .withExactArgs(env.sandbox.match.func, 111)
       .returns(1)
       .once();
     timerMock.expects('cancel').never();
@@ -95,12 +80,12 @@ describe('Pass', () => {
   it('schedule earlier', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(window.sandbox.match.func, 222)
+      .withExactArgs(env.sandbox.match.func, 222)
       .returns(1)
       .once();
     timerMock
       .expects('delay')
-      .withExactArgs(window.sandbox.match.func, 111)
+      .withExactArgs(env.sandbox.match.func, 111)
       .returns(2)
       .once();
     timerMock.expects('cancel').withExactArgs(1).once();
@@ -122,7 +107,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        window.sandbox.match((value) => {
+        env.sandbox.match((value) => {
           delayedFunc0 = value;
           return true;
         }),
@@ -133,7 +118,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        window.sandbox.match((value) => {
+        env.sandbox.match((value) => {
           delayedFunc1 = value;
           return true;
         }),

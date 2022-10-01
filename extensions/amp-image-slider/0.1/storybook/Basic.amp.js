@@ -1,43 +1,28 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'Image Slider',
-  decorators: [withKnobs, withA11y, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-image-slider', version: 0.1}],
   },
+  argTypes: {
+    first: {
+      name: 'First image URL',
+      defaultValue: 'https://amp.dev/static/samples/img/canoe_900x600.jpg',
+      control: {type: 'text'},
+    },
+    second: {
+      name: 'Second image URL',
+      defaultValue: 'https://amp.dev/static/samples/img/canoe_900x600_blur.jpg',
+      control: {type: 'text'},
+    },
+  },
 };
 
-export const Default = () => {
-  const first = text(
-    'First image',
-    'https://amp.dev/static/samples/img/canoe_900x600.jpg'
-  );
-  const second = text(
-    'Second image',
-    'https://amp.dev/static/samples/img/canoe_900x600_blur.jpg'
-  );
-
+export const Default = ({first, second}) => {
   return (
     <amp-image-slider width="600" height="300" layout="fixed">
       <amp-img src={first} alt={'First image'} layout="fill"></amp-img>
@@ -46,20 +31,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
-
-export const CustomHints = () => {
-  const first = text(
-    'First image',
-    'https://amp.dev/static/samples/img/canoe_900x600.jpg'
-  );
-  const second = text(
-    'Second image',
-    'https://amp.dev/static/samples/img/canoe_900x600_blur.jpg'
-  );
-
+export const CustomHints = ({first, second}) => {
   return (
     <amp-image-slider width="600" height="300" layout="fixed">
       <amp-img src={first} alt={'First image'} layout="fill"></amp-img>
@@ -88,8 +60,4 @@ export const CustomHints = () => {
       </style>
     </amp-image-slider>
   );
-};
-
-CustomHints.story = {
-  name: 'custom-hints',
 };

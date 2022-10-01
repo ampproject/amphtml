@@ -1,27 +1,13 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeChildren} from '#core/dom';
+
+import {Services} from '#service';
+
+import {listen} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
-import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {listen} from '../../../src/event-helper';
-import {removeChildren} from '../../../src/dom';
 
 const TAG = 'amp-access-laterpay';
 
@@ -66,7 +52,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let LaterpayConfig_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -79,7 +65,7 @@ let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camel
  *   validity_value: number
  * }}
  */
-let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseOption_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -90,7 +76,7 @@ let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camel
  *   subscriptions: (!Array<PurchaseOption_0_1_Def>|undefined)
  * }}
  */
-let PurchaseConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseConfig_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
@@ -141,11 +127,10 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      DEFAULT_MESSAGES,
-      this.laterpayConfig_['localeMessages'] || dict()
-    ));
+    this.i18n_ = /** @type {!JsonObject} */ ({
+      ...DEFAULT_MESSAGES,
+      ...(this.laterpayConfig_['localeMessages'] || {}),
+    });
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;
@@ -335,12 +320,10 @@ export class LaterpayVendor {
     }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
-    this.purchaseConfig_['premiumcontent']['title'] = this.i18n_[
-      'premiumContentTitle'
-    ];
-    this.purchaseConfig_['premiumcontent'][
-      'description'
-    ] = this.getArticleTitle_();
+    this.purchaseConfig_['premiumcontent']['title'] =
+      this.i18n_['premiumContentTitle'];
+    this.purchaseConfig_['premiumcontent']['description'] =
+      this.getArticleTitle_();
     listContainer.appendChild(
       this.createPurchaseOption_(this.purchaseConfig_['premiumcontent'])
     );

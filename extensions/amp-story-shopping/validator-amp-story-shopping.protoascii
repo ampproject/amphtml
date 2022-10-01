@@ -1,0 +1,75 @@
+tags: {  # amp-story-shopping
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-shopping"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-shopping-tag>
+html_format: AMP
+  tag_name: "AMP-STORY-SHOPPING-TAG"
+  requires_extension: "amp-story-shopping"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+  attrs: {
+    name: "data-product-id"
+    mandatory: true
+  }
+}
+tags: {  # <amp-story-shopping-attachment>
+  html_format: AMP
+  tag_name: "AMP-STORY-SHOPPING-ATTACHMENT"
+  requires_extension: "amp-story-shopping"
+  mandatory_last_child: true
+  spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true
+    }
+  }
+  attrs: {
+    name: "theme"
+    value: "dark"
+    value: "light"
+  }
+  attrs: {
+    name: "cta-text"
+  }
+  child_tags: {
+    child_tag_name_oneof: "SCRIPT"
+    mandatory_min_num_child_tags: 1
+  }
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+tags: { # amp-story-shopping-attachment
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-shopping-attachment config script"
+  mandatory_parent: "AMP-STORY-SHOPPING-ATTACHMENT"
+  requires_extension: "amp-story-shopping"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
+}

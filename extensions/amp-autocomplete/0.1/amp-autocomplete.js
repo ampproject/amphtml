@@ -1,51 +1,35 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {removeChildren, tryFocus} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {mod} from '#core/math';
+import {isArray, isEnumValue} from '#core/types';
+import {once} from '#core/types/function';
+import {getValueForExpr, hasOwn, map, ownProperty} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+import {includes} from '#core/types/string';
 
-import {ActionTrust} from '../../../src/action-constants';
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
+
+import fuzzysearch from '#third_party/fuzzysearch';
+
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
+
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {addParamToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {includes} from '../../../src/string';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue} from '../../../src/types';
-import {mod} from '../../../src/utils/math';
-import {once} from '../../../src/utils/function';
-import {removeChildren, tryFocus} from '../../../src/dom';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
-import {toggle} from '../../../src/style';
-import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
 /**
  * @typedef {{
@@ -53,7 +37,7 @@ import fuzzysearch from '../../../third_party/fuzzysearch/index';
  *   selectedText: ?string
  * }}
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let SelectionValues;
 
 const TAG = 'amp-autocomplete';
@@ -186,8 +170,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
      */
     this.initialAutocompleteAttr_ = null;
 
-    /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /**
      * Whether a <template> or <script type="text/plain"> tag is present.
@@ -236,14 +220,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const doc = this.element.ownerDocument;
-    const isEmail = doc && isAmp4Email(doc);
-    userAssert(
-      !isEmail ||
-        doc.documentElement.hasAttribute('data-amp-autocomplete-opt-in'),
-      '<amp-autocomplete> is not currently available in AMP4Email.'
-    );
-
+    this.templates_ = Services.templatesForDoc(this.element);
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
@@ -443,12 +420,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
     this.maybeSetSrcFromInput_();
     if (this.isSsr_) {
       return requestForBatchFetch(
         this.element,
+        this.element.getAttribute('src'),
         policy,
         /* refresh */ false
       ).then((request) => {
@@ -460,12 +438,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
         );
         setupJsonFetchInit(request.fetchOpt);
 
-        const attributes = dict({
+        const attributes = {
           'ampAutocompleteAttributes': {
             'items': itemsExpr,
             'maxItems': this.maxItems_,
           },
-        });
+        };
         return this.getSsrTemplateHelper().ssr(
           this.element,
           request,
@@ -612,9 +590,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
   inputHandler_() {
     if (
       this.binding_.shouldAutocomplete(
-        /** @type {!HTMLInputElement} */ (dev().assertElement(
-          this.inputElement_
-        ))
+        /** @type {!HTMLInputElement} */ (
+          dev().assertElement(this.inputElement_)
+        )
       )
     ) {
       return this.maybeFetchAndAutocomplete_();
@@ -680,9 +658,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
   selectHandler_(event) {
     const element = dev().assertElement(event.target);
     const selectedElement = this.getItemElement_(element);
-    const {selectedObject, selectedText} = this.updateAndGetElementSelections_(
-      selectedElement
-    );
+    const {selectedObject, selectedText} =
+      this.updateAndGetElementSelections_(selectedElement);
     return this.mutateElement(() => {
       this.selectItem_(selectedText, selectedObject);
     });
@@ -1170,7 +1147,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.element,
       selectName,
       selectEvent,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     // Ensure native change listeners are triggered
@@ -1210,9 +1187,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const newValue = newActiveElement.getAttribute('data-value');
 
     this.binding_.displayActiveItemInInput(
-      /** @type {!HTMLInputElement} */ (dev().assertElement(
-        this.inputElement_
-      )),
+      /** @type {!HTMLInputElement} */ (
+        dev().assertElement(this.inputElement_)
+      ),
       newValue,
       this.userInput_
     );
@@ -1222,11 +1199,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     return this.measureMutateElement(
       () => {
-        const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
-        const {
-          scrollTop: resultTop,
-          offsetHeight: resultHeight,
-        } = this.container_;
+        const {offsetHeight: itemHeight, offsetTop: itemTop} = newActiveElement;
+        const {offsetHeight: resultHeight, scrollTop: resultTop} =
+          this.container_;
         shouldScroll =
           resultTop > itemTop ||
           resultTop + resultHeight < itemTop + itemHeight;
@@ -1318,7 +1293,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     switch (event.key) {
-      case Keys.DOWN_ARROW:
+      case Keys_Enum.DOWN_ARROW:
         event.preventDefault();
         if (this.areResultsDisplayed_()) {
           // Disrupt loop around to display user input.
@@ -1332,7 +1307,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.autocomplete_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
         });
-      case Keys.UP_ARROW:
+      case Keys_Enum.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
         if (this.activeIndex_ === 0) {
@@ -1340,7 +1315,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           return Promise.resolve();
         }
         return this.updateActiveItem_(-1);
-      case Keys.ENTER:
+      case Keys_Enum.ENTER:
         const shouldPreventDefault = this.binding_.shouldPreventDefaultOnEnter(
           !!this.activeElement_
         );
@@ -1349,10 +1324,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);
         if (this.areResultsDisplayed_() && this.activeElement_) {
-          const {
-            selectedObject,
-            selectedText,
-          } = this.updateAndGetElementSelections_(this.activeElement_);
+          const {selectedObject, selectedText} =
+            this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedText, selectedObject);
             this.resetActiveElement_();
@@ -1361,7 +1334,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return this.mutateElement(() => {
           this.toggleResults_(false);
         });
-      case Keys.ESCAPE:
+      case Keys_Enum.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
           if (!this.fallbackDisplayed_) {
@@ -1370,19 +1343,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.toggleResults_(false);
           }
         });
-      case Keys.TAB:
+      case Keys_Enum.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
-          const {
-            selectedObject,
-            selectedText,
-          } = this.updateAndGetElementSelections_(this.activeElement_);
+          const {selectedObject, selectedText} =
+            this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedText, selectedObject);
           });
         }
         return Promise.resolve();
-      case Keys.BACKSPACE:
+      case Keys_Enum.BACKSPACE:
         this.detectBackspace_ = this.shouldSuggestFirst_;
         return Promise.resolve();
       default:
@@ -1413,7 +1384,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 }
 

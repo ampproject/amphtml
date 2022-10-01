@@ -1,18 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+
+import {getServiceForDocOrNull} from '../../../../src/service-helpers';
+import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {
   ANIMATIONS_DISABLED_CLASS,
   CURRENT_LABEL_ANIMATION_ATTR,
@@ -22,12 +13,8 @@ import {
   GWD_TIMELINE_EVENT,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
-import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
-import {Services} from '../../../../src/services';
-import {createCustomEvent} from '../../../../src/event-helper';
-import {getServiceForDocOrNull} from '../../../../src/service';
 
-describes.sandboxed('AMP GWD Animation', {}, () => {
+describes.sandboxed('AMP GWD Animation', {}, (env) => {
   /**
    * Creates a test amp-gwd-animation element in the given document.
    * @param {!Document} root
@@ -40,7 +27,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       element.setAttribute(attr, attrs[attr]);
     }
     root.body.appendChild(element);
-    return element.build().then(() => element);
+    return element.buildInternal().then(() => element);
   }
 
   /**
@@ -112,12 +99,16 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               'timeline-event-prefix': 'tl_',
               'layout': 'nodisplay',
             };
-            return createGwdAnimationElement(doc, config).then((el) => {
-              element = el;
-              impl = element.implementation_;
-              runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
-              page1Elem = doc.getElementById('page1');
-            });
+            return createGwdAnimationElement(doc, config)
+              .then((el) => {
+                element = el;
+                runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
+                page1Elem = doc.getElementById('page1');
+                return element.getImpl(false);
+              })
+              .then((aImpl) => {
+                impl = aImpl;
+              });
           });
 
           afterEach(() => {
@@ -499,9 +490,9 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
     let actionService;
 
     beforeEach(() => {
-      actionService = {setActions: window.sandbox.stub()};
+      actionService = {setActions: env.sandbox.stub()};
       element = document.createElement('div');
-      window.sandbox
+      env.sandbox
         .stub(Services, 'actionServiceForDoc')
         .withArgs(element)
         .returns(actionService);
@@ -537,7 +528,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       const target = document.createElement('div');
       target.setAttribute('on', 'event2:node2.hide');
       // FIE should have its own ActionService.
-      const fieActionService = {setActions: window.sandbox.stub()};
+      const fieActionService = {setActions: env.sandbox.stub()};
       Services.actionServiceForDoc.withArgs(target).returns(fieActionService);
       // Provide `target` as the service context to simulate FIE case.
       addAction(target, target, 'event1', 'node1.foo()');

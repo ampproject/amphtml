@@ -1,39 +1,26 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {
-  SandboxOptions,
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
+import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {
+  SandboxOptions_Enum,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {disableScrollingOnIframe} from '../../../src/iframe-helper';
-import {
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @private @const */
 const TAG = 'amp-redbull-player';
@@ -43,11 +30,11 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @private @const */
 const SANDBOX = [
-  SandboxOptions.ALLOW_SCRIPTS,
-  SandboxOptions.ALLOW_SAME_ORIGIN,
-  SandboxOptions.ALLOW_POPUPS,
-  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
-  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
+  SandboxOptions_Enum.ALLOW_SCRIPTS,
+  SandboxOptions_Enum.ALLOW_SAME_ORIGIN,
+  SandboxOptions_Enum.ALLOW_POPUPS,
+  SandboxOptions_Enum.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SandboxOptions_Enum.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /** @implements {../../../src/video-interface.VideoInterface} */
@@ -59,7 +46,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenFrame_ = null;
 
     /** @private {string} */
@@ -108,15 +95,12 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
     const origin = 'https://player.redbull.com/amp/amp-iframe.html';
 
-    const src = addParamsToUrl(
-      origin,
-      dict({
-        'videoId': videoId,
-        'skinId': skinId,
-        'ampTagId': this.tagId_,
-        'locale': locale,
-      })
-    );
+    const src = addParamsToUrl(origin, {
+      'videoId': videoId,
+      'skinId': skinId,
+      'ampTagId': this.tagId_,
+      'locale': locale,
+    });
 
     this.iframe_ = disableScrollingOnIframe(
       createFrameFor(this, src, '', SANDBOX)
@@ -132,12 +116,10 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   onReady_() {
     Services.videoManagerForDoc(this.element).register(this);
     this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(
-        dict({
-          'msg': 'amp-loaded',
-          'id': `${TAG}-${this.tagId_}`,
-        })
-      ),
+      JSON.stringify({
+        'msg': 'amp-loaded',
+        'id': `${TAG}-${this.tagId_}`,
+      }),
       '*'
     );
   }
@@ -203,14 +185,10 @@ class AmpRedBullPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
-    dispatchCustomEvent(
-      this.element,
-      VideoEvents.CUSTOM_TICK,
-      dict({
-        'eventType': `video-custom-tracking-${this.tagId_}`,
-        'vars': vars,
-      })
-    );
+    dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {
+      'eventType': `video-custom-tracking-${this.tagId_}`,
+      'vars': vars,
+    });
   }
 
   /** @override */

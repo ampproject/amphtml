@@ -1,27 +1,19 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {omit} from '#core/types/object';
 
-import * as Preact from '../../../src/preact/index';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Slot} from '../../../src/preact/slot';
-import {createElementWithAttributes} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {omit} from '../../../src/utils/object';
-import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
-import {waitFor} from '../../../testing/test-helper';
+import * as Preact from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+import {
+  createParseAttrsWithPrefix,
+  createParseDateAttr,
+} from '#preact/parse-props';
+import {Slot} from '#preact/slot';
+
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+
+import {testElementR1} from '#testing/element-v1';
+import {waitFor} from '#testing/helpers/service';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 
@@ -74,6 +66,28 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
   }
 
+  describe('R1', () => {
+    it('testElementR1', () => {
+      testElementR1(PreactBaseElement);
+    });
+
+    it('by default prerenderAllowed is tied to the "loadable" flag', () => {
+      Impl['loadable'] = false;
+      expect(Impl.prerenderAllowed()).to.be.true;
+
+      Impl['loadable'] = true;
+      expect(Impl.prerenderAllowed()).to.be.false;
+    });
+
+    it('by default previewAllowed is NOT tied to the "loadable" flag', () => {
+      Impl['loadable'] = false;
+      expect(Impl.previewAllowed()).to.be.false;
+
+      Impl['loadable'] = true;
+      expect(Impl.previewAllowed()).to.be.false;
+    });
+  });
+
   describe('layout mapping', () => {
     let element;
 
@@ -85,7 +99,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should allow container for layoutSizeDefined', async () => {
       Impl['layoutSizeDefined'] = true;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       const impl = await element.getImpl();
       expect(impl.isLayoutSupported('fixed')).to.be.true;
       expect(impl.isLayoutSupported('container')).to.be.true;
@@ -104,7 +118,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
         'propA': {attr: 'prop-a'},
         'minFontSize': {attr: 'min-font-size', type: 'number'},
-        'aDate': {attr: 'a-date', type: 'date'},
+        'aDate': createParseDateAttr('a-date'),
         'disabled': {attr: 'disabled', type: 'boolean'},
         'enabled': {attr: 'enabled', type: 'boolean'},
         'boolDefTrue': {attr: 'bool-def-true', type: 'boolean', default: true},
@@ -113,8 +127,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           parseAttrs: (e) =>
             `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
         },
-        'params': {attrPrefix: 'data-param-'},
-        'prefix': {attrPrefix: 'prefix'},
+        'params': createParseAttrsWithPrefix('data-param-'),
+        'prefix': createParseAttrsWithPrefix('prefix'),
       };
       element = html`
         <amp-preact
@@ -135,7 +149,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       `;
       element.setAttribute('a-date', DATE_STRING);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -251,7 +265,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(win.innerWidth).to.equal(300);
     });
@@ -291,7 +305,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -313,7 +327,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"> </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -332,17 +346,24 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     let element;
 
     beforeEach(() => {
-      Impl['children'] = {};
+      Impl['usesShadowDom'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
           <div id="child1"></div>
+          <div placeholder>foo</div>
+          <div fallback>bar</div>
+          <div overflow>load more</div>
         </amp-preact>
       `;
     });
 
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
+    });
+
     it('should render from scratch', async () => {
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(component).to.be.calledOnce;
       const container = element.shadowRoot.querySelector(':scope > c');
@@ -352,6 +373,26 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(
         element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
       ).to.have.lengthOf(1);
+    });
+
+    it('should pass placeholder, fallback, and overflow elements to service slot', async () => {
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const serviceSlot = element.shadowRoot.querySelectorAll(
+        'slot[name="i-amphtml-svc"]'
+      );
+      expect(serviceSlot).to.have.lengthOf(1);
+      const placeholder = element.querySelector('[placeholder]');
+      const fallback = element.querySelector('[fallback]');
+      const overflow = element.querySelector('[overflow]');
+      expect(placeholder.getAttribute('slot')).to.equal('i-amphtml-svc');
+      expect(fallback.getAttribute('slot')).to.equal('i-amphtml-svc');
+      expect(overflow.getAttribute('slot')).to.equal('i-amphtml-svc');
+      expect(serviceSlot[0].assignedElements()).to.have.lengthOf(3);
+      expect(serviceSlot[0].assignedElements()[0]).to.equal(placeholder);
+      expect(serviceSlot[0].assignedElements()[1]).to.equal(fallback);
+      expect(serviceSlot[0].assignedElements()[2]).to.equal(overflow);
     });
 
     describe('SSR', () => {
@@ -372,7 +413,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         shadowRoot.appendChild(styleEl);
 
         doc.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
         await waitFor(() => component.callCount > 0, 'component hydrated');
       });
 
@@ -399,7 +440,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       it('should rerender after SSR hydration', async () => {
         // Only rendering updates attributes.
-        element.implementation_.mutateProps({name: 'A'});
+        const impl = await element.getImpl();
+        impl.mutateProps({name: 'A'});
         await waitFor(() => component.callCount > 1, 'component rendered');
         expect(component).to.be.calledTwice;
         expect(componentEl.getAttribute('data-name')).to.equal('A');
@@ -449,9 +491,13 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element.addEventListener('amp:dom-update', updateEventSpy);
     });
 
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.false;
+    });
+
     it('should render from scratch', async () => {
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(
         () => element.querySelector(':scope > time'),
         'lightDom element created'
@@ -460,6 +506,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledOnce;
       const lightDom = element.querySelector(':scope > time');
       expect(lightDom.className).to.equal('');
+      expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lastProps.as).to.equal('time');
       await waitFor(
@@ -471,7 +518,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should add fill class', async () => {
       Impl['layoutSizeDefined'] = true;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(
         () => element.querySelector(':scope > time'),
         'lightDom element created'
@@ -479,7 +526,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       const lightDom = element.querySelector(':scope > time');
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lightDom.className).to.equal('i-amphtml-fill-content');
-      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
+      expect(lastProps.class).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
         () => updateEventSpy.callCount > 0,
@@ -489,15 +537,17 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should use the existing element if exists', async () => {
       Impl['layoutSizeDefined'] = true;
-      const existing = document.createElement('time');
+      const existing = createElementWithAttributes(document, 'time', {
+        'i-amphtml-rendered': '',
+      });
       element.appendChild(existing);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(element.querySelector(':scope > time')).to.equal(existing);
       expect(existing.querySelector(':scope > #component')).to.be.ok;
       expect(existing.className).to.equal('i-amphtml-fill-content');
-      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.class).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
         () => updateEventSpy.callCount > 0,
@@ -512,18 +562,21 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     const DATE = Date.parse(DATE_STRING);
 
     beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
       Impl['props'] = {
+        'cloned': {
+          selector: '[cloned]',
+          single: false,
+          clone: true,
+        },
         'propA': {attr: 'prop-a'},
-      };
-      Impl['children'] = {
         'special1': {
-          name: 'special1',
           props: {
             'noValue': {attr: 'no-value'},
             'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
             'propA': {attr: 'prop-a'},
             'minFontSize': {attr: 'min-font-size', type: 'number'},
-            'aDate': {attr: 'a-date', type: 'date'},
+            'aDate': createParseDateAttr('a-date'),
             'disabled': {attr: 'disabled', type: 'boolean'},
             'enabled': {attr: 'enabled', type: 'boolean'},
           },
@@ -531,18 +584,23 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           single: true,
         },
         'special2': {
-          name: 'special2',
           selector: '[special2]',
           single: true,
         },
-        'cloned': {
-          name: 'cloned',
-          selector: '[cloned]',
-          single: false,
-          clone: true,
+        'specialAs': {
+          selector: '[special3]',
+          props: {
+            'noValue': {attr: 'no-value'},
+            'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+            'propA': {attr: 'prop-a'},
+            'minFontSize': {attr: 'min-font-size', type: 'number'},
+            'disabled': {attr: 'disabled', type: 'boolean'},
+            'enabled': {attr: 'enabled', type: 'boolean'},
+          },
+          single: true,
+          as: true,
         },
         'children': {
-          name: 'children',
           props: {
             'boolDefTrue': {
               attr: 'bool-def-true',
@@ -554,10 +612,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
               parseAttrs: (e) =>
                 `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
             },
-            'params': {attrPrefix: 'data-param-'},
-            'prefix': {attrPrefix: 'prefix'},
+            'params': createParseAttrsWithPrefix('data-param-'),
+            'prefix': createParseAttrsWithPrefix('prefix'),
           },
-          selector: '*',
+          selector: '*', // This should be last as catch-all.
           single: false,
         },
       };
@@ -565,6 +623,13 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100">
           <div
             special1
+            prop-a="A"
+            min-font-size="72"
+            disabled
+            unknown="1"
+          ></div>
+          <div
+            special3
             prop-a="A"
             min-font-size="72"
             disabled
@@ -588,12 +653,17 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           ></div>
           <div cloned id="cloned1"></div>
           <div cloned id="cloned2"></div>
+          text (should be ignored)
         </amp-preact>
       `;
       element.firstElementChild.setAttribute('a-date', DATE_STRING);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {
@@ -622,6 +692,71 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(element.querySelector('[special1]').slot).to.equal(
         'i-amphtml-special1'
       );
+    });
+
+    it('should pass children as functional prop slot for single-element mapping with "as" and parse attributes', () => {
+      const {specialAs: Comp} = lastProps;
+      expect(typeof Comp).to.equal('function');
+      expect(Comp.name).to.equal('SlotWithProps');
+
+      const special3 = Comp();
+      expect(special3.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
+
+      const special3WithProps = Comp({
+        'aria-disabled': 'false',
+        disabled: false,
+      });
+      expect(special3WithProps.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        name: 'i-amphtml-specialAs',
+        'aria-disabled': 'false',
+        disabled: false,
+      });
+
+      expect(element.querySelector('[special3]').slot).to.equal(
+        'i-amphtml-specialAs'
+      );
+    });
+
+    it('should pass new functional prop slot for "as" on mutation', async () => {
+      const {specialAs: prevComp} = lastProps;
+      const prevSpecial3 = prevComp();
+      expect(prevSpecial3.props).to.deep.equal({
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
+
+      // Mutate slot prop, but this won't trigger a rerender
+      element
+        .querySelector('[special3]')
+        .setAttribute('value-with-def', 'CUSTOM');
+      // Mutate an observed attr to trigger rerender
+      element.setAttribute('prop-a', 'B');
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+
+      const {specialAs: Comp} = lastProps;
+      expect(Comp).not.to.deep.equal(prevComp);
+      const special3 = Comp();
+      expect(special3.props).to.deep.equal({
+        valueWithDef: 'CUSTOM',
+        propA: 'A',
+        minFontSize: 72,
+        disabled: true,
+        name: 'i-amphtml-specialAs',
+      });
     });
 
     it('should pass children as prop slot array and parse attributes', () => {
@@ -818,18 +953,23 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     let element;
 
     beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
       Impl['props'] = {
+        'children': {passthrough: true},
         'propA': {attr: 'prop-a'},
       };
-      Impl['passthrough'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
           Some <b>text</b>
         </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {
@@ -844,7 +984,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.querySelector('b').slot).to.equal('');
     });
 
@@ -859,7 +999,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should re-render on empty content', async () => {
@@ -873,7 +1013,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should ignore service children mutations', async () => {
@@ -898,16 +1038,21 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     let element;
 
     beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
       Impl['props'] = {
+        'children': {passthroughNonEmpty: true},
         'propA': {attr: 'prop-a'},
       };
-      Impl['passthroughNonEmpty'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100"> text </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {
@@ -922,15 +1067,15 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
-    it('should pass children as null when empty', async () => {
+    it('should pass children as undefined when empty', async () => {
       element.textContent = '   ';
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
-      expect(lastProps.children).to.be.null;
+      expect(lastProps.children).to.be.undefined;
     });
 
     it('should re-render on content changes', async () => {
@@ -944,7 +1089,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({});
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should ignore service children mutations', async () => {
@@ -962,6 +1107,302 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element.setAttribute('prop-a', 'B');
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
+    });
+  });
+
+  describe('delegatesFocus mapping', () => {
+    let element;
+
+    beforeEach(async () => {
+      Impl['delegatesFocus'] = true;
+      Impl['props'] = {'children': {passThroughNonEmpty: true}};
+      Impl['usesShadowDom'] = true;
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"></amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should focus on the host when an element in the shadow DOM receives focus', async () => {
+      // expect the shadowRoot to have delegatesFocus property set to true
+      expect(element.shadowRoot.delegatesFocus).to.be.true;
+
+      // initial focus is not on host
+      expect(doc.activeElement).to.not.equal(element);
+
+      // focus an element within the shadow DOM
+      const inner = element.shadowRoot.querySelector('#component');
+      // required to receive focus
+      inner.setAttribute('tabIndex', 0);
+      inner.focus();
+
+      // host receives focus and custom style for outline
+      expect(doc.activeElement).to.equal(element);
+    });
+  });
+
+  describe('children with passthrough mapping', () => {
+    let element;
+    const DATE_STRING = '2018-01-01T08:00:00Z';
+    const DATE = Date.parse(DATE_STRING);
+
+    beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
+      Impl['props'] = {
+        'cloned': {
+          selector: '[cloned]',
+          single: false,
+          clone: true,
+        },
+        'propA': {attr: 'prop-a'},
+        'special1': {
+          props: {
+            'noValue': {attr: 'no-value'},
+            'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+            'propA': {attr: 'prop-a'},
+            'minFontSize': {attr: 'min-font-size', type: 'number'},
+            'aDate': createParseDateAttr('a-date'),
+            'disabled': {attr: 'disabled', type: 'boolean'},
+            'enabled': {attr: 'enabled', type: 'boolean'},
+          },
+          selector: '[special1]',
+          single: true,
+        },
+        'special2': {
+          selector: '[special2]',
+          single: true,
+        },
+        'children': {
+          passthrough: true,
+        },
+      };
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100">
+          <div
+            special1
+            prop-a="A"
+            min-font-size="72"
+            disabled
+            unknown="1"
+          ></div>
+          <div
+            id="child1"
+            part-a="A"
+            part-b="B"
+            data-param-test="helloworld"
+            data-param-test-two="confirm"
+            prefix="pref"
+          ></div>
+          <div
+            id="child2"
+            part-a="C"
+            part-b="D"
+            data-param-test="helloworld2"
+            data-param-test-two="confirm2"
+            prefix="pref2"
+          ></div>
+          <div cloned id="cloned1"></div>
+          <div cloned id="cloned2"></div>
+          text (should be passed through)
+        </amp-preact>
+      `;
+      element.firstElementChild.setAttribute('a-date', DATE_STRING);
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should render into shadow DOM', () => {
+      expect(component).to.be.calledOnce;
+      expect(element.shadowRoot).to.be.ok;
+      expect(element.shadowRoot.querySelector('#component')).to.be.ok;
+      expect(element.querySelector('#component')).to.not.be.ok;
+    });
+
+    it('should skip unavailable children', () => {
+      expect(lastProps).to.not.have.property('special2');
+    });
+
+    it('should pass children as prop slot for single-element mapping and parse attributes', () => {
+      const {special1} = lastProps;
+      expect(special1.type).to.equal(Slot);
+      expect(special1.props).to.deep.equal({
+        name: 'i-amphtml-special1',
+        valueWithDef: 'DEFAULT',
+        propA: 'A',
+        minFontSize: 72,
+        aDate: DATE,
+        disabled: true,
+      });
+
+      expect(element.querySelector('[special1]').slot).to.equal(
+        'i-amphtml-special1'
+      );
+    });
+
+    it('should pass children as prop slot array and parse attributes', () => {
+      const {children} = lastProps;
+      expect(children).to.have.lengthOf(1);
+      const child = children[0];
+      expect(child.type).to.equal(Slot);
+      expect(child.props).to.deep.equal({loading: 'lazy'});
+      expect(element.querySelector('#child1').slot).to.equal('');
+      expect(element.querySelector('#child2').slot).to.equal('');
+      expect(element.textContent).to.contain('text (should be passed through)');
+    });
+
+    it('should rerender on new children', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren, specialAs: prevSpecialAs} = lastProps;
+      expect(prevChildren).to.have.lengthOf(1);
+
+      const newChild = createElementWithAttributes(doc, 'div', {
+        'id': 'child3',
+        'part-a': 'E',
+        'part-b': 'F',
+      });
+      element.appendChild(newChild);
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+
+      const {children, specialAs} = lastProps;
+      expect(children).to.have.lengthOf(1);
+      const child = children[0];
+
+      // New child.
+      expect(child.type).to.equal(Slot);
+      expect(child.props).to.deep.equal({loading: 'lazy'});
+      expect(element.querySelector('#child3').slot).to.equal('');
+
+      // No changes.
+      expect(element.querySelector('#child1').slot).to.equal('');
+      expect(element.querySelector('#child2').slot).to.equal('');
+      expect(element.textContent).to.contain('text (should be passed through)');
+      expect(specialAs).to.deep.equal(prevSpecialAs);
+    });
+
+    it('should rerender on text change', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(1);
+
+      const newChild = doc.createTextNode('more text');
+      element.appendChild(newChild);
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+
+      const {children} = lastProps;
+      expect(children).to.have.lengthOf(1);
+      const child = children[0];
+
+      // New child.
+      expect(child.type).to.equal(Slot);
+      expect(child.props).to.deep.equal({loading: 'lazy'});
+      expect(element.textContent).to.contain('more text');
+
+      // No changes.
+      expect(element.querySelector('#child1').slot).to.equal('');
+      expect(element.querySelector('#child2').slot).to.equal('');
+      expect(element.textContent).to.contain('text (should be passed through)');
+    });
+
+    it('should rerender when children are removed', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(1);
+
+      const oldChild = element.querySelector('#child1');
+      element.removeChild(oldChild);
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+
+      const {children} = lastProps;
+      expect(children).to.have.lengthOf(1);
+      const child = children[0];
+      expect(child.type).to.equal(Slot);
+      expect(child.props).to.deep.equal({loading: 'lazy'});
+
+      // No changes.
+      expect(element.querySelector('#child2').slot).to.equal('');
+      expect(element.textContent).to.contain('text (should be passed through)');
+    });
+
+    it('should rerender on reorder', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(1);
+      const child1 = element.querySelector('#child1');
+      const child2 = element.querySelector('#child2');
+      expect(child1.nextElementSibling).to.equal(child2);
+
+      element.insertBefore(
+        element.querySelector('#child2'),
+        element.querySelector('#child1')
+      );
+
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+
+      const {children} = lastProps;
+      expect(children).to.have.lengthOf(1);
+      const child = children[0];
+      expect(child.type).to.equal(Slot);
+      expect(child.props).to.deep.equal({loading: 'lazy'});
+
+      // No changes, except for ordering
+      expect(child1.slot).to.equal('');
+      expect(child2.slot).to.equal('');
+      expect(child2.nextElementSibling).to.equal(child1);
+      expect(element.textContent).to.contain('text (should be passed through)');
+    });
+
+    it('should ignore service children mutations', async () => {
+      await waitForMutation(element, () => {
+        const newChild1 = doc.createElement('i-amphtml-size');
+        element.appendChild(newChild1);
+
+        const newChild2 = doc.createElement('div');
+        newChild2.setAttribute('slot', 'i-amphtml-svc');
+        element.appendChild(newChild2);
+      });
+
+      // Execute a handled mutation and check that execution happened only
+      // twice.
+      element.setAttribute('prop-a', 'B');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+    });
+
+    it('clones children (without descendant) as vnodes into prop', async () => {
+      expect(
+        component.withArgs(
+          env.sandbox.match({
+            cloned: [
+              env.sandbox.match({
+                type: 'div',
+                key: element.querySelector('#cloned1'),
+                props: {
+                  cloned: '',
+                  id: 'cloned1',
+                },
+              }),
+              env.sandbox.match({
+                type: 'div',
+                key: element.querySelector('#cloned2'),
+                props: {
+                  cloned: '',
+                  id: 'cloned2',
+                },
+              }),
+            ],
+          })
+        )
+      ).to.be.calledOnce;
     });
   });
 });

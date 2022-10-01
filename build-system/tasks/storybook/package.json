@@ -1,21 +1,17 @@
 {
-  "name": "gulp-storybook",
+  "name": "amp-storybook",
   "version": "0.1.0",
-  "description": "Gulp storybook tasks",
-  "main": "index.js",
+  "description": "amp storybook task",
   "devDependencies": {
-    "@ampproject/storybook-addon": "1.1.6",
-    "@babel/core": "7.12.10",
-    "@babel/preset-react": "7.12.10",
-    "@babel/runtime-corejs3": "7.12.5",
-    "@storybook/addon-a11y": "5.3.21",
-    "@storybook/addon-knobs": "5.3.21",
-    "@storybook/addon-viewport": "5.3.21",
-    "@storybook/preact": "5.3.21",
-    "babel-loader": "8.2.2",
-    "core-js": "3.8.3",
-    "preact": "10.5.11",
-    "preact-render-to-string": "5.1.12",
-    "styled-jsx": "3.4.1"
+    "@babel/core": "7.15.8",
+    "@babel/preset-react": "7.14.5",
+    "@babel/runtime-corejs3": "7.15.4",
+    "@storybook/addon-a11y": "6.4.19",
+    "@storybook/addon-controls": "6.4.19",
+    "@storybook/addon-viewport": "6.4.19",
+    "@storybook/client-api": "6.4.19",
+    "babel-loader": "8.2.3",
+    "core-js": "3.19.0",
+    "styled-jsx": "4.0.1"
   }
 }

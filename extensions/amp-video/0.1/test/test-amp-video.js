@@ -1,26 +1,19 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {dispatchCustomEvent} from '#core/dom';
 
-import '../amp-video';
-import {DisplayObserver} from '../../../../src/utils/display-observer';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {dispatchCustomEvent} from '../../../../src/dom';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {installPerformanceService} from '#service/performance-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {listenOncePromise} from '#utils/event-helper';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
+import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
+import {AmpVideo, isCachedByCdn} from '../amp-video';
 
 describes.realWin(
   'amp-video',
@@ -32,28 +25,16 @@ describes.realWin(
   (env) => {
     let win, doc;
     let timer;
-    let displayObserverTargets;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       timer = Services.timerFor(win);
 
-      displayObserverTargets = [];
-      env.sandbox
-        .stub(DisplayObserver.prototype, 'observe')
-        .callsFake((target, callback) => {
-          displayObserverTargets.push({target, callback});
-        });
+      installPerformanceService(win);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
-
-    function setDisplay(aTarget, value) {
-      displayObserverTargets.forEach(({target, callback}) => {
-        if (target === aTarget) {
-          callback(value);
-        }
-      });
-    }
 
     function getFooVideoSrc(filetype) {
       return '//someHost/foo.' + filetype.slice(filetype.indexOf('/') + 1); // assumes no optional params
@@ -75,13 +56,14 @@ describes.realWin(
         }
       }
       doc.body.appendChild(v);
-      await v.build();
+      await v.buildInternal();
+      const impl = await v.getImpl(false);
 
       if (opt_noLayout) {
-        return;
+        return v;
       }
       if (opt_beforeLayoutCallback) {
-        opt_beforeLayoutCallback(v);
+        opt_beforeLayoutCallback(v, impl);
       }
       try {
         await v.layoutCallback();
@@ -102,9 +84,10 @@ describes.realWin(
         width: 160,
         height: 90,
       });
+      const impl = await v.getImpl(false);
       const preconnect = Services.preconnectFor(win);
       env.sandbox.spy(preconnect, 'url');
-      v.implementation_.preconnectCallback();
+      impl.preconnectCallback();
       expect(preconnect.url).to.have.been.calledWithExactly(
         env.sandbox.match.object, // AmpDoc
         'video.mp4',
@@ -134,11 +117,17 @@ describes.realWin(
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.be.null;
       const sources = video.querySelectorAll('source');
-      expect(sources.length).to.equal(2);
+      expect(sources.length).to.equal(4);
       expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=high'
       );
       expect(sources[1].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=medium'
+      );
+      expect(sources[2].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=low'
+      );
+      expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
       );
     });
@@ -161,15 +150,54 @@ describes.realWin(
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.be.null;
       const sources = video.querySelectorAll('source');
-      expect(sources.length).to.equal(2);
-      expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-      );
-      expect(sources[1].getAttribute('src')).to.equal(
+      expect(sources.length).to.equal(4);
+      expect(sources[0].getAttribute('data-bitrate')).to.equal('2000');
+      expect(sources[1].getAttribute('data-bitrate')).to.equal('720');
+      expect(sources[2].getAttribute('data-bitrate')).to.equal('400');
+      expect(sources[3].hasAttribute('data-bitrate')).to.be.false;
+      expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
       );
-      expect(sources[0].getAttribute('data-bitrate')).to.equal('1000');
-      expect(sources[1].getAttribute('data-bitrate')).to.equal('1000');
+    });
+
+    it('should set an attribute on cached video sources', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const sources = v.querySelectorAll('source');
+      expect(sources[0]).to.have.attribute('i-amphtml-video-cached-source');
+      expect(sources[1]).to.have.attribute('i-amphtml-video-cached-source');
+      expect(sources[2]).to.have.attribute('i-amphtml-video-cached-source');
+    });
+
+    it('should not set an attribute on non cached video sources', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const sources = v.querySelectorAll('source');
+      expect(sources[3]).to.not.have.attribute('i-amphtml-video-cached-source');
     });
 
     it('should load a video', async () => {
@@ -282,11 +310,12 @@ describes.realWin(
           'autoplay': '',
           'muted': '',
           'loop': '',
-        }).catch((e) => {
+        }).catch(async (e) => {
           const v = doc.querySelector('amp-video');
+          const impl = await v.getImpl(false);
           // preconnectCallback could get called again after this test is done, and
           // trigger an other "start with https://" error that would crash mocha.
-          env.sandbox.stub(v.implementation_, 'preconnectCallback');
+          env.sandbox.stub(impl, 'preconnectCallback');
           throw e;
         })
       ).to.be.rejectedWith(/start with/);
@@ -469,7 +498,15 @@ describes.realWin(
       env.sandbox.spy(video, 'pause');
       // The auto-pause only happens on when the video is actually playing.
       dispatchCustomEvent(video, 'play');
-      setDisplay(v, false);
+      // First send "size" event and then "no size".
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+      });
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+      });
       expect(video.pause.called).to.be.true;
     });
 
@@ -481,34 +518,14 @@ describes.realWin(
           height: 90,
         },
         null,
-        function (element) {
-          const impl = element.implementation_;
+        function (element, impl) {
           env.sandbox.stub(impl, 'isVideoSupported_').returns(false);
           env.sandbox.spy(impl, 'toggleFallback');
         }
       );
-      const impl = v.implementation_;
+      const impl = await v.getImpl(false);
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback).to.have.been.calledWith(true);
-    });
-
-    it('play() should not log promise rejections', async () => {
-      const playPromise = Promise.reject('The play() request was interrupted');
-      const catchSpy = env.sandbox.spy(playPromise, 'catch');
-      await getVideo(
-        {
-          src: 'video.mp4',
-          width: 160,
-          height: 90,
-        },
-        null,
-        function (element) {
-          const impl = element.implementation_;
-          env.sandbox.stub(impl.video_, 'play').returns(playPromise);
-          impl.play();
-        }
-      );
-      expect(catchSpy.called).to.be.true;
     });
 
     it('decode error retries the next source', async () => {
@@ -523,7 +540,8 @@ describes.realWin(
         },
         [s0, s1]
       );
-      const ele = video.implementation_.video_;
+      const impl = await video.getImpl(false);
+      const ele = impl.video_;
       ele.play = env.sandbox.stub();
       ele.load = env.sandbox.stub();
       Object.defineProperty(ele, 'error', {
@@ -553,7 +571,8 @@ describes.realWin(
         },
         [s0, s1]
       );
-      const ele = video.implementation_.video_;
+      const impl = await video.getImpl(false);
+      const ele = impl.video_;
       ele.play = env.sandbox.stub();
       ele.load = env.sandbox.stub();
       Object.defineProperty(ele, 'error', {
@@ -661,20 +680,20 @@ describes.realWin(
         width: 160,
         height: 90,
       });
-      const impl = v.implementation_;
+      const impl = await v.getImpl(false);
       await Promise.resolve();
       impl.mute();
-      await listenOncePromise(v, VideoEvents.MUTED);
+      await listenOncePromise(v, VideoEvents_Enum.MUTED);
       impl.play();
-      const playPromise = listenOncePromise(v, VideoEvents.PLAY);
-      await listenOncePromise(v, VideoEvents.PLAYING);
+      const playPromise = listenOncePromise(v, VideoEvents_Enum.PLAY);
+      await listenOncePromise(v, VideoEvents_Enum.PLAYING);
       await playPromise;
       impl.pause();
-      await listenOncePromise(v, VideoEvents.PAUSE);
+      await listenOncePromise(v, VideoEvents_Enum.PAUSE);
       impl.unmute();
-      await listenOncePromise(v, VideoEvents.UNMUTED);
+      await listenOncePromise(v, VideoEvents_Enum.UNMUTED);
       // Should not send the unmute event twice if already sent once.
-      const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
+      const p = listenOncePromise(v, VideoEvents_Enum.UNMUTED).then(() => {
         assert.fail('Should not have dispatch unmute message twice');
       });
       v.querySelector('video').dispatchEvent(new Event('volumechange'));
@@ -684,9 +703,306 @@ describes.realWin(
       video.currentTime = video.duration - 0.1;
       impl.play();
       // Make sure pause and end are triggered when video ends.
-      const pEnded = listenOncePromise(v, VideoEvents.ENDED);
-      const pPause = listenOncePromise(v, VideoEvents.PAUSE);
+      const pEnded = listenOncePromise(v, VideoEvents_Enum.ENDED);
+      const pPause = listenOncePromise(v, VideoEvents_Enum.PAUSE);
       return Promise.all([pEnded, pPause]);
+    });
+
+    describe('remote video cache (amp-video[cache=*])', () => {
+      let remoteSources;
+      beforeEach(() => {
+        const cacheUrlService = new AmpCacheUrlService();
+        env.sandbox
+          .stub(Services, 'cacheUrlServicePromiseForDoc')
+          .resolves(cacheUrlService);
+
+        const extensionsService = {
+          installExtensionForDoc: env.sandbox.spy(() => Promise.resolve()),
+        };
+        env.sandbox.stub(Services, 'extensionsFor').returns(extensionsService);
+
+        const xhrService = xhrServiceForTesting(env.win);
+        env.sandbox.stub(Services, 'xhrFor').returns(xhrService);
+        remoteSources = [];
+        env.sandbox.stub(xhrService, 'fetch').resolves({
+          json: () => Promise.resolve({sources: remoteSources}),
+        });
+      });
+
+      it('should play a source fetched from video caching', async () => {
+        remoteSources.push({
+          url: 'https://example.com/cached-video.mp4',
+          type: 'video/mp4',
+        });
+        const v = await getVideo({
+          src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          type: 'video/mp4',
+          'amp-orig-src': 'https://example.com/video.mp4',
+          cache: 'google',
+          layout: 'responsive',
+          height: '100px',
+          width: '100px',
+        });
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(2);
+        expect(v.querySelector('video')).to.not.have.attribute('src');
+        expect(sources[0].getAttribute('src')).to.equal(
+          'https://example.com/cached-video.mp4'
+        );
+        expect(sources[1].getAttribute('src')).to.equal(
+          'https://example.com/video.mp4'
+        );
+      });
+
+      it('should remove AMP Cache video caching on video[src] if remote video caching is provided', async () => {
+        const origSrc = 'https://example.com/video.mp4';
+        const v = await getVideo({
+          src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          type: 'video/mp4',
+          'amp-orig-src': origSrc,
+          cache: 'google',
+          layout: 'responsive',
+          height: '100px',
+          width: '100px',
+        });
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(1);
+        expect(sources[0].getAttribute('src')).to.equal(origSrc);
+      });
+
+      it('should remove AMP Cache video caching on source elements if remote video caching is provided', async () => {
+        const origSrc = 'https://example.com/video.mp4';
+        const cachedSource = doc.createElement('source');
+        cachedSource.setAttribute(
+          'src',
+          'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+        );
+        cachedSource.setAttribute('amp-orig-src', origSrc);
+        const v = await getVideo(
+          {
+            type: 'video/mp4',
+            cache: 'google',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          },
+          [cachedSource]
+        );
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(1);
+        expect(sources[0].getAttribute('src')).to.equal(origSrc);
+      });
+
+      describe('prerendering', () => {
+        let makeVisible;
+        let visibilityStubs;
+
+        beforeEach(() => {
+          visibilityStubs = {
+            getVisibilityState: env.sandbox.stub(
+              env.ampdoc,
+              'getVisibilityState'
+            ),
+            whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+          };
+          visibilityStubs.getVisibilityState.returns(
+            VisibilityState_Enum.PRERENDER
+          );
+          const visiblePromise = new Promise((resolve) => {
+            makeVisible = resolve;
+          });
+          visibilityStubs.whenFirstVisible.returns(visiblePromise);
+        });
+
+        it('should propagate cached sources in prerendering', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video.mp4',
+            type: 'video/mp4',
+          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example.com/video.mp4');
+          const v = await getVideo(
+            {
+              type: 'video/mp4',
+              cache: 'google',
+              layout: 'responsive',
+              height: '100px',
+              width: '100px',
+            },
+            [source],
+            null,
+            /* opt_noLayout */ true
+          );
+          v.layoutCallback();
+          const sources = v.querySelectorAll('video source');
+          // Only one source, and the cached one.
+          expect(sources.length).to.equal(1);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video.mp4'
+          );
+        });
+
+        it('should have all sources when visible after prerendering', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video.mp4',
+            type: 'video/mp4',
+          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example.com/video.mp4');
+          const v = await getVideo(
+            {
+              type: 'video/mp4',
+              cache: 'google',
+              layout: 'responsive',
+              height: '100px',
+              width: '100px',
+            },
+            [source],
+            null,
+            /* opt_noLayout */ true
+          );
+          v.layoutCallback();
+          makeVisible();
+          await Promise.resolve();
+          const sources = v.querySelectorAll('video source');
+          // Cached + non cached source and in the right order.
+          expect(sources.length).to.equal(2);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video.mp4'
+          );
+          expect(sources[1].getAttribute('src')).to.equal(
+            'https://example.com/video.mp4'
+          );
+        });
+      });
+
+      describe('max bitrate', () => {
+        beforeEach(() => {
+          toggleExperiment(env.win, 'amp-story-first-page-max-bitrate', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(env.win, 'amp-story-first-page-max-bitrate', false);
+        });
+
+        it('should apply a max bitrate on first story page', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video-2000.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 2000,
+          });
+          remoteSources.push({
+            url: 'https://example.com/cached-video-720.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 720,
+          });
+          const attrs = {
+            src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            type: 'video/mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            cache: 'google',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          };
+          const storyEl = doc.createElement('amp-story');
+          const storyPageEl = doc.createElement('amp-story-page');
+          const v = doc.createElement('amp-video');
+          for (const key in attrs) {
+            v.setAttribute(key, attrs[key]);
+          }
+          storyEl.appendChild(storyPageEl);
+          storyPageEl.appendChild(v);
+          doc.body.appendChild(storyEl);
+          await v.buildInternal();
+          await v.getImpl(false);
+
+          try {
+            await v.layoutCallback();
+          } catch (e) {}
+
+          const sources = v.querySelectorAll('source');
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video-720.mp4'
+          );
+        });
+
+        it('should not apply a max bitrate on second story page', async () => {
+          remoteSources.push({
+            url: 'https://example.com/cached-video-2000.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 2000,
+          });
+          remoteSources.push({
+            url: 'https://example.com/cached-video-720.mp4',
+            type: 'video/mp4',
+            'bitrate_kbps': 720,
+          });
+          const attrs = {
+            src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            type: 'video/mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            cache: 'google',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          };
+          const storyEl = doc.createElement('amp-story');
+          const storyPageEl = doc.createElement('amp-story-page');
+          const storyPageEl2 = doc.createElement('amp-story-page');
+          const v = doc.createElement('amp-video');
+          for (const key in attrs) {
+            v.setAttribute(key, attrs[key]);
+          }
+          storyEl.appendChild(storyPageEl);
+          storyEl.appendChild(storyPageEl2);
+          storyPageEl2.appendChild(v);
+          doc.body.appendChild(storyEl);
+          await v.buildInternal();
+          await v.getImpl(false);
+
+          try {
+            await v.layoutCallback();
+          } catch (e) {}
+
+          const sources = v.querySelectorAll('source');
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example.com/cached-video-2000.mp4'
+          );
+        });
+
+        it('should apply a max bitrate on first story page with legacy caching', async () => {
+          const attrs = {
+            src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            type: 'video/mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          };
+          const storyEl = doc.createElement('amp-story');
+          const storyPageEl = doc.createElement('amp-story-page');
+          const v = doc.createElement('amp-video');
+          for (const key in attrs) {
+            v.setAttribute(key, attrs[key]);
+          }
+          storyEl.appendChild(storyPageEl);
+          storyPageEl.appendChild(v);
+          doc.body.appendChild(storyEl);
+          await v.buildInternal();
+          await v.getImpl(false);
+
+          try {
+            await v.layoutCallback();
+          } catch (e) {}
+
+          const sources = v.querySelectorAll('source');
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=medium'
+          );
+          expect(sources[0].getAttribute('data-bitrate')).to.equal('720');
+        });
+      });
     });
 
     describe('blurred image placeholder', () => {
@@ -697,9 +1013,9 @@ describes.realWin(
        *     placeholder attribute.
        * @param {boolean} addBlurClass Whether the child should have the
        *     class that allows it to be a blurred placeholder.
-       * @return {AmpImg} An amp-video potentially with a blurry placeholder
+       * @return {!Promise<AmpImg>} An amp-video potentially with a blurry placeholder
        */
-      function getVideoWithBlur(addPlaceholder, addBlurClass) {
+      async function getVideoWithBlur(addPlaceholder, addBlurClass) {
         const v = doc.createElement('amp-video');
         v.setAttribute('layout', 'fixed');
         v.setAttribute('width', '300px');
@@ -717,14 +1033,14 @@ describes.realWin(
         v.setAttribute('poster', 'img.png');
         doc.body.appendChild(v);
         v.appendChild(img);
-        v.build();
-        const impl = v.implementation_;
+        v.buildInternal();
+        const impl = await v.getImpl(false);
         impl.togglePlaceholder = env.sandbox.stub();
         return impl;
       }
 
-      it('should only fade out blurry image placeholders', () => {
-        let impl = getVideoWithBlur(true, true);
+      it('should only fade out blurry image placeholders', async () => {
+        let impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -733,7 +1049,7 @@ describes.realWin(
         expect(img.style.opacity).to.equal('0');
         expect(impl.togglePlaceholder).to.not.be.called;
 
-        impl = getVideoWithBlur(true, false);
+        impl = await getVideoWithBlur(true, false);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -742,7 +1058,7 @@ describes.realWin(
         expect(img.style.opacity).to.be.equal('');
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-        impl = getVideoWithBlur(false, true);
+        impl = await getVideoWithBlur(false, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -751,7 +1067,7 @@ describes.realWin(
         expect(img.style.opacity).to.be.equal('');
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-        impl = getVideoWithBlur(false, false);
+        impl = await getVideoWithBlur(false, false);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -760,8 +1076,8 @@ describes.realWin(
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
       });
 
-      it('should fade out the blurry image placeholder on video load', () => {
-        const impl = getVideoWithBlur(true, true);
+      it('should fade out the blurry image placeholder on video load', async () => {
+        const impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -771,8 +1087,8 @@ describes.realWin(
         expect(impl.togglePlaceholder).to.not.be.called;
       });
 
-      it('should fade out the blurry image placeholder on poster load', () => {
-        const impl = getVideoWithBlur(true, true);
+      it('should fade out the blurry image placeholder on poster load', async () => {
+        const impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         const el = impl.element;
@@ -797,161 +1113,103 @@ describes.realWin(
           ),
           whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
         };
-        visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
+        visibilityStubs.getVisibilityState.returns(
+          VisibilityState_Enum.PRERENDER
+        );
         visiblePromise = new Promise((resolve) => {
           makeVisible = resolve;
         });
         visibilityStubs.whenFirstVisible.returns(visiblePromise);
+
+        video = doc.createElement('amp-video');
+        video.setAttribute('layout', 'nodisplay');
+        doc.body.appendChild(video);
       });
 
       describe('should not prerender if no cached sources', () => {
         it('with just src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
 
         it('with just source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
 
         it('with both src and source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source],
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
       });
 
       describe('should prerender cached sources', () => {
         it('with just cached src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
-                'amp-orig-src': 'https://example.com/video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
 
         it('with just cached source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            source.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              [source],
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
 
         it('with a mix or cached and non-cached', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
 
-            const cachedSource = doc.createElement('source');
-            cachedSource.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            cachedSource.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          video.appendChild(cachedSource);
 
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source, cachedSource],
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 
       describe('should prerender poster image', () => {
         it('with just cached src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                src: 'https://example.com/video.mp4',
-                poster: 'https://example.com/poster.jpg',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'https://example.com/video.mp4');
+          video.setAttribute('poster', 'https://example.com/poster.jpg');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
+        });
+      });
+
+      describe('should prerender remote video cache', () => {
+        it('with cache="*"', () => {
+          video.setAttribute('src', 'https://example.com/video.mp4');
+          video.setAttribute('cache', 'google');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 
@@ -1231,8 +1489,7 @@ describes.realWin(
               },
               null,
               (element) => {
-                expect(element.implementation_.isCachedByCDN_(element)).to.be
-                  .false;
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );
@@ -1251,8 +1508,7 @@ describes.realWin(
               },
               null,
               (element) => {
-                expect(element.implementation_.isCachedByCDN_(element)).to.be
-                  .false;
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );
@@ -1271,14 +1527,13 @@ describes.realWin(
               height: 90,
             },
             /* children */ null,
-            (element) => {
-              const {implementation_} = element;
-              const {video_} = implementation_;
+            (element, impl) => {
+              const {video_} = impl;
 
               expect(video_.currentTime).to.equal(0);
 
               [20, 100, 0, 50, 22].forEach((timeSeconds) => {
-                implementation_.seekTo(timeSeconds);
+                impl.seekTo(timeSeconds);
                 expect(video_.currentTime).to.equal(timeSeconds);
               });
 
@@ -1286,6 +1541,26 @@ describes.realWin(
             }
           );
         }));
+    });
+
+    describe('bitrate manager', () => {
+      it('should manage bitrate of replaced video from mediapool', async () => {
+        toggleExperiment(env.win, 'flexible-bitrate', true);
+        const v = await getVideo(
+          {
+            src: 'video.mp4',
+            width: 160,
+            height: 90,
+          },
+          null,
+          null
+        );
+        const impl = await v.getImpl(false);
+        impl.hasBitrateSources_ = true;
+        impl.resetOnDomChange();
+
+        expect(impl.video_.changedSources).to.not.be.undefined;
+      });
     });
   }
 );

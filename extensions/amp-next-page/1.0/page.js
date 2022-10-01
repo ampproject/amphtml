@@ -1,22 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+
+import {devAssert} from '#utils/log';
 
 import {ViewportRelativePos} from './visibility-observer';
-import {VisibilityState} from '../../../src/visibility-state';
-import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {
@@ -65,8 +51,8 @@ export class Page {
     this.content_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
-    /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.PRERENDER;
+    /** @private {!VisibilityState_Enum} */
+    this.visibilityState_ = VisibilityState_Enum.PRERENDER;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
   }
@@ -149,11 +135,13 @@ export class Page {
    * @return {boolean}
    */
   isVisible() {
-    return this.isLoaded() && this.visibilityState_ === VisibilityState.VISIBLE;
+    return (
+      this.isLoaded() && this.visibilityState_ === VisibilityState_Enum.VISIBLE
+    );
   }
 
   /**
-   * @param {VisibilityState} visibilityState
+   * @param {VisibilityState_Enum} visibilityState
    */
   setVisibility(visibilityState) {
     if (!this.isLoaded() || visibilityState == this.visibilityState_) {
@@ -163,7 +151,7 @@ export class Page {
     //Reload the page if necessary
     if (
       this.is(PageState.PAUSED) &&
-      visibilityState === VisibilityState.VISIBLE
+      visibilityState === VisibilityState_Enum.VISIBLE
     ) {
       this.resume();
     }
@@ -193,7 +181,7 @@ export class Page {
     return this.shadowDoc_.close().then(() => {
       return this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
-        this.visibilityState_ = VisibilityState.HIDDEN;
+        this.visibilityState_ = VisibilityState_Enum.HIDDEN;
         this.state_ = PageState.PAUSED;
       });
     });
@@ -274,7 +262,7 @@ export class HostPage extends Page {
    * @param {!./service.NextPageService} manager
    * @param {{ url: string, title: string, image: string }} meta
    * @param {!PageState} initState
-   * @param {!VisibilityState} initVisibility
+   * @param {!VisibilityState_Enum} initVisibility
    * @param {!Document} doc
    */
   constructor(manager, meta, initState, initVisibility, doc) {

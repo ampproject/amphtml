@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This is a sample bootstrap script for AMP in-a-box host.
  */
 
@@ -24,7 +8,9 @@ initInaboxHost(win);
 // Enable amp-inabox APIs for all iframes. Normally, the actualy bootstrap
 // script would be more specific about which iframes to support.
 Array.prototype.push.apply(
-    win.ampInaboxIframes, document.querySelectorAll('iframe'));
+  win.ampInaboxIframes,
+  document.querySelectorAll('iframe')
+);
 
 /**
  * A sample bootstrap script that is to be run in ads tag.
@@ -43,7 +29,7 @@ function initInaboxHost(win) {
 
   let hostScriptRequested = false;
 
-  const listener = function(event) {
+  const listener = function (event) {
     if (!isInaboxMessage(event.data)) {
       return;
     }
@@ -55,7 +41,7 @@ function initInaboxHost(win) {
     }
     hostScriptRequested = true;
     // Load inabox-host.js when the 1st inabox message is received.
-    loadScript(win, hostScriptUrl, function() {
+    loadScript(win, hostScriptUrl, function () {
       win.removeEventListener('message', listener);
       console.log('a4a-host.js loaded.');
     });

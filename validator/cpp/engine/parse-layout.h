@@ -1,26 +1,11 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#ifndef AMPVALIDATOR__PARSE_LAYOUT_H_
-#define AMPVALIDATOR__PARSE_LAYOUT_H_
+#ifndef CPP_ENGINE_PARSE_LAYOUT_H_
+#define CPP_ENGINE_PARSE_LAYOUT_H_
 
 #include <string>
 
 #include "absl/strings/string_view.h"
 #include "validator.pb.h"
+#include "re2/re2.h"
 
 namespace amp::validator::parse_layout {
 
@@ -50,8 +35,9 @@ struct CssLength {
   // Parses a given |input| value. |allow_auto| determines whether 'auto'
   // is accepted as a value. |allow_fluid| determines whether 'fluid' is
   // accepted as a value.
-  explicit CssLength(absl::string_view input, bool allow_auto,
-                     bool allow_fluid);
+  explicit CssLength(
+      re2::StringPiece input,
+      bool allow_auto, bool allow_fluid);
 };
 
 // Interprets a |layout| string, such as fixed-height, as
@@ -101,7 +87,7 @@ amp::validator::AmpLayout::Layout CalculateLayout(
 std::string GetCssLengthStyle(const CssLength& length, const std::string& type);
 
 // Returns the CSS class name for the given AmpLayout. Equivalent to
-// https://github.com/ampproject/amphtml/blob/master/src/layout.js.
+// https://github.com/ampproject/amphtml/blob/main/src/layout.js.
 std::string GetLayoutClass(amp::validator::AmpLayout::Layout layout);
 
 // Returns the name for the given AmpLayout.
@@ -117,12 +103,18 @@ std::string GetSizerStyle(amp::validator::AmpLayout::Layout layout,
                           const CssLength& width, const CssLength& height);
 
 // Returns whether the given AmpLayout has size defined. Equivalent to
-// https://github.com/ampproject/amphtml/blob/master/src/layout.js.
+// https://github.com/ampproject/amphtml/blob/main/src/layout.js.
 bool IsLayoutSizeDefined(amp::validator::AmpLayout::Layout layout);
+
+// Returns whether the given AmpLayout waits on a runtime size.
+bool IsLayoutAwaitingSize(amp::validator::AmpLayout::Layout layout);
 
 // Returns the CSS class name for AmpLayouts with defined sizes.
 std::string GetLayoutSizeDefinedClass();
 
+// Returns the CSS class name for AmpLayouts which wait on a runtime size.
+std::string GetLayoutAwaitingSizeClass();
+
 }  // namespace amp::validator::parse_layout
 
-#endif  // AMPVALIDATOR__PARSE_LAYOUT_H_
+#endif  // CPP_ENGINE_PARSE_LAYOUT_H_

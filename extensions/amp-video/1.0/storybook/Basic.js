@@ -1,65 +1,35 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
-} from '../../../amp-accordion/1.0/accordion';
-import {VideoWrapper} from '../video-wrapper';
-import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
+} from '#bento/components/bento-accordion/1.0/component';
+import {BentoVideo} from '#bento/components/bento-video/1.0/component';
+
+import * as Preact from '#preact';
+
+import '#bento/components/bento-video/1.0/component.jss';
 
 export default {
-  title: 'Video Wrapper',
-  component: VideoWrapper,
-  decorators: [withA11y, withKnobs],
-};
-
-const VideoTagPlayer = ({i}) => {
-  const group = `Player ${i + 1}`;
-
-  const width = text('width', '640px', group);
-  const height = text('height', '360px', group);
-
-  const ariaLabel = text('aria-label', 'Video Player', group);
-  const autoplay = boolean('autoplay', true, group);
-  const controls = boolean('controls', true, group);
-  const mediasession = boolean('mediasession', true, group);
-  const noaudio = boolean('noaudio', false, group);
-  const loop = boolean('loop', false, group);
-  const poster = text(
-    'poster',
-    'https://amp.dev/static/inline-examples/images/kitten-playing.png',
-    group
-  );
-
-  const artist = text('artist', '', group);
-  const album = text('album', '', group);
-  const artwork = text('artwork', '', group);
-  const title = text('title', '', group);
-
-  const sources = object(
-    'sources',
-    [
+  title: 'Video',
+  component: BentoVideo,
+  args: {
+    width: '640px',
+    height: '360px',
+    ariaLabel: 'Video Player',
+    autoplay: true,
+    controls: true,
+    mediasession: true,
+    noaudio: false,
+    loop: false,
+    poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
+    artist: '',
+    album: '',
+    artwork: '',
+    title: '',
+    sources: [
       {
-        src:
-          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
       },
       {
@@ -67,23 +37,21 @@ const VideoTagPlayer = ({i}) => {
         type: 'video/mp4',
       },
     ],
-    group
-  );
+
+    amount: 1,
+    spaceAbove: false,
+    spaceBelow: false,
+  },
+};
+
+const VideoTagPlayer = ({height, i, sources, width, ...args}) => {
+  const group = `Player ${i + 1}`;
 
   return (
-    <VideoWrapper
+    <BentoVideo
       component="video"
-      ariaLabel={ariaLabel}
-      autoplay={autoplay}
-      controls={controls}
-      mediasession={mediasession}
-      noaudio={noaudio}
-      loop={loop}
-      poster={poster}
-      artist={artist}
-      album={album}
-      artwork={artwork}
-      title={title}
+      {...args}
+      id={group}
       style={{width, height}}
       sources={sources.map((props) => (
         <source {...props}></source>
@@ -104,15 +72,16 @@ const Spacer = ({height}) => {
   );
 };
 
-export const Default = () => {
-  const amount = number('Amount', 1, {}, 'Page');
-  const spacerHeight = text('Space', '80vh', 'Page');
-  const spaceAbove = boolean('Space above', false, 'Page');
-  const spaceBelow = boolean('Space below', false, 'Page');
-
+export const Default = ({
+  amount,
+  spaceAbove,
+  spaceBelow,
+  spacerHeight,
+  ...args
+}) => {
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<VideoTagPlayer key={i} i={i} />);
+    players.push(<VideoTagPlayer key={i} i={i} {...args} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -127,17 +96,22 @@ export const Default = () => {
   );
 };
 
-export const InsideAccordion = () => {
-  const width = text('width', '320px');
-  const height = text('height', '180px');
+Default.args = {
+  amount: 1,
+  spacerHeight: '80vh',
+  spaceAbove: false,
+  spaceBelow: false,
+};
+
+export const InsideAccordion = ({height, width}) => {
   return (
-    <Accordion expandSingleSection>
-      <AccordionSection key={1} expanded>
-        <AccordionHeader>
+    <BentoAccordion expandSingleSection>
+      <BentoAccordionSection key={1} expanded>
+        <BentoAccordionHeader>
           <h2>Controls</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <VideoWrapper
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoVideo
             component="video"
             controls={true}
             loop={true}
@@ -145,14 +119,14 @@ export const InsideAccordion = () => {
             src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
             poster="https://amp.dev/static/inline-examples/images/kitten-playing.png"
           />
-        </AccordionContent>
-      </AccordionSection>
-      <AccordionSection key={2}>
-        <AccordionHeader>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+      <BentoAccordionSection key={2}>
+        <BentoAccordionHeader>
           <h2>Autoplay</h2>
-        </AccordionHeader>
-        <AccordionContent>
-          <VideoWrapper
+        </BentoAccordionHeader>
+        <BentoAccordionContent>
+          <BentoVideo
             component="video"
             autoplay={true}
             loop={true}
@@ -166,8 +140,13 @@ export const InsideAccordion = () => {
               />,
             ]}
           />
-        </AccordionContent>
-      </AccordionSection>
-    </Accordion>
+        </BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
   );
+};
+
+InsideAccordion.args = {
+  width: '320px',
+  height: '180px',
 };

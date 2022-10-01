@@ -1,33 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Tests integration.js
 // Most coverage through test-3p-frame
 
+import {getRegistrations, register} from '#3p/3p';
 import {
-  draw3p,
+  draw3pInternal,
   ensureFramed,
   parseFragment,
   validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
   validateParentOrigin,
-} from '../../3p/integration';
-import {getRegistrations, register} from '../../3p/3p';
+} from '#3p/integration-lib';
 
-describe('3p integration.js', () => {
+describes.sandboxed('3p integration.js', {}, () => {
   const registrations = getRegistrations();
   afterEach(() => {
     delete registrations.testAction;
@@ -154,11 +138,11 @@ describe('3p integration.js', () => {
       expect(myData).to.equal(myData);
     });
     expect(called).to.be.false;
-    draw3p(win, data);
+    draw3pInternal(win, data);
     expect(called).to.be.true;
   });
 
-  it('should support config processing in draw3p', () => {
+  it('should support config processing in draw3pInternal', () => {
     const data = {
       type: 'testAction2',
     };
@@ -180,7 +164,7 @@ describe('3p integration.js', () => {
     });
     expect(called).to.be.false;
     let finish;
-    draw3p(win, data, (_config, done) => {
+    draw3pInternal(win, data, (_config, done) => {
       finish = () => {
         done({
           custom: true,
@@ -207,7 +191,7 @@ describe('3p integration.js', () => {
     };
     allowConsoleError(() => {
       expect(() => {
-        draw3p(win, data);
+        draw3pInternal(win, data);
       }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
     });
   });

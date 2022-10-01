@@ -1,27 +1,13 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {OwnersImpl} from '../../src/service/owners-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {isCancellation} from '../../src/error';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {OwnersImpl} from '#service/owners-impl';
+import {Resource, ResourceState_Enum} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+
+import {isCancellation} from '../../src/error-reporting';
 
 describes.realWin('Resource', {amp: true}, (env) => {
   let win, doc;
@@ -29,18 +15,16 @@ describes.realWin('Resource', {amp: true}, (env) => {
   let elementMock;
   let resources;
   let resource;
-  let sandbox;
 
   beforeEach(() => {
     win = env.win;
-    sandbox = env.sandbox;
     doc = win.document;
 
     element = env.createAmpElement('amp-fake-element');
     doc.body.appendChild(element);
     env.sandbox
       .stub(element, 'getLayoutPriority')
-      .callsFake(() => LayoutPriority.ADS);
+      .callsFake(() => LayoutPriority_Enum.ADS);
     elementMock = env.sandbox.mock(element);
 
     const viewer = Services.viewerForDoc(doc);
@@ -50,6 +34,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .callsFake(() => {});
     resources = new ResourcesImpl(env.ampdoc);
     resource = new Resource(1, element, resources);
+    element.resources_ = resources;
 
     const vsync = Services.vsyncFor(win);
     env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
@@ -73,8 +58,8 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should initialize correctly', () => {
     expect(resource.getId()).to.equal(1);
     expect(resource.debugid).to.equal('amp-fake-element#1');
-    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
+    expect(resource.getState()).to.equal(ResourceState_Enum.NOT_BUILT);
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
     expect(resource.isInViewport()).to.equal(false);
@@ -83,61 +68,26 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should initialize correctly when already built', () => {
     elementMock.expects('isBuilt').returns(true).once();
     expect(new Resource(1, element, resources).getState()).to.equal(
-      ResourceState.NOT_LAID_OUT
+      ResourceState_Enum.NOT_LAID_OUT
     );
   });
 
   it('should not build before upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
-    elementMock.expects('build').never();
+    elementMock.expects('buildInternal').never();
     elementMock.expects('updateLayoutBox').never();
 
     expect(resource.build()).to.be.null;
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    expect(resource.getState()).to.equal(ResourceState_Enum.NOT_BUILT);
   });
 
   it('should build after upgraded', () => {
     const buildPromise = Promise.resolve();
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(buildPromise).once();
+    elementMock.expects('buildInternal').returns(buildPromise).once();
     elementMock.expects('updateLayoutBox').never();
     return resource.build().then(() => {
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
-    });
-  });
-
-  describe('intersect-resources', () => {
-    beforeEach(() => {
-      sandbox.stub(resources, 'isIntersectionExperimentOn').returns(true);
-      resource = new Resource(1, element, resources);
-    });
-
-    it('should be ready for layout if measured before build', () => {
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
-      resource.measure(/* usePremeasuredRect */ true);
-      elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('build').returns(Promise.resolve()).once();
-      elementMock.expects('onMeasure').withArgs(/* sizeChanged */ true).once();
-      return resource.build().then(() => {
-        expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
-      });
-    });
-
-    it('should remeasure if measured before upgrade and isFixed', () => {
-      // First measure
-      element.isAlwaysFixed = () => false;
-      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
-      resource.measure(/* usePremeasuredRect */ true);
-
-      // Now adjust implementation to be alwaysFixed and call build.
-      element.isUpgraded = () => true;
-      element.isAlwaysFixed = () => true;
-      element.build = () => Promise.resolve();
-      element.onMeasure = () => {};
-      resource.requestMeasure = env.sandbox.stub();
-      return resource.build().then(() => {
-        expect(resource.requestMeasure).calledOnce;
-      });
+      expect(resource.getState()).to.equal(ResourceState_Enum.NOT_LAID_OUT);
     });
   });
 
@@ -145,7 +95,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('isBuilt').returns(false).once();
     elementMock.expects('isBuilding').returns(true).once();
     elementMock.expects('isUpgraded').returns(true).once();
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     const r = new Resource(2, element, resources);
     expect(r.isBuilding()).to.be.true;
   });
@@ -156,7 +106,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .callsFake(() => {});
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock
-      .expects('build')
+      .expects('buildInternal')
       .returns(Promise.reject(new Error('intentional')))
       .once();
     elementMock.expects('updateLayoutBox').never();
@@ -168,7 +118,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       },
       () => {
         expect(resource.isBuilding()).to.be.false;
-        expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+        expect(resource.getState()).to.equal(ResourceState_Enum.NOT_BUILT);
       }
     );
   });
@@ -176,24 +126,24 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should mark as not ready for layout even if already measured', () => {
     const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     resource.layoutBox_ = box;
     return resource.build().then(() => {
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.NOT_LAID_OUT);
     });
   });
 
   it('should mark as not laid out if not yet measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.NOT_LAID_OUT);
     });
   });
 
   it('should track size changes on measure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       elementMock
         .expects('getBoundingClientRect')
@@ -215,7 +165,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should track no size changes on measure', () => {
     layoutRectLtwh(0, 0, 0, 0);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       elementMock
         .expects('getBoundingClientRect')
@@ -255,13 +205,13 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .returns(layoutRectLtwh(0, 0, 0, 0))
       .once();
     resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    expect(resource.getState()).to.equal(ResourceState_Enum.NOT_BUILT);
     expect(resource.isFixed()).to.be.false;
   });
 
   it('should measure and update state', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       elementMock
         .expects('getBoundingClientRect')
@@ -277,7 +227,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         )
         .once();
       resource.measure();
-      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
       expect(resource.getLayoutBox().left).to.equal(11);
       expect(resource.getLayoutBox().top).to.equal(12);
       expect(resource.getLayoutBox().width).to.equal(111);
@@ -288,7 +238,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should update initial box only on first measure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(Promise.resolve()).once();
+    elementMock.expects('buildInternal').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       element.getBoundingClientRect = () => ({
         left: 11,
@@ -322,14 +272,14 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should request measure when built', () => {
     expect(resource.isMeasureRequested()).to.be.false;
     elementMock.expects('getBoundingClientRect').never();
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     resource.requestMeasure();
     expect(resource.isMeasureRequested()).to.be.true;
   });
 
   it('should always layout if has not been laid out before', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    resource.state_ = ResourceState.NOT_LAID_OUT;
+    resource.state_ = ResourceState_Enum.NOT_LAID_OUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     elementMock
@@ -337,11 +287,11 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .returns(resource.layoutBox_)
       .once();
     resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+    expect(resource.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
   });
 
   it('should not relayout if has box has not changed', () => {
-    resource.state_ = ResourceState.LAYOUT_COMPLETE;
+    resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     // Left is not part of validation.
@@ -350,13 +300,13 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .returns({left: 11 + 10, top: 12, width: 111, height: 222})
       .once();
     resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_COMPLETE);
     expect(resource.getLayoutBox().left).to.equal(11 + 10);
   });
 
   it("should not relayout if box changed but element didn't opt in", () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    resource.state_ = ResourceState.LAYOUT_COMPLETE;
+    resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     // Width changed.
@@ -366,13 +316,13 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .once();
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
     resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_COMPLETE);
     expect(resource.getLayoutBox().width).to.equal(111 + 10);
   });
 
   it('should relayout if box changed when element opted in', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    resource.state_ = ResourceState.LAYOUT_COMPLETE;
+    resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     // Width changed.
@@ -382,13 +332,13 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .once();
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(1);
     resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+    expect(resource.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
     expect(resource.getLayoutBox().width).to.equal(111 + 10);
   });
 
   it('should not relayout if element has not completed layout', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     // Width changed.
@@ -398,7 +348,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       .once();
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(0);
     resource.measure();
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
     expect(resource.getLayoutBox().width).to.equal(111 + 10);
   });
 
@@ -489,7 +439,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       });
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
-      elementMock.expects('build').returns(Promise.resolve()).once();
+      elementMock.expects('buildInternal').returns(Promise.resolve()).once();
       rect = {left: 11, top: 12, width: 111, height: 222};
       resource = new Resource(1, element, resources);
       return resource.build();
@@ -499,7 +449,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('getBoundingClientRect').returns(rect).once();
       resource.measure();
 
-      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
       expect(resource.hasBeenMeasured()).to.be.true;
     });
 
@@ -510,7 +460,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('getBoundingClientRect').never();
       resource.measure();
 
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.NOT_LAID_OUT);
       expect(resource.hasBeenMeasured()).to.be.false;
     });
 
@@ -520,7 +470,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('getBoundingClientRect').returns(rect).once();
       resource.measure();
 
-      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
       expect(resource.hasBeenMeasured()).to.be.true;
     });
 
@@ -530,7 +480,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('getBoundingClientRect').returns(rect).once();
       resource.measure();
 
-      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
       expect(resource.hasBeenMeasured()).to.be.true;
     });
   });
@@ -575,18 +525,18 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('layoutCallback').never();
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
 
-    resource.state_ = ResourceState.LAYOUT_COMPLETE;
+    resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
     resource.startLayout();
 
-    resource.state_ = ResourceState.LAYOUT_FAILED;
+    resource.state_ = ResourceState_Enum.LAYOUT_FAILED;
     resource.startLayout();
 
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     allowConsoleError(() => {
       resource.startLayout();
     });
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutPromise_ = {};
     resource.startLayout();
   });
@@ -594,7 +544,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should fail startLayout if not built', () => {
     elementMock.expects('layoutCallback').never();
 
-    resource.state_ = ResourceState.NOT_BUILT;
+    resource.state_ = ResourceState_Enum.NOT_BUILT;
     allowConsoleError(() => {
       expect(() => {
         resource.startLayout();
@@ -604,7 +554,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('layoutCallback').never();
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
     allowConsoleError(() => {
       expect(() => {
@@ -616,20 +566,20 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should force startLayout for first layout', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.startLayout();
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
   });
 
   it('should abort startLayout with unload', async () => {
     const neverEndingPromise = new Promise(() => {});
     elementMock.expects('layoutCallback').returns(neverEndingPromise).once();
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     const layoutPromise = resource.startLayout();
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
 
     resource.unload();
 
@@ -646,37 +596,37 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should ignore startLayout for re-layout when not opt-in', () => {
     elementMock.expects('layoutCallback').never();
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
     resource.startLayout();
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_COMPLETE);
   });
 
   it('should force startLayout for re-layout when opt-in', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(1);
     resource.startLayout();
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
   });
 
   it('should complete startLayout', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     const loaded = resource.loadedOnce();
     const promise = resource.startLayout();
     expect(resource.layoutPromise_).to.not.equal(null);
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
 
     return promise.then(() => {
-      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+      expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_COMPLETE);
       expect(resource.layoutPromise_).to.equal(null);
       return loaded; // Just making sure this doesn't time out.
     });
@@ -686,15 +636,15 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
     elementMock.expects('getLayout').returns('fluid').once();
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 0};
     const loaded = resource.loadedOnce();
     const promise = resource.startLayout();
     expect(resource.layoutPromise_).to.not.equal(null);
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
 
     return promise.then(() => {
-      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+      expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_COMPLETE);
       expect(resource.layoutPromise_).to.equal(null);
       return loaded;
     });
@@ -704,11 +654,11 @@ describes.realWin('Resource', {amp: true}, (env) => {
     const error = new Error('intentional');
     elementMock.expects('layoutCallback').returns(Promise.reject(error)).once();
 
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     const promise = resource.startLayout();
     expect(resource.layoutPromise_).to.not.equal(null);
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
 
     /* global fail: false */
     return promise
@@ -717,7 +667,9 @@ describes.realWin('Resource', {amp: true}, (env) => {
           fail('should not be here');
         },
         () => {
-          expect(resource.getState()).to.equal(ResourceState.LAYOUT_FAILED);
+          expect(resource.getState()).to.equal(
+            ResourceState_Enum.LAYOUT_FAILED
+          );
           expect(resource.layoutPromise_).to.equal(null);
           expect(resource.lastLayoutError_).to.equal(error);
 
@@ -743,21 +695,21 @@ describes.realWin('Resource', {amp: true}, (env) => {
     resource.layoutScheduled(400);
     expect(resource.element.layoutScheduleTime).to.equal(400);
 
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
   });
 
   it('should not record layout schedule time in startLayout', () => {
-    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     allowConsoleError(() => resource.startLayout());
 
     expect(resource.element.layoutScheduleTime).to.be.undefined;
-    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
   });
 
   it('should change size and update state', () => {
     expect(resource.isMeasureRequested()).to.be.false;
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     elementMock
       .expects('applySize')
       .withExactArgs(111, 222, {top: 1, right: 2, bottom: 3, left: 4})
@@ -767,29 +719,31 @@ describes.realWin('Resource', {amp: true}, (env) => {
   });
 
   it('should change size but not state', () => {
-    resource.state_ = ResourceState.NOT_BUILT;
+    resource.state_ = ResourceState_Enum.NOT_BUILT;
     elementMock
       .expects('applySize')
       .withExactArgs(111, 222, {top: 1, right: 2, bottom: 3, left: 4})
       .once();
     resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
-    expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+    expect(resource.getState()).to.equal(ResourceState_Enum.NOT_BUILT);
   });
 
   it('should update priority', () => {
-    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
 
-    resource.updateLayoutPriority(LayoutPriority.ADS);
-    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+    resource.updateLayoutPriority(LayoutPriority_Enum.ADS);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
 
-    resource.updateLayoutPriority(LayoutPriority.BACKGROUND);
-    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.BACKGROUND);
+    resource.updateLayoutPriority(LayoutPriority_Enum.BACKGROUND);
+    expect(resource.getLayoutPriority()).to.equal(
+      LayoutPriority_Enum.BACKGROUND
+    );
 
-    resource.updateLayoutPriority(LayoutPriority.METADATA);
-    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+    resource.updateLayoutPriority(LayoutPriority_Enum.METADATA);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority_Enum.METADATA);
 
-    resource.updateLayoutPriority(LayoutPriority.CONTENT);
-    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+    resource.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority_Enum.CONTENT);
   });
 
   describe('setInViewport', () => {
@@ -892,22 +846,22 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   describe('unlayoutCallback', () => {
     it('should NOT call unlayoutCallback on unbuilt element', () => {
-      resource.state_ = ResourceState.NOT_BUILT;
+      resource.state_ = ResourceState_Enum.NOT_BUILT;
       elementMock.expects('unlayoutCallback').never();
       resource.unlayout();
-      expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.NOT_BUILT);
     });
 
     it('should call unlayoutCallback on built element and update state', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+      resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(true).once();
       elementMock.expects('togglePlaceholder').withArgs(true).once();
       resource.unlayout();
-      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+      expect(resource.getState()).to.equal(ResourceState_Enum.NOT_LAID_OUT);
     });
 
     it('updated state should bypass isRelayoutNeeded', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+      resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(true).once();
       elementMock.expects('togglePlaceholder').withArgs(true).once();
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
@@ -918,81 +872,59 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
       resource.unlayout();
 
-      resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+      resource.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
       elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
       resource.measure();
       resource.startLayout();
     });
 
     it('should call unlayoutCallback on built element but NOT update state', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+      resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(false).once();
       elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unlayout();
-      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+      expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_COMPLETE);
     });
 
     it('should delegate unload to unlayoutCallback', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+      resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(false).once();
       elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unload();
-      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+      expect(resource.getState()).to.equal(ResourceState_Enum.LAYOUT_COMPLETE);
     });
   });
 
-  describe('pauseCallback', () => {
-    it('should call pauseCallback on unbuilt element', () => {
-      resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('pauseCallback').once();
+  describe('pause', () => {
+    it('should call pause on unbuilt element', () => {
+      resource.state_ = ResourceState_Enum.NOT_BUILT;
+      elementMock.expects('pause').once();
       resource.pause();
     });
 
-    it('should call pauseCallback on built element', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('pauseCallback').once();
+    it('should call pause on built element', () => {
+      resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
+      elementMock.expects('pause').once();
       resource.pause();
     });
 
     it('should NOT call unlayoutCallback', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('pauseCallback').once();
+      resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
+      elementMock.expects('pause').once();
       elementMock.expects('unlayoutCallback').never();
       resource.pause();
     });
 
-    describe('when unlayoutOnPause', () => {
-      beforeEach(() => {
-        elementMock.expects('unlayoutOnPause').returns(true).once();
-      });
-
-      it('should call unlayoutCallback and update state', () => {
-        resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        elementMock.expects('pauseCallback').once();
-        elementMock.expects('unlayoutCallback').returns(true).once();
-        resource.pause();
-        expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
-      });
-
-      it('should call unlayoutCallback but NOT update state', () => {
-        resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        elementMock.expects('pauseCallback').once();
-        elementMock.expects('unlayoutCallback').returns(false).once();
-        resource.pause();
-        expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
-      });
-    });
-
     describe('when remove from DOM', () => {
-      it('should call pauseCallback on remove for unbuilt ele', () => {
-        resource.state_ = ResourceState.NOT_BUILT;
-        elementMock.expects('pauseCallback').once();
+      it('should call pause on remove for unbuilt ele', () => {
+        resource.state_ = ResourceState_Enum.NOT_BUILT;
+        elementMock.expects('pause').once();
         resource.pauseOnRemove();
       });
 
-      it('should call pauseCallback on remove for built ele', () => {
-        resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        elementMock.expects('pauseCallback').once();
+      it('should call pause on remove for built ele', () => {
+        resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
+        elementMock.expects('pause').once();
         resource.pauseOnRemove();
       });
     });
@@ -1024,22 +956,22 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
   });
 
-  describe('resumeCallback', () => {
-    it('should call resumeCallback on unbuilt element', () => {
-      resource.state_ = ResourceState.NOT_BUILT;
-      elementMock.expects('resumeCallback').once();
+  describe('resume', () => {
+    it('should call resume on unbuilt element', () => {
+      resource.state_ = ResourceState_Enum.NOT_BUILT;
+      elementMock.expects('resume').once();
       resource.resume();
     });
 
-    it('should call resumeCallback on un-paused element', () => {
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      elementMock.expects('resumeCallback').once();
+    it('should call resume on un-paused element', () => {
+      resource.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
+      elementMock.expects('resume').once();
       resource.resume();
     });
   });
 });
 
-describe('Resource idleRenderOutsideViewport', () => {
+describes.sandboxed('Resource idleRenderOutsideViewport', {}, (env) => {
   let element;
   let resources;
   let resource;
@@ -1047,7 +979,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   let isWithinViewportRatio;
 
   beforeEach(() => {
-    idleRenderOutsideViewport = window.sandbox.stub();
+    idleRenderOutsideViewport = env.sandbox.stub();
     element = {
       idleRenderOutsideViewport,
       ownerDocument: {defaultView: window},
@@ -1066,16 +998,13 @@ describe('Resource idleRenderOutsideViewport', () => {
       applySize: () => {},
       unlayoutOnPause: () => false,
       unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
-      getLayoutPriority: () => LayoutPriority.CONTENT,
+      pause: () => false,
+      resume: () => false,
+      getLayoutPriority: () => LayoutPriority_Enum.CONTENT,
     };
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
-    isWithinViewportRatio = window.sandbox.stub(
-      resource,
-      'isWithinViewportRatio'
-    );
+    isWithinViewportRatio = env.sandbox.stub(resource, 'isWithinViewportRatio');
   });
 
   it('should return true if isWithinViewportRatio', () => {

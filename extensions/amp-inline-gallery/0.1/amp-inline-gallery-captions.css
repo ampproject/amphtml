@@ -1,0 +1,7 @@
+
+
+amp-inline-gallery-captions {
+  pointer-events: none;
+  padding-top: var(--caption-margin-top);
+  margin-top: calc(-1 * var(--i-amphtml-caption-height, 0));
+}

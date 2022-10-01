@@ -1,50 +1,39 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-mustache/0.1/amp-mustache';
-import '../../../amp-selector/0.1/amp-selector';
-import * as xhrUtils from '../../../../src/utils/xhr-utils';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {AmpEvents} from '../../../../src/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
+} from '#core/constants/async-input';
+import {createElementWithAttributes} from '#core/dom';
+import {fromIterator} from '#core/types/array';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {user} from '#utils/log';
+import * as xhrUtils from '#utils/xhr-utils';
+
+import {whenCalled} from '#testing/helpers/service';
+
+import {
+  createFormDataWrapper,
+  isFormDataWrapper,
+} from '../../../../src/form-data-wrapper';
+import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
-import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
-} from '../../../../src/async-input';
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
-import {Services} from '../../../../src/services';
-import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
-import {createCustomEvent} from '../../../../src/event-helper';
-import {
-  createFormDataWrapper,
-  isFormDataWrapper,
-} from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/utils/array';
-import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
-import {user} from '../../../../src/log';
-import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.repeated(
   '',
@@ -73,7 +62,8 @@ describes.repeated(
           document = env.ampdoc.getRootNode();
           timer = Services.timerFor(env.win);
           const ownerDoc = document.ownerDocument || document;
-          createElement = ownerDoc.createElement.bind(ownerDoc);
+          createElement = (tagName, attrs) =>
+            createElementWithAttributes(ownerDoc, tagName, attrs);
           createTextNode = ownerDoc.createTextNode.bind(ownerDoc);
 
           // Force sync mutateElement to make testing easier.
@@ -101,6 +91,7 @@ describes.repeated(
           env.sandbox
             .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
             .returns(false);
+          env.sandbox.stub(ampForm, 'analyticsEvent_');
           return Promise.resolve(ampForm);
         }
 
@@ -157,9 +148,9 @@ describes.repeated(
             // Create our async input element
             // With the required fields
             const asyncInput = createElement('amp-mock-async-input');
-            asyncInput.classList.add(AsyncInputClasses.ASYNC_INPUT);
+            asyncInput.classList.add(AsyncInputClasses_Enum.ASYNC_INPUT);
             asyncInput.setAttribute(
-              AsyncInputAttributes.NAME,
+              AsyncInputAttributes_Enum.NAME,
               'mock-async-input'
             );
 
@@ -180,13 +171,13 @@ describes.repeated(
                 'amp-mock-async-input-required-action'
               );
               asyncInputRequiredAction.classList.add(
-                AsyncInputClasses.ASYNC_INPUT
+                AsyncInputClasses_Enum.ASYNC_INPUT
               );
               asyncInputRequiredAction.classList.add(
-                AsyncInputClasses.ASYNC_REQUIRED_ACTION
+                AsyncInputClasses_Enum.ASYNC_REQUIRED_ACTION
               );
               asyncInput.setAttribute(
-                AsyncInputAttributes.NAME,
+                AsyncInputAttributes_Enum.NAME,
                 'mock-async-input-required-action'
               );
 
@@ -245,7 +236,6 @@ describes.repeated(
               ampForm.method_ = 'GET';
               env.sandbox.stub(form, 'submit');
               env.sandbox.stub(form, 'checkValidity').returns(true);
-              env.sandbox.stub(ampForm, 'analyticsEvent_');
               ampForm.ssrTemplateHelper_.isEnabled.restore();
               env.sandbox
                 .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
@@ -320,9 +310,8 @@ describes.repeated(
                 .onSecondCall()
                 .resolves(response);
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(ssr)
                 .then(() => {
                   expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
@@ -395,9 +384,8 @@ describes.repeated(
                 .onSecondCall()
                 .resolves(response);
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(ssr)
                 .then(() => {
                   expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
@@ -475,9 +463,8 @@ describes.repeated(
                 'renderTemplate_'
               );
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(renderTemplate, 2).then(() => {
                 expect(ampForm.ssrTemplateHelper_.applySsrOrCsrTemplate).to.have
                   .been.called;
@@ -696,7 +683,8 @@ describes.repeated(
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
           env.sandbox.stub(ampForm, 'analyticsEvent_');
           env.sandbox.spy(form, 'checkValidity');
-          const errorRe = /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+          const errorRe =
+            /Only XHR based \(via action-xhr attribute\) submissions are supported/;
           expectAsyncConsoleError(errorRe);
           return ampForm.handleSubmitEvent_(event).catch(() => {
             expect(event.preventDefault).to.be.called;
@@ -752,7 +740,8 @@ describes.repeated(
           };
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
           env.sandbox.spy(form, 'checkValidity');
-          const submitErrorRe = /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+          const submitErrorRe =
+            /Only XHR based \(via action-xhr attribute\) submissions are supported/;
           expectAsyncConsoleError(submitErrorRe);
           return ampForm.handleSubmitEvent_(event).catch(() => {
             expect(event.preventDefault).to.be.called;
@@ -872,7 +861,7 @@ describes.repeated(
 
             const event = createCustomEvent(
               env.win,
-              AmpEvents.FORM_VALUE_CHANGE,
+              AmpEvents_Enum.FORM_VALUE_CHANGE,
               /* detail */ null,
               {bubbles: true}
             );
@@ -1118,6 +1107,67 @@ describes.repeated(
           });
         });
 
+        it('should render responses even if analytics throws', () => {
+          expectAsyncConsoleError(/Form submission failed/);
+          expectAsyncConsoleError(/Sending analytics failed/, 2);
+
+          return getAmpForm(getForm()).then((ampForm) => {
+            const form = ampForm.form_;
+
+            const errorTemplate = createElement('template', {
+              id: 'errorTemplate',
+              type: 'amp-mustache',
+            });
+            errorTemplate.content.appendChild(
+              createTextNode('Sorry, {{name}}')
+            );
+            form.appendChild(errorTemplate);
+
+            const messageContainer = createElement('div', {
+              id: 'message',
+              'submit-error': '',
+              template: 'errorTemplate',
+            });
+            form.appendChild(messageContainer);
+            env.sandbox.stub(ampForm.xhr_, 'fetch').rejects({
+              response: {
+                json: () => {
+                  return Promise.resolve({'name': 'John Doe'});
+                },
+              },
+            });
+            ampForm.analyticsEvent_.throws('Test.');
+            const renderedTemplate = createElement('div');
+            renderedTemplate.innerText = 'Sorry, John Doe';
+            env.sandbox
+              .stub(ampForm.templates_, 'findAndRenderTemplate')
+              .resolves(renderedTemplate);
+            const event = {
+              stopImmediatePropagation: env.sandbox.spy(),
+              target: form,
+              preventDefault: env.sandbox.spy(),
+            };
+
+            const submitEventPromise = ampForm.handleSubmitEvent_(event);
+
+            return whenCalled(ampForm.templates_.findAndRenderTemplate)
+              .then(() => {
+                return ampForm.renderTemplatePromiseForTesting();
+              })
+              .then(() => {
+                expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
+                expect(ampForm.templates_.findAndRenderTemplate).calledWith(
+                  messageContainer,
+                  {'name': 'John Doe'}
+                );
+                expect(mutateElementStub).to.have.been.calledOnce;
+                expect(messageContainer.firstChild).to.equal(renderedTemplate);
+
+                return submitEventPromise;
+              });
+          });
+        });
+
         it('should replace previously rendered responses', () => {
           return getAmpForm(getForm(/*button1*/ true)).then((ampForm) => {
             const form = ampForm.form_;
@@ -1224,7 +1274,7 @@ describes.repeated(
                 .then(() => {
                   expect(spyDispatchEvent.calledOnce).to.be.true;
                   expect(spyDispatchEvent).calledWithMatch({
-                    type: AmpEvents.DOM_UPDATE,
+                    type: AmpEvents_Enum.DOM_UPDATE,
                     bubbles: true,
                   });
                   env.sandbox.assert.callOrder(
@@ -1378,7 +1428,6 @@ describes.repeated(
             env.sandbox.stub(ampForm.xhr_, 'fetch').resolves({
               json: () => Promise.resolve({}),
             });
-            env.sandbox.stub(ampForm, 'analyticsEvent_');
 
             const event = {
               stopImmediatePropagation: env.sandbox.spy(),
@@ -1437,10 +1486,9 @@ describes.repeated(
             });
             env.sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
             env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
-            env.sandbox.stub(ampForm, 'analyticsEvent_');
 
             // Setup some Promises
-            const submitPromise = ampForm.submit_(ActionTrust.HIGH);
+            const submitPromise = ampForm.submit_(ActionTrust_Enum.HIGH);
 
             // Fetch
             expect(ampForm.xhr_.fetch).to.have.not.been.called;
@@ -1553,12 +1601,12 @@ describes.repeated(
             form,
             'submit-success',
             /* CustomEvent */ env.sandbox.match.has('detail'),
-            ActionTrust.DEFAULT // Expect: ActionTrust.HIGH - 1
+            ActionTrust_Enum.DEFAULT // Expect: ActionTrust_Enum.HIGH - 1
           );
 
           await ampForm.handleSubmitAction_({
             method: 'submit',
-            trust: ActionTrust.DEFAULT,
+            trust: ActionTrust_Enum.DEFAULT,
           });
 
           expect(actions.trigger.callCount).to.equal(4);
@@ -1566,7 +1614,7 @@ describes.repeated(
             form,
             'submit-success',
             /* CustomEvent */ env.sandbox.match.has('detail'),
-            ActionTrust.LOW // Expect: ActionTrust.DEFAULT - 1
+            ActionTrust_Enum.LOW // Expect: ActionTrust_Enum.DEFAULT - 1
           );
         });
 
@@ -1578,7 +1626,6 @@ describes.repeated(
                 fetchResolver = resolve;
               })
             );
-            env.sandbox.stub(ampForm, 'analyticsEvent_');
             env.sandbox.stub(ampForm.actions_, 'trigger');
             const form = ampForm.form_;
             const event = {
@@ -1631,7 +1678,6 @@ describes.repeated(
           return getAmpForm(getForm(/*button1*/ true, /*button2*/ true)).then(
             (ampForm) => {
               let fetchRejecter;
-              env.sandbox.stub(ampForm, 'analyticsEvent_');
               env.sandbox.stub(ampForm.xhr_, 'fetch').returns(
                 new Promise((unusedResolve, reject) => {
                   fetchRejecter = reject;
@@ -1966,9 +2012,8 @@ describes.repeated(
               };
 
               // Submit an invalid form
-              const invalidFormPromiseResponse = ampForm.handleSubmitEvent_(
-                event
-              );
+              const invalidFormPromiseResponse =
+                ampForm.handleSubmitEvent_(event);
               return invalidFormPromiseResponse
                 .then(() => {
                   expect(form.checkValidity).to.be.called;
@@ -2229,74 +2274,70 @@ describes.repeated(
           });
         });
 
-        it('should submit after timeout of waiting for amp-selector', function () {
+        it('should submit after timeout of waiting for amp-selector', async function () {
           expectAsyncConsoleError(/Form submission failed/);
           this.timeout(3000);
-          return getAmpForm(getForm()).then((ampForm) => {
-            const form = ampForm.form_;
-            const selector = createElement('amp-selector');
-            selector.setAttribute('name', 'color');
-            form.appendChild(selector);
 
-            env.sandbox
-              .stub(selector, 'whenBuilt')
-              .returns(new Promise((unusedResolve) => {}));
-            env.sandbox.spy(ampForm, 'handleSubmitAction_');
+          const ampForm = await getAmpForm(getForm());
+          const form = ampForm.form_;
+          const selector = createElement('amp-selector');
+          selector.setAttribute('name', 'color');
 
-            const submitPromise = ampForm.actionHandler_({
-              method: 'submit',
-              satisfiesTrust: () => true,
-            });
-            expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-            return timer
-              .promise(1)
-              .then(() => {
-                expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-                return timer.promise(2000);
-              })
-              .then(() => {
-                expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
-                return submitPromise;
-              });
+          env.sandbox
+            .stub(AmpSelector.prototype, 'buildCallback')
+            .returns(new Promise((unusedResolve) => {}));
+          env.sandbox.spy(ampForm, 'handleSubmitAction_');
+
+          form.appendChild(selector);
+
+          const submitPromise = ampForm.actionHandler_({
+            method: 'submit',
+            satisfiesTrust: () => true,
           });
+          expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+
+          await timer.promise(1);
+          expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+
+          await timer.promise(2000);
+          expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
+
+          await submitPromise;
         });
 
-        it('should wait for amp-selector to build before submitting', () => {
-          return getAmpForm(getForm()).then((ampForm) => {
-            let builtPromiseResolver_;
-            const form = ampForm.form_;
-            const selector = createElement('amp-selector');
-            selector.setAttribute('name', 'color');
-            form.appendChild(selector);
+        it('should wait for amp-selector to build before submitting', async () => {
+          const ampForm = await getAmpForm(getForm());
 
-            env.sandbox.stub(selector, 'whenBuilt').returns(
-              new Promise((resolve) => {
-                builtPromiseResolver_ = resolve;
-              })
-            );
-            env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
-            env.sandbox.spy(ampForm, 'handleSubmitAction_');
+          let builtPromiseResolver_;
+          const form = ampForm.form_;
+          const selector = createElement('amp-selector');
+          selector.setAttribute('name', 'color');
 
-            ampForm.actionHandler_({
-              method: 'submit',
-              satisfiesTrust: () => true,
-            });
-            expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-            return timer
-              .promise(1)
-              .then(() => {
-                expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-                return timer.promise(100);
-              })
-              .then(() => {
-                expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-                builtPromiseResolver_();
-                return timer.promise(1);
-              })
-              .then(() => {
-                expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
-              });
+          env.sandbox.stub(AmpSelector.prototype, 'buildCallback').returns(
+            new Promise((resolve) => {
+              builtPromiseResolver_ = resolve;
+            })
+          );
+          env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
+          env.sandbox.spy(ampForm, 'handleSubmitAction_');
+
+          form.appendChild(selector);
+
+          ampForm.actionHandler_({
+            method: 'submit',
+            satisfiesTrust: () => true,
           });
+          expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+
+          await timer.promise(1);
+          expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+
+          await timer.promise(100);
+          expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+          builtPromiseResolver_();
+
+          await timer.promise(1);
+          expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
         });
 
         describe('Var Substitution', () => {
@@ -2325,7 +2366,7 @@ describes.repeated(
               env.sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
               env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
 
-              const submitPromise = ampForm.submit_(ActionTrust.HIGH);
+              const submitPromise = ampForm.submit_(ActionTrust_Enum.HIGH);
               expect(ampForm.xhr_.fetch).to.have.not.been.called;
               expect(ampForm.urlReplacement_.expandInputValueSync).to.not.have
                 .been.called;
@@ -2383,7 +2424,7 @@ describes.repeated(
               env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
 
               env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
-              const submitPromise = ampForm.submit_(ActionTrust.HIGH);
+              const submitPromise = ampForm.submit_(ActionTrust_Enum.HIGH);
 
               expect(ampForm.xhr_.fetch).to.have.not.been.called;
               expect(ampForm.urlReplacement_.expandInputValueSync).to.not.have
@@ -2758,7 +2799,6 @@ describes.repeated(
             env.sandbox.stub(form, 'submit');
             env.sandbox.stub(form, 'checkValidity').returns(true);
             env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
-            env.sandbox.stub(ampForm, 'analyticsEvent_');
 
             env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
             const submitActionPromise = ampForm.handleSubmitAction_(
@@ -2802,7 +2842,6 @@ describes.repeated(
                 fetchResolver = resolve;
               })
             );
-            env.sandbox.stub(ampForm, 'analyticsEvent_');
             const event = {
               stopImmediatePropagation: env.sandbox.spy(),
               target: form,
@@ -2856,7 +2895,6 @@ describes.repeated(
                 fetchRejecter = reject;
               })
             );
-            env.sandbox.stub(ampForm, 'analyticsEvent_');
             const event = {
               stopImmediatePropagation: env.sandbox.spy(),
               target: form,
@@ -2914,7 +2952,6 @@ describes.repeated(
             env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
             env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
             env.sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
-            env.sandbox.stub(ampForm, 'analyticsEvent_');
             ampForm.handleSubmitAction_(/* invocation */ {});
 
             const expectedFormData = {
@@ -2962,7 +2999,7 @@ describes.repeated(
             'source',
             'caller',
             'event',
-            ActionTrust.HIGH
+            ActionTrust_Enum.HIGH
           );
           expect(clearSpy).to.be.called;
 
@@ -2975,7 +3012,7 @@ describes.repeated(
             'source',
             'caller',
             'event',
-            ActionTrust.HIGH
+            ActionTrust_Enum.HIGH
           );
           await whenCalled(submitSpy);
           expect(submitSpy).to.be.calledWith(
@@ -2987,7 +3024,7 @@ describes.repeated(
               method: 'submit',
               node: element,
               source: 'source',
-              trust: ActionTrust.HIGH,
+              trust: ActionTrust_Enum.HIGH,
             })
           );
         });
@@ -3004,7 +3041,7 @@ describes.repeated(
                 'assertNoSensitiveFields_'
               );
 
-              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+              return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                 expect(assertNoSensitiveFieldsStub).to.be.called;
               });
             });
@@ -3027,10 +3064,12 @@ describes.repeated(
                 preventDefault: () => {},
               };
 
-              return ampForm.submit_(ActionTrust.HIGH, mockEvent).then(() => {
-                expect(getValueStub).to.be.called;
-                expect(formElementSubmitSpy).to.be.calledOnce;
-              });
+              return ampForm
+                .submit_(ActionTrust_Enum.HIGH, mockEvent)
+                .then(() => {
+                  expect(getValueStub).to.be.called;
+                  expect(formElementSubmitSpy).to.be.calledOnce;
+                });
             });
           });
 
@@ -3038,7 +3077,7 @@ describes.repeated(
             return getAmpFormWithAsyncInput().then((response) => {
               const {ampForm, getValueStub} = response;
 
-              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+              return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                 expect(getValueStub).to.be.called;
               });
             });
@@ -3051,9 +3090,9 @@ describes.repeated(
               return getAmpFormWithAsyncInput().then((response) => {
                 const {ampForm, asyncInput} = response;
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                   const name = asyncInput.getAttribute(
-                    AsyncInputAttributes.NAME
+                    AsyncInputAttributes_Enum.NAME
                   );
                   const hiddenInput = ampForm.form_.querySelector(
                     `input[hidden][name=${name}]`
@@ -3071,9 +3110,9 @@ describes.repeated(
               return getAmpFormWithAsyncInput().then((response) => {
                 const {ampForm, asyncInput, asyncInputValue} = response;
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                   const name = asyncInput.getAttribute(
-                    AsyncInputAttributes.NAME
+                    AsyncInputAttributes_Enum.NAME
                   );
                   const hiddenInput = ampForm.form_.querySelector(
                     `input[hidden][name=${name}]`
@@ -3090,25 +3129,20 @@ describes.repeated(
               'hidden inputs for Async Inputs',
             () => {
               return getAmpFormWithAsyncInput().then((response) => {
-                const {
-                  ampForm,
-                  asyncInput,
-                  asyncInputValue,
-                  getValueStub,
-                } = response;
+                const {ampForm, asyncInput, asyncInputValue, getValueStub} =
+                  response;
 
                 const newAsyncInputValue = 'new-async-input-value';
                 let hiddenInput;
                 let previousHiddenInputCount;
 
                 return ampForm
-                  .submit_(ActionTrust.HIGH)
+                  .submit_(ActionTrust_Enum.HIGH)
                   .then(() => {
-                    previousHiddenInputCount = ampForm.form_.querySelectorAll(
-                      'input[hidden]'
-                    ).length;
+                    previousHiddenInputCount =
+                      ampForm.form_.querySelectorAll('input[hidden]').length;
                     const name = asyncInput.getAttribute(
-                      AsyncInputAttributes.NAME
+                      AsyncInputAttributes_Enum.NAME
                     );
                     hiddenInput = ampForm.form_.querySelector(
                       `input[hidden][name=${name}]`
@@ -3117,12 +3151,11 @@ describes.repeated(
                     expect(value).to.be.equal(asyncInputValue);
 
                     getValueStub.resolves(newAsyncInputValue);
-                    return ampForm.submit_(ActionTrust.HIGH);
+                    return ampForm.submit_(ActionTrust_Enum.HIGH);
                   })
                   .then(() => {
-                    const totalHiddenInputs = ampForm.form_.querySelectorAll(
-                      'input[hidden]'
-                    );
+                    const totalHiddenInputs =
+                      ampForm.form_.querySelectorAll('input[hidden]');
                     expect(totalHiddenInputs.length).to.be.equal(
                       previousHiddenInputCount
                     );
@@ -3148,7 +3181,7 @@ describes.repeated(
                   'handlePresubmitSuccess_'
                 );
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                   expect(handlePresubmitSuccessStub).to.be.called;
                 });
               });
@@ -3165,7 +3198,7 @@ describes.repeated(
                 ampForm,
                 'handlePresubmitSuccess_'
               );
-              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+              return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                 expect(getValueStubRequiredAction).to.be.called;
                 expect(handlePresubmitSuccessStub).to.be.called;
               });
@@ -3183,7 +3216,7 @@ describes.repeated(
                 getValueStub.rejects(getValueError);
 
                 const stub = env.sandbox.stub(ampForm, 'handleSubmitFailure_');
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                   expect(stub).to.be.called;
                   expect(stub).to.be.calledWith(getValueError, {
                     'error': 'amp-async-input-error',
@@ -3202,7 +3235,7 @@ describes.repeated(
 
                 const setStateStub = env.sandbox.stub(ampForm, 'setState_');
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                   expect(setStateStub).to.be.calledWith('submitting');
                 });
               });
@@ -3220,7 +3253,7 @@ describes.repeated(
 
                 const setStateStub = env.sandbox.stub(ampForm, 'setState_');
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                   expect(setStateStub).to.be.calledWith('initial');
                 });
               });
@@ -3238,7 +3271,7 @@ describes.repeated(
                 getValueStub.rejects(getValueError);
                 const setStateStub = env.sandbox.stub(ampForm, 'setState_');
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ActionTrust_Enum.HIGH).then(() => {
                   expect(setStateStub).to.be.calledWith('submit-error');
                 });
               });
@@ -3271,7 +3304,7 @@ describes.repeated(
             ampForm.xhrAction_ = null;
 
             changeInput(input, 'Another Name');
-            await ampForm.submit_(ActionTrust.HIGH);
+            await ampForm.submit_(ActionTrust_Enum.HIGH);
 
             expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
           });
@@ -3282,7 +3315,7 @@ describes.repeated(
               .resolves({json: async () => {}});
 
             changeInput(input, 'Another Name');
-            await ampForm.submit_(ActionTrust.HIGH);
+            await ampForm.submit_(ActionTrust_Enum.HIGH);
 
             expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
           });
@@ -3291,7 +3324,7 @@ describes.repeated(
             env.sandbox.stub(ampForm.xhr_, 'fetch').rejects({});
 
             changeInput(input, 'Another Name');
-            await ampForm.submit_(ActionTrust.HIGH);
+            await ampForm.submit_(ActionTrust_Enum.HIGH);
 
             expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
           });

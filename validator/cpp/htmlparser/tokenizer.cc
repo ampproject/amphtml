@@ -1,31 +1,23 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
+#include "cpp/htmlparser/tokenizer.h"
 
-#include "tokenizer.h"
+#include "absl/flags/flag.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/strings.h"
 
-#include "atom.h"
-#include "atomutil.h"
-#include "defer.h"
-#include "strings.h"
+ABSL_FLAG(std::size_t, htmlparser_max_attributes_per_node,
+          1000,
+          "Protects out of memory errors by dropping insanely large amounts "
+          "of attributes per node.");
 
 namespace htmlparser {
 
 Tokenizer::Tokenizer(std::string_view html, std::string context_tag) :
-    buffer_(html), lines_cols_{{1, 0}}, current_line_col_{1, 0},
-    token_line_col_{1, 0} {
+    buffer_(html) {
+  lines_cols_.push_back(std::make_pair(1, 0));
+  current_line_col_ = std::make_pair(1, 0);
+  token_line_col_ = std::make_pair(1, 0);
   if (!context_tag.empty()) {
     Strings::ToLower(&context_tag);
     if (std::find(kAllowedFragmentContainers.begin(),
@@ -65,8 +57,10 @@ inline char Tokenizer::ReadByte() {
 
 inline void Tokenizer::UnreadByte() {
   raw_.end--;
-  if (current_line_col_.second == 0) {
-    lines_cols_.pop_back();
+  if (current_line_col_.first > 1 && current_line_col_.second == 0) {
+    if (lines_cols_.size() > 1) {
+      lines_cols_.pop_back();
+    }
     current_line_col_ = lines_cols_.back();
     return;
   }
@@ -452,7 +446,8 @@ TokenType Tokenizer::ReadMarkupDeclaration() {
     return TokenType::COMMENT_TOKEN;
   }
 
-  raw_.end = raw_.end - 2;
+  UnreadByte();
+  UnreadByte();
   if (ReadDoctype()) {
     return TokenType::DOCTYPE_TOKEN;
   }
@@ -471,14 +466,14 @@ bool Tokenizer::ReadDoctype() {
   token_line_col_ = {current_line_col_.first,
                      current_line_col_.second - 2 /* <! */};
 
-  static const std::string kDoctype = "DOCTYPE";
+  static constexpr std::string_view kDoctype = "DOCTYPE";
   for (std::size_t i = 0; i < kDoctype.size(); ++i) {
     char c = ReadByte();
     if (eof_) {
       data_.end = raw_.end;
       return false;
     }
-    if (c != kDoctype.at(i) && c != kDoctype.at(i)+('a'-'A')) {
+    if (c != kDoctype.at(i) && c != (kDoctype.at(i) + ('a' - 'A'))) {
       // Back up to read the fragment of "DOCTYPE" again.
       raw_.end = data_.start;
       return false;
@@ -497,7 +492,7 @@ bool Tokenizer::ReadDoctype() {
 }
 
 bool Tokenizer::ReadCDATA() {
-  static const std::string kCData = "[CDATA[";
+  static constexpr std::string_view kCData = "[CDATA[";
   for (std::size_t i = 0; i < kCData.size(); ++i) {
     char c = ReadByte();
     if (eof_) {
@@ -519,16 +514,18 @@ bool Tokenizer::ReadCDATA() {
       return true;
     }
     switch (c) {
-      case ']':
+      case ']': {
         brackets++;
         break;
-      case '>':
+      }
+      case '>': {
         if (brackets >= 2) {
-          data_.end = raw_.end - 3 /* "]]>".size() */;
+          data_.end = raw_.end - 3 /* "]]>" */;
           return true;
         }
         brackets = 0;
         break;
+      }
       default:
         brackets = 0;
     }
@@ -622,6 +619,7 @@ void Tokenizer::ReadTag(bool save_attr, bool template_mode) {
   if (eof_) {
     return;
   }
+
   while (!eof_) {
     char c = ReadByte();
     if (eof_ || c == '>') {
@@ -636,6 +634,9 @@ void Tokenizer::ReadTag(bool save_attr, bool template_mode) {
     // Save pending_attribute if save_attr and that attribute has a non-empty
     // key.
     if (save_attr &&
+        // Skip excessive attributes.
+        attributes_.size() < ::absl::GetFlag(
+            FLAGS_htmlparser_max_attributes_per_node) &&
         std::get<0>(pending_attribute_).start !=
         std::get<0>(pending_attribute_).end) {
       attributes_.push_back(pending_attribute_);
@@ -870,19 +871,6 @@ TokenType Tokenizer::Next(bool template_mode) {
       continue;
     }
 
-    // We have a non-text token, but we might have accumulated some text
-    // before that. If so, we return the text first, and return the non text
-    // token on the subsequent call to Next.
-    //
-    // <space><space><mytag>, returns two spaces before processing the mytag
-    // token in the next call.
-    if (data_.start < raw_.end - 1) {
-      current_line_col_.second--;
-      data_.end = --raw_.end;
-      token_type_ = TokenType::TEXT_TOKEN;
-      return token_type_;
-    }
-
     c = ReadByte();
     if (eof_) break;
 
@@ -898,6 +886,21 @@ TokenType Tokenizer::Next(bool template_mode) {
     } else {
       UnreadByte();
       continue;
+    }
+
+    // We have a non-text token, but we might have accumulated some text
+    // before that. If so, we return the text first, and return the non text
+    // token on the subsequent call to Next.
+    //
+    // <space><space><mytag>, returns two spaces before processing the mytag
+    // token in the next call.
+    if (int x = raw_.end - 2 /* "<a" */; raw_.start < x) {
+      raw_.end = x;
+      data_.end = x;
+      // We know there is no \n so no line adjustment needed.
+      current_line_col_.second -= 2;
+      token_type_ = TokenType::TEXT_TOKEN;
+      return token_type_;
     }
 
     switch (token_type) {
@@ -923,6 +926,7 @@ TokenType Tokenizer::Next(bool template_mode) {
           }
           return token_type_;
         }
+        UnreadByte();
         ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
         return token_type_;
@@ -933,7 +937,6 @@ TokenType Tokenizer::Next(bool template_mode) {
         }
         is_token_manufactured_ = true;
         // <? is part of the comment text.
-        UnreadByte();
         UnreadByte();
         ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
@@ -1025,7 +1028,7 @@ std::optional<std::tuple<Attribute, bool>> Tokenizer::TagAttr() {
             {.name_space = "",
              .key = std::move(key),
              .value = std::move(val),
-             .position_in_html_src = std::get<LineCol>(attr)},
+             .line_col_in_html_src = std::get<LineCol>(attr)},
             n_attributes_returned_ < attributes_.size());
       }
       default:
@@ -1097,7 +1100,7 @@ Token Tokenizer::token() {
       break;
   }
 
-  t.position_in_html_src = token_line_col_;
+  t.line_col_in_html_src = token_line_col_;
   return t;
 }
 

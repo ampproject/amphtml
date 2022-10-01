@@ -1,21 +1,5 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {Resource, ResourceState_Enum} from '#service/resource';
 
 describes.realWin(
   'owners-impl',
@@ -28,7 +12,6 @@ describes.realWin(
     let owners;
     let parent;
     let children;
-    let scheduleLayoutOrPreloadStub;
 
     beforeEach(() => {
       win = env.win;
@@ -54,10 +37,6 @@ describes.realWin(
           children[0].appendChild(children[i]);
         }
       }
-      scheduleLayoutOrPreloadStub = env.sandbox.stub(
-        resources,
-        'scheduleLayoutOrPreload'
-      );
     });
 
     function createElement() {
@@ -68,13 +47,13 @@ describes.realWin(
 
     function createElementWithResource(
       id,
-      state = ResourceState.LAYOUT_COMPLETE
+      state = ResourceState_Enum.LAYOUT_COMPLETE
     ) {
       const element = createElement();
       const resource = new Resource(id, element, resources);
       resource.state_ = state;
       env.sandbox.stub(resource, 'measure').callsFake(() => {
-        resource.state_ = ResourceState.READY_FOR_LAYOUT;
+        resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
       });
       resource.isDisplayedForTesting = true;
       env.sandbox
@@ -118,23 +97,13 @@ describes.realWin(
         }).to.not.throw();
       });
 
-      it('should call pauseCallback on custom element', () => {
-        const stub1 = env.sandbox.stub(children[1], 'pauseCallback');
-        const stub2 = env.sandbox.stub(children[2], 'pauseCallback');
+      it('should call pause on custom element', () => {
+        const stub1 = env.sandbox.stub(children[1], 'pause');
+        const stub2 = env.sandbox.stub(children[2], 'pause');
 
         owners.schedulePause(parent, children);
         expect(stub1.calledOnce).to.be.true;
         expect(stub2.calledOnce).to.be.true;
-      });
-
-      it('should call unlayoutCallback when unlayoutOnPause', () => {
-        const stub1 = env.sandbox.stub(children[1], 'unlayoutCallback');
-        const stub2 = env.sandbox.stub(children[2], 'unlayoutCallback');
-        env.sandbox.stub(children[1], 'unlayoutOnPause').returns(true);
-
-        owners.schedulePause(parent, children);
-        expect(stub1.calledOnce).to.be.true;
-        expect(stub2.calledOnce).to.be.false;
       });
     });
 
@@ -163,15 +132,15 @@ describes.realWin(
         }).to.not.throw();
       });
 
-      it('should call resumeCallback on paused custom elements', () => {
-        const stub1 = env.sandbox.stub(children[1], 'resumeCallback');
+      it('should call resume on paused custom elements', () => {
+        const stub1 = env.sandbox.stub(children[1], 'resume');
 
         owners.scheduleResume(parent, children);
         expect(stub1.calledOnce).to.be.true;
       });
 
-      it('should call resumeCallback on non-paused custom elements', () => {
-        const stub2 = env.sandbox.stub(children[2], 'resumeCallback');
+      it('should call resume on non-paused custom elements', () => {
+        const stub2 = env.sandbox.stub(children[2], 'resume');
 
         owners.scheduleResume(parent, children);
         expect(stub2.calledOnce).to.be.true;
@@ -182,32 +151,26 @@ describes.realWin(
       it('should schedule when resource is READY_FOR_LAYOUT', () => {
         const resource1 = setElementResourceState(
           children[1],
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
+        const ensureLoadedStub = env.sandbox
+          .stub(resource1.element, 'ensureLoaded')
+          .resolves();
         owners.scheduleLayout(parent, children[1]);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
-          resource1,
-          true,
-          parent.getLayoutPriority()
-        );
+        expect(ensureLoadedStub).to.be.calledWith(parent.getLayoutPriority());
       });
 
-      it('should schedule after build', async () => {
+      it('should schedule even when not build', async () => {
         const resource1 = setElementResourceState(
           children[1],
-          ResourceState.NOT_BUILT
+          ResourceState_Enum.NOT_BUILT
         );
-        let buildResource;
-        env.sandbox.stub(resource1, 'whenBuilt').returns(
-          new Promise((resolve) => {
-            buildResource = resolve;
-          })
-        );
+        env.sandbox.stub(resource1, 'whenBuilt').returns(new Promise(() => {}));
+        const ensureLoadedStub = env.sandbox
+          .stub(resource1.element, 'ensureLoaded')
+          .resolves();
         owners.scheduleLayout(parent, children[1]);
-        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
-        buildResource();
-        await Promise.resolve();
-        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(resource1, true);
+        expect(ensureLoadedStub).to.be.calledWith(parent.getLayoutPriority());
       });
     });
 
@@ -241,9 +204,9 @@ describes.realWin(
 
     describe('schedulePreload', () => {
       beforeEach(() => {
-        setAllResourceState(ResourceState.NOT_BUILT);
+        setAllResourceState(ResourceState_Enum.NOT_BUILT);
         [parent, children[1], children[2]].forEach((element) => {
-          setElementResourceState(element, ResourceState.READY_FOR_LAYOUT);
+          setElementResourceState(element, ResourceState_Enum.READY_FOR_LAYOUT);
         });
       });
 
@@ -266,38 +229,59 @@ describes.realWin(
       });
 
       it('should schedule on custom element with multiple children', () => {
+        const ensureLoadedStub1 = env.sandbox
+          .stub(children[1], 'ensureLoaded')
+          .resolves();
+        const ensureLoadedStub2 = env.sandbox
+          .stub(children[2], 'ensureLoaded')
+          .resolves();
         owners.schedulePreload(parent, children);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledTwice;
+        expect(ensureLoadedStub1).to.be.calledOnce.calledWith(
+          parent.getLayoutPriority()
+        );
+        expect(ensureLoadedStub2).to.be.calledOnce.calledWith(
+          parent.getLayoutPriority()
+        );
       });
 
       it('should schedule on nested custom element placeholder', () => {
         const placeholder1 = createElementWithResource(
           10,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         children[1].getPlaceholder = () => placeholder1;
 
         const placeholder2 = createElementWithResource(
           11,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         children[2].getPlaceholder = () => placeholder2;
 
+        const stub1 = env.sandbox.stub(children[1], 'ensureLoaded');
+        const stub2 = env.sandbox.stub(children[2], 'ensureLoaded');
+        const stub3 = env.sandbox.stub(placeholder1, 'ensureLoaded');
+        const stub4 = env.sandbox.stub(placeholder2, 'ensureLoaded');
+
         owners.schedulePreload(parent, children);
-        expect(scheduleLayoutOrPreloadStub.callCount).to.equal(4);
+        expect(stub1).to.be.calledOnce;
+        expect(stub2).to.be.calledOnce;
+        expect(stub3).to.be.calledOnce;
+        expect(stub4).to.be.calledOnce;
       });
 
       it('should schedule amp-* placeholder inside non-amp element', () => {
         const insidePlaceholder1 = createElementWithResource(
           10,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         const placeholder1 = doc.createElement('div');
         children[0].getElementsByClassName = () => [insidePlaceholder1];
         children[0].getPlaceholder = () => placeholder1;
 
+        const stub1 = env.sandbox.stub(insidePlaceholder1, 'ensureLoaded');
+
         owners.schedulePreload(parent, children);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledThrice;
+        expect(stub1).to.be.calledOnce;
       });
     });
 
@@ -310,68 +294,48 @@ describes.realWin(
           }
           env.sandbox.stub(resource, 'whenBuilt').returns(Promise.resolve());
           env.sandbox.stub(resource, 'loadedOnce').returns(Promise.resolve());
+          env.sandbox.stub(element, 'ensureLoaded').resolves(resource.getId());
         });
       });
 
       it('should layout AMP element itself', async () => {
-        setAllResourceState(ResourceState.READY_FOR_LAYOUT);
+        setAllResourceState(ResourceState_Enum.READY_FOR_LAYOUT);
         const scheduledElements = await owners.requireLayout(parent);
-        expect(scheduledElements).to.have.length(1);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledOnce;
-        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
-          resources.getResourceForElement(parent),
-          true
-        );
+        expect(scheduledElements).to.deep.equal([0]);
       });
 
       it("should layout non-AMP element's all AMP children", async () => {
-        setAllResourceState(ResourceState.READY_FOR_LAYOUT);
+        setAllResourceState(ResourceState_Enum.READY_FOR_LAYOUT);
         const scheduledElements = await owners.requireLayout(children[0]);
-        expect(scheduledElements).to.have.length(2);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledTwice;
-        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
-          resources.getResourceForElement(children[3]),
-          true
-        );
-        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
-          resources.getResourceForElement(children[4]),
-          true
-        );
+        expect(scheduledElements).to.deep.equal([3, 4]);
       });
 
       it('should layout element w/ state=LAYOUT_FAILED', async () => {
-        const resource = setElementResourceState(
-          parent,
-          ResourceState.LAYOUT_FAILED
-        );
-        await owners.requireLayout(parent);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledOnce;
-        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(resource, true);
+        setElementResourceState(parent, ResourceState_Enum.LAYOUT_FAILED);
+        const scheduledElements = await owners.requireLayout(parent);
+        expect(scheduledElements).to.deep.equal([0]);
       });
 
-      it('should not layout element w/ state=LAYOUT_COMPLETE', async () => {
-        setElementResourceState(parent, ResourceState.LAYOUT_COMPLETE);
+      it('should layout element w/ state=LAYOUT_COMPLETE', async () => {
+        setElementResourceState(parent, ResourceState_Enum.LAYOUT_COMPLETE);
         const scheduledElements = await owners.requireLayout(parent);
-        expect(scheduledElements).to.have.length(0);
-        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+        expect(scheduledElements).to.deep.equal([0]);
       });
 
       it('should not double schedule element w/ state=LAYOUT_SCHEDULED', async () => {
-        setElementResourceState(parent, ResourceState.LAYOUT_SCHEDULED);
+        setElementResourceState(parent, ResourceState_Enum.LAYOUT_SCHEDULED);
         const scheduledElements = await owners.requireLayout(parent);
-        expect(scheduledElements).to.have.length(1);
-        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+        expect(scheduledElements).to.deep.equal([0]);
       });
 
       it('should not require layout for undisplayed element', async () => {
         const resource = setElementResourceState(
           parent,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         resource.isDisplayedForTesting = false;
         const scheduledElements = await owners.requireLayout(parent);
-        expect(scheduledElements).to.have.length(1);
-        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+        expect(scheduledElements).to.deep.equal([0]);
       });
     });
   }

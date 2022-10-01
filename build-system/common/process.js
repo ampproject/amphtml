@@ -1,18 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
@@ -26,19 +11,22 @@ const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 
 /**
  * Spawns the given command in a child process with the given options.
+ * Special-cases the AMP task runner so that it is correctly spawned on all
+ * platforms (node shebangs do not work on Windows).
  *
  * @param {string} cmd
  * @param {?Object} options
  * @return {!Object}
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync(cmd, {shell: shellCmd, ...options});
+  const cmdToSpawn = cmd.startsWith('amp ') ? `node ${cmd}` : cmd;
+  return childProcess.spawnSync(cmdToSpawn, {shell: shellCmd, ...options});
 }
 
 /**
  * Executes the provided command, returning the process object.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {!Object}
  */
 function getOutput(cmd, options = {}) {
@@ -54,7 +42,7 @@ function getOutput(cmd, options = {}) {
 /**
  * Executes the provided command, returning its stdout.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {string}
  */
 function getStdout(cmd, options) {
@@ -64,7 +52,7 @@ function getStdout(cmd, options) {
 /**
  * Executes the provided command, returning its stderr.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {string}
  */
 function getStderr(cmd, options) {

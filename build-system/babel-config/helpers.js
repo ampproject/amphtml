@@ -1,23 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 
 /**
  * Get experiment constant to define from command line arguments, if any
@@ -39,31 +25,29 @@ function getExperimentConstant() {
 }
 
 /**
- * Computes options for the minify-replace plugin
+ * Computes options for minify-replace and returns the plugin object.
  *
+ * @param {!Object=} opt_overrides overrides for BUILD_CONSTANTS
  * @return {Array<string|Object>}
  */
-function getReplacePlugin() {
+function getReplacePlugin(opt_overrides) {
   /**
    * @param {string} identifierName the identifier name to replace
-   * @param {boolean} value the value to replace with
+   * @param {boolean|string} value the value to replace with
    * @return {!Object} replacement options used by minify-replace plugin
    */
   function createReplacement(identifierName, value) {
-    return {
-      identifierName,
-      replacement: {type: 'booleanLiteral', value: !!value},
-    };
+    const replacement =
+      typeof value === 'boolean'
+        ? {type: 'booleanLiteral', value}
+        : {type: 'stringLiteral', value};
+    return {identifierName, replacement};
   }
 
-  // We build on the idea that SxG is an upgrade to the ESM build.
-  // Therefore, all conditions set by ESM will also hold for SxG.
-  // However, we will also need to introduce a separate IS_SxG flag
-  // for conditions only true for SxG.
-  const replacements = [
-    createReplacement('IS_ESM', argv.esm || argv.sxg),
-    createReplacement('IS_SXG', argv.sxg),
-  ];
+  const constants = Object.assign({}, BUILD_CONSTANTS, opt_overrides);
+  const replacements = Object.entries(constants).map(([ident, val]) =>
+    createReplacement(ident, val)
+  );
 
   const experimentConstant = getExperimentConstant();
   if (experimentConstant) {
@@ -98,7 +82,43 @@ function getReplacePlugin() {
   return ['minify-replace', {replacements}];
 }
 
+/**
+ * Returns a Babel plugin that replaces the global identifier with the correct
+ * alternative. Used before transforming test code with esbuild.
+ *
+ * @return {Array<string|Object>}
+ */
+function getReplaceGlobalsPlugin() {
+  return [
+    (babel) => {
+      const {types: t} = babel;
+      return {
+        visitor: {
+          ReferencedIdentifier(path) {
+            const {node, scope} = path;
+            if (node.name !== 'global') {
+              return;
+            }
+            if (scope.getBinding('global')) {
+              return;
+            }
+            const possibleNames = ['globalThis', 'self'];
+            const name = possibleNames.find((name) => !scope.getBinding(name));
+            if (!name) {
+              throw path.buildCodeFrameError(
+                'Could not replace `global` with globalThis identifier'
+              );
+            }
+            path.replaceWith(t.identifier(name));
+          },
+        },
+      };
+    },
+  ];
+}
+
 module.exports = {
   getExperimentConstant,
   getReplacePlugin,
+  getReplaceGlobalsPlugin,
 };

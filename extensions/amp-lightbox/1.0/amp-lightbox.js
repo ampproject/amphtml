@@ -1,85 +1,68 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {BaseElement} from '#bento/components/bento-lightbox/1.0/base-element';
 
-import {ActionTrust, DEFAULT_ACTION} from '../../../src/action-constants';
-import {CSS as COMPONENT_CSS} from './lightbox.jss';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
+import {getWin} from '#core/window';
+
+import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
-import {Lightbox} from './lightbox';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends PreactBaseElement {
-  /** @param {!AmpElement} element */
+class AmpLightbox extends setSuperClass(BaseElement, AmpPreactBaseElement) {
+  /** @override */
   constructor(element) {
     super(element);
 
-    /** @private {boolean} */
-    this.open_ = false;
+    /** @private {!../../../src/service/history-impl.History} */
+    this.history_ = null;
+
+    /** @private {number|null} */
+    this.historyId_ = null;
   }
 
   /** @override */
   init() {
+    this.history_ = Services.historyForDoc(this.getAmpDoc());
+
     this.registerApiAction(
       DEFAULT_ACTION,
       (api) => api.open(),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
-    this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
-    this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
-    return dict({
-      'onBeforeOpen': this.beforeOpen_.bind(this),
-      'onAfterClose': this.afterClose_.bind(this),
-    });
-  }
+    this.registerApiAction('open', (api) => api.open(), ActionTrust_Enum.LOW);
+    this.registerApiAction('close', (api) => api.close(), ActionTrust_Enum.LOW);
 
-  /**
-   * Setting hidden to false
-   * @private
-   */
-  beforeOpen_() {
-    this.open_ = true;
-    toggle(this.element, true);
-    this.element.setAttribute('open', '');
-  }
-
-  /**
-   * Setting hidden to true
-   * @private
-   */
-  afterClose_() {
-    this.open_ = false;
-    toggle(this.element, false);
-    this.element.removeAttribute('open');
+    return super.init();
   }
 
   /** @override */
-  mutationObserverCallback() {
-    const open = this.element.hasAttribute('open');
-    if (open === this.open_) {
-      return;
-    }
-    this.open_ = open;
-    open ? this.api().open() : this.api().close();
+  triggerEvent(element, eventName, detail) {
+    const event = createCustomEvent(
+      getWin(element),
+      `amp-lightbox.${eventName}`,
+      detail
+    );
+    Services.actionServiceForDoc(element).trigger(
+      element,
+      eventName,
+      event,
+      ActionTrust_Enum.HIGH
+    );
+
+    super.triggerEvent(element, eventName, detail);
   }
 
   /** @override */
@@ -91,23 +74,34 @@ class AmpLightbox extends PreactBaseElement {
     );
     return super.isLayoutSupported(layout);
   }
+
+  /** @override */
+  afterOpen() {
+    super.afterOpen();
+    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
+    this.setAsContainer?.(scroller);
+
+    this.history_
+      .push(() => this.api().close())
+      .then((historyId) => (this.historyId_ = historyId));
+  }
+
+  /** @override */
+  afterClose() {
+    super.afterClose();
+    this.removeAsContainer?.();
+
+    if (this.historyId_ != null) {
+      this.history_.pop(this.historyId_);
+      this.historyId_ = null;
+    }
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer?.();
+  }
 }
-
-/** @override */
-AmpLightbox['Component'] = Lightbox;
-
-/** @override */
-AmpLightbox['props'] = {
-  'animation': {attr: 'animation'},
-  'scrollable': {attr: 'scrollable', type: 'boolean'},
-  'id': {attr: 'id'},
-};
-
-/** @override */
-AmpLightbox['passthrough'] = true;
-
-/** @override */
-AmpLightbox['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox, CSS);

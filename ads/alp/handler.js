@@ -1,30 +1,16 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {closest} from '#core/dom/query';
+import {parseQueryString} from '#core/types/string/url';
 
+import {dev} from '#utils/log';
+
+import * as urls from '../../src/config/urls';
+import {openWindowDialog} from '../../src/open-window-dialog';
 import {
   addParamToUrl,
   isLocalhostOrigin,
   isProxyOrigin,
-  parseQueryString,
   parseUrlDeprecated,
 } from '../../src/url';
-import {closest, openWindowDialog} from '../../src/dom';
-import {dev} from '../../src/log';
-import {dict} from '../../src/utils/object';
-import {urls} from '../../src/config';
 
 /**
  * Install a click listener that transforms navigation to the AMP cache
@@ -159,11 +145,9 @@ function navigateTo(win, a, url) {
   if (a2aAncestor) {
     a2aAncestor.win./*OK*/ postMessage(
       'a2a;' +
-        JSON.stringify(
-          dict({
-            'url': url,
-          })
-        ),
+        JSON.stringify({
+          'url': url,
+        }),
       a2aAncestor.origin
     );
     return;

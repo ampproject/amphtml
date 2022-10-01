@@ -1,30 +1,17 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {hasNextNodeInDocumentOrder} from '#core/dom';
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
-import {Pass} from '../pass';
-import {READY_SCAN_SIGNAL} from '../service/resources-interface';
-import {Resource, ResourceState} from '../service/resource';
-import {Services} from '../services';
-import {VisibilityState} from '../visibility-state';
-import {dev} from '../log';
+import {Services} from '#service';
+import {Resource, ResourceState_Enum} from '#service/resource';
+import {READY_SCAN_SIGNAL} from '#service/resources-interface';
+
+import {dev} from '#utils/log';
+
 import {getMode} from '../mode';
-import {hasNextNodeInDocumentOrder} from '../dom';
-import {registerServiceBuilderForDoc} from '../service';
+import {Pass} from '../pass';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;
@@ -70,10 +57,10 @@ export class InaboxResources {
     if (getMode(this.win).runtime != 'inabox') {
       ampdoc.onVisibilityChanged(() => {
         switch (ampdoc.getVisibilityState()) {
-          case VisibilityState.PAUSED:
+          case VisibilityState_Enum.PAUSED:
             this.resources_.forEach((r) => r.pause());
             break;
-          case VisibilityState.VISIBLE:
+          case VisibilityState_Enum.VISIBLE:
             this.resources_.forEach((r) => r.resume());
             this./*OK*/ schedulePass();
             break;
@@ -87,17 +74,11 @@ export class InaboxResources {
     /** @private {boolean} */
     this.documentReady_ = false;
 
-    // TODO(#31776): cleanup when launched.
-    // eslint-disable-next-line no-undef
-    if (INABOX_RESOURCES_EAGER) {
-      this.ampdoc_.whenReady().then(() => {
-        this.documentReady_ = true;
-        this.buildReadyResources_();
-        this./*OK*/ schedulePass(1);
-      });
-    } else {
-      this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
-    }
+    this.ampdoc_.whenReady().then(() => {
+      this.documentReady_ = true;
+      this.buildReadyResources_();
+      this./*OK*/ schedulePass(1);
+    });
   }
 
   /** @override */
@@ -145,18 +126,8 @@ export class InaboxResources {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    // TODO(#31776): cleanup when launched.
-    // eslint-disable-next-line no-undef
-    if (INABOX_RESOURCES_EAGER) {
-      this.pendingBuildResources_.push(resource);
-      this.buildReadyResources_();
-    } else {
-      this.ampdoc_
-        .whenReady()
-        .then(resource.build.bind(resource))
-        .then(this.schedulePass.bind(this));
-      dev().fine(TAG, 'resource upgraded:', resource.debugid);
-    }
+    this.pendingBuildResources_.push(resource);
+    this.buildReadyResources_();
   }
 
   /** @override */
@@ -217,11 +188,6 @@ export class InaboxResources {
     return this.firstPassDone_.promise;
   }
 
-  /** @override */
-  isIntersectionExperimentOn() {
-    return false;
-  }
-
   /**
    * @private
    */
@@ -230,7 +196,7 @@ export class InaboxResources {
     dev().fine(TAG, 'doPass');
     // measure in a batch
     this.resources_.forEach((resource) => {
-      if (!resource.isLayoutPending()) {
+      if (!resource.isLayoutPending() || resource.element.R1()) {
         return;
       }
       resource.measure();
@@ -238,7 +204,8 @@ export class InaboxResources {
     // mutation in a batch
     this.resources_.forEach((resource) => {
       if (
-        resource.getState() === ResourceState.READY_FOR_LAYOUT &&
+        !resource.element.R1() &&
+        resource.getState() === ResourceState_Enum.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
         resource.layoutScheduled(now);
@@ -264,7 +231,9 @@ export class InaboxResources {
         hasNextNodeInDocumentOrder(resource.element, this.ampdoc_.getRootNode())
       ) {
         this.pendingBuildResources_.splice(i, 1);
-        resource.build().then(() => this./*OK*/ schedulePass());
+        (resource.build() || Promise.resolve()).then(() =>
+          this./*OK*/ schedulePass()
+        );
         dev().fine(TAG, 'resource upgraded:', resource.debugid);
       }
     }

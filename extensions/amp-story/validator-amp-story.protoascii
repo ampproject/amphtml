@@ -1,19 +1,3 @@
-#
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
-
 tags: {  # amp-story
   html_format: AMP
   tag_name: "SCRIPT"
@@ -33,7 +17,7 @@ tags: {  # <amp-story>
   # TODO(gregable): This global requires/satisfies approach only works because
   # there is only one <amp-story standalone> in a document. We really want this
   # requirement to be expressed on the <amp-story> children, however.
-  requires: "amp-story-page"
+  requires_condition: "amp-story-page"
   attrs: {
     name: "background-audio"
     value_url: {
@@ -122,8 +106,11 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-SIDEBAR"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ANALYTICS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
+    child_tag_name_oneof: "AMP-STORY-SOCIAL-SHARE"
+    child_tag_name_oneof: "AMP-STORY-SUBSCRIPTIONS"
   }
 }
 tags: {  # <amp-story-page>
@@ -131,7 +118,7 @@ tags: {  # <amp-story-page>
   tag_name: "AMP-STORY-PAGE"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
-  satisfies: "amp-story-page"
+  satisfies_condition: "amp-story-page"
   attrs: { name: "auto-advance-after" }
   attrs: {
     name: "background-audio"
@@ -146,9 +133,12 @@ tags: {  # <amp-story-page>
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-ANIMATION"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ANALYTICS"
     child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
+    child_tag_name_oneof: "AMP-STORY-PAGE-OUTLINK"
+    child_tag_name_oneof: "AMP-STORY-SHOPPING-ATTACHMENT"
     mandatory_min_num_child_tags: 1
   }
 }
@@ -194,6 +184,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-GRID-LAYER default"
+  descriptive_name: "amp-story-grid-layer child"
   attrs: {
     name: "align-content"
     value: "center"
@@ -279,6 +270,12 @@ tags: {
     value_regex_casei: "[0-9]+px"
   }
   attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
+  attrs: {
     name: "justify-content"
     value: "center"
     value: "end"
@@ -311,6 +308,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  descriptive_name: "amp-story-grid-layer [animate-in] child"
   # Attribute grid-area is not allowed in this tag. That's what makes this
   # reference point different than the grid-area reference point.
   attrs: {
@@ -372,6 +370,12 @@ tags: {
     name: "translate-y"
     value_regex_casei: "[0-9]+px"
   }
+  attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
@@ -417,6 +421,46 @@ tags: {  # amp-story-bookend (json)
   }
   attr_lists: "nonce-attr"
 }
+tags: {  # <amp-story-social-share>
+  html_format: AMP
+  tag_name: "AMP-STORY-SOCIAL-SHARE"
+  mandatory_ancestor: "AMP-STORY"
+  mandatory_last_child: true
+  descendant_tag_list: "amp-story-social-share-allowed-descendants"
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+}
+descendant_tag_list: {
+  name: "amp-story-social-share-allowed-descendants"
+  tag: "SCRIPT"
+}
+tags: {  # amp-story-social-share (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-social-share extension .json script"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-SOCIAL-SHARE"
+  unique: true
+  mandatory_last_child: true
+  siblings_disallowed: true
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+}
 tags: {  # amp-story-consent (json)
   html_format: AMP
   tag_name: "SCRIPT"
@@ -425,7 +469,7 @@ tags: {  # amp-story-consent (json)
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY-CONSENT"
   unique: true
-  satisfies: "amp-story-consent extension .json script"
+  satisfies_condition: "amp-story-consent extension .json script"
   attrs: {
     name: "type"
     mandatory: true
@@ -446,7 +490,7 @@ tags: {  # <amp-story-consent>
   requires_extension: "amp-consent"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-CONSENT"
-  requires: "amp-story-consent extension .json script"
+  requires_condition: "amp-story-consent extension .json script"
   attr_lists: "mandatory-id-attr"
   child_tags: {
     mandatory_num_child_tags: 1
@@ -492,6 +536,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  descriptive_name: "amp-story-cta-layer [animate-in] child"
   attrs: {
     name: "animate-in"
     value: "drop"
@@ -535,6 +580,12 @@ tags: {
     name: "translate-y"
     value_regex_casei: "[0-9]+px"
   }
+  attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
@@ -547,6 +598,7 @@ descendant_tag_list: {
   tag: "ADDRESS"
   tag: "AMP-CALL-TRACKING"
   tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
@@ -572,6 +624,7 @@ descendant_tag_list: {
   tag: "EM"
   tag: "FECOLORMATRIX"
   tag: "FECOMPOSITE"
+  tag: "FEBLEND"
   tag: "FEFLOOD"
   tag: "FEGAUSSIANBLUR"
   tag: "FEMERGE"
@@ -659,7 +712,9 @@ descendant_tag_list: {
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
+  tag: "AMP-BODYMOVIN-ANIMATION"
   tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
   tag: "AMP-EXPERIMENT"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
@@ -669,13 +724,20 @@ descendant_tag_list: {
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
+  tag: "AMP-RENDER"
   tag: "AMP-STATE"
   tag: "AMP-STORY-360"
+  tag: "AMP-STORY-AUTO-ANALYTICS"
+  tag: "AMP-STORY-CAPTIONS"
   tag: "AMP-STORY-INTERACTIVE-BINARY-POLL"
+  tag: "AMP-STORY-INTERACTIVE-IMG-POLL"
+  tag: "AMP-STORY-INTERACTIVE-IMG-QUIZ"
   tag: "AMP-STORY-INTERACTIVE-POLL"
   tag: "AMP-STORY-INTERACTIVE-QUIZ"
   tag: "AMP-STORY-INTERACTIVE-RESULTS"
+  tag: "AMP-STORY-INTERACTIVE-SLIDER"
   tag: "AMP-STORY-PANNING-MEDIA"
+  tag: "AMP-STORY-SHOPPING-TAG"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
@@ -706,6 +768,7 @@ descendant_tag_list: {
   tag: "EM"
   tag: "FECOLORMATRIX"
   tag: "FECOMPOSITE"
+  tag: "FEBLEND"
   tag: "FEFLOOD"
   tag: "FEGAUSSIANBLUR"
   tag: "FEMERGE"
@@ -796,12 +859,25 @@ descendant_tag_list: {
   tag: "VKERN"
   tag: "WBR"
 }
-tags: {  # <amp-story-page-attachment> with href
+# <amp-story-page-attachment> with href.
+# Legacy version of <amp-story-page-outlink>.
+tags: {
   html_format: AMP
   tag_name: "AMP-STORY-PAGE-ATTACHMENT"
   spec_name: "amp-story-page-attachment[href]"
   mandatory_ancestor: "AMP-STORY-PAGE"
   mandatory_last_child: true
+  attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
   attrs: {
     name: "layout"
     mandatory: true
@@ -813,12 +889,7 @@ tags: {  # <amp-story-page-attachment> with href
     value: "light"
   }
   attrs: {
-    name: "href"
-    mandatory: true
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-    }
+    name: "title"
   }
   child_tags: {
     mandatory_num_child_tags: 0
@@ -832,6 +903,26 @@ tags: {  # <amp-story-page-attachment> with no href
   descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
   mandatory_last_child: true
   attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "title"
+  }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "cta-image-2"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "layout"
     mandatory: true
     value: "nodisplay"
@@ -842,12 +933,49 @@ tags: {  # <amp-story-page-attachment> with no href
     value: "light"
   }
 }
+tags: {
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE-OUTLINK"
+  spec_name: "amp-story-page-outlink"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_last_child: true
+  attrs: {
+    name: "cta-accent-color"
+  }
+  attrs: {
+    name: "cta-accent-element"
+    value: "background"
+    value: "text"
+  }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "theme"
+    value: "custom"
+    value: "dark"
+    value: "light"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "A"
+  }
+}
 tags: {  # <amp-story-animation> <script>
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-story-animation json script"
   mandatory_parent: "AMP-STORY-ANIMATION"
-  satisfies: "amp-story-animation json script"
+  satisfies_condition: "amp-story-animation json script"
   attrs: {
     name: "type"
     mandatory: true
@@ -867,7 +995,7 @@ tags: {  # <amp-story-animation>
   html_format: AMP
   tag_name: "AMP-STORY-ANIMATION"
   requires_extension: "amp-story"
-  requires: "amp-story-animation json script"
+  requires_condition: "amp-story-animation json script"
   mandatory_parent: "AMP-STORY-PAGE"
   attrs: { name: "animate-in-after" }
   attrs: {
@@ -920,8 +1048,7 @@ tags: {
 }
 descendant_tag_list {
   # Allowlisting as many components as possible, unless they could result in a
-  # bad UX (ie: modal in a modal with amp-lightbox), or potential security
-  # issues (ie: amp-form).
+  # bad UX (ie: modal in a modal with amp-lightbox).
   name: "amp-story-page-attachment-allowed-descendants"
   tag: "A"
   tag: "ABBR"
@@ -939,6 +1066,7 @@ descendant_tag_list {
   tag: "AMP-CAROUSEL"
   tag: "AMP-DAILYMOTION"
   tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
   tag: "AMP-EMBEDLY-CARD"
   tag: "AMP-FACEBOOK"
   tag: "AMP-FACEBOOK-COMMENTS"
@@ -973,8 +1101,10 @@ descendant_tag_list {
   tag: "AMP-POWR-PLAYER"
   tag: "AMP-REACH-PLAYER"
   tag: "AMP-REDDIT"
+  tag: "AMP-RENDER"
   tag: "AMP-RIDDLE-QUIZ"
   tag: "AMP-SOUNDCLOUD"
+  tag: "AMP-SELECTOR"
   tag: "AMP-SPRINGBOARD-PLAYER"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
@@ -1003,6 +1133,7 @@ descendant_tag_list {
   tag: "COL"
   tag: "COLGROUP"
   tag: "DATA"
+  tag: "DATALIST"
   tag: "DD"
   tag: "DEFS"
   tag: "DEL"
@@ -1015,14 +1146,17 @@ descendant_tag_list {
   tag: "EM"
   tag: "FECOLORMATRIX"
   tag: "FECOMPOSITE"
+  tag: "FEBLEND"
   tag: "FEFLOOD"
   tag: "FEGAUSSIANBLUR"
   tag: "FEMERGE"
   tag: "FEMERGENODE"
   tag: "FEOFFSET"
   tag: "FIGCAPTION"
+  tag: "FIELDSET"
   tag: "FIGURE"
   tag: "FILTER"
+  tag: "FORM"
   tag: "FOOTER"
   tag: "G"
   tag: "GLYPH"
@@ -1040,9 +1174,12 @@ descendant_tag_list {
   tag: "I"
   tag: "IMAGE"
   tag: "IMG"  # Only allowed when document is transformed AMP
+  tag: "INPUT"
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
+  tag: "LABEL"
+  tag: "LEGEND"
   tag: "LI"
   tag: "LINE"
   tag: "LINEARGRADIENT"
@@ -1051,14 +1188,19 @@ descendant_tag_list {
   tag: "MARKER"
   tag: "MASK"
   tag: "METADATA"
+  tag: "METER"
   tag: "NAV"
   tag: "OL"
+  tag: "OPTGROUP"
+  tag: "OPTION"
+  tag: "OUTPUT"
   tag: "P"
   tag: "PATH"
   tag: "PATTERN"
   tag: "POLYGON"
   tag: "POLYLINE"
   tag: "PRE"
+  tag: "PROGRESS"
   tag: "Q"
   tag: "RADIALGRADIENT"
   tag: "RECT"
@@ -1069,6 +1211,7 @@ descendant_tag_list {
   tag: "S"
   tag: "SAMP"
   tag: "SECTION"
+  tag: "SELECT"
   tag: "SMALL"
   tag: "SOLIDCOLOR"
   tag: "SOURCE"
@@ -1083,7 +1226,9 @@ descendant_tag_list {
   tag: "TABLE"
   tag: "TBODY"
   tag: "TD"
+  tag: "TEMPLATE"
   tag: "TEXT"
+  tag: "TEXTAREA"
   tag: "TEXTPATH"
   tag: "TFOOT"
   tag: "TH"

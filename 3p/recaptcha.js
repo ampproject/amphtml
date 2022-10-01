@@ -1,36 +1,22 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import {hasOwn} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
-import {IframeMessagingClient} from './iframe-messaging-client';
 import {
   dev,
   devAssert,
   initLogConstructor,
   setReportError,
   user,
-} from '../src/log';
-import {dict, hasOwn} from '../src/utils/object';
-import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
+} from '#utils/log';
+
 import {loadScript} from './3p';
-import {parseJson} from '../src/json';
+import {IframeMessagingClient} from './iframe-messaging-client';
+
+import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
+import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 /**
  * @fileoverview
@@ -168,13 +154,10 @@ function actionTypeHandler(win, grecaptcha, data) {
       // .then() promise pollyfilled by recaptcha api script
       executePromise./*OK*/ then(
         function (token) {
-          iframeMessagingClient./*OK*/ sendMessage(
-            'amp-recaptcha-token',
-            dict({
-              'id': data.id,
-              'token': token,
-            })
-          );
+          iframeMessagingClient./*OK*/ sendMessage('amp-recaptcha-token', {
+            'id': data.id,
+            'token': token,
+          });
         },
         function (err) {
           let message =
@@ -184,13 +167,10 @@ function actionTypeHandler(win, grecaptcha, data) {
             message = err.toString();
           }
           user().error(TAG, '%s', message);
-          iframeMessagingClient./*OK*/ sendMessage(
-            'amp-recaptcha-error',
-            dict({
-              'id': data.id,
-              'error': message,
-            })
-          );
+          iframeMessagingClient./*OK*/ sendMessage('amp-recaptcha-error', {
+            'id': data.id,
+            'error': message,
+          });
         }
       );
     })

@@ -1,41 +1,27 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {
-  CONSENT_ITEM_STATE,
-  constructConsentInfo,
-  constructMetadata,
-} from '../consent-info';
+
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/consent-state';
-import {
-  ConsentPolicyInstance,
-  ConsentPolicyManager,
-} from '../consent-policy-manager';
-import {dict} from '../../../../src/utils/object';
-import {expandPolicyConfig} from '../consent-config';
-import {macroTask} from '../../../../testing/yield';
+} from '#core/constants/consent-state';
+
+import {macroTask} from '#testing/helpers';
 
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
+import {expandPolicyConfig} from '../consent-config';
+import {
+  CONSENT_ITEM_STATE,
+  PURPOSE_CONSENT_STATE,
+  constructConsentInfo,
+  constructMetadata,
+} from '../consent-info';
+import {
+  ConsentPolicyInstance,
+  ConsentPolicyManager,
+} from '../consent-policy-manager';
 
 describes.realWin(
   'ConsentPolicyManager',
@@ -65,12 +51,13 @@ describes.realWin(
             consentManagerOnChangeSpy(handler);
             handler(consentInfo);
           },
+          whenHasAllPurposeConsents: () => {
+            return Promise.resolve();
+          },
           getConsentInstanceSharedData: () => {
-            return Promise.resolve(
-              dict({
-                'shared': 'test',
-              })
-            );
+            return Promise.resolve({
+              'shared': 'test',
+            });
           },
         });
       });
@@ -87,32 +74,38 @@ describes.realWin(
         consentInfo = constructConsentInfo(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1),
+          {
+            'purpose-foo': PURPOSE_CONSENT_STATE.ACCEPTED,
+            'purpose-bar': PURPOSE_CONSENT_STATE.REJECTED,
+          }
         );
         manager.setLegacyConsentInstanceId('ABC');
       });
 
-      it('Initiate consent value', function* () {
-        yield macroTask();
+      it('should initiate consent value', async () => {
+        await macroTask();
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
-        expect(manager.consentString_).to.equal('test');
         expect(manager.consentMetadata_).to.be.deep.equals(
           constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
         );
+        expect(manager.purposeConsents_).to.deep.equals({
+          'purpose-foo': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'purpose-bar': PURPOSE_CONSENT_STATE.REJECTED,
+        });
       });
 
       describe('Register policy instance', () => {
-        it('Valid consent policy', function* () {
+        it('should register valid consent policy', async () => {
           manager.registerConsentPolicyInstance('default', {
             'waitFor': {
               'ABC': undefined,
             },
           });
-          yield macroTask();
-          return manager.whenPolicyResolved('default').then((status) => {
-            expect(status).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
-          });
+          await macroTask();
+          const status = await manager.whenPolicyResolved('default');
+          expect(status).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
         });
 
         it('Invalid consent policy', function* () {
@@ -217,7 +210,7 @@ describes.realWin(
           manager = new ConsentPolicyManager(ampdoc);
           consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
           manager.setLegacyConsentInstanceId('ABC');
-          policy = expandPolicyConfig(dict({}), 'ABC');
+          policy = expandPolicyConfig({}, 'ABC');
           const keys = Object.keys(policy);
           for (let i = 0; i < keys.length; i++) {
             manager.registerConsentPolicyInstance(keys[i], policy[keys[i]]);
@@ -403,6 +396,65 @@ describes.realWin(
           );
 
           return Promise.all(promises);
+        });
+      });
+
+      describe('setOnPolicyChange', () => {
+        let policy;
+        beforeEach(() => {
+          manager = new ConsentPolicyManager(ampdoc);
+          consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+          manager.setLegacyConsentInstanceId('ABC');
+          policy = expandPolicyConfig({}, 'ABC');
+          const keys = Object.keys(policy);
+          for (let i = 0; i < keys.length; i++) {
+            manager.registerConsentPolicyInstance(keys[i], policy[keys[i]]);
+          }
+        });
+
+        it('will not fire, if not set', () => {
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(manager.tcfConsentChangeHandler_).is.null;
+        });
+
+        it('will fire only fire for a valid change', () => {
+          const spy = env.sandbox.spy();
+          manager.setOnPolicyChange(spy);
+          expect(manager.tcfConsentChangeHandler_).to.not.be.null;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(spy).to.be.calledOnce;
+
+          // Unknown does not trigger change.
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN, '321cba')
+          );
+          expect(spy).to.be.calledOnce;
+        });
+
+        it('will fire on multiple changes', () => {
+          const spy = env.sandbox.spy();
+          manager.setOnPolicyChange(spy);
+          expect(manager.tcfConsentChangeHandler_).to.not.be.null;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(spy).to.be.calledOnce;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'abc123')
+          );
+          expect(spy).to.be.calledTwice;
+
+          manager.consentStateChangeHandler_(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'xyz123')
+          );
+          expect(spy).to.be.calledThrice;
         });
       });
     });
@@ -617,6 +669,53 @@ describes.realWin(
         ).to.eventually.deep.equals(
           constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103', false)
         );
+      });
+    });
+
+    describe('consent purposes', () => {
+      let manager;
+
+      beforeEach(() => {
+        manager = new ConsentPolicyManager(ampdoc);
+        manager.setLegacyConsentInstanceId('ABC');
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          undefined,
+          undefined,
+          {
+            'purpose-foo': PURPOSE_CONSENT_STATE.ACCEPTED,
+            'purpose-bar': PURPOSE_CONSENT_STATE.ACCEPTED,
+            'purpose-xyz': PURPOSE_CONSENT_STATE.REJECTED,
+          }
+        );
+      });
+
+      it('should unblock on purpose consents', async () => {
+        manager.registerConsentPolicyInstance('default', {
+          'waitFor': {
+            'ABC': undefined,
+          },
+        });
+        await macroTask();
+        await expect(
+          manager.whenPurposesUnblock(['purpose-foo', 'purpose-bar'])
+        ).to.eventually.be.true;
+      });
+
+      it('should unblock on purpose consents', async () => {
+        manager.registerConsentPolicyInstance('default', {
+          'waitFor': {
+            'ABC': undefined,
+          },
+        });
+        await macroTask();
+        await expect(
+          manager.whenPurposesUnblock([
+            'purpose-foo',
+            'purpose-bar',
+            'purpose-xyz',
+          ])
+        ).to.eventually.be.false;
       });
     });
   }

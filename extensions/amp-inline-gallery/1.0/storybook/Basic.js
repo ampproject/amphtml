@@ -1,65 +1,111 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
+import {
+  BentoInlineGallery,
+  BentoInlineGalleryPagination,
+  BentoInlineGalleryThumbnails,
+} from '#bento/components/bento-inline-gallery/1.0/component';
 
-import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
-import {InlineGallery} from '../inline-gallery';
-import {Pagination} from '../pagination';
-import {Thumbnails} from '../thumbnails';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '#preact';
 
 export default {
   title: 'InlineGallery',
-  component: InlineGallery,
-  decorators: [withA11y, withKnobs],
+  component: BentoInlineGallery,
+  argTypes: {
+    aspectRatio: {
+      name: 'thumbnail aspect ratio (w/h)',
+      defaultValue: 3 / 2,
+      control: {type: 'number'},
+    },
+    topInset: {
+      name: 'top indicator inset?',
+      defaultValue: false,
+      control: {type: 'boolean'},
+    },
+    bottomInset: {
+      name: 'bottom indicator inset?',
+      defaultValue: false,
+      control: {type: 'boolean'},
+    },
+    autoAdvance: {
+      name: 'auto advance',
+      defaultValue: false,
+      control: {type: 'boolean'},
+    },
+    loop: {
+      name: 'thumbnail loop',
+      defaultValue: false,
+      control: {type: 'boolean'},
+    },
+    paginationHeight: {
+      name: 'top indicator height',
+      control: {type: 'number'},
+      defaultValue: 20,
+    },
+    autoAdvanceCount: {
+      name: 'auto advance count',
+      control: {type: 'number'},
+      defaultValue: 1,
+    },
+    autoAdvanceInterval: {
+      name: 'auto advance interval',
+      control: {type: 'number'},
+      defaultValue: 1000,
+    },
+    autoAdvanceLoops: {
+      name: 'auto advance loops',
+      control: {type: 'number'},
+      defaultValue: 3,
+    },
+    thumbnailHeight: {
+      name: 'thumbnail height',
+      control: {type: 'number'},
+      defaultValue: 50,
+    },
+    width: {type: 'number'},
+    height: {type: 'number'},
+    orientation: {
+      name: 'orientation',
+      control: {type: 'select'},
+      options: ['horizontal', 'vertical'],
+      defaultValue: 'vertical',
+    },
+  },
 };
 
-export const _default = () => {
-  const width = 360;
-  const height = 240;
-  const paginationHeight = number('top indicator height', 20);
-  const topInset = boolean('top indicator inset?', false);
-  const bottomInset = boolean('bottom indicator inset?', false);
-  const autoAdvance = boolean('auto advance', false);
-  const autoAdvanceCount = number('auto advance count', 1);
-  const autoAdvanceInterval = number('auto advance interval', 1000);
-  const autoAdvanceLoops = number('auto advance loops', 3);
-  const thumbnailHeight = number('thumbnail height', 50);
-  const loop = boolean('thumbnail loop', false);
-  const aspectRatio = number('thumbnail aspect ratio (w/h)', 3 / 2);
-  const orientation = select(
-    'orientation',
-    ['horizontal', 'vertical'],
-    'vertical'
-  );
-
+export const Default = ({
+  aspectRatio,
+  autoAdvance,
+  autoAdvanceCount,
+  autoAdvanceInterval,
+  autoAdvanceLoops,
+  bottomInset,
+  height,
+  loop,
+  orientation,
+  paginationHeight,
+  thumbnailHeight,
+  topInset,
+  width,
+  ...args
+}) => {
+  width = width ?? 360;
+  height = height ?? 240;
   return (
     <>
-      <InlineGallery style={{width}}>
-        <Pagination style={{height: paginationHeight}} inset={topInset} />
-        <Thumbnails
+      <BentoInlineGallery style={{width}} {...args}>
+        <BentoInlineGalleryPagination
+          style={{height: paginationHeight}}
+          inset={topInset}
+        />
+        <BentoInlineGalleryThumbnails
           aspectRatio={aspectRatio}
           loop={loop}
           style={{height: thumbnailHeight}}
         />
         <br />
-        <Thumbnails />
+        <BentoInlineGalleryThumbnails />
         <br />
-        <BaseCarousel
+        <BentoBaseCarousel
           style={{height}}
           autoAdvanceCount={autoAdvanceCount}
           autoAdvanceInterval={autoAdvanceInterval}
@@ -91,22 +137,27 @@ export const _default = () => {
             src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
             thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
           />
-        </BaseCarousel>
-        <Pagination inset={bottomInset} />
-      </InlineGallery>
+        </BentoBaseCarousel>
+        <BentoInlineGalleryPagination inset={bottomInset} />
+      </BentoInlineGallery>
       Content below carousel
     </>
   );
 };
 
-export const WithLooping = () => {
-  const width = number('width', 440);
-  const height = number('height', 225);
-  const paginationHeight = number('indicator height', 20);
-  const inset = boolean('inset?', false);
-  const thumbnailHeight = number('thumbnail height', 50);
-  const loop = boolean('thumbnail loop', true);
-  const aspectRatio = number('thumbnail aspect ratio', 2);
+export const WithLooping = ({
+  aspectRatio,
+  height,
+  inset,
+  loop,
+  paginationHeight,
+  thumbnailHeight,
+  width,
+  ...args
+}) => {
+  width = width ?? 440;
+  height = height ?? 225;
+
   const slides = [
     'lightpink',
     'lightcoral',
@@ -130,12 +181,15 @@ export const WithLooping = () => {
   ));
 
   return (
-    <InlineGallery style={{width, position: 'relative'}}>
-      <BaseCarousel loop style={{height, position: 'relative'}}>
+    <BentoInlineGallery style={{width, position: 'relative'}} {...args}>
+      <BentoBaseCarousel loop style={{height, position: 'relative'}}>
         {slides}
-      </BaseCarousel>
-      <Pagination inset={inset} style={{height: paginationHeight}} />
-      <Thumbnails
+      </BentoBaseCarousel>
+      <BentoInlineGalleryPagination
+        inset={inset}
+        style={{height: paginationHeight}}
+      />
+      <BentoInlineGalleryThumbnails
         aspectRatio={aspectRatio}
         loop={loop}
         style={{height: thumbnailHeight}}
@@ -144,7 +198,7 @@ export const WithLooping = () => {
         <div>b</div>
         <div>c</div>
         <div>d</div>
-      </Thumbnails>
-    </InlineGallery>
+      </BentoInlineGalleryThumbnails>
+    </BentoInlineGallery>
   );
 };

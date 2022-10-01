@@ -1,24 +1,10 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as DocumentReady from '#core/document/ready';
 
-import * as DocumentReady from '../../../../src/document-ready';
+import {Services} from '#service';
+
+import {TwoStepsResponse} from '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {Linkmate} from '../linkmate';
-import {Services} from '../../../../src/services';
-import {TwoStepsResponse} from '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 
 const helpersFactory = (env) => {
   const {win} = env;
@@ -73,7 +59,7 @@ describes.fakeWin(
           publisherID: 999,
           linkAttribute: 'href',
         };
-        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions, env.win);
         anchorList = [
           {attributeName: 'href', link: 'http://fakelink.example'},
           {attributeName: 'href', link: 'http://fakelink2.example'},
@@ -408,12 +394,12 @@ describes.fakeWin(
           publisherID: 999,
           linkAttribute: 'href',
         };
-        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
-        const envRoot = env.ampdoc.getRootNode();
-        envRoot.title = 'Fake Website Title';
-
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions, env.win);
         env.sandbox
-          .stub(env.ampdoc, 'getUrl')
+          .stub(linkmate, 'getEditName_')
+          .returns('Fake Website Title');
+        env.sandbox
+          .stub(linkmate, 'getLocationHref_')
           .returns('http://fakewebsite.example/');
         env.sandbox.spy(linkmate, 'getEditInfo_');
 

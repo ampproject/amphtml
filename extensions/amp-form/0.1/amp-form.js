@@ -1,77 +1,61 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
-import {AmpFormTextarea} from './amp-form-textarea';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
-} from '../../../src/async-input';
-import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
+} from '#core/constants/async-input';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {isAmp4Email} from '#core/document/format';
+import {
+  createElementWithAttributes,
+  iterateCursor,
+  removeElement,
+  tryFocus,
+} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {
+  formOrNullForElement,
+  getFormAsObject,
+  setFormForElement,
+} from '#core/dom/form';
+import {ancestorElementsByTag, childElementByAttr} from '#core/dom/query';
+import {isArray, toArray} from '#core/types/array';
+import {deepMerge} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInit, setupInput} from '#utils/xhr-utils';
+
+import {AmpFormTextarea} from './amp-form-textarea';
+import {FormDirtiness} from './form-dirtiness';
+import {FormEvents} from './form-events';
+import {installFormProxy} from './form-proxy';
+import {FormSubmitService} from './form-submit-service';
+import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {
   FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
-import {FormDirtiness} from './form-dirtiness';
-import {FormEvents} from './form-events';
-import {FormSubmitService} from './form-submit-service';
-import {Keys} from '../../../src/utils/key-codes';
+
+import {CSS} from '../../../build/amp-form-0.1.css';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
+import {getMode} from '../../../src/mode';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
   isProxyOrigin,
-  parseQueryString,
   serializeQueryString,
 } from '../../../src/url';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
-import {
-  ancestorElementsByTag,
-  childElementByAttr,
-  createElementWithAttributes,
-  iterateCursor,
-  removeElement,
-  tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {
-  formOrNullForElement,
-  getFormAsObject,
-  setFormForElement,
-} from '../../../src/form';
-import {getFormValidator, isCheckValiditySupported} from './form-validators';
-import {getMode} from '../../../src/mode';
-import {installFormProxy} from './form-proxy';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray, toWin} from '../../../src/types';
-import {
-  setupAMPCors,
-  setupInit,
-  setupInput,
-} from '../../../src/utils/xhr-utils';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -136,32 +120,32 @@ export class AmpForm {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = Services.urlReplacementsForDoc(element);
-
-    /** @private {?Promise} */
-    this.dependenciesPromise_ = null;
-
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
 
+    /** @private {?Promise} */
+    this.dependenciesPromise_ = null;
+
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacement_ = Services.urlReplacementsForDoc(this.ampdoc_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
+    this.templates_ = Services.templatesForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.form_);
+    this.actions_ = Services.actionServiceForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(this.form_);
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
-    this.viewer_ = Services.viewerForDoc(this.form_);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /**
      * @const {!../../../src/ssr-template-helper.SsrTemplateHelper}
@@ -257,7 +241,7 @@ export class AmpForm {
   getXhrUrl_(attribute) {
     const url = this.form_.getAttribute(attribute);
     if (url) {
-      const urlService = Services.urlForDoc(this.form_);
+      const urlService = Services.urlForDoc(this.ampdoc_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
       userAssert(
         !urlService.isProxyOrigin(url),
@@ -308,7 +292,7 @@ export class AmpForm {
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldDenylist) {
     let xhrUrl, body;
-    let headers = dict({'Accept': 'application/json'});
+    let headers = {'Accept': 'application/json'};
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
@@ -325,10 +309,10 @@ export class AmpForm {
       xhrUrl = url;
       if (this.encType_ === 'application/x-www-form-urlencoded') {
         body = serializeQueryString(this.getFormAsObject_());
-        headers = dict({
+        headers = {
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
-        });
+        };
       } else {
         // default case: encType_ is 'multipart/form-data'
         devAssert(this.encType_ === 'multipart/form-data');
@@ -346,12 +330,12 @@ export class AmpForm {
     /** @type {!FetchRequestDef}*/
     const request = {
       xhrUrl,
-      fetchOpt: dict({
+      fetchOpt: {
         'body': body,
         'method': method,
         'credentials': 'include',
         'headers': headers,
-      }),
+      },
     };
     return request;
   }
@@ -371,7 +355,7 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'submit') {
@@ -399,7 +383,7 @@ export class AmpForm {
       EXTERNAL_DEPS.join(',')
     );
     // Wait for an element to be built to make sure it is ready.
-    const promises = toArray(depElements).map((el) => el.whenBuilt());
+    const promises = toArray(depElements).map((el) => el.build());
     return (this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(
       promises,
       2000
@@ -431,7 +415,7 @@ export class AmpForm {
     );
 
     this.form_.addEventListener(
-      AmpEvents.FORM_VALUE_CHANGE,
+      AmpEvents_Enum.FORM_VALUE_CHANGE,
       (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
@@ -443,7 +427,7 @@ export class AmpForm {
     if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', (e) => {
         this.verifier_.onCommit().then((updatedErrors) => {
-          const {updatedElements, errors} = updatedErrors;
+          const {errors, updatedElements} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.
@@ -453,11 +437,11 @@ export class AmpForm {
           if (this.state_ === FormState.VERIFYING) {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
-              this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
+              this.renderTemplate_({'verifyErrors': errors}).then(() => {
                 this.triggerAction_(
                   FormEvents.VERIFY_ERROR,
                   errors,
-                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                  ActionTrust_Enum.DEFAULT // DEFAULT because async after gesture.
                 );
               });
             } else {
@@ -476,7 +460,7 @@ export class AmpForm {
 
   /** @private */
   installInputMasking_() {
-    Services.inputmaskServiceForDocOrNull(this.form_).then(
+    Services.inputmaskServiceForDocOrNull(this.ampdoc_).then(
       (inputmaskService) => {
         if (inputmaskService) {
           inputmaskService.install();
@@ -494,7 +478,7 @@ export class AmpForm {
    */
   triggerFormSubmitInAnalytics_(eventType) {
     this.assertSsrTemplate_(false, 'Form analytics not supported');
-    const formDataForAnalytics = dict({});
+    const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
 
     for (const k in formObject) {
@@ -504,7 +488,11 @@ export class AmpForm {
     }
     formDataForAnalytics['formId'] = this.form_.id;
 
-    this.analyticsEvent_(eventType, formDataForAnalytics);
+    try {
+      this.analyticsEvent_(eventType, formDataForAnalytics);
+    } catch (err) {
+      dev().error(TAG, 'Sending analytics failed:', err);
+    }
   }
 
   /**
@@ -535,7 +523,7 @@ export class AmpForm {
     const validityElements = this.form_.querySelectorAll(
       '.user-valid, .user-invalid'
     );
-    iterateCursor(validityElements, (element) => {
+    validityElements.forEach((element) => {
       element.classList.remove('user-valid');
       element.classList.remove('user-invalid');
     });
@@ -543,7 +531,7 @@ export class AmpForm {
     const messageElements = this.form_.querySelectorAll(
       '.visible[validation-for]'
     );
-    iterateCursor(messageElements, (element) => {
+    messageElements.forEach((element) => {
       element.classList.remove('visible');
     });
 
@@ -581,12 +569,12 @@ export class AmpForm {
     }
 
     // Submits caused by user input have high trust.
-    return this.submit_(ActionTrust.HIGH, event);
+    return this.submit_(ActionTrust_Enum.HIGH, event);
   }
 
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @param {?Event} event
    * @return {!Promise}
    * @private
@@ -605,7 +593,7 @@ export class AmpForm {
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
     const asyncInputs = this.form_.getElementsByClassName(
-      AsyncInputClasses.ASYNC_INPUT
+      AsyncInputClasses_Enum.ASYNC_INPUT
     );
 
     this.dirtinessHandler_.onSubmitting();
@@ -651,7 +639,9 @@ export class AmpForm {
     iterateCursor(asyncInputs, (asyncInput) => {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
-        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+        asyncInput.classList.contains(
+          AsyncInputClasses_Enum.ASYNC_REQUIRED_ACTION
+        )
       ) {
         requiredActionPromises.push(asyncCall);
       } else {
@@ -676,12 +666,12 @@ export class AmpForm {
   /**
    * Handle form error for presubmit async calls.
    * @param {*} error
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {Promise}
    * @private
    */
   handlePresubmitError_(error, trust) {
-    const detail = dict();
+    const detail = {};
     if (error && error.message) {
       detail['error'] = error.message;
     }
@@ -700,7 +690,7 @@ export class AmpForm {
 
   /**
    * Handle successful presubmit tasks
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    */
   handlePresubmitSuccess_(trust) {
@@ -724,7 +714,11 @@ export class AmpForm {
       return Promise.resolve();
     }
     this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormEvents.VERIFY, /* detail */ null, ActionTrust.HIGH);
+    this.triggerAction_(
+      FormEvents.VERIFY,
+      /* detail */ null,
+      ActionTrust_Enum.HIGH
+    );
 
     return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
       this.doVerifyXhr_()
@@ -732,7 +726,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -755,7 +749,7 @@ export class AmpForm {
 
   /**
    * Handles the server side proxying and then rendering of the template.
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -796,7 +790,7 @@ export class AmpForm {
       .then(
         (response) => this.handleSsrTemplateResponse_(response, trust),
         (error) => {
-          const detail = dict();
+          const detail = {};
           if (error && error.message) {
             detail['error'] = error.message;
           }
@@ -830,7 +824,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit-success or submit-error state depending on the response status.
    * @param {!JsonObject} response
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -852,7 +846,7 @@ export class AmpForm {
 
   /**
    * Triggers the analytics and renders any template for submitting state.
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    */
   submittingWithTrust_(trust) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
@@ -898,19 +892,15 @@ export class AmpForm {
       .getImpl()
       .then((implementation) => implementation.getValue())
       .then((value) => {
-        const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+        const name = asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME);
         let input = this.form_.querySelector(
           `input[name=${escapeCssSelectorIdent(name)}]`
         );
         if (!input) {
-          input = createElementWithAttributes(
-            this.win_.document,
-            'input',
-            dict({
-              'name': asyncInput.getAttribute(AsyncInputAttributes.NAME),
-              'hidden': 'true',
-            })
-          );
+          input = createElementWithAttributes(this.win_.document, 'input', {
+            'name': asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME),
+            'hidden': 'true',
+          });
         }
         input.setAttribute('value', value);
         this.form_.appendChild(input);
@@ -969,18 +959,18 @@ export class AmpForm {
 
   /**
    * Returns the action trust for submit-success and submit-error events.
-   * @param {!ActionTrust} incomingTrust
-   * @return {!ActionTrust}
+   * @param {!ActionTrust_Enum} incomingTrust
+   * @return {!ActionTrust_Enum}
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
     // Degrade trust across form submission.
-    return /** @type {!ActionTrust} */ (incomingTrust - 1);
+    return /** @type {!ActionTrust_Enum} */ (incomingTrust - 1);
   }
 
   /**
    * @param {!Response} response
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -1004,7 +994,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject} result
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
@@ -1027,7 +1017,7 @@ export class AmpForm {
 
   /**
    * @param {*} e
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -1042,8 +1032,8 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then((responseJson) => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.handleSubmitFailure_(e, responseJson, incomingTrust);
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.maybeHandleRedirect_(e.response);
     });
   }
@@ -1052,7 +1042,7 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
-   * @param {!ActionTrust} incomingTrust
+   * @param {!ActionTrust_Enum} incomingTrust
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
@@ -1173,7 +1163,7 @@ export class AmpForm {
         this.form_
       );
       try {
-        const urlService = Services.urlForDoc(this.form_);
+        const urlService = Services.urlForDoc(this.ampdoc_);
         urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
         urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
       } catch (e) {
@@ -1184,7 +1174,7 @@ export class AmpForm {
           redirectTo
         );
       }
-      const navigator = Services.navigationForDoc(this.form_);
+      const navigator = Services.navigationForDoc(this.ampdoc_);
       navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
     }
   }
@@ -1193,15 +1183,13 @@ export class AmpForm {
    * Triggers an action e.g. submit success/error with response data.
    * @param {!FormEvents} name
    * @param {?JsonObject|!Array<{message: string, name: string}>} detail
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerAction_(name, detail, trust) {
-    const event = createCustomEvent(
-      this.win_,
-      `${TAG}.${name}`,
-      dict({'response': detail})
-    );
+    const event = createCustomEvent(this.win_, `${TAG}.${name}`, {
+      'response': detail,
+    });
     this.actions_.trigger(this.form_, name, event, trust);
   }
 
@@ -1255,7 +1243,7 @@ export class AmpForm {
    */
   renderTemplate_(data) {
     if (isArray(data)) {
-      data = dict();
+      data = {};
       user().warn(
         TAG,
         `Unexpected data type: ${data}. Expected non JSON array.`
@@ -1292,7 +1280,7 @@ export class AmpForm {
                 container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
-                  AmpEvents.DOM_UPDATE,
+                  AmpEvents_Enum.DOM_UPDATE,
                   /* detail */ null,
                   {bubbles: true}
                 );
@@ -1401,8 +1389,9 @@ export class AmpForm {
     const queryParams = parseQueryString(this.win_.location.search);
     Object.keys(queryParams).forEach((key) => {
       // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
-      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
-        .elements[key]);
+      const formControls = /** @type {(!Element|!NodeList)} */ (
+        this.form_.elements[key]
+      );
       if (!formControls) {
         return;
       }
@@ -1412,7 +1401,7 @@ export class AmpForm {
         maybeFillField(field, key);
       } else if (formControls.length) {
         const fields = /** @type {!NodeList} */ (formControls);
-        iterateCursor(fields, (field) => maybeFillField(field, key));
+        fields.forEach((field) => maybeFillField(field, key));
       }
     });
   }
@@ -1445,7 +1434,7 @@ export class AmpForm {
  */
 function checkUserValidityOnSubmission(form) {
   const elements = form.querySelectorAll('input,select,textarea,fieldset');
-  iterateCursor(elements, (element) => checkUserValidity(element));
+  elements.forEach((element) => checkUserValidity(element));
   return checkUserValidity(form);
 }
 
@@ -1488,7 +1477,7 @@ function removeValidityStateClasses(form) {
     const elements = form.querySelectorAll(
       `.${escapeCssSelectorIdent(validityState)}`
     );
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       dev().assertElement(element).classList.remove(validityState);
     });
   }
@@ -1631,8 +1620,7 @@ export class AmpFormService {
 
   /**
    * Install submission handler on all forms in the document.
-   * @param {?IArrayLike<T>} forms
-   * @template T
+   * @param {NodeList} forms
    * @private
    */
   installSubmissionHandlers_(forms) {
@@ -1640,7 +1628,7 @@ export class AmpFormService {
       return;
     }
 
-    iterateCursor(forms, (form, index) => {
+    forms.forEach((form, index) => {
       const existingAmpForm = formOrNullForElement(form);
       if (!existingAmpForm) {
         new AmpForm(form, `amp-form-${index}`);
@@ -1654,7 +1642,7 @@ export class AmpFormService {
    * @private
    */
   installDomUpdateEventListener_(doc) {
-    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    doc.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }
@@ -1668,7 +1656,7 @@ export class AmpFormService {
     doc.addEventListener('keydown', (e) => {
       if (
         e.defaultPrevented ||
-        e.key != Keys.ENTER ||
+        e.key != Keys_Enum.ENTER ||
         !(e.ctrlKey || e.metaKey) ||
         e.target.tagName !== 'TEXTAREA'
       ) {

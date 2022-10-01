@@ -1,19 +1,3 @@
-#
-# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
-
 tags: {  # amp-consent
   html_format: AMP
   tag_name: "SCRIPT"
@@ -31,7 +15,7 @@ tags: {  # amp-consent (json)
   requires_extension: "amp-consent"
   mandatory_parent: "AMP-CONSENT"
   unique: true
-  satisfies: "amp-consent extension .json script"
+  satisfies_condition: "amp-consent extension .json script"
   attrs: {
     name: "type"
     mandatory: true
@@ -51,8 +35,8 @@ tags: {  # <amp-consent>
   tag_name: "AMP-CONSENT"
   requires_extension: "amp-consent"
   unique: true
-  requires: "amp-consent extension .json script"
-  excludes: "amp-consent [type]"
+  requires_condition: "amp-consent extension .json script"
+  excludes_condition: "amp-consent [type]"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY
@@ -65,9 +49,9 @@ tags: {  # <amp-consent> (type)
   spec_name: "amp-consent [type]"
   requires_extension: "amp-consent"
   unique: true
-  requires: "meta name=amp-consent-blocking"
-  requires: "amp-consent extension .json script"
-  satisfies: "amp-consent [type]"
+  requires_condition: "meta name=amp-consent-blocking"
+  requires_condition: "amp-consent extension .json script"
+  satisfies_condition: "amp-consent [type]"
   attrs: {
     name: "type"
     mandatory: true

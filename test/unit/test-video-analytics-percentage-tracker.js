@@ -1,27 +1,13 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {Services} from '#service';
 import {
   AnalyticsPercentageTracker,
   PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS,
   PERCENTAGE_INTERVAL,
-} from '../../src/service/video-manager-impl';
-import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
-import {createCustomEvent} from '../../src/event-helper';
+} from '#service/video-manager-impl';
+
+import {createCustomEvent} from '#utils/event-helper';
+
+import {PlayingStates_Enum, VideoEvents_Enum} from '../../src/video-interface';
 
 describes.fakeWin(
   'video-manager-impl#AnalyticsPercentageTracker',
@@ -69,7 +55,7 @@ describes.fakeWin(
     }
 
     function dispatchLoadedMetadata(element) {
-      dispatchCustom(element, VideoEvents.LOADEDMETADATA);
+      dispatchCustom(element, VideoEvents_Enum.LOADEDMETADATA);
     }
 
     function mockTrigger(tracker) {
@@ -77,7 +63,7 @@ describes.fakeWin(
     }
 
     beforeEach(() => {
-      const {win, sandbox} = env;
+      const {sandbox, win} = env;
 
       mockTimer = {
         delay: sandbox.stub().callsFake((fn) => {
@@ -88,7 +74,7 @@ describes.fakeWin(
       mockEntry = {
         video: createFakeVideo(),
         getPlayingState() {
-          return PlayingStates.PAUSED;
+          return PlayingStates_Enum.PAUSED;
         },
       };
 
@@ -161,7 +147,7 @@ describes.fakeWin(
 
           const {element} = video;
 
-          setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+          setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
           tracker.start();
 
           dispatchLoadedMetadata(element);
@@ -206,7 +192,7 @@ describes.fakeWin(
 
         dispatchLoadedMetadata(element);
 
-        setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+        setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
         const cutoff = (validDurationSeconds / 100) * interval;
 
@@ -241,7 +227,7 @@ describes.fakeWin(
 
           dispatchLoadedMetadata(element);
 
-          setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+          setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
           for (
             let timeSeconds = startTimeSeconds;
@@ -279,14 +265,14 @@ describes.fakeWin(
         setDuration(video, validDurationSeconds);
         setCurrentTime(video, startTimeSeconds);
 
-        setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+        setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
         tracker.start();
 
         dispatchLoadedMetadata(element);
 
         mockTimerCallback();
-        dispatchCustom(element, VideoEvents.ENDED);
+        dispatchCustom(element, VideoEvents_Enum.ENDED);
 
         expect(triggerMock.withArgs(100)).to.have.been.calledOnce;
       });
@@ -305,7 +291,7 @@ describes.fakeWin(
         setDuration(video, validDurationSeconds);
         setCurrentTime(video, startTimeSeconds);
 
-        setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+        setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
         tracker.start();
 
@@ -314,7 +300,7 @@ describes.fakeWin(
         tracker.stop();
 
         mockTimerCallback();
-        dispatchCustom(element, VideoEvents.ENDED);
+        dispatchCustom(element, VideoEvents_Enum.ENDED);
 
         expect(triggerMock).to.not.have.been.called;
       });

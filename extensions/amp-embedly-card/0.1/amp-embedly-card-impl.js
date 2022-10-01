@@ -1,26 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeElement} from '#core/dom';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
 
 import {TAG as KEY_TAG} from './amp-embedly-key';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
 
 /**
  * Component tag identifier.
@@ -87,7 +75,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
       opt_is3P
     );
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.getVsync().mutate(() => {
       this.element.appendChild(iframe);
     });
@@ -109,7 +97,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return layout == Layout_Enum.RESPONSIVE;
   }
 
   /**

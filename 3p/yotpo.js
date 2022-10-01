@@ -1,31 +1,18 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {loadScript} from './3p';
 
 /**
  * Get the correct script for the container.
  * @param {!Window} global
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
+ * @param {string} widgetType The type of the widget being instantiated.
  * @param {function(!Object, string)} cb
  */
-function getContainerScript(global, scriptSource, cb) {
+function getContainerScript(global, scriptSource, widgetType, cb) {
   loadScript(global, scriptSource, () => {
     global.Yotpo = global.Yotpo || {};
-    delete global.Yotpo.widgets['testimonials'];
+    if (widgetType !== 'ReviewsTab') {
+      delete global.Yotpo.widgets['testimonials'];
+    }
     const yotpoWidget =
       typeof global.yotpo === 'undefined' ? undefined : global.yotpo;
     yotpoWidget.on('CssReady', function () {
@@ -301,23 +288,28 @@ export function yotpo(global, data) {
   let batchLoaded = false;
   const scriptSource =
     'https://staticw2.yotpo.com/' + data.appKey + '/widget.js';
-  getContainerScript(global, scriptSource, (yotpoWidget, eventType) => {
-    if (eventType === 'cssLoaded') {
-      cssLoaded = true;
-    }
-    if (eventType === 'batchLoaded') {
-      batchLoaded = true;
-    }
+  getContainerScript(
+    global,
+    scriptSource,
+    widgetType,
+    (yotpoWidget, eventType) => {
+      if (eventType === 'cssLoaded') {
+        cssLoaded = true;
+      }
+      if (eventType === 'batchLoaded') {
+        batchLoaded = true;
+      }
 
-    if (batchLoaded && cssLoaded) {
-      setTimeout(() => {
-        if (yotpoWidget.widgets[0]) {
-          context.updateDimensions(
-            yotpoWidget.widgets[0].element./*OK*/ offsetWidth,
-            yotpoWidget.widgets[0].element./*OK*/ offsetHeight
-          );
-        }
-      }, 100);
+      if (batchLoaded && cssLoaded) {
+        setTimeout(() => {
+          if (yotpoWidget.widgets[0]) {
+            context.updateDimensions(
+              yotpoWidget.widgets[0].element./*OK*/ offsetWidth,
+              yotpoWidget.widgets[0].element./*OK*/ offsetHeight
+            );
+          }
+        }, 100);
+      }
     }
-  });
+  );
 }

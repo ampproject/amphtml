@@ -1,29 +1,19 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for babel transforms run during `gulp build`.
+ * Gets the config for babel transforms run during `amp build`.
  *
+ * @param {'preact' | 'react'} buildFor
+ * @param {!Object=} opt_replacePluginOverrides
  * @return {!Object}
  */
-function getUnminifiedConfig() {
+function getUnminifiedConfig(buildFor = 'preact', opt_replacePluginOverrides) {
+  const isEsmBuild = argv.esm || argv.sxg;
+
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -32,33 +22,50 @@ function getUnminifiedConfig() {
       useSpread: true,
     },
   ];
+
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
-      modules: 'commonjs',
+      modules: false,
       loose: true,
-      targets: {'browsers': ['Last 2 versions']},
+      targets: isEsmBuild ? {esmodules: true} : {browsers: ['Last 2 versions']},
+      shippedProposals: true,
+      exclude: isEsmBuild ? ['@babel/plugin-transform-for-of'] : [],
     },
   ];
-  const replacePlugin = getReplacePlugin();
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
+  ];
+  const replacePlugin = getReplacePlugin(opt_replacePluginOverrides);
   const unminifiedPlugins = [
+    './build-system/babel-plugins/babel-plugin-jsx-style-object',
+    getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
+    './build-system/babel-plugins/babel-plugin-amp-story-supported-languages',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-react-constant-elements',
-    '@babel/plugin-transform-classes',
+    './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
-  const unminifiedPresets = [presetEnv];
+  const unminifiedPresets = [presetTypescript, presetEnv];
   return {
     compact: false,
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
+    sourceMaps: true,
+    assumptions: {
+      constantSuper: true,
+      noClassCalls: true,
+      setClassMethods: true,
+      setPublicClassFields: true,
+    },
   };
 }
 

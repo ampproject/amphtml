@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!---
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-stream-gallery
 
 ## Usage
@@ -59,7 +43,18 @@ navigational arrows to go forward or backwards by a given number of items.
 The gallery advances between items if the user swipes or uses the customizable
 arrow buttons.
 
-### Slide layout
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-stream-gallery`, see [**`bento-stream-gallery`**](./1.0/README.md).
+
+### Behavior users should be aware of
+
+#### Slide layout
 
 Slides are automatically sized by the carousel. You should give the slides `layout="flex-item"`:
 
@@ -82,20 +77,7 @@ wrapping element, and use that to center the content.
 ### Media Queries
 
 The attributes for `<amp-stream-gallery>` can be configured to use different
-options based on a media query. You can also use a value without any media
-queries. The format looks like:
-
-```html
-<amp-stream-gallery
-  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
-></amp-stream-gallery>
-```
-
-The media queries are evaluated from left to right, with the first matching
-media query being used. A default value (without a media query) is required. In
-this case, if the page has a screen width of 1000px or more, `valueOne` is used.
-If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
-smaller, `defaultValue` is used.
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### Behavior
 

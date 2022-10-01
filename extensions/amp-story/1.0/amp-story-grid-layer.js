@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This is a layer that lays its children out into a grid. Its
  * implementation is based off of the CSS Grid Spec.
  *
@@ -26,12 +10,15 @@
  * </code>
  */
 
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from '#core/dom/style';
+
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {parseQueryString} from '../../../src/url';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {isPrerenderActivePage} from './prerender-active-page';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -61,29 +48,6 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
   .join(',');
 
 /**
- * The attribute name for grid layer templates.
- * @private @const {string}
- */
-const TEMPLATE_ATTRIBUTE_NAME = 'template';
-
-/**
- * A mapping of template attribute values to CSS class names.
- * @const {!Object<string, string>}
- */
-export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
-  'fill': 'i-amphtml-story-grid-template-fill',
-  'vertical': 'i-amphtml-story-grid-template-vertical',
-  'horizontal': 'i-amphtml-story-grid-template-horizontal',
-  'thirds': 'i-amphtml-story-grid-template-thirds',
-};
-
-/**
- * The attribute name for grid layer presets.
- * @private @const {string}
- */
-const PRESET_ATTRIBUTE_NAME = 'preset';
-
-/**
  * @typedef {{
  *  aspect-ratio: string,
  *  scaling-factor: ?float,
@@ -92,150 +56,45 @@ const PRESET_ATTRIBUTE_NAME = 'preset';
 export let PresetDetails;
 
 /**
- * The attributes that will be applied for each preset.
- * @private @const {!Object<string, !PresetDetails>}
- */
-const GRID_LAYER_PRESET_DETAILS = {
-  '2021-background': {
-    'aspect-ratio': '69:116',
-    'scaling-factor': 1.142,
-  },
-  '2021-foreground': {
-    'aspect-ratio': '69:116',
-  },
-};
-
-/**
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
+  /** @override  */
+  static prerenderAllowed(element) {
+    return isPrerenderActivePage(element.parentElement);
+  }
+
+  /** @override  */
+  static previewAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?boolean} */
-    this.isPrerenderActivePage_ = null;
-
-    /** @private {?{horiz: number, vert: number}} */
-    this.aspectRatio_ = null;
-
-    /** @private {number} */
-    this.scalingFactor_ = 1;
-  }
-
-  /**
-   * Returns true if the page should be prerendered (for being an active page or first page)
-   * @return {boolean}
-   */
-  isPrerenderActivePage() {
-    if (this.isPrerenderActivePage_ != null) {
-      return this.isPrerenderActivePage_;
-    }
-    const hashId = parseQueryString(this.win.location.href)['page'];
-    let selector = 'amp-story-page:first-of-type';
-    if (hashId) {
-      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
-    }
-    const selectorNodes = this.win.document.querySelectorAll(selector);
-    this.isPrerenderActivePage_ =
-      selectorNodes[selectorNodes.length - 1] === this.element.parentElement;
-    return this.isPrerenderActivePage_;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.applyResponsivenessPresets_();
-    this.applyTemplateClassName_();
+    this.applyAspectRatioAttributes_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
-    this.initializeListeners_();
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return this.isPrerenderActivePage();
   }
 
   /**
-   * Applies the attributes to the layer from the preset specified in the [preset] attribute.
+   * Grab the aspect-ratio attribute and apply to CSS variable as a fraction.
    * @private
    */
-  applyResponsivenessPresets_() {
-    if (!this.element.hasAttribute(PRESET_ATTRIBUTE_NAME)) {
+  applyAspectRatioAttributes_() {
+    if (!this.element.hasAttribute('aspect-ratio')) {
       return;
     }
-    const preset = this.element.getAttribute(PRESET_ATTRIBUTE_NAME);
-    const presetDetails = GRID_LAYER_PRESET_DETAILS[preset];
-    if (!presetDetails) {
-      return;
-    }
-    Object.entries(presetDetails).forEach((keyValue) =>
-      this.element.setAttribute(keyValue[0], keyValue[1])
-    );
-  }
-
-  /** @private */
-  initializeListeners_() {
-    const aspectRatio = this.element.getAttribute('aspect-ratio');
-    const scalingFactorFloat = parseFloat(
-      this.element.getAttribute('scaling-factor')
-    );
-    if (scalingFactorFloat && scalingFactorFloat > 0) {
-      this.scalingFactor_ = scalingFactorFloat;
-    }
-    if (aspectRatio) {
-      const aspectRatioSplits = aspectRatio.split(':');
-      const horiz = parseInt(aspectRatioSplits[0], 10);
-      const vert = parseInt(aspectRatioSplits[1], 10);
-      if (horiz > 0 && vert > 0) {
-        this.aspectRatio_ = {horiz, vert};
-        const storeService = getStoreService(this.win);
-        storeService.subscribe(
-          StateProperty.PAGE_SIZE,
-          this.updatePageSize_.bind(this),
-          true /* callToInitialize */
-        );
-      }
-    }
-  }
-
-  /**
-   * @param {?{width: number, height: number}} pageSize
-   * @private
-   */
-  updatePageSize_(pageSize) {
-    if (!pageSize) {
-      return;
-    }
-    const {width: vw, height: vh} = pageSize;
-    const {horiz, vert} = this.aspectRatio_;
-    const width = Math.min(vw, (vh * horiz) / vert);
-    const height = Math.min(vh, (vw * vert) / horiz);
-    if (width > 0 && height > 0) {
-      this.getVsync().mutate(() => {
-        this.element.classList.add('i-amphtml-story-grid-template-aspect');
-        setStyles(this.element, {
-          '--i-amphtml-story-layer-width': px(width * this.scalingFactor_),
-          '--i-amphtml-story-layer-height': px(height * this.scalingFactor_),
-        });
-      });
-    }
-  }
-
-  /**
-   * Applies internal CSS class names for the template attribute, so that styles
-   * can use the class name instead of compound
-   * amp-story-grid-layer[template="..."] selectors, since the latter increases
-   * CSS specificity and can prevent users from being able to override styles.
-   * @private
-   */
-  applyTemplateClassName_() {
-    if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
-      const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
-      this.element.classList.add(templateClassName);
-    }
+    setImportantStyles(this.element, {
+      '--aspect-ratio': this.element
+        .getAttribute('aspect-ratio')
+        .replace(':', '/'),
+    });
   }
 
   /**
@@ -249,7 +108,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
     );
 
-    Array.prototype.forEach.call(elementsToUpgradeStyles, (element) => {
+    elementsToUpgradeStyles.forEach((element) => {
       this.setCssGridStyles_(element);
     });
   }

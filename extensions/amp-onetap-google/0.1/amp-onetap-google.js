@@ -26,17 +26,19 @@
  * </code>
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {removeElement} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
+import {px, setStyle, toggle} from '#core/dom/style';
+import {isObject} from '#core/types';
+
+import {Services} from '#service';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import {CSS} from '../../../build/amp-onetap-google-0.1.css';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
-import {isObject} from '../../../src/types';
-import {px, setStyle, toggle} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-onetap-google';
@@ -71,7 +73,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /** @override */
@@ -83,6 +85,16 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
           assertHttpsUrl(this.element.dataset.src, this.element)
         );
       });
+  }
+
+  /**
+   * @param {!MessageEventSource} source
+   * @param {*} message
+   * @param {string} origin
+   * @private
+   */
+  postMessage_(source, message, origin) {
+    source./*OK*/ postMessage(message, origin);
   }
 
   /**
@@ -107,12 +119,13 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         if (!nonce) {
           return;
         }
-        event.source./*OK*/ postMessage(
-          dict({
+        this.postMessage_(
+          event.source,
+          {
             'sentinel': SENTINEL,
             'command': 'parent_frame_ready',
             'nonce': nonce,
-          }),
+          },
           event.origin
         );
         break;
@@ -165,10 +178,27 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
 
   /** @private */
   refreshAccess_() {
+    Promise.all([
+      this.refreshAmpAccess_(),
+      this.refreshAmpSubscriptions_(),
+    ]).then((refreshed) => {
+      if (!refreshed.reduce((a, b) => a || b)) {
+        user().warn(
+          TAG,
+          'Sign-in was completed, but there were no entitlements to refresh. Please include amp-access or amp-subscriptions.'
+        );
+      }
+    });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  refreshAmpAccess_() {
     const accessElement = this.getAmpDoc().getElementById('amp-access');
     if (!accessElement) {
-      user().warn(TAG, 'No <script id="amp-access"> to refresh');
-      return;
+      return false;
     }
     Services.actionServiceForDoc(this.element).execute(
       accessElement,
@@ -177,7 +207,24 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       /* source */ null,
       /* caller */ null,
       /* event */ null,
-      ActionTrust.DEFAULT
+      ActionTrust_Enum.DEFAULT
+    );
+    return true;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  refreshAmpSubscriptions_() {
+    return Services.subscriptionsServiceForDocOrNull(this.element).then(
+      (subscriptions) => {
+        if (!subscriptions) {
+          return false;
+        }
+        subscriptions.resetPlatforms();
+        return true;
+      }
     );
   }
 
@@ -189,7 +236,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
     if (this.iframe_) {
       return;
     }
-    this.iframe_ = this.getAmpDoc().getRootNode().createElement('iframe');
+    this.iframe_ = this.getAmpDoc().win.document.createElement('iframe');
 
     // Don't insert <iframe> until URL has been expanded.
     // Likewise, don't display the UI until then.

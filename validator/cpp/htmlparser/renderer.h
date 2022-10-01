@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 // Renderer renders the parse tree rooted at node to the given buffer.
 //
 // Rendering is done on a 'best effort' basis: calling Parse on the output of
@@ -39,12 +23,12 @@
 // Another example is that the programmatic equivalent of "a<head>b</head>c"
 // becomes "<html><head><head/><body>abc</body></html>".
 
-#ifndef HTMLPARSER__RENDERER_H_
-#define HTMLPARSER__RENDERER_H_
+#ifndef CPP_HTMLPARSER_RENDERER_H_
+#define CPP_HTMLPARSER_RENDERER_H_
 
 #include <sstream>
 
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 namespace htmlparser {
 
@@ -58,9 +42,11 @@ enum class RenderError {
 
 class Renderer {
  public:
-  static RenderError Render(Node* node, std::stringbuf* output_buffer);
+  // This renderer though fully functional, is primarily used to render webkit
+  // test cases.
+  static RenderError Render(Node* node, std::stringbuf* buf);
 };
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__RENDERER_H_
+#endif  // CPP_HTMLPARSER_RENDERER_H_

@@ -1,31 +1,17 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-base-carousel';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {
-  createElementWithAttributes,
-  waitForChildPromise,
-} from '../../../../src/dom';
-import {mod} from '../../../../src/utils/math';
-import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
-import {toggleExperiment} from '../../../../src/experiments';
-import {useStyles} from '../base-carousel.jss';
-import {waitFor, whenCalled} from '../../../../testing/test-helper';
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
+
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
+import {setStyles} from '#core/dom/style';
+import {mod} from '#core/math';
+import {toArray} from '#core/types/array';
+
+import {toggleExperiment} from '#experiments';
+
+import {ActionInvocation} from '#service/action-impl';
+
+import {waitFor, whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-base-carousel:1.0',
@@ -62,7 +48,7 @@ describes.realWin(
       const wrappers = await getSlideWrappersFromShadow();
       const slots = Array.from(wrappers)
         .map((wrapper) => wrapper.querySelector('slot'))
-        .filter((slot) => !!slot);
+        .filter(Boolean);
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
         []
@@ -244,6 +230,25 @@ describes.realWin(
       });
     });
 
+    it('should fire DOM event', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      const eventSpy = env.sandbox.spy();
+      element.addEventListener('slideChange', eventSpy);
+      element.setAttribute('slide', '1');
+
+      await waitFor(() => eventSpy.callCount > 0, 'event fired');
+      expect(eventSpy).to.be.calledOnce;
+      expect(eventSpy.firstCall).calledWithMatch({
+        'data': {
+          'index': 1,
+        },
+      });
+    });
+
     describe('imperative api', () => {
       let scroller;
       let slides;
@@ -267,7 +272,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,
@@ -343,7 +348,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,

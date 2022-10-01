@@ -1,0 +1,170 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Custom Browser Events</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-size: 14px;
+    }
+
+    [fallback] {
+      display: block;
+      /* @alternative */ display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
+
+    .main {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .main, h1, .wrap {
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .input-container {
+      flex: 1;
+    }
+
+    .form-container {
+      flex: 1;
+    }
+
+    h1 {
+      font-weight: bold;
+      margin: 40px auto 20px;
+      font-size: 24px;
+    }
+
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script>
+  (self.AMP = self.AMP || []).push(function (AMP) {
+    AMP.toggleExperiment('analytics-browser-events', true);
+  });
+</script>
+</head>
+<body>
+  <div style="display: flex; flex-direction: column; height: 100vh">
+    <div>
+      <h1>Custom Browser Events</h1>
+      <h1>AMP Input</h1>
+      <div class="main">
+        <div class="input-container">
+          Enter any text: <input type="text" id="inputText">
+        </div>
+        <div class="input-container">
+          Enter any text: <input type="text" id="inputText2">
+        </div>
+      </div>
+    </div>
+    <div>
+      <h1>AMP Form</h1>
+      <div class="main">
+        <div class="form-container">
+          <form method="post"
+   class="p1"
+   action-xhr="wololo"
+   custom-validation-reporting="show-all-on-submit"
+   target="_top">
+   <label for="numChild">Child (0-17)</label>
+   <div class="custom-select sg__select-wrapper">
+     <select name="numChild" id="dropDown">
+       <option data-vars-num-child="0" value="0">0</option>
+       <option data-vars-num-child="1" value="1">1</option>
+       <option data-vars-num-child="2" value="2">2</option>
+       <option data-vars-num-child="3" value="3">3</option>
+       <option data-vars-num-child="4" value="4">4</option>
+     </select>
+   </div>
+   <div class="custom-select sg__select-wrapper">
+     <select name="numChild2" id="dropDown2">
+       <option data-vars-num-child="0" value="0">0</option>
+       <option data-vars-num-child="1" value="1">1</option>
+       <option data-vars-num-child="2" value="2">2</option>
+       <option data-vars-num-child="3" value="3">3</option>
+       <option data-vars-num-child="4" value="4">4</option>
+     </select>
+   </div>
+ </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "event": "https://foo.com/event?type=${eventType}"
+        },
+        "transport": {
+          "beacon": false,
+          "image": false,
+          "xhrpost": true
+        },
+        "triggers": {
+          "genericTrigger-1":{
+            "on": "change",
+            "request": "event",
+            "selector": "#inputText",
+            "vars": {
+              "eventType": "change"
+            },
+            "extraUrlParams":{
+                "eventId": "inputText"
+            }
+          },
+          "genericTrigger-2":{
+            "on": "change",
+            "request": "event",
+            "selector": "#dropDown",
+            "vars": {
+              "eventType": "change"
+            },
+            "extraUrlParams":{
+                "eventId": "dropDown"
+            }
+          },
+          "genericTrigger-3":{
+            "on": "blur",
+            "request": "event",
+            "selector": "#inputText2",
+            "vars": {
+              "eventType": "blur"
+            },
+            "extraUrlParams":{
+                "eventId": "inputText2"
+            }
+          },
+          "genericTrigger-4":{
+            "on": "blur",
+            "request": "event",
+            "selector": "#dropDown2",
+            "vars": {
+              "eventType": "blur"
+            },
+            "extraUrlParams":{
+                "eventId": "dropDown2"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+</body>
+</html>

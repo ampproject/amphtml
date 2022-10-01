@@ -5,7 +5,7 @@
 The AMP Viewer Messaging library allows an AMP Viewer to establish a
 communication channel with an AMP document.
 
-See [Connecting AMP Viewers with AMP pages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/integrating-viewer-with-amp-doc-guide.md)
+See [Connecting AMP Viewers with AMP pages](https://github.com/ampproject/amphtml/blob/main/extensions/amp-viewer-integration/integrating-viewer-with-amp-doc-guide.md)
 for more information.
 
 ## Installation

@@ -1,20 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS-IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Global configuration file for various babel transforms.
  *
  * Notes: From https://babeljs.io/docs/en/plugins#plugin-ordering:
@@ -25,33 +9,34 @@
 
 'use strict';
 
-const {
-  getDepCheckConfig,
-  getPostClosureConfig,
-  getPreClosureConfig,
-  getTestConfig,
-  getUnminifiedConfig,
-  getEslintConfig,
-} = require('./build-system/babel-config');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
+
 const {log} = require('./build-system/common/logging');
 
 /**
- * Mapping of babel transform callers to their corresponding babel configs.
+ * Mapping of each babel transform caller to the name of the function that
+ * returns its config.
  */
 const babelTransforms = new Map([
-  ['babel-jest', {}],
-  ['dep-check', getDepCheckConfig()],
-  ['post-closure', getPostClosureConfig()],
-  ['pre-closure', getPreClosureConfig()],
-  ['test', getTestConfig()],
-  ['unminified', getUnminifiedConfig()],
-  ['@babel/eslint-parser', getEslintConfig()],
+  ['babel-jest', 'getEmptyConfig'],
+  ['nomodule-loader', 'getNoModuleLoaderConfig'],
+  ['test', 'getTestConfig'],
+  ['unminified', 'getUnminifiedConfig'],
+  ['unminified-ssr-css', 'getUnminifiedSsrCssConfig'],
+  ['minified', 'getMinifiedConfig'],
+  ['minified-ssr-css', 'getMinifiedSsrCssConfig'],
+  ['jss', 'getJssConfig'],
+  ['@babel/eslint-parser', 'getEslintConfig'],
+  ['is-enum-value', 'getEmptyConfig'],
+  ['import-resolver', 'getEmptyConfig'],
+  ['react-minified', 'getReactMinifiedConfig'],
+  ['react-unminified', 'getReactUnminifiedConfig'],
 ]);
 
 /**
- * Main entry point. Returns babel config corresponding to the caller, or a
- * blank config if the caller is unrecognized.
+ * Main entry point. Returns babel config corresponding to the caller, or an
+ * empty object if the caller is unrecognized. Configs are lazy-required when
+ * requested so we don't unnecessarily compute the entire set for all callers.
  *
  * @param {!Object} api
  * @return {!Object}
@@ -61,7 +46,8 @@ module.exports = function (api) {
     return callerObj ? callerObj.name : '<unnamed>';
   });
   if (callerName && babelTransforms.has(callerName)) {
-    return babelTransforms.get(callerName);
+    const configFunctionName = babelTransforms.get(callerName);
+    return require('./build-system/babel-config')[configFunctionName]();
   } else {
     log(
       yellow('WARNING:'),

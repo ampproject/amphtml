@@ -1,0 +1,28 @@
+<!--
+  Test Description:
+  Format is set to A4A.
+-->
+<!doctype html>
+<html ⚡4ads>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <!-- Invalid: importing disallowed version in the ads format. -->
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-1.0.js"></script>
+</head>
+<body>
+  <!-- Valid use with close-button despite importing the wrong version. -->
+  <amp-lightbox layout="nodisplay" close-button>
+  </amp-lightbox>
+
+  <!-- Invalid: close-button not present. -->
+  <amp-lightbox layout="nodisplay">
+  </amp-lightbox>
+
+  <!-- Invalid: scrollable present. -->
+  <amp-lightbox layout="nodisplay" close-button scrollable>
+  </amp-lightbox>
+</body>
+</html>

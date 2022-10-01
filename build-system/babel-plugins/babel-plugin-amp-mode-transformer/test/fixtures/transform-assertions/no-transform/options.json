@@ -1,3 +1,11 @@
 {
-  "plugins": ["../../../.."]
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "IS_ESM": false,
+        "INTERNAL_RUNTIME_VERSION": "$internalRuntimeVersion$"
+      }
+    ]
+  ]
 }

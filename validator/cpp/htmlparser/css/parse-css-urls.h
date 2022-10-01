@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 // This code is a stripped-down CSS parser that has enough remaining to support
 // extracting URLs in a CSS stylesheet and identifying if those URLs represent
 // images or fonts.
@@ -23,8 +7,8 @@
 // CSS. See search/amphtml/transformers/external_url_rewrite_transformer.cc for
 // the primary use case of this library.
 
-#ifndef HTMLPARSER__CSS_PARSE_CSS_URLS_H_
-#define HTMLPARSER__CSS_PARSE_CSS_URLS_H_
+#ifndef CPP_HTMLPARSER_CSS_PARSE_CSS_URLS_H_
+#define CPP_HTMLPARSER_CSS_PARSE_CSS_URLS_H_
 
 #include <memory>
 #include <string>
@@ -33,9 +17,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/types/variant.h"
-#include "css/parse-css-urls.pb.h"
-#include "validator.pb.h"
-
+#include "cpp/htmlparser/css/parse-css-urls.pb.h"
 
 namespace htmlparser::css::url {
 // Implements 3.3. Preprocessing the input stream.
@@ -284,4 +266,4 @@ bool SegmentCss(const std::string& utf8_css,
 
 }  // namespace htmlparser::css::url
 
-#endif  // HTMLPARSER__CSS_PARSE_CSS_URLS_H_
+#endif  // CPP_HTMLPARSER_CSS_PARSE_CSS_URLS_H_

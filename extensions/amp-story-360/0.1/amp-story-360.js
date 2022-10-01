@@ -1,39 +1,30 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * Must be served over https for permissions API to work.
- * For local development, run gulp --host="192.168.44.47" --https --extensions=amp-story-360
+ * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import * as Preact from '#core/dom/jsx';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {listenOncePromise} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
+import {Matrix, Renderer} from '#third_party/zuho/zuho';
+
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
+import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {
   Action,
   StateProperty,
-} from '../../../extensions/amp-story/1.0/amp-story-store-service';
-import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
-import {Services} from '../../../src/services';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenOncePromise} from '../../../src/event-helper';
-import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
+} from '../../amp-story/1.0/amp-story-store-service';
+import {timeStrToMillis} from '../../amp-story/1.0/utils';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -51,71 +42,69 @@ const HAVE_CURRENT_DATA = 2;
 const CENTER_OFFSET = 90;
 
 /**
- * Minimum distance from active page to activate WebGL context.
- * @const {number}
- */
-const MIN_WEBGL_DISTANCE = 2;
-
-/**
- * Generates the template for the permission button.
- *
- * @param {!Element} element
+ * Renders the template for the permission button.
  * @return {!Element}
  */
-const buildActivateButtonTemplate = (element) => htmlFor(element)`
-    <button class="i-amphtml-story-360-activate-button" role="button">
-      <span class="i-amphtml-story-360-activate-text"></span>
-      <span class="i-amphtml-story-360-activate-button-icon"
-        >360°
-        <svg
-          class="i-amphtml-story-360-activate-button-icon-svg"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <defs>
-            <linearGradient id="i-amphtml-story-360-activate-gradient">
-              <stop stop-color="white" stop-opacity=".3"></stop>
-              <stop offset="1" stop-color="white"></stop>
-            </linearGradient>
-            <ellipse
-              id="i-amphtml-story-360-activate-ellipse"
-              ry="11.5"
-              rx="7.5"
-              cy="12"
-              cx="12"
-              stroke="url(#i-amphtml-story-360-activate-gradient)"
-            ></ellipse>
-          </defs>
-          <use xlink:href="#i-amphtml-story-360-activate-ellipse"></use>
-          <use
-            xlink:href="#i-amphtml-story-360-activate-ellipse"
-            transform="rotate(90, 12, 12)"
-          ></use>
-        </svg>
-      </span>
-    </button>
-  `;
+const renderActivateButtonTemplate = () => (
+  <button class="i-amphtml-story-360-activate-button" role="button">
+    <span
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
+      }
+    ></span>
+    <span class="i-amphtml-story-360-activate-button-icon">
+      360°
+      <svg
+        class="i-amphtml-story-360-activate-button-icon-svg"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <defs>
+          <linearGradient id="i-amphtml-story-360-activate-gradient">
+            <stop stop-color="white" stop-opacity=".3"></stop>
+            <stop offset="1" stop-color="white"></stop>
+          </linearGradient>
+          <ellipse
+            id="i-amphtml-story-360-activate-ellipse"
+            ry="11.5"
+            rx="7.5"
+            cy="12"
+            cx="12"
+            stroke="url(#i-amphtml-story-360-activate-gradient)"
+          ></ellipse>
+        </defs>
+        <use href="#i-amphtml-story-360-activate-ellipse"></use>
+        <use
+          href="#i-amphtml-story-360-activate-ellipse"
+          transform="rotate(90, 12, 12)"
+        ></use>
+      </svg>
+    </span>
+  </button>
+);
 
 /**
- * Generates the template for the gyroscope feature discovery animation.
+ * Renders the template for the gyroscope feature discovery animation.
  *
  * NOTE: i-amphtml-story-360-discovery is used in maybeShowDiscoveryAnimation_
  * and must be changed in both places if updated.
  *
- * @param {!Element} element
  * @return {!Element}
  */
-const buildDiscoveryTemplate = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-360-discovery" aria-live="polite">
-      <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-discovery-text" aria-hidden="true">
-        Move device to explore
-      </span>
-    </div>
-  `;
+const renderDiscoveryTemplate = () => (
+  <div class="i-amphtml-story-360-discovery" aria-live="polite">
+    <div class="i-amphtml-story-360-discovery-animation"></div>
+    <span
+      class="i-amphtml-story-360-discovery-text"
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
+      }
+    ></span>
+  </div>
+);
 
 /**
  * @param {number} deg
@@ -239,12 +228,19 @@ class CameraAnimation {
 }
 
 export class AmpStory360 extends AMP.BaseElement {
+  /** @override  */
+  static previewAllowed(element) {
+    // We can assume that images are cached, but the same is not necessarily
+    // true for videos. We only allow preview mode for `AmpStory360` when it
+    // uses cached sources, because requests for origin sources cannot be made
+    // due to privacy concerns.
+    const usesVideo = element.querySelector('amp-video');
+    return !usesVideo;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
 
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
@@ -282,9 +278,6 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {boolean} */
     this.isOnActivePage_ = false;
 
-    /** @private {?number} */
-    this.distance_ = null;
-
     /** @private {number} */
     this.sceneHeading_ = 0;
 
@@ -302,9 +295,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {number} */
     this.headingOffset_ = 0;
-
-    /** @private WebGL extension for lost context. */
-    this.lostGlContext_ = null;
 
     /** @private {!Array<number>} */
     this.rot_ = null;
@@ -355,19 +345,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.canvas_ = this.element.ownerDocument.createElement('canvas');
     this.element.appendChild(container);
     container.appendChild(this.canvas_);
-    this.applyFillContent(container, /* replacedContent */ true);
-
-    // Mutation observer for distance attribute
-    const config = {attributes: true, attributeFilter: ['distance']};
-    const callback = (mutationsList) => {
-      this.distance_ = parseInt(
-        mutationsList[0].target.getAttribute('distance'),
-        10
-      );
-      this.restoreOrLoseGlContext_();
-    };
-    const observer = new MutationObserver(callback);
-    this.getPage_() && observer.observe(this.getPage_(), config);
+    applyFillContent(container, /* replacedContent */ true);
 
     // Initialize all services before proceeding
     return Promise.all([
@@ -404,7 +382,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.localizationService_ = localizationService;
         }
       ),
-    ]).then(() => Promise.resolve());
+    ]);
   }
 
   /**
@@ -436,20 +414,6 @@ export class AmpStory360 extends AMP.BaseElement {
     } else {
       this.pause_();
       this.rewind_();
-    }
-  }
-
-  /** @private */
-  restoreOrLoseGlContext_() {
-    if (!this.renderer_) {
-      return;
-    }
-    if (this.distance_ < MIN_WEBGL_DISTANCE) {
-      if (this.renderer_.gl.isContextLost()) {
-        this.lostGlContext_.restoreContext();
-      }
-    } else if (!this.renderer_.gl.isContextLost()) {
-      this.lostGlContext_.loseContext();
     }
   }
 
@@ -518,7 +482,7 @@ export class AmpStory360 extends AMP.BaseElement {
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
-        if (this.isReady_ && this.distance_ < MIN_WEBGL_DISTANCE) {
+        if (this.isReady_) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
           rafTimeout = this.win.requestAnimationFrame(() => {
             if (!this.isOnActivePage_) {
@@ -561,8 +525,11 @@ export class AmpStory360 extends AMP.BaseElement {
       )
     ) {
       const page = this.getPage_();
-      const discoveryTemplate = page && buildDiscoveryTemplate(page);
-      this.mutateElement(() => page.appendChild(discoveryTemplate));
+      const discoveryTemplate = page && renderDiscoveryTemplate();
+      // Support translation of discovery dialogue text.
+      localizeTemplate(discoveryTemplate, page).then(() =>
+        this.mutateElement(() => page.appendChild(discoveryTemplate))
+      );
     }
   }
 
@@ -593,14 +560,9 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   renderActivateButton_() {
     const ampStoryPage = this.getPage_();
-    this.activateButton_ =
-      ampStoryPage && buildActivateButtonTemplate(ampStoryPage);
+    this.activateButton_ = ampStoryPage && renderActivateButtonTemplate();
 
-    this.activateButton_.querySelector(
-      '.i-amphtml-story-360-activate-text'
-    ).textContent = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
-    );
+    localizeTemplate(this.activateButton_, ampStoryPage);
 
     this.activateButton_.addEventListener('click', () =>
       this.requestGyroscopePermissions_()
@@ -674,16 +636,36 @@ export class AmpStory360 extends AMP.BaseElement {
     // Used to update the video in animate_.
     this.ampVideoEl_ = this.element.querySelector('amp-video');
 
+    const mediaEl = ampImgEl || this.ampVideoEl_;
     userAssert(
-      ampImgEl || this.ampVideoEl_,
+      mediaEl,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
+    if (mediaEl) {
+      this.setAccessibleText_(mediaEl);
+    }
 
     if (ampImgEl) {
       return this.setupAmpImgRenderer_(ampImgEl);
     }
     if (this.ampVideoEl_) {
       return this.setupAmpVideoRenderer_();
+    }
+  }
+
+  /**
+   * Puts a11y text on canvas element so it can be read by screen readers.
+   * The media element is hidden by CSS it no longer can read it.
+   * @param {!Element} mediaEl Either an amp-img or amp-video
+   * @private
+   */
+  setAccessibleText_(mediaEl) {
+    const altTags = ['alt', 'title', 'aria-label']; /** In order of priority. */
+    const altTag = altTags.find((attr) => mediaEl.getAttribute(attr));
+    if (altTag) {
+      const altText = mediaEl.getAttribute(altTag);
+      this.canvas_.setAttribute('role', 'img');
+      this.canvas_.setAttribute('aria-label', altText);
     }
   }
 
@@ -697,19 +679,16 @@ export class AmpStory360 extends AMP.BaseElement {
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() => ampImgEl.signals().whenSignal(CommonSignals_Enum.LOAD_END))
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.setupGlContextListeners_();
           this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
           this.initRenderer_();
         },
-        () => {
-          user().error(TAG, 'Failed to load the amp-img.');
-        }
+        () => user().error(TAG, 'Failed to load the amp-img.')
       );
   }
 
@@ -719,7 +698,9 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   setupAmpVideoRenderer_() {
     return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
-      .then(() => this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() =>
+        this.ampVideoEl_.signals().whenSignal(CommonSignals_Enum.LOAD_END)
+      )
       .then(() => {
         const alreadyHasData =
           dev().assertElement(this.ampVideoEl_.querySelector('video'))
@@ -732,26 +713,10 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.setupGlContextListeners_();
           this.initRenderer_();
         },
-        () => {
-          user().error(TAG, 'Failed to load the amp-video.');
-        }
+        () => user().error(TAG, 'Failed to load the amp-video.')
       );
-  }
-
-  /** @private */
-  setupGlContextListeners_() {
-    this.lostGlContext_ = this.renderer_.gl.getExtension('WEBGL_lose_context');
-    this.renderer_.canvas.addEventListener('webglcontextlost', (e) => {
-      // Calling preventDefault is necessary for restoring context.
-      e.preventDefault();
-      this.isReady_ = false;
-    });
-    this.renderer_.canvas.addEventListener('webglcontextrestored', () =>
-      this.initRenderer_()
-    );
   }
 
   /** @private */

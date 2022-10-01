@@ -1,9 +1,0 @@
-{
-  "packageRules": [
-    {
-      "packagePatterns": ["^@storybook/"],
-      "groupName": "@storybook major version hold",
-      "allowedVersions": "<6"
-    }
-  ]
-}

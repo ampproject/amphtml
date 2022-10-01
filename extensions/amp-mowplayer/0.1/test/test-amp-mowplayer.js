@@ -1,24 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-mowplayer';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
+import {listenOncePromise} from '#utils/event-helper';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
 const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
@@ -41,23 +28,24 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getMowPlayer(attributes) {
+    async function getMowPlayer(attributes) {
       const element = createElementWithAttributes(doc, 'amp-mowplayer', {
         width: 250,
         height: 180,
         ...attributes,
       });
       doc.body.appendChild(element);
-      element.implementation_.baseURL_ =
+      const impl = await element.getImpl(false);
+      impl.baseURL_ =
         // Use a blank page, since these tests don't require an actual page.
         // hash # at the end so path is not affected by param concat
         `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => {
           const iframe = element.querySelector('iframe');
-          element.implementation_.handleMowMessage_({
+          impl.handleMowMessage_({
             origin: 'https://mowplayer.com',
             source: iframe.contentWindow,
             data: JSON.stringify({event: 'onReady'}),
@@ -96,48 +84,51 @@ describes.realWin(
           const iframe = mp.querySelector('iframe');
 
           return Promise.resolve()
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.MUTED);
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: true});
+            .then(async () => {
+              const p = listenOncePromise(mp, VideoEvents_Enum.MUTED);
+              await sendFakeInfoDeliveryMessage(mp, iframe, {muted: true});
               return p;
             })
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.PLAYING);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 1});
+            .then(async () => {
+              const p = listenOncePromise(mp, VideoEvents_Enum.PLAYING);
+              await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 1});
               return p;
             })
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.PAUSE);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 2});
+            .then(async () => {
+              const p = listenOncePromise(mp, VideoEvents_Enum.PAUSE);
+              await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 2});
               return p;
             })
-            .then(() => {
-              const p = listenOncePromise(mp, VideoEvents.UNMUTED);
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
+            .then(async () => {
+              const p = listenOncePromise(mp, VideoEvents_Enum.UNMUTED);
+              await sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
               return p;
             })
-            .then(() => {
+            .then(async () => {
               // Should not send the unmute event twice if already sent once.
-              const p = listenOncePromise(mp, VideoEvents.UNMUTED).then(() => {
-                assert.fail('Should not have dispatch unmute message twice');
-              });
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
+              const p = listenOncePromise(mp, VideoEvents_Enum.UNMUTED).then(
+                () => {
+                  assert.fail('Should not have dispatch unmute message twice');
+                }
+              );
+              await sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
               const successTimeout = timer.promise(10);
               return Promise.race([p, successTimeout]);
             })
-            .then(() => {
+            .then(async () => {
               // Make sure pause and end are triggered when video ends.
-              const pEnded = listenOncePromise(mp, VideoEvents.ENDED);
-              const pPause = listenOncePromise(mp, VideoEvents.PAUSE);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 0});
+              const pEnded = listenOncePromise(mp, VideoEvents_Enum.ENDED);
+              const pPause = listenOncePromise(mp, VideoEvents_Enum.PAUSE);
+              await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 0});
               return Promise.all([pEnded, pPause]);
             });
         });
       });
     }
 
-    function sendFakeInfoDeliveryMessage(mp, iframe, info) {
-      mp.implementation_.handleMowMessage_({
+    async function sendFakeInfoDeliveryMessage(mp, iframe, info) {
+      const impl = await mp.getImpl(false);
+      impl.handleMowMessage_({
         origin: 'https://mowplayer.com',
         source: iframe.contentWindow,
         data: JSON.stringify({

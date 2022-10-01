@@ -1,31 +1,18 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {
-  createElementWithAttributes,
-  waitForChildPromise,
-} from '../../../../src/dom';
-import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/types';
-import {toggleExperiment} from '../../../../src/experiments';
-import {useStyles} from '../../../amp-base-carousel/1.0/base-carousel.jss';
-import {waitFor} from '../../../../testing/test-helper';
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
+
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
+import {setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {toggleExperiment} from '#experiments';
+
+import {ActionInvocation} from '#service/action-impl';
+
+import {waitFor} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
 
 describes.realWin(
   'amp-stream-gallery',
@@ -79,7 +66,7 @@ describes.realWin(
     }
 
     async function getSlideWrappersFromShadow() {
-      await element.build();
+      await element.buildInternal();
       const shadow = element.shadowRoot;
       await waitForChildPromise(shadow, (shadow) => {
         return shadow.querySelectorAll('[class*=hideScrollbar]');
@@ -99,7 +86,7 @@ describes.realWin(
       const wrappers = await getSlideWrappersFromShadow();
       const slots = Array.from(wrappers)
         .map((wrapper) => wrapper.querySelector('slot'))
-        .filter((slot) => !!slot);
+        .filter(Boolean);
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
         []
@@ -108,7 +95,7 @@ describes.realWin(
 
     it('should render slides and arrows when built', async () => {
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const renderedSlides = await getSlidesFromShadow();
       expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
@@ -126,7 +113,7 @@ describes.realWin(
       element.appendChild(customPrev);
       element.appendChild(customNext);
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const renderedSlides = await getSlidesFromShadow();
       expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
@@ -149,7 +136,7 @@ describes.realWin(
     it('should render in preparation for looping with loop prop', async () => {
       element.setAttribute('loop', '');
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const renderedSlideWrappers = await getSlideWrappersFromShadow();
       // Given slides [0][1][2] should be rendered as [2][0][1]. But [2] is
@@ -167,29 +154,21 @@ describes.realWin(
     });
 
     describe('imperative api', () => {
-      let scroller;
-      let slides;
-
       beforeEach(async () => {
         element.setAttribute('max-visible-count', '1');
         win.document.body.appendChild(element);
-        slides = await getSlidesFromShadow();
-
-        scroller = element.shadowRoot.querySelector(
-          `[class*=${styles.scrollContainer}]`
-        );
+        await element.buildInternal();
       });
 
       afterEach(() => {
         win.document.body.removeChild(element);
-        scroller = null;
       });
 
       function invocation(method, args = {}) {
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,
@@ -202,28 +181,64 @@ describes.realWin(
       }
 
       it('should execute next and prev actions', async () => {
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener('slideChange', eventSpy);
+
         element.enqueAction(invocation('next'));
-        await waitFor(
-          () => scroller.scrollLeft === slides[1].offsetLeft,
-          'advanced to next slide'
+        // These must wait longer than `waitFor` because of
+        // the render on debounced scrolling.
+        await poll(
+          'advanced to next slide',
+          () => eventSpy.callCount > 0,
+          null,
+          1000
         );
 
+        expect(eventSpy).to.be.calledOnce;
+        expect(eventSpy.firstCall).calledWithMatch({
+          'data': {
+            'index': 1,
+          },
+        });
+
         element.enqueAction(invocation('prev'));
-        await waitFor(
-          () => scroller.scrollLeft === slides[0].offsetLeft,
-          'returned to prev slide'
+        // These must wait longer than `waitFor` because of
+        // the render on debounced scrolling.
+        await poll(
+          'returned to prev slide',
+          () => eventSpy.callCount > 1,
+          null,
+          1000
         );
+        expect(eventSpy).to.be.calledTwice;
+        expect(eventSpy.secondCall).calledWithMatch({
+          'data': {
+            'index': 0,
+          },
+        });
       });
 
       it('should execute goToSlide action', async () => {
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener('slideChange', eventSpy);
+
         element.enqueAction(invocation('goToSlide', {index: 1}));
-        await waitFor(() => scroller.scrollLeft > 0, 'go to slide 1');
+        await waitFor(() => eventSpy.callCount > 0, 'go to slide 1');
+        expect(eventSpy).to.be.calledOnce;
+        expect(eventSpy.firstCall).calledWithMatch({
+          'data': {
+            'index': 1,
+          },
+        });
 
         element.enqueAction(invocation('goToSlide', {index: 0}));
-        await waitFor(
-          () => scroller.scrollLeft == 0,
-          'returned to first slide'
-        );
+        await waitFor(() => eventSpy.callCount > 1, 'returned to first slide');
+        expect(eventSpy).to.be.calledTwice;
+        expect(eventSpy.secondCall).calledWithMatch({
+          'data': {
+            'index': 0,
+          },
+        });
       });
     });
   }

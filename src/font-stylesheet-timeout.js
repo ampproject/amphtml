@@ -1,22 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {onDocumentReady} from '#core/document/ready';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 
-import {escapeCssSelectorIdent} from './css';
-import {onDocumentReady} from './document-ready';
-import {urls} from './config';
+import * as urls from './config/urls';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -69,7 +54,7 @@ function maybeTimeoutFonts(win) {
     // Find all stylesheets that aren't loaded from the AMP CDN (those are
     // critical if they are present).
     const styleLinkElements = win.document.querySelectorAll(
-      `link[rel~="stylesheet"]:not([href^="${escapeCssSelectorIdent(
+      `link[rel~="stylesheet"]:not([href^="https://translate.googleapis.com/translate_static/css/"]):not([href^="${escapeCssSelectorIdent(
         urls.cdn
       )}"])`
     );

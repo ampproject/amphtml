@@ -8,22 +8,6 @@ teaser:
   text: Allows rendering of Mustache templates.
 ---
 
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-mustache
 
 ## Version notes
@@ -45,7 +29,7 @@ Mustache is a logic-less template syntax. See [Mustache specification](http://mu
 ## Usage
 
 The `amp-mustache` template has to be defined and used according to the
-[AMP Template Spec](../../spec/amp-html-templates.md).
+[AMP Template Spec](../../docs/spec/amp-html-templates.md).
 
 First, the `amp-mustache` has to be declared/loaded like this:
 
@@ -90,7 +74,19 @@ that among other things, you can't use `amp-mustache` to:
 -   Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
 -   Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 
-The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `amp-list`, `b`, `br`, `caption`, `col`, `colgroup`, `code`, `del`, `div`, `em`, `h1`, `h2`, `h3`, `hr`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
+The output of "triple-mustache" is sanitized to only allow the following tags:
+
+[filter formats="websites, ads"]
+
+`a`, `amp-img`, `article`, `aside`, `b`, `blockquote`, `br`, `caption`, `code`, `col`, `colgroup`, `dd`, `del`, `details`, `div`, `dl`, `dt`, `em`, `figcaption`, `figure`, `footer`, `h1`, `h2`, `h3`, `header`, `hr`, `i`, `ins`, `li`, `main`, `mark`, `nav`, `ol`, `p`, `pre`, `q`, `s`, `section`, `small`, `span`, `strong`, `sub`, `summary`, `sup`, `table`, `tbody`, `td`, `tfoot`, `th`, `thead`, `time`, `tr`, `u`, `ul`.
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+`a`, `article`, `aside`, `b`, `blockquote`, `br`, `caption`, `code`, `col`, `colgroup`, `dd`, `del`, `details`, `div`, `dl`, `dt`, `em`, `figcaption`, `figure`, `footer`, `h1`, `h2`, `h3`, `header`, `hr`, `i`, `ins`, `li`, `main`, `mark`, `nav`, `ol`, `p`, `pre`, `q`, `s`, `section`, `small`, `span`, `strong`, `sub`, `summary`, `sup`, `table`, `tbody`, `td`, `tfoot`, `th`, `thead`, `time`, `tr`, `u`, `ul`.
+
+[/filter]<!-- formats="email" -->
 
 ### Sanitization
 
@@ -189,4 +185,4 @@ Workarounds include replacing strings like {% raw %}`{{`{% endraw %} with differ
 
 ## Validation
 
-See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.
+See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.

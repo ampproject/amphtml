@@ -1,25 +1,13 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Layout_Enum} from '#core/dom/layout';
+import {realChildElements, realChildNodes} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {dev, userAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
-import {setStyle} from '../../../src/style';
 
 const TAG = 'amp-fx-flying-carpet';
 
@@ -62,7 +50,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout == Layout_Enum.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -75,10 +63,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 
-    this.children_ = this.getRealChildren();
+    this.children_ = realChildElements(this.element);
     this.container_ = container;
 
-    const childNodes = this.getRealChildNodes();
+    const childNodes = realChildNodes(this.element);
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
     const owners = Services.ownersForDoc(this.element);
@@ -155,7 +143,26 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this.children_
     );
     this.observeNewChildren_();
+    this.forceClipDraw_();
     return Promise.resolve();
+  }
+
+  /**
+   * Something causes browsers to forget to redraw the content of the container when they become visible.
+   * @private
+   */
+  forceClipDraw_() {
+    const inob = new this.win.IntersectionObserver(
+      (entries) => {
+        const last = entries[entries.length - 1];
+        this.container_.classList.toggle(
+          'i-amphtml-fx-flying-carpet-container-fix',
+          last.isIntersecting
+        );
+      },
+      {threshold: 0.01}
+    );
+    inob.observe(this.element);
   }
 
   /**
@@ -177,7 +184,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
           }
           node
             .signals()
-            .whenSignal(CommonSignals.BUILT)
+            .whenSignal(CommonSignals_Enum.BUILT)
             .then(this.layoutBuiltChild_.bind(this, node));
         }
       }

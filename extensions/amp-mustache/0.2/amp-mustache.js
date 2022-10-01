@@ -1,27 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {templateContentClone} from '#core/dom';
+
+import {Purifier} from '#purifier';
+
+import {user} from '#utils/log';
+
+import mustache from '#third_party/mustache/mustache';
 
 import {BaseTemplate} from '../../../src/base-template';
-import {Purifier} from '../../../src/purifier/purifier';
-import {dict} from '../../../src/utils/object';
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
@@ -40,7 +27,7 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     registerServiceBuilder(win, 'purifier', function () {
-      return new Purifier(win.document, dict(), rewriteAttributeValue);
+      return new Purifier(win.document, {}, rewriteAttributeValue);
     });
     /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
@@ -60,7 +47,7 @@ export class AmpMustache extends BaseTemplate {
       return;
     }
     /** @private @const {!JsonObject} */
-    this.nestedTemplates_ = dict();
+    this.nestedTemplates_ = {};
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
@@ -101,7 +88,7 @@ export class AmpMustache extends BaseTemplate {
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');
-    iterateCursor(templates, (template, index) => {
+    templates.forEach((template, index) => {
       const key = `__AMP_NESTED_TEMPLATE_${index}`;
 
       // Store the nested template markup, keyed by index.

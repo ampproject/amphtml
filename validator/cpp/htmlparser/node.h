@@ -1,21 +1,5 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#ifndef HTMLPARSER__NODE_H_
-#define HTMLPARSER__NODE_H_
+#ifndef CPP_HTMLPARSER_NODE_H_
+#define CPP_HTMLPARSER_NODE_H_
 
 #include <deque>
 #include <memory>
@@ -26,9 +10,9 @@
 #include <utility>
 #include <vector>
 
-#include "atom.h"
-#include "error.h"
-#include "token.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/error.h"
+#include "cpp/htmlparser/token.h"
 
 namespace htmlparser {
 
@@ -55,7 +39,8 @@ enum class NodeType {
 // "svg" is short for "http://www.w3.org/2000/svg".
 class Node {
  public:
-  Node(NodeType node_type, Atom atom = Atom::UNKNOWN);
+  Node(NodeType node_type, Atom atom = Atom::UNKNOWN,
+       std::string name_space = "");
   ~Node() = default;
 
   // Allows move.
@@ -70,6 +55,7 @@ class Node {
   void AddAttribute(const Attribute& attr);
   // Sorts the attributes of this node.
   void SortAttributes(bool remove_duplicates = false);
+  void DropDuplicateAttributes();
 
   // Updates child nodes line and column numbers relative to the given node.
   // This does not change order or parent/child relationship of this or child
@@ -86,8 +72,11 @@ class Node {
   Atom DataAtom() const { return atom_; }
   std::string_view NameSpace() const { return name_space_; }
   // Returns nullopt if ParseOptions.store_node_offsets is not set.
-  std::optional<LineCol> PositionInHtmlSrc() const {
-    return position_in_html_src_;
+  std::optional<LineCol> LineColInHtmlSrc() const {
+    return line_col_in_html_src_;
+  }
+  int NumTerms() const {
+    return num_terms_;
   }
 
   const std::vector<Attribute>& Attributes() const { return attributes_; }
@@ -136,10 +125,7 @@ class Node {
 
   // True, if this node is manufactured by parser as per HTML5 specification.
   // Currently, this applies only to HTML, HEAD and BODY tags.
-  // TODO: Implement this for all manufactured tags.
-  bool IsManufactured() const {
-    return is_manufactured_;
-  }
+  bool IsManufactured() const { return is_manufactured_; }
 
   // Debug/Logging utils.
   // Outputs node debug info.
@@ -155,7 +141,10 @@ class Node {
   std::string data_;
   std::string name_space_;
   // Position at which this node appears in HTML source.
-  std::optional<LineCol> position_in_html_src_;
+  std::optional<LineCol> line_col_in_html_src_;
+  // Records the number of terms for text contents.
+  // Populated and meaningful only if node is of type TEXT_NODE.
+  int num_terms_ = -1;
   std::vector<Attribute> attributes_{};
   Node* first_child_ = nullptr;
   Node* next_sibling_ = nullptr;
@@ -189,17 +178,13 @@ class NodeStack {
 
   // Allows iterator like access to elements in stack_.
   // Since this is a stack. It returns reverse iterator.
-  std::deque<Node*>::const_reverse_iterator begin() {
-    return stack_.rbegin();
-  }
+  std::deque<Node*>::const_reverse_iterator begin() { return stack_.rbegin(); }
 
   std::deque<Node*>::const_reverse_iterator begin() const {
     return stack_.rbegin();
   }
 
-  std::deque<Node*>::const_reverse_iterator end() {
-    return stack_.rend();
-  }
+  std::deque<Node*>::const_reverse_iterator end() { return stack_.rend(); }
 
   std::deque<Node*>::const_reverse_iterator end() const {
     return stack_.rend();
@@ -247,4 +232,4 @@ std::optional<Error> CheckNodeConsistency(Node* node);
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__NODE_H_
+#endif  // CPP_HTMLPARSER_NODE_H_

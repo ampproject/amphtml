@@ -1,29 +1,29 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const {
   verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
+} = require('../../../build-system/tasks/visual-diff/verifiers');
+
+function toggleScrollable(page, toggle) {
+  return page.evaluate((toggle) => {
+    if (toggle) {
+      document.querySelector('html').style.removeProperty('overflow');
+    } else {
+      document.querySelector('html').style.overflow = 'hidden';
+    }
+  }, toggle);
+}
 
 async function scroll(page, _, target = 'bottom') {
+  await toggleScrollable(page, true);
+
   await page.tap(`#scroll-${target}-button`);
 
   // Scrolling takes 500ms as defined by the runtime, and leeway.
   await page.waitForTimeout(700);
+
+  // Ensures that scrollbar is hidden before capture.
+  await toggleScrollable(page, false);
 }
 
 async function dock(page, name) {
@@ -89,16 +89,18 @@ const testControlsActivatedBy = (tapOrHover) => ({
     await page.tap('.amp-video-docked-unmute');
   },
 
-  [`displays scrollback button on ad (controls on ${tapOrHover})`]: async (
-    page,
-    name
-  ) => {
-    await dock(page, name);
-    await activateControlsBy(page, name, tapOrHover);
-    await verifySelectorsVisible(page, name, [
-      '.amp-video-docked-control-set-scroll-back',
-    ]);
-  },
+  // TODO(#32684, @ampproject/wg-components): fix flaky test.
+  // See https://percy.io/ampproject/amphtml/builds/8876280/changed/503549685
+  // [`displays scrollback button on ad (controls on ${tapOrHover})`]: async (
+  //   page,
+  //   name
+  // ) => {
+  //   await dock(page, name);
+  //   await activateControlsBy(page, name, tapOrHover);
+  //   await verifySelectorsVisible(page, name, [
+  //     '.amp-video-docked-control-set-scroll-back',
+  //   ]);
+  // },
 });
 
 module.exports = {

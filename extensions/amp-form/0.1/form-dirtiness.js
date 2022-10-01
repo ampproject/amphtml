@@ -1,25 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
+import {map} from '#core/types/object';
 
-import {AmpEvents} from '../../../src/amp-events';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {dev} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
@@ -116,8 +102,8 @@ export class FormDirtiness {
 
       const formDirtinessChangeEvent = createCustomEvent(
         this.win_,
-        AmpEvents.FORM_DIRTINESS_CHANGE,
-        dict({'isDirty': isDirty}),
+        AmpEvents_Enum.FORM_DIRTINESS_CHANGE,
+        {'isDirty': isDirty},
         {bubbles: true}
       );
       this.form_.dispatchEvent(formDirtinessChangeEvent);
@@ -136,7 +122,7 @@ export class FormDirtiness {
     // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
     // mutates the value of a form field (e.g. textarea, input, etc)
     this.form_.addEventListener(
-      AmpEvents.FORM_VALUE_CHANGE,
+      AmpEvents_Enum.FORM_VALUE_CHANGE,
       this.onInput_.bind(this)
     );
   }
@@ -251,7 +237,7 @@ export class FormDirtiness {
  * @return {boolean}
  */
 function shouldSkipDirtinessCheck(field) {
-  const {tagName, name, hidden} = field;
+  const {hidden, name, tagName} = field;
 
   if (!SUPPORTED_TAG_NAMES[tagName]) {
     return true;

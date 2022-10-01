@@ -1,27 +1,21 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssertElement} from '#core/assert';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {tryFocus} from '#core/dom';
+import {Layout_Enum, getLayoutClass} from '#core/dom/layout';
+import {computedStyle, toggle} from '#core/dom/style';
+import {isFiniteNumber} from '#core/types';
+import {getWin} from '#core/window';
+import {
+  copyTextToClipboard,
+  isCopyingToClipboardSupported,
+} from '#core/window/clipboard';
 
-import {ActionTrust} from '../action-constants';
-import {Layout, getLayoutClass} from '../layout';
-import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
-import {dev, user, userAssert} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
-import {isFiniteNumber, toWin} from '../types';
-import {tryFocus} from '../dom';
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element} element
@@ -76,6 +70,8 @@ export class StandardActions {
     // Explicitly not setting `Action` as a member to scope installation to one
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
+
+    this.initThemeMode_();
   }
 
   /**
@@ -108,6 +104,49 @@ export class StandardActions {
       'toggleClass',
       this.handleToggleClass_.bind(this)
     );
+
+    actionService.addGlobalMethodHandler('copy', this.handleCopy_.bind(this));
+
+    actionService.addGlobalMethodHandler(
+      'toggleChecked',
+      this.handleToggleChecked_.bind(this)
+    );
+  }
+
+  /**
+   * Handles initiliazing the theme mode.
+   *
+   * This methode needs to be called on page load to set the `amp-dark-mode`
+   * class on the body if the user prefers the dark mode.
+   */
+  initThemeMode_() {
+    if (this.prefersDarkMode_()) {
+      this.ampdoc.waitForBodyOpen().then((body) => {
+        const darkModeClass =
+          body.getAttribute('data-prefers-dark-mode-class') || 'amp-dark-mode';
+
+        body.classList.add(darkModeClass);
+      });
+    }
+  }
+
+  /**
+   * Checks whether the user prefers dark mode based on local storage and
+   * user's operating systen settings.
+   *
+   * @return {boolean}
+   */
+  prefersDarkMode_() {
+    try {
+      const themeMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
+
+      if (themeMode) {
+        return 'yes' === themeMode;
+      }
+    } catch (e) {}
+
+    // LocalStorage may not be accessible
+    return this.ampdoc.win.matchMedia?.('(prefers-color-scheme: dark)').matches;
   }
 
   /**
@@ -120,16 +159,18 @@ export class StandardActions {
    */
   handleAmpTarget_(invocation) {
     // All global `AMP` actions require default trust.
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
-    const {node, method, args} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const {args, method, node} = invocation;
+    const win = getWin(node);
     switch (method) {
       case 'pushState':
       case 'setState':
         const element =
-          node.nodeType === Node.DOCUMENT_NODE ? node.documentElement : node;
+          node.nodeType === Node.DOCUMENT_NODE
+            ? /** @type {!Document} */ (node).documentElement
+            : dev().assertElement(node);
         return Services.bindForDocOrNull(element).then((bind) => {
           userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
@@ -159,14 +200,100 @@ export class StandardActions {
         win.print();
         return null;
 
+      case 'copy':
+        return this.handleCopy_(invocation);
+
       case 'optoutOfCid':
         return Services.cidForDoc(this.ampdoc)
           .then((cid) => cid.optOut())
           .catch((reason) => {
             dev().error(TAG, 'Failed to opt out of CID', reason);
           });
+      case 'toggleTheme':
+        this.handleToggleTheme_();
+        return null;
     }
     throw user().createError('Unknown AMP action ', method);
+  }
+
+  /**
+   * Handles the copy to clipboard action
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleCopy_(invocation) {
+    const {args, node} = invocation;
+    const win = getWin(node);
+
+    /** @enum {string} */
+    const CopyEvents = {
+      COPY_ERROR: 'copy-error',
+      COPY_SUCCESS: 'copy-success',
+    };
+    let textToCopy;
+
+    if (invocation.tagOrTarget === 'AMP') {
+      //
+      // Copy Static Text
+      //  Example: AMP.copy(text='TextToCopy');
+      //
+      textToCopy = args['text'].trim();
+    } else {
+      //
+      // Copy Target Element Text
+      //  Example: targetId.copy();
+      //
+      const target = devAssertElement(invocation.node);
+      textToCopy = (target.value ?? target.textContent).trim();
+    }
+
+    /**
+     * Raises a status event for copy task result
+     * @param {string} eventName
+     * @param {string} eventResult
+     * @param {!./action-impl.ActionInvocation} invocation
+     */
+    const triggerEvent = function (eventName, eventResult, invocation) {
+      const eventValue = /** @type {!JsonObject} */ ({
+        data: /** @type {!JsonObject} */ {type: eventResult},
+      });
+      const copyEvent = createCustomEvent(win, `${eventName}`, eventValue);
+
+      const action_ = Services.actionServiceForDoc(invocation.caller);
+      action_.trigger(
+        invocation.caller,
+        eventName,
+        copyEvent,
+        ActionTrust_Enum.HIGH
+      );
+    };
+
+    //
+    // Trigger Event based on copy action
+    //  - If content got copied to the clipboard successfully, it will
+    //    fire `copy-success` event with data type `success`.
+    //  - If there's any error in copying, it will
+    //    fire `copy-error` event with data type `error`.
+    //  - If browser is not supporting the copy function/action, it
+    //    will fire `copy-error` event with data type `browser`.
+    //
+    //  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
+    //
+    if (isCopyingToClipboardSupported(win.document)) {
+      copyTextToClipboard(
+        win,
+        textToCopy,
+        () => {
+          triggerEvent(CopyEvents.COPY_SUCCESS, 'success', invocation);
+        },
+        () => {
+          // Error encountered while copying.
+          triggerEvent(CopyEvents.COPY_ERROR, 'error', invocation);
+        }
+      );
+    } else {
+      // Copy is disabled or not supported by user.
+      triggerEvent(CopyEvents.COPY_ERROR, 'unsupported', invocation);
+    }
   }
 
   /**
@@ -176,12 +303,13 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleNavigateTo_(invocation) {
-    const {node, caller, method, args} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const {args, caller, method, node} = invocation;
+    const win = getWin(node);
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();
     if (caller.tagName.startsWith('AMP-')) {
-      permission = caller.getImpl().then((impl) => {
+      const ampElement = /** @type {!AmpElement} */ (caller);
+      permission = ampElement.getImpl().then((impl) => {
         if (typeof impl.throwIfCannotNavigate == 'function') {
           impl.throwIfCannotNavigate();
         }
@@ -197,9 +325,33 @@ export class StandardActions {
         );
       },
       /* onrejected */ (e) => {
-        user().error(TAG, e.message);
+        user().error(TAG, e);
       }
     );
+  }
+
+  /**
+   * Handles the `toggleTheme` action.
+   *
+   * This action sets the `amp-dark-mode` class on the body element and stores the the preference for dark mode in localstorage.
+   */
+  handleToggleTheme_() {
+    this.ampdoc.waitForBodyOpen().then((body) => {
+      try {
+        const darkModeClass =
+          body.getAttribute('data-prefers-dark-mode-class') || 'amp-dark-mode';
+
+        if (this.prefersDarkMode_()) {
+          body.classList.remove(darkModeClass);
+          this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'no');
+        } else {
+          body.classList.add(darkModeClass);
+          this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
+        }
+      } catch (e) {
+        // LocalStorage may not be accessible.
+      }
+    });
   }
 
   /**
@@ -215,7 +367,7 @@ export class StandardActions {
    */
   handleCloseOrNavigateTo_(invocation) {
     const {node} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const win = getWin(node);
 
     // Don't allow closing if embedded in iframe or does not have an opener or
     // embedded in a multi-doc shadowDOM case.
@@ -298,9 +450,10 @@ export class StandardActions {
     const target = dev().assertElement(invocation.node);
 
     if (target.classList.contains('i-amphtml-element')) {
+      const ampElement = /** @type {!AmpElement} */ (target);
       this.mutator_.mutateElement(
-        target,
-        () => target./*OK*/ collapse(),
+        ampElement,
+        () => ampElement./*OK*/ collapse(),
         // It is safe to skip measuring, because `mutator-impl.collapseElement`
         // will set the size of the element as well as trigger a remeasure of
         // everything below the collapsed element.
@@ -323,9 +476,9 @@ export class StandardActions {
   handleShow_(invocation) {
     const {node} = invocation;
     const target = dev().assertElement(node);
-    const ownerWindow = toWin(target.ownerDocument.defaultView);
+    const ownerWindow = getWin(target);
 
-    if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
+    if (target.classList.contains(getLayoutClass(Layout_Enum.NODISPLAY))) {
       user().warn(
         TAG,
         'Elements with layout=nodisplay cannot be dynamically shown.',
@@ -370,7 +523,8 @@ export class StandardActions {
    */
   handleShowSync_(target, autofocusElOrNull) {
     if (target.classList.contains('i-amphtml-element')) {
-      target./*OK*/ expand();
+      const ampElement = /** @type {!AmpElement} */ (target);
+      ampElement./*OK*/ expand();
     } else {
       toggle(target, true);
     }
@@ -420,6 +574,36 @@ export class StandardActions {
         target.classList.toggle(className, shouldForce);
       } else {
         target.classList.toggle(className);
+      }
+    });
+
+    return null;
+  }
+
+  /**
+   * Handles "toggleChecked" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private Visible to tests only.
+   */
+  handleToggleChecked_(invocation) {
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
+
+    this.mutator_.mutateElement(target, () => {
+      if (args?.['force'] !== undefined) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(
+          args['force'],
+          "Optional argument 'force' must be a boolean."
+        );
+        target.checked = shouldForce;
+      } else {
+        if (target.checked === true) {
+          target.checked = false;
+        } else {
+          target.checked = true;
+        }
       }
     });
 

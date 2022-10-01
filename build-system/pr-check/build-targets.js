@@ -1,18 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
@@ -21,17 +6,28 @@
  * determine which tasks are required to run for pull request builds.
  */
 const config = require('../test-configs/config');
+const fastGlob = require('fast-glob');
+const fs = require('fs');
+const json5 = require('json5');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {gitDiffNameOnlyMaster} = require('../common/git');
+const {gitDiffNameOnlyMain} = require('../common/git');
+const {ignoreListFiles} = require('../tasks/check-ignore-lists');
 const {isCiBuild} = require('../common/ci');
+const {shouldTriggerAva} = require('../tasks/ava');
 
 /**
  * Used to prevent the repeated recomputing of build targets during PR jobs.
  */
-const buildTargets = new Set();
+let buildTargets;
+
+/**
+ * Used to prevent the repeated expansion of globs during PR jobs.
+ */
+const fileLists = {};
+const jsonFilesWithSchemas = [];
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -41,13 +37,21 @@ const buildTargets = new Set();
 const Targets = {
   AVA: 'AVA',
   BABEL_PLUGIN: 'BABEL_PLUGIN',
-  CACHES_JSON: 'CACHES_JSON',
+  BUILD_SYSTEM: 'BUILD_SYSTEM',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
+  DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
-  FLAG_CONFIG: 'FLAG_CONFIG',
+  HTML_FIXTURES: 'HTML_FIXTURES',
+  IGNORE_LIST: 'IGNORE_LIST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
+  INVALID_WHITESPACES: 'INVALID_WHITESPACES',
+  JSON_FILES: 'JSON_FILES',
+  LINT: 'LINT',
+  LINT_RULES: 'LINT_RULES',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
+  PRESUBMIT: 'PRESUBMIT',
+  PRETTIFY: 'PRETTIFY',
   RENOVATE_CONFIG: 'RENOVATE_CONFIG',
   RUNTIME: 'RUNTIME',
   SERVER: 'SERVER',
@@ -56,6 +60,26 @@ const Targets = {
   VALIDATOR_WEBUI: 'VALIDATOR_WEBUI',
   VISUAL_DIFF: 'VISUAL_DIFF',
 };
+
+/**
+ * Files matching these targets are known not to affect the runtime. For all
+ * other targets, we play safe and default to adding the RUNTIME target, which
+ * will trigger all the runtime tests.
+ */
+const nonRuntimeTargets = [
+  Targets.AVA,
+  Targets.DEV_DASHBOARD,
+  Targets.DOCS,
+  Targets.E2E_TEST,
+  Targets.IGNORE_LIST,
+  Targets.INTEGRATION_TEST,
+  Targets.OWNERS,
+  Targets.RENOVATE_CONFIG,
+  Targets.UNIT_TEST,
+  Targets.VALIDATOR,
+  Targets.VALIDATOR_WEBUI,
+  Targets.VISUAL_DIFF,
+];
 
 /**
  * Checks if the given file is an OWNERS file.
@@ -68,7 +92,7 @@ function isOwnersFile(file) {
 }
 
 /**
- * Checks if the given file is of the form validator-.*\.(html|out|protoascii)
+ * Checks if the given file is of the form validator-.*\.(html|out|out.cpponly|protoascii)
  *
  * @param {string} file
  * @return {boolean}
@@ -78,6 +102,7 @@ function isValidatorFile(file) {
   return (
     name.startsWith('validator-') &&
     (name.endsWith('.out') ||
+      name.endsWith('.out.cpponly') ||
       name.endsWith('.html') ||
       name.endsWith('.protoascii'))
   );
@@ -85,18 +110,15 @@ function isValidatorFile(file) {
 
 /**
  * A dictionary of functions that match a given file to a given build target.
+ * Owners files are special because they live all over the repo, so most target
+ * matchers must first make sure they're not matching an owners file.
  */
 const targetMatchers = {
   [Targets.AVA]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
-    return (
-      file == 'build-system/tasks/ava.js' ||
-      file.startsWith('build-system/tasks/csvify-size/') ||
-      file.startsWith('build-system/tasks/get-zindex/') ||
-      file.startsWith('build-system/tasks/prepend-global/')
-    );
+    return shouldTriggerAva(file);
   },
   [Targets.BABEL_PLUGIN]: (file) => {
     if (isOwnersFile(file)) {
@@ -113,23 +135,17 @@ const targetMatchers = {
       file.startsWith('build-system/babel-config/')
     );
   },
-  [Targets.CACHES_JSON]: (file) => {
+  [Targets.BUILD_SYSTEM]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return (
-      file == 'build-system/tasks/caches-json.js' ||
-      file == 'build-system/global-configs/caches.json'
-    );
-  },
-  [Targets.DEV_DASHBOARD]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return (
-      file == 'build-system/tasks/dev-dashboard-tests.js' ||
-      file == 'build-system/server/app.js' ||
-      file.startsWith('build-system/server/app-index/')
+      file == 'build-system/tasks/check-build-system.js' ||
+      file == 'build-system/tsconfig.json' ||
+      (file.startsWith('build-system') &&
+        (file.endsWith('.js') ||
+          file.endsWith('.ts') ||
+          file.endsWith('.json')))
     );
   },
   [Targets.DOCS]: (file) => {
@@ -137,8 +153,9 @@ const targetMatchers = {
       return false;
     }
     return (
+      fileLists.linkCheckFiles.includes(file) ||
       file == 'build-system/tasks/check-links.js' ||
-      (path.extname(file) == '.md' && !file.startsWith('examples/'))
+      file.startsWith('build-system/tasks/markdown-toc/')
     );
   },
   [Targets.E2E_TEST]: (file) => {
@@ -152,11 +169,19 @@ const targetMatchers = {
       })
     );
   },
-  [Targets.FLAG_CONFIG]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return file.startsWith('build-system/global-configs/');
+  [Targets.HTML_FIXTURES]: (file) => {
+    return (
+      fileLists.htmlFixtureFiles.includes(file) ||
+      file == 'build-system/tasks/validate-html-fixtures.js' ||
+      file.startsWith('build-system/test-configs')
+    );
+  },
+  [Targets.IGNORE_LIST]: (file) => {
+    return (
+      ignoreListFiles.includes(file) ||
+      file === 'build-system/tasks/check-ignore-lists.js' ||
+      file === 'build-system/tasks/clean.js'
+    );
   },
   [Targets.INTEGRATION_TEST]: (file) => {
     if (isOwnersFile(file)) {
@@ -171,11 +196,68 @@ const targetMatchers = {
       })
     );
   },
+  [Targets.INVALID_WHITESPACES]: (file) => {
+    return (
+      fileLists.invalidWhitespaceFiles.includes(file) ||
+      file == 'build-system/tasks/check-invalid-whitespaces.js' ||
+      file.startsWith('build-system/test-configs')
+    );
+  },
+  [Targets.JSON_FILES]: (file) => {
+    return (
+      jsonFilesWithSchemas.includes(file) ||
+      file == 'build-system/tasks/check-json-schemas.js' ||
+      file == '.vscode/settings.json'
+    );
+  },
+  [Targets.LINT]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      fileLists.lintFiles.includes(file) ||
+      file == 'build-system/tasks/lint.js' ||
+      file.startsWith('build-system/test-configs')
+    );
+  },
+  [Targets.LINT_RULES]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file.startsWith('build-system/eslint-rules') ||
+      file.endsWith('.eslintrc.js') ||
+      file == '.eslintignore' ||
+      file == '.prettierrc' ||
+      file == '.prettierignore' ||
+      file == 'build-system/test-configs/forbidden-terms.js' ||
+      file == 'package.json'
+    );
+  },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
   [Targets.PACKAGE_UPGRADE]: (file) => {
-    return file == 'package.json' || file == 'package-lock.json';
+    return file.endsWith('package.json') || file.endsWith('package-lock.json');
+  },
+  [Targets.PRESUBMIT]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      fileLists.presubmitFiles.includes(file) ||
+      file == 'build-system/tasks/presubmit-checks.js' ||
+      file.startsWith('build-system/test-configs')
+    );
+  },
+  [Targets.PRETTIFY]: (file) => {
+    // OWNERS files can be prettified.
+    return (
+      fileLists.prettifyFiles.includes(file) ||
+      file == '.prettierrc' ||
+      file == '.prettierignore' ||
+      file == 'build-system/tasks/prettify.js'
+    );
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
     return (
@@ -237,7 +319,7 @@ const targetMatchers = {
     return (
       file.startsWith('build-system/tasks/visual-diff/') ||
       file.startsWith('examples/visual-tests/') ||
-      file == 'test/visual-diff/visual-tests'
+      file == 'test/visual-diff/visual-tests.jsonc'
     );
   },
 };
@@ -249,21 +331,25 @@ const targetMatchers = {
  * @return {Set<string>}
  */
 function determineBuildTargets() {
-  if (buildTargets.size > 0) {
+  if (buildTargets != undefined) {
     return buildTargets;
   }
-  const filesChanged = gitDiffNameOnlyMaster();
+  expandFileLists();
+  buildTargets = new Set();
+  const filesChanged = gitDiffNameOnlyMain();
   for (const file of filesChanged) {
-    let matched = false;
+    let isRuntimeFile = true;
     Object.keys(targetMatchers).forEach((target) => {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
-        matched = true;
+        if (nonRuntimeTargets.includes(target)) {
+          isRuntimeFile = false;
+        }
       }
     });
-    if (!matched) {
-      buildTargets.add(Targets.RUNTIME); // Default to RUNTIME for files that don't match a target.
+    if (isRuntimeFile) {
+      buildTargets.add(Targets.RUNTIME);
     }
   }
   const loggingPrefix = getLoggingPrefix();
@@ -271,15 +357,11 @@ function determineBuildTargets() {
     `${loggingPrefix} Detected build targets:`,
     cyan(Array.from(buildTargets).sort().join(', '))
   );
-  // Test the runtime for babel plugin and server changes.
-  if (
-    buildTargets.has(Targets.BABEL_PLUGIN) ||
-    buildTargets.has(Targets.SERVER)
-  ) {
-    buildTargets.add(Targets.RUNTIME);
-  }
   // Test all targets during CI builds for package upgrades.
   if (isCiBuild() && buildTargets.has(Targets.PACKAGE_UPGRADE)) {
+    logWithoutTimestamp(
+      `${loggingPrefix} Running all tests since this PR contains package upgrades...`
+    );
     const allTargets = Object.keys(targetMatchers);
     allTargets.forEach((target) => buildTargets.add(target));
   }
@@ -297,6 +379,41 @@ function buildTargetsInclude(...targets) {
     determineBuildTargets();
   }
   return Array.from(targets).some((target) => buildTargets.has(target));
+}
+
+/**
+ * Helper that expands some of the config globs used to match files. Called once
+ * at the start in order to avoid repeated glob expansion.
+ */
+function expandFileLists() {
+  const globNames = [
+    'htmlFixtureGlobs',
+    'invalidWhitespaceGlobs',
+    'linkCheckGlobs',
+    'lintGlobs',
+    'presubmitGlobs',
+    'prettifyGlobs',
+  ];
+  for (const globName of globNames) {
+    const fileListName = globName.replace('Globs', 'Files');
+    fileLists[fileListName] = fastGlob.sync(config[globName], {dot: true});
+  }
+
+  const vscodeSettings = json5.parse(
+    fs.readFileSync('.vscode/settings.json', 'utf8')
+  );
+  /** @type {Array<{fileMatch: string[], url: string}>} */
+  const schemas = vscodeSettings['json.schemas'];
+  const jsonGlobs = schemas.flatMap(({fileMatch, url}) => [
+    ...fileMatch,
+    path.normalize(url),
+  ]);
+  jsonFilesWithSchemas.push(
+    fastGlob.sync(jsonGlobs, {
+      dot: true,
+      ignore: ['**/node_modules'],
+    })
+  );
 }
 
 module.exports = {

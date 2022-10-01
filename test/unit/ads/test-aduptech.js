@@ -1,25 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import * as _3p from '../../../3p/3p';
+import * as _3p from '#3p/3p';
+
 import {
   ADUPTECH_API_URL,
   ADUPTECH_ELEMENT_ID,
   aduptech,
-} from '../../../ads/aduptech';
-import {createIframePromise} from '../../../testing/iframe';
+} from '#ads/vendors/aduptech';
+
+import {createIframePromise} from '#testing/iframe';
 
 describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
   let win;
@@ -100,7 +87,7 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
       query: 'foo;bar',
       pageurl: 'http://www.adup-tech.com',
       gdpr: '0',
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       gdpr_consent: 'crazyConsentString',
       adtest: '1',
     });
@@ -109,7 +96,7 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
       adtest: '1',
       amp: true,
       gdpr: '0',
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       gdpr_consent: 'crazyConsentString',
       mincpc: '0.33',
       onAds: env.sandbox.match.func,
@@ -152,7 +139,7 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
     aduptech(win, {
       placementkey: 'crazyPlacementKey',
       gdpr: true,
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       gdpr_consent: 'customConsentString',
     });
 

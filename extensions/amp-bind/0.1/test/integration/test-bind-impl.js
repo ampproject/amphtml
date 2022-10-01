@@ -1,54 +1,55 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
  * because it requires building web-worker binary.
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../../../../src/amp-events';
-import {Bind} from '../../bind-impl';
-import {BindEvents} from '../../bind-events';
-import {Deferred} from '../../../../../src/utils/promise';
-import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
-import {Services} from '../../../../../src/services';
+
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
+
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
-import {dev, user} from '../../../../../src/log';
-import {toArray} from '../../../../../src/types';
+import {BindEvents} from '../../bind-events';
+import {Bind} from '../../bind-impl';
 
 /**
  * @param {!Object} env
  * @param {?Element} container
  * @param {string} binding
- * @param {string=} opt_tag Tag name of element (default is <p>).
- * @param {boolean=} opt_amp Is this an AMP element?
- * @param {boolean=} opt_head Add element to document <head>?
+ * @param {string=} opts.tag Tag name of element (default is <p>).
+ * @param {boolean=} opts.amp Is this an AMP element?
+ * @param {boolean=} opts.insertInHead Add element to document <head>?
+ * @param {boolean=} opts.insertQuerySelectorAttr Add i-amphtml-binding attribute to element?
  * @return {!Element}
  */
-function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
-  const tag = opt_tag || 'p';
+function createElement(env, container, binding, opts = {}) {
+  const {
+    amp = false,
+    insertInHead = false,
+    insertQuerySelectorAttr = false,
+    tag = 'p',
+  } = opts;
   const div = env.win.document.createElement('div');
   div.innerHTML = `<${tag} ${binding}></${tag}>`;
   const element = div.firstElementChild;
-  if (opt_amp) {
+
+  if (amp) {
     element.className = 'i-amphtml-foo -amp-foo amp-foo';
+
     element.mutatedAttributesCallback = () => {};
   }
-  if (opt_head) {
+
+  if (insertQuerySelectorAttr) {
+    element.setAttribute('i-amphtml-binding', '');
+  }
+
+  if (insertInHead) {
     env.win.document.head.appendChild(element);
   } else if (container) {
     container.appendChild(element);
@@ -65,7 +66,9 @@ function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
 function addAmpState(env, container, id, fetchingPromise) {
   const ampState = env.win.document.createElement('amp-state');
   ampState.setAttribute('id', id);
+
   ampState.createdCallback = () => {};
+
   ampState.getImpl = () =>
     Promise.resolve({
       getFetchingPromise() {
@@ -188,19 +191,31 @@ function waitForEvent(env, name) {
       resolve();
       env.win.removeEventListener(name, callback);
     };
+
     env.win.addEventListener(name, callback);
   });
 }
 
 const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
-  type: AmpEvents.FORM_VALUE_CHANGE,
+  type: AmpEvents_Enum.FORM_VALUE_CHANGE,
   bubbles: true,
 };
+const chromed = describes.sandboxed.configure().ifChrome();
+chromed.run('Bind', {}, function () {
+  describes.repeated(
+    'Walker',
+    {
+      'using TreeWalker': {useQuerySelector: false},
+      'using querySelectorAll': {useQuerySelector: true},
+    },
+    (name, variant) => {
+      describe(name, function () {
+        testSuite.call(this, variant.useQuerySelector);
+      });
+    }
+  );
 
-describe
-  .configure()
-  .ifChrome()
-  .run('Bind', function () {
+  function testSuite(useQuerySelector) {
     // Give more than default 2000ms timeout for local testing.
     const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
     this.timeout(TIMEOUT);
@@ -223,6 +238,13 @@ describe
           // Make sure we have a chunk instance for testing.
           chunkInstanceForTesting(env.ampdoc);
 
+          if (useQuerySelector) {
+            env.win.document.documentElement.setAttribute(
+              'i-amphtml-binding',
+              ''
+            );
+          }
+
           fieBind = new Bind(env.ampdoc);
           fieWindow = env.ampdoc.win;
           fieBody = env.ampdoc.getBody();
@@ -232,7 +254,9 @@ describe
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
-          createElement(env, fieBody, '[text]="1+1"');
+          createElement(env, fieBody, '[text]="1+1"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(fieBind.numberOfBindings()).to.equal(0);
           return onBindReady(env, fieBind).then(() => {
             expect(fieBind.numberOfBindings()).to.equal(1);
@@ -240,14 +264,12 @@ describe
         });
 
         it('should not update host document title for <title> elements', () => {
-          createElement(
-            env,
-            fieBody,
-            '[text]="\'bar\'"',
-            'title',
-            /* opt_amp */ false,
-            /* opt_head */ true
-          );
+          createElement(env, fieBody, '[text]="\'bar\'"', {
+            tag: 'title',
+            amp: false,
+            insertInHead: true,
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           fieWindow.document.title = 'foo';
           hostWindow.document.title = 'foo';
           return onBindReadyAndSetState(env, fieBind, {}).then(() => {
@@ -265,8 +287,12 @@ describe
           });
 
           it('should only scan elements in provided window', () => {
-            createElement(env, fieBody, '[text]="1+1"');
-            createElement(env, hostBody, '[text]="2+2"');
+            createElement(env, fieBody, '[text]="1+1"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
+            createElement(env, hostBody, '[text]="2+2"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             return Promise.all([
               onBindReady(env, fieBind),
               onBindReady(env, hostBind),
@@ -277,11 +303,14 @@ describe
           });
 
           it('should not be able to access variables from other windows', () => {
-            const element = createElement(env, fieBody, '[text]="foo + bar"');
+            const element = createElement(env, fieBody, '[text]="foo + bar"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             const parentElement = createElement(
               env,
               hostBody,
-              '[text]="foo + bar"'
+              '[text]="foo + bar"',
+              {insertQuerySelectorAttr: useQuerySelector}
             );
             const promises = [
               onBindReadyAndSetState(env, fieBind, {foo: '123', bar: '456'}),
@@ -295,7 +324,7 @@ describe
           });
         });
       }
-    ); // in FIE
+    );
 
     describes.realWin(
       'in shadow ampdoc',
@@ -314,12 +343,21 @@ describe
           // Make sure we have a chunk instance for testing.
           chunkInstanceForTesting(env.ampdoc);
 
+          if (useQuerySelector) {
+            env.win.document.documentElement.setAttribute(
+              'i-amphtml-binding',
+              ''
+            );
+          }
+
           bind = new Bind(env.ampdoc);
           container = env.ampdoc.getBody();
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
-          createElement(env, container, '[text]="1+1"');
+          createElement(env, container, '[text]="1+1"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(bind.numberOfBindings()).to.equal(0);
           return onBindReady(env, bind).then(() => {
             expect(bind.numberOfBindings()).to.equal(1);
@@ -327,14 +365,12 @@ describe
         });
 
         it('should not update document title for <title> elements', () => {
-          createElement(
-            env,
-            container,
-            '[text]="\'bar\'"',
-            'title',
-            /* opt_amp */ false,
-            /* opt_head */ true
-          );
+          createElement(env, container, '[text]="\'bar\'"', {
+            tag: 'title',
+            amp: false,
+            insertInHead: true,
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           env.win.document.title = 'foo';
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             // Make sure does not update the host window's document title.
@@ -342,7 +378,7 @@ describe
           });
         });
       }
-    ); // in shadow ampdoc
+    );
 
     describes.realWin(
       'in single ampdoc',
@@ -365,12 +401,17 @@ describe
 
           // Make sure we have a chunk instance for testing.
           chunkInstanceForTesting(ampdoc);
-
           viewer = Services.viewerForDoc(ampdoc);
           env.sandbox.stub(viewer, 'sendMessage');
 
-          bind = new Bind(ampdoc);
+          if (useQuerySelector) {
+            env.win.document.documentElement.setAttribute(
+              'i-amphtml-binding',
+              ''
+            );
+          }
 
+          bind = new Bind(ampdoc);
           // Connected <div> element created by describes.js.
           container = win.document.getElementById('parent');
 
@@ -395,14 +436,22 @@ describe
         });
 
         it('should not send "bindReady" until all <amp-state> are built', () => {
-          const element = createElement(env, container, '', 'amp-state', true);
-          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          const element = createElement(env, container, '', {
+            tag: 'amp-state',
+            amp: true,
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+
+          // Makes whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
+
           const parseAndUpdate = env.sandbox.spy();
+
           element.getImpl = () => {
             expect(viewer.sendMessage).to.not.be.called;
             return Promise.resolve({parseAndUpdate});
           };
+
           return onBindReady(env, bind).then(() => {
             expect(parseAndUpdate).to.be.calledOnce;
             expect(viewer.sendMessage).to.be.calledOnce;
@@ -411,7 +460,9 @@ describe
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
-          createElement(env, container, '[text]="1+1"');
+          createElement(env, container, '[text]="1+1"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(bind.numberOfBindings()).to.equal(0);
           return onBindReady(env, bind).then(() => {
             expect(bind.numberOfBindings()).to.equal(1);
@@ -429,14 +480,21 @@ describe
           // </p>
           const parent = document.createElement('div');
           container.appendChild(parent);
-
           const uncle = document.createElement('p');
           container.appendChild(uncle);
 
-          const list = createElement(env, parent, `[class]="'x'"`, 'amp-list');
-          const child = createElement(env, list, '[text]="2+2"', 'h1');
-          const cousin = createElement(env, uncle, '[text]="3+3"', 'span');
-
+          const list = createElement(env, parent, `[class]="'x'"`, {
+            tag: 'amp-list',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          const child = createElement(env, list, '[text]="2+2"', {
+            tag: 'h1',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          const cousin = createElement(env, uncle, '[text]="3+3"', {
+            tag: 'span',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(bind.numberOfBindings()).to.equal(0);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             // Children of amp-list should be skipped.
@@ -449,10 +507,14 @@ describe
         });
 
         it('should not update attribute for non-primitive new values', () => {
-          const list = createElement(env, container, `[src]="x"`, 'amp-list');
+          const list = createElement(env, container, `[src]="x"`, {
+            tag: 'amp-list',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           list.setAttribute('src', 'https://foo.example/data.json');
-
-          return onBindReadyAndSetState(env, bind, {x: [1, 2, 3]}).then(() => {
+          return onBindReadyAndSetState(env, bind, {
+            x: [1, 2, 3],
+          }).then(() => {
             expect(list.getAttribute('src')).to.equal(
               'https://foo.example/data.json'
             );
@@ -466,7 +528,9 @@ describe
           doc.documentElement.appendChild(pseudoFixedLayer);
 
           // Make sure that the sibling <body> is scanned for bindings.
-          createElement(env, pseudoFixedLayer, '[text]="1+1"');
+          createElement(env, pseudoFixedLayer, '[text]="1+1"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           return onBindReady(env, bind).then(() => {
             expect(bind.numberOfBindings()).to.equal(1);
           });
@@ -476,7 +540,8 @@ describe
           const element = createElement(
             env,
             container,
-            'data-amp-bind-text="1+1"'
+            'data-amp-bind-text="1+1"',
+            {insertQuerySelectorAttr: useQuerySelector}
           );
           expect(bind.numberOfBindings()).to.equal(0);
           expect(element.textContent).to.equal('');
@@ -490,7 +555,8 @@ describe
           const element = createElement(
             env,
             container,
-            '[text]="1+1" data-amp-bind-text="2+2"'
+            '[text]="1+1" data-amp-bind-text="2+2"',
+            {insertQuerySelectorAttr: useQuerySelector}
           );
           expect(bind.numberOfBindings()).to.equal(0);
           expect(element.textContent).to.equal('');
@@ -500,20 +566,27 @@ describe
           });
         });
 
-        it('should call createTreeWalker() with all params', () => {
-          const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
-          createElement(env, container, '[text]="1+1"');
-          return onBindReady(env, bind).then(() => {
-            // createTreeWalker() on IE does not support optional arguments.
-            expect(spy.callCount).to.equal(1);
-            expect(spy.firstCall.args.length).to.equal(4);
+        if (!useQuerySelector) {
+          it('should call createTreeWalker() with all params', () => {
+            const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
+            createElement(env, container, '[text]="1+1"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
+            return onBindReady(env, bind).then(() => {
+              // createTreeWalker() on IE does not support optional arguments.
+              expect(spy.callCount).to.equal(1);
+              expect(spy.firstCall.args.length).to.equal(4);
+            });
           });
-        });
+        }
 
         it('should have same state after removing + re-adding a subtree', () => {
           for (let i = 0; i < 5; i++) {
-            createElement(env, container, '[text]="1+1"');
+            createElement(env, container, '[text]="1+1"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
           }
+
           expect(bind.numberOfBindings()).to.equal(0);
           return onBindReady(env, bind)
             .then(() => {
@@ -536,10 +609,12 @@ describe
           return onBindReady(env, bind)
             .then(() => {
               expect(bind.numberOfBindings()).to.equal(0);
-              const element = createElement(env, container, '[text]="1+1"');
+              const element = createElement(env, container, '[text]="1+1"', {
+                insertQuerySelectorAttr: useQuerySelector,
+              });
               dynamicTag.appendChild(element);
               dynamicTag.dispatchEvent(
-                new Event(AmpEvents.DOM_UPDATE, {bubbles: true})
+                new Event(AmpEvents_Enum.DOM_UPDATE, {bubbles: true})
               );
               return waitForEvent(env, BindEvents.RESCAN_TEMPLATE);
             })
@@ -549,7 +624,9 @@ describe
         });
 
         it('should NOT apply expressions on first load', () => {
-          const element = createElement(env, container, '[text]="1+1"');
+          const element = createElement(env, container, '[text]="1+1"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           return onBindReady(env, bind).then(() => {
             expect(element.textContent).to.equal('');
@@ -557,11 +634,23 @@ describe
         });
 
         it('should verify class bindings in dev mode', () => {
-          window.__AMP_MODE = {development: true, test: true};
-          createElement(env, container, '[class]="\'foo\'" class="foo"');
-          createElement(env, container, '[class]="\'foo\'" class=" foo "');
-          createElement(env, container, '[class]="\'\'"');
-          createElement(env, container, '[class]="\'bar\'" class="qux"'); // Error
+          window.__AMP_MODE = {
+            development: true,
+            test: true,
+          };
+          createElement(env, container, '[class]="\'foo\'" class="foo"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          createElement(env, container, '[class]="\'foo\'" class=" foo "', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          createElement(env, container, '[class]="\'\'"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          createElement(env, container, '[class]="\'bar\'" class="qux"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          // Error
           const warnSpy = env.sandbox.spy(user(), 'warn');
           return onBindReady(env, bind).then(() => {
             expect(warnSpy).to.be.calledOnce;
@@ -570,12 +659,16 @@ describe
         });
 
         it('should verify string attribute bindings in dev mode', () => {
-          window.__AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {
+            development: true,
+            test: true,
+          };
           // Only the initial value for [a] binding does not match.
           createElement(
             env,
             container,
-            '[text]="\'a\'" [class]="\'b\'" class="b"'
+            '[text]="\'a\'" [class]="\'b\'" class="b"',
+            {insertQuerySelectorAttr: useQuerySelector}
           );
           const warnSpy = env.sandbox.spy(user(), 'warn');
           return onBindReady(env, bind).then(() => {
@@ -585,10 +678,23 @@ describe
         });
 
         it('should verify boolean attribute bindings in dev mode', () => {
-          window.__AMP_MODE = {development: true, test: true};
-          createElement(env, container, '[disabled]="true" disabled', 'button');
-          createElement(env, container, '[disabled]="false"', 'button');
-          createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.
+          window.__AMP_MODE = {
+            development: true,
+            test: true,
+          };
+          createElement(env, container, '[disabled]="true" disabled', {
+            tag: 'button',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          createElement(env, container, '[disabled]="false"', {
+            tag: 'button',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          createElement(env, container, '[disabled]="true"', {
+            tag: 'button',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          // Mismatch.
           const warnSpy = env.sandbox.spy(user(), 'warn');
           return onBindReady(env, bind).then(() => {
             expect(warnSpy).to.be.calledOnce;
@@ -597,7 +703,9 @@ describe
         });
 
         it('should skip digest if specified in setState()', () => {
-          const element = createElement(env, container, '[text]="1+1"');
+          const element = createElement(env, container, '[text]="1+1"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           return onBindReady(env, bind).then(() => {
             bind.setState({}, /* opt_skipDigest */ true);
@@ -607,7 +715,9 @@ describe
         });
 
         it('should support binding to string attributes', () => {
-          const element = createElement(env, container, '[text]="1+1"');
+          const element = createElement(env, container, '[text]="1+1"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(element.textContent).to.equal('2');
@@ -619,7 +729,10 @@ describe
             env,
             container,
             '[checked]="true" [disabled]="false" disabled',
-            /* opt_tagName */ 'input'
+            {
+              tag: 'input',
+              insertQuerySelectorAttr: useQuerySelector,
+            }
           );
           expect(element.getAttribute('checked')).to.equal(null);
           expect(element.getAttribute('disabled')).to.equal('');
@@ -631,12 +744,10 @@ describe
 
         it('should update values first, then attributes', () => {
           const spy = env.sandbox.spy();
-          const element = createElement(
-            env,
-            container,
-            '[value]="foo"',
-            'input'
-          );
+          const element = createElement(env, container, '[value]="foo"', {
+            tag: 'input',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           env.sandbox.stub(element, 'value').set(spy);
           env.sandbox.stub(element, 'setAttribute').callsFake(spy);
           return onBindReadyAndSetState(env, bind, {'foo': '2'}).then(() => {
@@ -649,12 +760,10 @@ describe
         });
 
         it('should update properties for empty strings', function* () {
-          const element = createElement(
-            env,
-            container,
-            '[value]="foo"',
-            'input'
-          );
+          const element = createElement(env, container, '[value]="foo"', {
+            tag: 'input',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           yield onBindReadyAndSetState(env, bind, {'foo': 'bar'});
           expect(element.value).to.equal('bar');
           yield onBindReadyAndSetState(env, bind, {'foo': ''});
@@ -662,7 +771,9 @@ describe
         });
 
         it('should support binding to Node.textContent', () => {
-          const element = createElement(env, container, '[text]="\'abc\'"');
+          const element = createElement(env, container, '[text]="\'abc\'"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(element.textContent).to.equal('abc');
@@ -670,12 +781,10 @@ describe
         });
 
         it('should set value for [text] in <textarea>', () => {
-          const element = createElement(
-            env,
-            container,
-            '[text]="\'abc\'"',
-            'textarea'
-          );
+          const element = createElement(env, container, '[text]="\'abc\'"', {
+            tag: 'textarea',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           expect(element.value).to.equal('');
           return onBindReadyAndSetState(env, bind, {}).then(() => {
@@ -689,7 +798,10 @@ describe
             env,
             container,
             '[defaultText]="\'abc\'"',
-            'textarea'
+            {
+              tag: 'textarea',
+              insertQuerySelectorAttr: useQuerySelector,
+            }
           );
           expect(element.textContent).to.equal('');
           expect(element.value).to.equal('');
@@ -702,14 +814,12 @@ describe
         });
 
         it('should update document title for <title> elements', () => {
-          const element = createElement(
-            env,
-            container,
-            '[text]="\'bar\'"',
-            'title',
-            /* opt_amp */ false,
-            /* opt_head */ true
-          );
+          const element = createElement(env, container, '[text]="\'bar\'"', {
+            tag: 'title',
+            amp: false,
+            insertInHead: true,
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           element.textContent = 'foo';
           env.win.document.title = 'foo';
           return onBindReadyAndSetState(env, bind, {}).then(() => {
@@ -726,14 +836,19 @@ describe
           title.textContent = 'foo';
           env.win.document.head.appendChild(title);
           // Add <title [text]="'bar'"> to <body>.
-          createElement(env, container, '[text]="\'bar\'"', 'title');
+          createElement(env, container, '[text]="\'bar\'"', {
+            tag: 'title',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(env.win.document.title).to.equal('foo');
           });
         });
 
         it('should support binding to CSS classes with strings', () => {
-          const element = createElement(env, container, '[class]="[\'abc\']"');
+          const element = createElement(env, container, '[class]="[\'abc\']"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(toArray(element.classList)).to.deep.equal([]);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(toArray(element.classList)).to.deep.equal(['abc']);
@@ -744,7 +859,8 @@ describe
           const element = createElement(
             env,
             container,
-            "[class]=\"['a','b']\""
+            "[class]=\"['a','b']\"",
+            {insertQuerySelectorAttr: useQuerySelector}
           );
           expect(toArray(element.classList)).to.deep.equal([]);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
@@ -753,7 +869,9 @@ describe
         });
 
         it('should support binding to CSS classes with a null value', () => {
-          const element = createElement(env, container, '[class]="null"');
+          const element = createElement(env, container, '[class]="null"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(toArray(element.classList)).to.deep.equal([]);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(toArray(element.classList)).to.deep.equal([]);
@@ -761,12 +879,10 @@ describe
         });
 
         it('should support binding to CSS classes for svg tags', () => {
-          const element = createElement(
-            env,
-            container,
-            '[class]="[\'abc\']"',
-            'svg'
-          );
+          const element = createElement(env, container, '[class]="[\'abc\']"', {
+            tag: 'svg',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(toArray(element.classList)).to.deep.equal([]);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(toArray(element.classList)).to.deep.equal(['abc']);
@@ -774,12 +890,10 @@ describe
         });
 
         it('supports binding to CSS classes for svg tags with a null value', () => {
-          const element = createElement(
-            env,
-            container,
-            '[class]="null"',
-            'svg'
-          );
+          const element = createElement(env, container, '[class]="null"', {
+            tag: 'svg',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(toArray(element.classList)).to.deep.equal([]);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(toArray(element.classList)).to.deep.equal([]);
@@ -857,7 +971,9 @@ describe
         });
 
         it('should support parsing exprs in setStateWithExpression()', () => {
-          const element = createElement(env, container, '[text]="onePlusOne"');
+          const element = createElement(env, container, '[text]="onePlusOne"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           const promise = onBindReadyAndSetStateWithExpression(
             env,
@@ -909,7 +1025,7 @@ describe
 
           describe('with trusted viewer', () => {
             beforeEach(() => {
-              window.sandbox
+              env.sandbox
                 .stub(viewer, 'isTrustedViewer')
                 .returns(Promise.resolve(true));
             });
@@ -952,7 +1068,8 @@ describe
           const element = createElement(
             env,
             container,
-            '[text]="mystate.mykey"'
+            '[text]="mystate.mykey"',
+            {insertQuerySelectorAttr: useQuerySelector}
           );
           expect(element.textContent).to.equal('');
           const promise = onBindReadyAndSetStateWithObject(env, bind, {
@@ -1029,7 +1146,9 @@ describe
         it('should support pushStateWithExpression()', () => {
           env.sandbox.spy(history, 'push');
 
-          const element = createElement(env, container, '[text]="foo"');
+          const element = createElement(env, container, '[text]="foo"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           const promise = bind.pushStateWithExpression('{"foo": "bar"}', {});
           return promise
@@ -1050,7 +1169,9 @@ describe
         it('pushStateWithExpression() should work with nested objects', () => {
           env.sandbox.spy(history, 'push');
 
-          const element = createElement(env, container, '[text]="foo.bar"');
+          const element = createElement(env, container, '[text]="foo.bar"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           return bind
             .pushStateWithExpression('{foo: {bar: 0}}', {})
@@ -1075,13 +1196,12 @@ describe
         });
 
         it('should ignore <amp-state> updates if specified in setState()', () => {
-          const element = createElement(
-            env,
-            container,
-            '[src]="foo"',
-            'amp-state'
-          );
-          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          const element = createElement(env, container, '[src]="foo"', {
+            tag: 'amp-state',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+
+          // Makes whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
           element.getImpl = () =>
             Promise.resolve({parseAndUpdate: env.sandbox.spy()});
@@ -1100,13 +1220,10 @@ describe
         });
 
         it('should support NOT override internal AMP CSS classes', () => {
-          const element = createElement(
-            env,
-            container,
-            '[class]="[\'abc\']"',
-            /* opt_tagName */ undefined,
-            /* opt_amp */ true
-          );
+          const element = createElement(env, container, '[class]="[\'abc\']"', {
+            amp: true,
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(toArray(element.classList)).to.deep.equal([
             'i-amphtml-foo',
             '-amp-foo',
@@ -1126,13 +1243,11 @@ describe
           const binding =
             '[text]="1+1" [value]="\'4\'" value="4" ' +
             'checked [checked]="false" [disabled]="true" [multiple]="false"';
-          const element = createElement(
-            env,
-            container,
-            binding,
-            /* opt_tagName */ 'input',
-            /* opt_amp */ true
-          );
+          const element = createElement(env, container, binding, {
+            tag: 'input',
+            amp: true,
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(spy).calledWithMatch({
@@ -1147,13 +1262,15 @@ describe
                 value: 4,
                 multiple: false,
               })
-            ).to.be.true; // sinon-chai doesn't support "never" API.
+            ).to.be.true;
           });
         });
 
         it('should support scope variable references', () => {
           const binding = '[text]="foo + bar + baz.qux.join(\',\')"';
-          const element = createElement(env, container, binding);
+          const element = createElement(env, container, binding, {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           expect(element.textContent).to.equal('');
           return onBindReadyAndSetState(env, bind, {
             foo: 'abc',
@@ -1169,7 +1286,10 @@ describe
         it('should NOT mutate elements if expression result is unchanged', () => {
           const binding =
             '[value]="foo" [class]="\'abc\'" [text]="\'a\'+\'b\'"';
-          const element = createElement(env, container, binding, 'input');
+          const element = createElement(env, container, binding, {
+            tag: 'input',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           element.mutatedAttributesCallback = env.sandbox.spy();
           return onBindReadyAndSetState(env, bind, {foo: {bar: [1]}})
             .then(() => {
@@ -1200,7 +1320,8 @@ describe
           const element = createElement(
             env,
             container,
-            '[invalidBinding]="1+1"'
+            '[invalidBinding]="1+1"',
+            {insertQuerySelectorAttr: useQuerySelector}
           );
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(element.getAttribute('invalidbinding')).to.be.null;
@@ -1208,8 +1329,14 @@ describe
         });
 
         it('should rewrite attribute values regardless of result type', () => {
-          const withString = createElement(env, container, '[href]="foo"', 'a');
-          const withArray = createElement(env, container, '[href]="bar"', 'a');
+          const withString = createElement(env, container, '[href]="foo"', {
+            tag: 'a',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          const withArray = createElement(env, container, '[href]="bar"', {
+            tag: 'a',
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           return onBindReadyAndSetState(env, bind, {
             foo: '?__amp_source_origin',
             bar: ['?__amp_source_origin'],
@@ -1223,14 +1350,18 @@ describe
           bind.setMaxNumberOfBindingsForTesting(2);
           const errorStub = env.sandbox.stub(dev(), 'expectedError');
 
-          const foo = createElement(env, container, '[text]="foo"');
+          const foo = createElement(env, container, '[text]="foo"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           const bar = createElement(
             env,
             container,
-            '[text]="bar" [class]="baz"'
+            '[text]="bar" [class]="baz"',
+            {insertQuerySelectorAttr: useQuerySelector}
           );
-          const qux = createElement(env, container, '[text]="qux"');
-
+          const qux = createElement(env, container, '[text]="qux"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           return onBindReadyAndSetState(env, bind, {
             foo: 1,
             bar: 2,
@@ -1254,11 +1385,18 @@ describe
           bind.addOverridableKey('foo');
           bind.addOverridableKey('bar');
 
-          const foo = createElement(env, container, '[text]="foo"');
-          const bar = createElement(env, container, '[text]="bar"');
-          const baz = createElement(env, container, '[text]="baz"');
-          const qux = createElement(env, container, '[text]="qux"');
-
+          const foo = createElement(env, container, '[text]="foo"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          const bar = createElement(env, container, '[text]="bar"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          const baz = createElement(env, container, '[text]="baz"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
+          const qux = createElement(env, container, '[text]="qux"', {
+            insertQuerySelectorAttr: useQuerySelector,
+          });
           return onBindReadyAndSetState(env, bind, {
             foo: 1,
             bar: 2,
@@ -1288,9 +1426,13 @@ describe
           let toAdd;
 
           beforeEach(async () => {
-            toRemove = createElement(env, container, '[text]="foo"');
+            toRemove = createElement(env, container, '[text]="foo"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             // New elements to rescan() don't need to be attached to DOM.
-            toAdd = createElement(env, /* container */ null, '[text]="1+1"');
+            toAdd = createElement(env, /* container */ null, '[text]="1+1"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
           });
 
           it('{update: true, fast: true}', async () => {
@@ -1364,9 +1506,11 @@ describe
           });
 
           it('{update: "evaluate"}', async () => {
-            toAdd = createElement(env, /* container */ null, '[text]="x"');
             const options = {update: 'evaluate', fast: false};
 
+            toAdd = createElement(env, /* container */ null, '[text]="x"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             // `toRemove` is updated normally before removal.
             await onBindReadyAndSetState(env, bind, {foo: 'foo', x: '1'});
             expect(toRemove.textContent).to.equal('foo');
@@ -1389,14 +1533,12 @@ describe
           });
         });
 
-        describe('AmpEvents.FORM_VALUE_CHANGE', () => {
+        describe('AmpEvents_Enum.FORM_VALUE_CHANGE', () => {
           it('should dispatch FORM_VALUE_CHANGE on <input [value]> changes', () => {
-            const element = createElement(
-              env,
-              container,
-              '[value]="foo"',
-              'input'
-            );
+            const element = createElement(env, container, '[value]="foo"', {
+              tag: 'input',
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
@@ -1406,12 +1548,10 @@ describe
           });
 
           it('should dispatch FORM_VALUE_CHANGE on <input [checked]> changes', () => {
-            const element = createElement(
-              env,
-              container,
-              '[checked]="foo"',
-              'input'
-            );
+            const element = createElement(env, container, '[checked]="foo"', {
+              tag: 'input',
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'checked'}).then(
@@ -1424,11 +1564,13 @@ describe
 
           it('should dispatch FORM_VALUE_CHANGE at parent <select> on <option [selected]> changes', () => {
             const select = env.win.document.createElement('select');
-            select.innerHTML = `
-              <optgroup>
-                <option [selected]="foo"></option>
-              </optgroup>
-            `;
+            const optgroup = createElement(env, select, '', {
+              tag: 'optgroup',
+            });
+            createElement(env, optgroup, '[selected]="foo"', {
+              tag: 'option',
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             container.appendChild(select);
 
             const spy = env.sandbox.spy(select, 'dispatchEvent');
@@ -1437,7 +1579,7 @@ describe
               () => {
                 expect(spy).to.have.been.calledOnce;
                 expect(spy).calledWithMatch({
-                  type: AmpEvents.FORM_VALUE_CHANGE,
+                  type: AmpEvents_Enum.FORM_VALUE_CHANGE,
                   bubbles: true,
                 });
               }
@@ -1445,30 +1587,26 @@ describe
           });
 
           it('should dispatch FORM_VALUE_CHANGE on <textarea [text]> changes', () => {
-            const element = createElement(
-              env,
-              container,
-              '[text]="foo"',
-              'textarea'
-            );
+            const element = createElement(env, container, '[text]="foo"', {
+              tag: 'textarea',
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AmpEvents.FORM_VALUE_CHANGE,
+                type: AmpEvents_Enum.FORM_VALUE_CHANGE,
                 bubbles: true,
               });
             });
           });
 
           it('should NOT dispatch FORM_VALUE_CHANGE on other attributes changes', () => {
-            const element = createElement(
-              env,
-              container,
-              '[name]="foo"',
-              'input'
-            );
+            const element = createElement(env, container, '[name]="foo"', {
+              tag: 'input',
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'name'}).then(() => {
@@ -1477,7 +1615,10 @@ describe
           });
 
           it('should NOT dispatch FORM_VALUE_CHANGE on other element changes', () => {
-            const element = createElement(env, container, '[text]="foo"', 'p');
+            const element = createElement(env, container, '[text]="foo"', {
+              tag: 'p',
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
@@ -1488,5 +1629,6 @@ describe
           });
         });
       }
-    ); // in single ampdoc
-  });
+    );
+  }
+});

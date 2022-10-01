@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-inline-gallery
 
 ## Usage
@@ -40,7 +24,7 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
     width="3.6"
     height="2"
     snap-align="center"
-    loop="true"
+    loop
     visible-count="1.2"
   >
     <amp-img
@@ -71,14 +55,14 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
 
 The above example shows slides using an aspect ratio of 3:2, with 10% of a slide peeking on either side. An aspect ratio of 3.6:2 is used on the `amp-base-carousel` to show 1.2 slides at a time.
 
-### Migrating from 0.1
+### Standalone use outside valid AMP documents
 
-Unlike `0.1`, the experimental `1.0` version of `amp-inline-gallery` includes the following changes:
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
--   `amp-inline-gallery-pagination` with `inset` attribute positions the element with an overwritable `bottom: 0`.
--   `amp-inline-gallery-thumbnails` takes `data-thumbnail-src` from slide elements (children of the `amp-base-carousel`) instead of `srcset`.
--   `amp-inline-gallery-thumbnails` takes `aspect-ratio` as expressed by `width / height` instead of two separate attributes, `aspect-ratio-width` and `aspect-ratio-height`.
--   `amp-inline-gallery-thumbnails` configuration for `loop` defaults to `"false"`.
+To find the standalone version of `amp-inline-gallery`, see [**`bento-inline-gallery`**](./1.0/README.md).
 
 ### Include pagination indicators
 
@@ -86,7 +70,7 @@ The `<amp-inline-gallery-pagination>` component determines how a pagination idic
 
 The pagination indicator renders as dots when there are eight or fewer slides in the `amp-base-carousel`. For nine or more slides, the pagination indicator renders the current slide number and total number of slides, aligned to the right.
 
-The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the media attribute:
+The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the [media attribute](./../../docs/spec/amp-html-responsive-attributes.md):
 
 ```html
 <amp-inline-gallery layout="container">
@@ -145,7 +129,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
       width="3"
       height="2"
       snap-align="center"
-      loop="true"
+      loop
     >
       <amp-img
         class="slide"
@@ -258,6 +242,11 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
 
 #### `amp-inline-gallery-thumbnails` attributes
 
+##### Media Queries
+
+The attributes for `<amp-inline-gallery-thumbnails>` can be configured to use different
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
+
 ##### `aspect-ratio` (optional)
 
 Specifies the aspect ratio expressed as `width / height`. The aspect radio defaults to match the slides in `<amp-base-carousel>`.
@@ -275,3 +264,12 @@ The `<amp-inline-gallery-thumbnails>` element includes <a href="https://amp.dev/
 ### common attributes
 
 This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
+
+## Version notes
+
+Unlike `0.1`, the experimental `1.0` version of `amp-inline-gallery` includes the following changes:
+
+-   `amp-inline-gallery-pagination` with `inset` attribute positions the element with an overwritable `bottom: 0`.
+-   `amp-inline-gallery-thumbnails` takes `data-thumbnail-src` from slide elements (children of the `amp-base-carousel`) instead of `srcset`.
+-   `amp-inline-gallery-thumbnails` takes `aspect-ratio` as expressed by `width / height` instead of two separate attributes, `aspect-ratio-width` and `aspect-ratio-height`.
+-   `amp-inline-gallery-thumbnails` configuration for `loop` defaults to `"false"`.

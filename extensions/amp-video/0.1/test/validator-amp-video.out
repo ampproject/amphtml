@@ -1,25 +1,10 @@
 FAIL
 |  <!--
-|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests for amp-video tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -49,9 +34,9 @@ FAIL
 |    <!-- Invalid: Incorrect attribute value for autoplay -->
 |    <amp-video autoplay=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'autoplay' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video/)
+amp-video/0.1/test/validator-amp-video.html:34:2 The attribute 'autoplay' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video/)
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'amp-video' is set to the invalid value '1'. (see https://amp.dev/documentation/components/amp-video/)
+amp-video/0.1/test/validator-amp-video.html:34:2 The attribute 'loop' in tag 'amp-video' is set to the invalid value '1'. (see https://amp.dev/documentation/components/amp-video/)
 |      loop="1" preload="metadata" controls="controls"></amp-video>
 |
 |    <!-- Valid: Correct attribute value for rotate-to-fullscreen -->
@@ -59,24 +44,29 @@ amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'am
 |      loop preload="metadata" controls></amp-video>
 |
 |    <!-- Valid: Media Session Attributes -->
-|    <amp-video layout=fill width=300 height=500 
+|    <amp-video layout=fill width=300 height=500
 |      title="Hello" artist="World" artwork="example.jpg" poster="example.jpg"
 |      ></amp-video>
 |
 |    <!-- Valid: Most attributes are bindable -->
-|    <amp-video layout=fill width=300 height=500 
+|    <amp-video layout=fill width=300 height=500
 |      [title]="Hello" [artist]="World" [artwork]="example.jpg" [poster]="example.jpg"
 |      ></amp-video>
 |
 |    <!-- Invalid: `dock` without `amp-video-docking` extension. -->
 |    <amp-video dock layout=fill width=300 height=500 controls></amp-video>
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:67:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript.
+amp-video/0.1/test/validator-amp-video.html:52:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript.
 |
 |    <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
 |    <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:70:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video/)
+amp-video/0.1/test/validator-amp-video.html:55:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video/)
+|      loop preload="metadata" controls></amp-video>
+|    <!-- Invalid: Cannot enable google cache on non-stories video -->
+|    <amp-video cache="google" layout=fill width=300 height=500
+>>   ^~~~~~~~~
+amp-video/0.1/test/validator-amp-video.html:58:2 The attribute 'cache' may not appear in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
 |      loop preload="metadata" controls></amp-video>
 |  </body>
 |  </html>

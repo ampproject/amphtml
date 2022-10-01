@@ -1,113 +1,9 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 
-import {MessageType} from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+
 import {SubscriptionApi} from '../../../src/iframe-helper';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {intersectionEntryToJson} from '../../../src/utils/intersection';
-import {
-  layoutRectLtwh,
-  moveLayoutRect,
-  rectIntersection,
-} from '../../../src/layout-rect';
-
-/**
- * The structure that defines the rectangle used in intersection observers.
- *
- * @typedef {{
- *   top: number,
- *   bottom: number,
- *   left: number,
- *   right: number,
- *   width: number,
- *   height: number,
- *   x: number,
- *   y: number,
- * }}
- */
-export let DOMRect;
-
-/**
- * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!../../../src/layout-rect.LayoutRectDef} smaller
- * @param {!../../../src/layout-rect.LayoutRectDef} larger
- * @return {number}
- */
-function intersectionRatio(smaller, larger) {
-  return (smaller.width * smaller.height) / (larger.width * larger.height);
-}
-
-/**
- * Produces a change entry for that should be compatible with
- * IntersectionObserverEntry.
- *
- * Mutates passed in rootBounds to have x and y according to spec.
- *
- * @param {!../../../src/layout-rect.LayoutRectDef} element The element's layout rectangle
- * @param {?../../../src/layout-rect.LayoutRectDef} owner The owner's layout rect, if
- *     there is an owner.
- * @param {!../../../src/layout-rect.LayoutRectDef} viewport The viewport's layout rect.
- * @return {!IntersectionObserverEntry} A change entry.
- * @private
- * @visibleForTesting
- */
-export function getIntersectionChangeEntry(element, owner, viewport) {
-  devAssert(
-    element.width >= 0 && element.height >= 0,
-    'Negative dimensions in element.'
-  );
-  // Building an IntersectionObserverEntry.
-
-  let intersectionRect = element;
-  if (owner) {
-    intersectionRect =
-      rectIntersection(owner, element) ||
-      // No intersection.
-      layoutRectLtwh(0, 0, 0, 0);
-  }
-  intersectionRect =
-    rectIntersection(viewport, intersectionRect) ||
-    // No intersection.
-    layoutRectLtwh(0, 0, 0, 0);
-
-  // The element is relative to (0, 0), while the viewport moves. So, we must
-  // adjust.
-  const boundingClientRect = moveLayoutRect(
-    element,
-    -viewport.left,
-    -viewport.top
-  );
-  intersectionRect = moveLayoutRect(
-    intersectionRect,
-    -viewport.left,
-    -viewport.top
-  );
-  // Now, move the viewport to (0, 0)
-  const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
-
-  return /** @type {!IntersectionObserverEntry} */ ({
-    time: Date.now(),
-    rootBounds,
-    boundingClientRect,
-    intersectionRect,
-    intersectionRatio: intersectionRatio(intersectionRect, element),
-  });
-}
 
 /**
  * LegacyAdIntersectionObserverHost exists for backward compatibility to support
@@ -170,7 +66,7 @@ export class LegacyAdIntersectionObserverHost {
      */
     this.postMessageApi_ = new SubscriptionApi(
       adIframe,
-      MessageType.SEND_INTERSECTIONS,
+      MessageType_Enum.SEND_INTERSECTIONS,
       true, // is3p
       // Each time someone subscribes we make sure that they
       // get an update.
@@ -303,12 +199,9 @@ export class LegacyAdIntersectionObserverHost {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send(
-      MessageType.INTERSECTION,
-      dict({
-        'changes': this.pendingChanges_,
-      })
-    );
+    this.postMessageApi_.send(MessageType_Enum.INTERSECTION, {
+      'changes': this.pendingChanges_,
+    });
     this.pendingChanges_.length = 0;
   }
 

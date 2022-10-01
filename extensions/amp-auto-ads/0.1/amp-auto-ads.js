@@ -1,19 +1,10 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isExperimentOn} from '#experiments';
 
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
+import {getAdNetworkConfig} from './ad-network-config';
 import {AdStrategy} from './ad-strategy';
 import {
   AdTracker,
@@ -22,12 +13,7 @@ import {
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -59,7 +45,9 @@ export class AmpAutoAds extends AMP.BaseElement {
     this.configPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
-        return this.getConfig_(this.adNetwork_.getConfigUrl());
+        return this.adNetwork_.filterConfig(
+          this.getConfig_(this.adNetwork_.getConfigUrl())
+        );
       });
 
     if (!this.isAutoAdsLayoutCallbackExperimentOn_()) {
@@ -127,11 +115,10 @@ export class AmpAutoAds extends AMP.BaseElement {
       }
 
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
-      const attributes = /** @type {!JsonObject} */ (Object.assign(
-        dict({}),
-        this.adNetwork_.getAttributes(),
-        getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
-      ));
+      const attributes = /** @type {!JsonObject} */ ({
+        ...this.adNetwork_.getAttributes(),
+        ...getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES),
+      });
       const sizing = this.adNetwork_.getSizing();
       const adConstraints =
         getAdConstraintsFromConfigObj(ampdoc, configObj) ||
@@ -144,11 +131,13 @@ export class AmpAutoAds extends AMP.BaseElement {
         adTracker,
         this.adNetwork_.isResponsiveEnabled()
       ).run();
-      const stickyAdAttributes = /** @type {!JsonObject} */ (Object.assign(
-        dict({}),
-        attributes,
-        getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
-      ));
+      const stickyAdAttributes = /** @type {!JsonObject} */ ({
+        ...attributes,
+        ...getAttributesFromConfigObj(
+          configObj,
+          Attributes.STICKY_AD_ATTRIBUTES
+        ),
+      });
       new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
     });
   }

@@ -1,34 +1,20 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from '../../../src/services';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {map} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getVariableService} from './variable-service';
-import {map} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+
+import {getAmpdoc, registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */
 export const StoryAnalyticsEvent = {
-  BOOKEND_CLICK: 'story-bookend-click',
-  BOOKEND_ENTER: 'story-bookend-enter',
-  BOOKEND_EXIT: 'story-bookend-exit',
   CLICK_THROUGH: 'story-click-through',
   FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
@@ -38,8 +24,13 @@ export const StoryAnalyticsEvent = {
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
   INTERACTIVE: 'story-interactive',
+  STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
+  SHOPPING_BUY_NOW_CLICK: 'story-shopping-buy-now-click',
+  SHOPPING_PLP_VIEW: 'story-shopping-plp-view',
+  SHOPPING_PDP_VIEW: 'story-shopping-pdp-view',
+  SHOPPING_TAG_CLICK: 'story-shopping-tag-click',
 };
 
 /**
@@ -111,18 +102,11 @@ export class StoryAnalyticsService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.triggerEvent(
-        isActive
-          ? StoryAnalyticsEvent.BOOKEND_ENTER
-          : StoryAnalyticsEvent.BOOKEND_EXIT
-      );
-    });
-
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (pageId) => {
-        if (!pageId) {
+        const isAd = this.storeService_.get(StateProperty.AD_STATE);
+        if (!pageId || isAd) {
           return;
         }
 
@@ -147,11 +131,15 @@ export class StoryAnalyticsService {
   triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
 
-    triggerAnalyticsEvent(
-      this.element_,
-      eventType,
-      this.updateDetails(eventType, element)
-    );
+    getAmpdoc(this.element_)
+      .whenFirstVisible()
+      .then(() =>
+        triggerAnalyticsEvent(
+          this.element_,
+          eventType,
+          this.updateDetails(eventType, element)
+        )
+      );
   }
 
   /**

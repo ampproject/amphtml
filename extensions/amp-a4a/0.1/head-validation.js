@@ -1,26 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeElement, rootNodeFor} from '#core/dom';
+import {map} from '#core/types/object';
+import {includes} from '#core/types/string';
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {parseExtensionUrl} from '#service/extension-script';
+
+import * as urls from '../../../src/config/urls';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {getMode} from '../../../src/mode';
-import {includes} from '../../../src/string';
-import {map} from '../../../src/utils/object';
-import {parseExtensionUrl} from '../../../src/service/extension-location';
-import {removeElement, rootNodeFor} from '../../../src/dom';
-import {urls} from '../../../src/config';
 
 /**
  * @typedef {{
@@ -62,6 +49,7 @@ const EXTENSION_ALLOWLIST = map({
   'amp-fit-text': true,
   'amp-font': true,
   'amp-form': true,
+  'amp-gwd-animation': true,
   'amp-img': true,
   'amp-layout': true,
   'amp-lightbox': true,
@@ -74,8 +62,18 @@ const EXTENSION_ALLOWLIST = map({
   'amp-video': true,
 });
 
+/**
+ * Escape any regex chars from given string.
+ * https://developer.cdn.mozilla.net/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+ * @param {string} string
+ * @return {string}
+ */
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 const EXTENSION_URL_PREFIX = new RegExp(
-  urls.cdn.replace(/\./g, '\\.') + '/v0/'
+  '^' + escapeRegExp(urls.cdn) + '/(rtv/\\d+/)?v0/'
 );
 
 /**
@@ -101,8 +99,8 @@ export function processHead(win, adElement, head) {
     return null;
   }
 
-  const extensionService = Services.extensionsFor(win);
   const urlService = Services.urlForDoc(adElement);
+  /** @type {!Array<{extensionId: string, extensionVersion: string}>} */
   const extensions = [];
   const fonts = [];
   const images = [];
@@ -136,13 +134,13 @@ export function processHead(win, adElement, head) {
 
   // Load any extensions; do not wait on their promises as this
   // is just to prefetch.
-  extensions.forEach((extension) =>
-    extensionService.preloadExtension(extension.extensionId)
-  );
+  preloadFriendlyIframeEmbedExtensions(win, extensions);
+
   // Preload any fonts.
   fonts.forEach((fontUrl) =>
     Services.preconnectFor(win).preload(adElement.getAmpDoc(), fontUrl)
   );
+
   // Preload any AMP images.
   images.forEach(
     (imageUrl) =>
@@ -158,7 +156,7 @@ export function processHead(win, adElement, head) {
 
 /**
  * Allows json scripts and allowlisted amp elements while removing others.
- * @param {!Array} extensions
+ * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
  * @param {!Element} script
  */
 function handleScript(extensions, script) {
@@ -174,7 +172,7 @@ function handleScript(extensions, script) {
     (isTesting && includes(src, '/dist/'))
   ) {
     const extensionInfo = parseExtensionUrl(src);
-    if (EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
+    if (extensionInfo && EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
       extensions.push(extensionInfo);
     }
   }
@@ -190,7 +188,7 @@ function handleScript(extensions, script) {
  * @param {!Element} link
  */
 function handleLink(fonts, images, link) {
-  const {href, as, rel} = link;
+  const {as, href, rel} = link;
   if (rel === 'preload' && as === 'image') {
     images.push(href);
     return;

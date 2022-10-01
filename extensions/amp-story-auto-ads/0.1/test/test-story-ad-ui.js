@@ -1,28 +1,17 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
   A4AVarNames,
   createCta,
+  getStoryAdMacroTags,
+  getStoryAdMetaTags,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
   maybeCreateAttribution,
   validateCtaMetadata,
 } from '../story-ad-ui';
-import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 
 describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let win;
@@ -33,14 +22,15 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     doc = win.document;
   });
 
-  describe('getStoryAdMetadataFromDoc', () => {
+  describe('meta tags', () => {
     it('returns metadata for amp-* values', () => {
       const adDoc = doc.implementation.createHTMLDocument();
       adDoc.head.innerHTML = `
+        <meta name="other-tag" content="random-val">
         <meta name="amp-cta-type" content="SHOP">
         <meta name="amp-cta-url" content="https://www.kittens.com">
       `;
-      const result = getStoryAdMetadataFromDoc(adDoc);
+      const result = getStoryAdMetadataFromDoc(getStoryAdMetaTags(adDoc));
       expect(result).to.eql({
         'cta-type': 'SHOP',
         'cta-url': 'https://www.kittens.com',
@@ -50,17 +40,38 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     it('returns metadata for amp4ads-vars-* values', () => {
       const adDoc = doc.implementation.createHTMLDocument();
       adDoc.head.innerHTML = `
+        <meta name="other-tag" content="random-val">
         <meta name="amp4ads-vars-cta-type" content="SHOP">
         <meta name="amp4ads-vars-cta-url" content="https://www.kittens.com">
         <meta name="amp4ads-vars-attribution-icon" content="https://www.kittens.com/img1">
         <meta name="amp4ads-vars-attribution-url" content="https://www.kittens.com/moreinfo">
       `;
-      const result = getStoryAdMetadataFromDoc(adDoc);
+      const result = getStoryAdMetadataFromDoc(getStoryAdMetaTags(adDoc));
       expect(result).to.eql({
         'cta-type': 'SHOP',
         'cta-url': 'https://www.kittens.com',
         'attribution-icon': 'https://www.kittens.com/img1',
         'attribution-url': 'https://www.kittens.com/moreinfo',
+      });
+    });
+
+    it('getStoryAdMacroTags should return all tags', () => {
+      const adDoc = doc.implementation.createHTMLDocument();
+      adDoc.head.innerHTML = `
+        <meta name="other-tag" content="random-val">
+        <meta name="invalid-tag-name-*" content="random-val">
+        <meta name="amp4ads-vars-cta-type" content="SHOP">
+        <meta name="amp4ads-vars-cta-url" content="https://www.kittens.com">
+        <meta name="amp4ads-vars-attribution-icon" content="https://www.kittens.com/img1">
+        <meta name="amp4ads-vars-attribution-url" content="https://www.kittens.com/moreinfo">
+      `;
+      const result = getStoryAdMacroTags(getStoryAdMetaTags(adDoc));
+      expect(result).to.eql({
+        'other-tag': 'random-val',
+        'amp4ads-vars-cta-type': 'SHOP',
+        'amp4ads-vars-cta-url': 'https://www.kittens.com',
+        'amp4ads-vars-attribution-icon': 'https://www.kittens.com/img1',
+        'amp4ads-vars-attribution-url': 'https://www.kittens.com/moreinfo',
       });
     });
   });
@@ -229,6 +240,137 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
       ).then((anchor) => {
         expect(anchor).to.be.null;
         expect(doc.querySelector('amp-story-cta-layer')).not.to.exist;
+      });
+    });
+  });
+
+  describe('createCta page outlink element', () => {
+    let buttonFitter;
+
+    beforeEach(() => {
+      buttonFitter = new ButtonTextFitter(env.ampdoc);
+      forceExperimentBranch(
+        win,
+        StoryAdSegmentExp.ID,
+        StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA
+      );
+    });
+
+    it('createCta page outlink custom theme element', () => {
+      const metadata = {
+        'cta-accent-color': '#FF00FF',
+        'cta-accent-element': 'text',
+        'cta-image':
+          '/examples/visual-tests/picsum.photos/image1068_300x169.jpg',
+        'theme': 'custom',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+
+        expect(containerElem.getAttribute('cta-accent-color')).to.equal(
+          '#FF00FF'
+        );
+        expect(containerElem.getAttribute('cta-accent-element')).to.equal(
+          'text'
+        );
+        expect(containerElem.getAttribute('cta-image')).to.equal(
+          '/examples/visual-tests/picsum.photos/image1068_300x169.jpg'
+        );
+        expect(containerElem.getAttribute('theme')).to.equal('custom');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
+        expect(containerElem.children[0].target).to.equal('_top');
+        expect(containerElem.children[0].tagName).to.equal('A');
+      });
+    });
+
+    it('createCta page outlink light theme element', () => {
+      const metadata = {
+        'theme': 'light',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('light');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
+      });
+    });
+
+    it('createCta page outlink dark theme element', () => {
+      const metadata = {
+        'theme': 'dark',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('dark');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
+      });
+    });
+
+    it('createCta page outlink dark theme element with color and accent-element (should have no effect)', () => {
+      const metadata = {
+        'theme': 'dark',
+        'cta-accent-color': '#FF00FF',
+        'cta-accent-element': 'text',
+        [A4AVarNames.CTA_TYPE]: 'SHOP',
+        [A4AVarNames.CTA_URL]: 'https://www.cats.com',
+      };
+      return createCta(
+        doc,
+        buttonFitter,
+        doc.body /* container */,
+        metadata
+      ).then((container) => {
+        expect(container).to.exist;
+        const containerElem = doc.querySelector(
+          '.i-amphtml-story-page-outlink-container'
+        );
+        expect(containerElem).to.exist;
+        expect(containerElem.getAttribute('theme')).to.equal('dark');
+        expect(containerElem.children[0].href).to.equal(
+          'https://www.cats.com/'
+        );
+        expect(containerElem.children[0].textContent).to.equal('SHOP');
       });
     });
   });

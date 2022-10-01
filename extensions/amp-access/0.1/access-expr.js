@@ -1,28 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {accessParser as parser} from '#build/parsers/access-expr-impl';
 
-import {hasOwn, map} from '../../../src/utils/object';
-import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
+import {hasOwn, map} from '#core/types/object';
 
 /**
  * Evaluates access expressions.
  *
  * The grammar is defined in the `access-expr-impl.jison` and compiled using
  * (Jison)[https://zaach.github.io/jison/] parser. The compilation steps are
- * built into the `gulp build` and `gulp dist` tasks.
+ * built into the `amp build` and `amp dist` tasks.
  *
  * Grammar highlights:
  * - Shorthand truthy expressions are allowed, such as `field`. Truthy value

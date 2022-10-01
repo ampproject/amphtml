@@ -1,31 +1,17 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {RelativePositions_Enum} from '#core/dom/layout/rect';
+import {throttle} from '#core/types/function';
 
+import {Services} from '#service';
+import {
+  PositionObserver, // eslint-disable-line @typescript-eslint/no-unused-vars
+  installPositionObserverServiceForDoc,
+} from '#service/position-observer/position-observer-impl';
 import {
   PositionInViewportEntryDef,
-  PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-worker';
-import {
-  PositionObserver, // eslint-disable-line no-unused-vars
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {RelativePositions} from '../../../src/layout-rect';
-import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
-import {throttle} from '../../../src/utils/rate-limit';
+  PositionObserverFidelity_Enum,
+} from '#service/position-observer/position-observer-worker';
+
+import {devAssert} from '#utils/log';
 
 /** @enum {number} */
 export const ViewportRelativePos = {
@@ -52,23 +38,23 @@ export class VisibilityObserverEntry {
   constructor(observer, callback) {
     /** @private {!VisibilityObserver} */
     this.observer_ = observer;
-    /** @private {?RelativePositions} */
+    /** @private {?RelativePositions_Enum} */
     this.topSentinelPosition_ = null;
-    /** @private {?RelativePositions} */
+    /** @private {?RelativePositions_Enum} */
     this.bottomSentinelPosition_ = null;
     /** @const {function(!ViewportRelativePos)} */
     this.callback = callback;
   }
 
   /**
-   * @return {?RelativePositions}
+   * @return {?RelativePositions_Enum}
    */
   get top() {
     return this.topSentinelPosition_;
   }
 
   /**
-   * @return {?RelativePositions}
+   * @return {?RelativePositions_Enum}
    */
   get bottom() {
     return this.bottomSentinelPosition_;
@@ -89,12 +75,12 @@ export class VisibilityObserverEntry {
 
     this.observer_
       .getPositionObserver()
-      .observe(top, PositionObserverFidelity.LOW, (position) =>
+      .observe(top, PositionObserverFidelity_Enum.LOW, (position) =>
         this.topSentinelPositionChanged_(position)
       );
     this.observer_
       .getPositionObserver()
-      .observe(bottom, PositionObserverFidelity.LOW, (position) =>
+      .observe(bottom, PositionObserverFidelity_Enum.LOW, (position) =>
         this.bottomSentinelPositionChanged_(position)
       );
   }
@@ -316,7 +302,7 @@ export default class VisibilityObserver {
    */
   getRelativePosFromScroll(entry) {
     // Measure the position of the host page (edge case)
-    const {viewportHeight_: vh, lastScrollTop_: scroll} = this;
+    const {lastScrollTop_: scroll, viewportHeight_: vh} = this;
     // Document height is the same as the distance from the top
     // to the <amp-next-page> element
     // TODO(wassgha): Synchronous access to position updates will
@@ -341,8 +327,8 @@ export default class VisibilityObserver {
    * @return {?ViewportRelativePos}
    */
   getRelativePosFromSentinel(entry) {
-    const {top, bottom} = entry;
-    const {INSIDE, TOP, BOTTOM} = RelativePositions;
+    const {bottom, top} = entry;
+    const {BOTTOM, INSIDE, TOP} = RelativePositions_Enum;
     if (!top && !bottom) {
       // Early exit if this an intersection change happening before a
       // sentinel position change

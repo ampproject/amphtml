@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 // To regenerate entity.h file, run:
 // bazel build htmlparser/bin:entitytablegen
 // bazel-bin/htmlparser/bin/entitytablegen
@@ -25,39 +9,23 @@
 #include <utility>
 #include <vector>
 
-#include "defer.h"
-#include "fileutil.h"
-#include "strings.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/strings.h"
 
 const char kFileHeader[] =
-    R"HEADER(//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-// AUTO GENERATED; DO NOT EDIT.
+    R"HEADER(// AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file, see comments in bin/entitytablegen.cc
 
-#ifndef HTMLPARSER__ENTITY_H_
-#define HTMLPARSER__ENTITY_H_
+#ifndef CPP_HTMLPARSER_ENTITY_H_
+#define CPP_HTMLPARSER_ENTITY_H_
 
 #include <algorithm>
 #include <array>
 #include <string>
 #include <string_view>
 
-#include "comparators.h"
+#include "cpp/htmlparser/comparators.h"
 
 namespace htmlparser {
 
@@ -85,7 +53,7 @@ inline std::string_view EntityLookup(std::string_view entity_name) {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__ENTITY_H_
+#endif  // CPP_HTMLPARSER_ENTITY_H_
 )FOOTER";
 
 // Extracts the entity name from it's line in entities.json.
@@ -135,7 +103,7 @@ int main(int argc, char** argv) {
   options.white_space_transform =
       htmlparser::FileReadOptions::LineTransforms::StripWhitespace();
   if (!htmlparser::FileUtil::ReadFileLines(
-          options, "data/entities.json", &lines)) {
+          options, "cpp/htmlparser/data/entities.json", &lines)) {
     std::cerr << "Error reading input file." << std::endl;
     return EXIT_FAILURE;
   }
@@ -145,7 +113,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::ofstream fd("entity.h");
+  std::ofstream fd("cpp/htmlparser/entity.h");
   htmlparser::Defer __([&]() {fd.close();});
 
   fd << kFileHeader;

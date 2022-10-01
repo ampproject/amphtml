@@ -1,30 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {install, installForChildWin} from '#polyfills/intersection-observer';
 import {
   IntersectionObserverStub,
   installStub,
   resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
-} from '../../../src/polyfillstub/intersection-observer-stub';
-import {
-  install,
-  installForChildWin,
-} from '../../../src/polyfills/intersection-observer';
+} from '#polyfills/stubs/intersection-observer-stub';
+
+import {Services} from '#service';
 
 class NativeIntersectionObserver {
   constructor(callback, options) {
@@ -59,13 +42,38 @@ class NativeIntersectionObserverEntry {
   get isIntersecting() {}
 }
 
-describes.sandboxed('shouldLoadPolyfill', {}, () => {
+const APPLE_NAVIGATOR = {vendor: 'Apple Computer, Inc.'};
+const CHROME_NAVIGATOR = {vendor: 'Google Inc.'};
+
+describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
+  let isIos;
+  let isSafari;
+  beforeEach(() => {
+    isIos = false;
+    isSafari = false;
+    const platform = {isIos: () => isIos, isSafari: () => isSafari};
+    env.sandbox.stub(Services, 'platformFor').returns(platform);
+  });
+
   it('should not load with native', () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: CHROME_NAVIGATOR,
     };
     expect(shouldLoadPolyfill(win)).to.be.false;
+  });
+
+  it('should always load in WebKit/Safari', () => {
+    const win = {
+      IntersectionObserver: NativeIntersectionObserver,
+      IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: CHROME_NAVIGATOR,
+    };
+    expect(shouldLoadPolyfill(win)).to.be.false;
+
+    win.navigator = APPLE_NAVIGATOR;
+    expect(shouldLoadPolyfill(win)).to.be.true;
   });
 
   it('should load when native does not support {root: document}', () => {
@@ -80,6 +88,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
       IntersectionObserver: NativeNoDocumentRoot,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
       document: {nodeType: 9},
+      navigator: CHROME_NAVIGATOR,
     };
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
@@ -93,6 +102,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
     const win = {
       IntersectionObserver: IntersectionObserverStub,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: CHROME_NAVIGATOR,
     };
     installStub(win);
     expect(shouldLoadPolyfill(win)).to.be.true;
@@ -101,6 +111,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
   it('should load when no native entry', () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
+      navigator: CHROME_NAVIGATOR,
     };
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
@@ -198,6 +209,28 @@ describes.fakeWin('installForChildWin', {}, (env) => {
   it('should install IntersectionObserverStub when no native', () => {
     const {win} = env;
     delete win.IntersectionObserver;
+    const parentWin = {
+      IntersectionObserver: IntersectionObserver1,
+      IntersectionObserverEntry: IntersectionObserverEntry1,
+    };
+    installForChildWin(parentWin, win);
+    expect(win.IntersectionObserver).to.equal(IntersectionObserver1);
+    expect(win.IntersectionObserverEntry).to.equal(IntersectionObserverEntry1);
+
+    // Change parent.
+    parentWin.IntersectionObserver = IntersectionObserver2;
+    parentWin.IntersectionObserverEntry = IntersectionObserverEntry2;
+    expect(win.IntersectionObserver).to.equal(IntersectionObserver2);
+    expect(win.IntersectionObserverEntry).to.equal(IntersectionObserverEntry2);
+  });
+
+  it('should install IntersectionObserverStub when native does not support document root', () => {
+    const {win} = env;
+    win.IntersectionObserver = function (callback, opts) {
+      if (opts && opts.root && opts.root.nodeType !== 1) {
+        throw new TypeError('Root must be an Element');
+      }
+    };
     const parentWin = {
       IntersectionObserver: IntersectionObserver1,
       IntersectionObserverEntry: IntersectionObserverEntry1,
@@ -511,7 +544,7 @@ describes.fakeWin('IntersectionObserverStub', {}, (env) => {
       io.unobserve(element1);
       const native = upgrade(io);
       expect(native.observe).to.not.be.called;
-      expect(io.elements_).to.be.null;
+      expect(io.elements_.length).to.equal(0);
     });
 
     it('should re-observe previously observed elements', () => {
@@ -522,7 +555,7 @@ describes.fakeWin('IntersectionObserverStub', {}, (env) => {
       expect(native.observe).to.be.calledTwice;
       expect(native.observe).to.be.calledWith(element1);
       expect(native.observe).to.be.calledWith(element2);
-      expect(io.elements_).to.be.null;
+      expect(io.elements_.length).to.equal(0);
     });
 
     it('should observe new elements only on native', () => {

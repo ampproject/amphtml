@@ -224,8 +224,6 @@
 #errors
 (1,8): eof-in-attribute-name
 (1,8): expected-doctype-but-got-eof
-#new-errors
-(1:9) eof-in-tag
 #document
 | <html>
 |   <head>
@@ -238,10 +236,6 @@
 (1,32): named-entity-without-semicolon
 (1,33): attributes-in-end-tag
 (1,33): unexpected-end-tag-before-html
-#new-errors
-(1:24) unexpected-character-in-attribute-name
-(1:33) missing-semicolon-after-character-reference
-(1:33) end-tag-with-attributes
 #document
 | <!DOCTYPE html>
 | <html>
@@ -254,8 +248,6 @@
 #errors
 (1,9): need-space-after-doctype
 (1,54): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:10) missing-whitespace-before-doctype-name
 #document
 | <!DOCTYPE html>
 | <html>
@@ -280,8 +272,6 @@
 #errors
 (1,2): expected-numeric-entity
 (1,2): expected-doctype-but-got-chars
-#new-errors
-(1:3) absence-of-digits-in-numeric-character-reference
 #document
 | <html>
 |   <head>
@@ -293,8 +283,6 @@
 #errors
 (1,3): expected-numeric-entity
 (1,3): expected-doctype-but-got-chars
-#new-errors
-(1:4) absence-of-digits-in-numeric-character-reference
 #document
 | <html>
 |   <head>
@@ -306,8 +294,6 @@
 #errors
 (1,3): expected-numeric-entity
 (1,3): expected-doctype-but-got-chars
-#new-errors
-(1:4) absence-of-digits-in-numeric-character-reference
 #document
 | <html>
 |   <head>
@@ -319,8 +305,6 @@
 #errors
 (1,4): numeric-entity-without-semicolon
 (1,4): expected-doctype-but-got-chars
-#new-errors
-(1:5) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -341,8 +325,6 @@
 <!doctypehtml><p><li>
 #errors
 (1,9): need-space-after-doctype
-#new-errors
-(1:10) missing-whitespace-before-doctype-name
 #document
 | <!DOCTYPE html>
 | <html>
@@ -355,8 +337,6 @@
 <!doctypehtml><p><dt>
 #errors
 (1,9): need-space-after-doctype
-#new-errors
-(1:10) missing-whitespace-before-doctype-name
 #document
 | <!DOCTYPE html>
 | <html>
@@ -369,8 +349,6 @@
 <!doctypehtml><p><dd>
 #errors
 (1,9): need-space-after-doctype
-#new-errors
-(1:10) missing-whitespace-before-doctype-name
 #document
 | <!DOCTYPE html>
 | <html>
@@ -384,8 +362,6 @@
 #errors
 (1,9): need-space-after-doctype
 (1,23): expected-closing-tag-but-got-eof
-#new-errors
-(1:10) missing-whitespace-before-doctype-name
 #document
 | <!DOCTYPE html>
 | <html>
@@ -410,8 +386,6 @@
 #errors
 (1,4): named-entity-without-semicolon
 (1,4): expected-doctype-but-got-chars
-#new-errors
-(1:5) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -423,8 +397,6 @@
 #errors
 (1,3): expected-named-entity
 (1,3): expected-doctype-but-got-chars
-#new-errors
-(1:5) unknown-named-character-reference
 #document
 | <html>
 |   <head>
@@ -457,8 +429,6 @@
 <!DOCTYPE html><!-- X
 #errors
 (1,21): eof-in-comment
-#new-errors
-(1:22) eof-in-comment
 #document
 | <!DOCTYPE html>
 | <!--  X -->
@@ -501,6 +471,7 @@
 <!DOCTYPE html><select><optgroup><option></optgroup><option><select><option>
 #errors
 (1,68): unexpected-select-in-select
+(1,76): expected-closing-tag-but-got-eof
 #document
 | <!DOCTYPE html>
 | <html>
@@ -565,8 +536,6 @@
 <!DOCTYPE html><!-- XXX - XXX
 #errors
 (1,29): eof-in-comment
-#new-errors
-(1:30) eof-in-comment
 #document
 | <!DOCTYPE html>
 | <!--  XXX - XXX -->
@@ -747,10 +716,6 @@ x { content:"</style" } "
 (1,19): unexpected-character-after-solidus-in-tag
 (1,21): unexpected-character-after-solidus-in-tag
 (1,23): unexpected-character-after-solidus-in-tag
-#new-errors
-(1:20) unexpected-solidus-in-tag
-(1:22) unexpected-solidus-in-tag
-(1:24) unexpected-solidus-in-tag
 #document
 | <!DOCTYPE html>
 | <html>
@@ -766,8 +731,6 @@ x { content:"</style" } "
 <!DOCTYPE html><!--x--
 #errors
 (1,22): eof-in-comment-double-dash
-#new-errors
-(1:23) eof-in-comment
 #document
 | <!DOCTYPE html>
 | <!-- x -->
@@ -796,9 +759,6 @@ x { content:"</style" } "
 (1,20): expected-space-or-right-bracket-in-doctype
 (1,25): unknown-doctype
 (1,35): unexpected-char-in-comment
-#new-errors
-(1:21) invalid-character-sequence-after-doctype-name
-(1:35) nested-comment
 #document
 | <!DOCTYPE <!doctype>
 | <html>

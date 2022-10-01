@@ -1,53 +1,48 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-next-page';
-import {PageState} from '../page';
-import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {htmlFor} from '../../../../src/static-template';
-import {setStyle} from '../../../../src/style';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
 
-const MOCK_NEXT_PAGE = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <footer>Footer</footer>`;
-const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <amp-next-page>
-        <script type="application/json">
-        [
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 3",
-            "url": "./document3"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 4",
-            "url": "./document4"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 2",
-            "url": "./document2"
-          }
-        ]
-      </script>
-    </amp-next-page>
-    <footer>Footer</footer>`;
+import {Services} from '#service';
+import {installCidService} from '#service/cid-impl';
+
+import {getAmpdoc} from 'src/service-helpers';
+import * as url from 'src/url';
+
+import {HostPage, PageState} from '../page';
+import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
+
+const MOCK_NEXT_PAGE = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <footer>Footer</footer>
+`;
+const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <amp-next-page>
+    <script type="application/json">
+      [
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 3",
+          "url": "./document3"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 4",
+          "url": "./document4"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 2",
+          "url": "./document2"
+        }
+      ]
+    </script>
+  </amp-next-page>
+  <footer>Footer</footer>
+`;
 const VALID_CONFIG = [
   {
     'image': '/examples/img/hero@1x.jpg',
@@ -120,7 +115,7 @@ describes.realWin(
         options.scrollTop != undefined ? options.scrollTop : 1;
 
       if (waitForLayout) {
-        await element.build();
+        await element.buildInternal();
         await element.layoutCallback();
       }
 
@@ -175,7 +170,7 @@ describes.realWin(
           false /** waitForLayout */
         );
         await allowConsoleError(() =>
-          element.build().catch((err) => {
+          element.buildInternal().catch((err) => {
             expect(err.message).to.include(
               'amp-next-page Page list expected an array, found: object: [object Object]'
             );
@@ -248,7 +243,7 @@ describes.realWin(
           });
         const service = Services.nextPageServiceForDoc(doc);
 
-        await element.build();
+        await element.buildInternal();
         await element.layoutCallback();
 
         expect(
@@ -325,7 +320,7 @@ describes.realWin(
         expect(service.pages_[0].url).to.include('about:srcdoc');
         expect(service.pages_[0].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[0].visibilityState_).to.equal(
-          VisibilityState.VISIBLE
+          VisibilityState_Enum.VISIBLE
         );
       });
 
@@ -333,7 +328,7 @@ describes.realWin(
         [1, 2].forEach((i) => {
           expect(service.pages_[i].state_).to.equal(PageState.QUEUED);
           expect(service.pages_[i].visibilityState_).to.equal(
-            VisibilityState.PRERENDER
+            VisibilityState_Enum.PRERENDER
           );
         });
       });
@@ -347,13 +342,13 @@ describes.realWin(
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.not.be.called;
         expect(service.pages_[2].state_).to.equal(PageState.QUEUED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -366,13 +361,13 @@ describes.realWin(
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[2].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -391,7 +386,7 @@ describes.realWin(
 
         expect(service.pages_[1].state_).to.equal(PageState.FAILED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -412,7 +407,7 @@ describes.realWin(
           `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`,
           '/document1'
         );
-        service.pages_[1].setVisibility(VisibilityState.VISIBLE);
+        service.pages_[1].setVisibility(VisibilityState_Enum.VISIBLE);
 
         await fetchDocuments(
           service,
@@ -438,6 +433,7 @@ describes.realWin(
     describe('initial behavior', () => {
       let element;
       let service;
+      let hostPage;
 
       beforeEach(async () => {
         element = await getAmpNextPage(
@@ -448,8 +444,21 @@ describes.realWin(
           /* no awaiting */ false
         );
 
+        hostPage = new HostPage(
+          {} /* nextPageService */,
+          {
+            url: 'test.html',
+            title: 'test title',
+            img: '/img.jpg',
+          },
+          PageState.INSERTED /** initState */,
+          VisibilityState_Enum.VISIBLE /** initVisibility */,
+          {} /* Document */
+        );
+
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+        env.sandbox.stub(service, 'createHostPage').returns(hostPage);
       });
 
       afterEach(async () => {
@@ -457,11 +466,13 @@ describes.realWin(
       });
 
       it('awaits first scroll', async () => {
-        element.build();
-        await Promise.resolve();
+        element.buildInternal();
+        await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(1);
+        expect(service.hostPage_).to.equal(hostPage);
+        expect(service.currentTitlePage_).to.equal(service.hostPage_);
         win.dispatchEvent(new Event('scroll'));
-        await Promise.resolve();
+        await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(3);
       });
     });
@@ -517,7 +528,7 @@ describes.realWin(
         expect(container.querySelector('.i-amphtml-next-page-shadow-root')).to
           .be.ok;
 
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.pages_[2].visibilityState_ = VisibilityState_Enum.VISIBLE;
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
 
         await service.hidePreviousPages_(
@@ -529,7 +540,7 @@ describes.realWin(
         expect(secondPagePauseSpy).to.be.calledOnce;
         expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VisibilityState_Enum.HIDDEN
         );
 
         // Replaces the inserted shadow doc with a placeholder of equal height
@@ -554,7 +565,7 @@ describes.realWin(
 
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.pages_[2].visibilityState_ = VisibilityState_Enum.VISIBLE;
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
         await service.hidePreviousPages_(
           0 /** index */,
@@ -562,7 +573,7 @@ describes.realWin(
         );
         expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VisibilityState_Enum.HIDDEN
         );
 
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.DOWN;
@@ -582,6 +593,129 @@ describes.realWin(
             container.querySelector('.i-amphtml-next-page-shadow-root')
           ).height
         ).to.equal('1036px');
+      });
+    });
+
+    describe('amp-next-page within Viewer', () => {
+      let element;
+      let service;
+
+      beforeEach(async () => {
+        element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+        });
+
+        service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+      });
+
+      afterEach(async () => {
+        element.parentNode.removeChild(element);
+      });
+
+      it('propagates viewer cid capabilties', async () => {
+        // Fake capabilities
+        ampdoc.params_['cap'] = 'swipe,cid';
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+        // Don't need to check the host page.
+        // Will only be forwarded `cid`
+        [1, 2].forEach((index) => {
+          expect(
+            service.pages_[index].shadowDoc.ampdoc.getParam('cap')
+          ).to.equal('cid');
+        });
+      });
+
+      it('shadow-doc Viewer calls host-doc messageDeliverer', async () => {
+        const initialMessageDeliverer = env.sandbox.spy();
+        const initialViewer = Services.viewerForDoc(ampdoc);
+        initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const index of [1, 2]) {
+          const {ampdoc} = service.pages_[index].shadowDoc;
+          const viewer = Services.viewerForDoc(ampdoc);
+          expect(viewer).to.not.equal(initialViewer);
+
+          const messageDeliverer = viewer.maybeGetMessageDeliverer();
+          expect(messageDeliverer).to.not.be.null;
+
+          const args = [`event${index}`, `data${index}`, true];
+
+          messageDeliverer(...args);
+
+          expect(initialMessageDeliverer.withArgs(...args)).to.have.been
+            .calledOnce;
+        }
+      });
+
+      it('shadow-doc Viewer suppresses viewport message requests', async () => {
+        const initialMessageDeliverer = env.sandbox.spy();
+        const initialViewer = Services.viewerForDoc(ampdoc);
+        initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const eventType of ['documentHeight', 'scroll', 'viewport']) {
+          for (const index of [1, 2]) {
+            const {ampdoc} = service.pages_[index].shadowDoc;
+            const viewer = Services.viewerForDoc(ampdoc);
+            expect(viewer).to.not.equal(initialViewer);
+
+            const messageDeliverer = viewer.maybeGetMessageDeliverer();
+            expect(messageDeliverer).to.not.be.null;
+
+            const args = [eventType, `data${index}`, true];
+
+            messageDeliverer(...args);
+
+            expect(initialMessageDeliverer.withArgs(...args)).to.not.have.been
+              .called;
+          }
+        }
+      });
+
+      it('replaces CLIENT_ID from propagated message', async () => {
+        const expectedCid = 'myCid123';
+
+        installCidService(ampdoc);
+
+        // Only Proxy Origin URLs enable the Viewer CID API
+        env.sandbox.stub(url, 'isProxyOrigin').returns(true);
+
+        const messageDeliverer = (type) => {
+          if (type === 'cid') {
+            return expectedCid;
+          }
+        };
+        Services.viewerForDoc(ampdoc).setMessageDeliverer(messageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const page of service.pages_) {
+          const ampdoc = getAmpdoc(page.document);
+
+          // CID API is bound to doc visibility
+          env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
+
+          const viewer = Services.viewerForDoc(page.document);
+
+          // Mock hasCapability and isTrustedViewer to enable Viewer CID API
+          env.sandbox
+            .stub(viewer, 'hasCapability')
+            .callsFake((capability) => capability === 'cid');
+
+          env.sandbox.stub(viewer, 'isTrustedViewer').resolves(true);
+        }
+
+        for (const page of service.pages_) {
+          const cidStruct = {scope: 'foo', cookie: 'bar'};
+          const cidConsent = Promise.resolve();
+          const cidService = await Services.cidForDoc(page.document);
+          const cid = await cidService.get(cidStruct, cidConsent);
+          expect(cid).to.equal(expectedCid);
+        }
       });
     });
 
@@ -704,12 +838,10 @@ describes.realWin(
           }
         );
 
-        const template1 = service.pages_[1].container.querySelector(
-          '[separator]'
-        );
-        const template2 = service.pages_[2].container.querySelector(
-          '[separator]'
-        );
+        const template1 =
+          service.pages_[1].container.querySelector('[separator]');
+        const template2 =
+          service.pages_[2].container.querySelector('[separator]');
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');

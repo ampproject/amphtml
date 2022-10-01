@@ -1,20 +1,4 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '#core/types/object/json';
 
 /**
  * Handles an XHR response by calling lineCallback for each line delineation.
@@ -49,7 +33,9 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
   }
 
   const decoder = new TextDecoder('utf-8');
-  const reader = /** @type {!ReadableStreamDefaultReader} */ (response.body.getReader());
+  const reader = /** @type {!ReadableStreamDefaultReader} */ (
+    response.body.getReader()
+  );
   reader.read().then(function chunk(result) {
     if (result.value) {
       streamer(
@@ -76,8 +62,9 @@ export function metaJsonCreativeGrouper(callback) {
   let first;
   return function (line, done) {
     if (first) {
-      const metadata = /** @type {!Object<string, *>} */ (tryParseJson(first) ||
-        {});
+      const metadata = /** @type {!Object<string, *>} */ (
+        tryParseJson(first) || {}
+      );
       const lowerCasedMetadata = Object.keys(metadata).reduce((newObj, key) => {
         newObj[key.toLowerCase()] = metadata[key];
         return newObj;

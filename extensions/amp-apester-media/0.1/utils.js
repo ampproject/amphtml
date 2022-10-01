@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import * as events from '../../../src/event-helper';
-import {isJsonLdScriptTag} from '../../../src/dom';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {isJsonLdScriptTag} from '#core/dom';
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+
+import * as events from '#utils/event-helper';
 
 const rules = [
   // if it says it's a webview, let's go with that
@@ -124,7 +125,7 @@ export function extractArticleTags(ampdoc) {
   return (ampdoc.getMetaByName('keywords') || '')
     .split(',')
     .map((e) => e.trim())
-    .filter((e) => e);
+    .filter(Boolean);
 }
 
 /**

@@ -4,7 +4,7 @@ This package is published and available at
 https://www.npmjs.com/package/amphtml-validator.
 
 The source code is available at
-https://github.com/ampproject/amphtml/tree/master/validator/js/nodejs.
+https://github.com/ampproject/amphtml/tree/main/validator/js/nodejs.
 
 ## Command Line Tool
 
@@ -51,7 +51,27 @@ line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', b
 
 As expected, this emits errors because the provided string in the example, `<html>Hello, world.</html>` is not a valid AMP HTML document.
 
+The method `validateString` also takes a `htmlFormat` parameter which
+would allow applying the validator rules for `AMP4ADS` or `AMP4EMAIL` as well. `validateString(inputString, htmlFormat).
+
+```js
+/**
+ * Validates the provided inputString; the htmlFormat can be 'AMP' or
+ * 'AMP4ADS'; it defaults to 'AMP' if not specified.
+ * @param {string} inputString
+ * @param {string=} htmlFormat
+ * @return {!ValidationResult}
+ * @export
+ */
+```
+
 ## Release Notes
+
+### 1.0.35
+
+-   Set default engine to the WebAssembly version validator, which is
+    `https://cdn.ampproject.org/v0/validator_wasm.js`.
+    [ampproject/amphtml #34213](https://github.com/ampproject/amphtml/pull/34213)
 
 ### 1.0.34
 

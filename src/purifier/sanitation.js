@@ -1,21 +1,6 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isAmp4Email} from '#core/document/format';
+import {map} from '#core/types/object';
 
-import {dict, map} from '../utils/object';
-import {isAmp4Email} from '../format';
 import {isUrlAttribute} from '../url-rewrite';
 
 /** @const {string} */
@@ -72,7 +57,7 @@ export function markElementForDiffing(element, generateKey) {
 
 /**
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
+ * @see https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md
  */
 export const DENYLISTED_TAGS = {
   'applet': true,
@@ -95,7 +80,7 @@ export const DENYLISTED_TAGS = {
  * - amp-list and amp-state, which cannot be nested.
  * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
+ * @see https://github.com/ampproject/amphtml/blob/main/docs/spec/email/amp-email-components.md
  */
 export const EMAIL_ALLOWLISTED_AMP_TAGS = {
   'amp-accordion': true,
@@ -111,7 +96,8 @@ export const EMAIL_ALLOWLISTED_AMP_TAGS = {
 };
 
 /**
- * Allowlist of tags allowed in triple mustache e.g. {{{name}}}.
+ * Allowlist of tags allowed in triple mustache in non-email format, e.g.
+ * {{{name}}}.
  * Very restrictive by design since the triple mustache renders unescaped HTML
  * which, unlike double mustache, won't be processed by the AMP Validator.
  * @const {!Array<string>}
@@ -173,6 +159,68 @@ export const TRIPLE_MUSTACHE_ALLOWLISTED_TAGS = [
   'ul',
 ];
 
+/**
+ * Same as `TRIPLE_MUSTACHE_ALLOWLISTED_TAGS` except for the email format. The
+ * email format has a different threat model and needs to evolve the allowlist
+ * independently from other formats, as certain tags can be considered safe in
+ * other formats but not in the email format.
+ * @const {!Array<string>}
+ */
+export const EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS = [
+  'a',
+  'article',
+  'aside',
+  'b',
+  'blockquote',
+  'br',
+  'caption',
+  'code',
+  'col',
+  'colgroup',
+  'dd',
+  'del',
+  'details',
+  'div',
+  'dl',
+  'dt',
+  'em',
+  'figcaption',
+  'figure',
+  'footer',
+  'h1',
+  'h2',
+  'h3',
+  'header',
+  'hr',
+  'i',
+  'ins',
+  'li',
+  'main',
+  'mark',
+  'nav',
+  'ol',
+  'p',
+  'pre',
+  'q',
+  's',
+  'section',
+  'small',
+  'span',
+  'strong',
+  'sub',
+  'summary',
+  'sup',
+  'table',
+  'tbody',
+  'td',
+  'tfoot',
+  'th',
+  'thead',
+  'time',
+  'tr',
+  'u',
+  'ul',
+];
 /**
  * Tag-agnostic attribute allowlisted used by both Caja and DOMPurify.
  * @const {!Array<string>}
@@ -242,28 +290,25 @@ const DENYLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
 const EXTENDED_DENYLISTED_PROTOCOLS = /^(?:blob):/i;
 
 // From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
-const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
+const ATTR_WHITESPACE =
+  /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
-  dict({
-    'input': {
-      'type': /(?:image|button)/i,
-    },
-  })
-);
+const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze({
+  'input': {
+    'type': /(?:image|button)/i,
+  },
+});
 
 /**
  * Rules in addition to DENYLISTED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
  * @const {!Object<string, !Object<string, !RegExp>>}
  */
-const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
-  dict({
-    'input': {
-      'type': /(?:button|file|image|password)/i,
-    },
-  })
-);
+const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze({
+  'input': {
+    'type': /(?:button|file|image|password)/i,
+  },
+});
 
 /** @const {!Array<string>} */
 const DENYLISTED_FIELDS_ATTR = Object.freeze([
@@ -276,24 +321,20 @@ const DENYLISTED_FIELDS_ATTR = Object.freeze([
 ]);
 
 /** @const {!Object<string, !Array<string>>} */
-const DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
-  dict({
-    'input': DENYLISTED_FIELDS_ATTR,
-    'textarea': DENYLISTED_FIELDS_ATTR,
-    'select': DENYLISTED_FIELDS_ATTR,
-  })
-);
+const DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze({
+  'input': DENYLISTED_FIELDS_ATTR,
+  'textarea': DENYLISTED_FIELDS_ATTR,
+  'select': DENYLISTED_FIELDS_ATTR,
+});
 
 /**
  * Rules in addition to denylistED_TAG_SPECIFIC_ATTRS for AMP4EMAIL.
  * @const {!Object<string, !Array<string>>}
  */
-const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
-  dict({
-    'amp-anim': ['controls'],
-    'form': ['name'],
-  })
-);
+const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze({
+  'amp-anim': ['controls'],
+  'form': ['name'],
+});
 
 /**
  * Test for invalid `style` attribute values.
@@ -305,7 +346,8 @@ const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
  *
  * @const {!RegExp}
  */
-const INVALID_INLINE_STYLE_REGEX = /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
+const INVALID_INLINE_STYLE_REGEX =
+  /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /**
  * Whether the attribute/value is valid.

@@ -1,50 +1,31 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggleAttribute} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {toggle} from '#core/dom/style';
+import {parseQueryString} from '#core/types/string/url';
 
 import {
-  AmpStoryDevToolsTabLogs,
-  createTabLogsElement,
-} from './amp-story-dev-tools-tab-logs';
-import {
-  AmpStoryDevToolsTabPageExperience,
-  createTabPageExperienceElement,
-} from './amp-story-dev-tools-tab-page-experience';
+  AmpStoryDevToolsTabDebug,
+  createTabDebugElement,
+} from './amp-story-dev-tools-tab-debug';
 import {
   AmpStoryDevToolsTabPreview,
   createTabPreviewElement,
 } from './amp-story-dev-tools-tab-preview';
-import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
-import {htmlFor} from '../../../src/static-template';
-import {parseQueryString} from '../../../src/url';
-import {toggle} from '../../../src/style';
 import {updateHash} from './utils';
+
+import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap */
 const fontsToLoad = [
   {
     family: 'Poppins',
     weight: '400',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
     weight: '600',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
 
@@ -70,7 +51,7 @@ const buildContainerTemplate = (element) => {
             <path
               fill="#202125"
               d="M19.5 9a1.5 1.5 0 011.5 1.5v9a1.5 1.5 0 01-1.5 1.5V9zM8.25 9a1.5 1.5 0 011.5-1.5h6.75A1.5 1.5 0 0118 9v12a1.5 1.5 0 01-1.5 1.5H9.75a1.5 1.5 0 01-1.5-1.5V9zM22.5 10.5c.621 0 1.125.504 1.125 1.125v6.75c0 .622-.504 1.125-1.125 1.125v-9z"
-            />
+            ></path>
           </svg>
           <span class="i-amphtml-story-dev-tools-brand-text">
             <span>WEB STORIES</span>
@@ -92,7 +73,7 @@ const buildContainerTemplate = (element) => {
             <path
               d="M9.9165 4.08333L9.094 4.90583L10.599 6.41667H4.6665V7.58333H10.599L9.094 9.08833L9.9165 9.91667L12.8332 7L9.9165 4.08333ZM2.33317 2.91667H6.99984V1.75H2.33317C1.6915 1.75 1.1665 2.275 1.1665 2.91667V11.0833C1.1665 11.725 1.6915 12.25 2.33317 12.25H6.99984V11.0833H2.33317V2.91667Z"
               fill="black"
-            />
+            ></path>
           </svg>
         </a>
       </div>
@@ -103,8 +84,7 @@ const buildContainerTemplate = (element) => {
 /** @enum {string} */
 const DevToolsTab = {
   PREVIEW: 'Preview',
-  LOGS: 'Logs',
-  PAGE_EXPERIENCE: 'Page Experience',
+  DEBUG: 'Debug',
 };
 
 export class AmpStoryDevTools extends AMP.BaseElement {
@@ -139,6 +119,11 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   }
 
   /** @override */
+  isLayoutSupported() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.loadFonts_();
     this.removeCustomCSS_();
@@ -155,9 +140,8 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   buildLayout_() {
     const container = buildContainerTemplate(this.element);
     this.element.appendChild(container);
-    this.element.querySelector(
-      '.i-amphtml-story-dev-tools-close'
-    ).href = this.storyUrl_;
+    this.element.querySelector('.i-amphtml-story-dev-tools-close').href =
+      this.storyUrl_;
 
     // Create tabs on top
     const tabsContainer = container.querySelector(
@@ -213,10 +197,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       this.storyUrl_,
       this.hashParams_['devices']
     );
-    this.tabContents_[
-      DevToolsTab.PAGE_EXPERIENCE
-    ] = createTabPageExperienceElement(this.win, this.storyUrl_);
-    this.tabContents_[DevToolsTab.LOGS] = createTabLogsElement(
+    this.tabContents_[DevToolsTab.DEBUG] = createTabDebugElement(
       this.win,
       this.storyUrl_
     );
@@ -235,30 +216,25 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     this.mutateElement(() => {
       toggle(this.tabContents_[this.currentTab_], false);
       toggle(this.tabContents_[tab], true);
-      this.tabSelectors_.forEach((tabSelector) => {
-        return tabSelector.toggleAttribute(
+      this.tabSelectors_.forEach((tabSelector) =>
+        toggleAttribute(
+          tabSelector,
           'active',
           tabSelector.getAttribute('data-tab') === tab
-        );
-      });
+        )
+      );
       this.currentTab_ = tab;
     });
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   loadFonts_() {
     if (this.win.document.fonts && FontFace) {
-      fontsToLoad.forEach((fontProperties) => {
-        const font = new FontFace(fontProperties.family, fontProperties.src, {
-          weight: fontProperties.weight,
-          style: 'normal',
-        });
-        font.load().then(() => {
-          this.win.document.fonts.add(font);
-        });
-      });
+      fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
+        new FontFace(family, src, {weight, style})
+          .load()
+          .then((font) => this.win.document.fonts.add(font))
+      );
     }
   }
 
@@ -272,10 +248,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
 
 AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
-  AMP.registerElement('amp-story-dev-tools-tab-logs', AmpStoryDevToolsTabLogs);
   AMP.registerElement(
-    'amp-story-dev-tools-tab-page-experience',
-    AmpStoryDevToolsTabPageExperience
+    'amp-story-dev-tools-tab-debug',
+    AmpStoryDevToolsTabDebug
   );
   AMP.registerElement(
     'amp-story-dev-tools-tab-preview',

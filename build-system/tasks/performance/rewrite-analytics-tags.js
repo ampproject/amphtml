@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const fs = require('fs');
 const {
   CONTROL,
@@ -21,13 +5,12 @@ const {
   getLocalVendorConfig,
   urlToCachePath,
 } = require('./helpers');
-const {JSDOM} = require('jsdom');
 
 /**
  * Return local vendor config.
  *
  * @param {string} vendor
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function getVendorConfig(vendor) {
   return JSON.parse(await getLocalVendorConfig(vendor));
@@ -41,11 +24,11 @@ async function getVendorConfig(vendor) {
  *
  * @param {Element} tag
  * @param {Object} script
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function maybeMergeAndRemoveVendorConfig(tag, script) {
-  if (tag.hasAttribute('type')) {
-    const vendor = tag.getAttribute('type');
+  const vendor = tag.getAttribute('type');
+  if (vendor) {
     tag.removeAttribute('type');
     const vendorConfig = await getVendorConfig(vendor);
     // TODO (micajuineho) replace with analytics/config.js merge objects
@@ -61,10 +44,12 @@ async function maybeMergeAndRemoveVendorConfig(tag, script) {
  * @param {string} url
  * @param {string} version
  * @param {?object} extraUrlParams
+ * @return {Promise<void>}
  */
 async function alterAnalyticsTags(url, version, extraUrlParams) {
   const cachePath = urlToCachePath(url, version);
   const document = fs.readFileSync(cachePath);
+  const {JSDOM} = await import('jsdom'); // Lazy-imported to speed up task loading.
   const dom = new JSDOM(document);
 
   const analyticsTags = Array.from(
@@ -93,12 +78,12 @@ async function alterAnalyticsTags(url, version, extraUrlParams) {
  * Rewrite analytics configs for each document
  * downloaded from the analytics or ads handler urls
  * @param {?Object} handlers
- * @return {Promise}
+ * @return {Promise<void[]>}
  */
 async function rewriteAnalyticsConfig(handlers) {
   const handlerPromises = [];
   handlers.forEach((handler) => {
-    const {handlerName, adsUrls, urls, extraUrlParam} = handler;
+    const {adsUrls, extraUrlParam, handlerName, urls} = handler;
     if (handlerName !== 'analyticsHandler' && handlerName !== 'adsHandler') {
       return;
     }

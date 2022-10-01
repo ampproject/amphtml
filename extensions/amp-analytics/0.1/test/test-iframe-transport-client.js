@@ -1,24 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   IframeTransportClient,
   IframeTransportContext,
-} from '../../../../3p/iframe-transport-client';
-import {MessageType} from '../../../../src/3p-frame-messaging';
+} from '#3p/iframe-transport-client';
+
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -28,7 +14,7 @@ function createUniqueId() {
   return String(++nextId);
 }
 
-describe('iframe-transport-client', () => {
+describes.sandboxed('iframe-transport-client', {}, (env) => {
   let iframeTransportClient;
   let sentinel;
 
@@ -56,7 +42,8 @@ describe('iframe-transport-client', () => {
     window./*OK*/ postMessage(payload, '*');
   }
 
-  it('fails to create iframeTransportClient if no window.name ', () => {
+  // TODO:(35898): unskip
+  it.skip('fails to create iframeTransportClient if no window.name ', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
@@ -102,7 +89,7 @@ describe('iframe-transport-client', () => {
       expect(event).to.equal('hello, world!');
     };
     send(
-      MessageType.IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
       /** @type {!JsonObject} */ ({
         events: [{creativeId: '101', message: 'hello, world!'}],
       })
@@ -123,7 +110,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('calls onNewContextInstance', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
@@ -137,7 +124,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('Sets listener and baseMessage properly', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
@@ -149,8 +136,8 @@ describe('iframe-transport-client', () => {
     expect(ctx.baseMessage_).to.not.be.null;
     expect(ctx.baseMessage_.creativeId).to.equal('my_creative');
     expect(ctx.baseMessage_.vendor).to.equal('my_vendor');
-    const listener1 = window.sandbox.spy();
-    const listener2 = window.sandbox.spy();
+    const listener1 = env.sandbox.spy();
+    const listener2 = env.sandbox.spy();
     ctx.onAnalyticsEvent(listener1);
     expect(ctx.listener_).to.equal(listener1);
     ctx.onAnalyticsEvent(listener2);
@@ -159,7 +146,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('dispatches event', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
@@ -167,7 +154,7 @@ describe('iframe-transport-client', () => {
       'my_creative',
       'my_vendor'
     );
-    const listener = window.sandbox.spy();
+    const listener = env.sandbox.spy();
     ctx.onAnalyticsEvent(listener);
     const event = 'Something important happened';
     ctx.dispatch(event);
@@ -177,7 +164,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('sends response', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     // This const exists solely to avoid triggering a false positive on the
     // presubmit rule that says you can't call stub() on a cross-domain iframe.
@@ -189,8 +176,8 @@ describe('iframe-transport-client', () => {
       'my_vendor'
     );
     const response = {foo: 'bar', answer: '42'};
-    window.sandbox.stub(imc, 'sendMessage').callsFake((type, opt_payload) => {
-      expect(type).to.equal(MessageType.IFRAME_TRANSPORT_RESPONSE);
+    env.sandbox.stub(imc, 'sendMessage').callsFake((type, opt_payload) => {
+      expect(type).to.equal(MessageType_Enum.IFRAME_TRANSPORT_RESPONSE);
       expect(opt_payload).to.not.be.null;
       expect(opt_payload.creativeId).to.equal('my_creative');
       expect(opt_payload.vendor).to.equal('my_vendor');

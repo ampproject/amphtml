@@ -962,21 +962,36 @@ export function installResizeObserver(global) {
             }
             if (mutationObserverSupported) {
                 this.mutationsObserver_ = new MutationObserver(this.refresh);
-                this.mutationsObserver_.observe(rootNode, {
-                    attributes: true,
-                    childList: true,
-                    characterData: true,
-                    subtree: true
-                });
+                try {
+                    this.mutationsObserver_.observe(rootNode, {
+                        attributes: true,
+                        childList: true,
+                        characterData: true,
+                        subtree: true
+                    });
+                }
+                catch (e) {
+                    // A Shadow DOM polyfill might fail when oberving a "synthetic"
+                    // ShadowRoot object. Ignore the error. The additional data
+                    // will arrive from the host observer below.
+                }
+                if (rootNode.host) {
+                    this.mutationsObserver_.observe(rootNode.host, {
+                        attributes: true,
+                        childList: true,
+                        characterData: true,
+                        subtree: true
+                    });
+                }
             }
             else {
                 rootNode.addEventListener('DOMSubtreeModified', this.refresh, true);
                 this.mutationEventsAdded_ = true;
             }
             // It's a shadow root. Monitor the host.
-            if (this.rootNode_.host) {
+            if (rootNode.host) {
                 this.hostObserver_ = new ResizeObserverSPI(this.refresh, this.globalController_, this);
-                this.hostObserver_.observe(this.rootNode_.host);
+                this.hostObserver_.observe(rootNode.host);
             }
             this.connected_ = true;
         };

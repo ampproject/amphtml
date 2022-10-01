@@ -1,28 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {templateContentClone} from '#core/dom';
+
+import {user} from '#utils/log';
+
+import mustache from '#third_party/mustache/mustache';
 
 import {BaseTemplate} from '../../../src/base-template';
-import {dict} from '../../../src/utils/object';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
-import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
@@ -41,7 +27,9 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer(sanitizeTagsForTripleMustache);
+    mustache.setUnescapedSanitizer((html) =>
+      sanitizeTagsForTripleMustache(html, this.win.document)
+    );
 
     user().warn(
       TAG,
@@ -59,7 +47,7 @@ export class AmpMustache extends BaseTemplate {
       return;
     }
     /** @private @const {!JsonObject} */
-    this.nestedTemplates_ = dict();
+    this.nestedTemplates_ = {};
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
@@ -78,7 +66,8 @@ export class AmpMustache extends BaseTemplate {
       const container = this.element.ownerDocument.createElement('div');
       container.appendChild(content);
       return container./*OK*/ innerHTML;
-    } else if (this.element.tagName == 'SCRIPT') {
+    }
+    if (this.element.tagName == 'SCRIPT') {
       return this.element.textContent;
     }
 
@@ -96,13 +85,12 @@ export class AmpMustache extends BaseTemplate {
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');
-    iterateCursor(templates, (nestedTemplate, index) => {
+    templates.forEach((nestedTemplate, index) => {
       const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
       this.nestedTemplates_[nestedTemplateKey] =
         nestedTemplate./*OK*/ outerHTML;
-      const nestedTemplateAsVariable = this.element.ownerDocument.createTextNode(
-        `{{{${nestedTemplateKey}}}}`
-      );
+      const nestedTemplateAsVariable =
+        this.element.ownerDocument.createTextNode(`{{{${nestedTemplateKey}}}}`);
       nestedTemplate.parentNode.replaceChild(
         nestedTemplateAsVariable,
         nestedTemplate

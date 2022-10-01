@@ -1,0 +1,65 @@
+---
+name: Intent-to-Ship (I2S)
+description: Propose the launch of an already implemented significant feature or change to AMP.
+labels: INTENT TO SHIP
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for creating this Intent-to-Ship (I2S) issue.
+        - See AMP's [code contribution guide](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md) for instructions on how to fill out this I2I form and how to get help.
+        - Note that if you are shipping a minor feature or change, you likely do not need to file an I2I.
+        - Typically, issues that require an I2S issue also required an Intent-to-implement (I2I) issue.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A brief description of the feature being shipped.
+      placeholder: Provide a brief description of the feature you have implemented and are planning on shipping.
+    validations:
+      required: true
+  - type: textarea
+    id: i2i_issue
+    attributes:
+      label: Intent-to-Implement (I2I) Issue
+      description: A link to the I2I issue.
+      placeholder: Provide a link to the I2I issue you filed for this feature or change.
+    validations:
+      required: true
+  - type: textarea
+    id: experiments
+    attributes:
+      label: Experiment(s) to Enable
+      description: A list of experiments to enable.
+      placeholder: Provide a list of the experiment(s) that should be enabled to launch your feature.
+    validations:
+      required: true
+  - type: textarea
+    id: required_release
+    attributes:
+      label: Release Tracking Issue
+      description: AMP release containing the implementation of this feature.
+      placeholder: 'Provide a link to the "Type: Release" issue for the release that contains all of the changes necessary for your launch.'
+    validations:
+      required: true
+  - type: textarea
+    id: demo_instructions
+    attributes:
+      label: Demo Instructions
+      description: How to demo the feature.
+      placeholder: Provide instructions for how to demonstrate the feature. E.g. a link to an example page that uses the feature.
+    validations:
+      required: true
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Other relevant context.
+      placeholder: Add any other information that may be relevant in determining if your feature can ship.
+  - type: textarea
+    id: notifications
+    attributes:
+      label: Notifications
+      description: Add working groups or individuals you want to notify about this I2S, including the code reviewer you worked with on the I2I.
+      value: /cc @ampproject/wg-approvers

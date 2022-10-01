@@ -1,21 +1,5 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#ifndef HTMLPARSER__STRINGS_H_
-#define HTMLPARSER__STRINGS_H_
+#ifndef CPP_HTMLPARSER_STRINGS_H_
+#define CPP_HTMLPARSER_STRINGS_H_
 
 #include <optional>
 #include <sstream>
@@ -72,7 +56,7 @@ class Strings {
     std::string_view uri);
 
   // Returns hex string representation of a 4 byte codepoint.
-  static std::string ToHexString(char32_t c);
+  static std::string ToHexString(uint32_t c);
 
   // byte is in the range 0x41-0x5A or 0x61-0x7A (A-Z or a-z).
   static bool IsCharAlphabet(char c);
@@ -307,6 +291,9 @@ class Strings {
   // Returns 0, if the character at current position is not a whitespace.
   static int IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position = 0);
 
+  // Counts number of terms in a text separated by whitespace and punctuations.
+  static int CountTerms(std::string_view s);
+
  private:
   // No instance of this class.
   Strings() = default;
@@ -314,4 +301,4 @@ class Strings {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__STRINGS_H_
+#endif  // CPP_HTMLPARSER_STRINGS_H_

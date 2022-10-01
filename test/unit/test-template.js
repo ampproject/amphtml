@@ -1,44 +1,27 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {
+  installTemplatesServiceForDoc,
+  registerExtendedTemplateForDoc,
+} from '#service/template-impl';
 
 import {BaseTemplate} from '../../src/base-template';
-import {Services} from '../../src/services';
-import {getServiceForDoc, resetServiceForTesting} from '../../src/service';
-import {
-  installTemplatesService,
-  registerExtendedTemplate,
-} from '../../src/service/template-impl';
+import {getServiceForDoc} from '../../src/service-helpers';
 
 describes.realWin('Template', {amp: true}, (env) => {
   let templates;
   let doc;
   let win;
+  let ampdoc;
   let container;
 
   beforeEach(() => {
     win = env.win;
-    installTemplatesService(win);
-    templates = Services.templatesFor(win);
     doc = win.document;
+    ampdoc = env.ampdoc;
+    installTemplatesServiceForDoc(ampdoc);
+    templates = Services.templatesForDoc(ampdoc);
     container = doc.createElement('div');
     doc.body.appendChild(container);
-  });
-
-  afterEach(() => {
-    resetServiceForTesting(win, 'templates');
   });
 
   class TemplateImpl extends BaseTemplate {
@@ -75,8 +58,8 @@ describes.realWin('Template', {amp: true}, (env) => {
 
   it('should render immediately', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(
-      win,
+    registerExtendedTemplateForDoc(
+      ampdoc,
       templateElement.getAttribute('type'),
       TemplateImpl
     );
@@ -87,8 +70,8 @@ describes.realWin('Template', {amp: true}, (env) => {
 
   it('should render as string', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(
-      win,
+    registerExtendedTemplateForDoc(
+      ampdoc,
       templateElement.getAttribute('type'),
       TemplateImpl
     );
@@ -103,8 +86,8 @@ describes.realWin('Template', {amp: true}, (env) => {
     const templateElement = createTemplateElement();
     // Use TemplateImplCheckingViewer to make sure viewerCanRenderTemplates
     // works correctly when the template is later detached.
-    registerExtendedTemplate(
-      win,
+    registerExtendedTemplateForDoc(
+      ampdoc,
       templateElement.getAttribute('type'),
       TemplateImplCheckingViewer
     );
@@ -123,8 +106,8 @@ describes.realWin('Template', {amp: true}, (env) => {
 
   it('should render array', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(
-      win,
+    registerExtendedTemplateForDoc(
+      ampdoc,
       templateElement.getAttribute('type'),
       TemplateImpl
     );
@@ -139,15 +122,15 @@ describes.realWin('Template', {amp: true}, (env) => {
 
   it('should NOT allow registering template class twice', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(
-      win,
+    registerExtendedTemplateForDoc(
+      ampdoc,
       templateElement.getAttribute('type'),
       TemplateImpl
     );
     allowConsoleError(() => {
       expect(() => {
-        registerExtendedTemplate(
-          win,
+        registerExtendedTemplateForDoc(
+          ampdoc,
           templateElement.getAttribute('type'),
           TemplateImpl
         );
@@ -183,8 +166,8 @@ describes.realWin('Template', {amp: true}, (env) => {
     );
     doc.body.appendChild(scriptElement);
     const p = templates.renderTemplate(templateElement, {value: 1});
-    registerExtendedTemplate(
-      win,
+    registerExtendedTemplateForDoc(
+      ampdoc,
       templateElement.getAttribute('type'),
       TemplateImpl
     );
@@ -203,8 +186,8 @@ describes.realWin('Template', {amp: true}, (env) => {
     doc.body.appendChild(scriptElement);
     const p1 = templates.renderTemplate(templateElement, {value: 1});
     const p2 = templates.renderTemplate(templateElement, {value: 2});
-    registerExtendedTemplate(
-      win,
+    registerExtendedTemplateForDoc(
+      ampdoc,
       templateElement.getAttribute('type'),
       TemplateImpl
     );
@@ -227,7 +210,7 @@ describes.realWin('Template', {amp: true}, (env) => {
     const id = type + Math.random();
     templateElement.setAttribute('id', id);
     doc.body.appendChild(templateElement);
-    registerExtendedTemplate(win, type, TemplateImpl);
+    registerExtendedTemplateForDoc(ampdoc, type, TemplateImpl);
 
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
@@ -283,7 +266,7 @@ describes.realWin('Template', {amp: true}, (env) => {
   it('should discover template via children', () => {
     const templateElement = createTemplateElement();
     const type = templateElement.getAttribute('type');
-    registerExtendedTemplate(win, type, TemplateImpl);
+    registerExtendedTemplateForDoc(ampdoc, type, TemplateImpl);
 
     const parentElement = doc.createElement('div');
     parentElement.appendChild(templateElement);
@@ -322,7 +305,7 @@ describes.realWin('Template', {amp: true}, (env) => {
 
     const templateElement = createTemplateElement();
     const type = templateElement.getAttribute('type');
-    registerExtendedTemplate(env.win, type, TemplateImpl);
+    registerExtendedTemplateForDoc(env.ampdoc, type, TemplateImpl);
 
     // With template, but different ID
     parentElement.appendChild(templateElement);
@@ -339,7 +322,7 @@ describes.realWin('Template', {amp: true}, (env) => {
     const id = type + Math.random();
     templateElement.setAttribute('id', id);
     doc.body.appendChild(templateElement);
-    registerExtendedTemplate(win, type, TemplateImpl);
+    registerExtendedTemplateForDoc(env.ampdoc, type, TemplateImpl);
 
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);

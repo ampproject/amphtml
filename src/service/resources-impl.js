@@ -1,49 +1,27 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
+import {Deferred} from '#core/data-structures/promise';
+import {hasNextNodeInDocumentOrder} from '#core/dom';
+import {expandLayoutRect} from '#core/dom/layout/rect';
+import * as mode from '#core/mode';
+import {remove} from '#core/types/array';
+import {throttle} from '#core/types/function';
 
-import {Deferred} from '../utils/promise';
-import {FiniteStateMachine} from '../finite-state-machine';
-import {FocusHistory} from '../focus-history';
-import {
-  INTERSECT_RESOURCES_EXP,
-  divertIntersectResources,
-} from '../experiments/intersect-resources-exp';
-import {Pass} from '../pass';
+import {Services} from '#service';
+
+import {listen, loadPromise} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import {Resource, ResourceState_Enum} from './resource';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
-
-import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
 import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../visibility-state';
-import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
-import {expandLayoutRect} from '../layout-rect';
-import {getExperimentBranch, isExperimentOn} from '../experiments';
-import {getMode} from '../mode';
-import {getSourceUrl} from '../url';
-import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
-import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
-import {ieMediaCheckAndFix} from './ie-media-bug';
-import {isAmp4Email} from '../format';
-import {isBlockedByConsent, reportError} from '../error';
-import {listen, loadPromise} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
+
 import {startupChunk} from '../chunk';
-import {throttle} from '../utils/rate-limit';
+import {isBlockedByConsent, reportError} from '../error-reporting';
+import {FocusHistory} from '../focus-history';
+import {Pass} from '../pass';
+import {registerServiceBuilderForDoc} from '../service-helpers';
+import {getSourceUrl} from '../url';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -56,7 +34,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const MAX_BUILD_CHUNK_SIZE = 10;
 
 /**
  * @implements {ResourcesInterface}
@@ -143,9 +120,6 @@ export class ResourcesImpl {
 
     /** @const @private {!Pass} */
     this.remeasurePass_ = new Pass(this.win, () => {
-      // With IntersectionObserver, "remeasuring" hack no longer needed.
-      devAssert(!this.intersectionObserver_);
-
       this.relayoutAll_ = true;
       this.schedulePass();
     });
@@ -156,7 +130,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef):number} */
+    /** @const {function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -194,65 +168,13 @@ export class ResourcesImpl {
     /** @const @private {!Array<!Element>} */
     this.elementsThatScrolled_ = [];
 
-    /** @const @private {boolean} */
-    this.onlyBuildWhenCloseToViewport_ = isExperimentOn(
-      this.win,
-      'build-close-to-viewport'
-    );
-
-    /** @const @private {boolean} */
-    this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
-
-    /** @const @private {boolean} */
-    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
-
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
-    /** @private @const {!FiniteStateMachine<!VisibilityState>} */
+    /** @private @const {!FiniteStateMachine<!VisibilityState_Enum>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.ampdoc.getVisibilityState()
     );
-
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
-
-    /**
-     * True if the callback for intersectionObserver_ has fired at least once.
-     * @private {boolean}
-     */
-    this.intersectionObserverCallbackFired_ = false;
-
-    divertIntersectResources(this.win);
-
-    if (
-      isExperimentOn(this.win, 'bento') ||
-      getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment ||
-      isAmp4Email(this.win.document)
-    ) {
-      const iframed = isIframed(this.win);
-
-      // Classic IntersectionObserver doesn't support viewport tracking and
-      // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
-      // supports it via {root: document}, which throws on other browsers.
-      const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
-        ? /** @type {*} */ (this.win.document)
-        : null);
-      try {
-        this.intersectionObserver_ = new IntersectionObserver(
-          (e) => this.intersect(e),
-          // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
-          {root, rootMargin: '250% 31.25%'}
-        );
-
-        // Wait for intersection callback instead of measuring all elements
-        // during the first pass.
-        this.relayoutAll_ = false;
-      } catch (e) {
-        dev().warn(TAG_, 'Falling back to classic Resources:', e);
-      }
-    }
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
@@ -262,13 +184,6 @@ export class ResourcesImpl {
       if (event.relayoutAll) {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
-      }
-
-      // Unfortunately, a viewport size change invalidates all premeasurements.
-      if (this.relayoutAll_ && this.intersectionObserver_) {
-        this.resources_.forEach((resource) =>
-          resource.invalidatePremeasurementAndRequestMeasure()
-        );
       }
 
       this.schedulePass();
@@ -301,51 +216,13 @@ export class ResourcesImpl {
 
     this.rebuildDomWhenReady_();
 
-    if (!this.intersectionObserver_) {
-      /** @private @const */
-      this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
+    /** @private @const */
+    this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
 
-      listen(this.win.document, 'scroll', this.throttledScroll_, {
-        capture: true,
-        passive: true,
-      });
-    }
-  }
-
-  /** @override */
-  isIntersectionExperimentOn() {
-    return !!this.intersectionObserver_;
-  }
-
-  /**
-   * @param {!Array<!IntersectionObserverEntry>} entries
-   * @visibleForTesting
-   */
-  intersect(entries) {
-    devAssert(this.intersectionObserver_);
-
-    if (getMode().localDev) {
-      const inside = [];
-      const outside = [];
-      entries.forEach((e) => {
-        const r = Resource.forElement(e.target);
-        (e.isIntersecting ? inside : outside).push({e, id: r.debugid});
-      });
-      dev().fine(TAG_, 'intersection', inside, outside);
-    }
-
-    this.intersectionObserverCallbackFired_ = true;
-
-    entries.forEach((entry) => {
-      const {boundingClientRect, target} = entry;
-
-      const r = Resource.forElement(target);
-      // Strangely, JSC is missing x/y from typedefs of boundingClientRect
-      // despite it being a DOMRectReadOnly (ClientRect) by spec.
-      r.premeasure(/** @type {!ClientRect} */ (boundingClientRect));
+    listen(this.win.document, 'scroll', this.throttledScroll_, {
+      capture: true,
+      passive: true,
     });
-
-    this.schedulePass();
   }
 
   /** @private */
@@ -359,43 +236,32 @@ export class ResourcesImpl {
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
 
-      if (IS_ESM) {
+      if (mode.isEsm()) {
         return;
       }
 
-      ieIntrinsicCheckAndFix(this.win);
+      const remeasure = () => this.remeasurePass_.schedule();
+      remeasure();
 
-      // With IntersectionObserver, no need for remeasuring hacks.
-      if (!this.intersectionObserver_) {
-        const fixPromise = ieMediaCheckAndFix(this.win);
-        const remeasure = () => this.remeasurePass_.schedule();
-        if (fixPromise) {
-          fixPromise.then(remeasure);
-        } else {
-          // No promise means that there's no problem.
-          remeasure();
-        }
+      // Safari 10 and under incorrectly estimates font spacing for
+      // `@font-face` fonts. This leads to wild measurement errors. The best
+      // course of action is to remeasure everything on window.onload or font
+      // timeout (3s), whichever is earlier. This has to be done on the global
+      // window because this is where the fonts are always added.
+      // Unfortunately, `document.fonts.ready` cannot be used here due to
+      // https://bugs.webkit.org/show_bug.cgi?id=174030.
+      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+      Promise.race([
+        loadPromise(this.win),
+        Services.timerFor(this.win).promise(3100),
+      ]).then(remeasure);
 
-        // Safari 10 and under incorrectly estimates font spacing for
-        // `@font-face` fonts. This leads to wild measurement errors. The best
-        // course of action is to remeasure everything on window.onload or font
-        // timeout (3s), whichever is earlier. This has to be done on the global
-        // window because this is where the fonts are always added.
-        // Unfortunately, `document.fonts.ready` cannot be used here due to
-        // https://bugs.webkit.org/show_bug.cgi?id=174030.
-        // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
-        Promise.race([
-          loadPromise(this.win),
-          Services.timerFor(this.win).promise(3100),
-        ]).then(remeasure);
-
-        // Remeasure the document when all fonts loaded.
-        if (
-          this.win.document.fonts &&
-          this.win.document.fonts.status != 'loaded'
-        ) {
-          this.win.document.fonts.ready.then(remeasure);
-        }
+      // Remeasure the document when all fonts loaded.
+      if (
+        this.win.document.fonts &&
+        this.win.document.fonts.status != 'loaded'
+      ) {
+        this.win.document.fonts.ready.then(remeasure);
       }
     });
   }
@@ -438,7 +304,7 @@ export class ResourcesImpl {
     let resource = Resource.forElementOptional(element);
     if (
       resource &&
-      resource.getState() != ResourceState.NOT_BUILT &&
+      resource.getState() != ResourceState_Enum.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
       resource.requestMeasure();
@@ -449,13 +315,7 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
-
-    if (this.intersectionObserver_) {
-      // The observer callback will schedule a pass to process this element.
-      this.intersectionObserver_.observe(element);
-    } else {
-      this.remeasurePass_.schedule(1000);
-    }
+    this.remeasurePass_.schedule(1000);
   }
 
   /**
@@ -464,9 +324,6 @@ export class ResourcesImpl {
    * @return {boolean}
    */
   isUnderBuildQuota_() {
-    if (this.buildInChunks_ && this.buildsThisPass_ >= MAX_BUILD_CHUNK_SIZE) {
-      return false;
-    }
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -475,7 +332,12 @@ export class ResourcesImpl {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_ < 20 || this.ampdoc.hasBeenVisible();
+    return (
+      this.buildAttemptsCount_ < 20 ||
+      // Ignore build quota for previews.
+      this.ampdoc.getVisibilityState() == VisibilityState_Enum.PREVIEW ||
+      this.ampdoc.hasBeenVisible()
+    );
   }
 
   /**
@@ -496,25 +358,18 @@ export class ResourcesImpl {
       return;
     }
 
-    // During prerender mode, don't build elements that aren't allowed to be
-    // prerendered. This avoids wasting our prerender build quota.
+    // During prerender/preview mode, don't build elements that aren't allowed
+    // to be prerendered. This avoids wasting our prerender build quota.
     // See isUnderBuildQuota_() for more details.
-    const shouldBuildResource =
-      this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
-      resource.prerenderAllowed();
-    if (!shouldBuildResource) {
+    const visibilityState = this.ampdoc.getVisibilityState();
+    const shouldSkipForPrerender =
+      visibilityState == VisibilityState_Enum.PRERENDER &&
+      !resource.prerenderAllowed();
+    const shouldSkipForPreview =
+      visibilityState == VisibilityState_Enum.PREVIEW &&
+      !resource.previewAllowed();
+    if (shouldSkipForPrerender || shouldSkipForPreview) {
       return;
-    }
-
-    if (this.onlyBuildWhenCloseToViewport_) {
-      const isCloseEnoughToViewport =
-        ignoreQuota ||
-        resource.isBuildRenderBlocking() ||
-        resource.renderOutsideViewport() ||
-        (this.isIdle_() && resource.idleRenderOutsideViewport());
-      if (!isCloseEnoughToViewport) {
-        return;
-      }
     }
 
     if (this.documentReady_) {
@@ -625,9 +480,9 @@ export class ResourcesImpl {
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
     }
-    if (this.intersectionObserver_) {
-      // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
-      this.intersectionObserver_.unobserve(resource.element);
+
+    if (resource.getState() === ResourceState_Enum.LAYOUT_SCHEDULED) {
+      resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
@@ -744,24 +599,37 @@ export class ResourcesImpl {
       // data.metaTags.viewport from 'documentLoaded' message.
       this.viewer_.sendMessage(
         'documentLoaded',
-        dict({
+        {
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+          'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
           'viewport': documentInfo.viewport,
-        }),
+        },
         /* cancelUnsent */ true
       );
 
       this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage(
         'documentHeight',
-        dict({'height': this.contentHeight_}),
+        {'height': this.contentHeight_},
         /* cancelUnsent */ true
       );
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
+    }
+
+    // Once we know the document is fully parsed, we check to see if every AMP Element has been built
+    const firstPassAfterAllBuilt =
+      !this.firstPassAfterDocumentReady_ &&
+      this.firstPassAfterAllBuilt_ &&
+      this.resources_.every(
+        (r) => r.getState() != Resource.NOT_BUILT || r.element.R1()
+      );
+    if (firstPassAfterAllBuilt) {
+      this.firstPassAfterAllBuilt_ = false;
+      this.maybeChangeHeight_ = true;
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -791,7 +659,7 @@ export class ResourcesImpl {
         if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage(
             'documentHeight',
-            dict({'height': measuredContentHeight}),
+            {'height': measuredContentHeight},
             /* cancelUnsent */ true
           );
           this.contentHeight_ = measuredContentHeight;
@@ -818,10 +686,6 @@ export class ResourcesImpl {
     if (
       this.documentReady_ &&
       this.ampInitialized_ &&
-      // With IntersectionObserver, elements are not measured until the first
-      // intersection callback.
-      (!this.intersectionObserver_ ||
-        this.intersectionObserverCallbackFired_) &&
       !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
     ) {
       // This signal mainly signifies that most of elements have been measured
@@ -882,17 +746,15 @@ export class ResourcesImpl {
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        const {
-          resource,
-          event,
-        } = /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
+        const {event, resource} =
+          /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
         let leftMarginDiff = 0;
         let rightMarginDiff = 0;
-        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
+        let {bottom: bottomDisplacedBoundary, top: topUnchangedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -1083,7 +945,8 @@ export class ResourcesImpl {
         this.vsync_.run(
           {
             measure: (state) => {
-              state./*OK*/ scrollHeight = this.viewport_./*OK*/ getScrollHeight();
+              state./*OK*/ scrollHeight =
+                this.viewport_./*OK*/ getScrollHeight();
               state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
             },
             mutate: (state) => {
@@ -1144,13 +1007,12 @@ export class ResourcesImpl {
    * Always returns true unless the resource was previously displayed but is
    * not displayed now (i.e. the resource should be unloaded).
    * @param {!Resource} r
-   * @param {boolean} usePremeasuredRect
    * @return {boolean}
    * @private
    */
-  measureResource_(r, usePremeasuredRect = false) {
+  measureResource_(r) {
     const wasDisplayed = r.isDisplayed();
-    r.measure(usePremeasuredRect);
+    r.measure();
     return !(wasDisplayed && !r.isDisplayed());
   }
 
@@ -1191,9 +1053,9 @@ export class ResourcesImpl {
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
     const {
+      elementsThatScrolled_: elementsThatScrolled,
       relayoutAll_: relayoutAll,
       relayoutTop_: relayoutTop,
-      elementsThatScrolled_: elementsThatScrolled,
     } = this;
     this.relayoutAll_ = false;
     this.relayoutTop_ = -1;
@@ -1203,16 +1065,19 @@ export class ResourcesImpl {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
+      if (
+        r.getState() == ResourceState_Enum.NOT_BUILT &&
+        !r.isBuilding() &&
+        !r.element.R1()
+      ) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
-      if (this.intersectionObserver_) {
-        // Do nothing.
-      } else if (
+
+      if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
-        r.getState() == ResourceState.NOT_LAID_OUT
+        r.getState() == ResourceState_Enum.NOT_LAID_OUT
       ) {
         relayoutCount++;
       }
@@ -1224,43 +1089,7 @@ export class ResourcesImpl {
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
     let toUnload;
-    if (this.intersectionObserver_) {
-      // The IntersectionObserver variant for phase 2 is just a simplification
-      // that ignores `relayoutTop` and `elementsThatScrolled`.
-      for (let i = 0; i < this.resources_.length; i++) {
-        const r = this.resources_[i];
-        const requested = r.isMeasureRequested();
-        if (r.hasOwner() && !requested) {
-          continue;
-        }
-        const premeasured = r.hasBeenPremeasured();
-        if (requested) {
-          dev().fine(TAG_, 'force remeasure:', r.debugid);
-        }
-        // Immediately measure (vs. waiting for async premeasure) for certain
-        // elements with sensitive time-to-measure.
-        const expediteFirstMeasure =
-          !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
-        const needsMeasure =
-          premeasured || requested || relayoutAll || expediteFirstMeasure;
-        if (needsMeasure) {
-          const isDisplayed = this.measureResource_(
-            r,
-            /* usePremeasuredRect */ premeasured
-          );
-          if (!isDisplayed) {
-            devAssert(
-              r.getState() != ResourceState.NOT_BUILT,
-              'Should not unload unbuilt elements.'
-            );
-            if (!toUnload) {
-              toUnload = [];
-            }
-            toUnload.push(r);
-          }
-        }
-      }
-    } else if (
+    if (
       relayoutCount > 0 ||
       remeasureCount > 0 ||
       relayoutAll ||
@@ -1269,13 +1098,13 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner() && !r.isMeasureRequested()) {
+        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.R1()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
         let needsMeasure =
           relayoutAll ||
-          r.getState() == ResourceState.NOT_LAID_OUT ||
+          r.getState() == ResourceState_Enum.NOT_LAID_OUT ||
           !r.hasBeenMeasured() ||
           r.isMeasureRequested() ||
           (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
@@ -1330,7 +1159,11 @@ export class ResourcesImpl {
     // Phase 3: Set inViewport status for resources.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+      if (
+        r.getState() == ResourceState_Enum.NOT_BUILT ||
+        r.hasOwner() ||
+        r.element.R1()
+      ) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its
@@ -1355,6 +1188,7 @@ export class ResourcesImpl {
           !r.isBuilt() &&
           !r.isBuilding() &&
           !r.hasOwner() &&
+          !r.element.R1() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
@@ -1365,7 +1199,10 @@ export class ResourcesImpl {
             /* ignoreQuota */ true
           );
         }
-        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+        if (
+          r.getState() != ResourceState_Enum.READY_FOR_LAYOUT ||
+          r.hasOwner()
+        ) {
           continue;
         }
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
@@ -1388,8 +1225,9 @@ export class ResourcesImpl {
       ) {
         const r = this.resources_[i];
         if (
-          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          r.getState() == ResourceState_Enum.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.R1() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1407,8 +1245,9 @@ export class ResourcesImpl {
       ) {
         const r = this.resources_[i];
         if (
-          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          r.getState() == ResourceState_Enum.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.R1() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
@@ -1455,9 +1294,7 @@ export class ResourcesImpl {
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      if (!this.removeTaskTimeout_) {
-        timeout = this.calcTaskTimeout_(task);
-      }
+      timeout = this.calcTaskTimeout_(task);
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1469,10 +1306,8 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (!this.removeTaskTimeout_) {
-        if (timeout > 16) {
-          break;
-        }
+      if (timeout > 16) {
+        break;
       }
 
       this.queue_.dequeue(task);
@@ -1487,20 +1322,10 @@ export class ResourcesImpl {
       } else {
         const {resource} = task;
 
-        let stillDisplayed = true;
-        if (this.intersectionObserver_) {
-          // With IntersectionObserver, peek at the premeasured rect to see
-          // if the resource is still displayed (has a non-zero size).
-          // The premeasured rect is most analogous to an immediate measure.
-          if (resource.hasBeenPremeasured()) {
-            stillDisplayed = resource.isDisplayed(
-              /* usePremeasuredRect */ true
-            );
-          }
-        } else {
-          // Remeasure can only update isDisplayed(), not in-viewport state.
-          resource.measure();
-        }
+        const stillDisplayed = true;
+        // Remeasure can only update isDisplayed(), not in-viewport state.
+        resource.measure();
+
         // Check if the element has exited the viewport or the page has changed
         // visibility since the layout was scheduled.
         if (
@@ -1535,12 +1360,10 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (!this.removeTaskTimeout_) {
-      if (timeout >= 0) {
-        // Still tasks in the queue, but we took too much time.
-        // Schedule the next work pass.
-        return timeout;
-      }
+    if (timeout >= 0) {
+      // Still tasks in the queue, but we took too much time.
+      // Schedule the next work pass.
+      return timeout;
     }
 
     // No tasks left in the queue.
@@ -1677,7 +1500,7 @@ export class ResourcesImpl {
   isLayoutAllowed_(resource, forceOutsideViewport) {
     // Only built and displayed elements can be loaded.
     if (
-      resource.getState() == ResourceState.NOT_BUILT ||
+      resource.getState() == ResourceState_Enum.NOT_BUILT ||
       !resource.isDisplayed()
     ) {
       return false;
@@ -1685,13 +1508,16 @@ export class ResourcesImpl {
 
     // Don't schedule elements when we're not visible, or in prerender mode
     // (and they can't prerender).
-    if (!this.visible_) {
-      if (
-        this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
-        !resource.prerenderAllowed()
-      ) {
-        return false;
-      }
+    const visibilityState = this.ampdoc.getVisibilityState();
+    const shouldPrerender =
+      visibilityState == VisibilityState_Enum.PRERENDER &&
+      resource.prerenderAllowed();
+    const shouldPreview =
+      visibilityState == VisibilityState_Enum.PREVIEW &&
+      resource.previewAllowed();
+    const shouldBuild = this.visible_ || shouldPrerender || shouldPreview;
+    if (!shouldBuild) {
+      return false;
     }
 
     // The element has to be in its rendering corridor.
@@ -1714,7 +1540,10 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
-    const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
+    if (resource.element.R1()) {
+      return;
+    }
+    const isBuilt = resource.getState() != ResourceState_Enum.NOT_BUILT;
     const isDisplayed = resource.isDisplayed();
     if (!isBuilt || !isDisplayed) {
       devAssert(
@@ -1791,11 +1620,7 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      if (this.removeTaskTimeout_) {
-        this.schedulePass();
-      } else {
-        this.schedulePass(this.calcTaskTimeout_(task));
-      }
+      this.schedulePass(this.calcTaskTimeout_(task));
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }
@@ -1809,16 +1634,17 @@ export class ResourcesImpl {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {!FiniteStateMachine<!VisibilityState>} vsm
+   * @param {!FiniteStateMachine<!VisibilityState_Enum>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
     const {
-      PRERENDER: prerender,
-      VISIBLE: visible,
       HIDDEN: hidden,
-      PAUSED: paused,
       INACTIVE: inactive,
-    } = VisibilityState;
+      PAUSED: paused,
+      PRERENDER: prerender,
+      PREVIEW: preview,
+      VISIBLE: visible,
+    } = VisibilityState_Enum;
     const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
@@ -1865,10 +1691,17 @@ export class ResourcesImpl {
     };
 
     vsm.addTransition(prerender, prerender, doWork);
+    vsm.addTransition(prerender, preview, doWork);
     vsm.addTransition(prerender, visible, doWork);
     vsm.addTransition(prerender, hidden, doWork);
     vsm.addTransition(prerender, inactive, doWork);
     vsm.addTransition(prerender, paused, doWork);
+
+    vsm.addTransition(preview, preview, doWork);
+    vsm.addTransition(preview, visible, doWork);
+    vsm.addTransition(preview, hidden, doWork);
+    vsm.addTransition(preview, inactive, doWork);
+    vsm.addTransition(preview, paused, doWork);
 
     vsm.addTransition(visible, visible, doWork);
     vsm.addTransition(visible, hidden, doWork);
@@ -1912,8 +1745,8 @@ export class ResourcesImpl {
    */
   cleanupTasks_(resource, opt_removePending) {
     if (
-      resource.getState() == ResourceState.NOT_LAID_OUT ||
-      resource.getState() == ResourceState.READY_FOR_LAYOUT
+      resource.getState() == ResourceState_Enum.NOT_LAID_OUT ||
+      resource.getState() == ResourceState_Enum.READY_FOR_LAYOUT
     ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
@@ -1932,7 +1765,7 @@ export class ResourcesImpl {
     }
 
     if (
-      resource.getState() == ResourceState.NOT_BUILT &&
+      resource.getState() == ResourceState_Enum.NOT_BUILT &&
       opt_removePending &&
       this.pendingBuildResources_
     ) {

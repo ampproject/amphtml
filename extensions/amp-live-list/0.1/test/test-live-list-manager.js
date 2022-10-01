@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
@@ -742,7 +726,7 @@ describes.fakeWin('LiveListManager', {amp: true}, (env) => {
   );
 
   it('should find highest "update time" from amp-live-list elements', () => {
-    const doc = [];
+    const doc = {};
     const list1 = getLiveList(undefined, 'id1');
     const list2 = getLiveList(undefined, 'id2');
     env.sandbox.stub(list1, 'update').returns(1000);
@@ -750,7 +734,7 @@ describes.fakeWin('LiveListManager', {amp: true}, (env) => {
     doc.getElementsByTagName = () => {
       return [list1.element, list2.element];
     };
-    doc.querySelectorAll = function () {};
+    doc.querySelectorAll = () => [];
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
@@ -824,31 +808,40 @@ describes.realWin(
       const script1 = document.createElement('script');
       const script2 = document.createElement('script');
       script1.setAttribute('custom-element', 'amp-test');
+      env.sandbox
+        .stub(script1, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-test-0.2.js');
       script2.setAttribute('custom-template', 'amp-template');
+      env.sandbox
+        .stub(script2, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-template-0.2.js');
       div.appendChild(script1);
       div.appendChild(script2);
 
       expect(
         doc.head.querySelectorAll('[custom-element="amp-test"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      expect(extensions.extensions_['amp-test:0.2']).to.be.undefined;
 
       expect(
         doc.head.querySelectorAll('[custom-template="amp-template"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-template']).to.be.undefined;
+      expect(extensions.extensions_['amp-template:0.2']).to.be.undefined;
 
       manager.installExtensionsForDoc_(div);
 
       expect(
-        doc.head.querySelectorAll('[custom-element="amp-test"]')
+        doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.2"]')
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-test:0.2'].scriptPresent).to.be.true;
 
       expect(
-        doc.head.querySelectorAll('[custom-element="amp-template"]')
+        doc.head.querySelectorAll(
+          '[custom-element="amp-template"][src*="-0.2"]'
+        )
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-template:0.2'].scriptPresent).to.be
+        .true;
     });
   }
 );

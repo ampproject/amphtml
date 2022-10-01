@@ -1,20 +1,4 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
   /**
@@ -42,11 +26,11 @@ export class ServiceAdapter {
 
   /**
    * Returns the encrypted document key for the specified service.
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {?string}
    */
-  getEncryptedDocumentKey(serviceId) {
-    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
+  getEncryptedDocumentKey(platformKey) {
+    return this.subscriptionService_.getEncryptedDocumentKey(platformKey);
   }
 
   /**
@@ -59,11 +43,11 @@ export class ServiceAdapter {
 
   /**
    * Returns the reader ID for the specified service.
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {!Promise<string>}
    */
-  getReaderId(serviceId) {
-    return this.subscriptionService_.getReaderId(serviceId);
+  getReaderId(platformKey) {
+    return this.subscriptionService_.getReaderId(platformKey);
   }
 
   /**
@@ -87,14 +71,14 @@ export class ServiceAdapter {
   /**
    * Delegates actions to a given service.
    * @param {string} action
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {?string} sourceId
    * @return {!Promise<boolean>}
    */
-  delegateActionToService(action, serviceId, sourceId) {
+  delegateActionToService(action, platformKey, sourceId) {
     return this.subscriptionService_.delegateActionToService(
       action,
-      serviceId,
+      platformKey,
       sourceId
     );
   }
@@ -102,14 +86,14 @@ export class ServiceAdapter {
   /**
    * Delegate UI decoration to another service.
    * @param {!Element} element
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {string} action
    * @param {?JsonObject} options
    */
-  decorateServiceAction(element, serviceId, action, options) {
+  decorateServiceAction(element, platformKey, action, options) {
     this.subscriptionService_.decorateServiceAction(
       element,
-      serviceId,
+      platformKey,
       action,
       options
     );
@@ -129,5 +113,44 @@ export class ServiceAdapter {
    */
   selectPlatformForLogin() {
     return this.subscriptionService_.selectPlatformForLogin();
+  }
+
+  /**
+   * Loads metering state.
+   * @return {!Promise<?./metering-store.MeteringStateDef>}
+   */
+  loadMeteringState() {
+    if (!this.subscriptionService_.metering_) {
+      return Promise.resolve(null);
+    }
+
+    return this.subscriptionService_.metering_.loadMeteringState();
+  }
+
+  /**
+   * Saves metering state.
+   * @param {!./metering-store.MeteringStateDef} meteringState
+   * @return {!Promise}
+   */
+  saveMeteringState(meteringState) {
+    if (!this.subscriptionService_.metering_) {
+      return Promise.resolve();
+    }
+
+    return this.subscriptionService_.metering_.saveMeteringState(meteringState);
+  }
+
+  /**
+   * Remembers metering entitlements were fetched
+   * with the current metering state.
+   *
+   * This helps avoid redundant fetches.
+   */
+  rememberMeteringEntitlementsWereFetched() {
+    if (!this.subscriptionService_.metering_) {
+      return;
+    }
+
+    this.subscriptionService_.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
   }
 }

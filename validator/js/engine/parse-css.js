@@ -1,19 +1,4 @@
 /**
- * @license
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the license.
- *
  * Credits:
  *   This original version of this file was derived from
  *   https://github.com/tabatkins/parse-css by Tab Atkins,
@@ -1313,6 +1298,35 @@ class MediaQueryVisitor extends RuleVisitor {
   }
 
   /**
+   * token_stream->Current() must be a FUNCTION_TOKEN. Consumes all Tokens up
+   * to and including the matching closing paren for that FUNCTION_TOKEN.
+   * If false, recursion exceeded maximum depth.
+   * @param {!TokenStream} tokenStream
+   * @param {number} depth
+   * @returns {boolean}
+   */
+  consumeAFunction_(tokenStream, depth) {
+    if (depth > kMaximumCssRecursion) return false;
+    if (tokenStream.current().tokenType !=
+        tokenize_css.TokenType.FUNCTION_TOKEN)
+      return false;
+    tokenStream.consume();  // FUNCTION_TOKEN
+    while (tokenStream.current().tokenType !=
+           tokenize_css.TokenType.EOF_TOKEN) {
+      const type = tokenStream.current().tokenType;
+      if (type == tokenize_css.TokenType.FUNCTION_TOKEN) {
+        if (!this.consumeAFunction_(tokenStream, depth + 1)) return false;
+      } else if (type == tokenize_css.TokenType.CLOSE_PAREN) {
+        tokenStream.consume();
+        return true;
+      } else {
+        tokenStream.consume();
+      }
+    }
+    return false;  // EOF before function CLOSE_PAREN
+  }
+
+  /**
    * Parse a media expression
    * @param {!TokenStream} tokenStream
    * @return {boolean}
@@ -1336,19 +1350,18 @@ class MediaQueryVisitor extends RuleVisitor {
       // The CSS3 grammar at this point just tells us to expect some
       // expr. Which tokens are accepted here are defined by the media
       // feature found above. We don't implement media features here, so
-      // we just loop over tokens until we find a CLOSE_PAREN or EOF.
-      // While expr in general may have arbitrary sets of open/close parens,
-      // it seems that https://www.w3.org/TR/css3-mediaqueries/#media1
-      // suggests that media features cannot:
-      //
-      // "Media features only accept single values: one keyword, one number,
-      // or a number with a unit identifier. (The only exceptions are the
-      // ‘aspect-ratio’ and ‘device-aspect-ratio’ media features.)
-      while (tokenStream.current().tokenType !==
-                 tokenize_css.TokenType.EOF_TOKEN &&
-             tokenStream.current().tokenType !==
-                 tokenize_css.TokenType.CLOSE_PAREN) {
-        tokenStream.consume();
+      // we just loop over tokens until we find a CLOSE_PAREN or EOF while
+      // handling nested functions like calc().
+      while (tokenStream.current().tokenType !=
+             tokenize_css.TokenType.EOF_TOKEN) {
+        const type = tokenStream.current().tokenType;
+        if (type == tokenize_css.TokenType.CLOSE_PAREN) {
+          break;
+        } else if (type == tokenize_css.TokenType.FUNCTION_TOKEN) {
+          if (!this.consumeAFunction_(tokenStream, 0)) return false;
+        } else {
+          tokenStream.consume();
+        }
       }
     }
     if (tokenStream.current().tokenType !==

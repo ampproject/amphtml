@@ -1,21 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {DirectionX} from './def';
-import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect';
-import {mapRange} from '../../../src/utils/math.js';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {mapRange} from '#core/math';
+
+import {DirectionX, RectDef} from './def';
 
 /**
  * @param {number} containerWidth
@@ -76,8 +62,8 @@ const mapStep = (step, min, max) => mapRange(step, 0, 1, min, max);
 
 /**
  * Provides offset coords to interpolate `from` rect `to` rect.
- * @param {!LayoutRectDef} from
- * @param {!LayoutRectDef} to
+ * @param {!RectDef} from
+ * @param {!RectDef} to
  * @param {number=} step  in [0..1]
  * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
  *  - x is offset from the original box in pixels.
@@ -95,13 +81,13 @@ export function interpolatedBoxesTransform(from, to, step = 1) {
 
 /**
  * Scales, fits and centers `original` into `container`.
- * @param {!LayoutRectDef} original
- * @param {!LayoutRectDef} container
- * @return {!LayoutRectDef}
+ * @param {!RectDef} original
+ * @param {!RectDef} container
+ * @return {!RectDef}
  */
 export function letterboxRect(original, container) {
-  const {width, height} = original;
-  const {top, left, width: maxWidth, height: maxHeight} = container;
+  const {height, width} = original;
+  const {height: maxHeight, left, top, width: maxWidth} = container;
 
   const containerAspect = maxWidth / maxHeight;
   const originalAspect = width / height;
@@ -122,14 +108,14 @@ export function letterboxRect(original, container) {
 }
 
 /**
- * @param {!LayoutRectDef} original
- * @param {!LayoutRectDef} container
+ * @param {!RectDef} original
+ * @param {!RectDef} container
  * @param {DirectionX} horizontalEdge
  * @param {number} widthRatio
  * @param {number} widthMin
  * @param {number} marginRatio
  * @param {number} marginMax
- * @return {!LayoutRectDef}
+ * @return {!RectDef}
  */
 export function topCornerRect(
   original,
@@ -166,7 +152,7 @@ export const isVisibleBySize = (element) =>
   isSizedRect(element./*OK*/ getBoundingClientRect());
 
 /**
- * @param {!LayoutRectDef|!ClientRect|!DOMRect} rect
+ * @param {!RectDef} rect
  * @return {boolean}
  */
 export const isSizedRect = (rect) => rect.width > 0 && rect.height > 0;

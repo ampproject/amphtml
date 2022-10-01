@@ -1,20 +1,4 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
 /**
  * Fake story implementation mocking public methods.
@@ -25,8 +9,8 @@ export class MockStoryImpl extends AMP.BaseElement {
     this.element = element;
     this.pages_ = [];
     // Fire these events so that story ads thinks the parent story is ready.
-    element.signals().signal(CommonSignals.BUILT);
-    element.signals().signal(CommonSignals.INI_LOAD);
+    element.signals().signal(CommonSignals_Enum.BUILT);
+    element.signals().signal(CommonSignals_Enum.INI_LOAD);
   }
 
   addPage(pageImpl) {
@@ -103,7 +87,7 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
     const page = doc.createElement('amp-story-page');
     page.id = 'story-page-' + i;
     element.appendChild(page);
-    page.signals().signal(CommonSignals.BUILT);
+    page.signals().signal(CommonSignals_Enum.BUILT);
     const implPromise = page
       .getImpl()
       .then((pageImpl) => storyImpl.addPage(pageImpl));
@@ -123,7 +107,7 @@ export function fireBuildSignals(doc, additonalSelectors = []) {
   const selectors = defaultSelectors.concat(additonalSelectors).join(',');
   doc.querySelectorAll(selectors).forEach((element) => {
     const signals = element.signals();
-    signals.signal(CommonSignals.BUILT);
-    signals.signal(CommonSignals.INI_LOAD);
+    signals.signal(CommonSignals_Enum.BUILT);
+    signals.signal(CommonSignals_Enum.INI_LOAD);
   });
 }

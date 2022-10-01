@@ -2,29 +2,11 @@
 $category@: layout
 formats:
   - websites
-  - ads
-  - email
 teaser:
   text: A stacked list of headers that collapse or expand content sections with user interaction.
 experimental: true
 bento: true
 ---
-
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-accordion
 
@@ -46,7 +28,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
+    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 -   An `amp-accordion` with a defined `id` preserves the collapsed or expanded
     state of each section while the user remains on your domain.
@@ -62,7 +44,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-html.md).
+    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/main/docs/spec/email/amp-email-html.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 
 [/filter]
@@ -95,11 +77,14 @@ The example below contains an `amp-accordion` with three sections. The
 
 [/example]
 
-### Migrating from 0.1
+### Standalone use outside valid AMP documents
 
-The experimental `1.0` version of `amp-accordion` does not support session states. It behaves as if the `disable-session-states` attribute is always applied.
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
-Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `[data-expanded]` is not supported in version `1.0`. See the `expanded` attribute below for further information.
+To find the standalone version of `amp-accordion`, see [**`bento-accordion`**](./1.0/README.md).
 
 ## Attributes
 
@@ -107,6 +92,8 @@ Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax 
 
 Include the `animate` attribute in `<amp-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
+
+This attribute can be configured to based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 [example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
 
@@ -194,134 +181,6 @@ Allow only one section to expand at a time by applying the `expand-single-sectio
 
 [/example]
 
-[filter formats="websites"]
-
-## Actions
-
-### toggle
-
-The `toggle` action switches the `expanded` and `collapsed` states of
-`amp-accordion` sections. When called with no arguments, it toggles all sections
-of the accordion. To specify a specific section, add the `section` argument and
-use its corresponding `id` as the value.
-
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
-
-```html
-<amp-accordion id="myAccordion">
-  <section id="section1">
-    <h2>Section 1</h2>
-    <p>Bunch of awesome content</p>
-  </section>
-  <section>
-    <h2>Section 2</h2>
-    <div>Bunch of awesome content</div>
-  </section>
-  <section>
-    <h2>Section 3</h2>
-    <div>Bunch of awesome content</div>
-  </section>
-</amp-accordion>
-<button on="tap:myAccordion.toggle">Toggle All Sections</button>
-<button on="tap:myAccordion.toggle(section='section1')">
-  Toggle Section 1
-</button>
-```
-
-[/example]
-
-### expand
-
-The `expand` action expands the sections of the `amp-accordion`. If a section
-is already expanded, it stays expanded. When called with no arguments, it
-expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
-
-```html
-<button on="tap:myAccordion.expand">Expand All Sections</button>
-<button on="tap:myAccordion.expand(section='section1')">
-  Expand Section 1
-</button>
-```
-
-### collapse
-
-The `collapse` action collapses the sections of the `amp-accordion`. If a
-section is already collapsed, it stays collapsed. When called with no arguments,
-it collapses all sections of the accordion. To specify a section, add the
-`section` argument, and use its corresponding `id` as the value.
-
-```html
-<button on="tap:myAccordion.collapse">Collapse All Sections</button>
-<button on="tap:myAccordion.collapse(section='section1')">
-  Collapse Section 1
-</button>
-```
-
-### Actions in Bento Mode
-
-In Bento mode, the above actions can be called via `getApi()`. For example:
-
-```html
-<script>
-  var api = await document.querySelector('#myAccordion').getApi();
-  api.toggle();
-  api.toggle('section1');
-</script>
-```
-
-[/filter] <!-- formats="websites" -->
-
-## Events
-
-The following `amp-accordion` events trigger on accordion sections when they're
-clicked or tapped.
-
-### expand
-
-The `expand` event triggers the targeted `amp-accordion` section to change from
-the collapsed state to the expanded state. Call `expand` on an already expanded
-section to trigger the `expand` event.
-
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
-
-```html
-<amp-accordion id="myAccordion">
-  <section id="section1" on="expand:myAccordion.expand(section='section2')">
-    <h2>Section 1</h2>
-    <p>Opening me will open Section 2</p>
-  </section>
-  <section>
-    <h2>Section 3</h2>
-    <div>Bunch of awesome content</div>
-  </section>
-</amp-accordion>
-```
-
-[/example]
-
-### collapse
-
-The `collapse` event triggers the targeted `amp-accordion` section to change
-from the expanded state to the collapsed state. Call `collapse` on an already
-collapsed section to trigger the event.
-
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
-
-```html
-<amp-accordion id="myAccordion">
-  <section id="section2" on="collapse:myAccordion.collapse(section='section1')">
-    <h2>Section 2</h2>
-    <div>Closing me will close Section 1</div>
-  </section>
-  <section>
-    <h2>Section 3</h2>
-    <div>Bunch of awesome content</div>
-  </section>
-</amp-accordion>
-```
-
-[/example]
-
 ## Styling
 
 The `amp-accordion` element selector styles an `amp-accordion` according to your
@@ -358,3 +217,9 @@ Keep the following points in mind when you style an amp-accordion:
 -   `tabindex`: Applied to the header element of each `amp-accordion` section.
 -   `role=button`: Applied to the header element of each `amp-accordion` section.
 -   `role=region`: Applied to the content element of each `amp-accordion` section.
+
+## Version notes
+
+The experimental `1.0` version of `amp-accordion` does not support session states. It behaves as if the `disable-session-states` attribute is always applied.
+
+Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `data-expand` binding is not supported in version `1.0`. See the [`expanded` attribute](#expanded) for further information.

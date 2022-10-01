@@ -1,31 +1,18 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {AmpContext} from '../../3p/ampcontext';
-import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
-import {Platform} from '../../src/service/platform-impl';
+import {AmpContext} from '#3p/ampcontext';
+
+import {MessageType_Enum, serializeMessage} from '#core/3p-frame-messaging';
+
+import {Platform} from '#service/platform-impl';
 
 const NOOP = () => {};
 
-describe('3p ampcontext.js', () => {
+describes.sandboxed('3p ampcontext.js', {}, (env) => {
   let windowPostMessageSpy;
   let windowMessageHandler;
   let win;
 
   beforeEach(() => {
-    windowPostMessageSpy = window.sandbox.spy();
+    windowPostMessageSpy = env.sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {
         expect(eventType).to.equal('message');
@@ -132,6 +119,7 @@ describe('3p ampcontext.js', () => {
     });
     expect(context.canonicalUrl).to.equal('https://bar.com');
     expect(context.pageViewId).to.equal('1');
+    expect(context.pageViewId64).to.equal('abcdef');
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
     expect(context.referrer).to.equal('baz.net');
@@ -151,9 +139,10 @@ describe('3p ampcontext.js', () => {
     });
   });
 
+  // TODO(35898): unskip
   it.configure()
     .skipFirefox()
-    .run('should throw error if metadata missing', () => {
+    .skip('should throw error if metadata missing', () => {
       win.name = generateIncorrectAttributes();
       const platform = new Platform(window);
       expect(() => new AmpContext(win)).to.throw(
@@ -166,7 +155,7 @@ describe('3p ampcontext.js', () => {
   it('should be able to send an intersection observer request', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    const callbackSpy = window.sandbox.spy();
+    const callbackSpy = env.sandbox.spy();
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
@@ -185,7 +174,7 @@ describe('3p ampcontext.js', () => {
     // send an intersection message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.INTERSECTION,
+      type: MessageType_Enum.INTERSECTION,
       changes: 'changes',
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
@@ -211,7 +200,7 @@ describe('3p ampcontext.js', () => {
   it('should send a pM and set callback when onPageVisibilityChange()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    const callbackSpy = window.sandbox.spy();
+    const callbackSpy = env.sandbox.spy();
     const stopObserving = context.onPageVisibilityChange(callbackSpy);
 
     // window.context should have sent postMessage asking for visibility
@@ -226,7 +215,7 @@ describe('3p ampcontext.js', () => {
     // send a page visibility message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_STATE,
+      type: MessageType_Enum.EMBED_STATE,
       pageHidden: true,
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
@@ -258,8 +247,8 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    const successCallbackSpy = window.sandbox.spy();
-    const failureCallbackSpy = window.sandbox.spy();
+    const successCallbackSpy = env.sandbox.spy();
+    const failureCallbackSpy = env.sandbox.spy();
     const initialId = context.nextResizeRequestId_;
 
     const height = 100;
@@ -283,7 +272,7 @@ describe('3p ampcontext.js', () => {
     // send a resize success message down
     const messagePayloadSuccess = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_CHANGED,
+      type: MessageType_Enum.EMBED_SIZE_CHANGED,
       id: initialId,
       requestedHeight: 300,
       requestedWidth: 200,
@@ -296,7 +285,7 @@ describe('3p ampcontext.js', () => {
     // send a resize failure message down
     const messagePayloadFailure = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_DENIED,
+      type: MessageType_Enum.EMBED_SIZE_DENIED,
       id: initialId + 1,
       requestedHeight: 300,
       requestedWidth: 200,
@@ -315,10 +304,10 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    context.sendDeprecationNotice_ = window.sandbox.spy();
+    context.sendDeprecationNotice_ = env.sandbox.spy();
 
-    const successCallbackSpy = window.sandbox.spy();
-    const deniedCallbackSpy = window.sandbox.spy();
+    const successCallbackSpy = env.sandbox.spy();
+    const deniedCallbackSpy = env.sandbox.spy();
 
     context.onResizeSuccess(successCallbackSpy);
     context.onResizeDenied(deniedCallbackSpy);
@@ -339,7 +328,7 @@ describe('3p ampcontext.js', () => {
     // send a resize success message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_CHANGED,
+      type: MessageType_Enum.EMBED_SIZE_CHANGED,
       requestedHeight: 300,
       requestedWidth: 200,
     };
@@ -365,8 +354,8 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    const successCallbackSpy = window.sandbox.spy();
-    const deniedCallbackSpy = window.sandbox.spy();
+    const successCallbackSpy = env.sandbox.spy();
+    const deniedCallbackSpy = env.sandbox.spy();
 
     context.onResizeSuccess(successCallbackSpy);
     context.onResizeDenied(deniedCallbackSpy);
@@ -385,7 +374,7 @@ describe('3p ampcontext.js', () => {
     // send a resize denied message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_DENIED,
+      type: MessageType_Enum.EMBED_SIZE_DENIED,
       requestedHeight: 300,
       requestedWidth: 200,
     };
@@ -418,6 +407,7 @@ function generateAttributes(opt_sentinel) {
     },
     canonicalUrl: 'https://bar.com',
     pageViewId: '1',
+    pageViewId64: 'abcdef',
     sentinel,
     startTime: 0,
     referrer: 'baz.net',

@@ -1,27 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-selector-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-selector', version: '1.0'}],
@@ -71,10 +54,6 @@ export const WithAmpImg = () => {
   );
 };
 
-WithAmpImg.story = {
-  name: 'with <amp-img>',
-};
-
 export const WithUl = () => {
   return (
     <amp-selector class="sample-selector" layout="container">
@@ -88,24 +67,15 @@ export const WithUl = () => {
   );
 };
 
-WithUl.story = {
-  name: 'with <ul>',
-};
-
-export const Actions = () => {
-  const keyboardSelectMode = select(
-    'keyboard select mode',
-    ['none', 'focus', 'select'],
-    'focus'
-  );
+export const Actions = (args) => {
   return (
     <>
       <amp-selector
         id="actionsSample"
         layout="container"
         class="sample-selector"
-        keyboard-select-mode={keyboardSelectMode}
         multiple
+        {...args}
       >
         <ul>
           <li option="1" selected>
@@ -135,8 +105,13 @@ export const Actions = () => {
   );
 };
 
-Actions.story = {
-  name: 'actions',
+Actions.argTypes = {
+  'keyboard-select-mode': {
+    name: 'keyboard-select-mode',
+    defaultValue: 'select',
+    options: ['none', 'focus', 'select'],
+    control: {type: 'select'},
+  },
 };
 
 export const Responsive = () => {
@@ -150,8 +125,4 @@ export const Responsive = () => {
       </ul>
     </amp-selector>
   );
-};
-
-Responsive.story = {
-  name: 'responsive',
 };

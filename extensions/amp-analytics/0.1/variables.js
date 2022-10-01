@@ -1,43 +1,29 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {TickLabel_Enum} from '#core/constants/enums';
+import {isArray, isFiniteNumber} from '#core/types';
+import {asyncStringReplace} from '#core/types/string';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
 
-import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
-import {asyncStringReplace} from '../../../src/string';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {getActiveExperimentBranches, getExperimentBranch} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {cookieReader} from './cookie-reader';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  getActiveExperimentBranches,
-  getExperimentBranch,
-} from '../../../src/experiments';
+import {linkerReaderServiceFor} from './linker-reader';
+import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
+
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {isInFie} from '../../../src/iframe-helper';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
-import {isInFie} from '../../../src/iframe-helper';
-import {linkerReaderServiceFor} from './linker-reader';
+} from '../../../src/service-helpers';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
@@ -182,6 +168,41 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * This macro function allows arithmetic operations over other analytics variables.
+ *
+ * @param {string} leftOperand
+ * @param {string} rightOperand
+ * @param {string} operation
+ * @param {string} round If this flag is truthy the result will be rounded
+ * @return {number}
+ */
+function calcMacro(leftOperand, rightOperand, operation, round) {
+  const left = Number(leftOperand);
+  const right = Number(rightOperand);
+  userAssert(!isNaN(left), 'CALC macro - left operand must be a number');
+  userAssert(!isNaN(right), 'CALC macro - right operand must be a number');
+  let result = 0;
+  switch (operation) {
+    case 'add':
+      result = left + right;
+      break;
+    case 'subtract':
+      result = left - right;
+      break;
+    case 'multiply':
+      result = left * right;
+      break;
+    case 'divide':
+      userAssert(right, 'CALC macro - cannot divide by 0');
+      result = left / right;
+      break;
+    default:
+      user().error(TAG, 'CALC macro - Invalid operation');
+  }
+  return stringToBool(round) ? Math.round(result) : result;
+}
+
+/**
  * If given an experiment name returns the branch id if a branch is selected.
  * If no branch name given, it returns a comma separated list of active branch
  * experiment ids and their names or an empty string if none exist.
@@ -212,10 +233,13 @@ export class VariableService {
     this.ampdoc_ = ampdoc;
 
     /** @private {!JsonObject} */
-    this.macros_ = dict({});
+    this.macros_ = {};
 
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
+
+    /** @const @private {!Promise<SessionManager>} */
+    this.sessionManagerPromise_ = sessionServicePromiseForDoc(this.ampdoc_);
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
@@ -230,6 +254,7 @@ export class VariableService {
     );
     this.register_('$REPLACE', replaceMacro);
     this.register_('$MATCH', matchMacro);
+    this.register_('$CALC', calcMacro);
     this.register_(
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue
@@ -278,6 +303,7 @@ export class VariableService {
    * @return {!JsonObject} contains all registered macros
    */
   getMacros(element) {
+    const type = element.getAttribute('type');
     const elementMacros = {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
@@ -288,37 +314,62 @@ export class VariableService {
           element,
           userAssert(key, 'CONSENT_METADATA macro must contain a key')
         ),
+      'SESSION_ID': () =>
+        this.getSessionValue_(type, SESSION_VALUES.SESSION_ID),
+      'SESSION_TIMESTAMP': () =>
+        this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
+      'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
+      'SESSION_EVENT_TIMESTAMP': () =>
+        this.getSessionValue_(type, SESSION_VALUES.EVENT_TIMESTAMP),
+      'SESSION_ENGAGED': () =>
+        this.getSessionValue_(type, SESSION_VALUES.ENGAGED),
     };
     const perfMacros = isInFie(element)
       ? {}
       : {
           'FIRST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.FIRST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_VIEWPORT_READY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_VIEWPORT_READY
+              TickLabel_Enum.FIRST_VIEWPORT_READY
             ),
           'MAKE_BODY_VISIBLE': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.MAKE_BODY_VISIBLE
+              TickLabel_Enum.MAKE_BODY_VISIBLE
             ),
           'LARGEST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_INPUT_DELAY
+              TickLabel_Enum.FIRST_INPUT_DELAY
             ),
           'CUMULATIVE_LAYOUT_SHIFT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+              TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT
             ),
         };
-    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
+    const merged = {
+      ...this.macros_,
+      ...elementMacros,
+      ...perfMacros,
+    };
     return /** @type {!JsonObject} */ (merged);
+  }
+
+  /**
+   *
+   * @param {string} vendorType
+   * @param {!SESSION_VALUES} key
+   * @return {!Promise<number>}
+   */
+  getSessionValue_(vendorType, key) {
+    return this.sessionManagerPromise_.then((sessionManager) => {
+      return sessionManager.getSessionValue(vendorType, key);
+    });
   }
 
   /**
@@ -344,7 +395,7 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string.
    */
   expandTemplate(template, options, element, opt_bindings, opt_allowlist) {
-    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
+    return asyncStringReplace(template, /\${([^{}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,
@@ -360,7 +411,7 @@ export class VariableService {
 
       // Split the key to name and args
       // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
-      const {name, argList} = getNameArgs(key);
+      const {argList, name} = getNameArgs(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
@@ -465,7 +516,7 @@ export function encodeVars(raw) {
     return raw.map(encodeVars).join(',');
   }
   // Separate out names and arguments from the value and encode the value.
-  const {name, argList} = getNameArgs(String(raw));
+  const {argList, name} = getNameArgs(String(raw));
   return encodeURIComponent(name) + argList;
 }
 
@@ -511,10 +562,9 @@ export function variableServiceForDoc(elementOrAmpDoc) {
  * @return {!Promise<!VariableService>}
  */
 export function variableServicePromiseForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    'amp-analytics-variables'
-  ));
+  return /** @type {!Promise<!VariableService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-variables')
+  );
 }
 
 /**

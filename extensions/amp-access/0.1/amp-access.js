@@ -1,38 +1,26 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {TickLabel_Enum} from '#core/constants/enums';
+import {Observable} from '#core/data-structures/observable';
+import {isJsonScriptTag} from '#core/dom';
+import {isArray} from '#core/types';
+import {getValueForExpr} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
-import {AccessSource, AccessType} from './amp-access-source';
-import {AccessVars} from './access-vars';
-import {ActionTrust} from '../../../src/action-constants';
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {listenOnce} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {AmpAccessEvaluator} from './access-expr';
-import {AmpEvents} from '../../../src/amp-events';
+import {AccessVars} from './access-vars';
+import {AccessSource, AccessType} from './amp-access-source';
+
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
-import {cancellation} from '../../../src/error';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {cancellation} from '../../../src/error-reporting';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isArray} from '../../../src/types';
-import {isJsonScriptTag} from '../../../src/dom';
-import {listenOnce} from '../../../src/event-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {getSourceOrigin} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-access';
@@ -90,7 +78,7 @@ export class AccessService {
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(ampdoc.win);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
@@ -134,9 +122,9 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tick(TickLabel_Enum.ACCESS_AUTHORIZATION);
         this.performance_.tickSinceVisible(
-          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+          TickLabel_Enum.ACCESS_AUTHORIZATION_VISIBLE
         );
         this.performance_.flush();
       }
@@ -145,7 +133,10 @@ export class AccessService {
     // Re-authorize newly added sections.
     ampdoc
       .getRootNode()
-      .addEventListener(AmpEvents.DOM_UPDATE, this.onDomUpdate_.bind(this));
+      .addEventListener(
+        AmpEvents_Enum.DOM_UPDATE,
+        this.onDomUpdate_.bind(this)
+      );
   }
 
   /** @override from AccessVars */
@@ -261,7 +252,10 @@ export class AccessService {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
-        const vendorAdapter = /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (source.getAdapter());
+        const vendorAdapter =
+          /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
+            source.getAdapter()
+          );
         if (vendorAdapter.getVendorName() == name) {
           return source;
         }
@@ -376,12 +370,10 @@ export class AccessService {
 
   /** @private */
   broadcastReauthorize_() {
-    this.viewer_.broadcast(
-      dict({
-        'type': 'amp-access-reauthorize',
-        'origin': this.pubOrigin_,
-      })
-    );
+    this.viewer_.broadcast({
+      'type': 'amp-access-reauthorize',
+      'origin': this.pubOrigin_,
+    });
   }
 
   /**
@@ -702,7 +694,7 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'login') {
@@ -771,8 +763,9 @@ export class AccessService {
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() ||
-        {});
+      return /** @type {!JsonObject} */ (
+        this.sources_[0].getAuthResponse() || {}
+      );
     }
 
     const combined = /** @type {!JsonObject} */ ({});

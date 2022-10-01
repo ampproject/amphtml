@@ -1,33 +1,18 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
+const config = require('../../../tsconfig.base.json');
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
+const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
-const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
-const {gitDiffNameOnlyMaster} = require('../../common/git');
-const {green, cyan} = require('ansi-colors');
+const {EXTENSIONS, maybeInitializeExtensions} = require('../extension-helpers');
+const {gitDiffNameOnlyMain} = require('../../common/git');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
-const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
 const TEST_FILE_COUNT_THRESHOLD = 20;
@@ -40,7 +25,7 @@ let testsToRun = null;
  * @return {boolean}
  */
 function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
 }
 
@@ -51,11 +36,18 @@ function isLargeRefactor() {
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  execOrDie('gulp css', {'stdio': 'ignore'});
-  maybeInitializeExtensions(extensions);
+  execOrDie('amp css', {'stdio': 'ignore'});
+  maybeInitializeExtensions(EXTENSIONS);
+  /** @type {Object<string, string>} */
   const cssJsFileMap = {};
 
-  // Adds an entry that maps a CSS file to a JS file
+  /**
+   * Adds an entry that maps a CSS file to a JS file
+   *
+   * @param {Object} cssData
+   * @param {string} cssBinaryName
+   * @param {Object} cssJsFileMap
+   */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
       `extensions/${cssData['name']}/${cssData['version']}/` +
@@ -64,8 +56,8 @@ function extractCssJsFileMap() {
     cssJsFileMap[cssFilePath] = jsFilePath;
   }
 
-  Object.keys(extensions).forEach((extension) => {
-    const cssData = extensions[extension];
+  Object.keys(EXTENSIONS).forEach((extension) => {
+    const cssData = EXTENSIONS[extension];
     if (cssData['hasCss']) {
       addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
       if (cssData.hasOwnProperty('cssBinaries')) {
@@ -80,6 +72,27 @@ function extractCssJsFileMap() {
 }
 
 /**
+ * Returns the full path of an import after resolving aliases if necessary.
+ * During prefix matching, wildcard characters if any are dropped.
+ * @param {string} jsFile
+ * @param {string} file
+ * @return {string}
+ */
+function resolveImportAliases(jsFile, file) {
+  const {paths} = config.compilerOptions;
+  const importAliases = Object.keys(paths);
+  for (const alias of importAliases) {
+    const aliasPrefix = alias.replace('*', '');
+    const actualPrefix = paths[alias][0].replace('*', '');
+    if (file.startsWith(aliasPrefix)) {
+      return file.replace(aliasPrefix, actualPrefix).replace('./', '');
+    }
+  }
+  const jsFileDir = path.dirname(jsFile);
+  return path.resolve(jsFileDir, file);
+}
+
+/**
  * Returns the list of files imported by a JS file
  *
  * @param {string} jsFile
@@ -87,17 +100,13 @@ function extractCssJsFileMap() {
  */
 function getImports(jsFile) {
   const jsFileContents = fs.readFileSync(jsFile, 'utf8');
-  const {imports} = listImportsExports.parse(jsFileContents, [
-    'importAssertions',
-  ]);
+  const parsePlugins = ['importAssertions'];
+  const {imports} = listImportsExports.parse(jsFileContents, parsePlugins);
   const files = [];
-  const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
-    const fullPath = path.resolve(jsFileDir, `${file}.js`);
-    if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(ROOT_DIR, fullPath);
-      files.push(relativePath);
-    }
+    const fullPath = resolveImportAliases(jsFile, file);
+    const relativePath = path.relative(ROOT_DIR, fullPath);
+    files.push(relativePath);
   });
   return files;
 }
@@ -118,7 +127,10 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
     });
     jsFilesInDir.forEach((jsFile) => {
       const jsFilePath = `${cssFileDir}/${jsFile}`;
-      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
+      const jsImports = getImports(jsFilePath);
+      if (
+        jsImports.some((jsImport) => jsImport.includes(cssJsFileMap[cssFile]))
+      ) {
         jsFiles.push(jsFilePath);
       }
     });
@@ -126,7 +138,12 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
-function getUnitTestsToRun() {
+/**
+ * Computes the list of unit tests to run under difference scenarios
+ * @param {{bentoOnly?: boolean}} [options]
+ * @return {Array<string>|void}
+ */
+function getUnitTestsToRun({bentoOnly = false} = {}) {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -134,17 +151,15 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    reportTestSkipped();
     return;
   }
 
-  const tests = unitTestsToRun();
+  const tests = unitTestsToRun({bentoOnly});
   if (tests.length == 0) {
     log(
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    reportTestSkipped();
     return;
   }
   if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
@@ -152,7 +167,6 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    reportTestSkipped();
     return;
   }
 
@@ -168,37 +182,53 @@ function getUnitTestsToRun() {
  * Extracts the list of unit tests to run based on the changes in the local
  * branch. Return value is cached to optimize for multiple calls.
  *
+ * @param {{bentoOnly?: boolean}} [options]
  * @return {!Array<string>}
  */
-function unitTestsToRun() {
+function unitTestsToRun({bentoOnly = false} = {}) {
   if (testsToRun) {
     return testsToRun;
   }
   const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
-  const {unitTestPaths} = testConfig;
+  const filesChanged = gitDiffNameOnlyMain();
+  const {bentoUnitTestPaths, unitTestPaths: nonBentoUnitTestPaths} = testConfig;
+  const unitTestPaths = bentoOnly ? bentoUnitTestPaths : nonBentoUnitTestPaths;
   testsToRun = [];
   let srcFiles = [];
 
+  /**
+   * @param {string} file
+   * @return {boolean}
+   */
   function isUnitTest(file) {
     return unitTestPaths.some((pattern) => {
       return minimatch(file, pattern);
     });
   }
 
+  /**
+   * @param {string} testFile
+   * @param {string[]} srcFiles
+   * @return {boolean}
+   */
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
     return (
       filesImported.filter(function (file) {
-        return srcFiles.includes(file);
+        return srcFiles.some((srcFile) => srcFile.includes(file));
       }).length > 0
     );
   }
 
-  // Retrieves the set of unit tests that should be run
-  // for a set of source files.
+  /**
+   * Retrieves the set of unit tests that should be run
+   * for a set of source files.
+   *
+   * @param {string[]} srcFiles
+   * @return {string[]}
+   */
   function getTestsFor(srcFiles) {
-    const allUnitTests = globby.sync(unitTestPaths);
+    const allUnitTests = fastGlob.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {
       return shouldRunTest(testFile, srcFiles);
     });

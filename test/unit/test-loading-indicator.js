@@ -1,22 +1,7 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {pushIfNotExist, removeItem} from '#core/types/array';
 
-import {LoadingIndicatorImpl} from '../../src/service/loading-indicator';
-import {Services} from '../../src/services';
-import {pushIfNotExist, removeItem} from '../../src/utils/array';
+import {Services} from '#service';
+import {LoadingIndicatorImpl} from '#service/loading-indicator';
 
 describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
   let ampdoc;
@@ -169,5 +154,18 @@ describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
     // Untrack.
     service.untrack(el);
     expect(getLoader()).to.not.exist;
+  });
+
+  it('should configure loader as a service element', async () => {
+    // Ensure loader is created.
+    io.record({
+      target: el,
+      isIntersecting: true,
+      boundingClientRect: {width: 100, height: 100},
+    });
+
+    const loader = getLoader();
+    expect(loader.getAttribute('slot')).to.equal('i-amphtml-svc');
+    expect(loader).to.have.class('i-amphtml-svc');
   });
 });

@@ -1,21 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {AutoFullscreenManager} from '../../src/service/video-manager-impl';
-import {PlayingStates} from '../../src/video-interface';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {AutoFullscreenManager} from '#service/video-manager-impl';
+
+import {PlayingStates_Enum} from '../../src/video-interface';
 
 describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
   let ampdoc;
@@ -41,7 +27,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
     env.win.screen.orientation.type = orientation;
   }
 
-  function fireIntersection({target, boundingClientRect, intersectionRatio}) {
+  function fireIntersection({boundingClientRect, intersectionRatio, target}) {
     ioCallback([
       {
         target,
@@ -147,15 +133,16 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PAUSED);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_AUTO);
-    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PAUSED);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_AUTO);
+    getPlayingState.withArgs(video3).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     fireIntersection(video3Entry);
     expect(await bestCenteredPromise).equal(video3);
   });
@@ -209,15 +196,16 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video3).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     [video1Entry, video2Entry, video3Entry].forEach(fireIntersection);
     expect(await bestCenteredPromise).to.equal(video2);
   });
@@ -259,13 +247,14 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     [video1Entry, video2Entry].forEach(fireIntersection);
     expect(await bestCenteredPromise).to.equal(video1);
   });
@@ -306,13 +295,14 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     [video1Entry, video2Entry].forEach(fireIntersection);
     expect(await bestCenteredPromise).to.equal(video2);
   });

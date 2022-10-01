@@ -327,9 +327,6 @@ Line1<br>Line2<br>Line3<br>Line4
 (1,10): expected-doctype-but-got-start-tag
 (1,17): incorrect-comment
 (1,17): expected-closing-tag-but-got-eof
-#new-errors
-(1:5) abrupt-closing-of-empty-comment
-(1:17) abrupt-closing-of-empty-comment
 #document
 | <!--  -->
 | <html>
@@ -360,6 +357,7 @@ Line1<br>Line2<br>Line3<br>Line4
 (1,27): unexpected-select-in-select
 (1,39): unexpected-end-tag
 (1,48): unexpected-end-tag
+(1,49): expected-closing-tag-but-got-eof
 #document
 | <html>
 |   <head>
@@ -501,8 +499,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,1): expected-tag-name
 (1,1): expected-doctype-but-got-chars
-#new-errors
-(1:2) eof-before-tag-name
 #document
 | <html>
 |   <head>
@@ -514,8 +510,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,1): expected-tag-name
 (1,1): expected-doctype-but-got-chars
-#new-errors
-(1:2) invalid-first-character-of-tag-name
 #document
 | <html>
 |   <head>
@@ -527,8 +521,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-closing-tag-but-got-eof
 (1,2): expected-doctype-but-got-chars
-#new-errors
-(1:3) eof-before-tag-name
 #document
 | <html>
 |   <head>
@@ -540,8 +532,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-closing-tag-but-got-char
 (1,3): expected-doctype-but-got-eof
-#new-errors
-(1:3) invalid-first-character-of-tag-name
 #document
 | <!-- # -->
 | <html>
@@ -553,8 +543,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,1): expected-tag-name-but-got-question-mark
 (1,2): expected-doctype-but-got-eof
-#new-errors
-(1:2) unexpected-question-mark-instead-of-tag-name
 #document
 | <!-- ? -->
 | <html>
@@ -566,8 +554,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,1): expected-tag-name-but-got-question-mark
 (1,3): expected-doctype-but-got-eof
-#new-errors
-(1:2) unexpected-question-mark-instead-of-tag-name
 #document
 | <!-- ?# -->
 | <html>
@@ -579,8 +565,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-dashes-or-doctype
 (1,2): expected-doctype-but-got-eof
-#new-errors
-(1:3) incorrectly-opened-comment
 #document
 | <!--  -->
 | <html>
@@ -592,8 +576,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-dashes-or-doctype
 (1,3): expected-doctype-but-got-eof
-#new-errors
-(1:3) incorrectly-opened-comment
 #document
 | <!-- # -->
 | <html>
@@ -605,8 +587,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,1): expected-tag-name-but-got-question-mark
 (1,11): expected-doctype-but-got-eof
-#new-errors
-(1:2) unexpected-question-mark-instead-of-tag-name
 #document
 | <!-- ?COMMENT? -->
 | <html>
@@ -618,8 +598,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-dashes-or-doctype
 (1,10): expected-doctype-but-got-eof
-#new-errors
-(1:3) incorrectly-opened-comment
 #document
 | <!-- COMMENT -->
 | <html>
@@ -631,8 +609,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-closing-tag-but-got-char
 (1,12): expected-doctype-but-got-eof
-#new-errors
-(1:3) invalid-first-character-of-tag-name
 #document
 | <!--  COMMENT  -->
 | <html>
@@ -644,8 +620,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,1): expected-tag-name-but-got-question-mark
 (1,13): expected-doctype-but-got-eof
-#new-errors
-(1:2) unexpected-question-mark-instead-of-tag-name
 #document
 | <!-- ?COM--MENT? -->
 | <html>
@@ -657,8 +631,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-dashes-or-doctype
 (1,12): expected-doctype-but-got-eof
-#new-errors
-(1:3) incorrectly-opened-comment
 #document
 | <!-- COM--MENT -->
 | <html>
@@ -670,8 +642,6 @@ Line1<br>Line2<br>Line3<br>Line4
 #errors
 (1,2): expected-closing-tag-but-got-char
 (1,14): expected-doctype-but-got-eof
-#new-errors
-(1:3) invalid-first-character-of-tag-name
 #document
 | <!--  COM--MENT  -->
 | <html>
@@ -1569,6 +1539,7 @@ Line1<br>Line2<br>Line3<br>Line4
 (1,27): unexpected-select-in-select
 (1,39): unexpected-end-tag
 (1,48): unexpected-end-tag
+(1,48): expected-closing-tag-but-got-eof
 #document
 | <html>
 |   <head>

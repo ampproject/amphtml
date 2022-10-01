@@ -1,24 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
 const tempy = require('tempy');
-const {cyan, red} = require('ansi-colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const logFile = path.resolve(process.cwd(), 'dist', 'debug-compilation.log');
@@ -28,24 +13,23 @@ const pad = (value, length) =>
     length
   );
 
-const LIFECYCLES = {
-  'pre-babel': 'pre-babel',
-  'pre-closure': 'pre-closure',
-  'closured-pre-babel': 'closured-pre-babel',
-  'closured-pre-terser': 'closured-pre-terser',
-  'complete': 'complete',
-};
-
 /**
  * Output debugging information when developing changes in this functionality.
  *
  * @param {string} lifecycle
  * @param {string} fullpath
- * @param {Buffer} content
- * @param {Object} sourcemap
+ * @param {?string=} content
+ * @param {Object=} sourcemap
  */
 function debug(lifecycle, fullpath, content, sourcemap) {
-  if (argv.debug && Object.keys(LIFECYCLES).includes(lifecycle)) {
+  if (argv.debug) {
+    if (!content) {
+      content = fs.readFileSync(fullpath, 'utf-8');
+    }
+    const sourcemapPath = `${fullpath}.map`;
+    if (!sourcemap && fs.existsSync(sourcemapPath)) {
+      sourcemap = fs.readFileSync(sourcemapPath, 'utf-8');
+    }
     const contentsPath = tempy.writeSync(content);
     if (sourcemap) {
       fs.writeFileSync(
@@ -55,14 +39,14 @@ function debug(lifecycle, fullpath, content, sourcemap) {
     }
     fs.appendFileSync(
       logFile,
-      `${pad(lifecycle, 20)}: ${pad(
-        path.basename(fullpath),
-        30
-      )} ${contentsPath}\n`
+      `${pad(lifecycle, 20)}: ${pad(fullpath, 100)} ${contentsPath}\n`
     );
   }
 }
 
+/**
+ * Logs debug information.
+ */
 function displayLifecycleDebugging() {
   if (argv.debug) {
     log(cyan('Debug Lifecycles: ') + red(logFile));
@@ -72,5 +56,4 @@ function displayLifecycleDebugging() {
 module.exports = {
   displayLifecycleDebugging,
   debug,
-  CompilationLifecycles: LIFECYCLES,
 };

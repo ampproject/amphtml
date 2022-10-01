@@ -15,7 +15,6 @@
 */
 
 @import './amp-story-shadow-reset.css';
-@import './amp-story-share.css';
 
 .i-amphtml-story-info-dialog {
   position: absolute !important;

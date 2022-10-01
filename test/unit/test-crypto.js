@@ -1,25 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {Crypto} from '#service/crypto-impl';
+import {installExtensionsService} from '#service/extensions-impl';
+import {Platform} from '#service/platform-impl';
 
-import {Crypto} from '../../src/service/crypto-impl';
-import {Platform} from '../../src/service/platform-impl';
-import {Services} from '../../src/services';
+import {FakePerformance} from '#testing/fake-dom';
+
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installExtensionsService} from '../../src/service/extensions-impl';
 
 describes.realWin('crypto-impl', {}, (env) => {
   let win;
@@ -121,9 +108,10 @@ describes.realWin('crypto-impl', {}, (env) => {
   }
 
   function createCrypto(win) {
-    if (win && !win.document) {
+    if (!win.document) {
       win.document = env.win.document;
     }
+    win.performance = new FakePerformance(win);
     installDocService(win, /* isSingleDoc */ true);
     installExtensionsService(win);
     const extensions = Services.extensionsFor(win);
@@ -144,8 +132,9 @@ describes.realWin('crypto-impl', {}, (env) => {
   }
 
   testSuite('with native crypto API');
-  testSuite('with crypto lib', {});
+  testSuite('with crypto lib', {...win, crypto: null});
   testSuite('with native crypto API rejects', {
+    ...win,
     crypto: {
       subtle: {
         digest: () => Promise.reject('Operation not supported'),
@@ -155,6 +144,7 @@ describes.realWin('crypto-impl', {}, (env) => {
   testSuite(
     'with native crypto API throws',
     {
+      ...win,
       crypto: {
         subtle: {
           digest: () => {
@@ -167,9 +157,10 @@ describes.realWin('crypto-impl', {}, (env) => {
   );
 
   it('native API result should exactly equal to crypto lib result', () => {
+    const fakeWin = {...win, crypto: null};
     return Promise.all([
       createCrypto(win).sha384('abc'),
-      createCrypto({}).sha384('abc'),
+      createCrypto(fakeWin).sha384('abc'),
     ]).then((results) => {
       expect(results[0]).to.jsonEqual(results[1]);
     });

@@ -1,79 +1,45 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const fs = require('fs');
-const gulp = require('gulp');
 const path = require('path');
-const through2 = require('through2');
-const {green, red, yellow} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
-const CONFIG_PATH = 'build-system/tasks/performance/config.json';
+const CONFIG_PATH = './performance/config.json';
 const LOCAL_HOST_URL = 'http://localhost:8000/';
 
 /**
- * Throws an error with the given message. Duplicate function
- * located in check-sourcemaps.js
- *
- * @param {string} message
- */
-function throwError(message) {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-}
-
-/**
- * Entry point for 'gulp performance-urls'
+ * Entry point for 'amp performance-urls'
  * Check if all localhost urls in performance/config.json exist
- * @return {!Promise}
+ * @return {Promise<void>}
  */
 async function performanceUrls() {
-  return gulp.src([CONFIG_PATH]).pipe(
-    through2.obj(function (file) {
-      let obj;
-      try {
-        obj = JSON.parse(file.contents.toString());
-      } catch (e) {
-        log(yellow(`Could not parse ${CONFIG_PATH}. `));
-        throwError(`Could not parse ${CONFIG_PATH}. `);
-        return;
-      }
-      const filepaths = obj.handlers.flatMap((handler) =>
-        handler.urls
-          .filter((url) => url.startsWith(LOCAL_HOST_URL))
-          .map((url) =>
-            path.join(__dirname, '../../', url.split(LOCAL_HOST_URL)[1])
-          )
-      );
-      for (const filepath of filepaths) {
-        if (!fs.existsSync(filepath)) {
-          log(red(filepath + ' does not exist.'));
-          throwError(`${filepath} does not exist.`);
-          return;
-        }
-      }
-      log(green('SUCCESS:'), 'All local performance task urls are valid.');
-    })
+  let jsonContent;
+  try {
+    jsonContent = require(CONFIG_PATH);
+  } catch (e) {
+    log(red('ERROR:'), 'Could not parse', cyan(CONFIG_PATH));
+    process.exitCode = 1;
+    return;
+  }
+  /** @type {string[]} */
+  const filepaths = jsonContent.handlers.flatMap((handler) =>
+    handler.urls
+      .filter((url) => url.startsWith(LOCAL_HOST_URL))
+      .map((url) =>
+        path.join(__dirname, '../../', url.split(LOCAL_HOST_URL)[1])
+      )
   );
+  for (const filepath of filepaths) {
+    if (!fs.existsSync(filepath)) {
+      log(red('ERROR:'), cyan(filepath), 'does not exist');
+      process.exitCode = 1;
+      return;
+    }
+  }
+  log(green('SUCCESS:'), 'All local performance task urls are valid.');
 }
 
 module.exports = {
   performanceUrls,
 };
 
-performanceUrls.description =
-  "Check validity of performance task config's urls";
+performanceUrls.description = 'Validite config urls for the performance task';

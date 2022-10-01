@@ -1,135 +1,124 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
-const {getBaseUrl} = require('../pr-deploy-bot-utils');
-const {installPackages} = require('../../common/utils');
 const {isCiBuild} = require('../../common/ci');
-const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {writeFileSync} = require('fs-extra');
+const {updateSubpackages} = require('../../common/update-packages');
+const {bootstrapThirdPartyFrames} = require('../helpers');
+
+/** @typedef {'amp'|'preact'|'react'} StorybookEnv */
 
 const ENV_PORTS = {
   amp: 9001,
   preact: 9002,
+  react: 9003,
 };
 
 const repoDir = path.join(__dirname, '../../..');
 
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  * @return {string}
  */
-const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
+const envDir = (env) => path.join(__dirname, 'env', env);
 
 /**
- * @param {string} message Message for gulp task (call stack is already in logs)
+ * @param {StorybookEnv} env
  */
-const throwError = (message) => {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-};
-
-/**
- * @param {string} env 'amp' or 'preact'
- */
-function launchEnv(env) {
-  log(`Launching storybook for the ${cyan(env)} environment...`);
+function startStorybook(env) {
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
+  log(`Launching storybook for the ${cyan(env)} environment...`);
   execScriptAsync(
     [
-      './node_modules/.bin/start-storybook',
-      `--config-dir ${envConfigDir(env)}`,
-      `--static-dir ${repoDir}/`,
+      'npx',
+      'start-storybook',
+      `--config-dir .`,
       `--port ${port}`,
       '--quiet',
       isCiBuild() ? '--ci' : '',
     ].join(' '),
-    {cwd: __dirname, stdio: 'inherit'}
+    {cwd: envDir(env), stdio: 'inherit'}
   ).on('error', () => {
-    throwError('Launch failed');
+    throw new Error('Launch failed');
   });
 }
 
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  */
-function buildEnv(env) {
-  const configDir = envConfigDir(env);
-
-  if (env === 'amp' && isPullRequestBuild()) {
-    // Allows PR deploys to reference built binaries.
-    writeFileSync(
-      `${configDir}/preview.js`,
-      // If you change this JS template, make sure to JSON.stringify every
-      // dynamic value. This prevents XSS and other types of garbling.
-      `// DO NOT${' '}SUBMIT.
-       // This preview.js file was generated for a specific PR build.
-       import {addParameters} from '@storybook/preact';
-       addParameters(${JSON.stringify({
-         ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
-       })});`
-    );
-  }
+function buildStorybook(env) {
   log(`Building storybook for the ${cyan(env)} environment...`);
+
   const result = exec(
     [
-      './node_modules/.bin/build-storybook',
-      `--config-dir ${configDir}`,
+      'npx',
+      'build-storybook',
+      `--config-dir .`,
       `--output-dir ${repoDir}/examples/storybook/${env}`,
       '--quiet',
       `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
     ].join(' '),
-    {cwd: __dirname, stdio: 'inherit'}
+    {cwd: envDir(env), stdio: 'inherit'}
   );
   if (result.status != 0) {
-    throwError('Build failed');
+    throw new Error('Build failed');
   }
 }
 
+/**
+ * @param {string} env
+ * @return {StorybookEnv[]}
+ */
+function parseEnvs(env) {
+  return /** @type {StorybookEnv[]} */ (
+    env.split(',').filter((env) => {
+      return env === 'amp' || env === 'preact' || env === 'react';
+    })
+  );
+}
+
+/**
+ * @return {Promise<void>}
+ */
 async function storybook() {
-  const {'storybook_env': env = 'amp,preact', build = false} = argv;
-  const envs = env.split(',');
-  if (!build && envs.includes('amp')) {
-    await runAmpDevBuildServer();
-  }
-  installPackages(__dirname);
+  const {build = false, 'storybook_env': storybookEnv = 'preact'} = argv;
+  const envs = parseEnvs(storybookEnv);
   if (!build) {
     createCtrlcHandler('storybook');
+    if (envs.includes('amp')) {
+      await runAmpDevBuildServer();
+    } else {
+      // Proxy frames require an .html file output from the function below.
+      // runAmpDevBuildServer() does this implicitly, so it's not required to
+      // call directly in that case.
+      await bootstrapThirdPartyFrames({});
+    }
   }
-  envs.map(build ? buildEnv : launchEnv);
+  for (const env of envs) {
+    updateSubpackages(envDir(env));
+    if (build) {
+      buildStorybook(env);
+    } else {
+      startStorybook(env);
+    }
+  }
 }
 
 module.exports = {
   storybook,
 };
 
-storybook.description = 'Isolated testing and development for AMP components.';
+storybook.description =
+  'Set up isolated development and testing for AMP components';
 
 storybook.flags = {
-  'build':
-    '  Builds a static web application, as described in https://storybook.js.org/docs/react/workflows/publish-storybook',
+  'build': 'Build a static web application (see https://storybook.js.org/docs)',
   'storybook_env':
-    "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
-  'storybook_port': '  Set port from which to run the Storybook dashboard.',
+    "Environment(s) to run Storybook. Either 'amp', 'preact' or 'react', or a list as 'amp,preact'. Defaults to 'preact'",
+  'storybook_port': 'Port from which to run the Storybook dashboard',
 };

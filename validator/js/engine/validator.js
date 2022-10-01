@@ -1,19 +1,3 @@
-/**
- * @license DEDUPE_ON_MINIFY
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the license.
- */
 goog.module('amp.validator');
 const VALIDATE_CSS = goog.require('amp.validator.VALIDATE_CSS');
 const amp4ads = goog.require('amp.validator.validateAmp4AdsCss');
@@ -736,7 +720,7 @@ function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
   // Unique and similar can introduce requirements, ie: there cannot be
   // another such tag. We don't want to introduce requirements for failing
   // tags.
-  if (tag.unique || tag.requires.length > 0 || tag.uniqueWarning)
+  if (tag.unique || tag.requiresCondition.length > 0 || tag.uniqueWarning)
     return RecordValidated.IF_PASSING;
   return RecordValidated.NEVER;
 }
@@ -855,6 +839,35 @@ class ParsedTagSpec {
     sortAndUniquify(this.mandatoryOneofs_);
     sortAndUniquify(this.mandatoryAnyofs_);
     sortAndUniquify(this.mandatoryAttrIds_);
+
+    /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.dispatchKeys_ = [];
+    for (const attrName of Object.keys(this.attrsByName_)) {
+      const attrId = this.attrsByName_[attrName];
+      if (attrId < 0)  // negative attr ids are simple attrs (only name set).
+        continue;
+      const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(attrId);
+      const attrSpec = parsedAttrSpec.getSpec();
+      if (attrSpec.dispatchKey !== null) {
+        const mandatoryParent =
+            tagSpec.mandatoryParent !== null ? tagSpec.mandatoryParent : '';
+        if (attrSpec.value.length > 0) {
+          this.dispatchKeys_.push(makeDispatchKey(
+              attrSpec.dispatchKey, attrName, attrSpec.value[0].toLowerCase(),
+              mandatoryParent));
+        } else if (attrSpec.valueCasei.length > 0) {
+          this.dispatchKeys_.push(makeDispatchKey(
+              attrSpec.dispatchKey, attrName, attrSpec.valueCasei[0],
+              mandatoryParent));
+        } else {
+          this.dispatchKeys_.push(makeDispatchKey(
+              attrSpec.dispatchKey, attrName, '', mandatoryParent));
+        }
+      }
+    }
   }
 
   /**
@@ -892,7 +905,7 @@ class ParsedTagSpec {
       }
       if (spec.name === 'type' && spec.valueCasei.length > 0) {
         for (const v of spec.valueCasei) {
-          if ('application/json' === v) {
+          if (('application/json' === v) || ('application/ld+json' === v)) {
             this.isTypeJson_ = true;
             break;
           }
@@ -991,6 +1004,23 @@ class ParsedTagSpec {
   }
 
   /**
+   * Returns an array (typically empty) of all unique dispatch keys for this
+   * tagspec. A dispatch key is a combination of attribute name, attribute
+   * value, and / or tag parent. If multiple TagSpecs have the same dispatch
+   * key, then the Tagwith the first instance of that dispatch key is used.
+   * When an encounttag matches this dispatch key, it is validated first
+   * against that first TagSpec in order to improve validation performance and
+   * error message selection. Not all TagSpecs have a dispatch key. If the
+   * attribute value is used (either value or value_casei), uses the first
+   * value from the protoascii.
+   * @return {!Array<string>}
+   */
+  GetDispatchKeys() {
+    return this.dispatchKeys_;
+  }
+
+
+  /**
    * A TagSpec may specify other tags to be required as well, when that
    * tag is used. This accessor returns the IDs for the tagspecs that
    * are also required if |this| tag occurs in the document, but where
@@ -1006,8 +1036,8 @@ class ParsedTagSpec {
    * tag is present. This accessor returns the list of those conditions.
    * @return {!Array<number>}
    */
-  requires() {
-    return this.spec_.requires;
+  requiresCondition() {
+    return this.spec_.requiresCondition;
   }
 
   /**
@@ -1015,8 +1045,8 @@ class ParsedTagSpec {
    * the list of those tags.
    * @return {!Array<number>}
    */
-  excludes() {
-    return this.spec_.excludes;
+  excludesCondition() {
+    return this.spec_.excludesCondition;
   }
 
   /**
@@ -1995,9 +2025,10 @@ function isAtRuleValid(cssSpec, atRuleName) {
   for (const atRuleSpec of cssSpec.atRuleSpec) {
     // "-moz-document" is specified in the list of allowed rules with an
     // explicit vendor prefix. The idea here is that only this specific vendor
-    // prefix is allowed, not "-ms-document" or even "document". We first search
-    // the allowed list for the seen `at_rule_name` with stripped vendor prefix,
-    // then if not found, we search again without sripping the vendor prefix.
+    // prefix is allowed, not "-ms-document" or even "document". We first
+    // search the allowed list for the seen `at_rule_name` with stripped
+    // vendor prefix, then if not found, we search again without sripping the
+    // vendor prefix.
     if (atRuleSpec.name === parse_css.stripVendorPrefix(atRuleName) ||
         atRuleSpec.name === atRuleName) {
       return true;
@@ -2071,7 +2102,8 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
         this.context.addError(
             generated.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
             new LineCol(declaration.line, declaration.col),
-            /* params */[getTagDescriptiveName(this.tagSpec), declaration.name],
+            /* params */
+            [getTagDescriptiveName(this.tagSpec), declaration.name],
             /* url */ '', this.result);
 
       } else {
@@ -2563,7 +2595,7 @@ class CdataMatcher {
 
     // Validate the allowed CSS declarations (eg: `background-color`)
     if (maybeDocCssSpec !== null &&
-        !maybeDocCssSpec.spec().allowAllDeclarationInStyleTag) {
+        !maybeDocCssSpec.spec().allowAllDeclarationInStyle) {
       const invalidDeclVisitor = new InvalidDeclVisitor(
           maybeDocCssSpec, context, getTagDescriptiveName(this.tagSpec_),
           validationResult);
@@ -2756,19 +2788,6 @@ class ExtensionsContext {
   }
 }
 
-// If any script in the page uses a specific release version, then all scripts
-// must use that specific release version. This is used to record the first seen
-// script tag and ensure all following script tags follow the convention set by
-// it.
-/** @enum {string} */
-const ScriptReleaseVersion = {
-  UNKNOWN: 'unknown',
-  STANDARD: 'standard',
-  LTS: 'LTS',
-  MODULE_NOMODULE: 'module/nomodule',
-  MODULE_NOMODULE_LTS: 'module/nomodule LTS',
-};
-
 /**
  * The Context keeps track of the line / column that the validator is
  * in, as well as the mandatory tag specs that have already been validated.
@@ -2881,11 +2900,11 @@ class Context {
     this.extensions_ = new ExtensionsContext();
 
     /**
-     * Flag for if the LTS runtime engine is present.
-     * @type {!ScriptReleaseVersion}
+     * Which script release version is present first in the document.
+     * @type {!parserInterface.ScriptReleaseVersion}
      * @private
      */
-    this.scriptReleaseVersion_ = ScriptReleaseVersion.UNKNOWN;
+    this.scriptReleaseVersion_ = parserInterface.ScriptReleaseVersion.UNKNOWN;
   }
 
   /** @return {!ParsedValidatorRules} */
@@ -3013,14 +3032,15 @@ class Context {
   }
 
   /**
-   * Record if this document contains a tag requesting the LTS runtime engine.
+   * Record the first script release version in the document.
    * @param {!parserInterface.ParsedHtmlTag} parsedTag
    * @private
    */
   recordScriptReleaseVersionFromTagResult_(parsedTag) {
-    if (this.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN &&
+    if (this.getScriptReleaseVersion() ===
+            parserInterface.ScriptReleaseVersion.UNKNOWN &&
         (parsedTag.isExtensionScript() || parsedTag.isAmpRuntimeScript())) {
-      this.scriptReleaseVersion_ = getScriptReleaseVersion(parsedTag);
+      this.scriptReleaseVersion_ = parsedTag.getScriptReleaseVersion();
     }
   }
 
@@ -3093,7 +3113,7 @@ class Context {
    * @private
    */
   satisfyConditionsFromTagSpec_(parsedTagSpec) {
-    for (const condition of parsedTagSpec.getSpec().satisfies) {
+    for (const condition of parsedTagSpec.getSpec().satisfiesCondition) {
       this.conditionsSatisfied_[condition] = true;
     }
   }
@@ -3355,7 +3375,7 @@ class Context {
     return /** @type {!LineCol} */ (this.encounteredBodyLineCol_);
   }
 
-  /** @return {!ScriptReleaseVersion} */
+  /** @return {!parserInterface.ScriptReleaseVersion} */
   getScriptReleaseVersion() {
     return this.scriptReleaseVersion_;
   }
@@ -3804,6 +3824,13 @@ function getLayoutSizeDefinedClass() {
 }
 
 /**
+ * @return {string}
+ */
+function getLayoutAwaitingSizeClass() {
+  return 'i-amphtml-layout-awaiting-size';
+}
+
+/**
  * @param {!generated.AmpLayout.Layout} layout
  * @return {boolean}
  */
@@ -3819,6 +3846,14 @@ function isLayoutSizeDefined(layout) {
 }
 
 /**
+ * @param {!generated.AmpLayout.Layout} layout
+ * @return {boolean}
+ */
+function isLayoutAwaitingSize(layout) {
+  return layout === generated.AmpLayout.Layout.FLUID;
+}
+
+/**
  * @param {string} layout
  * @return {!generated.AmpLayout.Layout}
  */
@@ -3826,8 +3861,9 @@ function parseLayout(layout) {
   if (layout === undefined) {
     return generated.AmpLayout.Layout.UNKNOWN;
   }
-  const normLayout = layout.toUpperCase().replace('-', '_');
-  const idx = generated.AmpLayout.Layout_NamesByIndex.indexOf(normLayout);
+  const idx = generated.AmpLayout.Layout_NamesByIndex.findIndex((name) => {
+    return name.toLowerCase().replace('_', '-') === layout;
+  });
   if (idx === -1) {
     return generated.AmpLayout.Layout.UNKNOWN;
   }
@@ -4390,6 +4426,10 @@ function validateSsrLayout(
       // i-amphtml-layout-size-defined
       validInternalClasses[getLayoutSizeDefinedClass()] = 0;
     }
+    if (isLayoutAwaitingSize(layout)) {
+      // i-amphtml-layout-awaiting-size
+      validInternalClasses[getLayoutAwaitingSizeClass()] = 0;
+    }
     const classes = classAttr.split(/[\s+]/);
     for (const classToken of classes) {
       if (googString./*OK*/ startsWith(classToken, 'i-amphtml-') &&
@@ -4698,16 +4738,14 @@ function getExtensionNameAttribute(extensionSpec) {
 /**
  * Validates whether an encountered attribute is validated by an
  * generated.ExtensionSpec. ExtensionSpec's validate the 'custom-element',
- * 'custom-template', and 'src' attributes. If an error is found, it is added
- * to the |result|. The return value indicates whether or not the provided
- * attribute is explained by this validation function.
+ * 'custom-template', and 'host-service' attributes. If an error is found, it
+ * is added to the |result|. The return value indicates whether or not the
+ * provided attribute is explained by this validation function.
  * @param {!generated.TagSpec} tagSpec
- * @param {!Context} context
  * @param {!parserInterface.ParsedAttr} attr
- * @param {!generated.ValidationResult} result
  * @return {boolean}
  */
-function validateAttrInExtension(tagSpec, context, attr, result) {
+function validateAttrInExtension(tagSpec, attr) {
   asserts.assert(tagSpec.extensionSpec !== null);
 
   const {extensionSpec} = tagSpec;
@@ -4723,31 +4761,6 @@ function validateAttrInExtension(tagSpec, context, attr, result) {
       asserts.assert(extensionSpec.name === attr.value.toLowerCase());
       return false;
     }
-    return true;
-  } else if (attr.name === 'src') {
-    const srcUrlRe =
-        /^https:\/\/cdn\.ampproject\.org(?:\/lts)?\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?$/;
-    const reResult = srcUrlRe.exec(attr.value);
-    // If the src URL matches this regex and the base name of the file matches
-    // the extension, look to see if the version matches.
-    if (reResult !== null && reResult[1] === extensionSpec.name) {
-      const encounteredVersion = reResult[2];
-      if (extensionSpec.deprecatedVersion.indexOf(encounteredVersion) !== -1) {
-        context.addWarning(
-            generated.ValidationError.Code.WARNING_EXTENSION_DEPRECATED_VERSION,
-            context.getLineCol(),
-            /* params */[extensionSpec.name, encounteredVersion],
-            getTagSpecUrl(tagSpec), result);
-        return true;
-      }
-      if (extensionSpec.version.indexOf(encounteredVersion) !== -1) {
-        return true;
-      }
-    }
-    context.addError(
-        generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
-        getTagSpecUrl(tagSpec), result);
     return true;
   }
   return false;
@@ -4773,79 +4786,134 @@ function validateClassAttr(attr, tagSpec, context, result) {
 }
 
 /**
+ * Validates the 'src' attribute for AMP JavaScript (Runtime and Extensions)
+ * script tags. This validates:
+ *  - the script is using an AMP domain
+ *  - the script path is valid (for extensions only, runtime uses attrSpec)
+ *  - that the same script release version is used for all script sources
  * @param {!parserInterface.ParsedHtmlTag} tag
- * @return {!ScriptReleaseVersion}
- */
-function getScriptReleaseVersion(tag) {
-  if (tag.isModuleLtsScriptTag() || tag.isNomoduleLtsScriptTag())
-    return ScriptReleaseVersion.MODULE_NOMODULE_LTS;
-  if (tag.isModuleScriptTag() || tag.isNomoduleScriptTag())
-    return ScriptReleaseVersion.MODULE_NOMODULE;
-  if (tag.isLtsScriptTag()) return ScriptReleaseVersion.LTS;
-  return ScriptReleaseVersion.STANDARD;
-}
-
-/**
- * Validates that LTS is used for either all script sources or none.
- * @param {!parserInterface.ParsedHtmlTag} tag
+ * @param {string} attrValue
  * @param {!generated.TagSpec} tagSpec
  * @param {!Context} context
  * @param {!generated.ValidationResult} result
  */
-function validateScriptSrcAttr(tag, tagSpec, context, result) {
-  if (context.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN)
-    return;
+function validateAmpScriptSrcAttr(tag, attrValue, tagSpec, context, result) {
+  if (!tag.isAmpDomain()) {
+    context.addError(
+        generated.ValidationError.Code.DISALLOWED_AMP_DOMAIN,
+        context.getLineCol(), /* params */[], /* spec_url*/ '', result);
+  }
 
-  const scriptReleaseVersion = getScriptReleaseVersion(tag);
+  if (tag.isExtensionScript() && tagSpec.extensionSpec !== null) {
+    const {extensionSpec} = tagSpec;
+    const extensionName = tag.getExtensionName();
+    const extensionVersion = tag.getExtensionVersion();
 
-  if (context.getScriptReleaseVersion() != scriptReleaseVersion) {
-    const specName = tagSpec.extensionSpec !== null ?
-        tagSpec.extensionSpec.name :
-        tagSpec.specName;
+    // If the path is invalid, then do not evaluate further.
+    if (!tag.hasValidAmpScriptPath()) {
+      // If path is not empty use invalid path error, otherwise use the invalid
+      // attribute value error. This is to avoid errors saying "has a path ''".
+      if (tag.getAmpScriptPath().length > 0) {
+        context.addError(
+            generated.ValidationError.Code.INVALID_EXTENSION_PATH,
+            context.getLineCol(),
+            /* params */[extensionSpec.name, tag.getAmpScriptPath()],
+            getTagSpecUrl(tagSpec), result);
+      } else {
+        context.addError(
+            generated.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getLineCol(),
+            /* params */['src', getTagDescriptiveName(tagSpec), attrValue],
+            getTagSpecUrl(tagSpec), result);
+      }
+      return;
+    }
 
-    switch (context.getScriptReleaseVersion()) {
-      case ScriptReleaseVersion.LTS:
-        context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+    if (extensionName === extensionSpec.name) {
+      // Validate deprecated version.
+      if (extensionSpec.deprecatedVersion.indexOf(extensionVersion) !== -1) {
+        context.addWarning(
+            generated.ValidationError.Code.WARNING_EXTENSION_DEPRECATED_VERSION,
             context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      case ScriptReleaseVersion.MODULE_NOMODULE:
+            /* params */[extensionSpec.name, extensionVersion],
+            getTagSpecUrl(tagSpec), result);
+      }
+      // Validate version.
+      if (extensionSpec.version.indexOf(extensionVersion) === -1) {
         context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+            generated.ValidationError.Code.INVALID_EXTENSION_VERSION,
             context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      case ScriptReleaseVersion.MODULE_NOMODULE_LTS:
-        context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
-            context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      case ScriptReleaseVersion.STANDARD:
-        context.addError(
-            generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
-            context.getLineCol(),
-            /*params=*/
-            [specName, scriptReleaseVersion, context.getScriptReleaseVersion()],
-            'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
-                'amphtml#required-markup',
-            result);
-        break;
-      default:
-        break;
+            /* params */[extensionSpec.name, extensionVersion],
+            getTagSpecUrl(tagSpec), result);
+      }
+    } else {
+      // Extension name does not match extension spec name.
+      context.addError(
+          generated.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getLineCol(),
+          /* params */['src', getTagDescriptiveName(tagSpec), attrValue],
+          getTagSpecUrl(tagSpec), result);
+    }
+  }
+
+  // Only evaluate the script tag's release version if the first script tag's
+  // release version is not UNKNOWN.
+  if (context.getScriptReleaseVersion() !==
+      parserInterface.ScriptReleaseVersion.UNKNOWN) {
+    const scriptReleaseVersion = tag.getScriptReleaseVersion();
+    if (context.getScriptReleaseVersion() != scriptReleaseVersion) {
+      const specName = tagSpec.extensionSpec !== null ?
+          tagSpec.extensionSpec.name :
+          tagSpec.specName;
+
+      switch (context.getScriptReleaseVersion()) {
+        case parserInterface.ScriptReleaseVersion.LTS:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE_LTS:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        case parserInterface.ScriptReleaseVersion.STANDARD:
+          context.addError(
+              generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
+              context.getLineCol(), /*params=*/
+              [
+                specName, scriptReleaseVersion,
+                context.getScriptReleaseVersion()
+              ],
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              result);
+          break;
+        default:
+          break;
+      }
     }
   }
 }
@@ -4903,30 +4971,30 @@ function validateAttrCss(
   }
 
   /** @type {?ParsedDocCssSpec} */
-  const maybeSpec = context.matchingDocCssSpec();
-  if (maybeSpec) {
+  const maybeDocCssSpec = context.matchingDocCssSpec();
+  if (maybeDocCssSpec !== null) {
     // Determine if we've exceeded the maximum bytes per inline style
     // requirements.
-    if (maybeSpec.spec().maxBytesPerInlineStyle >= 0 &&
-        attrByteLen > maybeSpec.spec().maxBytesPerInlineStyle) {
-      if (maybeSpec.spec().maxBytesIsWarning) {
+    if (maybeDocCssSpec.spec().maxBytesPerInlineStyle >= 0 &&
+        attrByteLen > maybeDocCssSpec.spec().maxBytesPerInlineStyle) {
+      if (maybeDocCssSpec.spec().maxBytesIsWarning) {
         context.addWarning(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
               getTagDescriptiveName(tagSpec), attrByteLen.toString(),
-              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+              maybeDocCssSpec.spec().maxBytesPerInlineStyle.toString()
             ],
-            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+            maybeDocCssSpec.spec().maxBytesSpecUrl, result.validationResult);
       } else {
         context.addError(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
               getTagDescriptiveName(tagSpec), attrByteLen.toString(),
-              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+              maybeDocCssSpec.spec().maxBytesPerInlineStyle.toString()
             ],
-            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+            maybeDocCssSpec.spec().maxBytesSpecUrl, result.validationResult);
       }
     }
 
@@ -4935,14 +5003,55 @@ function validateAttrCss(
     // relevant.
     for (const declaration of declarations) {
       const firstIdent = declaration.firstIdent();
-      // Allowed declarations vary by context. SVG has its own set of CSS
-      // declarations not supported generally in HTML.
-      const cssDeclaration = parsedAttrSpec.getSpec().valueDocSvgCss === true ?
-          maybeSpec.cssDeclarationSvgByName(declaration.name) :
-          maybeSpec.cssDeclarationByName(declaration.name);
-      // If there is no matching declaration in the rules, then this
-      // declaration is not allowed.
-      if (cssDeclaration === null) {
+      // Validate declarations only when they are not all allowed.
+      if (!maybeDocCssSpec.spec().allowAllDeclarationInStyle) {
+        // Allowed declarations vary by context. SVG has its own set of CSS
+        // declarations not supported generally in HTML.
+        const cssDeclaration =
+            parsedAttrSpec.getSpec().valueDocSvgCss === true ?
+            maybeDocCssSpec.cssDeclarationSvgByName(declaration.name) :
+            maybeDocCssSpec.cssDeclarationByName(declaration.name);
+        // If there is no matching declaration in the rules, then this
+        // declaration is not allowed.
+        if (cssDeclaration === null) {
+          context.addError(
+              generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+              context.getLineCol(), /* params */
+              [declaration.name, attrName, getTagDescriptiveName(tagSpec)],
+              context.getRules().getStylesSpecUrl(), result.validationResult);
+          // Don't emit additional errors for this declaration.
+          continue;
+        } else if (cssDeclaration.valueCasei.length > 0) {
+          let hasValidValue = false;
+          for (const value of cssDeclaration.valueCasei) {
+            if (firstIdent.toLowerCase() == value) {
+              hasValidValue = true;
+              break;
+            }
+          }
+          if (!hasValidValue) {
+            // Declaration value not allowed.
+            context.addError(
+                generated.ValidationError.Code
+                    .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.getLineCol(), /* params */
+                [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
+                context.getRules().getStylesSpecUrl(), result.validationResult);
+          }
+        } else if (cssDeclaration.valueRegexCasei != null) {
+          const valueRegex = context.getRules().getFullMatchCaseiRegex(
+              /** @type {number} */ (cssDeclaration.valueRegexCasei));
+          if (!valueRegex.test(firstIdent)) {
+            context.addError(
+                generated.ValidationError.Code
+                    .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.getLineCol(), /* params */
+                [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
+                context.getRules().getStylesSpecUrl(), result.validationResult);
+          }
+        }
+      }
+      if (declaration.name.indexOf('i-amphtml-') > -1) {
         context.addError(
             generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.getLineCol(), /* params */
@@ -4950,36 +5059,8 @@ function validateAttrCss(
             context.getRules().getStylesSpecUrl(), result.validationResult);
         // Don't emit additional errors for this declaration.
         continue;
-      } else if (cssDeclaration.valueCasei.length > 0) {
-        let hasValidValue = false;
-        for (const value of cssDeclaration.valueCasei) {
-          if (firstIdent.toLowerCase() == value) {
-            hasValidValue = true;
-            break;
-          }
-        }
-        if (!hasValidValue) {
-          // Declaration value not allowed.
-          context.addError(
-              generated.ValidationError.Code
-                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.getLineCol(), /* params */
-              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
-              context.getRules().getStylesSpecUrl(), result.validationResult);
-        }
-      } else if (cssDeclaration.valueRegexCasei != null) {
-        const valueRegex = context.getRules().getFullMatchCaseiRegex(
-            /** @type {number} */ (cssDeclaration.valueRegexCasei));
-        if (!valueRegex.test(firstIdent)) {
-          context.addError(
-              generated.ValidationError.Code
-                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.getLineCol(), /* params */
-              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
-              context.getRules().getStylesSpecUrl(), result.validationResult);
-        }
       }
-      if (!maybeSpec.spec().allowImportant) {
+      if (!maybeDocCssSpec.spec().allowImportant) {
         if (declaration.important)
           context.addError(
               generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_IMPORTANT,
@@ -5005,16 +5086,16 @@ function validateAttrCss(
         // Validate that the URL itself matches the spec.
         // Only image specs apply to inline styles. Fonts are only defined in
         // @font-face rules which we require a full stylesheet to define.
-        if (maybeSpec.spec().imageUrlSpec !== null) {
+        if (maybeDocCssSpec.spec().imageUrlSpec !== null) {
           const adapter = new UrlErrorInStylesheetAdapter(
               context.getLineCol().getLine(), context.getLineCol().getCol());
           validateUrlAndProtocol(
-              maybeSpec.imageUrlSpec(), adapter, context, url.utf8Url, tagSpec,
-              result.validationResult);
+              maybeDocCssSpec.imageUrlSpec(), adapter, context, url.utf8Url,
+              tagSpec, result.validationResult);
         }
         // Subtract off URL lengths from doc-level inline style bytes, if
         // specified by the DocCssSpec.
-        if (!maybeSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
+        if (!maybeDocCssSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
           result.inlineStyleCssBytes -= htmlparser.byteLength(url.utf8Url);
       }
     }
@@ -5189,13 +5270,19 @@ function validateAttributes(
       validateClassAttr(attr, spec, context, result.validationResult);
     }
 
-    // If |spec| is the runtime or an extension script, validate that LTS is
-    // either used by all pages or no pages.
+    // If 'src' attribute and an extension or runtime script, then validate the
+    // 'src' attribute by calling this method.
     if (attr.name == 'src' &&
         (encounteredTag.isExtensionScript() ||
          encounteredTag.isAmpRuntimeScript())) {
-      validateScriptSrcAttr(
-          encounteredTag, spec, context, result.validationResult);
+      validateAmpScriptSrcAttr(
+          encounteredTag, attr.value, spec, context, result.validationResult);
+      if (encounteredTag.isExtensionScript()) {
+        seenExtensionSrcAttr = true;
+        // Extension TagSpecs do not have an explicit 'src' attribute, while
+        // Runtime TagSpecs do. For Extension TagSpecs, continue.
+        continue;
+      }
     }
 
     if (!(attr.name in attrsByName)) {
@@ -5218,15 +5305,9 @@ function validateAttributes(
       }
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-template', 'host-service', and 'src' attributes by calling
-      // this method.  For 'src', we also keep track whether we validated it
-      // this way, (seen_src_attr), since it's a mandatory attr.
-      if (spec.extensionSpec !== null &&
-          validateAttrInExtension(
-              spec, context, attr, result.validationResult)) {
-        if (attr.name === 'src') {
-          seenExtensionSrcAttr = true;
-        }
+      // 'custom-template', and 'host-service' attributes by calling this
+      // method.
+      if (spec.extensionSpec !== null && validateAttrInExtension(spec, attr)) {
         continue;
       }
       validateAttrNotFoundInSpec(
@@ -5915,16 +5996,20 @@ class ParsedValidatorRules {
 
     // For every tagspec that contains an ExtensionSpec, we add several
     // TagSpec fields corresponding to the data found in the ExtensionSpec.
-    // The addition of module/nomodule extensions happens in validator_gen_js.py
-    // and are built as proper JavaScript classes. They will also be expanded
-    // by this method.
+    // The addition of module/nomodule extensions happens in
+    // validator_gen_js.py and are built as proper JavaScript classes. They
+    // will also be expanded by this method.
     this.expandExtensionSpec_ = function() {
       const numTags = this.rules_.tags.length;
       for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
         let tagSpec = this.rules_.tags[tagSpecId];
         if (tagSpec.extensionSpec == null) continue;
+        let baseSpecName = tagSpec.extensionSpec.name;
+        if (tagSpec.extensionSpec.versionName !== null)
+          baseSpecName = tagSpec.extensionSpec.name + ' ' +
+              tagSpec.extensionSpec.versionName;
         if (tagSpec.specName === null)
-          tagSpec.specName = tagSpec.extensionSpec.name + ' extension script';
+          tagSpec.specName = baseSpecName + ' extension script';
         if (tagSpec.descriptiveName === null)
           tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';
@@ -6019,6 +6104,11 @@ class ParsedValidatorRules {
       for (const otherTag of tag.alsoRequiresTagWarning) {
         this.tagSpecIdsToTrack_[otherTag] = true;
       }
+      const parsed = new ParsedTagSpec(
+          this.parsedAttrSpecs_,
+          shouldRecordTagspecValidated(tag, tagSpecId, this.tagSpecIdsToTrack_),
+          tag, tagSpecId);
+      this.parsedTagSpecById_[tagSpecId] = parsed;
       if (tag.tagName !== '$REFERENCE_POINT') {
         if (!(tag.tagName in this.tagSpecByTagName_)) {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
@@ -6034,11 +6124,12 @@ class ParsedValidatorRules {
               /** @type {string} */ (tag.extensionSpec.name), '');
           tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
         } else {
-          const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
-          if (dispatchKey === undefined) {
-            tagnameDispatch.registerTagSpec(tagSpecId);
+          const dispatchKeys = parsed.GetDispatchKeys();
+          if (dispatchKeys.length > 0) {
+            for (const dispatchKey of dispatchKeys)
+              tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
           } else {
-            tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
+            tagnameDispatch.registerTagSpec(tagSpecId);
           }
         }
       }
@@ -6176,6 +6267,8 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
+    let hasEmailTypeIdentifier = false;
+    let hasCssStrictTypeIdentifier = false;
     // The named values should match up to `self` and AMP caches listed at
     // https://cdn.ampproject.org/caches.json
     const transformedValueRe = new RegExp(/^(bing|google|self);v=(\d+)$/);
@@ -6223,6 +6316,12 @@ class ParsedValidatorRules {
                 context.getLineCol(),
                 /*params=*/[], /*url*/ '', validationResult);
           }
+          if (typeIdentifier === 'amp4email') {
+            hasEmailTypeIdentifier = true;
+          }
+          if (typeIdentifier === 'data-css-strict') {
+            hasCssStrictTypeIdentifier = true;
+          }
         } else {
           context.addError(
               generated.ValidationError.Code.DISALLOWED_ATTR,
@@ -6233,8 +6332,18 @@ class ParsedValidatorRules {
         }
       }
     }
+    // If AMP Email format and not set to data-css-strict, then issue a
+    // warning that not having data-css-strict is deprecated. See b/179798751.
+    if (hasEmailTypeIdentifier && !hasCssStrictTypeIdentifier) {
+      context.addWarning(
+          generated.ValidationError.Code.AMP_EMAIL_MISSING_STRICT_CSS_ATTR,
+          context.getLineCol(), /*params=*/[],
+          'https://github.com/ampproject/amphtml/issues/32587',
+          validationResult);
+    }
     if (!hasMandatoryTypeIdentifier) {
-      // Missing mandatory type identifier (any AMP variant but "transformed").
+      // Missing mandatory type identifier (any AMP variant but
+      // "transformed").
       context.addError(
           generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(),
@@ -6456,7 +6565,7 @@ class ParsedValidatorRules {
               context.getTypeIdentifiers())) {
         continue;
       }
-      for (const condition of parsedTagSpec.requires()) {
+      for (const condition of parsedTagSpec.requiresCondition()) {
         if (!context.satisfiesCondition(condition)) {
           context.addError(
               generated.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
@@ -6469,7 +6578,7 @@ class ParsedValidatorRules {
               getTagSpecUrl(parsedTagSpec), validationResult);
         }
       }
-      for (const condition of parsedTagSpec.excludes()) {
+      for (const condition of parsedTagSpec.excludesCondition()) {
         if (context.satisfiesCondition(condition)) {
           context.addError(
               generated.ValidationError.Code.TAG_EXCLUDED_BY_TAG,
@@ -6643,18 +6752,7 @@ class ParsedValidatorRules {
    * @return {!ParsedTagSpec}
    */
   getByTagSpecId(id) {
-    let parsed = this.parsedTagSpecById_[id];
-    if (parsed !== undefined) {
-      return parsed;
-    }
-    const tag = this.rules_.tags[id];
-    asserts.assert(tag !== undefined);
-    parsed = new ParsedTagSpec(
-        this.parsedAttrSpecs_,
-        shouldRecordTagspecValidated(tag, id, this.tagSpecIdsToTrack_), tag,
-        id);
-    this.parsedTagSpecById_[id] = parsed;
-    return parsed;
+    return this.parsedTagSpecById_[id];
   }
 
   /**
@@ -6868,8 +6966,8 @@ const ValidationHandler =
   }
 
   /**
-   * Currently, the Javascript HTML parser considers Doctype to be another HTML
-   * tag, which is not technically accurate. We have special handling for
+   * Currently, the Javascript HTML parser considers Doctype to be another
+   * HTML tag, which is not technically accurate. We have special handling for
    * doctype in Javascript which applies to all AMP formats, as this is strict
    * handling for all HTML in general. Specifically "attributes" are not
    * allowed, even things like `data-foo`.
@@ -6883,10 +6981,10 @@ const ValidationHandler =
         encounteredTag.attrs()[0].name === 'html')
       return;
     // <!doctype html lang=...> OK
-    // This is technically invalid. The 'correct' way to do this is to emit the
-    // lang attribute on the `<html>` tag. However, we observe a number of
-    // websites incorrectly emitting `lang` as part of doctype, so this specific
-    // attribute is allowed to avoid breaking existing pages.
+    // This is technically invalid. The 'correct' way to do this is to emit
+    // the lang attribute on the `<html>` tag. However, we observe a number of
+    // websites incorrectly emitting `lang` as part of doctype, so this
+    // specific attribute is allowed to avoid breaking existing pages.
     if (encounteredTag.attrs().length === 2) {
       if (encounteredTag.attrs()[0].name === 'html' &&
           encounteredTag.attrs()[1].name === 'lang')
@@ -6921,9 +7019,9 @@ const ValidationHandler =
       this.validateDocType(
           encounteredTag, this.context_, this.validationResult_);
       // Even though validateDocType emits all necessary errors about the tag,
-      // we continue to process it further (validateTag and such) so that we can
-      // record the tag was present and record it as the root pseudo element for
-      // the document.
+      // we continue to process it further (validateTag and such) so that we
+      // can record the tag was present and record it as the root pseudo
+      // element for the document.
     }
     /** @type {?string} */
     const maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
@@ -7247,7 +7345,7 @@ function errorLine(filenameOrUrl, error) {
 /**
  * Renders the validation results into an array of human readable strings.
  * Careful when modifying this - it's called from
- * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ * https://github.com/ampproject/amphtml/blob/main/test/integration/test-example-validation.js.
  *
  * WARNING: This is exported; htmlparser changes may break downstream users
  * like https://www.npmjs.com/package/amphtml-validator and

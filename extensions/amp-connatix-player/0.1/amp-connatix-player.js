@@ -1,39 +1,30 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {getDataParamsFromAttributes, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '#core/dom/layout/size-observer';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
+import {addParamsToUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
 
 /**
  * @param {!Array<T>} promises
@@ -78,7 +69,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cdm.connatix.com';
+    this.iframeDomain_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -88,6 +79,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -110,13 +106,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
       if (iframe.contentWindow) {
         iframe.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'event': 'command',
-              'func': command,
-              'args': opt_args || '',
-            })
-          ),
+          JSON.stringify({
+            'event': 'command',
+            'func': command,
+            'args': opt_args || '',
+          }),
           this.iframeDomain_
         );
       }
@@ -244,7 +238,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') || '';
-
+    const elementsPlayer =
+      element.getAttribute('data-elements-player') || false;
+    if (elementsPlayer) {
+      this.iframeDomain_ = 'https://cdm.elements.video';
+    } else {
+      this.iframeDomain_ = 'https://cdm.connatix.com';
+    }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -268,11 +268,12 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   layoutCallback() {
     const {element} = this;
     // Url Params for iframe source
-    const urlParams = dict({
+    const urlParams = {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
       'url': Services.documentInfoForDoc(element).sourceUrl,
-    });
+      ...getDataParamsFromAttributes(element),
+    };
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 
@@ -282,7 +283,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     iframe.src = src;
 
     // applyFillContent so that frame covers the entire component.
-    this.applyFillContent(iframe, /* replacedContent */ true);
+    applyFillContent(iframe, /* replacedContent */ true);
 
     // append child iframe for element
     element.appendChild(iframe);
@@ -293,6 +294,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     // bind to amp consent and send consent info to the iframe content and propagate to player
     this.bindToAmpConsent_();
 
+    observeContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
@@ -301,18 +305,25 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  onLayoutMeasure() {
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_({height, width}) {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutSize();
     this.sendCommand_('ampResize', {'width': width, 'height': height});
   }
 
   /** @override */
   pauseCallback() {
+    if (!this.iframe_) {
+      return;
+    }
     this.sendCommand_('ampPause');
+    // The player doesn't appear to respect "ampPause" message.
+    this.iframe_.src = this.iframe_.src;
   }
 
   /** @override */
@@ -322,6 +333,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    unobserveContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }

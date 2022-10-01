@@ -1,65 +1,51 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys_Enum} from '#core/constants/key-codes';
+import {bezierCurve} from '#core/data-structures/curve';
+import * as dom from '#core/dom';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+  moveLayoutRect,
+} from '#core/dom/layout/rect';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import * as query from '#core/dom/query';
+import {srcsetFromElement} from '#core/dom/srcset';
+import {setStyles, toggle} from '#core/dom/style';
+import * as st from '#core/dom/style';
+import * as tr from '#core/dom/transition';
+import {boundValue, clamp, distance, magnitude} from '#core/math';
+import {WindowInterface} from '#core/window/interface';
 
-import * as dom from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
+import {Services} from '#service';
+
+import {Animation} from '#utils/animation';
+import {isLoaded} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
+import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
-import {dev, userAssert} from '../../../src/log';
-import {isLoaded} from '../../../src/event-helper';
-import {
-  layoutRectFromDomRect,
-  layoutRectLtwh,
-  moveLayoutRect,
-} from '../../../src/layout-rect';
-import {setStyles, toggle} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
 
 const TAG = 'amp-image-lightbox';
 
-/** @private @const {!Object<string, boolean>} */
-const SUPPORTED_ELEMENTS_ = {
-  'amp-img': true,
-  'amp-anim': true,
-};
+/** @private @const {!Set<string>} */
+const SUPPORTED_ELEMENTS_ = new Set(['amp-img', 'amp-anim', 'img']);
 
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
 
-/** @private @const {!../../../src/curve.CurveDef} */
+/** @private @const {!../../../src/core/data-structures/curve.CurveDef} */
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
-/** @private @const {!../../../src/curve.CurveDef} */
+/** @private @const {!../../../src/core/data-structures/curve.CurveDef} */
 const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
-/** @private @const {!../../../src/curve.CurveDef} */
+/** @private @const {!../../../src/core/data-structures/curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
 /** @private @const {number} */
@@ -253,9 +239,15 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    sourceElement.getImpl().then((elem) => {
-      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
-    });
+    if (sourceElement.tagName.toLowerCase() === 'img') {
+      propagateAttributes(ARIA_ATTRIBUTES, sourceElement, this.image_);
+    } else {
+      sourceElement
+        .getImpl()
+        .then((impl) =>
+          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
+        );
+    }
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
@@ -608,12 +600,9 @@ export class ImageViewer {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (this.set_(
-      newScale,
-      newPosX,
-      newPosY,
-      animate
-    ));
+    return /** @type {!Promise|undefined} */ (
+      this.set_(newScale, newPosX, newPosY, animate)
+    );
   }
 
   /**
@@ -786,9 +775,11 @@ class AmpImageLightbox extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** If the element is in an email document, allow its `open` action. */
-    Services.actionServiceForDoc(
-      this.element
-    ).addToAllowlist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
+    Services.actionServiceForDoc(this.element).addToAllowlist(
+      'AMP-IMAGE-LIGHTBOX',
+      'open',
+      ['email']
+    );
   }
 
   /**
@@ -824,9 +815,8 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.
-    const screenReaderCloseButton = this.element.ownerDocument.createElement(
-      'button'
-    );
+    const screenReaderCloseButton =
+      this.element.ownerDocument.createElement('button');
     // TODO(aghassemi, #4146) i18n
     const ariaLabel =
       this.element.getAttribute('data-close-button-aria-label') ||
@@ -871,8 +861,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.buildLightbox_();
 
     const source = invocation.caller;
+    const tagName = source.tagName.toLowerCase();
     userAssert(
-      source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+      source && SUPPORTED_ELEMENTS_.has(tagName),
       'Unsupported element: %s',
       source.tagName
     );
@@ -924,7 +915,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.key == Keys.ESCAPE) {
+    if (event.key == Keys_Enum.ESCAPE) {
       event.preventDefault();
       this.close();
     }
@@ -983,19 +974,19 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.sourceElement_ = sourceElement;
 
     // Initialize the viewer.
-    this.sourceImage_ = dom.childElementByTag(sourceElement, 'img');
+    this.sourceImage_ = query.childElementByTag(sourceElement, 'img');
     this.imageViewer_.init(this.sourceElement_, this.sourceImage_);
 
     // Discover caption.
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    const figure = dom.closestAncestorElementBySelector(
+    const figure = query.closestAncestorElementBySelector(
       sourceElement,
       'figure'
     );
     if (figure) {
-      caption = dom.elementByTag(figure, 'figcaption');
+      caption = query.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".

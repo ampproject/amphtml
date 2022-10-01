@@ -826,6 +826,7 @@ td
 </select><option>
 #errors
 (1,9): XXX-undefined-error
+(1,17): eof-in-select
 #document-fragment
 select
 #document
@@ -835,6 +836,7 @@ select
 <input><option>
 #errors
 (1,7): unexpected-input-in-select
+(1,15): eof-in-select
 #document-fragment
 select
 #document
@@ -844,6 +846,7 @@ select
 <keygen><option>
 #errors
 (1,8): unexpected-input-in-select
+(1,16): eof-in-select
 #document-fragment
 select
 #document
@@ -853,6 +856,7 @@ select
 <textarea><option>
 #errors
 (1,10): unexpected-input-in-select
+(1,18): eof-in-select
 #document-fragment
 select
 #document

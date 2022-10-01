@@ -1,34 +1,13 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#ifndef HTMLPARSER__DOCTYPE_H_
-#define HTMLPARSER__DOCTYPE_H_
+#ifndef CPP_HTMLPARSER_DOCTYPE_H_
+#define CPP_HTMLPARSER_DOCTYPE_H_
 
 #include <memory>
 #include <string_view>
 #include <tuple>
 
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 namespace htmlparser {
-
-// Controls if lang=.* parameter or any combinations of it are allowed in the
-// doctype declarations. We have seen several web pages with lang attribute in
-// doctype.
-#define ALLOW_LANG_ATTRIBUTE_IN_DOCTYPE 1
 
 // Parses the data from a DoctypeToken into a name,
 // public identifier, and system identifier. It returns a Node whose Type
@@ -99,4 +78,4 @@ inline constexpr std::array<std::string_view, 55> kQuirkyIDs {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__DOCTYPE_H_
+#endif  // CPP_HTMLPARSER_DOCTYPE_H_

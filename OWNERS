@@ -1,19 +1,18 @@
 // For an explanation of the OWNERS rules and syntax, see:
-// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
-  reviewerTeam: 'ampproject/reviewers-amphtml',
+  reviewerPool: ['ampproject/reviewers-amphtml', 'renovate-approve[bot]'],
   rules: [
     {
       owners: [
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
         {name: 'jridgewell', requestReviews: false},
-        {name: 'kristoferbaxter', requestReviews: false},
       ],
     },
     {
-      pattern: '**/validator-*.{protoascii,html,out}',
+      pattern: '**/validator-*.{protoascii,html,out,out.cpponly}',
       owners: [{name: 'ampproject/wg-caching', required: true}],
     },
     {
@@ -21,19 +20,53 @@
       owners: [{name: '*'}],
     },
     {
-      pattern: '{.*,gulpfile.js}',
+      pattern: '{.*,amp.js}',
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{babel.config.js,package.json,package-lock.json}',
+      pattern: '{babel.config.js,package-scripts.js}',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},
       ],
     },
     {
+      pattern: '{package.json,package-lock.json}',
+      owners: [
+        {name: 'ampproject/wg-infra', requestReviews: false},
+        {name: 'ampproject/wg-performance', requestReviews: false},
+      ],
+    },
+    {
+      pattern: '**/package{,-lock}.json',
+      owners: [{name: 'renovate[bot]'}],
+    },
+    {
       pattern: '**/OWNERS',
-      owners: [{name: 'mrjoro', requestReviews: false}],
+      owners: [
+        {name: 'mrjoro', requestReviews: false},
+        {name: 'newmuis', requestReviews: false},
+      ],
+    },
+    {
+      // Locked down to minimize new import aliases being added
+      pattern: 'tsconfig{,.base}.json',
+      owners: [{name: 'ampproject/wg-performance', required: true}],
+    },
+    {
+      pattern: '**/tsconfig.json',
+      owners: [{name: 'ampproject/wg-performance'}],
+    },
+    {
+      pattern: '**/*.d.ts',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: '**/build-dom.js',
+      owners: [{name: 'samouri'}],
     },
   ],
 }

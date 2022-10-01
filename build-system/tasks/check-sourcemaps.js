@@ -1,52 +1,21 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const {cyan, green, red} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
 
 // Compile related constants
-const distWithSourcemapsCmd = 'gulp dist --core_runtime_only --full_sourcemaps';
-const v0JsMap = 'dist/v0.js.map';
+const distWithSourcemapsCmd =
+  'amp dist --core_runtime_only --extensions=amp-audio --full_sourcemaps';
 const distEsmWithSourcemapsCmd =
-  'gulp dist --core_runtime_only --full_sourcemaps --esm';
-const v0MjsMap = 'dist/v0.mjs.map';
+  'amp dist --core_runtime_only --extensions=amp-audio --full_sourcemaps --esm';
 
 // Sourcemap URL related constants
 const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
-
-// Mapping related constants
-const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.js.
-const expectedFirstLineCode = 'class AbortController {'; // First line of code in that file.
-
-/**
- * Throws an error with the given message
- *
- * @param {string} message
- */
-function throwError(message) {
-  const err = new Error(message);
-  err.showStack = false;
-  throw err;
-}
 
 /**
  * Build runtime with sourcemaps if needed.
@@ -68,7 +37,7 @@ function maybeBuild() {
 function getSourcemapJson(map) {
   if (!fs.existsSync(map)) {
     log(red('ERROR:'), 'Could not find', cyan(map));
-    throwError(`Could not find sourcemap file '${map}'`);
+    throw new Error(`Could not find sourcemap file '${map}'`);
   }
   return JSON.parse(fs.readFileSync(map, 'utf8'));
 }
@@ -83,11 +52,11 @@ function checkSourcemapUrl(sourcemapJson, map) {
   log('Inspecting', cyan('sourceRoot'), 'in', cyan(map) + '...');
   if (!sourcemapJson.sourceRoot) {
     log(red('ERROR:'), 'Could not find', cyan('sourceRoot'));
-    throwError('Could not find sourcemap URL');
+    throw new Error('Could not find sourcemap URL');
   }
   if (!sourcemapJson.sourceRoot.match(sourcemapUrlMatcher)) {
     log(red('ERROR:'), cyan(sourcemapJson.sourceRoot), 'is badly formatted');
-    throwError('Badly formatted sourcemap URL');
+    throw new Error('Badly formatted sourcemap URL');
   }
 }
 
@@ -101,8 +70,9 @@ function checkSourcemapSources(sourcemapJson, map) {
   log('Inspecting', cyan('sources'), 'in', cyan(map) + '...');
   if (!sourcemapJson.sources) {
     log(red('ERROR:'), 'Could not find', cyan('sources'));
-    throwError('Could not find sources array');
+    throw new Error('Could not find sources array');
   }
+  /** @type {string[]} */
   const invalidSources = sourcemapJson.sources
     .filter((source) => !source.match(/\[.*\]/)) // Ignore non-path sources '[...]'
     .filter((source) => !fs.existsSync(source)); // All source paths should exist
@@ -113,7 +83,7 @@ function checkSourcemapSources(sourcemapJson, map) {
       cyan('sources') + ':',
       cyan(invalidSources.join(', '))
     );
-    throwError('Invalid paths in sources array');
+    throw new Error('Invalid paths in sources array');
   }
 }
 
@@ -121,9 +91,9 @@ function checkSourcemapSources(sourcemapJson, map) {
  * Performs a sanity check on the mappings field in the sourcemap file.
  *
  * Today, the first line of amp.js after resolving imports comes from
- * src/polyfills/array-includes.js. (The import chain is src/amp.js -> src/polyfills.js
- * -> src/polyfills/array-includes.js.) This sequence changes rarely, so we can
- * use it as a sentinel value. Here is the process:
+ * src/polyfills/array-includes.js. (The import chain is src/amp.js ->
+ * src/polyfills/index.js -> src/polyfills/array-includes.js.) This sequence
+ * changes rarely, so we can use it as a sentinel value. Here is the process:
  *
  * 1. Decode the 'mappings' field into a 3d array using 'sourcemap-codec'.
  * 2. Extract the mapping for the first line of code in minified v0.js.
@@ -138,13 +108,13 @@ function checkSourcemapMappings(sourcemapJson, map) {
   log('Inspecting', cyan('mappings'), 'in', cyan(map) + '...');
   if (!sourcemapJson.mappings) {
     log(red('ERROR:'), 'Could not find', cyan('mappings'));
-    throwError('Could not find mappings array');
+    throw new Error('Could not find mappings array');
   }
 
-  // Zeroth sub-array corresponds to ';' and has no mappings.
-  // See https://www.npmjs.com/package/sourcemap-codec#usage
+  // See https://www.npmjs.com/package/sourcemap-codec#usage.
   const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
-  const [, sourceIndex, sourceCodeLine, sourceCodeColumn] = firstLineMapping;
+  const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
+    firstLineMapping;
 
   const firstLineFile = sourcemapJson.sources[sourceIndex];
   const contents = fs.readFileSync(firstLineFile, 'utf8').split('\n');
@@ -153,40 +123,60 @@ function checkSourcemapMappings(sourcemapJson, map) {
     'If this change is intentional, update the mapping related constants in ' +
     cyan('build-system/tasks/check-sourcemaps.js') +
     '.';
-  if (firstLineFile != expectedFirstLineFile) {
+
+  // Mapping related constants
+  const expectedFirstLine = map.includes('mjs')
+    ? {
+        file: 'src/polyfills/abort-controller.js',
+        code: 'class AbortController {',
+      }
+    : {
+        file: 'node_modules/@babel/runtime/helpers/esm/createClass.js',
+        code: 'function _defineProperties(target, props) {',
+      };
+
+  if (firstLineFile != expectedFirstLine.file) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
     log('Actual:', cyan(firstLineFile));
-    log('Expected:', cyan(expectedFirstLineFile));
+    log('Expected:', cyan(expectedFirstLine.file));
     log(helpMessage);
-    throwError('Found mapping for incorrect file');
+    throw new Error('Found mapping for incorrect file');
   }
-  if (firstLineCode != expectedFirstLineCode) {
+  if (firstLineCode != expectedFirstLine.code) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
     log('Actual:', cyan(firstLineCode));
-    log('Expected:', cyan(expectedFirstLineCode));
+    log('Expected:', cyan(expectedFirstLine.code));
     log(helpMessage);
-    throwError('Found mapping for incorrect code');
+    throw new Error('Found mapping for incorrect code');
   }
 }
 
 /**
  * @param {string} map The map filepath to check
+ * @param {boolean} checkMappings Whether to test a mapping points to a correct source.
  */
-function checkSourceMap(map) {
+function checkSourceMap(map, checkMappings) {
   const sourcemapJson = getSourcemapJson(map);
   checkSourcemapUrl(sourcemapJson, map);
   checkSourcemapSources(sourcemapJson, map);
-  checkSourcemapMappings(sourcemapJson, map);
+  if (checkMappings) {
+    checkSourcemapMappings(sourcemapJson, map);
+  }
 }
 
 /**
  * Checks sourcemaps generated during minified compilation for correctness.
- * Entry point for `gulp check-sourcemaps`.
+ * Entry point for `amp check-sourcemaps`.
+ * @return {Promise<void>}
  */
 async function checkSourcemaps() {
   maybeBuild();
-  checkSourceMap(v0JsMap);
-  checkSourceMap(v0MjsMap);
+  checkSourceMap('dist/v0.js.map', true);
+  checkSourceMap('dist/v0.mjs.map', true);
+
+  checkSourceMap('dist/v0/amp-audio-0.1.js.map', false);
+  checkSourceMap('dist/v0/amp-audio-0.1.mjs.map', false);
+
   log(green('SUCCESS:'), 'All sourcemaps checks passed.');
 }
 
@@ -195,7 +185,7 @@ module.exports = {
 };
 
 checkSourcemaps.description =
-  'Checks sourcemaps generated during minified compilation for correctness.';
+  'Check sourcemaps generated during minified compilation for correctness';
 checkSourcemaps.flags = {
-  'nobuild': '  Skips building the runtime (checks previously built code)',
+  'nobuild': 'Skip building the runtime (checks previously built code)',
 };

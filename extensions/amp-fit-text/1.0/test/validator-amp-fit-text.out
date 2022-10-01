@@ -1,0 +1,61 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-fit-text tag. See the inline comments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-1.0.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: Scales text to fit area. -->
+|    <div class="fixedblock">
+|      <amp-fit-text
+|        layout="responsive"
+|        height="200"
+|        width="200">
+|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
+|      </amp-fit-text>
+|    </div>
+|
+|    <!-- Valid: Scales text to fit area using a maximum font size. -->
+|    <div class="fixedblock">
+|      <amp-fit-text
+|        layout="responsive"
+|        height="200"
+|        width="200"
+|        max-font-size="22">
+|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
+|      </amp-fit-text>
+|    </div>
+|
+|    <!-- Valid: Text is truncated when minimum font size exceeds area. -->
+|    <div class="fixedblock">
+|      <amp-fit-text
+|        layout="responsive"
+|        height="200"
+|        width="200"
+|        min-font-size="40">
+|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
+|      </amp-fit-text>
+|    </div>
+|
+|    <!-- Invalid: illegal layout. -->
+|    <div class="fixedblock">
+|      <amp-fit-text
+>>     ^~~~~~~~~
+amp-fit-text/1.0/test/validator-amp-fit-text.html:50:4 The specified layout 'CONTAINER' is not supported by tag 'amp-fit-text'. (see https://amp.dev/documentation/components/amp-fit-text)
+|        layout="container"
+|        height="200"
+|        width="200">
+|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
+|      </amp-fit-text>
+|    </div>
+|  </body>
+|  </html>

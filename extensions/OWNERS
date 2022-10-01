@@ -1,5 +1,5 @@
 // For an explanation of the OWNERS rules and syntax, see:
-// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
   rules: [
@@ -8,6 +8,8 @@
         {name: 'ampproject/wg-components'},
         {name: 'ampproject/wg-bento'},
         {name: 'aghassemi', requestReviews: false},
+        {name: 'gmajoulet', requestReviews: false},
+        {name: 'newmuis', requestReviews: false},
       ],
     },
     {

@@ -1,26 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import * as domQuery from '#core/dom/query';
+import {setStyles} from '#core/dom/style';
+
+import {macroTask} from '#testing/helpers';
 
 import * as adHelper from '../../../../src/ad-helper';
-import * as dom from '../../../../src/dom';
-import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
-import {setStyles} from '../../../../src/style';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 
 describes.realWin(
   'amp-ad-ui handler',
@@ -37,6 +23,7 @@ describes.realWin(
 
     beforeEach(() => {
       adElement = env.win.document.createElement('amp-ad');
+      adElement.ampdoc_ = env.win.document;
       adImpl = new BaseElement(adElement);
       uiHandler = new AmpAdUIHandler(adImpl);
       env.sandbox.stub(adHelper, 'getAdContainer').callsFake(() => {
@@ -67,7 +54,7 @@ describes.realWin(
             .stub(adImpl, 'collapse')
             .callsFake(() => {});
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -98,7 +85,7 @@ describes.realWin(
 
           const otherElement = env.win.document.createElement('div');
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -131,7 +118,7 @@ describes.realWin(
           adElement.remove();
           otherElement.appendChild(adElement);
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -245,6 +232,7 @@ describes.realWin(
             height: '50px',
           });
           env.win.document.body.appendChild(adElement);
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -262,6 +250,7 @@ describes.realWin(
         });
 
         it('should tolerate string input', () => {
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -323,17 +312,40 @@ describes.realWin(
     });
 
     describe('sticky ads', () => {
-      it('should render close buttons on render once', () => {
+      it('should reject invalid sticky type', () => {
+        expectAsyncConsoleError(/Invalid sticky ad type: invalid/, 1);
+        adElement.setAttribute('sticky', 'invalid');
+        const uiHandler = new AmpAdUIHandler(adImpl);
+        expect(uiHandler.stickyAdPosition_).to.be.null;
+      });
+
+      it('should render close buttons', () => {
         expect(uiHandler.unlisteners_).to.be.empty;
-        uiHandler.isStickyAd_ = true;
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.closeButtonRendered_).to.be.true;
+        uiHandler.stickyAdPosition_ = 'bottom';
+        uiHandler.maybeInitStickyAd();
         expect(uiHandler.unlisteners_.length).to.equal(1);
         expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
           .not.null;
+      });
 
-        uiHandler.onResizeSuccess();
-        expect(uiHandler.unlisteners_.length).to.equal(1);
+      it('top sticky ads shall cause scroll trigger', () => {
+        uiHandler.stickyAdPosition_ = 'top';
+        uiHandler.maybeInitStickyAd();
+        expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
+      });
+
+      it('should refuse to load the second sticky ads', () => {
+        for (let i = 0; i < 2; i++) {
+          const adElement = env.win.document.createElement('amp-ad');
+          adElement.setAttribute('sticky', 'top');
+          adElement.setAttribute('class', 'i-amphtml-built');
+          env.win.document.body.insertBefore(adElement, null);
+        }
+        allowConsoleError(() => {
+          expect(() => {
+            uiHandler.validateStickyAd();
+          }).to.throw();
+        });
       });
     });
   }
