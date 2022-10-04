@@ -12,15 +12,6 @@ const {RequestError} = require('@octokit/request-error');
 
 const params = {owner: 'ampproject', repo: 'amphtml'};
 
-// Permanent external ID as assigned by the GitHub Actions runner.
-const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
-
-const CHECKS_TO_SKIP = [
-  'Cut Nightly Branch',
-  'create-issue-on-error',
-  'status-page',
-];
-
 /**
  * Get the current nightly branch's commit SHA.
  *
@@ -36,71 +27,18 @@ async function getCurrentNightly(octokit) {
 }
 
 /**
- * Get the SHA of the last green commit from the main branch.
+ * Get the SHA of the most recent commit from the main branch.
  *
  * @param {Octokit} octokit
  * @return {Promise<string>}
- * @throws {Error} if a green commit was not found in the last 100 main commits.
  */
 async function getCommit(octokit) {
-  const commits = await octokit.rest.repos.listCommits({
+  const {data: commit} = await octokit.rest.repos.getCommit({
     ...params,
     ref: 'main',
-    'per_page': 100,
   });
-  log(
-    'Iterating the latest',
-    cyan(commits.data.length),
-    'commits on',
-    cyan('main')
-  );
 
-  for (const {sha} of commits.data) {
-    const checkRuns = (
-      await octokit.paginate(octokit.rest.checks.listForRef, {
-        ...params,
-        ref: sha,
-        'per_page': 100,
-      })
-    ).filter(
-      ({'external_id': id, name}) =>
-        id !== GITHUB_EXTERNAL_ID && !CHECKS_TO_SKIP.includes(name)
-    );
-
-    if (checkRuns.some(({status}) => status != 'completed')) {
-      log(
-        'Not all check runs for commit',
-        cyan(sha),
-        'are completed. Checking next commit...'
-      );
-      continue;
-    }
-
-    if (
-      !checkRuns.every(({conclusion}) =>
-        ['success', 'neutral', 'skipped'].includes(conclusion ?? '')
-      )
-    ) {
-      log(
-        'Not all check runs for commit',
-        cyan(sha),
-        'are successful. Checking next commit...'
-      );
-      continue;
-    }
-
-    log(
-      'All check runs for commit',
-      cyan(sha),
-      'have completed successfully. Cutting a new nightly at this commit...'
-    );
-
-    return sha;
-  }
-
-  throw new Error(
-    'Failed to cut nightly. Could not find a green commit in the last 100 commits'
-  );
+  return commit.sha;
 }
 
 /**
@@ -207,6 +145,8 @@ async function cutNightlyBranch() {
     );
     return;
   }
+
+  log('Cutting a new nightly at', cyan(newSha), '...');
 
   const ampVersion = getVersion(newSha);
 
