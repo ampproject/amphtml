@@ -26,8 +26,8 @@ const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {watch} = require('chokidar');
 
-const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = isCiBuild() ? 2 : 0;
+const SLOW_TEST_THRESHOLD_MS = isCiBuild() ? 5000 : 2500;
+const TEST_RETRIES = isCiBuild() ? 3 : 0;
 
 const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
