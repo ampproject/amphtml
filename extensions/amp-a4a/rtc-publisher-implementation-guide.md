@@ -47,6 +47,7 @@ To use RTC, you must meet the following requirements:
 -   Salesforce
 -   [Snigel](https://www.snigel.com)
 -   T13
+-   [Improve Digital](https://www.improvedigital.com)
 -   Tail
 -   The Ozone Project
 -   Yieldbot

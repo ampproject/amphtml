@@ -153,6 +153,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Salesforce
 -   [Snigel](https://www.snigel.com)
 -   T13
+-   [Improve Digital](https://www.improvedigital.com)
 -   Tail
 -   The Ozone Project
 -   Yieldbot
