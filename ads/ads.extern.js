@@ -616,6 +616,19 @@ data.section;
 // pulsepoint.js
 window.PulsePointHeaderTag;
 
+// r9x.js
+window.r9x = {};
+window.r9x.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots,
+  jsontargeting,
+  extras
+) {};
+
 // rubicon.js
 data.method;
 data.width;
