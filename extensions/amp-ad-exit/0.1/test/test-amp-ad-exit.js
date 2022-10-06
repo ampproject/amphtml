@@ -391,7 +391,7 @@ describes.realWin(
       const config = {
         targets: {
           landingPage: {
-            finalUrl: 'https://advertiser.example',
+            finalUrl: 'https://adtech.example',
             behaviors: {
               browserAdConversion: {
                 attributionsrc: '',
@@ -411,7 +411,7 @@ describes.realWin(
       });
 
       expect(openStub).calledWithExactly(
-        'https://advertiser.example',
+        'https://adtech.example',
         '_blank',
         'noopener,attributionsrc='
       );
