@@ -63,6 +63,7 @@
       <option>captainmetrics</option>
       <option>chartbeat</option>
       <option>clicky</option>
+      <option>cognativex</option>
       <option>colanalytics</option>
       <option>comscore</option>
       <option>cxense</option>
@@ -595,6 +596,24 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Clicky example -->
+
+<!-- Cognativex tracking -->
+<amp-analytics type="cognativex" id="cognativex">
+  <script type="application/json">
+  {
+    "vars": {
+      "apikey": "example.com"
+    },
+    "triggers": {
+        "defaultPageview": {
+            "on": "visible",
+            "request": "pageview"
+        }
+    }
+  }
+  </script>
+</amp-analytics>
+<!-- End CognativeX example -->
 
 <!-- ColAnalytics pageview tracking -->
 <amp-analytics type="colanalytics" id="colanalytics">
