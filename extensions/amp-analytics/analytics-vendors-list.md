@@ -149,6 +149,13 @@ Type attribute value: `clicky`
 
 Adds support for Clicky Web Analytics. More details for adding Clicky support can be found at [clicky.com](https://clicky.com/help/apps-plugins).
 
+### cognativex
+
+Type attribute value: `cognativex`
+
+Adds support for cognativex analytics. More details for adding cognativex support can be found [here](https://cognativex.com/amp). If the page is empty or takes to the website, then it's under maintenance.
+
+
 ### colanalytics
 
 Type attribute value: `colanalytics`

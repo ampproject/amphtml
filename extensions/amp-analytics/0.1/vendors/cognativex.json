@@ -1,0 +1,35 @@
+{
+  "vars": {
+    "publisher": "striveme.com"
+  },
+  "requests": {
+    "host": "https://log.cognativex.com",
+    "basePrefix": "${host}/pixel.png?",
+    "pageview": "${basePrefix}kc=pv&cxv=10&apd=${publisher}&uid=375d5128-2ea4-4386-8d2d-ff7d65d05a57&cxnid=undefined&ptd=2c70e6fb-caf2-4b38-b2d5-1b2efcc851ba&cd=1664368082574&scr=1920x1080|1920x1040|24&cu=https://striveme.com/article/%D9%85%D8%AD%D8%B1%D9%83%D8%A7%D8%AA/%D8%A3%D8%AE%D8%A8%D8%A7%D8%B1/%D9%81%D9%88%D8%B1%D8%AF-%D8%AA%D9%82%D8%AF%D9%85-%D9%85%D9%88%D8%B3%D8%AA%D8%A7%D9%86%D8%AC-dark-horse-%D9%81%D8%A6%D8%A9-%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9-%D9%85%D8%AE%D8%B5%D8%B5%D8%A9-%D9%84%D8%AD%D9%84%D8%A8%D8%A7%D8%AA-%D8%A7%D9%84%D8%B3%D8%A8%D8%A7%D9%82&pid=29415&ldte=114&sid=4",
+    "heartbeat": "${basePrefix}kc=hb&cxv=10&apd=${publisher}&uid=375d5128-2ea4-4386-8d2d-ff7d65d05a57&cxnid=undefined&ptd=2c70e6fb-caf2-4b38-b2d5-1b2efcc851ba&cd=1664368082574&scr=1920x1080|1920x1040|24&cu=https://striveme.com/article/%D9%85%D8%AD%D8%B1%D9%83%D8%A7%D8%AA/%D8%A3%D8%AE%D8%A8%D8%A7%D8%B1/%D9%81%D9%88%D8%B1%D8%AF-%D8%AA%D9%82%D8%AF%D9%85-%D9%85%D9%88%D8%B3%D8%AA%D8%A7%D9%86%D8%AC-dark-horse-%D9%81%D8%A6%D8%A9-%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9-%D9%85%D8%AE%D8%B5%D8%B5%D8%A9-%D9%84%D8%AD%D9%84%D8%A8%D8%A7%D8%AA-%D8%A7%D9%84%D8%B3%D8%A8%D8%A7%D9%82&pid=29415&ldte=114&eg=_incremental_engaged_time(cognativex-js)_" 
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview"
+    },
+    "defaultHeartbeat": {
+       "on": "timer",
+       "enabled": "${incrementalEngagedTime(cognativex-js,false)}",
+       "timerSpec": {
+          "interval": 10,
+          "immediate": false,
+          "stopSpec": {
+            "on": "hidden"
+          }
+        },
+       "request": "heartbeat"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+  
+}
