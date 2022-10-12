@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.235 */
+/** Version: 0.1.22.236 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -3689,6 +3689,8 @@ const Constants$1 = {};
  */
 Constants$1.USER_TOKEN = 'USER_TOKEN';
 
+Constants$1.READ_TIME = 'READ_TIME';
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5203,7 +5205,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.235',
+    '_client': 'SwG 0.1.22.236',
   });
 }
 
@@ -5625,6 +5627,10 @@ class PayCompleteFlow {
       true,
       getEventParams$1(this.sku_ || '')
     );
+    const now = Date.now().toString();
+    this.deps_
+      .storage()
+      .set(Constants$1.READ_TIME, now, /*useLocalStorage=*/ false);
     this.deps_.entitlementsManager().unblockNextNotification();
     return Promise.all([
       this.activityIframeViewPromise_,
@@ -6541,7 +6547,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.235',
+        '_client': 'SwG 0.1.22.236',
         'supportsEventManager': true,
       },
       args || {}
@@ -7490,7 +7496,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.235');
+    context.setClientVersion('SwG 0.1.22.236');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7773,7 +7779,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'Google के ज़रिये सदस्यता',
     'id': 'Berlangganan dengan Google',
     'it': 'Abbonati con Google',
-    'jp': 'Google で購読',
+    'ja': 'Google で購読',
     'ko': 'Google 을 통한구독',
     'ms': 'Langgan dengan Google',
     'nl': 'Abonneren via Google',
@@ -7807,7 +7813,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'Google खाते की मदद से योगदान करें',
     'id': 'Berkontribusi dengan Google',
     'it': 'Contribuisci con Google',
-    'jp': 'Google で寄付',
+    'ja': 'Google で寄付',
     'ko': 'Google을 통해 참여하기',
     'ms': 'Sumbangkan dengan Google',
     'nl': 'Bijdragen met Google',
@@ -7839,7 +7845,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'आपने पहले ही इसके लिए रजिस्टर कर लिया है.',
     'id': 'Anda telah mendaftar sebelumnya.',
     'it': 'Registrazione già effettuata in precedenza.',
-    'jp': 'すでに登録済みです。',
+    'ja': 'すでに登録済みです。',
     'ko': '이전에 등록한 사용자입니다.',
     'ms': 'Anda telah mendaftar sebelum ini.',
     'nl': 'Je hebt je al eerder geregistreerd.',
@@ -7871,7 +7877,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'न्यूज़लेटर के लिए पहले ही साइन अप किया जा चुका है.',
     'id': 'Anda telah mendaftar sebelumnya.',
     'it': "Hai già effettuato l'iscrizione.",
-    'jp': 'すでに登録されています。',
+    'ja': 'すでに登録されています。',
     'ko': '이전에 가입한 사용자입니다.',
     'ms': 'Anda sudah mendaftar sebelum ini.',
     'nl': 'Je hebt je al eerder aangemeld.',
@@ -7903,7 +7909,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'रजिस्ट्रेशन नहीं हो सका. फिर से रजिस्टर करने की कोशिश करें.',
     'id': 'Pendaftaran gagal. Coba daftar lagi.',
     'it': 'Registrazione non riuscita. Prova a registrarti di nuovo.',
-    'jp': '登録できませんでした。もう一度お試しください。',
+    'ja': '登録できませんでした。もう一度お試しください。',
     'ko': '등록에 실패했습니다. 다시 등록해 보세요.',
     'ms': 'Pendaftaran gagal. Cuba mendaftar lagi.',
     'nl': 'Registratie mislukt. Probeer opnieuw te registreren.',
@@ -7935,7 +7941,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'साइन अप नहीं किया जा सका. फिर से साइन अप करने की कोशिश करें.',
     'id': 'Pendaftaran gagal. Coba daftar lagi.',
     'it': 'Iscrizione non riuscita. Prova a iscriverti di nuovo.',
-    'jp': '登録できませんでした。もう一度お試しください。',
+    'ja': '登録できませんでした。もう一度お試しください。',
     'ko': '가입에 실패했습니다. 다시 가입해 보세요.',
     'ms': 'Daftar gagal. Cuba daftar lagi.',
     'nl': 'Aanmelding mislukt. Probeer opnieuw aan te melden.',
@@ -7973,7 +7979,7 @@ const SWG_I18N_STRINGS = {
     'hi': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> का इस्तेमाल करके, एक खाता बनाया गया',
     'id': 'Membuat akun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'it': 'È stato creato un account con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
-    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でアカウントを作成しました',
+    'ja': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でアカウントを作成しました',
     'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 계정을 만들었습니다.',
     'ms': 'Membuat akaun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'nl': 'Account gemaakt met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -8012,7 +8018,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'न्यूज़लेटर पाने के लिए, <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> से साइन अप किया गया',
     'id': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk mendapatkan newsletter',
     'it': 'Iscrizione alla newsletter con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> effettuata',
-    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でニュースレターを登録しました',
+    'ja': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でニュースレターを登録しました',
     'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 뉴스레터에 가입했습니다.',
     'ms': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk surat berita',
     'nl': 'Aangemeld met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> voor de nieuwsbrief',
@@ -12645,16 +12651,24 @@ class EntitlementsManager {
     // Get swgUserToken from local storage
     const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
 
+    // Get read_time from session storage
+    const readTimePromise = this.storage_.get(
+      Constants$1.READ_TIME,
+      /*useLocalStorage=*/ false
+    );
+
     let url =
       '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
 
     return Promise.all([
       hash(getCanonicalUrl(this.deps_.doc())),
       swgUserTokenPromise,
+      readTimePromise,
     ])
       .then((values) => {
         const hashedCanonicalUrl = values[0];
         const swgUserToken = values[1];
+        const readTime = values[2];
 
         url = addDevModeParamsToUrl(this.win_.location, url);
 
@@ -12682,6 +12696,21 @@ class EntitlementsManager {
           params.publisherProvidedId.length > 0
         ) {
           url = addQueryParam(url, 'ppid', params.publisherProvidedId);
+        }
+
+        // Add interaction_age param.
+        if (readTime) {
+          const last = parseInt(readTime, 10);
+          if (last) {
+            const interactionAge = Math.floor((Date.now() - last) / 1000);
+            if (interactionAge >= 0) {
+              url = addQueryParam(
+                url,
+                'interaction_age',
+                interactionAge.toString()
+              );
+            }
+          }
         }
 
         /** @type {!GetEntitlementsParamsInternalDef|undefined} */
