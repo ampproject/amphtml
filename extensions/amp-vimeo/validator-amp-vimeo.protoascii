@@ -35,6 +35,10 @@ tags: {  # <amp-vimeo>
     value: ""
   }
   attrs: {
+    name: "do-not-track"
+    value: ""
+  }
+  attrs: {
     name: "data-videoid"
     mandatory: true
     value_regex: "[0-9]+"
