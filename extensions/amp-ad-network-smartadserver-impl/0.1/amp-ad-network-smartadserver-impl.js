@@ -242,15 +242,10 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
       switch (item.callout) {
         case 'aps':
           const tgt = item.response.targeting;
-
-          exTarget +=
-            'amznbid=' +
-            tgt.amznbid.replace('amp_', '') +
-            ';amzniid=' +
-            tgt.amzniid +
-            ';amznp=' +
-            tgt.amznp +
-            ';';
+          if (Object.keys(tgt).length) {
+            const bid = tgt.amznbid.replace('amp_', '');
+            exTarget += `amzniid=${tgt.amzniid};amznp=${tgt.amznp};amznbid=${bid};`;
+          }
           break;
 
         case 'criteo':
