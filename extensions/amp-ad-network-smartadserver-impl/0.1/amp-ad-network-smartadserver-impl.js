@@ -43,6 +43,12 @@ const TRUNCATION_PARAM = {
   value: 1,
 };
 
+/**
+ * Additional key-value target appended by extension
+ * @private {string}
+ */
+let exTarget = '';
+
 /** @final */
 export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   /**
@@ -95,6 +101,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           this.element.getAttribute('data-isasync') === 'false' ? 0 : 1;
         const formatId = this.element.getAttribute('data-format');
         const tagId = 'sas_' + formatId;
+
         return buildUrl(
           (this.element.getAttribute('data-domain') ||
             'https://www.smartadserver.com') + '/ac',
@@ -102,7 +109,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'siteid': this.element.getAttribute('data-site'),
             'pgid': this.element.getAttribute('data-page'),
             'fmtid': formatId,
-            'tgt': this.element.getAttribute('data-target'),
+            'tgt': exTarget + this.element.getAttribute('data-target'),
             'tag': tagId,
             'out': 'amp-hb',
             ...urlParams,
@@ -233,6 +240,19 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   modifyVendorResponse(vendorsResponses) {
     vendorsResponses.forEach((item) => {
       switch (item.callout) {
+        case 'aps':
+          const tgt = item.response.targeting;
+
+          exTarget +=
+            'amznbid=' +
+            tgt.amznbid.replace('amp_', '') +
+            ';amzniid=' +
+            tgt.amzniid +
+            ';amznp=' +
+            tgt.amznp +
+            ';';
+          break;
+
         case 'criteo':
           if (item.response.targeting.crt_display_url === undefined) {
             return;
@@ -245,6 +265,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           item.response.targeting['hb_cache_content_type'] =
             'application/javascript';
           break;
+
         default:
           return item;
       }
