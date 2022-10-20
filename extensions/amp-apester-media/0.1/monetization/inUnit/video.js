@@ -14,10 +14,13 @@ export function handleInUnitVideo(media, apesterElement, consentObj) {
     /**@type {!JsonObject}*/ (media),
     'campaignData.playerOptions'
   );
+  if (!playerOptions) {
+    return;
+  }
   const videoSettings = playerOptions.find(
     (options) => options.player.type === 'va'
   );
-  if (!videoSettings || !playerOptions) {
+  if (!videoSettings) {
     return;
   }
   const idleOptions = videoSettings.requests.find(
