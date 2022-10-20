@@ -129,37 +129,3 @@ export function getCompanionVideoAdSize(apesterElement) {
   const adHeight = Math.ceil(adWidth * adRatio);
   return {width: adWidth, height: adHeight};
 }
-
-/**
- * @param {!JsonObject} interactionModel
- * @param {?string} campaignId
- * @param {!AmpElement} apesterElement
- * @param {!JsonObject} consentObj
- * @return {!JsonObject}
- */
-function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
-  const interactionId = interactionModel['interactionId'];
-  const publisherId = interactionModel['publisherId'];
-  const publisher = interactionModel['publisher'];
-
-  const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
-
-  const macros = {
-    'param1': interactionId,
-    'param2': publisherId,
-    'param6': campaignId,
-    'page_url': pageUrl,
-  };
-
-  if (consentObj['gdpr']) {
-    macros['gdpr'] = consentObj['gdpr'];
-    macros['user_consent'] = consentObj['user_consent'];
-    macros['param4'] = consentObj['gdprString'];
-  }
-
-  if (publisher && publisher.groupId) {
-    macros['param7'] = `apester.com:${publisher.groupId}`;
-    macros['schain'] = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
-  }
-  return macros;
-}
