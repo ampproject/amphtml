@@ -10,45 +10,21 @@ import {Services} from '#service';
  * @param {!JsonObject} consentObj
  */
 export function handleInUnitVideo(media, apesterElement, consentObj) {
-  const videoCampaignOptions = getValueForExpr(
-    /**@type {!JsonObject}*/ (media),
-    'campaignData.videoCampaignOptions'
-  );
   const playerOptions = getValueForExpr(
     /**@type {!JsonObject}*/ (media),
     'campaignData.playerOptions'
   );
-  if (!videoSettings || !playerOptions) {
-    return;
-  }
   const videoSettings = playerOptions.find(
     (options) => options.player.type === 'va'
   );
+  if (!videoSettings || !playerOptions) {
+    return;
+  }
   const idleOptions = videoSettings.requests.find(
     (request) => request.type === 'idle'
   );
   const {provider} = videoSettings.player;
   switch (provider.type) {
-    case 'sr': {
-      const videoCampaignId = videoCampaignOptions?.videoCampaignId;
-      const {videoTag} = videoSettings;
-
-      if (!videoCampaignId || !videoTag) {
-        return;
-      }
-      const macros = getSrMacros(
-        media,
-        videoCampaignId,
-        apesterElement,
-        consentObj
-      );
-      addSrElement(
-        videoTag,
-        /** @type {!JsonObject} */ (macros),
-        apesterElement
-      );
-      break;
-    }
     case 'aniview': {
       const playerOptions = provider.options || {};
       if (!playerOptions.aniviewChannelId) {
@@ -136,42 +112,6 @@ function addAvElement(playerOptions, apesterElement, consentObj, idleOptions) {
 
   Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAvAd,
-    size.height
-  );
-}
-
-/**
- * @param {string} videoTag
- * @param {!JsonObject} macros
- * @param {!AmpElement} apesterElement
- */
-function addSrElement(videoTag, macros, apesterElement) {
-  const size = getCompanionVideoAdSize(apesterElement);
-  const refreshInterval = 30;
-  const ampBladeAd = createElementWithAttributes(
-    /** @type {!Document} */ (apesterElement.ownerDocument),
-    'amp-ad',
-    {
-      'width': size.width,
-      'height': size.height,
-      'type': 'blade',
-      'layout': 'fixed',
-      'data-blade_player_type': 'bladex',
-      'servingDomain': 'ssr.streamrail.net',
-      'data-blade_macros': JSON.stringify(macros),
-      'data-blade_player_id': videoTag,
-      'data-blade_api_key': '5857d2ee263dc90002000001',
-      'data-enable-refresh': `${refreshInterval}`,
-    }
-  );
-
-  ampBladeAd.classList.add('i-amphtml-amp-apester-in-unit');
-
-  const relativeElement = apesterElement.nextSibling;
-  apesterElement.parentNode.insertBefore(ampBladeAd, relativeElement);
-
-  Services.mutatorForDoc(apesterElement).requestChangeSize(
-    ampBladeAd,
     size.height
   );
 }

@@ -333,9 +333,10 @@ class AmpApesterMedia extends AMP.BaseElement {
                 const campaignData = media['campaignData'];
                 if (campaignData) {
                   const ampdoc = this.getAmpDoc();
+                  Services.extensionsFor(
+                    this.win
+                  )./*OK*/ installExtensionForDoc(ampdoc, AD_IFRAME_TAG);
                   const bottomAdOptions = campaignData['bottomAdOptions'];
-                  const companionVideoOptions =
-                    campaignData['companionOptions']['video'];
                   if (bottomAdOptions?.enabled) {
                     this.hasBottomAd_ = true;
                     Services.extensionsFor(
@@ -345,11 +346,6 @@ class AmpApesterMedia extends AMP.BaseElement {
                       BOTTOM_AD_MESSAGE,
                       '*'
                     );
-                  }
-                  if (companionVideoOptions?.enabled) {
-                    Services.extensionsFor(
-                      this.win
-                    )./*OK*/ installExtensionForDoc(ampdoc, AD_IFRAME_TAG);
                   }
 
                   this.iframe_.contentWindow./*OK*/ postMessage(
