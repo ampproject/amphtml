@@ -18,15 +18,15 @@ export function handleInUnitVideo(media, apesterElement, consentObj) {
     /**@type {!JsonObject}*/ (media),
     'campaignData.playerOptions'
   );
+  if (!videoSettings || !playerOptions) {
+    return;
+  }
   const videoSettings = playerOptions.find(
     (options) => options.player.type === 'va'
   );
   const idleOptions = videoSettings.requests.find(
     (request) => request.type === 'idle'
   );
-  if (!videoSettings) {
-    return;
-  }
   const {provider} = videoSettings.player;
   switch (provider.type) {
     case 'sr': {

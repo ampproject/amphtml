@@ -21,7 +21,7 @@ describes.realWin(
     const queryAmpAdBladeSelector = (myDoc) =>
       myDoc.querySelector('amp-ad[type=blade]');
     const queryAmpAdAniviewSelector = (myDoc) =>
-      myDoc.querySelector('amp-ad[type=aniview]');
+      myDoc.querySelector('amp-iframe[id=amp-iframe]');
     const queryAmpAdDisplaySelector = (myDoc) =>
       myDoc.querySelector('amp-ad[type=doubleclick]');
 
