@@ -170,6 +170,18 @@ describes.realWin(
       expect(displayAd.getAttribute('rtc-config')).to.exist;
       expect(displayAd).to.exist;
     });
+    it('Should show Aniview video for in-unit video', async () => {
+      const media = createCampaignData({inUnitVideo: true});
+      await handleAds(media, baseElement);
+      const inUnitVidoe = queryAmpAdAniviewSelector(doc);
+      expect(inUnitVidoe).to.exist;
+    });
+    it('Should not show Aniview video for in-unit video', async () => {
+      const media = createCampaignData({inUnitVideo: false});
+      await handleAds(media, baseElement);
+      const inUnitVidoe = queryAmpAdAniviewSelector(doc);
+      expect(inUnitVidoe).to.not.exist;
+    });
   }
 );
 
@@ -179,6 +191,7 @@ function createCampaignData({
   bottomAd,
   disabledAmpCompanionAds,
   display,
+  inUnitVideo,
   srAbove,
   srBelow,
 }) {
@@ -257,6 +270,32 @@ function createCampaignData({
   }
   if (disabledAmpCompanionAds) {
     campaignData.disabledAmpCompanionAds = true;
+  }
+  if (inUnitVideo) {
+    campaignData.playerOptions = [
+      {
+        'requests': [
+          {
+            'type': 'idle',
+            'options': {
+              'timeout': 5,
+              'skipTimer': 10,
+            },
+          },
+        ],
+        'player': {
+          'type': 'va',
+          'provider': {
+            'type': 'aniview',
+            'options': {
+              'aniviewChannelId': '5fad4ac42cd6d91dcb6e50e9',
+              'aniviewPlayerId': '5faf2a6e1b1ab26edc3f9173',
+            },
+          },
+          'playerId': 'a5ccbc2f0aff9adba5c9c3f1d7eba69c',
+        },
+      },
+    ];
   }
   media.campaignData = campaignData;
   return media;
