@@ -43,12 +43,6 @@ const TRUNCATION_PARAM = {
   value: 1,
 };
 
-/**
- * Additional key-value target appended by extension
- * @private {string}
- */
-let exTarget = '';
-
 /** @final */
 export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   /**
@@ -56,6 +50,13 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /**
+     * @private {string}
+     * Additional key-value target appended by extension
+     */
+    this.exTgt_ = '';
+
     this.addListener();
   }
 
@@ -100,7 +101,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         urlParams['isasync'] =
           this.element.getAttribute('data-isasync') === 'false' ? 0 : 1;
         const formatId = this.element.getAttribute('data-format');
-        const tagId = 'sas_' + formatId;
 
         return buildUrl(
           (this.element.getAttribute('data-domain') ||
@@ -109,8 +109,9 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'siteid': this.element.getAttribute('data-site'),
             'pgid': this.element.getAttribute('data-page'),
             'fmtid': formatId,
-            'tgt': exTarget + this.element.getAttribute('data-target'),
-            'tag': tagId,
+            'tgt':
+              this.exTgt_ + (this.element.getAttribute('data-target') || ''),
+            'tag': 'sas_' + formatId,
             'out': 'amp-hb',
             ...urlParams,
             'gdpr_consent': consentString,
@@ -239,30 +240,32 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   modifyVendorResponse(vendorsResponses) {
     vendorsResponses.forEach((item) => {
-      switch (item.callout) {
-        case 'aps':
-          const tgt = item.response.targeting;
-          if (Object.keys(tgt).length) {
-            const bid = tgt.amznbid.replace('amp_', '');
-            exTarget += `amzniid=${tgt.amzniid};amznp=${tgt.amznp};amznbid=${bid};`;
-          }
-          break;
+      if (item.response && item.response.targeting) {
+        switch (item.callout) {
+          case 'aps':
+            const tgt = item.response.targeting;
+            if (Object.keys(tgt).length) {
+              const bid = tgt.amznbid.replace('amp_', '');
+              this.exTgt_ += `amzniid=${tgt.amzniid};amznp=${tgt.amznp};amznbid=${bid};`;
+            }
+            break;
 
-        case 'criteo':
-          if (item.response.targeting.crt_display_url === undefined) {
-            return;
-          }
-          item.response.targeting['hb_bidder'] = item.callout;
-          item.response.targeting['hb_pb'] =
-            item.response.targeting.crt_amp_rtc_pb;
-          item.response.targeting['hb_cache_url'] =
-            item.response.targeting.crt_display_url;
-          item.response.targeting['hb_cache_content_type'] =
-            'application/javascript';
-          break;
+          case 'criteo':
+            if (item.response.targeting.crt_display_url === undefined) {
+              return;
+            }
+            item.response.targeting['hb_bidder'] = item.callout;
+            item.response.targeting['hb_pb'] =
+              item.response.targeting.crt_amp_rtc_pb;
+            item.response.targeting['hb_cache_url'] =
+              item.response.targeting.crt_display_url;
+            item.response.targeting['hb_cache_content_type'] =
+              'application/javascript';
+            break;
 
-        default:
-          return item;
+          default:
+            return item;
+        }
       }
     });
     return vendorsResponses;
