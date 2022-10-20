@@ -97,11 +97,16 @@ class JsonDict {
     items_.emplace_back(std::make_pair(key, std::forward<V>(value)));
   }
 
-  std::size_t size() const { return items_.size(); }
+  template <typename V>
+  void Insert(std::string_view key, const V& value) {
+    items_.emplace_back(std::make_pair(key, value));
+  }
+
+  std::size_t size() const;
   bool empty() const { return items_.empty(); }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf*, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 
   template <typename T>
   T* Get(std::string_view key);
@@ -130,20 +135,30 @@ class JsonArray {
     items_.emplace_back(i);
   }
 
+  template <typename T>
+  void Append(T& i) {
+    items_.emplace_back(i);
+  }
+
   // Facilitates appending multiple items.
   // my_array.Append(1, 2, 3, 4, "hello", "world", true, true, false);
   // my_array contains:
   // [1, 2, 3, 4, "hello", "world", true, true, false];
   template <typename... Ts>
   void Append(Ts&&... items) {
-    int unused[] = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
+    auto unused = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
   }
 
-  std::size_t size() const { return items_.size(); }
+  template <typename... Ts>
+  void Append(const Ts&... items) {
+    auto unused = {0, (items_.emplace_back(items), 0)...};
+  }
+
+  std::size_t size() const;
   bool empty() const { return items_.empty(); }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf*, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf*) const;
 
   // Facilitates range based for loop.
   // for (const auto& item : my_json_array) {
@@ -155,11 +170,8 @@ class JsonArray {
   auto begin() const { return items_.begin(); }
   auto end() const { return items_.end(); }
 
-  JsonObject& at(std::size_t i) { return items_[i]; }
-  JsonObject* Last() {
-    if (items_.empty()) return nullptr;
-    return &items_.back();
-  }
+  JsonObject& at(std::size_t i);
+  JsonObject* Last();
 
  private:
   std::vector<JsonObject> items_;
@@ -167,8 +179,8 @@ class JsonArray {
 
 class JsonNull {
  public:
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
-  std::string ToString(int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 };
 
 template <typename JsonType>
@@ -183,16 +195,18 @@ class Any {
   Any(Any&& from) { wrapper_ = std::move(from.wrapper_); }
 
   Any& operator=(const Any& from) {
-    wrapper_ = from.wrapper_->Clone();
+    if (&from != this) {
+      wrapper_ = from.wrapper_->Clone();
+    }
     return *this;
   }
 
-  std::string ToString(int indent_columns = 0) const {
-    return wrapper_->ToJson().ToString(indent_columns);
+  std::string ToString() const {
+    return wrapper_->ToJson().ToString();
   }
 
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const {
-    wrapper_->ToJson().ToString(buf, indent_columns);
+  void ToString(std::stringbuf* buf) const {
+    wrapper_->ToJson().ToString(buf);
   }
 
  private:
@@ -250,7 +264,9 @@ class JsonObject {
   JsonObject(const JsonObject& from) { v_ = from.v_; }
 
   JsonObject& operator=(const JsonObject& from) {
-    v_ = from.v_;
+    if (&from != this) {
+      v_ = from.v_;
+    }
     return *this;
   }
 
@@ -289,8 +305,8 @@ class JsonObject {
     return (std::holds_alternative<Types>(v_) || ...);
   }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 
  private:
   std::variant<bool, int32_t, int64_t, double, float, std::string,
@@ -298,6 +314,17 @@ class JsonObject {
                Any<JsonDict>, Any<JsonObject>>
       v_;
 };
+
+inline std::size_t JsonDict::size() const { return items_.size(); }
+
+inline std::size_t JsonArray::size() const { return items_.size(); }
+
+inline JsonObject& JsonArray::at(std::size_t i) { return items_[i]; }
+
+inline JsonObject* JsonArray::Last() {
+  if (items_.empty()) return nullptr;
+  return &items_.back();
+}
 
 template <typename T>
 T* JsonDict::Get(std::string_view key) {

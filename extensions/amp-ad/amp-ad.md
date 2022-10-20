@@ -430,6 +430,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [PulsePoint](../../ads/vendors/pulsepoint.md)
 -   [PuffNetwork](../../ads/vendors/puffnetwork.md)
 -   [Purch](../../ads/vendors/purch.md)
+-   [R9x](../../ads/vendors/r9x.md)
 -   [Rakuten Unified Ads](../../ads/vendors/rakutenunifiedads.md)
 -   [Rambler&Co](../../ads/vendors/capirs.md)
 -   [RbInfoxSg](../../ads/vendors/rbinfox.md)

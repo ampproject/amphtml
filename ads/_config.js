@@ -1052,6 +1052,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'r9x': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.r9x.in',
+  },
+
   'rakutenunifiedads': {
     prefetch: 'https://s-cdn.rmp.rakuten.co.jp/js/amp.js',
     renderStartImplemented: true,
