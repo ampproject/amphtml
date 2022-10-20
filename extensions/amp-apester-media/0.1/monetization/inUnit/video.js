@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+import {setStyle} from '#core/dom/style';
 import {getValueForExpr} from '#core/types/object';
 
 import {Services} from '#service';
@@ -13,15 +14,21 @@ export function handleInUnitVideo(media, apesterElement, consentObj) {
     /**@type {!JsonObject}*/ (media),
     'campaignData.videoCampaignOptions'
   );
-  const videoSettings = getValueForExpr(
+  const playerOptions = getValueForExpr(
     /**@type {!JsonObject}*/ (media),
-    'campaignData.companionOptions.video'
+    'campaignData.playerOptions'
   );
-  if (!videoSettings || !videoSettings.enabled) {
+  const videoSettings = playerOptions.find(
+    (options) => options.player.type === 'va'
+  );
+  const idleOptions = videoSettings.requests.find(
+    (request) => request.type === 'idle'
+  );
+  if (!videoSettings) {
     return;
   }
-  const provider = videoSettings['provider'];
-  switch (provider) {
+  const {provider} = videoSettings.player;
+  switch (provider.type) {
     case 'sr': {
       const videoCampaignId = videoCampaignOptions?.videoCampaignId;
       const {videoTag} = videoSettings;
@@ -43,11 +50,16 @@ export function handleInUnitVideo(media, apesterElement, consentObj) {
       break;
     }
     case 'aniview': {
-      const {playerOptions = {}} = videoSettings;
+      const playerOptions = provider.options || {};
       if (!playerOptions.aniviewChannelId) {
         return;
       }
-      addAvElement(playerOptions, apesterElement, consentObj);
+      addAvElement(
+        playerOptions,
+        apesterElement,
+        consentObj,
+        idleOptions.options
+      );
       break;
     }
     default:
@@ -56,24 +68,43 @@ export function handleInUnitVideo(media, apesterElement, consentObj) {
 }
 
 /**
+ * @param {!AmpElement} adWrap
+ * @param {!AmpElement} progressBar
+ * @param {!JsonObject} idleOptions
+ */
+function showVideoAd(adWrap, progressBar, idleOptions) {
+  const {skipTimer} = idleOptions;
+  adWrap.classList.add('active');
+  setStyle(progressBar, 'animation', `progress ${skipTimer}s linear 1`);
+  const timer = setTimeout(() => {
+    adWrap.classList.remove('active');
+    clearTimeout(timer);
+  }, skipTimer * 1000);
+}
+
+/**
  * @param {!JsonObject} playerOptions
- * @param {string} position
  * @param {!AmpElement} apesterElement
  * @param {!JsonObject} consentObj
+ * @param {!JsonObject} idleOptions
  */
-function addAvElement(playerOptions, apesterElement, consentObj) {
+function addAvElement(playerOptions, apesterElement, consentObj, idleOptions) {
   const size = getCompanionVideoAdSize(apesterElement);
-  const refreshInterval = 30;
   const ampAvAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
-    'amp-ad',
+    'amp-iframe',
     {
+      'scrolling': 'no',
+      'id': 'amp-iframe',
+      'title': 'Ads',
+      'layout': 'responsive',
+      'sandbox': 'allow-scripts allow-same-origin allow-popups',
+      'allowfullscreen': 'false',
+      'frameborder': '0',
       'width': size.width,
       'height': size.height,
-      'type': 'aniview',
-      'data-publisherid': '5fabb425e5d4cb4bbc0ca7e4',
-      'data-channelid': playerOptions.aniviewChannelId,
-      'data-enable-refresh': `${refreshInterval}`,
+      'class': 'i-amphtml-amp-apester-in-unit',
+      'src': `https://player.avplayer.com/amp/ampiframe.html?AV_TAGID=${playerOptions.aniviewPlayerId}&AV_PUBLISHERID=5fabb425e5d4cb4bbc0ca7e4`,
     }
   );
 
@@ -82,10 +113,26 @@ function addAvElement(playerOptions, apesterElement, consentObj) {
     ampAvAd['data-av_consent'] = consentObj['user_consent'];
   }
 
-  ampAvAd.classList.add('i-amphtml-amp-apester-in-unit');
+  const ampAvAdWrap = createElementWithAttributes(
+    /** @type {!Document} */ (apesterElement.ownerDocument),
+    'div',
+    {'class': 'i-amphtml-amp-apester-in-unit-wrap'}
+  );
 
-  const relativeElement = apesterElement.nextSibling;
-  apesterElement.parentNode.insertBefore(ampAvAd, relativeElement);
+  const progressBarWrap = createElementWithAttributes(
+    /** @type {!Document} */ (apesterElement.ownerDocument),
+    'div',
+    {'class': 'i-amphtml-amp-apester-progress-bar'}
+  );
+  ampAvAdWrap.appendChild(progressBarWrap);
+  ampAvAdWrap.appendChild(ampAvAd);
+  apesterElement.appendChild(ampAvAdWrap);
+
+  showVideoAd(ampAvAdWrap, progressBarWrap, idleOptions);
+  const {skipTimer, timeout} = idleOptions;
+  setInterval(() => {
+    showVideoAd(ampAvAdWrap, progressBarWrap, idleOptions);
+  }, (timeout + skipTimer) * 1000);
 
   Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAvAd,
@@ -95,11 +142,10 @@ function addAvElement(playerOptions, apesterElement, consentObj) {
 
 /**
  * @param {string} videoTag
- * @param {string} position
  * @param {!JsonObject} macros
  * @param {!AmpElement} apesterElement
  */
-function addSrElement(videoTag, position, macros, apesterElement) {
+function addSrElement(videoTag, macros, apesterElement) {
   const size = getCompanionVideoAdSize(apesterElement);
   const refreshInterval = 30;
   const ampBladeAd = createElementWithAttributes(
