@@ -6,9 +6,7 @@
   rules: [
     {
       owners: [
-        {name: 'cramforce', requestReviews: false},
-        {name: 'dvoytenko', requestReviews: false},
-        {name: 'jridgewell', requestReviews: false},
+        {name: 'erwinmombay', requestReviews: false},
       ],
     },
     {
@@ -44,6 +42,7 @@
     {
       pattern: '**/OWNERS',
       owners: [
+        {name: 'erwinmombay', requestReviews: false},
         {name: 'mrjoro', requestReviews: false},
         {name: 'newmuis', requestReviews: false},
       ],
@@ -66,7 +65,7 @@
     },
     {
       pattern: '**/build-dom.js',
-      owners: [{name: 'samouri'}],
+      owners: [{name: 'erwinmombay'}],
     },
   ],
 }
