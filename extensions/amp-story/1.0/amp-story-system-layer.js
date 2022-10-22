@@ -23,6 +23,7 @@ import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
+  toggleA11yReadable,
   triggerClickFromLightDom,
 } from './utils';
 
@@ -765,9 +766,11 @@ export class SystemLayer {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle(
-        'i-amphtml-story-hidden',
-        !isVisible
+      const shadowRoot = this.getShadowRoot();
+      shadowRoot.classList.toggle('i-amphtml-story-hidden', !isVisible);
+
+      toArray(shadowRoot.querySelectorAll('button')).forEach((button) =>
+        toggleA11yReadable(button, isVisible)
       );
     });
   }

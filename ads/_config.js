@@ -442,6 +442,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
+  'clever': {
+    renderStartImplemented: true,
+  },
+
   'dable': {
     preconnect: [
       'https://static.dable.io',
@@ -580,6 +584,10 @@ const adConfig = jsonConfiguration({
 
   'genieessp': {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
+  },
+
+  'geozo': {
+    renderStartImplemented: true,
   },
 
   'giraff': {
@@ -1004,6 +1012,10 @@ const adConfig = jsonConfiguration({
 
   'pubexchange': {},
 
+  'pubfuture': {
+    renderStartImplemented: true,
+  },
+
   'pubguru': {
     renderStartImplemented: true,
   },
@@ -1042,6 +1054,11 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://a.quora.com/amp_ad.js',
     preconnect: 'https://ampad.quora.com',
     renderStartImplemented: true,
+  },
+
+  'r9x': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.r9x.in',
   },
 
   'rakutenunifiedads': {

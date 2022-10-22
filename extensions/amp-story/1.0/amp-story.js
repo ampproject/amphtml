@@ -43,7 +43,7 @@ import {
 } from '#core/dom/style';
 import {devError} from '#core/error';
 import {clamp} from '#core/math';
-import {isEsm} from '#core/mode';
+import {isEsm, isSsrCss} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
@@ -199,6 +199,10 @@ const DEFAULT_MIN_PAGES_TO_PREVIEW = 1;
  * @const {number}
  */
 const DEFAULT_PCT_PAGES_TO_PREVIEW = 30;
+
+/** The targets that should not navigate when pressing keys.
+ * @const {string} */
+const IGNORE_KEYDOWN_EVENT_TARGET = 'amp-story-interactive-slider';
 
 /*
  * @implements {./media-pool.MediaPoolRoot}
@@ -1681,6 +1685,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
+    if (matches(e.target, IGNORE_KEYDOWN_EVENT_TARGET)) {
+      return;
+    }
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
@@ -2787,7 +2794,11 @@ export class AmpStory extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
-  AMP.registerElement('amp-story', AmpStory, CSS);
+  if (isSsrCss()) {
+    AMP.registerElement('amp-story', AmpStory);
+  } else {
+    AMP.registerElement('amp-story', AmpStory, CSS);
+  }
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
