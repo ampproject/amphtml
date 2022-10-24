@@ -93,8 +93,7 @@
   "cognativex": {
     "host": "https://log.cognativex.com",
     "basePrefix": "https://log.cognativex.com/pixel.png?",
-    "pageview": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=example.com&uid=375d5128-2ea4-4386-8d2d-ff7d65d05a57&cxnid=undefined&ptd=2c70e6fb-caf2-4b38-b2d5-1b2efcc851ba&cd=1664368082574&scr=1920x1080|1920x1040|24&cu=example.com/amp_article&pid=29415&ldte=114&sid=4",
-    "heartbeat": "https://log.cognativex.com/pixel.png?kc=hb&cxv=10&apd=example.com&uid=375d5128-2ea4-4386-8d2d-ff7d65d05a57&cxnid=undefined&ptd=2c70e6fb-caf2-4b38-b2d5-1b2efcc851ba&cd=1664368082574&scr=1920x1080|1920x1040|24&cu=example.com/amp_article&pid=29415&ldte=114&eg=_incremental_engaged_time(cognativex-js)_"
+    "pageview": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=example.com&uid=375d5128-2ea4-4386-8d2d-ff7d65d05a57&cxnid=undefined&ptd=2c70e6fb-caf2-4b38-b2d5-1b2efcc851ba&cd=1664368082574&scr=1920x1080|1920x1040|24&cu=example.com/amp_article&pid=29415&ldte=114&sid=4"
   },
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
