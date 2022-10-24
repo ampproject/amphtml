@@ -423,6 +423,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [PPStudio](../../ads/vendors/ppstudio.md)
 -   [Pressboard](../../ads/vendors/pressboard.md)
 -   [PromoteIQ](../../ads/vendors/promoteiq.md)
+-   [Pubfuture](../../ads/vendors/pubfuture.md)
 -   [PubGuru](../../ads/vendors/pubguru.md)
 -   [PubMatic](../../ads/vendors/pubmatic.md)
 -   [Pubmine](../../ads/vendors/pubmine.md)
