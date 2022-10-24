@@ -179,11 +179,11 @@
 .swg-button-dark:lang(it):after {
   background-image: url("https://news.google.com/swg/js/v1/i18n/b-it-dk.svg");
 }
-.swg-button:lang(jp):after,
-.swg-button-light:lang(jp):after {
+.swg-button:lang(ja):after,
+.swg-button-light:lang(ja):after {
   background-image: url("https://news.google.com/swg/js/v1/i18n/b-jp-lt.svg");
 }
-.swg-button-dark:lang(jp):after {
+.swg-button-dark:lang(ja):after {
   background-image: url("https://news.google.com/swg/js/v1/i18n/b-jp-dk.svg");
 }
 .swg-button:lang(ko):after,
