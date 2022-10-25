@@ -87,8 +87,8 @@ function createNode(container, strings) {
   );
 
   if (self.trustedTypes && self.trustedTypes.createPolicy) {
-    // Using an IIFE here to prevent the Trusted Types policy from 
-    // leaking outside its scope and being used to turn arbitrary 
+    // Using an IIFE here to prevent the Trusted Types policy from
+    // leaking outside its scope and being used to turn arbitrary
     // values into TrustedHTMLs.
     (function () {
       const policy = self.trustedTypes.createPolicy(
