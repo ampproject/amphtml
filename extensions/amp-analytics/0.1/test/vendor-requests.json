@@ -90,7 +90,7 @@
     "pageview": "https://in.getclicky.com/in.php?site_id=!site_id&res=_screen_width_x_screen_height_&lang=_browser_language_&secure=1&type=pageview&href=_canonical_path_&title=_title_&ref=_document_referrer_&mime=!contentType&x=_random_",
     "interval": "https://in.getclicky.com/in.php?site_id=!site_id&type=ping&mime=!contentType&x=_random_"
   },
-  "cognativex":{
+  "cognativex": {
     "host": "https://log.cognativex.com",
     "basePrefix": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_page_view_id_",
     "pageview": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_page_view_id_",
