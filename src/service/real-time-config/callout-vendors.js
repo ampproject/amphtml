@@ -160,7 +160,7 @@ const RTC_VENDORS = jsonConfiguration({
   },
   openwrap: {
     // PubMatic OpenWrap
-    url: 'https://ow.pubmatic.com/amp?v=1&w=ATTR(width)&h=ATTR(height)&ms=ATTR(data-multi-size)&auId=ATTR(data-slot)&purl=HREF&pubId=PUB_ID&profId=PROFILE_ID&consent_string=CONSENT_STRING&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&curl=CANONICAL_URL&consent_type=CONSENT_METADATA(consentStringType)',
+    url: 'https://ow.pubmatic.com/amp?v=1&w=ATTR(width)&h=ATTR(height)&ms=ATTR(data-multi-size)&auId=ATTR(data-slot)&targeting=TGT&purl=HREF&pubId=PUB_ID&profId=PROFILE_ID&consent_string=CONSENT_STRING&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&curl=CANONICAL_URL&consent_type=CONSENT_METADATA(consentStringType)',
     macros: ['PUB_ID', 'PROFILE_ID', 'CONSENT_STRING'],
     errorReportingUrl: 'https://ow.pubmatic.com/amp_error?e=ERROR_TYPE&h=HREF',
     disableKeyAppend: true,

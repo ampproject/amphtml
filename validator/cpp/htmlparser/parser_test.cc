@@ -768,10 +768,12 @@ TEST(ParserTest, NumTermsInTextNodeCountDisabled) {
 }
 
 TEST(ParserTest, DocumentMetadataTest) {
-  auto doc = htmlparser::Parse("<html><head><base href=\"www.google.com\""
-                               "target=\"blank\">"
-                               "<link rel=canonical href=\"foo.google.com\">"
-                               "</head><body></body></html>");
+  auto doc = htmlparser::Parse(
+      "<html><head><base href=\"www.google.com\""
+      "target=\"blank\">"
+      "<link rel=canonical href=\"foo.google.com\">"
+      "<link rel=\"icon\" href=\"https://www.bonappetit.com/favicon.ico\">"
+      "</head><body></body></html>");
   EXPECT_EQ(doc->Metadata().base_url.first, "www.google.com");
   EXPECT_EQ(doc->Metadata().base_url.second, "blank");
   EXPECT_EQ(doc->Metadata().canonical_url, "foo.google.com");

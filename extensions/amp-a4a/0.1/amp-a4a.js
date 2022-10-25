@@ -1472,6 +1472,16 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Remove the iframe and clean it up.
+   */
+  maybeDestroyIframe_() {
+    if (this.iframe && this.iframe.parentElement) {
+      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe = null;
+    }
+  }
+
+  /**
    * Attempts to remove the current frame and free any associated resources.
    * This function will no-op if this ad slot is currently in the process of
    * being refreshed.
@@ -1489,10 +1499,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.friendlyIframeEmbed_.destroy();
       this.friendlyIframeEmbed_ = null;
     }
-    if (this.iframe && this.iframe.parentElement) {
-      this.iframe.parentElement.removeChild(this.iframe);
-      this.iframe = null;
-    }
+    this.maybeDestroyIframe_();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
@@ -1795,6 +1802,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     const {height, width} = this.creativeSize_;
     const {extensions, fonts, head} = headData;
+    this.maybeDestroyIframe_();
     this.iframe = createSecureFrame(
       this.win,
       this.getIframeTitle(),
@@ -1875,6 +1883,7 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(!!this.element.ownerDocument, 'missing owner document?!');
     this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
+    this.maybeDestroyIframe_();
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
@@ -2034,6 +2043,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     mergedAttributes['allow'] = featurePolicies;
 
+    this.maybeDestroyIframe_();
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
