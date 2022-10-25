@@ -606,9 +606,9 @@ For complete documentation and additional examples please see: https://marketing
       },
       "requests": {
         "host": "https://log.cognativex.com",
-        "basePrefix": "${host}/pixel.png?kc=pv&cxv=10&apd=${appdomain}&cu=${ampdocUrl}&title=${title}&uid=${clientId(cognativexpixel)}&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=${timestamp}&ptd=${pageViewId}",
-        "pageview": "${basePrefix}",
-        "heartbeat": "${basePrefix}&eg=${incrementalEngagedTime(cognativex-timer)}"
+        "basePrefix": "${host}/pixel.png?cxv=10&apd=${appdomain}&cu=${ampdocUrl}&title=${title}&uid=${clientId(cognativexpixel)}&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=${timestamp}&ptd=${pageViewId}",
+        "pageview": "${basePrefix}&kc=pv",
+        "heartbeat": "${basePrefix}&kc=hb&eg=${incrementalEngagedTime(cognativex-timer)}"
       },
       "triggers": {
         "defaultPageview": {
