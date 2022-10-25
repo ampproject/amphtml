@@ -92,9 +92,9 @@
   },
   "cognativex":{
     "host": "https://log.cognativex.com",
-    "basePrefix": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&date=_timestamp_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_PAGE_VIEW_ID_",
-    "pageview": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&date=_timestamp_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_PAGE_VIEW_ID_",
-    "heartbeat": "https://log.cognativex.com/pixel.png?kc=hb&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&date=_timestamp_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_PAGE_VIEW_ID_&eg=_incremental_engaged_time(cognativex-timer)_"
+    "basePrefix": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_page_view_id_",
+    "pageview": "https://log.cognativex.com/pixel.png?kc=pv&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_page_view_id_",
+    "heartbeat": "https://log.cognativex.com/pixel.png?kc=hb&cxv=10&apd=!appdomain&cu=_ampdoc_url_&title=_title_&uid=_client_id(cognativexpixel)_&cxnid=undefined&scr=1920x1080|1920x1040|24&cd=_timestamp_&ptd=_page_view_id_&eg=_incremental_engaged_time(cognativex-timer)_"
   },
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
