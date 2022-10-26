@@ -20,6 +20,7 @@ async function buildCompiler() {
       IS_MINIFIED: 'false',
       IS_ESM: 'false',
       IS_SXG: 'false',
+      IS_SSR_CSS: 'false',
     },
   });
   endBuildStep('Compiled', 'compiler.js', startTime);

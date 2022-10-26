@@ -97,6 +97,8 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
+ *   ssrCss?: boolean,
+ *   additionalSuffix?: string
  * }}
  */
 const ExtensionOptionDef = {};
@@ -131,8 +133,14 @@ const adVendors = [];
 function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
+  const suffix = options?.additionalSuffix ?? '';
   versions.forEach((v) => {
-    extensionsObject[`${name}-${v}`] = {
+    // If `additionalSuffix` is given, make it as a part of the key as it is
+    // most likely needed to make the entry unique for instances where
+    // multiple entries share the same "entryPoint/name"  but have different
+    // destination name. This allows for a 1 to many relationship between
+    // entryPoint and output (1 -> *).
+    extensionsObject[`${name}-${v}${suffix}`] = {
       name,
       version: v,
       ...defaultOptions,
@@ -847,11 +855,14 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
+  const additionalSuffix = options.additionalSuffix
+    ? `.${options.additionalSuffix}`
+    : '';
   await compileJs(`${dir}/`, filename, './dist/v0', {
     ...options,
-    toName: `${name}-${version}.max.js`,
-    minifiedName: `${name}-${version}.js`,
-    aliasName: isLatest ? `${name}-latest.js` : '',
+    toName: `${name}-${version}.max${additionalSuffix}.js`,
+    minifiedName: `${name}-${version}${additionalSuffix}.js`,
+    aliasName: isLatest ? `${name}-latest${additionalSuffix}.js` : '',
     wrapper: resolvedWrapper,
     babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
@@ -867,10 +878,12 @@ async function buildExtensionJs(dir, name, options) {
   if (isAliased) {
     const {aliasedVersion} = aliasBundle;
     const src = maybeToEsmName(
-      `${name}-${version}${options.minify ? '' : '.max'}.js`
+      `${name}-${version}${options.minify ? '' : '.max'}${additionalSuffix}.js`
     );
     const dest = maybeToEsmName(
-      `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${name}-${aliasedVersion}${
+        options.minify ? '' : '.max'
+      }${additionalSuffix}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);

@@ -37,7 +37,6 @@ createTask('check-sourcemaps', 'checkSourcemaps');
 createTask('check-types', 'checkTypes');
 createTask('check-video-interface-list', 'checkVideoInterfaceList');
 createTask('clean');
-createTask('codecov-upload', 'codecovUpload');
 createTask('compile-jison', 'compileJison');
 createTask('css');
 createTask('default', 'defaultTask', 'default-task');
