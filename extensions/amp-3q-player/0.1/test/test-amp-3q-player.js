@@ -90,7 +90,7 @@ describes.realWin(
         expect(postMessageSpy).to.not.be.calledWith('pause');
       });
     });
-
+    //
     describe('rendering', async () => {
       it('renders', async () => {
         const player = await get3QElement(
