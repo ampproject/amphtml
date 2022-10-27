@@ -100,20 +100,21 @@ describes.realWin(
         const url =
           'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158';
         expect(iframe).to.not.be.null;
-        expect(iframe.src).to.be(url);
-        // expect(iframe.src).to.be.same(
-        //   'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
-        // );
-        // expect(iframe.src).to.equal(
-        //   'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
-        // );
+        //expect(iframe.src).to.be(url);
+        expect(iframe.src).to.be.same(
+          'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
+        );
+        expect(iframe.src).to.equal(
+          url
+          //'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
+        );
       });
 
-      it('requires data-id' || 'requires data-player', () => {
+      it('requires data-id', () => {
         //
         return allowConsoleError(() => {
-          return get3QElement('').should.eventually.be.rejectedWith(
-            'One of data-id or data-player attributes is required for <amp-3q-player>'
+          return get3QElement('').should.be.rejectedWith(
+            'Data-id or data-player attribute is required for <amp-3q-player>'
           );
         });
       });
