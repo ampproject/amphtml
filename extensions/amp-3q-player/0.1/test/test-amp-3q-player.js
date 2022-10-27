@@ -109,7 +109,8 @@ describes.realWin(
         // );
       });
 
-      it('requires data-id', () => {
+      it('requires data-id' || 'requires data-player', () => {
+        //
         return allowConsoleError(() => {
           return get3QElement('').should.eventually.be.rejectedWith(
             'One of data-id or data-player attributes is required for <amp-3q-player>'
