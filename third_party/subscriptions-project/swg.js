@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.237 */
+/** Version: 0.1.22.239 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -73,6 +73,7 @@ const AnalyticsEvent = {
   IMPRESSION_SUBSCRIPTION_LINKING_LOADING: 39,
   IMPRESSION_SUBSCRIPTION_LINKING_COMPLETE: 40,
   IMPRESSION_SUBSCRIPTION_LINKING_ERROR: 41,
+  IMPRESSION_SURVEY: 42,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -141,12 +142,16 @@ const AnalyticsEvent = {
   ACTION_CONTRIBUTION_OFFERS_RETRY: 1065,
   ACTION_TWG_SHORTENED_STICKER_FLOW_STICKER_SELECTION_CLICK: 1066,
   ACTION_INITIATE_UPDATED_SUBSCRIPTION_LINKING: 1067,
+  ACTION_SURVEY_SUBMIT_CLICK: 1068,
+  ACTION_SURVEY_CLOSED: 1069,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_REGWALL_ALREADY_OPT_IN: 2003,
   EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
   EVENT_SUBSCRIPTION_LINKING_FAILED: 2005,
+  EVENT_SURVEY_ALREADY_SUBMITTED: 2006,
+  EVENT_SURVEY_SUBMIT_FAILED: 2007,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -175,6 +180,7 @@ const AnalyticsEvent = {
   EVENT_SHOWCASE_METERING_INIT: 3025,
   EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
   EVENT_SUBSCRIPTION_LINKING_SUCCESS: 3027,
+  EVENT_SURVEY_SUBMITTED: 3028,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -5517,7 +5523,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.237',
+    '_client': 'SwG 0.1.22.239',
   });
 }
 
@@ -6859,7 +6865,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.237',
+        '_client': 'SwG 0.1.22.239',
         'supportsEventManager': true,
       },
       args || {}
@@ -7808,7 +7814,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.237');
+    context.setClientVersion('SwG 0.1.22.239');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -11542,7 +11548,10 @@ class MeterToastApi {
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
-      feUrl(iframeUrl, {'origin': parseUrl(this.win_.location.href).origin}),
+      feUrl(iframeUrl, {
+        'origin': parseUrl(this.win_.location.href).origin,
+        'hl': this.deps_.clientConfigManager().getLanguage(),
+      }),
       iframeArgs,
       /* shouldFadeBody */ false
     );
