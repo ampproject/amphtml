@@ -153,7 +153,7 @@ Adds support for Clicky Web Analytics. More details for adding Clicky support ca
 
 Type attribute value: `cognativex`
 
-Adds support for cognativex analytics. More details for adding cognativex support can be found here https://cognativex.com/integration. If the page is empty or takes you to the website, then it's under maintenance. Please fell free contact us.
+Adds support for cognativex analytics. More details for adding cognativex support can be found here `https://cognativex.com/integration`. If the page is empty or takes you to the website, then it's under maintenance. Please fell free contact us.
 
 ### colanalytics
 
