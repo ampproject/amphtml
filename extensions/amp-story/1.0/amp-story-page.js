@@ -379,8 +379,24 @@ export class AmpStoryPage extends AMP.BaseElement {
       previewSecondsPerPage + 's'
     );
 
+    // TODO(masanto): Maybe put the following code into its own private method
     const firstVideo = this.getFirstAmpVideo_();
     if (firstVideo) {
+      // TODO(masanto): Describe below
+      const robotsMetaTags = Array.from(
+        this.win.document.querySelectorAll('meta[name=robots]')
+      );
+      const maxVideoPreviewTags = robotsMetaTags.filter((tag) =>
+        tag.getAttribute('content')?.startsWith('max-video-preview')
+      );
+      const maxVideoPreviewStr = maxVideoPreviewTags[0]?.split(':')[1];
+      let maxVideoPreview = parseInt(maxVideoPreviewStr, 10);
+      if (maxVideoPreview) {
+        // max-video-preview must be an integer greater than or equal to -1
+        maxVideoPreview = Math.max(-1, maxVideoPreview);
+      }
+
+      // TODO(masanto): Describe below
       whenUpgradedToCustomElement(firstVideo)
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
@@ -389,6 +405,8 @@ export class AmpStoryPage extends AMP.BaseElement {
             const tooShort = duration < previewSecondsPerPage;
             const videoEl = firstVideo.querySelector('video');
             videoEl.loop ||= tooShort;
+
+            // TODO(masanto): Complete the max-video-preview logic
           });
         });
     }
