@@ -23,12 +23,11 @@ describes.fakeWin('Metering', {amp: true}, () => {
     });
 
     it('resets flag', async () => {
-      metering.entitlementsWereFetchedWithCurrentMeteringState = true;
+      metering.checkedForEntitlements = true;
 
       await metering.saveMeteringState({new: true});
 
-      expect(metering.entitlementsWereFetchedWithCurrentMeteringState).to.be
-        .false;
+      expect(metering.checkedForEntitlements).to.be.false;
     });
   });
 
