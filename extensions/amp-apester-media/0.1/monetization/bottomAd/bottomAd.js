@@ -8,7 +8,7 @@ const ALLOWED_AD_PROVIDER = 'gpt';
  * @param {!JsonObject} media
  * @param {!AmpElement} apesterElement
  */
-export function handleCompanionBottomAd(media, apesterElement) {
+export function handleBottomAd(media, apesterElement) {
   const bottomAdOptions = getValueForExpr(
     /**@type {!JsonObject}*/ (media),
     'campaignData.bottomAdOptions'
