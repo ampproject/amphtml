@@ -339,7 +339,7 @@ Adds support for Linkpulse. Configuration details can be found at [docs.linkpuls
 
 Type attribute value: `lotame`
 
-Adds support for Lotame. More information and configuration details can be found at [my.lotame.com](https://my.lotame.com/t/83h37h9/overview-1st-party-data-collection-in-google-amp).
+Adds support for Lotame. More information and configuration details can be found at `https://my.lotame.com/t/83h37h9/overview-1st-party-data-collection-in-google-amp`.
 
 ### Mapp Intelligence
 
@@ -429,7 +429,7 @@ Adds support for Nielsen DCR. Please contact your Nielsen representative to get 
 
 Type attribute value: `nielsen-marketing-cloud`
 
-Adds support for Nielsen Marketing Cloud. More details can be found at [Nielsen Marketing Cloud](http://www.nielsen.com/us/en/solutions/capabilities/nielsen-marketing-cloud.html).
+Adds support for Nielsen Marketing Cloud. More details can be found at Nielsen Marketing Cloud : `http://www.nielsen.com/us/en/solutions/capabilities/nielsen-marketing-cloud.html`.
 
 ### OEWA
 
@@ -572,7 +572,7 @@ To see the full list of fields that you can send, see [Segment Spec](https://seg
 
 Type attribute value: `sensorsanalytics`
 
-Adds support for Sensors Data. More details for adding Sensors Data support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
+Adds support for Sensors Data. More details for adding Sensors Data support can be found at `https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html`.
 
 ### ShinyStat
 
