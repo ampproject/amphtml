@@ -68,7 +68,9 @@ FAIL
 |        }
 |      }
 |    </style><noscript>
-|      <style amp-boilerplate>
+>>           ^~~~~~~~~
+amp-3q-player/0.1/test/validator-amp-3q-player.html:69:10 Tag 'noscript' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
+|      <!--<style amp-boilerplate>
 |        body {
 |          -webkit-animation: none;
 |          -moz-animation: none;
@@ -78,15 +80,13 @@ FAIL
 |      </style>
 |    </noscript>
 |    <style amp-boilerplate>
->>   ^~~~~~~~~
-amp-3q-player/0.1/test/validator-amp-3q-player.html:79:2 The tag 'head > style[amp-boilerplate]' appears more than once in the document. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
 |      body {
 |        -webkit-animation: none;
 |        -moz-animation: none;
 |        -ms-animation: none;
 |        animation: none
 |      }
-|    </style>
+|    </style>-->
 |    </noscript>
 |    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -113,3 +113,5 @@ amp-3q-player/0.1/test/validator-amp-3q-player.html:79:2 The tag 'head > style[a
 |  </body>
 |
 |  </html>
+>>       ^~~~~~~~~
+amp-3q-player/0.1/test/validator-amp-3q-player.html:112:6 The tag 'noscript > style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
