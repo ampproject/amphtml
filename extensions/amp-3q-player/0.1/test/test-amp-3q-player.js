@@ -111,7 +111,15 @@ describes.realWin(
       it('requires data-id', () => {
         return allowConsoleError(() => {
           return get3QElement('').should.eventually.be.rejectedWith(
-            'Data-id or data-player attribute is required for <amp-3q-player>'
+            'Data-id attribute is required for <amp-3q-player>'
+          );
+        });
+      });
+
+      it('requires data-player', () => {
+        return allowConsoleError(() => {
+          return get3QElement('').should.eventually.be.rejectedWith(
+            'Data-player attribute is required for <amp-3q-player>'
           );
         });
       });
