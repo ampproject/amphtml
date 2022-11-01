@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Test Description:
 |    Tests for the amp-3q-player tag. See the inline comments.
@@ -78,10 +78,8 @@ FAIL
 |        }
 |      </style>
 |    </noscript>
-|    <noscript>
+|    <!-- <noscript>
 |      <style amp-boilerplate>
->>     ^~~~~~~~~
-amp-3q-player/0.1/test/validator-amp-3q-player.html:81:4 The tag 'noscript > style[amp-boilerplate]' appears more than once in the document. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
 |        body {
 |          -webkit-animation: none;
 |          -moz-animation: none;
@@ -89,7 +87,7 @@ amp-3q-player/0.1/test/validator-amp-3q-player.html:81:4 The tag 'noscript > sty
 |          animation: none
 |        }
 |      </style>
-|    </noscript>
+|    </noscript> -->
 |    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
