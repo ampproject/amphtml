@@ -27,7 +27,7 @@ import {Services} from '#service';
 import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {dev, user, userAssert} from '#utils/log';
 
-import {handleCompanionAds} from './monetization';
+import {handleAds} from './monetization';
 import {
   extractTags,
   getPlatform,
@@ -42,6 +42,7 @@ import {addParamsToUrl} from '../../../src/url';
 /** @const */
 const TAG = 'amp-apester-media';
 const AD_TAG = 'amp-ad';
+const AD_IFRAME_TAG = 'amp-iframe';
 /** @const {!JsonObject} */
 const BOTTOM_AD_MESSAGE = {'type': 'has_bottom_ad', 'adHeight': 50};
 /**
@@ -321,7 +322,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
-            handleCompanionAds(media, this.element);
+            handleAds(media, this.element);
           })
           .then(() => this.loadPromise(iframe))
           .then(() =>
@@ -331,10 +332,13 @@ class AmpApesterMedia extends AMP.BaseElement {
 
                 const campaignData = media['campaignData'];
                 if (campaignData) {
+                  const ampdoc = this.getAmpDoc();
+                  Services.extensionsFor(
+                    this.win
+                  )./*OK*/ installExtensionForDoc(ampdoc, AD_IFRAME_TAG);
                   const bottomAdOptions = campaignData['bottomAdOptions'];
                   if (bottomAdOptions?.enabled) {
                     this.hasBottomAd_ = true;
-                    const ampdoc = this.getAmpDoc();
                     Services.extensionsFor(
                       this.win
                     )./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);

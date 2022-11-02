@@ -102,7 +102,7 @@ class JsonDict {
     items_.emplace_back(std::make_pair(key, value));
   }
 
-  std::size_t size() const { return items_.size(); }
+  std::size_t size() const;
   bool empty() const { return items_.empty(); }
 
   std::string ToString() const;
@@ -154,7 +154,7 @@ class JsonArray {
     auto unused = {0, (items_.emplace_back(items), 0)...};
   }
 
-  std::size_t size() const { return items_.size(); }
+  std::size_t size() const;
   bool empty() const { return items_.empty(); }
 
   std::string ToString() const;
@@ -170,11 +170,8 @@ class JsonArray {
   auto begin() const { return items_.begin(); }
   auto end() const { return items_.end(); }
 
-  JsonObject& at(std::size_t i) { return items_[i]; }
-  JsonObject* Last() {
-    if (items_.empty()) return nullptr;
-    return &items_.back();
-  }
+  JsonObject& at(std::size_t i);
+  JsonObject* Last();
 
  private:
   std::vector<JsonObject> items_;
@@ -317,6 +314,17 @@ class JsonObject {
                Any<JsonDict>, Any<JsonObject>>
       v_;
 };
+
+inline std::size_t JsonDict::size() const { return items_.size(); }
+
+inline std::size_t JsonArray::size() const { return items_.size(); }
+
+inline JsonObject& JsonArray::at(std::size_t i) { return items_[i]; }
+
+inline JsonObject* JsonArray::Last() {
+  if (items_.empty()) return nullptr;
+  return &items_.back();
+}
 
 template <typename T>
 T* JsonDict::Get(std::string_view key) {
