@@ -242,12 +242,12 @@
 .swg-button-dark:lang(ru):after {
   background-image: url("https://news.google.com/swg/js/v1/i18n/b-ru-dk.svg");
 }
-.swg-button:lang(se):after,
-.swg-button-light:lang(se):after {
-  background-image: url("https://news.google.com/swg/js/v1/i18n/b-se-lt.svg");
+.swg-button:lang(sv):after,
+.swg-button-light:lang(sv):after {
+  background-image: url("https://news.google.com/swg/js/v1/i18n/b-sv-lt.svg");
 }
-.swg-button-dark:lang(se):after {
-  background-image: url("https://news.google.com/swg/js/v1/i18n/b-se-dk.svg");
+.swg-button-dark:lang(sv):after {
+  background-image: url("https://news.google.com/swg/js/v1/i18n/b-sv-dk.svg");
 }
 .swg-button:lang(th):after,
 .swg-button-light:lang(th):after {

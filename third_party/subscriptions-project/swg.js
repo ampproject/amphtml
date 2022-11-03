@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.239 */
+/** Version: 0.1.22.240 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -144,6 +144,7 @@ const AnalyticsEvent = {
   ACTION_INITIATE_UPDATED_SUBSCRIPTION_LINKING: 1067,
   ACTION_SURVEY_SUBMIT_CLICK: 1068,
   ACTION_SURVEY_CLOSED: 1069,
+  ACTION_SURVEY_DATA_TRANSFER: 1070,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -1131,6 +1132,12 @@ class EntitlementsRequest {
 
     /** @private {?boolean} */
     this.isUserRegistered_ = data[5 + base] == null ? null : data[5 + base];
+
+    /** @private {?Timestamp} */
+    this.subscriptionTimestamp_ =
+      data[6 + base] == null || data[6 + base] == undefined
+        ? null
+        : new Timestamp(data[6 + base], includesLabel);
   }
 
   /**
@@ -1218,6 +1225,20 @@ class EntitlementsRequest {
   }
 
   /**
+   * @return {?Timestamp}
+   */
+  getSubscriptionTimestamp() {
+    return this.subscriptionTimestamp_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setSubscriptionTimestamp(value) {
+    this.subscriptionTimestamp_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -1230,6 +1251,7 @@ class EntitlementsRequest {
         this.entitlementResult_, // field 4 - entitlement_result
         this.token_, // field 5 - token
         this.isUserRegistered_, // field 6 - is_user_registered
+        this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 7 - subscription_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1348,6 +1370,12 @@ class EventParams {
 
     /** @private {?string} */
     this.subscriptionFlow_ = data[6 + base] == null ? null : data[6 + base];
+
+    /** @private {?Timestamp} */
+    this.subscriptionTimestamp_ =
+      data[7 + base] == null || data[7 + base] == undefined
+        ? null
+        : new Timestamp(data[7 + base], includesLabel);
   }
 
   /**
@@ -1449,6 +1477,20 @@ class EventParams {
   }
 
   /**
+   * @return {?Timestamp}
+   */
+  getSubscriptionTimestamp() {
+    return this.subscriptionTimestamp_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setSubscriptionTimestamp(value) {
+    this.subscriptionTimestamp_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -1462,6 +1504,7 @@ class EventParams {
         this.oldTransactionId_, // field 5 - old_transaction_id
         this.isUserRegistered_, // field 6 - is_user_registered
         this.subscriptionFlow_, // field 7 - subscription_flow
+        this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 8 - subscription_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2704,7 +2747,7 @@ class ClientEventManagerApi {
   /**
    * Call this function to log an event. The registered listeners will be
    * invoked unless the event is filtered.
-   * @param {!function(!ClientEvent)} listener
+   * @param {!function(!ClientEvent, (!ClientEventParams|undefined)=)} listener
    */
   registerEventListener(listener) {}
 
@@ -2723,10 +2766,10 @@ class ClientEventManagerApi {
    * stop the event if a filterer cancels it.  After that, it will call each
    * listener asynchronously.
    * @param {!ClientEvent} event
+   * @param {(!ClientEventParams|undefined)=} eventParams
    */
-  logEvent(event) {}
+  logEvent(event, eventParams = undefined) {}
 }
-/* eslint-enable no-unused-vars */
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4427,8 +4470,15 @@ class Entitlement {
    * @param {!Array<string>} products
    * @param {string} subscriptionToken
    * @param {JsonObject|null|undefined} subscriptionTokenContents
+   * @param {!Timestamp|null} subscriptionTimestamp
    */
-  constructor(source, products, subscriptionToken, subscriptionTokenContents) {
+  constructor(
+    source,
+    products,
+    subscriptionToken,
+    subscriptionTokenContents,
+    subscriptionTimestamp
+  ) {
     /** @const {string} */
     this.source = source;
     /** @const {!Array<string>} */
@@ -4437,6 +4487,8 @@ class Entitlement {
     this.subscriptionToken = subscriptionToken;
     /** @const {JsonObject|null|undefined} */
     this.subscriptionTokenContents = subscriptionTokenContents;
+    /** @const {!Timestamp|null} */
+    this.subscriptionTimestamp = subscriptionTimestamp;
   }
 
   /**
@@ -4447,7 +4499,8 @@ class Entitlement {
       this.source,
       this.products.slice(0),
       this.subscriptionToken,
-      this.subscriptionTokenContents
+      this.subscriptionTokenContents,
+      this.subscriptionTimestamp
     );
   }
 
@@ -4513,11 +4566,23 @@ class Entitlement {
     } catch (e) {
       subscriptionTokenContents = null;
     }
+
+    const timestampJson = json['subscriptionTimestamp'];
+    let subscriptionTimestamp;
+    try {
+      subscriptionTimestamp = new Timestamp(
+        [timestampJson.seconds_, timestampJson.nanos_],
+        false
+      );
+    } catch (e) {
+      subscriptionTimestamp = null;
+    }
     return new Entitlement(
       source,
       products,
       subscriptionToken,
-      subscriptionTokenContents
+      subscriptionTokenContents,
+      subscriptionTimestamp
     );
   }
 
@@ -5244,17 +5309,15 @@ function parseUrlWithA(a, url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
-    origin: '', // Set below.
+    origin: a.protocol + '//' + a.host,
   };
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin != 'null') {
+  if (a.origin && a.origin !== 'null') {
     info.origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
+  } else if (info.protocol === 'data:' || !info.host) {
     info.origin = info.href;
-  } else {
-    info.origin = info.protocol + '//' + info.host;
   }
   return info;
 }
@@ -5523,7 +5586,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.239',
+    '_client': 'SwG 0.1.22.240',
   });
 }
 
@@ -6865,7 +6928,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.239',
+        '_client': 'SwG 0.1.22.240',
         'supportsEventManager': true,
       },
       args || {}
@@ -7143,7 +7206,7 @@ class ClientEventManager {
    * @param {!Promise} configuredPromise
    */
   constructor(configuredPromise) {
-    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent, (!../api/client-event-manager-api.ClientEventParams|undefined)=)>} */
     this.listeners_ = [];
 
     /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
@@ -7179,8 +7242,9 @@ class ClientEventManager {
   /**
    * @overrides
    * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @param {(!../api/client-event-manager-api.ClientEventParams|undefined)=} eventParams
    */
-  logEvent(event) {
+  logEvent(event, eventParams = undefined) {
     validateEvent(event);
     this.lastAction_ = this.isReadyPromise_.then(() => {
       for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
@@ -7194,7 +7258,7 @@ class ClientEventManager {
       }
       for (let listener = 0; listener < this.listeners_.length; listener++) {
         try {
-          this.listeners_[listener](event);
+          this.listeners_[listener](event, eventParams);
         } catch (e) {
           log(e);
         }
@@ -7577,6 +7641,25 @@ function toTimestamp(millis) {
 }
 
 /**
+ * @param {!number} timestamp represented as seconds, milliseconds or microseconds
+ * @return {!number}
+ */
+function convertPotentialTimestampToMilliseconds(timestamp) {
+  let timestampInMilliseconds;
+  if (timestamp >= 1e14 || timestamp <= -1e14) {
+    // Microseconds
+    timestampInMilliseconds = Math.floor(timestamp / 1000);
+  } else if (timestamp >= 1e11 || timestamp <= -3e10) {
+    // Milliseconds
+    timestampInMilliseconds = timestamp;
+  } else {
+    // Seconds
+    timestampInMilliseconds = Math.floor(timestamp * 1000);
+  }
+  return timestampInMilliseconds;
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -7814,7 +7897,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.239');
+    context.setClientVersion('SwG 0.1.22.240');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8106,7 +8189,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Subscrever com o Google',
     'pt-br': 'Assine com o Google',
     'ru': 'Подпиcка через Google',
-    'se': 'Prenumerera med Google',
+    'sv': 'Prenumerera med Google',
     'th': 'สมัครฟาน Google',
     'tr': 'Google ile Abone Ol',
     'uk': 'Підписатися через Google',
@@ -8140,7 +8223,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Contribuir utilizando o Google',
     'pt-br': 'Contribua usando o Google',
     'ru': 'Внести средства через Google',
-    'se': 'Bidra med Google',
+    'sv': 'Bidra med Google',
     'th': 'มีส่วนร่วมผ่าน Google',
     'tr': 'Google ile Katkıda Bulun',
     'uk': 'Зробити внесок через Google',
@@ -8172,7 +8255,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Já se registou anteriormente.',
     'pt-br': 'Você já tem um cadastro.',
     'ru': 'Вы уже зарегистрированы.',
-    'se': 'Du har redan registrerat dig.',
+    'sv': 'Du har redan registrerat dig.',
     'th': 'คุณเคยลงทะเบียนแล้ว',
     'tr': 'Daha önce kaydolmuştunuz.',
     'uk': 'Ви вже зареєструвалися раніше.',
@@ -8204,7 +8287,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Já se inscreveu anteriormente.',
     'pt-br': 'Você se inscreveu anteriormente.',
     'ru': 'Вы уже зарегистрированы.',
-    'se': 'Du har redan registrerat dig.',
+    'sv': 'Du har redan registrerat dig.',
     'th': 'คุณสมัครรับข้อมูลมาก่อนแล้ว',
     'tr': 'Daha önce kaydolmuştunuz.',
     'uk': 'Ви вже зареєструвалися.',
@@ -8236,7 +8319,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Falha no registo. Tente registar-se novamente.',
     'pt-br': 'Não foi possível fazer o registro. Tente novamente.',
     'ru': 'Ошибка регистрации. Повторите попытку.',
-    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'sv': 'Registreringen misslyckades. Försök att registrera dig igen.',
     'th': 'ลงทะเบียนไม่สำเร็จ ลองลงทะเบียนอีกครั้ง',
     'tr': 'Kayıt işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
     'uk': 'Помилка реєстрації. Повторіть спробу.',
@@ -8268,7 +8351,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Falha na inscrição. Tente inscrever-se novamente.',
     'pt-br': 'Não foi possível se inscrever. Tente novamente.',
     'ru': 'Не удалось зарегистрироваться. Повторите попытку.',
-    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'sv': 'Registreringen misslyckades. Försök att registrera dig igen.',
     'th': 'ลงชื่อสมัครใช้ไม่สำเร็จ ลองลงชื่อสมัครใช้อีกครั้ง',
     'tr': 'Kaydolma işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
     'uk': 'Помилка реєстрації. Повторіть спробу.',
@@ -8307,7 +8390,7 @@ const SWG_I18N_STRINGS = {
     'pt-br':
       'Conta criada com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'ru': 'Вы зарегистрировали аккаунт на адрес <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
-    'se': 'Du skapade ett konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'sv': 'Du skapade ett konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'th': 'สร้างบัญชีด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'tr': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile bir hesap oluşturun',
     'uk': 'Обліковий запис створено за допомогою електронної адреси <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -8346,7 +8429,7 @@ const SWG_I18N_STRINGS = {
     'pt-br':
       'Inscrição na newsletter feita com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'ru': 'Вы подписались на новостную рассылку, используя аккаунт <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
-    'se': 'Du registrerade dig för nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'sv': 'Du registrerade dig för nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'th': 'ลงชื่อเข้าใช้ด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> สำหรับจดหมายข่าว',
     'tr': 'Bülten için <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile kaydoldunuz',
     'uk': 'Ви підписалися на інформаційні листи на електронну адресу <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -12103,6 +12186,12 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
     'success',
     false
   ),
+  [AnalyticsEvent.ACTION_SURVEY_DATA_TRANSFER]: createGoogleAnalyticsEvent(
+    '',
+    'survey submission',
+    '',
+    false
+  ),
 };
 
 /** @const {!Object<?AnalyticsEvent,?Object>} */
@@ -12527,12 +12616,15 @@ class EntitlementsManager {
     const token = this.getGaaToken_();
     const isUserRegistered =
       event?.additionalParameters?.getIsUserRegistered?.();
+    const subscriptionTimestamp =
+      event?.additionalParameters?.getSubscriptionTimestamp?.();
     this.postEntitlementsRequest_(
       new EntitlementJwt(),
       result,
       source,
       token,
-      isUserRegistered
+      isUserRegistered,
+      subscriptionTimestamp
     );
   }
 
@@ -12543,7 +12635,8 @@ class EntitlementsManager {
     entitlementResult,
     entitlementSource,
     optionalToken = '',
-    optionalIsUserRegistered = null
+    optionalIsUserRegistered = null,
+    optionalSubscriptionTimestamp = null
   ) {
     const message = new EntitlementsRequest();
     message.setUsedEntitlement(usedEntitlement);
@@ -12553,6 +12646,9 @@ class EntitlementsManager {
     message.setToken(optionalToken);
     if (typeof optionalIsUserRegistered === 'boolean') {
       message.setIsUserRegistered(optionalIsUserRegistered);
+    }
+    if (optionalSubscriptionTimestamp) {
+      message.setSubscriptionTimestamp(optionalSubscriptionTimestamp);
     }
 
     let url =
@@ -12911,6 +13007,9 @@ class EntitlementsManager {
 
     const params = new EventParams();
     params.setIsUserRegistered(true);
+    if (entitlement.subscriptionTimestamp) {
+      params.setSubscriptionTimestamp(entitlement.subscriptionTimestamp);
+    }
 
     // Log unlock event.
     const eventType =
@@ -13707,14 +13806,15 @@ class XhrFetcher {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-enable no-unused-vars */
 
 class GoogleAnalyticsEventListener {
   /**
    * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
+    /** @private @const {!./deps.DepsDef} deps */
+    this.deps_ = deps;
 
     /** @private @const {!./client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
@@ -13732,15 +13832,24 @@ class GoogleAnalyticsEventListener {
   /**
    *  Listens for new events from the events manager and logs appropriate events to Google Analytics.
    * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @param {(!../api/client-event-manager-api.ClientEventParams|undefined)=} eventParams
    */
-  handleClientEvent_(event) {
-    // Bail immediately if neither ga function (analytics.js) nor gtag function (gtag.js) exists in Window.
-    if (
-      typeof this.win_.ga !== 'function' &&
-      typeof this.win_.gtag !== 'function'
-    ) {
+  handleClientEvent_(event, eventParams = undefined) {
+    // Require either ga function (analytics.js) or gtag function (gtag.js).
+    const gaIsEligible = GoogleAnalyticsEventListener.isGaEligible(this.deps_);
+    const gtagIsEligible = GoogleAnalyticsEventListener.isGtagEligible(
+      this.deps_
+    );
+    const neitherIsEligible = !gaIsEligible && !gtagIsEligible;
+    if (neitherIsEligible) {
       return;
     }
+
+    // Extract methods from window.
+    const {ga, gtag} = /** @type {!WindowWithAnalyticsMethods} */ (
+      this.deps_.win()
+    );
+
     let subscriptionFlow = '';
     if (event.additionalParameters) {
       // additionalParameters isn't strongly typed so checking for both object and class notation.
@@ -13748,7 +13857,7 @@ class GoogleAnalyticsEventListener {
         event.additionalParameters.subscriptionFlow ||
         event.additionalParameters.getSubscriptionFlow();
     }
-    const gaEvent = analyticsEventToGoogleAnalyticsEvent(
+    let gaEvent = analyticsEventToGoogleAnalyticsEvent(
       event.eventType,
       subscriptionFlow
     );
@@ -13756,18 +13865,49 @@ class GoogleAnalyticsEventListener {
       return;
     }
 
-    // TODO(b/234825847): Remove it once universal analytics is deprecated in 2023.
-    if (typeof this.win_.ga === 'function') {
-      this.win_.ga('send', 'event', gaEvent);
+    const analyticsParams = eventParams?.googleAnalyticsParameters || {};
+    gaEvent = {
+      ...gaEvent,
+      eventCategory: analyticsParams.event_category || gaEvent.eventCategory,
+      eventLabel: analyticsParams.event_label || gaEvent.eventLabel,
+    };
+
+    // TODO(b/234825847): Remove this once universal analytics is deprecated in 2023.
+    if (gaIsEligible) {
+      ga('send', 'event', gaEvent);
     }
 
-    if (typeof this.win_.gtag === 'function') {
-      this.win_.gtag('event', gaEvent.eventAction, {
+    if (gtagIsEligible) {
+      const gtagEvent = {
         'event_category': gaEvent.eventCategory,
         'event_label': gaEvent.eventLabel,
         'non_interaction': gaEvent.nonInteraction,
-      });
+        ...analyticsParams,
+      };
+      gtag('event', gaEvent.eventAction, gtagEvent);
     }
+  }
+
+  /**
+   * Function to determine whether event is eligible for GA logging.
+   * @param {!./deps.DepsDef} deps
+   * @returns {boolean}
+   */
+  static isGaEligible(deps) {
+    return isFunction(
+      /** @type {!WindowWithAnalyticsMethods} */ (deps.win()).ga
+    );
+  }
+
+  /**
+   * Function to determine whether event is eligible for gTag logging.
+   * @param {!./deps.DepsDef} deps
+   * @returns {boolean}
+   */
+  static isGtagEligible(deps) {
+    return isFunction(
+      /** @type {!WindowWithAnalyticsMethods} */ (deps.win()).gtag
+    );
   }
 }
 
@@ -19353,6 +19493,15 @@ class ConfiguredRuntime {
       showcaseEventToAnalyticsEvents(entitlement.entitlement) || [];
     const params = new EventParams();
     params.setIsUserRegistered(entitlement.isUserRegistered);
+    if (entitlement.subscriptionTimestamp) {
+      params.setSubscriptionTimestamp(
+        toTimestamp(
+          convertPotentialTimestampToMilliseconds(
+            entitlement.subscriptionTimestamp
+          )
+        )
+      );
+    }
 
     for (let i = 0; i < eventsToLog.length; i++) {
       this.eventManager().logEvent({
