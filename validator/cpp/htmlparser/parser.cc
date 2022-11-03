@@ -3313,7 +3313,7 @@ void Parser::RecordLinkRelCanonical(Node* link_node) {
   if (link_node->Type() != NodeType::ELEMENT_NODE ||
       link_node->DataAtom() != Atom::LINK) return;
 
-  bool canonical;
+  bool canonical = false;
   std::string canonical_url;
   for (auto& attr : link_node->Attributes()) {
     if (Strings::EqualFold(attr.key, "rel") &&
