@@ -361,6 +361,61 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         });
     });
 
+    it('should return proper url with HB vendor and Amazon data', async () => {
+      const rtcResponseArray = [
+        {
+          response: {
+            targeting: {
+              'hb_bidder': 'appnexus',
+              'hb_cache_host': 'prebid.ams1.adnxs-simple.com',
+              'hb_cache_id': '0cb22b3e-aa2d-4936-9039-0ec93ff67de5',
+              'hb_cache_path': '/pbc/v1/cache',
+              'hb_pb': '1.3',
+              'hb_size': '300x250',
+            },
+          },
+          callout: 'prebidappnexus',
+          rtcTime: 184,
+        },
+        {
+          response: {
+            'targeting': {
+              'amzniid': 'JBJnc908',
+              'amznsz': '300x250',
+              'amznp': '19131mo',
+              'amznbid': 'amp_dv85c0',
+              'amznhost': 'https://amazon-adsystem.com',
+            },
+          },
+          callout: 'aps',
+          rtcTime: 102,
+        },
+      ];
+
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': 300,
+        'height': 250,
+        'data-site': 1,
+        'data-page': 22,
+        'data-format': 333,
+        'data-target': 'key=value',
+        'type': 'smartadserver',
+        'rtc-config': JSON.stringify(rtcConfig),
+      });
+      doc.body.appendChild(element);
+
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, Promise.resolve(rtcResponseArray))
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&pgid=22&fmtid=333&tgt=amzniid%3DJBJnc908%3Bamznp%3D19131mo%3Bamznbid%3Ddv85c0%3Bkey%3Dvalue&tag=sas_333&out=amp-hb&hb_bid=appnexus&hb_cpm=1.3&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+          );
+        });
+    });
+
     it('should return proper url with schain value', async () => {
       element = createElementWithAttributes(doc, 'amp-ad', {
         'data-site': '1',
@@ -649,7 +704,28 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
     });
 
-    it('should modifyVendorResponse', async () => {
+    it('should handle empty response', async () => {
+      const bidResponses = [
+        {},
+        {
+          'response': {},
+        },
+        {
+          'response': {
+            'targeting': {},
+          },
+          'callout': 'criteo',
+        },
+      ];
+
+      const res = impl.modifyVendorResponse(bidResponses);
+
+      expect(res[0]).to.deep.equal(bidResponses[0]);
+      expect(res[1]).to.deep.equal(bidResponses[1]);
+      expect(res[2]).to.deep.equal(bidResponses[2]);
+    });
+
+    it('should handle Criteo response', async () => {
       const criteoExampleResponse = [
         {
           'response': {
@@ -678,6 +754,54 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         undefined;
       res = impl.modifyVendorResponse(criteoExampleResponse);
       expect(res[0]).to.deep.equal(criteoExampleResponse[0]);
+    });
+
+    describe('Amazon', () => {
+      beforeEach(() => {
+        expect(impl.exTgt_).to.deep.equal('');
+      });
+
+      it('should add keywords to target', async () => {
+        const amazonBid = [
+          {
+            'response': {
+              'targeting': {
+                'amzniid': 'JBJnc908',
+                'amznsz': '300x250',
+                'amznp': '19131mo',
+                'amznbid': 'amp_dv85c0',
+                'amznhost': 'https://amazon-adsystem.com',
+              },
+            },
+            'rtcTime': 212,
+            'callout': 'aps',
+          },
+        ];
+
+        const res = impl.modifyVendorResponse(amazonBid);
+
+        expect(res[0]).to.deep.equal(amazonBid[0]);
+        expect(impl.exTgt_).to.deep.equal(
+          'amzniid=JBJnc908;amznp=19131mo;amznbid=dv85c0;'
+        );
+      });
+
+      it('should not modify target when no bid', async () => {
+        const amazonBid = [
+          {
+            'response': {
+              'targeting': {},
+            },
+            'rtcTime': 13,
+            'callout': 'aps',
+          },
+        ];
+
+        const res = impl.modifyVendorResponse(amazonBid);
+
+        expect(res[0]).to.deep.equal(amazonBid[0]);
+        expect(impl.exTgt_).to.deep.equal('');
+      });
     });
   });
 });
