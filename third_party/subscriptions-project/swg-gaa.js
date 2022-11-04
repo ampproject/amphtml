@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.239 */
+/** Version: 0.1.22.240 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -637,6 +637,7 @@ const AnalyticsEvent = {
   ACTION_INITIATE_UPDATED_SUBSCRIPTION_LINKING: 1067,
   ACTION_SURVEY_SUBMIT_CLICK: 1068,
   ACTION_SURVEY_CLOSED: 1069,
+  ACTION_SURVEY_DATA_TRANSFER: 1070,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -831,17 +832,15 @@ function parseUrlWithA(a, url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
-    origin: '', // Set below.
+    origin: a.protocol + '//' + a.host,
   };
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin != 'null') {
+  if (a.origin && a.origin !== 'null') {
     info.origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
+  } else if (info.protocol === 'data:' || !info.host) {
     info.origin = info.href;
-  } else {
-    info.origin = info.protocol + '//' + info.host;
   }
   return info;
 }
