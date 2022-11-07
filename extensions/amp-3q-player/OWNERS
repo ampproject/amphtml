@@ -4,7 +4,14 @@
 {
   rules: [
     {
-      owners: [{name: 'ayvar2000'}, {name: 'ampproject/wg-components'}],
+      owners: [
+         { name: 'ampproject/wg-components' },
+         {
+           name: 'rcebulko',
+           notify: true,
+         },
+       ],
+     }],
     },
   ],
 }
