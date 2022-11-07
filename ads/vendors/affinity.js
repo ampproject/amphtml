@@ -18,11 +18,8 @@ export function affinity(global, data) {
         global,
         'https://cdn4-hbs.affinitymatrix.com/amp/v2022/amp.js',
         () => {
-          (function(){
-            window.affinity.initAMP(
-              global,
-              data
-            );
+          (function () {
+            window.affinity.initAMP(global, data);
           })();
         }
       );
