@@ -319,6 +319,17 @@ window.andbeyond.initAmp = function (
   extras
 ) {};
 
+// affinity.js
+window.affinity = {};
+window.affinity.initAMP = function (global, data) {};
+data.width
+data.height
+data.adtype
+data.adslot
+data['multi-size']
+data.jsontargeting
+data.extras
+
 // adreactor.js
 data.zid;
 data.pid;
