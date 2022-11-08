@@ -16,6 +16,7 @@ Adtype Affinity support for AMP
 ```
 
 ## Configuration
+
 -   `data-adtype`: (Mandatory) Type of the adformat
 -   `data-adslot`: (Mandatory) Name of of adslot
 -   `data-multi-size`: (Optional) Multi-size support
