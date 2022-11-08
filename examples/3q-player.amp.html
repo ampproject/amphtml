@@ -89,8 +89,8 @@
     }
   </style>
   </noscript>
+  <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js"></script>
 </head>
 
 <body>
@@ -98,24 +98,24 @@
 
   <h3>Responsive</h3>
 
-  <amp-3q-player id="myVideo" data-id="47c234bc-f6ea-11e8-ae4b-0cc47a188158" layout="responsive" height="360"
-    width="640">
+  <amp-3q-player id="myVideo" data-id="47c234bc-f6ea-11e8-ae4b-0cc47a188158" data-player="" layout="responsive"
+    height="360" width="640">
   </amp-3q-player>
 
   <h3>Actions</h3>
-  <button on="tap:myVideo.play">Play</button>
+  <!-- <button on="tap:myVideo.play">Play</button>
   <button on="tap:myVideo.pause">Pause</button>
   <button on="tap:myVideo.mute">Mute</button>
   <button on="tap:myVideo.unmute">Unmute</button>
-  <button on="tap:myVideo.fullscreen">Fullscreen</button>
+  <button on="tap:myVideo.fullscreen">Fullscreen</button> -->
 
   <h2>Autoplay</h2>
-  <amp-3q-player autoplay id="video" data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158" layout="responsive" height="360"
-    width="640">
+  <amp-3q-player autoplay id="video" data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158" data-player="" layout="responsive"
+    height="360" width="640">
   </amp-3q-player>
   <h2>Resize</h2>
-  <amp-3q-player id="resizeVideo" data-id="7e3fc527-a9b5-11eb-b839-0cc47a188158" layout="responsive" height="110"
-    width="640">
+  <amp-3q-player id="resizeVideo" data-id="7e3fc527-a9b5-11eb-b839-0cc47a188158" data-player="" layout="responsive"
+    height="110" width="640">
   </amp-3q-player>
   <h2>Custom player</h2>
   <amp-3q-player id="resizeVideo" data-id="ce06cd3c-1d07-11eb-9d65-002590c750be"
