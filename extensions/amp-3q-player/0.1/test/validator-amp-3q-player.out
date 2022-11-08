@@ -10,6 +10,11 @@ PASS
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-custom>
+|      body {
+|        background-color: hotpink;
+|      }
+|    </style>
 |    <style amp-boilerplate>
 |      body {
 |        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
@@ -67,10 +72,7 @@ PASS
 |          visibility: visible
 |        }
 |      }
-|    </style>
-|    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
-|    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <noscript>
+|    </style><noscript>
 |      <style amp-boilerplate>
 |        body {
 |          -webkit-animation: none;
@@ -80,6 +82,9 @@ PASS
 |        }
 |      </style>
 |    </noscript>
+|    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|
 |  </head>
 |
 |  <body>
