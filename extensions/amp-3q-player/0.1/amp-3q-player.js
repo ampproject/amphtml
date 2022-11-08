@@ -70,7 +70,7 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.dataId = userAssert(
       el.getAttribute('data-id'),
-      'Data-id attribute is required for <amp-3q-player>',
+      'Data-id or data-player attribute is required for <amp-3q-player>',
       el
     );
 
