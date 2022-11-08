@@ -8,8 +8,10 @@ PASS
 |
 |  <head>
 |    <meta charset="utf-8">
-|    <link rel="canonical" href="./regular-html-version.html">
-|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <title>3Q AMP Example</title>
+|    <link rel="canonical" href="3q-player.amp.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
 |    <style amp-boilerplate>
 |      body {
 |        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
@@ -79,10 +81,7 @@ PASS
 |      </style>
 |    </noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js"></script>
-|    <!-- <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script> -->
-|    <!-- <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js"></script> -->
-|    <!-- <script async src="https://cdn.ampproject.org/v0.js"></script> -->
+|    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
 |  </head>
 |
 |  <body>
