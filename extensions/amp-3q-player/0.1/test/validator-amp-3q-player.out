@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Test Description:
 |    Tests for the amp-3q-player tag. See the inline comments.
@@ -10,65 +10,8 @@ PASS
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
-|    <style amp-boilerplate>
-|      body {
-|        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-|        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-|        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-|        animation: -amp-start 8s steps(1, end) 0s 1 normal both
-|      }
-|
-|      @-webkit-keyframes -amp-start {
-|        from {
-|          visibility: hidden
-|        }
-|
-|        to {
-|          visibility: visible
-|        }
-|      }
-|
-|      @-moz-keyframes -amp-start {
-|        from {
-|          visibility: hidden
-|        }
-|
-|        to {
-|          visibility: visible
-|        }
-|      }
-|
-|      @-ms-keyframes -amp-start {
-|        from {
-|          visibility: hidden
-|        }
-|
-|        to {
-|          visibility: visible
-|        }
-|      }
-|
-|      @-o-keyframes -amp-start {
-|        from {
-|          visibility: hidden
-|        }
-|
-|        to {
-|          visibility: visible
-|        }
-|      }
-|
-|      @keyframes -amp-start {
-|        from {
-|          visibility: hidden
-|        }
-|
-|        to {
-|          visibility: visible
-|        }
-|      }
-|    </style><noscript>
-|      <style amp-boilerplate>
+|    <!-- <noscript>
+|      <style>
 |        body {
 |          -webkit-animation: none;
 |          -moz-animation: none;
@@ -76,9 +19,11 @@ PASS
 |          animation: none
 |        }
 |      </style>
-|    </noscript>
-|    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script>
-|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    </noscript> -->
+|    <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js"></script>
+|    <!-- <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-latest.js"></script> -->
+|    <!-- <script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js"></script> -->
+|    <!-- <script async src="https://cdn.ampproject.org/v0.js"></script> -->
 |  </head>
 |
 |  <body>
@@ -99,6 +44,11 @@ PASS
 |    <amp-3q-player id="myVideo" data-id="7e3fc527-a9b5-11eb-b839-0cc47a188158" layout="responsive" height="110"
 |      width="640">
 |    </amp-3q-player>
+|
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+>>   ^~~~~~~~~
+amp-3q-player/0.1/test/validator-amp-3q-player.html:47:2 The parent tag of tag 'amphtml engine script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+|
 |  </body>
 |
 |  </html>
