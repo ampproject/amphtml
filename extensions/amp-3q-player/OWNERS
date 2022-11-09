@@ -6,10 +6,11 @@
     {
       owners: [
          { name: 'ampproject/wg-components' },
-         {
+          {
            name: 'rcebulko',
            notify: true,
-         },
-       ],
-     }]
+          },
+        ],
+      },
+    ],
 }
