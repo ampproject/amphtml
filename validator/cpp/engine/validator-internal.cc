@@ -311,62 +311,42 @@ ScriptTag ParseScriptTag(htmlparser::Node* node) {
     }
   }
 
-  if (src.empty()) {
-    return script_tag;
-  }
-
-  std::string src_str{src};
   // Determine if this has a valid AMP domain and separate the path from the
   // attribute 'src'. Consumes the domain making src just the path.
   if (absl::ConsumePrefix(&src, kAmpProjectDomain)) {
     script_tag.is_amp_domain = true;
-    script_tag.path = src_str;
-  } else {
-    script_tag.is_amp_domain = false;
-    htmlparser::URL url(src_str);
-    // Error cases, early exit:
-    if (!url.is_valid()) return script_tag;
-    if (!url.has_protocol()) return script_tag;
-    if (url.protocol() != "https" && url.protocol() != "http")
-      return script_tag;
-    if (url.hostname().empty()) return script_tag;
+    script_tag.path = std::string(src);
 
-    src = url.path_params_fragment().data();
-    // Trim the "/" prefix as this is what kExtensionPathRe expects.
-    if (!src.empty() && src[0] == '/') src = src.substr(1);
-    std::string src_str{src};
-    script_tag.path = src_str;
-  }
+    // Only look at script tags that have attribute 'async'.
+    if (has_async_attr) {
+      // Determine if this is the AMP Runtime.
+      if (!script_tag.is_extension &&
+          RE2::FullMatch(src, *kRuntimeScriptPathRe)) {
+        script_tag.is_runtime = true;
+        script_tag.has_valid_path = true;
+      }
 
-  // Only look at script tags that have attribute 'async'.
-  if (has_async_attr) {
-    // Determine if this is the AMP Runtime.
-    if (!script_tag.is_extension &&
-        RE2::FullMatch(src, *kRuntimeScriptPathRe)) {
-      script_tag.is_runtime = true;
-      script_tag.has_valid_path = true;
-    }
+      // For AMP Extensions, validate path and extract name and version.
+      if (script_tag.is_extension &&
+          RE2::FullMatch(src, *kExtensionPathRe, &script_tag.extension_name,
+                         &script_tag.extension_version)) {
+        script_tag.has_valid_path = true;
+      }
 
-    // For AMP Extensions, validate path and extract name and version.
-    if (script_tag.is_extension &&
-        RE2::FullMatch(src, *kExtensionPathRe, &script_tag.extension_name,
-                       &script_tag.extension_version)) {
-      script_tag.has_valid_path = true;
-    }
-
-    // Determine the release version (LTS, module, standard, etc).
-    if ((has_module_attr && RE2::FullMatch(src, *kModuleLtsScriptPathRe)) ||
-        (has_nomodule_attr && RE2::FullMatch(src, *kLtsScriptPathRe))) {
-      script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE_LTS;
-    } else if ((has_module_attr &&
-                RE2::FullMatch(src, *kModuleScriptPathRe)) ||
-               (has_nomodule_attr &&
-                RE2::FullMatch(src, *kStandardScriptPathRe))) {
-      script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE;
-    } else if (RE2::FullMatch(src, *kLtsScriptPathRe)) {
-      script_tag.release_version = ScriptReleaseVersion::LTS;
-    } else if (RE2::FullMatch(src, *kStandardScriptPathRe)) {
-      script_tag.release_version = ScriptReleaseVersion::STANDARD;
+      // Determine the release version (LTS, module, standard, etc).
+      if ((has_module_attr && RE2::FullMatch(src, *kModuleLtsScriptPathRe)) ||
+          (has_nomodule_attr && RE2::FullMatch(src, *kLtsScriptPathRe))) {
+        script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE_LTS;
+      } else if ((has_module_attr &&
+                  RE2::FullMatch(src, *kModuleScriptPathRe)) ||
+                 (has_nomodule_attr &&
+                  RE2::FullMatch(src, *kStandardScriptPathRe))) {
+        script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE;
+      } else if (RE2::FullMatch(src, *kLtsScriptPathRe)) {
+        script_tag.release_version = ScriptReleaseVersion::LTS;
+      } else if (RE2::FullMatch(src, *kStandardScriptPathRe)) {
+        script_tag.release_version = ScriptReleaseVersion::STANDARD;
+      }
     }
   }
   return script_tag;
@@ -1192,7 +1172,7 @@ class ParsedTagSpec {
 
   // Whether or not the tag should be recorded via
   // Context->RecordTagspecValidated if it was validated
-  // successfully. For performance, this is only done for tags that
+  // successfullly. For performance, this is only done for tags that
   // are mandatory, unique, or possibly required by some other tag.
   RecordValidated ShouldRecordTagspecValidated() const {
     return should_record_tagspec_validated_;
@@ -1284,7 +1264,7 @@ std::string TagSpecUrl(const TagSpec& spec) {
     return StrCat(extension_spec_url_prefix, spec.extension_spec().name());
   if (spec.requires_extension_size() > 0)
     // Return the first |requires_extension|, which should be the most
-    // representative.
+    // representitive.
     return StrCat(extension_spec_url_prefix, spec.requires_extension(0));
 
   return "";
@@ -2834,11 +2814,11 @@ class InvalidRuleVisitor : public htmlparser::css::RuleVisitor {
 class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
  public:
   InvalidDeclVisitor(const ParsedDocCssSpec& css_spec, Context* context,
-                     const std::string& tag_descriptive_name,
+                     const std::string& tag_decriptive_name,
                      ValidationResult* result)
       : css_spec_(css_spec),
         context_(context),
-        tag_descriptive_name_(tag_descriptive_name),
+        tag_descriptive_name_(tag_decriptive_name),
         result_(result) {}
 
   void VisitDeclaration(
@@ -3996,14 +3976,8 @@ void ValidateAmpScriptSrcAttr(const ParsedHtmlTag& tag,
                               const TagSpec& tag_spec, const Context& context,
                               ValidationResult* result) {
   if (!tag.IsAmpDomain()) {
-    bool is_amp_format =
-        c_find(context.type_identifiers(), TypeIdentifier::kAmp) !=
-        context.type_identifiers().end();
-    if (!is_amp_format || context.is_transformed()) {
-      context.AddError(ValidationError::DISALLOWED_AMP_DOMAIN,
-                       context.line_col(),
-                       /*params=*/{}, /*spec_url=*/"", result);
-    }
+    context.AddError(ValidationError::DISALLOWED_AMP_DOMAIN, context.line_col(),
+                     /*params=*/{}, /*spec_url=*/"", result);
   }
 
   if (tag.IsExtensionScript() && tag_spec.has_extension_spec()) {
@@ -5686,7 +5660,9 @@ class ParsedValidatorRulesProvider {
 class Validator {
  public:
   Validator(const ParsedValidatorRules* rules, int max_errors = -1)
-      : rules_(rules), max_errors_(max_errors), context_(rules_, max_errors_) {}
+      : rules_(rules),
+        max_errors_(max_errors),
+        context_(rules_, max_errors_) {}
 
   ValidationResult Validate(const htmlparser::Document& doc) {
     doc_metadata_ = doc.Metadata();
