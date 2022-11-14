@@ -102,7 +102,7 @@ TEST(ParserTest, ValidJson) {
   EXPECT_TRUE(V("[\"amaltas\", \"seol\", \"hello\", \"ok\\uA93Cbye\"]").first);
   EXPECT_TRUE(V("[true, false, false, true, true, null]").first);
   EXPECT_TRUE(V("[1.0, 2.0, 3.0, 4.0e+3, 5.12e-3, 6.40e3, 0.1, -0.1]").first);
-  // Basic with different type values.
+  // Basic with diffrent type values.
   EXPECT_TRUE(V("[1, true, \"amaltas\", 1.0, null, \"world\", false]").first);
   // Array inside array.
   EXPECT_TRUE(V("[1, [2, [3, [4, 5]]], true, false, [\"a\", \"b\"]]").first);
