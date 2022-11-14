@@ -41,7 +41,6 @@ TEST(URLTest, BasicTests) {
   EXPECT_EQ(url.protocol(), "http");
   EXPECT_EQ(url.hostname(), "www.google.com");
   EXPECT_EQ(url.port(), 80);
-  EXPECT_EQ(url.path_params_fragment(), "/");
 
   URL https_url("https://www.google.com/");
   EXPECT_TRUE(https_url.has_protocol());
@@ -92,11 +91,9 @@ TEST(URLTest, BasicTests) {
   EXPECT_EQ(port_url.protocol(), "http");
   EXPECT_EQ(port_url.hostname(), "www.google.com");
   EXPECT_EQ(port_url.port(), 8080);
-  EXPECT_EQ(url.path_params_fragment(), "/");
 
   URL port_url2("http://www.google.com:0080/foo:8080");
   EXPECT_EQ(port_url2.port(), 80);
-  EXPECT_EQ(url.path_params_fragment(), "/foo:8080");
 
   // Invalid port.
   URL invalid_port("http://www.google.com:99999/foo");
@@ -114,7 +111,6 @@ TEST(URLTest, BasicTests) {
   URL ipv6("http://[::2]/foo");
   EXPECT_TRUE(ipv6.is_valid());
   EXPECT_EQ(ipv6.hostname(), "::2");
-  EXPECT_EQ(ipv6.path_params_fragment(), "/foo");
 
   URL ipv62("http://foo:bar@[1:2:3::4]:8080/foo");
   EXPECT_TRUE(ipv62.is_valid());
@@ -177,7 +173,7 @@ TEST(URLTest, IPv6Urls) {
   EXPECT_TRUE(URL("http://[1:2:3:4:5:6::abc]").is_valid());
   EXPECT_TRUE(URL("http://[1:2:3:4:5:6::abcd]").is_valid());
 
-  // Illegal characters.
+  // Illegal characeters.
   EXPECT_FALSE(URL("http://[abcd:123_:abcd::]").is_valid());
   EXPECT_FALSE(URL("http://[abcd:123O:abcd::]").is_valid());
   // Two compression not valid.

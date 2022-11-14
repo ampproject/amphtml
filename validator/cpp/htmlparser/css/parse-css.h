@@ -741,7 +741,7 @@ class Selector : public Token {
   virtual void Accept(SelectorVisitor* visitor) const = 0;
 };
 
-// This node models type selectors and universal selectors.
+// This node models type selectors and universial selectors.
 // http://www.w3.org/TR/css3-selectors/#type-selectors
 // http://www.w3.org/TR/css3-selectors/#universal-selector
 class TypeSelector : public Selector {

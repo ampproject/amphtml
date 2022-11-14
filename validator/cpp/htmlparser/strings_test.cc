@@ -493,7 +493,7 @@ TEST(StringsTest, TranslateTest) {
   // Translate failed.
   EXPECT_FALSE(t8.has_value());
 
-  // Translate ignore characters if abc is longer than xyz.
+  // Translate ignore chracters if abc is longer than xyz.
   // In the following abc string ...wn is removed from translated string.
   auto t9 = htmlparser::Strings::Translate(
       "The quick brown fox.", "brown", "red");

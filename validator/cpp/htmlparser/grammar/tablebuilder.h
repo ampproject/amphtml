@@ -7,7 +7,7 @@
 // class must be thoroughly tested.
 //
 // Builds a state table by reading grammar file that contains rules for parsing
-// a basic (limited), context free, unambiguous grammar.
+// a basic (limited), context free, unambigous grammar.
 //
 // Using TableBuilder one can generate parser states by writing rules in a
 // text file. See htmlparser/data/jsongrammar.txt.
@@ -15,7 +15,7 @@
 // Grammar text file contains rules which lists states and its transition
 // from one state to another as parser reads input characters. The parse
 // table is pushdown automation that uses stack to push and pop parsing
-// states. Unlike LR parsers there is no shift at each stage of parsing.
+// states. Unline LR parsers there is no shift at each stage of parsing.
 
 // See grammar.txt tutorial for learning grammar syntax.
 // TODO: Add grammar tutorial.

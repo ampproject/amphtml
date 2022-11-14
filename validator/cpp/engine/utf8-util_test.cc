@@ -14,7 +14,7 @@ TEST(Utf8UtilTest, Utf16StrLen) {
   // It's 34 bytes long and 22 utf-8 characters long. Javascript uses UTF16
   // strings and string lengths.
   // The chars in Iñtërnâtiônàlizætiøn vary between 1 and 2 byte lengths, all
-  // javascript 1-char lengths. The ⚡ is a 3-byte length character, with a
+  // javascript 1-char lenghts. The ⚡ is a 3-byte length character, with a
   // 1-char javascript length. Finally the 💩 is a 4-byte length character with
   // a 2-char javascript length.
   EXPECT_EQ(Utf16StrLen("Iñtërnâtiônàlizætiøn☃💩"), 23);
