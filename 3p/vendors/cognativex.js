@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 // src/polyfills.js must be the first import.
 import '#3p/polyfills';
 
