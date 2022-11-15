@@ -161,7 +161,8 @@ void URL::ParseAuthority() {
 
   bool is_ipv6_literal = false;
   std::string_view host = url_.substr(host_begin, host_end - host_begin);
-  if (host.front() == '[' && host.back() == ']' && host.size() > 2 /* [] */) {
+  if (!host.empty() && host.front() == '[' && host.back() == ']' &&
+      host.size() > 2 /* [] */) {
     is_ipv6_literal = true;
     host.remove_prefix(1);
     host.remove_suffix(1);
