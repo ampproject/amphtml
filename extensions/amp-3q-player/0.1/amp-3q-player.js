@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {
@@ -6,6 +7,7 @@ import {
   isFullscreenElement,
 } from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {setStyle} from '#core/dom/style';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 
 import {Services} from '#service';
@@ -19,7 +21,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {addParamToUrl} from '../../../src/url';
+//import {addParamToUrl} from '../../../src/url';
 import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-3q-player';
@@ -44,6 +46,8 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.dataId = null;
 
+    this.playerId = null;
+
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
   }
@@ -66,10 +70,17 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.dataId = userAssert(
       el.getAttribute('data-id'),
-      'The data-id attribute is required for <amp-3q-player> %s',
+      'Data-id or data-player attribute is required for <amp-3q-player>',
       el
     );
 
+    if (el.getAttribute('data-player')) {
+      this.playerId = userAssert(
+        el.getAttribute('data-player'),
+        'Data-player attribute is required for <amp-3q-player>',
+        el
+      );
+    }
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -80,15 +91,6 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @private */
   generateIframeSrc_() {
-    const explicitParamsAttributes = [
-      'key',
-      'timestamp',
-      'controls',
-      'userToken',
-      'userGroup',
-      'player',
-    ];
-
     let iframeSrc = 'https://playout.3qsdn.com/';
     if (this.element.getAttribute(`data-datasource`)) {
       iframeSrc +=
@@ -103,13 +105,9 @@ class Amp3QPlayer extends AMP.BaseElement {
       dev().assertString(this.dataId) +
       // Autoplay is handled by VideoManager
       '?autoplay=false&amp=true';
-
-    explicitParamsAttributes.forEach((explicitParam) => {
-      const val = this.element.getAttribute(`data-${explicitParam}`);
-      if (val) {
-        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
-      }
-    });
+    if (this.playerId) {
+      iframeSrc += '&player=' + this.playerId;
+    }
 
     return iframeSrc;
   }
@@ -188,6 +186,9 @@ class Amp3QPlayer extends AMP.BaseElement {
       case 'complete':
         this.pauseHelper_.updatePlaying(false);
         break;
+      case 'resize':
+        this.resize_(data.value);
+        break;
     }
 
     redispatch(this.element, eventType, {
@@ -198,6 +199,26 @@ class Amp3QPlayer extends AMP.BaseElement {
       'muted': VideoEvents_Enum.MUTED,
       'unmuted': VideoEvents_Enum.UNMUTED,
     });
+  }
+
+  /**
+   * Forces the Layout to 'container' and sets a new height
+   * @private
+   * @param {number} newHeight
+   */
+  // resize_(newHeight) {
+  //   this.attemptChangeHeight(newHeight);
+  // }
+  resize_(newHeight) {
+    this.element.classList.remove(
+      'i-amphtml-fill-content',
+      'i-amphtml-replaced-content'
+    );
+
+    this.element.setAttribute('layout', 'container');
+    this.element.setAttribute('i-amphtml-layout', 'container');
+    this.element.classList.add('i-amphtml-layout-container');
+    setStyle(this.element, 'height', newHeight, 'px');
   }
 
   /**

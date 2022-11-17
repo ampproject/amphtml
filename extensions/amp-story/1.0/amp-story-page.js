@@ -8,7 +8,9 @@
  * </amp-story-page>
  * </code>
  */
+import {devAssert} from '#core/assert';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -48,7 +50,7 @@ import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {MediaPool} from './media-pool';
-import {AdvancementConfig} from './page-advancement';
+import {AdvancementConfig, AdvancementConfigType} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
@@ -94,11 +96,8 @@ const TAG = 'amp-story-page';
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
-/** @private @const {string} */
-const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
-
-/** @private @const {string} */
-const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
+/** @private @const {number} */
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S = 5;
 
 /** @private @const {number} */
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
@@ -172,6 +171,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(this.element);
 
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
@@ -247,6 +249,17 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /**
+     * The value of the 'auto-advance-after' attribute set by the publisher.
+     * @private {?string}
+     */
+    this.initialAutoAdvanceValue_ =
+      this.element.getAttribute('auto-advance-after');
+
+    /** @private {?VisibilityState_Enum} */
+    this.visibilityState_ = this.getAmpDoc().getVisibilityState();
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
   }
 
   /**
@@ -297,16 +310,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
-    this.maybeSetPreviewDuration_();
-    this.maybeSetStoryNextUp_();
-    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
-    this.advancement_.addPreviousListener(() => this.previous());
-    this.advancement_.addAdvanceListener(() =>
-      this.next(/* opt_isAutomaticAdvance */ true)
-    );
-    this.advancement_.addProgressListener((progress) =>
-      this.emitProgress_(progress)
-    );
+    this.setUpAdvancementConfig_();
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
@@ -321,18 +325,157 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.maybeConvertCtaLayerToPageOutlink_();
   }
 
-  /** @private */
-  maybeSetPreviewDuration_() {
-    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
-      const videos = this.getAllVideos_();
+  /**
+   * Handles visibility state changes.
+   * @private
+   */
+  onVisibilityChanged_() {
+    const ampDoc = this.getAmpDoc();
 
-      const autoAdvanceAttr =
-        videos.length > 0
-          ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-          : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+    const wasPreview = this.visibilityState_ === VisibilityState_Enum.PREVIEW;
+    const isPreviewToVisibleTransition = wasPreview && ampDoc.isVisible();
+    this.visibilityState_ = ampDoc.getVisibilityState();
 
-      this.element.setAttribute('auto-advance-after', autoAdvanceAttr);
+    if (ampDoc.isPreview() || ampDoc.isVisible()) {
+      // Preview mode and visible mode both have different advancement logic.
+      this.setUpAdvancementConfig_(isPreviewToVisibleTransition);
     }
+  }
+
+  /**
+   * Sets up the advancement config depending upon the
+   * @param {boolean=} handlePreviewToVisibleTransition
+   * @private
+   */
+  setUpAdvancementConfig_(handlePreviewToVisibleTransition = false) {
+    if (this.getAmpDoc().isPreview()) {
+      this.setupAutoAdvanceForPreview_();
+      this.initializeAdvancementConfig_();
+    } else if (this.getAmpDoc().isVisible()) {
+      this.setupAutoAdvanceForVisible_();
+      this.maybeSetStoryNextUp_();
+      if (this.isActive() && handlePreviewToVisibleTransition) {
+        this.handlePreviewToVisibleTransition_();
+      } else {
+        this.initializeAdvancementConfig_();
+      }
+    }
+  }
+
+  /**
+   * Configures the page to auto advance using preview-specific durations.
+   * @private
+   */
+  setupAutoAdvanceForPreview_() {
+    let previewSecondsPerPage = parseInt(
+      this.viewer_.getParam('previewSecondsPerPage'),
+      10
+    );
+    if (isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0) {
+      previewSecondsPerPage = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
+    }
+    this.element.setAttribute(
+      'auto-advance-after',
+      previewSecondsPerPage + 's'
+    );
+
+    const firstVideo = this.getFirstAmpVideo_();
+    if (firstVideo) {
+      whenUpgradedToCustomElement(firstVideo)
+        .then(() => firstVideo.getImpl())
+        .then((videoImpl) => {
+          this.loadPromise(firstVideo).then(() => {
+            const duration = videoImpl.getDuration();
+            const tooShort = duration < previewSecondsPerPage;
+            const videoEl = firstVideo.querySelector('video');
+            videoEl.loop ||= tooShort;
+          });
+        });
+    }
+  }
+
+  /**
+   * Configures the page to auto advance using default durations.
+   * @private
+   */
+  setupAutoAdvanceForVisible_() {
+    // The 'auto-advance-after' attribute value may have been altered if auto
+    // advance was set up for preview mode. We revert this alteration for
+    // visible mode, in accordance with any values specified by the publisher.
+    if (this.initialAutoAdvanceValue_) {
+      this.element.setAttribute(
+        'auto-advance-after',
+        this.initialAutoAdvanceValue_
+      );
+    } else {
+      this.element.removeAttribute('auto-advance-after');
+    }
+  }
+
+  /**
+   * Handles the transition between the `preview` and `visible` visibility
+   * states by reinitializing this page's advancement config.
+   *
+   * As long as this page has called `setupAutoAdvanceForVisible_()`, prior to
+   * this method, then the reinitialization will result in a new advancement
+   * config that aligns with the advancement logic specified by the publisher.
+   * @private
+   */
+  handlePreviewToVisibleTransition_() {
+    const advancementType = this.advancement_?.getType();
+    devAssert(
+      advancementType === AdvancementConfigType.TIME_BASED_ADVANCEMENT,
+      'The advancement is expected to be time-based in preview mode'
+    );
+
+    // Here, we store the progress values of the time-based advancement used
+    // during the preview. After the advancement is reinitialized below, we
+    // set its progress to the value that has already elapsed in preview mode,
+    // ensuring that the progress bar accurately reflects the page's progress.
+    const progress = this.advancement_.getProgress();
+    const progressMs = this.advancement_.getProgressMs();
+
+    this.initializeAdvancementConfig_();
+
+    switch (this.advancement_.getType()) {
+      case AdvancementConfigType.ADVANCEMENT_CONFIG:
+        // With this advancement, the progress bar should be full instead of
+        // gradually filling. We set the progress bar's progress to the 1.0
+        // because the bar would otherwise stagnate at a value between 0 & 1.
+        this.emitProgress_(1.0);
+        this.advancement_.start();
+        break;
+
+      case AdvancementConfigType.MEDIA_BASED_ADVANCEMENT:
+        // With this advancement, the progress bar should advance along with
+        // the video/audio playback progress. We ensure that the new
+        // advancement begins not at 0, but at the already-elapsed media
+        // playback time.
+        this.advancement_.start(progress);
+        break;
+
+      case AdvancementConfigType.TIME_BASED_ADVANCEMENT:
+        // With this advancement, the progress bar should advance along with
+        // time. We ensure that the new advancement begins not at 0, but at
+        // the already-elapsed time.
+        this.advancement_.start(progressMs / this.advancement_.getDelayMs());
+    }
+  }
+
+  /**
+   * Initialize this page's advancement config and set its listener callbacks.
+   * @private
+   */
+  initializeAdvancementConfig_() {
+    this.advancement_?.removeAllAddedListeners();
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    this.advancement_.addPreviousListener(() => this.previous());
+    this.advancement_.addAdvanceListener(() =>
+      this.next(/* opt_isAutomaticAdvance */ true)
+    );
+    this.advancement_.addProgressListener((progress) =>
+      this.emitProgress_(progress)
+    );
   }
 
   /**
@@ -517,43 +660,78 @@ export class AmpStoryPage extends AMP.BaseElement {
     const registerAllPromise = this.registerAllMedia_();
 
     if (this.isActive()) {
-      registerAllPromise.then(() => {
-        if (this.state_ === PageState.NOT_ACTIVE) {
-          return;
-        }
-        this.signals()
-          .whenSignal(CommonSignals_Enum.LOAD_END)
-          .then(() => {
-            if (this.state_ == PageState.PLAYING) {
-              this.advancement_.start();
-            }
-          });
-        this.preloadAllMedia_().then(() => {
+      registerAllPromise
+        .then(() => {
           if (this.state_ === PageState.NOT_ACTIVE) {
             return;
           }
-          this.startMeasuringAllVideoPerformance_();
-          this.startListeningToVideoEvents_();
-          // iOS 14.2 and 14.3 requires play to be called before unmute
-          this.playAllMedia_().then(() => {
-            if (
-              !this.storeService_.get(StateProperty.MUTED_STATE) &&
-              this.state_ !== PageState.NOT_ACTIVE
-            ) {
-              this.unmuteAllMedia();
+          this.signals()
+            .whenSignal(CommonSignals_Enum.LOAD_END)
+            .then(() => {
+              if (this.state_ == PageState.PLAYING) {
+                this.advancement_.start();
+              }
+            });
+          this.preloadAllMedia_().then(() => {
+            if (this.state_ === PageState.NOT_ACTIVE) {
+              return;
             }
+            this.startMeasuringAllVideoPerformance_();
+            this.startListeningToVideoEvents_();
+            // iOS 14.2 and 14.3 requires play to be called before unmute
+            this.playAllMedia_().then(() => {
+              if (
+                !this.storeService_.get(StateProperty.MUTED_STATE) &&
+                this.state_ !== PageState.NOT_ACTIVE
+              ) {
+                this.unmuteAllMedia();
+              }
+            });
+            this.toggleCaptions_(
+              this.storeService_.get(StateProperty.CAPTIONS_STATE)
+            );
           });
-          this.toggleCaptions_(
-            this.storeService_.get(StateProperty.CAPTIONS_STATE)
-          );
+        })
+        .then(() => {
+          // In the PREVIEW state, a video can only use cached sources. If it
+          // fails to play due to any issue with the cached sources, we
+          // reregister the video once it has obtained its origin sources.
+          if (this.getAmpDoc().isPreview()) {
+            // We first block the reregistration on video layout end because
+            // that is the point at which the story has entered the VISIBLE
+            // state and its origin sources have been added.
+            return this.waitForPlaybackMediaLayoutEnd_().then(() => {
+              return this.reregisterAndPlayUnplayedVideos_();
+            });
+          }
         });
-      });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.checkPageHasCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
+  }
+
+  /**
+   * @return {!Promise} A promise that resolves when all videos that failed to
+   *     play have been reregistered and played.
+   * @private
+   */
+  reregisterAndPlayUnplayedVideos_() {
+    const videos = this.getAllVideos_();
+    const unplayedVideos = videos.filter(
+      (video) => video.readyState < /* HAVE_CURRENT_DATA */ 2
+    );
+    return this.mediaPoolPromise_.then((pool) => {
+      const playPromises = unplayedVideos.map((video) => {
+        return this.reregisterMedia_(pool, video).then(() => {
+          this.toggleErrorMessage_(false);
+          return this.playMedia_(pool, video);
+        });
+      });
+      return Promise.all(playPromises);
+    });
   }
 
   /** @override */
@@ -649,10 +827,33 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {!Promise} A promise that blocks until all playback media on the
+   *     page have begun their layouts.
    * @private
    */
-  waitForPlaybackMediaLayout_() {
+  waitForPlaybackMediaLayoutStart_() {
+    return this.waitForPlaybackMediaLayout_(true /* waitForLayoutStart */);
+  }
+
+  /**
+   * @return {!Promise} A promise that blocks until all playback media on the
+   *     page have completed their layouts.
+   * @private
+   */
+  waitForPlaybackMediaLayoutEnd_() {
+    return this.waitForPlaybackMediaLayout_(false /* waitForLayoutStart */);
+  }
+
+  /**
+   * @param {boolean} waitForLayoutStart Whether this method should only block
+   *     until all playback media have begun their layouts, as opposed to
+   *     having completed them.
+   * @return {!Promise} A promise that blocks until all playback media on the
+   *     page have begun or completed their layouts, depending on the value of
+   *     `waitForLayoutStart`.
+   * @private
+   */
+  waitForPlaybackMediaLayout_(waitForLayoutStart) {
     const mediaSet = toArray(
       this.getMediaBySelector_(Selectors.ALL_PLAYBACK_AMP_MEDIA)
     );
@@ -662,10 +863,13 @@ export class AmpStoryPage extends AMP.BaseElement {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-audio':
           case 'amp-video':
+            const loadSignal = waitForLayoutStart
+              ? CommonSignals_Enum.LOAD_START
+              : CommonSignals_Enum.LOAD_END;
             const signal =
               mediaEl.getAttribute('layout') === Layout_Enum.NODISPLAY
                 ? CommonSignals_Enum.BUILT
-                : CommonSignals_Enum.LOAD_END;
+                : loadSignal;
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(signal))
@@ -1047,7 +1251,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     if (!this.registerAllMediaPromise_) {
-      this.registerAllMediaPromise_ = this.waitForPlaybackMediaLayout_().then(
+      // In preview mode, the `amp-video` layout callback does not resolve
+      // because it is blocked on requests for origin sources that cannot be
+      // made in the SERP due to privacy concerns. So, instead of indefinitely
+      // blocking registration, we register media elements at layout start.
+      const waitForPlaybackMediaLayoutPromise = this.getAmpDoc().isPreview()
+        ? this.waitForPlaybackMediaLayoutStart_()
+        : this.waitForPlaybackMediaLayoutEnd_();
+      this.registerAllMediaPromise_ = waitForPlaybackMediaLayoutPromise.then(
         () => this.whenAllMediaElements_((p, e) => this.registerMedia_(p, e))
       );
     }
@@ -1068,6 +1279,24 @@ export class AmpStoryPage extends AMP.BaseElement {
       return Promise.resolve();
     } else {
       return mediaPool.register(
+        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
+      );
+    }
+  }
+
+  /**
+   * Reregisters the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise} Promise that resolves after the media is reregistered.
+   * @private
+   */
+  reregisterMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      // No-op.
+      return Promise.resolve();
+    } else {
+      return mediaPool.reregister(
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
       );
     }

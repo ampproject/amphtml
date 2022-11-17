@@ -10,7 +10,11 @@ export function cleanHtml(html: string, keepAttrs?: string[]): string {
   });
 
   // Condense whitespace:
-  html = html.trim().replace(/\s\s+/g, ' ');
+  html = cleanWhitespace(html);
 
   return html;
+}
+
+export function cleanWhitespace(html: string): string {
+  return html.trim().replace(/\s\s+/g, ' ');
 }

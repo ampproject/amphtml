@@ -4,7 +4,12 @@
 {
   rules: [
     {
-      owners: [{name: 'adolgachev'}, {name: 'jpettitt', notify: true}],
+      owners: [
+        {name: 'alin04'},
+        {name: 'fikus'},
+        {name: 'hartmannr76'},
+        {name: 'jpettitt', notify: true},
+      ],
     },
   ],
 }

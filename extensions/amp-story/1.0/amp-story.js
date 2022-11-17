@@ -42,7 +42,8 @@ import {
   toggle,
 } from '#core/dom/style';
 import {devError} from '#core/error';
-import {isEsm} from '#core/mode';
+import {clamp} from '#core/math';
+import {isEsm, isSsrCss} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
@@ -56,32 +57,10 @@ import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {calculateExtensionFileUrl} from '#service/extension-script';
-import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
 
-import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs419 from './_locales/es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsFr from './_locales/fr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsHi from './_locales/hi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsId from './_locales/id.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsIt from './_locales/it.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsJa from './_locales/ja.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsKo from './_locales/ko.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsNl from './_locales/nl.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsNo from './_locales/no.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsPtBr from './_locales/pt-BR.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsPtPt from './_locales/pt-PT.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsRu from './_locales/ru.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
@@ -143,7 +122,7 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
  * NOTE: If udpated here, update in amp-story-player-impl.js
  * @private @const {string}
  */
-const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
@@ -193,16 +172,10 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 };
 
 /**
- * The index of the page where the paywall would be triggered.
- * @const {number}
- */
-export const PAYWALL_PAGE_INDEX = 2;
-
-/**
  * The number of milliseconds to wait before showing the paywall on paywall page.
  * @const {number}
  */
-export const PAYWALL_DELAY_DURATION = 500;
+export const SUBSCRIPTIONS_DELAY_DURATION = 500;
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -212,6 +185,24 @@ const TAG = 'amp-story';
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#202125';
+
+/**
+ * The default number of story pages that should be shown in preview mode
+ * before the preview is considered to be finished.
+ * @const {number}
+ */
+const DEFAULT_MIN_PAGES_TO_PREVIEW = 1;
+
+/**
+ * The default percentage of the total number of story pages that should be
+ * shown in preview mode before the preview is considered to be finished.
+ * @const {number}
+ */
+const DEFAULT_PCT_PAGES_TO_PREVIEW = 30;
+
+/** The targets that should not navigate when pressing keys.
+ * @const {string} */
+const IGNORE_KEYDOWN_EVENT_TARGET = 'amp-story-interactive-slider';
 
 /*
  * @implements {./media-pool.MediaPoolRoot}
@@ -324,10 +315,22 @@ export class AmpStory extends AMP.BaseElement {
     this.pageAfterSubscriptionsGranted_ = null;
 
     /** @private {!Deferred} a promise that is resolved once the subscription state is received */
-    this.subscriptionsStatePromise_ = new Deferred();
+    this.subscriptionsStateDeferred_ = new Deferred();
 
     /** @private {?number} the timeout to show subscriptions dialog after delay */
     this.showSubscriptionsUITimeout_ = null;
+
+    /** @private {?number} the index of the page where the paywall would be triggered. */
+    this.subscriptionsPageIndex_ = -1;
+
+    /** @private {!Deferred} a promise that is resolved once the subscriptions page index is extracted from amp-story-subscriptions. */
+    this.subscriptionsPageIndexDeferred_ = new Deferred();
+
+    /**
+     * @private {?number} the index of the last page that should be shown in
+     *     preview mode.
+     */
+    this.indexOfLastPageToPreview_ = null;
   }
 
   /** @override */
@@ -346,6 +349,8 @@ export class AmpStory extends AMP.BaseElement {
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
+
+    this.indexOfLastPageToPreview_ = this.calculateIndexOfLastPageToPreview_();
 
     this.installLocalizationStrings_();
 
@@ -583,12 +588,13 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Builds the system layer DOM.
    * @param {string} initialPageId
+   * @param {boolean} isVisible
    * @private
    */
-  buildSystemLayer_(initialPageId) {
+  buildSystemLayer_(initialPageId, isVisible) {
     this.updateAudioIcon_();
     this.updatePausedIcon_();
-    this.element.appendChild(this.systemLayer_.build(initialPageId));
+    this.element.appendChild(this.systemLayer_.build(initialPageId, isVisible));
   }
 
   /** @private */
@@ -643,6 +649,14 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
+      // SWITCH_PAGE is fired with each page advancement in preview mode.
+      // Before advancing beyond the final page of a preview, we send the
+      // viewer a message that the preview has finished. In the SERP, this
+      // message can be used to advance to a subsequent story's preview.
+      if (this.getAmpDoc().isPreview()) {
+        this.sendMessageIfPreviewFinished_();
+      }
+
       this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
@@ -724,13 +738,24 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_PAGE_INDEX,
+      (subscriptionsPageIndex) => {
+        if (subscriptionsPageIndex !== -1) {
+          this.subscriptionsPageIndexDeferred_.resolve();
+          this.subscriptionsPageIndex_ = subscriptionsPageIndex;
+        }
+      },
+      true
+    );
+
+    this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_STATE,
       (subscriptionsState) => {
         if (subscriptionsState === SubscriptionsState.PENDING) {
           return;
         }
 
-        this.subscriptionsStatePromise_.resolve();
+        this.subscriptionsStateDeferred_.resolve();
         if (subscriptionsState === SubscriptionsState.GRANTED) {
           this.hideSubscriptionsDialog_();
         }
@@ -949,7 +974,17 @@ export class AmpStory extends AMP.BaseElement {
   layoutStory_() {
     const initialPageId = this.getInitialPageId_();
 
-    this.buildSystemLayer_(initialPageId);
+    const shouldShowSystemLayer =
+      this.viewer_.getParam('hideProgressBar') !== '1';
+    if (!shouldShowSystemLayer) {
+      // The default value of `SYSTEM_UI_IS_VISIBLE_STATE` is `true`. We set it
+      // to `false` here solely to ensure that a subsequent firing of the
+      // `TOGGLE_SYSTEM_UI_IS_VISIBLE` action with a `true` value registers as
+      // a change in state instead of being a no-op.
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }
+    this.buildSystemLayer_(initialPageId, shouldShowSystemLayer);
+
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
@@ -1350,26 +1385,41 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // Block until the subscription state gets resolved.
+    // Block until the subscriptions page index gets resolved.
     const subscriptionsState = this.storeService_.get(
       StateProperty.SUBSCRIPTIONS_STATE
     );
     if (
-      pageIndex >= PAYWALL_PAGE_INDEX &&
+      subscriptionsState !== SubscriptionsState.DISABLED &&
+      this.subscriptionsPageIndex_ === -1
+    ) {
+      return this.blockOnPendingSubscriptionsData_(
+        this.subscriptionsPageIndexDeferred_,
+        targetPageId,
+        direction
+      );
+    }
+    // Block until the subscription state gets resolved.
+    if (
+      pageIndex >= this.subscriptionsPageIndex_ &&
       subscriptionsState === SubscriptionsState.PENDING
     ) {
-      return this.blockOnPendingSubscriptionsState_(targetPageId, direction);
+      return this.blockOnPendingSubscriptionsData_(
+        this.subscriptionsStateDeferred_,
+        targetPageId,
+        direction
+      );
     }
     // Navigation to the locked pages after the paywall page should be redirected to the paywall page.
     // This is necessary for deeplinking case to make sure the paywall dialog shows on the paywall page.
     if (
-      pageIndex > PAYWALL_PAGE_INDEX &&
+      pageIndex > this.subscriptionsPageIndex_ &&
       subscriptionsState === SubscriptionsState.BLOCKED
     ) {
       this.pageAfterSubscriptionsGranted_ = targetPageId;
       this.showSubscriptionsDialog_();
       return this.switchTo_(
-        this.pages_[PAYWALL_PAGE_INDEX].element.id,
+        this.pages_[this.subscriptionsPageIndex_].element.id,
         direction
       );
     }
@@ -1561,15 +1611,20 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Block while waiting to resolve subscriptions state.
+   * @param {Promise} subscriptionsDataDeferred
    * @param {string} targetPageId
    * @param {!NavigationDirection} direction
    * @return {!Promise}
    * @private
    */
-  blockOnPendingSubscriptionsState_(targetPageId, direction) {
-    return this.subscriptionsStatePromise_.promise.then(() => {
-      return this.switchTo_(targetPageId, direction);
-    });
+  blockOnPendingSubscriptionsData_(
+    subscriptionsDataDeferred,
+    targetPageId,
+    direction
+  ) {
+    return subscriptionsDataDeferred.promise.then(() =>
+      this.switchTo_(targetPageId, direction)
+    );
   }
 
   /**
@@ -1604,7 +1659,7 @@ export class AmpStory extends AMP.BaseElement {
     );
     // Navigation to the paywall page should show dialog after delay if not already shown.
     if (
-      pageIndex === PAYWALL_PAGE_INDEX &&
+      pageIndex === this.subscriptionsPageIndex_ &&
       !subscriptionsDialogUIState &&
       this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
         SubscriptionsState.BLOCKED
@@ -1613,10 +1668,13 @@ export class AmpStory extends AMP.BaseElement {
         this.pageAfterSubscriptionsGranted_ = targetPageId;
         this.showSubscriptionsDialog_();
         this.showSubscriptionsUITimeout_ = null;
-      }, PAYWALL_DELAY_DURATION);
+      }, SUBSCRIPTIONS_DELAY_DURATION);
     }
     // Hide paywall UI when navigating back to the previous page.
-    if (pageIndex < PAYWALL_PAGE_INDEX && subscriptionsDialogUIState) {
+    if (
+      pageIndex < this.subscriptionsPageIndex_ &&
+      subscriptionsDialogUIState
+    ) {
       this.hideSubscriptionsDialog_();
     }
   }
@@ -1627,6 +1685,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
+    if (matches(e.target, IGNORE_KEYDOWN_EVENT_TARGET)) {
+      return;
+    }
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
@@ -1699,6 +1760,14 @@ export class AmpStory extends AMP.BaseElement {
     const vState = this.getAmpDoc().getVisibilityState();
     const isPreview = vState === VisibilityState_Enum.PREVIEW;
     const isVisible = vState === VisibilityState_Enum.VISIBLE;
+
+    if (isPreview) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }
+    if (isVisible) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    }
+
     isPreview || isVisible ? this.resume_() : this.pause_();
   }
 
@@ -2627,41 +2696,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.maybeRegisterInlineLocalizationStrings_(storyLanguages[0])) {
       return;
     }
-    if (isExperimentOn(this.win, 'story-remote-localization')) {
-      this.fetchLocalizationStrings_(storyLanguages);
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'story-remote-localization'
-      );
-    } else {
-      getLocalizationService(this.element).registerLocalizedStringBundles({
-        'default': LocalizedStringsEn,
-        'ar': LocalizedStringsAr,
-        'de': LocalizedStringsDe,
-        'en': LocalizedStringsEn,
-        'en-GB': LocalizedStringsEnGb,
-        'es': LocalizedStringsEs,
-        'es-419': LocalizedStringsEs419,
-        'fr': LocalizedStringsFr,
-        'hi': LocalizedStringsHi,
-        'id': LocalizedStringsId,
-        'it': LocalizedStringsIt,
-        'ja': LocalizedStringsJa,
-        'ko': LocalizedStringsKo,
-        'nl': LocalizedStringsNl,
-        'no': LocalizedStringsNo,
-        'pt-PT': LocalizedStringsPtPt,
-        'pt-BR': LocalizedStringsPtBr,
-        'ru': LocalizedStringsRu,
-        'tr': LocalizedStringsTr,
-        'vi': LocalizedStringsVi,
-        'zh-CN': LocalizedStringsZhCn,
-        'zh-TW': LocalizedStringsZhTw,
-        'en-xa': createPseudoLocale(
-          LocalizedStringsEn,
-          (s) => `[${s} one two]`
-        ),
-      });
-    }
+    this.fetchLocalizationStrings_(storyLanguages);
   }
 
   /**
@@ -2720,10 +2755,50 @@ export class AmpStory extends AMP.BaseElement {
         devError(TAG, err, 'Bundle not found for language ' + languageCode);
       });
   }
+
+  /**
+   * @return {number} The index of the last page that should be shown in
+   *     preview mode.
+   * @private
+   */
+  calculateIndexOfLastPageToPreview_() {
+    const minPreviewPages =
+      parseInt(this.viewer_?.getParam('minPreviewPages'), 10) ||
+      DEFAULT_MIN_PAGES_TO_PREVIEW;
+    const pctPagesToPreview =
+      parseInt(this.viewer_?.getParam('pctPagesToPreview'), 10) ||
+      DEFAULT_PCT_PAGES_TO_PREVIEW;
+
+    // We calculate the number of preview pages by taking the larger of the two
+    // values: min # of preview pages vs the % of pages to show.
+    const numPages = this.element.querySelectorAll('amp-story-page').length;
+    let numPreviewPages = Math.ceil((pctPagesToPreview / 100) * numPages);
+    numPreviewPages = Math.max(minPreviewPages, numPreviewPages);
+    numPreviewPages = clamp(numPreviewPages, 1, numPages);
+
+    return numPreviewPages - 1;
+  }
+
+  /**
+   * Sends the 'storyPreviewFinished' viewer message if the active page is
+   * supposed to be the last page shown in the preview.
+   * @private
+   */
+  sendMessageIfPreviewFinished_() {
+    const activePageIdx = this.pages_.indexOf(this.activePage_);
+    const isPreviewFinished = activePageIdx >= this.indexOfLastPageToPreview_;
+    if (isPreviewFinished) {
+      this.viewerMessagingHandler_?.send('storyPreviewFinished', {});
+    }
+  }
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
-  AMP.registerElement('amp-story', AmpStory, CSS);
+  if (isSsrCss()) {
+    AMP.registerElement('amp-story', AmpStory);
+  } else {
+    AMP.registerElement('amp-story', AmpStory, CSS);
+  }
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);

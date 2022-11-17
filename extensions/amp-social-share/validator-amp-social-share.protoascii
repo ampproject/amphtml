@@ -1,8 +1,8 @@
 tags: {  # amp-social-share 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-social-share 1.0"
-  excludes: "amp-social-share 0.1"
+  satisfies_condition: "amp-social-share 1.0"
+  excludes_condition: "amp-social-share 0.1"
   extension_spec: {
     name: "amp-social-share"
     version_name: "v1.0"
@@ -15,8 +15,8 @@ tags: {  # amp-social-share 0.1 and latest
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  satisfies: "amp-social-share 0.1"
-  excludes: "amp-social-share 1.0"
+  satisfies_condition: "amp-social-share 0.1"
+  excludes_condition: "amp-social-share 1.0"
   extension_spec: {
     name: "amp-social-share"
     version_name: "v0.1"

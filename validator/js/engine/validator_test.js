@@ -1917,13 +1917,13 @@ describe('ValidatorRulesMakeSense', () => {
   const allSatisfies = [];
   const allRequiresAndExcludes = [];
   for (const tagSpec of rules.tags) {
-    for (const condition of tagSpec.requires) {
+    for (const condition of tagSpec.requiresCondition) {
       allRequiresAndExcludes.push(condition);
     }
-    for (const condition of tagSpec.excludes) {
+    for (const condition of tagSpec.excludesCondition) {
       allRequiresAndExcludes.push(condition);
     }
-    for (const condition of tagSpec.satisfies) {
+    for (const condition of tagSpec.satisfiesCondition) {
       allSatisfies.push(condition);
     }
   }

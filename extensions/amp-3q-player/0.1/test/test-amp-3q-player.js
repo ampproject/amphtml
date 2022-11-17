@@ -1,4 +1,6 @@
 import '../amp-3q-player';
+import {expect} from 'chai';
+
 import {createElementWithAttributes} from '#core/dom';
 import * as fullscreen from '#core/dom/fullscreen';
 
@@ -36,7 +38,8 @@ describes.realWin(
         height: 200,
       });
       if (playoutId) {
-        player.setAttribute('data-id', playoutId);
+        player.setAttribute('data-id', playoutId) ||
+          player.setAttribute('data-player', playoutId);
       }
       doc.body.appendChild(player);
       await player.buildInternal();
@@ -88,26 +91,38 @@ describes.realWin(
         expect(postMessageSpy).to.not.be.calledWith('pause');
       });
     });
-
+    //
     describe('rendering', async () => {
       it('renders', async () => {
         const player = await get3QElement(
           'c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
         );
         const iframe = player.querySelector('iframe');
+        const url =
+          'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158';
         expect(iframe).to.not.be.null;
+        expect(iframe.src).to.not.be.null;
         expect(iframe.src).to.equal(
-          'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true'
+          url
+          //'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true&player=c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
         );
       });
 
       it('requires data-id', () => {
         return allowConsoleError(() => {
           return get3QElement('').should.eventually.be.rejectedWith(
-            /The data-id attribute is required/
+            'Data-id or data-player attribute is required for <amp-3q-player>'
           );
         });
       });
+
+      // it('requires data-player', () => {
+      //   return allowConsoleError(() => {
+      //     return get3QElement('').should.eventually.be.rejectedWith(
+      //       'Data-id attribute is required for <amp-3q-player>'
+      //     );
+      //   });
+      // });
 
       it('should forward events from amp-3q-player to the amp element', async () => {
         const player = await get3QElement(

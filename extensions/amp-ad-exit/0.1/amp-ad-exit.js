@@ -456,7 +456,8 @@ export class AmpAdExit extends AMP.BaseElement {
     // https://groups.google.com/a/chromium.org/g/blink-dev/c/FFX6VkvladY/m/QgaWHK6ZBAAJ
     const parts = ['noopener'];
     for (const key of Object.keys(adConversionData)) {
-      parts.push(`${key.toLowerCase()}=${adConversionData[key]}`);
+      const encoded = encodeURIComponent(adConversionData[key]);
+      parts.push(`${key.toLowerCase()}=${encoded}`);
     }
     return parts.join(',');
   }
