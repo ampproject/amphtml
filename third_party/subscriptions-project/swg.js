@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.240 */
+/** Version: 0.1.22.243 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -74,6 +74,10 @@ const AnalyticsEvent = {
   IMPRESSION_SUBSCRIPTION_LINKING_COMPLETE: 40,
   IMPRESSION_SUBSCRIPTION_LINKING_ERROR: 41,
   IMPRESSION_SURVEY: 42,
+  IMPRESSION_REGWALL_ERROR: 43,
+  IMPRESSION_NEWSLETTER_ERROR: 44,
+  IMPRESSION_SURVEY_ERROR: 45,
+  IMPRESSION_METER_TOAST_ERROR: 46,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -134,7 +138,7 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
-  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
+  ACTION_SHOWCASE_REGWALL_SIWG_CLICK: 1060,
   ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
   ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
   ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
@@ -145,6 +149,10 @@ const AnalyticsEvent = {
   ACTION_SURVEY_SUBMIT_CLICK: 1068,
   ACTION_SURVEY_CLOSED: 1069,
   ACTION_SURVEY_DATA_TRANSFER: 1070,
+  ACTION_REGWALL_PAGE_REFRESH: 1071,
+  ACTION_NEWSLETTER_PAGE_REFRESH: 1072,
+  ACTION_SURVEY_PAGE_REFRESH: 1073,
+  ACTION_METER_TOAST_PAGE_REFRESH: 1074,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -153,6 +161,7 @@ const AnalyticsEvent = {
   EVENT_SUBSCRIPTION_LINKING_FAILED: 2005,
   EVENT_SURVEY_ALREADY_SUBMITTED: 2006,
   EVENT_SURVEY_SUBMIT_FAILED: 2007,
+  EVENT_SURVEY_DATA_TRANSFER_FAILED: 2008,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -182,6 +191,8 @@ const AnalyticsEvent = {
   EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
   EVENT_SUBSCRIPTION_LINKING_SUCCESS: 3027,
   EVENT_SURVEY_SUBMITTED: 3028,
+  EVENT_LINK_ACCOUNT_SUCCESS: 3029,
+  EVENT_SAVE_SUBSCRIPTION_SUCCESS: 3030,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -2067,6 +2078,9 @@ class SubscriptionLinkingCompleteResponse {
 
     /** @private {?string} */
     this.publisherProvidedId_ = data[base] == null ? null : data[base];
+
+    /** @private {?boolean} */
+    this.success_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -2084,6 +2098,20 @@ class SubscriptionLinkingCompleteResponse {
   }
 
   /**
+   * @return {?boolean}
+   */
+  getSuccess() {
+    return this.success_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setSuccess(value) {
+    this.success_ = value;
+  }
+
+  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -2091,6 +2119,7 @@ class SubscriptionLinkingCompleteResponse {
   toArray(includeLabel = true) {
     const arr = [
         this.publisherProvidedId_, // field 1 - publisher_provided_id
+        this.success_, // field 2 - success
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2261,7 +2290,7 @@ class SurveyDataTransferRequest {
     const base = includesLabel ? 1 : 0;
 
     /** @private {!Array<!SurveyQuestion>} */
-    this.surveyQuestions_ = data[base] || [];
+    this.surveyQuestions_ = (data[base] || []).map(item => new SurveyQuestion(item, includesLabel));
   }
 
   /**
@@ -2376,7 +2405,7 @@ class SurveyQuestion {
     this.questionCategory_ = data[2 + base] == null ? null : data[2 + base];
 
     /** @private {!Array<!SurveyAnswer>} */
-    this.surveyAnswers_ = data[3 + base] || [];
+    this.surveyAnswers_ = (data[3 + base] || []).map(item => new SurveyAnswer(item, includesLabel));
   }
 
   /**
@@ -5382,12 +5411,17 @@ function serializeProtoMessageForUrl(message) {
 }
 
 /**
+ * Returns the canonical URL from the canonical tag. If the canonical tag is
+ * not present, treat the doc URL itself as canonical.
  * @param {!../model/doc.Doc} doc
  * @return {string}
  */
 function getCanonicalUrl(doc) {
-  const node = doc.getRootNode().querySelector("link[rel='canonical']");
-  return (node && node.href) || '';
+  const rootNode = doc.getRootNode();
+  const canonicalTag = rootNode.querySelector("link[rel='canonical']");
+  return (
+    canonicalTag?.href || rootNode.location.origin + rootNode.location.pathname
+  );
 }
 
 const PARSED_URL = parseUrl(self.window.location.href);
@@ -5586,7 +5620,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.240',
+    '_client': 'SwG 0.1.22.243',
   });
 }
 
@@ -6928,7 +6962,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.240',
+        '_client': 'SwG 0.1.22.243',
         'supportsEventManager': true,
       },
       args || {}
@@ -7897,7 +7931,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.240');
+    context.setClientVersion('SwG 0.1.22.243');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -11539,6 +11573,17 @@ const IFRAME_BOX_SHADOW =
   'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
 const MINIMIZED_IFRAME_SIZE = '420px';
 const ANONYMOUS_USER_ATTRIBUTE = 'anonymous_user';
+
+/**
+ * Values of meterClientUserAttribute for which to show the Known MeterType.
+ * @const {Array<string>}
+ */
+const KNOWN_USER_ATTRIBUTES = [
+  'known_user',
+  'newsletter_user',
+  'registration_user',
+];
+
 /**
  * The iframe URLs to be used per MeterClientType
  * @type {Object.<MeterClientTypes, string>}
@@ -11551,6 +11596,7 @@ const IframeUrlByMeterClientType = {
 const MeterType = {
   UNKNOWN: 'UNKNOWN',
   KNOWN: 'KNOWN',
+  SUPPRESSED: 'SUPPRESSED',
 };
 
 class MeterToastApi {
@@ -11617,8 +11663,16 @@ class MeterToastApi {
       additionalArguments['meterType'] =
         this.meterClientUserAttribute_ === ANONYMOUS_USER_ATTRIBUTE
           ? MeterType.UNKNOWN
-          : MeterType.KNOWN;
+          : KNOWN_USER_ATTRIBUTES.includes(this.meterClientUserAttribute_)
+          ? MeterType.KNOWN
+          : MeterType.SUPPRESSED;
     }
+
+    // Exit flow and do not show prompt for Suppressed MeterType
+    if (additionalArguments['meterType'] === MeterType.SUPPRESSED) {
+      return Promise.resolve();
+    }
+
     const iframeArgs =
       this.activityPorts_.addDefaultArguments(additionalArguments);
 
@@ -11627,14 +11681,19 @@ class MeterToastApi {
         this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
       ];
 
+    const iframeUrlParams = {
+      'origin': parseUrl(this.win_.location.href).origin,
+    };
+
+    if (this.deps_.clientConfigManager().shouldForceLangInIframes()) {
+      iframeUrlParams['hl'] = this.deps_.clientConfigManager().getLanguage();
+    }
+
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
-      feUrl(iframeUrl, {
-        'origin': parseUrl(this.win_.location.href).origin,
-        'hl': this.deps_.clientConfigManager().getLanguage(),
-      }),
+      feUrl(iframeUrl, iframeUrlParams),
       iframeArgs,
       /* shouldFadeBody */ false
     );
@@ -14114,6 +14173,9 @@ class LinkCompleteFlow {
           deps
             .eventManager()
             .logSwgEvent(AnalyticsEvent.ACTION_LINK_CONTINUE, true);
+          deps
+            .eventManager()
+            .logSwgEvent(AnalyticsEvent.EVENT_LINK_ACCOUNT_SUCCESS);
           const flow = new LinkCompleteFlow(deps, response);
           flow.start();
         },
@@ -14163,32 +14225,11 @@ class LinkCompleteFlow {
     /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
-    const index = (response && response['index']) || '0';
-
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
 
-    /** @private @const {!Promise<!ActivityIframeView>} */
-    this.activityIframeViewPromise_ = this.clientConfigManager_
-      .getClientConfig()
-      .then(
-        (clientConfig) =>
-          new ActivityIframeView(
-            this.win_,
-            this.activityPorts_,
-            feUrl(
-              '/linkconfirmiframe',
-              {},
-              clientConfig.usePrefixedHostPath,
-              'u/' + index
-            ),
-            feArgs({
-              'productId': deps.pageConfig().getProductId(),
-              'publicationId': deps.pageConfig().getPublicationId(),
-            }),
-            /* shouldFadeBody */ true
-          )
-      );
+    /** @private {!Object} */
+    this.response_ = response || {};
 
     /** @private {?function()} */
     this.completeResolver_ = null;
@@ -14204,8 +14245,28 @@ class LinkCompleteFlow {
    * @return {!Promise}
    */
   start() {
-    return this.activityIframeViewPromise_.then((activityIframeView) => {
-      this.activityIframeView_ = activityIframeView;
+    if (this.response_['saveAndRefresh']) {
+      this.complete_(this.response_, this.response_['linked']);
+      return Promise.resolve();
+    }
+
+    return this.clientConfigManager_.getClientConfig().then((clientConfig) => {
+      const index = this.response_['index'] || '0';
+      this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl(
+          '/linkconfirmiframe',
+          {},
+          clientConfig.usePrefixedHostPath,
+          'u/' + index
+        ),
+        feArgs({
+          'productId': this.deps_.pageConfig().getProductId(),
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
+        }),
+        /* shouldFadeBody */ true
+      );
 
       const promise = this.activityIframeView_.acceptResultAndVerify(
         feOrigin(),
@@ -14213,8 +14274,8 @@ class LinkCompleteFlow {
         /* requireSecureChannel */ true
       );
       promise
-        .then((response) => {
-          this.complete_(response);
+        .then((response = {}) => {
+          this.complete_(response, !!response['success']);
         })
         .catch((reason) => {
           // Rethrow async.
@@ -14237,10 +14298,11 @@ class LinkCompleteFlow {
   }
 
   /**
-   * @param {?Object} response
+   * @param {!Object} response
+   * @param {boolean} success
    * @private
    */
-  complete_(response) {
+  complete_(response, success) {
     this.deps_
       .eventManager()
       .logSwgEvent(AnalyticsEvent.ACTION_GOOGLE_UPDATED_CLOSE, true);
@@ -14252,7 +14314,7 @@ class LinkCompleteFlow {
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
     this.entitlementsManager_.unblockNextNotification();
-    this.entitlementsManager_.reset((response && response['success']) || false);
+    this.entitlementsManager_.reset(success);
     if (response && response['entitlements']) {
       this.entitlementsManager_.pushNextEntitlements(response['entitlements']);
     }
@@ -14332,6 +14394,9 @@ class LinkSaveFlow {
       this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.LINK_ACCOUNT);
       linkConfirm = new LinkCompleteFlow(this.deps_, result);
       startPromise = linkConfirm.start();
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_SAVE_SUBSCRIPTION_SUCCESS);
     } else {
       startPromise = Promise.reject(createCancelError(this.win_, 'not linked'));
     }
