@@ -57,6 +57,7 @@ import {setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
+import {clamp} from '#core/math';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -367,10 +368,24 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   setupAutoAdvanceForPreview_() {
-    this.element.setAttribute(
-      'auto-advance-after',
-      this.getPreviewDurationSeconds_() + 's'
-    );
+    let autoAdvanceAfter = this.getAutoAdvanceAfterSeconds_();
+    const maxVideoPreview = this.getMaxVideoPreview_();
+    if (maxVideoPreview > 0) {
+      // DESCRIPTION use maxVideoPreview value as long as it does not exceed
+      // the default advancement value
+      autoAdvanceAfter = clamp(
+        maxVideoPreview,
+        1,
+        DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S
+      );
+    } else if (maxVideoPreview === 0) {
+      // DESCRIPTION 0 means static image instead of video preview but we still
+      // use default preview length
+      autoAdvanceAfter = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
+      // TODO(masanto): Prevent video from playing when maxVideoPreview is 0
+    }
+
+    this.element.setAttribute('auto-advance-after', autoAdvanceAfter + 's');
 
     const firstVideo = this.getFirstAmpVideo_();
     if (firstVideo) {
@@ -388,35 +403,29 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Calculates the duration of this page's preview based upon the
+   * 'previewSecondsPerPage' query parameter.
    * @return {number} The number of seconds for which this page should be
    *     previewed before advancing to the next page.
    * @private
    */
-  getPreviewDurationSeconds_() {
-    let previewSecondsPerPage = parseInt(
-      this.viewer_.getParam('previewSecondsPerPage'),
-      10
-    );
+  getAutoAdvanceAfterSeconds_() {
+    const previewSecondsStr = this.viewer_.getParam('previewSecondsPerPage');
+    const previewSecondsPerPage = parseInt(previewSecondsStr, 10);
+    return isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0
+      ? DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S
+      : previewSecondsPerPage;
+  }
 
-    // TODO(masanto): Describe below
-    const robotsMetaTags = Array.from(
-      this.win.document.querySelectorAll('meta[name=robots]')
-    );
-    const maxVideoPreviewTags = robotsMetaTags.filter((tag) =>
-      tag.getAttribute('content')?.startsWith('max-video-preview')
-    );
-    const maxVideoPreviewStr = maxVideoPreviewTags[0]?.split(':')[1];
-    let maxVideoPreview = parseInt(maxVideoPreviewStr, 10);
-    if (maxVideoPreview) {
-      // max-video-preview must be an integer greater than or equal to -1
-      maxVideoPreview = Math.max(-1, maxVideoPreview);
-    }
-
-    if (isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0) {
-      previewSecondsPerPage = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
-    }
-
-    return previewSecondsPerPage;
+  /**
+   * @returns {number} The max-video-preview value, if it exists on the doc.
+   * @private
+   */
+  getMaxVideoPreview_() {
+    const robotsContent = this.getAmpDoc().getMetaByName('robots');
+    const maxVideoPreviewRegex = /max-video-preview[^,]*/;
+    const maxVideoPreviewStr = robotsContent?.match(maxVideoPreviewRegex)[0];
+    return parseInt(maxVideoPreviewStr?.split(':')[1], 10);
   }
 
   /**
