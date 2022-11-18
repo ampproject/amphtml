@@ -24,6 +24,7 @@ import {
 } from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
+import {clamp} from '#core/math';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
@@ -57,7 +58,6 @@ import {setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
-import {clamp} from '#core/math';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -394,7 +394,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then((videoImpl) => {
           this.loadPromise(firstVideo).then(() => {
             const duration = videoImpl.getDuration();
-            const tooShort = duration < previewSecondsPerPage;
+            const tooShort = duration < autoAdvanceAfter;
             const videoEl = firstVideo.querySelector('video');
             videoEl.loop ||= tooShort;
           });
@@ -418,7 +418,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @returns {number} The max-video-preview value, if it exists on the doc.
+   * @return {number} The max-video-preview value, if it exists on the doc.
    * @private
    */
   getMaxVideoPreview_() {
