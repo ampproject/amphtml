@@ -369,37 +369,32 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setupAutoAdvanceForPreview_() {
     let autoAdvanceAfter = this.getAutoAdvanceAfterSeconds_();
-    const maxVideoPreview = this.getMaxVideoPreview_();
-    if (maxVideoPreview > 0) {
-      // DESCRIPTION use maxVideoPreview value as long as it does not exceed
-      // the default advancement value
-      autoAdvanceAfter = clamp(
-        maxVideoPreview,
-        1,
-        DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S
-      );
-    } else if (maxVideoPreview === 0) {
-      // DESCRIPTION 0 means static image instead of video preview but we still
-      // use default preview length
-      autoAdvanceAfter = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
-      // TODO(masanto): Prevent video from playing when maxVideoPreview is 0
-    }
-
-    this.element.setAttribute('auto-advance-after', autoAdvanceAfter + 's');
 
     const firstVideo = this.getFirstAmpVideo_();
-    if (firstVideo) {
-      whenUpgradedToCustomElement(firstVideo)
-        .then(() => firstVideo.getImpl())
-        .then((videoImpl) => {
-          this.loadPromise(firstVideo).then(() => {
-            const duration = videoImpl.getDuration();
-            const tooShort = duration < autoAdvanceAfter;
-            const videoEl = firstVideo.querySelector('video');
-            videoEl.loop ||= tooShort;
-          });
-        });
+    if (!firstVideo) {
+      this.element.setAttribute('auto-advance-after', autoAdvanceAfter + 's');
+      return;
     }
+
+    const maxPrev = this.getMaxVideoPreview_();
+    if (maxPrev > 0) {
+      // Comply with max-video-preview, but never to lengthen the page preview
+      autoAdvanceAfter = min(maxPrev, autoAdvanceAfter);
+    } else if (maxPrev === 0) {
+      // TODO(masanto): Prevent video from playing when maxVideoPreview is 0
+    }
+    this.element.setAttribute('auto-advance-after', autoAdvanceAfter + 's');
+
+    whenUpgradedToCustomElement(firstVideo)
+      .then(() => firstVideo.getImpl())
+      .then((videoImpl) => {
+        this.loadPromise(firstVideo).then(() => {
+          const duration = videoImpl.getDuration();
+          const tooShort = duration < autoAdvanceAfter;
+          const videoEl = firstVideo.querySelector('video');
+          videoEl.loop ||= tooShort;
+        });
+      });
   }
 
   /**
@@ -418,7 +413,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {number} The max-video-preview value, if it exists on the doc.
+   * @return {number} The max-video-preview value, if it exists on the doc. A
+   *     positive value means that a maximum of <value> seconds may be used as
+   *     a video snippet for videos on this page in search results. A value of
+   *     0 means that a static image may be used. And a value of -1 means that
+   *     there is no limit to the video's preview length.
    * @private
    */
   getMaxVideoPreview_() {
