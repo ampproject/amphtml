@@ -24,7 +24,6 @@ import {
 } from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
-import {min} from '#core/math';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
@@ -379,7 +378,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const maxPrev = this.getMaxVideoPreview_();
     if (maxPrev > 0) {
       // Comply with max-video-preview, but never to lengthen the page preview
-      autoAdvanceAfter = min(maxPrev, autoAdvanceAfter);
+      autoAdvanceAfter = Math.min(maxPrev, autoAdvanceAfter);
     } else if (maxPrev === 0) {
       // TODO(masanto): Prevent video from playing when maxVideoPreview is 0
     }
