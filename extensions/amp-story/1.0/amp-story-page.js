@@ -24,7 +24,7 @@ import {
 } from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
-import {clamp} from '#core/math';
+import {min} from '#core/math';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
