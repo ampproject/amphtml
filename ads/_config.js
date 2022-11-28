@@ -286,6 +286,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'affinity': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn4-hbs.affinitymatrix.com',
+  },
+
   'aja': {
     prefetch: [
       'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js',
