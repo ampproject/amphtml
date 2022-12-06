@@ -174,28 +174,38 @@ function ignoreErrorWhenFileAlreadyExists_(error) {
 }
 
 /**
+ * Ensures the presence of env variables or throws an error.
+ * @param  {...string} vars
+ * @return {string[]}
+ */
+function ensureEnvVariable_(...vars) {
+  const ret = [];
+  for (const v of vars) {
+    if (!(v in process.env)) {
+      throw new Error(`CircleCI job is missing the ${v} env variable`);
+    }
+    ret.push(v);
+  }
+  return ret;
+}
+
+/**
  * Uploads release files to Cloudflare R2.
  * @return {Promise<void>}
  */
 async function uploadFilesR2_() {
-  const {R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY} = process.env;
-  if (!R2_ACCESS_KEY_ID) {
-    throw new Error(
-      'CircleCI job is missing the R2_ACCESS_KEY_ID env variable'
-    );
-  }
-  if (!R2_SECRET_ACCESS_KEY) {
-    throw new Error(
-      'CircleCI job is missing the R2_SECRET_ACCESS_KEY env variable'
-    );
-  }
+  const [accountId, accessKeyId, secretAccessKey] = ensureEnvVariable_(
+    'R2_ACCOUNT_ID',
+    'R2_ACCESS_KEY_ID',
+    'R2_SECRET_ACCESS_KEY'
+  );
 
   const s3 = new S3({
     region: 'auto',
-    endpoint: `https://78e1d5140b47fc9dab18dc8b25351b7a.r2.cloudflarestorage.com`,
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: {
-      accessKeyId: R2_ACCESS_KEY_ID,
-      secretAccessKey: R2_SECRET_ACCESS_KEY,
+      accessKeyId,
+      secretAccessKey,
     },
   });
 
@@ -233,14 +243,9 @@ async function uploadFilesR2_() {
  * @return {Promise<void>}
  */
 async function uploadFilesGCS_() {
-  const {GCLOUD_SERVICE_KEY} = process.env;
-  if (!GCLOUD_SERVICE_KEY) {
-    throw new Error(
-      'CircleCI job is missing the GCLOUD_SERVICE_KEY env variable'
-    );
-  }
+  const [gcloudServiceKey] = ensureEnvVariable_('GCLOUD_SERVICE_KEY');
 
-  const credentials = JSON.parse(GCLOUD_SERVICE_KEY);
+  const credentials = JSON.parse(gcloudServiceKey);
   if (
     !credentials.client_email ||
     !credentials.private_key ||
