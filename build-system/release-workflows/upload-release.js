@@ -181,10 +181,11 @@ function ignoreErrorWhenFileAlreadyExists_(error) {
 function ensureEnvVariable_(...vars) {
   const ret = [];
   for (const v of vars) {
-    if (!(v in process.env)) {
+    const value = process.env[v];
+    if (!value) {
       throw new Error(`CircleCI job is missing the ${v} env variable`);
     }
-    ret.push(v);
+    ret.push(value);
   }
   return ret;
 }
