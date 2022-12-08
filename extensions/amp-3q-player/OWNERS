@@ -3,8 +3,6 @@
     {
       owners: [
         {name: 'ayvar2000'},
-        {name: 'ampproject/wg-cool-team'},
-
         {name: 'dvoytenko', requestReviews: false},
         {name: 'rcebulko', notify: false},
       ],
