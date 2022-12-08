@@ -1,17 +1,17 @@
 {
-    rules: [
+  rules: [
     {
       owners: [
-        { name: "ayvar2000" },
-        { name: "ampproject/wg-cool-team" },
+        {name: 'ayvar2000'},
+        {name: 'ampproject/wg-cool-team'},
 
-        { name: "dvoytenko", requestReviews: false },
-        { name: "rcebulko", notify: false },
+        {name: 'dvoytenko', requestReviews: false},
+        {name: 'rcebulko', notify: false},
       ]
     },
     {
-      pattern: "package.json",
-      owners: [{ name: "packager" }],
+      pattern: 'package.json',
+      owners: [{name: 'packager'}],
     },
   ],
 }
