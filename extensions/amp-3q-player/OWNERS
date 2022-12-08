@@ -7,7 +7,7 @@
 
         {name: 'dvoytenko', requestReviews: false},
         {name: 'rcebulko', notify: false},
-      ]
+      ],
     },
     {
       pattern: 'package.json',
