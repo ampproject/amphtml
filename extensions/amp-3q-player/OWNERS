@@ -28,129 +28,22 @@
  * `ampproject/wg-components` and `rcebulko`, who should always be notified of
  * changes:
  *
- * {
- *   rules: [{
- *     owners: [
- *       { name: 'ampproject/wg-components' },
- *       {
- *         name: 'rcebulko',
- *         notify: true,
- *       },
- *     ],
- *   }],
- * }
- */
 
 // All owners files must contain a single `rules` key containing a list of
 // owners rules.
   rules: [
     {
-      // By default, rules apply to all files in the same directory and all
-      // subdirectories of the directory containing the owners file.
-
-      // Each rule must contain an `owners` key containing a list of owners.
       owners: [
-        // Each owner must contain a `name` key containing a GitHub username.
-        { name: "someuser" },
-
-        // Usernames should not be prefixed with "@"; this will raise a
-        // validation error.
-        // { name: "@dontdothis" },
-
-        // GitHub teams are also supported as owners. When a team is declared as
-        // an owner, it is treated the same as if all members of the team were
-        // listed as owners individually
-        // (see https://github.com/orgs/ampproject/teams).
+        { name: "ayvar2000" },
         { name: "ampproject/wg-cool-team" },
 
-        // Adding `requestReviews: false` to an owner definition will prevent
-        // this owner from being automatically notified or requested as a
-        // reviewer. They are still an owner, and may still be requested or
-        // tagged manually.
         { name: "dvoytenko", requestReviews: false },
-
-        // Adding `notify: true` to an owner definition will ensure that the
-        // user is notified of any PR touching those files, even if they are not
-        // added as a reviewer. The bot will add a comment with an @mention to
-        // these PRs to notify the owners.
-        { name: "rcebulko", notify: true },
-
-        // Note that these options may not be combined; both will result in a
-        // validation error.
-        // { name: "rando", notify: true, requestReviews: false },
+        { name: "rcebulko", notify: false },
       ]
     },
-
     {
-      // Each rule may optionally contain a `pattern` key. If present, the rule
-      // will apply only to files matching the pattern. By default, this pattern
-      // applies only to files within the directory (not subdirectories). This
-      // may be used to list filenames explicitly.
       pattern: "package.json",
       owners: [{ name: "packager" }],
     },
-
-    {
-      // Glob-like patterns may be used in place of literal filenames. In these
-      // patterns, a star `*` can represent any sequence of characters. These
-      // patterns follow the same rules as above, so `*.js` in this directory
-      // applies to `./main.js` but not `./foo/bar.js`.
-      pattern: "*.js",
-      owners: [{ name: "scripter" }],
-    },
-
-    {
-      // To apply a filename or pattern to all subdirectories as well, prefix
-      // the pattern with `**/`. The pattern `**/.eslintrc` applies to
-      // `./.eslintrc` as well as `./foo/.eslintrc`. The pattern
-      // `**/*.protoascii` applies to `./test.protoascii` as well as
-      // `./foo/example.protoascii`.
-      pattern: "**/*.protoascii",
-      owners: [{ name: "ampproject/wg-caching" }],
-    },
-
-    {
-      // Any other use of `/` in a pattern is forbidden (ie. no directory
-      // traversal). Patterns using `/` will be ignored. If rules are needed in
-      // a subdirectory, the appropriate OWNERS file should be created/updated
-      // in that subdirectory. This rule will be ignored since the pattern is
-      // illegal.
-      pattern: "foo*/*.js",
-      owners: [{ name: "doesntmatter" }],
-    },
-
-    {
-      // Filename and pattern rules may be combined with brace expansion. The
-      // pattern parser uses
-      // `[minimatch](https://www.npmjs.com/package/minimatch)`, the matching
-      // library used internally by npm. The pattern `*.{js,css}` applies to
-      // `./script.js` and `./style.css`.
-      pattern: "*.{js,css}",
-      owners: [{ name: "frontend" }],
-    },
   ],
-
-  // The root-level owners file--and ONLY the root-level owners file--may
-  // specify an optional `reviewerPool` property, providing a list of GitHub
-  // teams/users/bots. If present, the owners check will require that at least
-  // one member of this pool has given approval. It is possible that a given
-  // reviewer is both a member of this reviewer pool and provides owners
-  // coverage.
-  reviewerPool: [
-    "ampproject/reviewers-amphtml",
-    "user-approver",
-    "bot-approver[bot]",
-  ]
 }
-
-// The result of parsing this file would be a tree with these rules:
-//
-// Reviewers: ampproject/reviewers-amphtml [members...], user-approver,
-//            bot-approver[bot]
-// **/*: someuser, dontdothis, ampproject/wg-cool-team [members...],
-//       dvoytenko (never notify), rcebulko (always notify), rando
-// ./{package.json}: packager
-// ./{*.js}: scripter
-// **/{*.protoascii}: ampproject/wg-caching [members...]
-// ./{*.{js,css}}: frontend
-// ./{package.json,yarn.lock}: ampproject/wg-infra [members...]
