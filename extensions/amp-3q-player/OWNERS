@@ -41,19 +41,6 @@
  * }
  */
 
-{
- rules: [{
-  owners: [
-    { name: 'ampproject/wg-components' },
-    {
-    name: 'rcebulko',
-    notify: true,
-    },
-  ],
-}],
-}
- 
-
 // All owners files must contain a single `rules` key containing a list of
 // owners rules.
   rules: [
