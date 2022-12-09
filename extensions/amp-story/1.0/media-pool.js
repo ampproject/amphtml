@@ -807,10 +807,12 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask()).then(
       () => {
         if (rewindToBeginning) {
-          // We add a 10 second delay to rewinding as sometimes this causes
+          // We add a 10 second delay to rewinding as sometimes this causes an
           // interlacing/glitch/frame jump when a new video is starting to play.
           // A 0 delay isn't enough as we need to push the "seeking" event
           // to the next tick of the event loop.
+          // NOTE: Please note that this is not an ideal solution and a bit hacky.
+          // The more ideal fix would be to fix the the navigations animation frames.
           // See https://github.com/ampproject/amphtml/issues/38531
           this.timer_.delay(() => {
             this.enqueueMediaElementTask_(
