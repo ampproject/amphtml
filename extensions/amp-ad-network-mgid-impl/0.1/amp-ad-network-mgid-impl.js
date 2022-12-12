@@ -1,19 +1,24 @@
-import {CONSENT_POLICY_STATE, CONSENT_STRING_TYPE} from '#core/constants/consent-state';
-import {removeElement} from "#core/dom";
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+
 import {Services} from '#service';
+
 import {user} from '#utils/log';
-import {devAssert} from "#utils/log";
-import {insertAnalyticsElement} from "../../../src/extension-analytics";
+
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CookieWriter} from '../../amp-consent/0.1/cookie-writer';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-mgid-impl';
 
 const BASE_URL_ = 'https://servicer.mgid.com/';
+const PV_URL_ = 'https://c.mgid.com/';
+const CAPPING_URL_ = 'https://c.mgid.com/';
 
 export class AmpAdNetworkMgidImpl extends AmpA4A {
-
   /**
    * @param {!Element} element
    */
@@ -24,13 +29,14 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     this.ampAnalyticsElement_ = null;
 
     /** @private */
-    this.mgidMetadata = {
-      "h": "",
-      "muidn": "",
-      "h2": "",
-      "rid": "",
-      "tt": "",
-      "ts": "",
+    this.mgidMetadata_ = {
+      'h': '',
+      'muidn': '',
+      'h2': '',
+      'rid': '',
+      'tt': '',
+      'ts': '',
+      'pvid': '',
     };
   }
 
@@ -56,6 +62,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     const widget = this.element.getAttribute('data-widget');
 
     let servicerUrl = BASE_URL_ + widget + '/' + this.getPageParam_();
+    let pvUrl = PV_URL_ + 'pv/';
 
     adUrlParams.concat(this.getNetworkInfoParams_());
     adUrlParams.push(this.getCacheBusterParam_());
@@ -65,13 +72,26 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     adUrlParams.push(this.getLuParam_());
     adUrlParams.push(this.getSessionIdParam_());
     adUrlParams.push(this.getPvidParam_());
-    adUrlParams.push('muid=' + this.mgidMetadata.muid);
+    if (localStorage.mgMuidn) {
+      adUrlParams.push('muid=' + localStorage.mgMuidn);
+    }
     adUrlParams.push('implVersion=15');
 
     return Promise.allSettled(adUrlParams).then((params) => {
       const data = [];
       params.forEach((result) => data.push(result.value));
-      servicerUrl += '?' + data.join('&');
+      const joinedParams = '?' + data.join('&');
+      servicerUrl += joinedParams;
+      pvUrl += joinedParams;
+
+      this.getAmpDoc()
+        .getBody()
+        .appendChild(
+          createElementWithAttributes(this.win.document, 'amp-pixel', {
+            'src': pvUrl,
+          })
+        );
+
       return servicerUrl;
     });
   }
@@ -82,27 +102,29 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
 
     const config = {
       'transport': {'beacon': false, 'xhrpost': false, 'image': true},
-      "requests": {
-        "base": "https://ads.localhost/c"
+      'requests': {
+        'base': CAPPING_URL_ + 'c',
       },
-      "triggers": {
-        "storyAdView": {
-          "on": "story-ad-view",
-          "request": "base",
-          "extraUrlParams": {
-            "f": 1,
-            "cid": this.element.getAttribute('data-widget'),
-            "h2": this.mgidMetadata.h2,
-            "rid": this.mgidMetadata.rid,
-            "tt": this.mgidMetadata.tt,
-            "ts": this.mgidMetadata.ts,
-            "iv": 13,
-            "pageImp": 1,
-            "pvid": "",
-            "muid": this.mgidMetadata.muidn,
-            "cbuster": "",
-            "v": "x|y|0|" + this.mgidMetadata.h,
-          }
+      'triggers': {
+        'storyAdView': {
+          'on': 'story-ad-view',
+          'request': 'base',
+          'extraUrlParams': {
+            'f': 1,
+            'cid': this.element.getAttribute('data-widget'),
+            'h2': this.mgidMetadata_.h2,
+            'rid': this.mgidMetadata_.rid,
+            'tt': this.mgidMetadata_.tt,
+            'ts': this.mgidMetadata_.ts,
+            'iv': 13,
+            'pageImp': 1,
+            'pvid': this.mgidMetadata_.pvid,
+            'muid': this.mgidMetadata_.muidn,
+            'cbuster':
+              Date.now().toString() +
+              Math.floor(Math.random() * 1000000000 + 1),
+            'v': 'x|y|0|' + this.mgidMetadata_.h,
+          },
         },
       },
     };
@@ -114,7 +136,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       false
     );
   }
-
 
   /** @override */
   sendXhrRequest(adUrl) {
@@ -130,7 +151,10 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
         const root = doc.documentElement;
         const meta = root.querySelector('#mgid_metadata');
         if (meta) {
-          this.mgidMetadata = JSON.parse(meta.innerHTML);
+          this.mgidMetadata_ = JSON.parse(meta./*OK*/ innerHTML);
+          if (this.mgidMetadata_.muidn != '') {
+            localStorage.mgMuidn = this.mgidMetadata_.muidn;
+          }
         }
 
         return new Response(responseText, {
@@ -141,6 +165,11 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     });
   }
 
+  /**
+   * @param {!ConsentTupleDef=} consentTuple
+   * @return {string[]} Consents parameters.
+   * @private
+   */
   getConsents_(consentTuple) {
     const result = [];
 
@@ -163,26 +192,28 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
 
     result.push(
       'gdprApplies=' +
-      (gdprApplies === true ? '1' : gdprApplies === false ? '0' : null)
+        (gdprApplies === true ? '1' : gdprApplies === false ? '0' : null)
     );
     result.push(
       'consentData=' +
-      (consentStringType !=
-      CONSENT_STRING_TYPE.US_PRIVACY_STRING
-        ? consentString
-        : null)
+        (consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null)
     );
     result.push(
       'uspString=' +
-      (consentStringType ==
-      CONSENT_STRING_TYPE.US_PRIVACY_STRING
-        ? consentString
-        : null)
+        (consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null)
     );
 
     return result;
   }
 
+  /**
+   * @return {string} Page data for ad request
+   * @private
+   */
   getPageParam_() {
     const widget = this.element.getAttribute('data-widget');
     let page = 1;
@@ -193,19 +224,34 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       }
     }
 
+    sessionStorage[`MG_widget_${widget}_page`] = page;
+
     return page;
   }
 
+  /**
+   * @return {string} Cachebuster for ad request
+   * @private
+   */
   getCacheBusterParam_() {
-    return 'cbuster=' +
+    return (
+      'cbuster=' +
       Date.now().toString() +
-      Math.floor(Math.random() * 1000000000 + 1);
+      Math.floor(Math.random() * 1000000000 + 1)
+    );
   }
 
+  /**
+   * @return {string} Network information data for ad request
+   * @private
+   */
   getNetworkInfoParams_() {
     const params = [];
     try {
-      const networkInformation = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const networkInformation =
+        navigator.connection ||
+        navigator.mozConnection ||
+        navigator.webkitConnection;
 
       if (typeof networkInformation.type != 'undefined') {
         params.push('nit=' + networkInformation.type);
@@ -216,20 +262,25 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       if (typeof networkInformation.saveData != 'undefined') {
         params.push('nisd=' + (networkInformation.saveData ? 1 : 0));
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     return params;
   }
 
+  /**
+   * @return {string} Device pixel ratio info for ad request
+   * @private
+   */
   getDevicePixelRatioParam_() {
     let ratio = 1;
 
     if (typeof window.devicePixelRatio !== 'undefined') {
       ratio = window.devicePixelRatio;
-    } else if (typeof window.screen.systemXDPI !== 'undefined' &&
+    } else if (
+      typeof window.screen.systemXDPI !== 'undefined' &&
       typeof window.screen.logicalXDPI !== 'undefined' &&
-      window.screen.systemXDPI > window.screen.logicalXDPI) {
+      window.screen.systemXDPI > window.screen.logicalXDPI
+    ) {
       ratio = window.screen.systemXDPI / window.screen.logicalXDPI;
     }
 
@@ -242,47 +293,73 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     return 'dpr=' + ratio;
   }
 
+  /**
+   * @return {string} Referrer info for ad request
+   * @private
+   */
   getRefParam_() {
-    return this.getReferrer_(10).then(referrer => {
+    return this.getReferrer_(10).then((referrer) => {
       return 'ref=' + referrer;
     });
   }
 
+  /**
+   * @return {string} Primary referrer info for ad request
+   * @private
+   */
   getPrParam_() {
-    if (sessionStorage.MG_Session_pr) {
-      return 'pr=' + encodeURIComponent(sessionStorage.MG_Session_pr);
+    if (sessionStorage['MG_Session_pr']) {
+      return 'pr=' + encodeURIComponent(sessionStorage['MG_Session_pr']);
     } else {
-      return this.getReferrer_(10).then(referrer => {
+      return this.getReferrer_(10).then((referrer) => {
         const matchDomain = referrer.match(/:\/\/([^\/:]+)/i);
-        sessionStorage.MG_Session_pr = matchDomain && matchDomain[1] ? matchDomain[1] : '';
+        sessionStorage['MG_Session_pr'] =
+          matchDomain && matchDomain[1] ? matchDomain[1] : '';
         return 'pr=' + encodeURIComponent(referrer);
       });
     }
   }
 
+  /**
+   * @return {string} First session page info for ad request
+   * @private
+   */
   getLuParam_() {
-    if (sessionStorage.MG_Session_lu) {
-      return 'lu=' + encodeURIComponent(sessionStorage.MG_Session_lu);
+    if (sessionStorage['MG_Session_lu']) {
+      return 'lu=' + encodeURIComponent(sessionStorage['MG_Session_lu']);
     } else {
       const url = Services.documentInfoForDoc(this.element).canonicalUrl;
-      sessionStorage.MG_Session_lu = url;
+      sessionStorage['MG_Session_lu'] = url;
       return 'lu=' + encodeURIComponent(url);
     }
   }
 
+  /**
+   * @return {string} Session id info for ad request
+   * @private
+   */
   getSessionIdParam_() {
-    if (sessionStorage.MG_Session_Id) {
-      return 'sessionId=' + sessionStorage.MG_Session_Id;
+    if (sessionStorage['MG_Session_Id']) {
+      return 'sessionId=' + sessionStorage['MG_Session_Id'];
     } else {
-      const sessionId = Math.round(Date.now() / 1000).toString(16) + '-' +
+      const sessionId =
+        Math.round(Date.now() / 1000).toString(16) +
+        '-' +
         ('00000' + Math.round(Math.random() * 100000).toString(16)).slice(-5);
-      sessionStorage.MG_Session_Id = sessionId;
+      sessionStorage['MG_Session_Id'] = sessionId;
       return 'sessionId=' + sessionId;
     }
   }
 
+  /**
+   * @return {string} Pageview info for ad request
+   * @private
+   */
   getPvidParam_() {
-    return 'pvid=' + Services.documentInfoForDoc(this.element).pageViewId64;
+    Services.documentInfoForDoc(this.element).pageViewId64.then((pvid) => {
+      this.mgidMetadata_.pvid = pvid;
+      return 'pvid=' + pvid;
+    });
   }
 
   /**
@@ -302,8 +379,8 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       return referrerPromise;
     }
     return Services.timerFor(this.win)
-    .timeoutPromise(timeoutInt, referrerPromise)
-    .catch(() => undefined);
+      .timeoutPromise(timeoutInt, referrerPromise)
+      .catch(() => undefined);
   }
 }
 
