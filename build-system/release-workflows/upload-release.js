@@ -9,7 +9,6 @@ const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
 const {S3} = require('@aws-sdk/client-s3');
 const {Storage} = require('@google-cloud/storage');
-const {ApiError} = require('@google-cloud/common');
 const {timedExecOrDie} = require('../pr-check/utils');
 const zlib = require('zlib');
 
@@ -160,38 +159,7 @@ async function brotliCompressAll_() {
 }
 
 /**
- * Rethrows an error, unless the error indicates that the upload failed because the file already exists in the storage bucket.
- * @param {ApiError | Error} error
- */
-function ignoreErrorWhenFileAlreadyExists_(error) {
-  if (
-    error instanceof ApiError &&
-    error.message.includes('does not have storage.objects.delete access')
-  ) {
-    return;
-  }
-  throw error;
-}
-
-/**
- * Ensures the presence of env variables or throws an error.
- * @param  {...string} vars
- * @return {string[]}
- */
-function ensureEnvVariable_(...vars) {
-  const ret = [];
-  for (const v of vars) {
-    const value = process.env[v];
-    if (!value) {
-      throw new Error(`CircleCI job is missing the ${v} env variable`);
-    }
-    ret.push(value);
-  }
-  return ret;
-}
-
-/**
- * Uploads release files to Cloudflare R2.
+ * Uploads release files to Google Cloud Storage.
  * @return {Promise<void>}
  */
 async function uploadFilesR2_() {
@@ -277,12 +245,9 @@ async function uploadFilesGCS_() {
 
     const destination = path.slice(DEST_DIR.length + 1);
     uploadsPromises.push(
-      bucket
-        .upload(path, {destination, resumable: false})
-        .catch(ignoreErrorWhenFileAlreadyExists_)
-        .then(() => {
-          logProgress_(totalFiles, ++uploadedFiles);
-        })
+      bucket.upload(path, {destination, resumable: false}).then(() => {
+        logProgress_(totalFiles, ++uploadedFiles);
+      })
     );
   }
 

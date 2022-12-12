@@ -413,22 +413,6 @@ describes.fakeWin('getExtensionScripts', {}, (env) => {
 
     doc.head.appendChild(
       createElementWithAttributes(doc, 'script', {
-        'id': 'amp-ext3-with-ssr-css-query-param-on',
-        'custom-element': 'amp-ext3',
-        'src': 'https://cdn.ampproject.org/v0/amp-ext3-0.3.js?ssr-css=1',
-      })
-    );
-
-    doc.head.appendChild(
-      createElementWithAttributes(doc, 'script', {
-        'id': 'amp-ext3-with-ssr-css-query-param-off',
-        'custom-element': 'amp-ext3',
-        'src': 'https://cdn.ampproject.org/v0/amp-ext3-0.3.js?ssr-css=0',
-      })
-    );
-
-    doc.head.appendChild(
-      createElementWithAttributes(doc, 'script', {
         'id': 'amp-ext2-latest',
         'custom-element': 'amp-ext2',
         'src': 'https://cdn.ampproject.org/v0/amp-ext2-latest.js',
@@ -469,15 +453,6 @@ describes.fakeWin('getExtensionScripts', {}, (env) => {
     expect(
       ids(getExtensionScripts(win, 'amp-ext2', '0.1', true))
     ).to.deep.equal(['amp-ext2-latest']);
-  });
-
-  it('should find a specific version with ssr-css query param', () => {
-    expect(
-      ids(getExtensionScripts(win, 'amp-ext3', '0.3', true))
-    ).to.deep.equal([
-      'amp-ext3-with-ssr-css-query-param-on',
-      'amp-ext3-with-ssr-css-query-param-off',
-    ]);
   });
 
   it('should find an intermediate extension', () => {

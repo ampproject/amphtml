@@ -5,7 +5,11 @@
   reviewerPool: ['ampproject/reviewers-amphtml', 'renovate-approve[bot]'],
   rules: [
     {
-      owners: [{name: 'erwinmombay', requestReviews: false}],
+      owners: [
+        {name: 'cramforce', requestReviews: false},
+        {name: 'dvoytenko', requestReviews: false},
+        {name: 'jridgewell', requestReviews: false},
+      ],
     },
     {
       pattern: '**/validator-*.{protoascii,html,out,out.cpponly}',
@@ -39,11 +43,7 @@
     },
     {
       pattern: '**/OWNERS',
-      owners: [
-        {name: 'erwinmombay', requestReviews: false},
-        {name: 'mrjoro', requestReviews: false},
-        {name: 'newmuis', requestReviews: false},
-      ],
+      owners: [{name: 'mrjoro', requestReviews: false}],
     },
     {
       // Locked down to minimize new import aliases being added
@@ -63,7 +63,7 @@
     },
     {
       pattern: '**/build-dom.js',
-      owners: [{name: 'erwinmombay'}],
+      owners: [{name: 'samouri'}],
     },
   ],
 }

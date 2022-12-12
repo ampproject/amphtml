@@ -26,7 +26,7 @@ const sandboxVals =
   'allow-top-navigation';
 
 const TOKEN_VALUE_1P =
-  'AlQOrFnZiFdI61JEjqDm5lg07gKrnYgXL9jDD/w7EHNFBE60/++yfetyABuyjCD917535XXwd9JHzjrKK36TDg0AAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2ODA2NTI3OTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
+  'AlbC5LKqHkvdIY45O3/1Js/EyRmwSjb4wyp3XZy8KbMWhfMknydD4Wx9K9GyEIdG3ojUlZOdpdbX340wPHpYfQoAAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
 
 /**
  * Create the starting html for all FIE ads. If streaming is supported body will be
@@ -53,7 +53,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
       default-src 'none';
       style-src ${fontProviderAllowList} 'unsafe-inline';
     ">
-    <meta http-equiv="origin-trial" content=${TOKEN_VALUE_1P}>
+    <meta http-equiv="origin-trial" content=${TOKEN_VALUE_1P}>    
     ${sanitizedHeadElements}
   </head>
   <body>${body}</body>

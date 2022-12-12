@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: b4808644 */
+/** Version: 0.1.22.237 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1149,4 +1149,4 @@ function getMetaTag(rootNode, name) {
   return null;
 }
 
-export { Doc, PageConfig, PageConfigResolver };
+export {Doc, PageConfig, PageConfigResolver};

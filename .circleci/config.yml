@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.2.3
-  codecov: codecov/codecov@3.2.3
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -65,7 +64,7 @@ executors:
     resource_class: xlarge
   macos-medium:
     macos:
-      xcode: 13.4.1
+      xcode: 12.4.0
     resource_class: macos.x86.medium.gen2
 
 commands:
@@ -148,7 +147,10 @@ commands:
     steps:
       - run:
           name: 'Enable Safari Automation'
-          command: sudo /usr/bin/safaridriver --enable
+          command: |
+            defaults write com.apple.Safari AllowRemoteAutomation 1
+            defaults write com.apple.Safari IncludeDevelopMenu 1
+            sudo safaridriver --enable
   store_test_output:
     steps:
       - store_artifacts:
@@ -243,6 +245,17 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/bundle-size-module-build.js
       - teardown_vm
+  pr_deploy:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ PR Deploy ⭐'
+          command: node build-system/pr-check/pr-deploy.js
+      - store_artifacts:
+          path: /tmp/artifacts/amp_nomodule_build.tar.gz
+      - teardown_vm
   bundle_size:
     executor:
       name: node-docker-medium
@@ -297,9 +310,6 @@ jobs:
       - run:
           name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
-      - codecov/upload:
-          file: test/coverage/lcov-unit.info
-          flags: unit_tests
       - store_test_output
       - store_filelist
       - teardown_vm
@@ -312,9 +322,6 @@ jobs:
       - run:
           name: '⭐ Unminified Tests ⭐'
           command: node build-system/pr-check/unminified-tests.js
-      - codecov/upload:
-          file: test/coverage/lcov-integration.info
-          flags: integration_tests
       - store_test_output
       - teardown_vm
   nomodule_tests:
@@ -523,6 +530,11 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
+      - pr_deploy:
+          name: 'PR Deploy'
+          <<: *pr_builds_only
+          requires:
+            - 'Nomodule Build (Test)'
       - bundle_size:
           name: 'Bundle Size'
           <<: *push_and_pr_builds

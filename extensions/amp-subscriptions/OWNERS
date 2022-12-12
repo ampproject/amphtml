@@ -6,7 +6,6 @@
     {
       owners: [
         {name: 'alin04'},
-        {name: 'chrisantaki'},
         {name: 'fikus'},
         {name: 'hartmannr76'},
         {name: 'jpettitt', notify: true},

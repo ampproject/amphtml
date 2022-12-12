@@ -5,7 +5,6 @@ import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -21,16 +20,10 @@ import {
   StateProperty,
   UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {
-  createShadowRootWithStyle,
-  toggleA11yReadable,
-} from '../../amp-story/1.0/utils';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
-
-/** @const {number} */
-const DRAWER_ANIMATE_IN_TIME = 400;
 
 /**
  * @enum {number}
@@ -585,39 +578,11 @@ export class DraggableDrawer extends AMP.BaseElement {
       }
 
       this.element.classList.add('i-amphtml-story-draggable-drawer-open');
-
-      this.hideOrShowSiblingContent();
-      // Focus spacer after transition for screen readers to be in
-      // position to read drawer content.
-      setTimeout(() => {
-        dev()
-          .assertElement(
-            this.element.querySelector(
-              '.i-amphtml-story-draggable-drawer-spacer'
-            )
-          )
-          ./*OK*/ focus();
-      }, DRAWER_ANIMATE_IN_TIME);
-
       toggle(dev().assertElement(this.containerEl), true);
     }).then(() => {
       const owners = Services.ownersForDoc(this.element);
       owners.scheduleLayout(this.element, this.ampComponents_);
       owners.scheduleResume(this.element, this.ampComponents_);
-    });
-  }
-
-  /**
-   * Handles hiding page content from assistive technology.
-   * @protected
-   */
-  hideOrShowSiblingContent() {
-    this.mutateElement(() => {
-      toArray(this.element.parentElement.children).forEach((siblingEl) => {
-        if (siblingEl !== this.element) {
-          toggleA11yReadable(siblingEl, this.state === DrawerState.CLOSED);
-        }
-      });
     });
   }
 
@@ -644,7 +609,6 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
     this.handleSoftKeyboardOnDrawerClose_();
-    this.hideOrShowSiblingContent();
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);

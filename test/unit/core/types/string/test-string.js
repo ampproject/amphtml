@@ -89,8 +89,7 @@ describes.sandboxed('type helpers - strings', {}, () => {
       expect(expandTemplate('$x}', testGetter)).to.equal('$x}');
       expect(expandTemplate('$x', testGetter)).to.equal('$x');
       expect(expandTemplate('{x}', testGetter)).to.equal('{x}');
-      expect(expandTemplate('${{x}', testGetter)).to.equal('${{x}');
-      expect(expandTemplate('${${x}', testGetter)).to.equal('${Test 1');
+      expect(expandTemplate('${{x}', testGetter)).to.equal('not found');
     });
 
     it('should default to one iteration.', () => {

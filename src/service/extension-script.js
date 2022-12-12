@@ -105,7 +105,7 @@ export function parseExtensionUrl(scriptUrl) {
   }
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
-    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)(?:\?ssr-css=[0|1])?$/i
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
   );
   const extensionId = matches ? matches[2] : undefined;
   const extensionVersion = matches ? matches[3] : undefined;

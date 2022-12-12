@@ -56,7 +56,7 @@ iframe.swg-dialog {
   margin-left: 0 !important;
 }
 
-@media(min-aspect-ratio: 31/40) {
+@media(min-aspect-ratio: 3/4) {
   amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper,
   iframe.swg-dialog  {
     width: var(--i-amphtml-story-desktop-one-panel-width) !important;
@@ -142,7 +142,7 @@ iframe.swg-dialog {
   margin-bottom: 0.2em !important;
 }
 
-.i-amphtml-story-subscriptions-headline {
+.i-amphtml-story-subscriptions-title {
   display: block !important;
   font-weight: 700 !important;
   font-size: 1.15em !important;
@@ -152,7 +152,7 @@ iframe.swg-dialog {
   margin: 0.4em 0 0.15em !important;
 }
 
-.i-amphtml-story-subscriptions-description, .i-amphtml-story-subscriptions-additional-description {
+.i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
   display: block !important;
   font-size: 0.9em !important;
   letter-spacing: -0.015em !important;

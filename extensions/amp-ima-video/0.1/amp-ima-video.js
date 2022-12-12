@@ -18,11 +18,7 @@ import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {getData, listen} from '#utils/event-helper';
 
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {
-  getConsentMetadata,
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
+import {getConsentPolicyState} from '../../../src/consent';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {VideoEvents_Enum} from '../../../src/video-interface';
@@ -181,37 +177,30 @@ class AmpImaVideo extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /**
-   * @return {Promise<Object|undefined>}
-   * @private
-   */
-  getIframeContext_() {
-    const consentPolicyId = this.getConsentPolicy();
-    if (!consentPolicyId) {
-      return Promise.resolve();
-    }
-    return Promise.all([
-      getConsentPolicyState(this.element, consentPolicyId),
-      getConsentMetadata(this.element, consentPolicyId),
-      getConsentPolicyInfo(this.element, consentPolicyId),
-    ]).then((result) => ({
-      initialConsentState: result[0],
-      initialConsentMetadata: result[1],
-      initialConsentValue: result[2],
-    }));
+  /** @override */
+  getConsentPolicy() {
+    return null;
   }
 
   /** @override */
   layoutCallback() {
-    const {element} = this;
+    const {element, win} = this;
+    const consentPolicyId = super.getConsentPolicy();
+    const consentPromise = consentPolicyId
+      ? getConsentPolicyState(element, consentPolicyId)
+      : Promise.resolve(null);
     element.setAttribute(
       'data-source-children',
       JSON.stringify(this.sourceChildren_)
     );
-    return this.getIframeContext_().then((context) => {
-      const iframe = getIframe(this.win, element, TYPE, context, {
-        allowFullscreen: true,
-      });
+    return consentPromise.then((initialConsentState) => {
+      const iframe = getIframe(
+        win,
+        element,
+        TYPE,
+        {initialConsentState},
+        {allowFullscreen: true}
+      );
       iframe.title = this.element.title || 'IMA video';
 
       applyFillContent(iframe);

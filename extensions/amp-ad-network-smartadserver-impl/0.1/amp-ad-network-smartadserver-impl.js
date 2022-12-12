@@ -17,7 +17,6 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -71,10 +70,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
       return opt_rtcResponsesPromise.then((result) => {
         checkStillCurrent();
-        if (result) {
-          result = this.modifyVendorResponse(result);
-        }
-
         const rtc = this.getBestRtcCallout_(result);
         const urlParams = {};
 
@@ -82,24 +77,18 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_bid'] = rtc.hb_bidder || '';
           urlParams['hb_cpm'] = rtc.hb_pb;
           urlParams['hb_ccy'] = 'USD';
-          if (hasOwn(rtc, 'hb_cache_url')) {
-            urlParams['hb_cache_url'] = rtc.hb_cache_url;
-          } else {
-            urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
-            urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
-            urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
-          }
+          urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
+          urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
+          urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
           urlParams['hb_width'] = this.element.getAttribute('width');
           urlParams['hb_height'] = this.element.getAttribute('height');
-          urlParams['hb_cache_content_type'] = rtc.hb_cache_content_type;
         }
 
         const schain = this.element.getAttribute('data-schain');
         if (schain) {
           urlParams['schain'] = schain;
         }
-        urlParams['isasync'] =
-          this.element.getAttribute('data-isasync') === 'false' ? 0 : 1;
+
         const formatId = this.element.getAttribute('data-format');
 
         return buildUrl(
@@ -229,46 +218,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     });
 
     return highestOffer;
-  }
-
-  /**
-   *
-   * Modify the response from vendors to have one standard response
-   * @param {Object} vendorsResponses
-   * @return {*}
-   * @memberof AmpAdNetworkSmartadserverImpl
-   */
-  modifyVendorResponse(vendorsResponses) {
-    vendorsResponses.forEach((item) => {
-      if (item.response && item.response.targeting) {
-        switch (item.callout) {
-          case 'aps':
-            const tgt = item.response.targeting;
-            if (Object.keys(tgt).length) {
-              const bid = tgt.amznbid.replace('amp_', '');
-              this.exTgt_ += `amzniid=${tgt.amzniid};amznp=${tgt.amznp};amznbid=${bid};`;
-            }
-            break;
-
-          case 'criteo':
-            if (item.response.targeting.crt_display_url === undefined) {
-              return;
-            }
-            item.response.targeting['hb_bidder'] = item.callout;
-            item.response.targeting['hb_pb'] =
-              item.response.targeting.crt_amp_rtc_pb;
-            item.response.targeting['hb_cache_url'] =
-              item.response.targeting.crt_display_url;
-            item.response.targeting['hb_cache_content_type'] =
-              'application/javascript';
-            break;
-
-          default:
-            return item;
-        }
-      }
-    });
-    return vendorsResponses;
   }
 }
 

@@ -503,13 +503,6 @@ export class GoogleSubscriptionsPlatform {
    * @private
    */
   getUrlParams_() {
-    // GAA params should be in the hash for AMP
-    // to avoid being seen as discrete documents
-    // by the AMP cache. However we check for
-    // both just in case.
-    if (/gaa_n=/.test(this.ampdoc_.win.location.hash)) {
-      return parseQueryString(this.ampdoc_.win.location.hash);
-    }
     return parseQueryString(this.ampdoc_.win.location.search);
   }
 

@@ -101,10 +101,6 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://servedbyadbutler.com/app.js',
   },
 
-  'adenza': {
-    renderStartImplemented: true,
-  },
-
   'adform': {},
 
   'adfox': {
@@ -449,10 +445,6 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://www.google.com/adsense/search/ads.js',
   },
 
-  'clever': {
-    renderStartImplemented: true,
-  },
-
   'dable': {
     preconnect: [
       'https://static.dable.io',
@@ -593,10 +585,6 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
 
-  'geozo': {
-    renderStartImplemented: true,
-  },
-
   'giraff': {
     renderStartImplemented: true,
   },
@@ -708,9 +696,7 @@ const adConfig = jsonConfiguration({
   'kiosked': {
     renderStartImplemented: true,
   },
-  'jioads': {
-    renderStartImplemented: true,
-  },
+
   'jixie': {
     prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',
@@ -1019,10 +1005,6 @@ const adConfig = jsonConfiguration({
 
   'pubexchange': {},
 
-  'pubfuture': {
-    renderStartImplemented: true,
-  },
-
   'pubguru': {
     renderStartImplemented: true,
   },
@@ -1061,11 +1043,6 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://a.quora.com/amp_ad.js',
     preconnect: 'https://ampad.quora.com',
     renderStartImplemented: true,
-  },
-
-  'r9x': {
-    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-    preconnect: 'https://cdn.r9x.in',
   },
 
   'rakutenunifiedads': {
@@ -1276,20 +1253,8 @@ const adConfig = jsonConfiguration({
   },
 
   'sunmedia': {
-    preconnect: [
-      'https://static.sunmedia.tv',
-      'https://services.sunmedia.tv',
-      'https://creative.sunmedia.tv',
-      'https://vod.sunmedia.tv',
-      'https://mx-sunmedia.videoplaza.tv',
-      'https://es-sunicontent.videoplaza.tv',
-      'https://es-sunelespanol.videoplaza.tv',
-      'https://es-suncopperland.videoplaza.tv',
-      'https://search.spotxchange.com',
-      'https://tpc.googlesyndication.com',
-    ],
-    clientIdScope: 'AMP_ECID_SUNMEDIA',
-    fullWidthHeightRatio: 1 / 1,
+    prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
+    preconnect: 'https://static.addevweb.com',
     renderStartImplemented: true,
   },
 
@@ -1407,10 +1372,6 @@ const adConfig = jsonConfiguration({
   'vmfive': {
     prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
     preconnect: ['https://vawpro.vm5apis.com', 'https://vahfront.vm5apis.com'],
-    renderStartImplemented: true,
-  },
-
-  'vox': {
     renderStartImplemented: true,
   },
 

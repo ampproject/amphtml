@@ -5,6 +5,37 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 cc_library(
+    name = "states",
+    hdrs = [
+        "states.h",
+    ],
+)
+
+cc_library(
+    name = "parser",
+    srcs = [
+        "parser.cc",
+    ],
+    hdrs = [
+        "parser.h",
+    ],
+    deps = [
+        ":states",
+    ],
+)
+
+cc_test(
+    name = "parser_test",
+    srcs = [
+        "parser_test.cc",
+    ],
+    deps = [
+        ":parser",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "types",
     srcs = [
         "types.cc",
@@ -30,25 +61,18 @@ filegroup(
     srcs = glob(["testdata/*.json"]),
 )
 
-cc_library(
-    name = "json",
-    srcs = ["json.cc"],
-    hdrs = ["json.h"],
-    deps = [
-        ":types",
-        "@com_google_absl//absl/strings",
-        "//cpp/htmlparser:logging",
-        "//cpp/htmlparser/validators:json",
-    ],
-)
-
 cc_test(
-    name = "json_test",
-    srcs = ["json_test.cc"],
-    data = [":json_testfiles"],
+    name = "jsondataset_test",
+    srcs = [
+        "jsondataset_test.cc",
+    ],
+    data = [
+        ":json_testfiles",
+    ],
     deps = [
-        ":json",
-        ":types",
+        ":parser",
         "@com_google_googletest//:gtest_main",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:fileutil",
     ],
 )

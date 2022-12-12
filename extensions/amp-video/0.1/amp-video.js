@@ -794,7 +794,6 @@ export class AmpVideo extends AMP.BaseElement {
   /** @private */
   onVideoLoaded_() {
     dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
-    this.removePosterForAndroidBug_();
   }
 
   /** @override */
@@ -984,6 +983,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
+    this.removePosterForAndroidBug_();
   }
 
   /**

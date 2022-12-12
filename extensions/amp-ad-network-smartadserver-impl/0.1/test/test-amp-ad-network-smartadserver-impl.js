@@ -15,8 +15,6 @@
  */
 
 import '../../../amp-ad/0.1/amp-ad';
-import {expect} from 'chai';
-
 import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
@@ -160,7 +158,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
   });
 
   describe('getAdUrl', () => {
-    it('should return proper url with vendor(default) data', async () => {
+    it('should return proper url with vendor data', async () => {
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': 300,
         'height': 250,
@@ -195,58 +193,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
-          );
-        });
-    });
-
-    it('should return proper url with Criteo vendor data', async () => {
-      element = createElementWithAttributes(doc, 'amp-ad', {
-        'width': 728,
-        'height': 90,
-        'data-site': 111,
-        'data-page': 121,
-        'data-format': 222,
-        'type': 'smartadserver',
-        'rtc-config': JSON.stringify(rtcConfig),
-      });
-      doc.body.appendChild(element);
-
-      const viewer = Services.viewerForDoc(element);
-      env.sandbox.stub(viewer, 'getReferrerUrl');
-
-      const rtcResponseArray = [
-        {
-          response: {
-            targeting: {
-              'hb_bidder': 'appnexus',
-              'hb_cache_host': 'prebid.ams1.adnxs-simple.com',
-              'hb_cache_id': '0cb22b3e-aa2d-4936-9039-0ec93ff67de5',
-              'hb_cache_path': '/pbc/v1/cache',
-              'hb_pb': '1.7',
-              'hb_size': '300x250',
-            },
-          },
-          rtcTime: 210,
-        },
-        {
-          response: {
-            targeting: {
-              'crt_display_url': 'http://test.test',
-              'crt_amp_rtc_pb': '2.6',
-              'crt_amp_rtc_format': '728x90',
-            },
-          },
-          rtcTime: 97,
-          callout: 'criteo',
-        },
-      ];
-
-      return new AmpAdNetworkSmartadserverImpl(element)
-        .getAdUrl({}, Promise.resolve(rtcResponseArray))
-        .then((url) => {
-          expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=criteo&hb_cpm=2.6&hb_ccy=USD&hb_cache_url=http%3A%2F%2Ftest.test&hb_width=728&hb_height=90&hb_cache_content_type=application%2Fjavascript&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -282,7 +229,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -314,7 +261,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -337,7 +284,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve())
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -356,7 +303,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1\-[0-9]+$/
           );
         });
     });
@@ -416,13 +363,49 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         });
     });
 
-    it('should return proper url with schain value', async () => {
+    it('should return proper url with HB vendor and Amazon data', async () => {
+      const rtcResponseArray = [
+        {
+          response: {
+            targeting: {
+              'hb_bidder': 'appnexus',
+              'hb_cache_host': 'prebid.ams1.adnxs-simple.com',
+              'hb_cache_id': '0cb22b3e-aa2d-4936-9039-0ec93ff67de5',
+              'hb_cache_path': '/pbc/v1/cache',
+              'hb_pb': '1.3',
+              'hb_size': '300x250',
+            },
+          },
+          callout: 'prebidappnexus',
+          rtcTime: 184,
+        },
+        {
+          response: {
+            'targeting': {
+              'amzniid': 'JBJnc908',
+              'amznsz': '300x250',
+              'amznp': '19131mo',
+              'amznbid': 'amp_dv85c0',
+              'amznhost': 'https://amazon-adsystem.com',
+            },
+          },
+          callout: 'aps',
+          rtcTime: 102,
+        },
+      ];
+
       element = createElementWithAttributes(doc, 'amp-ad', {
-        'data-site': '1',
-        'data-format': '22',
-        'data-schain': 'some-sco-string',
+        'width': 300,
+        'height': 250,
+        'data-site': 1,
+        'data-page': 22,
+        'data-format': 333,
+        'data-target': 'key=value',
+        'type': 'smartadserver',
+        'rtc-config': JSON.stringify(rtcConfig),
       });
       doc.body.appendChild(element);
+
       const viewer = Services.viewerForDoc(element);
       env.sandbox.stub(viewer, 'getReferrerUrl');
       return new AmpAdNetworkSmartadserverImpl(element)
@@ -434,17 +417,8 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         });
     });
 
-    it('should not return chain parameter in url if empty value', async () => {
-      element = createElementWithAttributes(doc, 'amp-ad', {
-        'data-site': 10,
-        'data-format': '3',
-        'data-schain': '',
-      });
-      doc.body.appendChild(element);
-      const viewer = Services.viewerForDoc(element);
-      env.sandbox.stub(viewer, 'getReferrerUrl');
       return new AmpAdNetworkSmartadserverImpl(element)
-        .getAdUrl({}, null)
+        .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
             /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&isasync=1&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
@@ -696,112 +670,6 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       iframe.contentWindow.parent.postMessage(data, '*');
       expect(attemptCollapse).to.be.calledOnce;
       expect(element.getBoundingClientRect().height).to.be.gt(150);
-    });
-  });
-
-  describe('modifyVendorResponse', () => {
-    beforeEach(() => {
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
-    });
-
-    it('should handle empty response', async () => {
-      const bidResponses = [
-        {},
-        {
-          'response': {},
-        },
-        {
-          'response': {
-            'targeting': {},
-          },
-          'callout': 'criteo',
-        },
-      ];
-
-      const res = impl.modifyVendorResponse(bidResponses);
-
-      expect(res[0]).to.deep.equal(bidResponses[0]);
-      expect(res[1]).to.deep.equal(bidResponses[1]);
-      expect(res[2]).to.deep.equal(bidResponses[2]);
-    });
-
-    it('should handle Criteo response', async () => {
-      const criteoExampleResponse = [
-        {
-          'response': {
-            'targeting': {
-              'crt_display_url':
-                'https%3A%2F%2Fads.eu.criteo.com%2Fdelivery%2Fr%2Fajs.php%3Fu%3D%257CyYP2Nxn%252BAmlnchiEQlOsuklsAFFZpGm3EU%252FjjuD0GOA%253D%257C%26c1%3D0n2XosTo5cmttfZ_Xo-xoRysCgATX3DvUOIjpsZKqJdm3eyNZdKRXiG1WaNgOl-yTgKu_JgyoYLHkIsbBRPK5MapBzXSKnuPUJPy0V6STkn6pelkbbtucKKReRNkE_d9ovu_dCN5_74mNyHExIWAhfzTHwsdk0ZdrYKbkuQzQjTaI46HGlSNLcJFInpzROSggbHvxVeN-leVzY818y-Ecu2pqHgq8_mGpyLWnL69l00EeuGdOORdpHGk5erc99iT74U7z9834rxtE6UZSB_dYOZjoHA5Asz33g3Siyu-N6woBaYGBqcaFWpH2t9dYbAvrSFo0dKG2zqyr16C0ls-qzk65I7WcFBBbyzxZ74My577ukVt_nluaBHHuougmq6czxQ3kiKBUMau_k7d_mnh1qN5s_2e3st-zYsJYUlQHjlpH0ENsWBk30Zdk3OTcAnD2I1StD3nkWPDZPKmJ4a0uV7bmrHqgKxkuVAQMaCs2no',
-              'crt_amp_rtc_pb': '0.81',
-              'crt_amp_rtc_format': '728x90',
-            },
-          },
-          'rtcTime': 97,
-          'callout': 'criteo',
-        },
-      ];
-      let res = impl.modifyVendorResponse(criteoExampleResponse);
-      expect(res[0].response.targeting.hb_pb).to.deep.equal(
-        criteoExampleResponse[0].response.targeting.crt_amp_rtc_pb
-      );
-      expect(res[0].response.targeting.hb_cache_content_type).to.deep.equal(
-        'application/javascript'
-      );
-      expect(res[0].response.targeting.hb_cache_url).to.deep.equal(
-        criteoExampleResponse[0].response.targeting.crt_display_url
-      );
-      criteoExampleResponse[0].response.targeting['crt_display_url'] =
-        undefined;
-      res = impl.modifyVendorResponse(criteoExampleResponse);
-      expect(res[0]).to.deep.equal(criteoExampleResponse[0]);
-    });
-
-    describe('Amazon', () => {
-      beforeEach(() => {
-        expect(impl.exTgt_).to.deep.equal('');
-      });
-
-      it('should add keywords to target', async () => {
-        const amazonBid = [
-          {
-            'response': {
-              'targeting': {
-                'amzniid': 'JBJnc908',
-                'amznsz': '300x250',
-                'amznp': '19131mo',
-                'amznbid': 'amp_dv85c0',
-                'amznhost': 'https://amazon-adsystem.com',
-              },
-            },
-            'rtcTime': 212,
-            'callout': 'aps',
-          },
-        ];
-
-        const res = impl.modifyVendorResponse(amazonBid);
-
-        expect(res[0]).to.deep.equal(amazonBid[0]);
-        expect(impl.exTgt_).to.deep.equal(
-          'amzniid=JBJnc908;amznp=19131mo;amznbid=dv85c0;'
-        );
-      });
-
-      it('should not modify target when no bid', async () => {
-        const amazonBid = [
-          {
-            'response': {
-              'targeting': {},
-            },
-            'rtcTime': 13,
-            'callout': 'aps',
-          },
-        ];
-
-        const res = impl.modifyVendorResponse(amazonBid);
-
-        expect(res[0]).to.deep.equal(amazonBid[0]);
-        expect(impl.exTgt_).to.deep.equal('');
-      });
     });
   });
 });

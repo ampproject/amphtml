@@ -27,4 +27,3 @@ For configuration details and to generate your tags, please contact https://admi
 
 -   `data-item-id`
 -   `data-service-name`
--   `data-channel`

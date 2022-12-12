@@ -139,14 +139,7 @@ export class ProgressBar {
     }
 
     const root = (
-      <ol
-        aria-hidden="true"
-        class={objStr({
-          'i-amphtml-story-progress-bar': true,
-          'i-amphtml-story-progress-bar-exp-disabled':
-            !this.isProgressBarExperimentEnabled_(),
-        })}
-      ></ol>
+      <ol aria-hidden="true" class="i-amphtml-story-progress-bar"></ol>
     );
     this.root_ = root;
 
@@ -164,12 +157,17 @@ export class ProgressBar {
             this.clear_();
           }
 
+          const storyAdSegmentBranch = getExperimentBranch(
+            this.win_,
+            StoryAdSegmentExp.ID
+          );
           /** @type {!Array} */ (pageIds).forEach((id) => {
             if (
               // Do not show progress bar for the ad page (control group).
               // Show progress bar for the ad page (experiment group).
               (!this.isAdSegment_(id) ||
-                this.isProgressBarExperimentEnabled_()) &&
+                (storyAdSegmentBranch &&
+                  storyAdSegmentBranch != StoryAdSegmentExp.CONTROL)) &&
               !(id in this.segmentIdMap_)
             ) {
               this.addSegment_(id);
@@ -218,20 +216,6 @@ export class ProgressBar {
     );
 
     return root;
-  }
-
-  /**
-   * Is the progress bar experiment enabled
-   * @return {boolean}
-   */
-  isProgressBarExperimentEnabled_() {
-    const storyAdSegmentBranch = getExperimentBranch(
-      this.win_,
-      StoryAdSegmentExp.ID
-    );
-    return (
-      storyAdSegmentBranch && storyAdSegmentBranch != StoryAdSegmentExp.CONTROL
-    );
   }
 
   /**

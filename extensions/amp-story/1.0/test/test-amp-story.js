@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
@@ -16,12 +14,14 @@ import {Performance} from '#service/performance-impl';
 import {waitFor} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
 
-import {DEFAULT_SUBSCRIPTIONS_PAGE_INDEX} from 'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions';
-
 import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import {AmpStory, SUBSCRIPTIONS_DELAY_DURATION} from '../amp-story';
+import {
+  AmpStory,
+  PAYWALL_DELAY_DURATION,
+  PAYWALL_PAGE_INDEX,
+} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {NavigationDirection, PageState} from '../amp-story-page';
 import {
@@ -56,8 +56,6 @@ describes.realWin(
     let replaceStateStub;
     let win;
     let localizationService;
-    let fetchJson = {};
-    let fetchStub;
 
     const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
@@ -147,12 +145,6 @@ describes.realWin(
       // Fakes the size of amp-story so it's not built/laid out until we call build/layoutCallbacks
       // allowing us to mock function calls before the lifecycle callbacks.
       setImportantStyles(win.document.documentElement, {'height': 'auto'});
-
-      fetchStub = env.sandbox
-        .stub(Services.xhrFor(env.win), 'fetchJson')
-        .resolves({
-          json: () => Promise.resolve(fetchJson),
-        });
     });
 
     afterEach(() => {
@@ -1386,13 +1378,13 @@ describes.realWin(
     describe('amp-story-subscriptions navigation', () => {
       let subscriptionsEl;
       let storeService;
-      const pages = ['cover', 'page-1', 'page-2', 'page-3', 'page-4'];
+      const pages = ['cover', 'page-1', 'page-2', 'page-3'];
 
       const clickRightEvent = new MouseEvent('click', {clientX: 200});
       const clickLeftEvent = new MouseEvent('click', {clientX: 10});
 
       async function setUpStorySubscriptions() {
-        await createStoryWithPages(5, pages);
+        await createStoryWithPages(4, pages);
         subscriptionsEl = win.document.createElement('amp-story-subscriptions');
         story.element.appendChild(subscriptionsEl);
 
@@ -1429,21 +1421,15 @@ describes.realWin(
 
       describe('UNKNOWN subscription state before paywall page', () => {
         beforeEach(async () => {
-          storeService.dispatch(
-            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
-          );
           await setUpStorySubscriptions();
-          tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
+          tapNavigationUntil(PAYWALL_PAGE_INDEX);
         });
 
         it('should not navigate to locked content while subscription state is unknown', () => {
           const activePage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          expect(activePage.element.id).to.equal(
-            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1]
-          );
+          expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX - 1]);
         });
 
         it('should resume to paywall page after the subscription state gets resolved', async () => {
@@ -1455,9 +1441,7 @@ describes.realWin(
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          expect(paywallPage.element.id).to.equal(
-            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
-          );
+          expect(paywallPage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
         });
 
         it('should continue normal navigation after the subscription state gets resolved to granted', async () => {
@@ -1474,7 +1458,7 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           expect(postPaywallPage.element.id).to.equal(
-            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
+            pages[PAYWALL_PAGE_INDEX + 1]
           );
         });
 
@@ -1485,7 +1469,7 @@ describes.realWin(
             SubscriptionsState.BLOCKED
           );
           await nextTick();
-          clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
+          clock.tick(PAYWALL_DELAY_DURATION);
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
         });
@@ -1512,24 +1496,18 @@ describes.realWin(
             const paywallPage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(paywallPage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
-            );
+            expect(paywallPage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
           });
         });
       });
 
       describe('GRANTED subscription state before paywall page', async () => {
-        storeService.dispatch(
-          Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-          DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
-        );
         await setUpStorySubscriptions();
         storeService.dispatch(
           Action.TOGGLE_SUBSCRIPTIONS_STATE,
           SubscriptionsState.GRANTED
         );
-        tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
+        tapNavigationUntil(PAYWALL_PAGE_INDEX);
         const paywallPage = story.getPageById(
           storeService.get(StateProperty.CURRENT_PAGE_ID)
         );
@@ -1546,86 +1524,24 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           expect(postPaywallPage.element.id).to.equal(
-            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
+            pages[PAYWALL_PAGE_INDEX + 1]
           );
-        });
-      });
-
-      describe('unresolved subscriptions page index', () => {
-        beforeEach(async () => {});
-
-        it('should block on the first page if subscriptions page index is unresolved', async () => {
-          setUpStorySubscriptions();
-          storeService.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_STATE,
-            SubscriptionsState.BLOCKED
-          );
-
-          // Blocking on unresolved page index during layout callback so the current page id is not set yet.
-          expect(storeService.get(StateProperty.CURRENT_PAGE_ID)).to.equal('');
-
-          storeService.dispatch(
-            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
-          );
-        });
-
-        describe('subscriptions page index is resolved', () => {
-          let clock;
-
-          beforeEach(async () => {
-            storeService.dispatch(
-              Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-              DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1
-            );
-            await setUpStorySubscriptions();
-            storeService.dispatch(
-              Action.TOGGLE_SUBSCRIPTIONS_STATE,
-              SubscriptionsState.BLOCKED
-            );
-
-            tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
-            clock = env.sandbox.useFakeTimers();
-          });
-
-          it('should not show paywall on the default paywall page', () => {
-            clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
-            expect(
-              storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
-            ).to.be.false;
-          });
-
-          it('should show paywall on the specified paywall page', () => {
-            const defaultPaywallPage = story.getPageById(
-              storeService.get(StateProperty.CURRENT_PAGE_ID)
-            );
-            defaultPaywallPage.element.dispatchEvent(clickRightEvent);
-
-            clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
-            expect(
-              storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
-            ).to.be.true;
-          });
         });
       });
 
       describe('BLOCKED subscription state before paywall page', () => {
         beforeEach(async () => {
-          storeService.dispatch(
-            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
-          );
           await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
+          tapNavigationUntil(PAYWALL_PAGE_INDEX);
         });
 
         it('should resume to paywall page once status becomes granted from blocked if the paywall is triggered on time delay', async () => {
           const clock = env.sandbox.useFakeTimers();
-          clock.tick(SUBSCRIPTIONS_DELAY_DURATION); // Paywall is shown after delay.
+          clock.tick(PAYWALL_DELAY_DURATION); // Paywall is shown after delay.
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.GRANTED
@@ -1642,7 +1558,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePageAfterGranted.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
+              pages[PAYWALL_PAGE_INDEX]
             );
           });
         });
@@ -1668,7 +1584,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePageAfterGranted.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
+              pages[PAYWALL_PAGE_INDEX + 1]
             );
           });
         });
@@ -1690,7 +1606,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1]
+              pages[PAYWALL_PAGE_INDEX - 1]
             );
           });
         });
@@ -1713,27 +1629,20 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1]
+              pages[PAYWALL_PAGE_INDEX - 1]
             );
           });
         });
       });
 
       describe('switch event and deep link', () => {
-        beforeEach(() => {
-          storeService.dispatch(
-            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
-          );
-        });
-
         it('should navigate to paywall page and navigate back to original page after granted with any switch events', async () => {
           await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1);
+          tapNavigationUntil(PAYWALL_PAGE_INDEX - 1);
 
           dispatch(win, story.element, EventType.SWITCH_PAGE, {
             'targetPageId': 'page-3',
@@ -1750,9 +1659,7 @@ describes.realWin(
             const activePage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(activePage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
-            );
+            expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
           });
 
           storeService.dispatch(
@@ -1771,7 +1678,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
+              pages[PAYWALL_PAGE_INDEX + 1]
             );
           });
         });
@@ -1805,9 +1712,7 @@ describes.realWin(
             const activePage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(activePage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
-            );
+            expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
           });
 
           storeService.dispatch(
@@ -1826,7 +1731,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
+              pages[PAYWALL_PAGE_INDEX + 1]
             );
           });
         });
@@ -1863,7 +1768,7 @@ describes.realWin(
           paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
+          clock.tick(PAYWALL_DELAY_DURATION);
 
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
@@ -1880,9 +1785,7 @@ describes.realWin(
             const activePage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(activePage.element.id).to.equal(
-              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
-            );
+            expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
           });
         });
       });
@@ -2130,6 +2033,23 @@ describes.realWin(
         env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
       });
 
+      it('should install the default english localizations', async () => {
+        await createStoryWithPages(1, ['cover']);
+
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('Swipe up');
+      });
+
+      it('should install the correct language localizations if specified', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'es');
+        await createStoryWithPages(1, ['cover']);
+
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('Deslizar el dedo hacia arriba');
+      });
+
       it('should use the inlined amp-story strings when available', async () => {
         const inlinedStrings = win.document.createElement('script');
         inlinedStrings.setAttribute('amp-localization', 'amp-story');
@@ -2145,8 +2065,6 @@ describes.realWin(
       });
 
       it('should not use the inlined amp-story strings if incorrect RTV', async () => {
-        fetchJson = {'35': 'REMOTE-TEXT'};
-
         const inlinedStrings = win.document.createElement('script');
         inlinedStrings.setAttribute('amp-localization', 'amp-story');
         inlinedStrings.setAttribute('i-amphtml-version', '1234');
@@ -2157,7 +2075,7 @@ describes.realWin(
 
         expect(
           await localizationService.getLocalizedStringAsync('35')
-        ).to.be.equal('REMOTE-TEXT');
+        ).to.be.equal('Swipe up');
       });
 
       it('should use the inlined amp-story strings when available if the language is specified', async () => {
@@ -2176,8 +2094,38 @@ describes.realWin(
         ).to.be.equal('TEXTO-EN-LINEA');
       });
 
+      it('should use the default strings if inlined JSON is corrupted', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'en');
+
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = 'this: is not a JSON';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('Swipe up');
+      });
+
       describe('remote localization strings', () => {
+        beforeEach(() => {
+          toggleExperiment(env.win, 'story-remote-localization', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(env.win, 'story-remote-localization', false);
+        });
+
         it('should fetch the localization strings for the default language from the cdn', async () => {
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
+
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.be.calledOnceWithExactly(
@@ -2188,6 +2136,12 @@ describes.realWin(
 
         it('should fetch the localization strings for the document language from the cdn', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
+
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
 
           await createStoryWithPages(1, ['cover']);
 
@@ -2201,6 +2155,12 @@ describes.realWin(
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
           env.win.__AMP_MODE.localDev = true;
 
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
+
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.have.been.calledOnceWithExactly(
@@ -2211,9 +2171,13 @@ describes.realWin(
 
         it('should use the remote localization strings', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
-          fetchJson = {
-            '35': 'REMOTE-STRING',
-          };
+
+          env.sandbox.stub(Services.xhrFor(env.win), 'fetchJson').resolves({
+            json: () =>
+              Promise.resolve({
+                '35': 'REMOTE-STRING',
+              }),
+          });
 
           await createStoryWithPages(1, ['cover']);
 

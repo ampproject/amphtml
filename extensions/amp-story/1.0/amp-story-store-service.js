@@ -149,7 +149,6 @@ export let ShoppingDataDef;
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
  *    subscriptionsDialogState: boolean,
- *    subscriptionsPageIndex: number,
  * }}
  */
 export let State;
@@ -210,7 +209,6 @@ const StateProperty = mangleObjectValues({
   // AMP Story paywall states.
   SUBSCRIPTIONS_DIALOG_UI_STATE: 'subscriptionsDialogUiState',
   SUBSCRIPTIONS_STATE: 'subscriptionsState',
-  SUBSCRIPTIONS_PAGE_INDEX: 'subscriptionsPageIndex',
 });
 
 export {StateProperty};
@@ -230,7 +228,6 @@ const Action = mangleObjectValues({
   SET_PAGE_IDS: 'setPageIds',
   SET_PAGE_SIZE: 'updatePageSize',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
-  SET_SUBSCRIPTIONS_PAGE_INDEX: 'setSubscriptionsPageIndex',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -480,11 +477,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
       });
-    case Action.SET_SUBSCRIPTIONS_PAGE_INDEX:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.SUBSCRIPTIONS_PAGE_INDEX]: data,
-      });
     case Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE:
       return /** @type {!State} */ ({
         ...state,
@@ -637,7 +629,6 @@ export class AmpStoryStoreService {
       [StateProperty.PREVIEW_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.DISABLED,
-      [StateProperty.SUBSCRIPTIONS_PAGE_INDEX]: -1,
     });
   }
 

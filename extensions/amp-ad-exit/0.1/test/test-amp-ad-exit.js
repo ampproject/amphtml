@@ -357,10 +357,12 @@ describes.realWin(
       const config = {
         targets: {
           landingPage: {
-            finalUrl: 'https://advertiser.example',
+            finalUrl: 'https://example.com',
             behaviors: {
               browserAdConversion: {
-                attributionsrc: 'https://adtech.example',
+                attributiondestination: 'https://example.com',
+                attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+                attributionreportto: 'https://google.com',
               },
             },
           },
@@ -377,43 +379,9 @@ describes.realWin(
       });
 
       expect(openStub).calledWithExactly(
-        'https://advertiser.example',
+        'https://example.com',
         '_blank',
-        'noopener,attributionsrc=https%3A%2F%2Fadtech.example'
-      );
-    });
-
-    it('should handle empty attributionsrc when given `browserAdConversion`', async () => {
-      env.sandbox
-        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
-        .returns(true);
-      const openStub = env.sandbox.stub(win, 'open').returns(win);
-      const config = {
-        targets: {
-          landingPage: {
-            finalUrl: 'https://adtech.example',
-            behaviors: {
-              browserAdConversion: {
-                attributionsrc: '',
-              },
-            },
-          },
-        },
-      };
-      const el = await makeElementWithConfig(config);
-      const impl = await el.getImpl();
-
-      impl.executeAction({
-        method: 'exit',
-        args: {target: 'landingPage'},
-        event: makeClickEvent(1001),
-        satisfiesTrust: () => true,
-      });
-
-      expect(openStub).calledWithExactly(
-        'https://adtech.example',
-        '_blank',
-        'noopener,attributionsrc='
+        'noopener,attributiondestination=https://example.com,attributionsourceeventid=EFnZ8GunL1xrwNTIHbXrvQ==,attributionreportto=https://google.com'
       );
     });
 
@@ -1011,7 +979,9 @@ describes.realWin(
         const target = {
           behaviors: {
             browserAdConversion: {
-              attributionsrc: 'https://adtech.example',
+              attributiondestination: 'https://example.com',
+              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+              attributionreportto: 'https://google.com',
             },
           },
         };
@@ -1027,7 +997,9 @@ describes.realWin(
         const target = {
           behaviors: {
             browserAdConversion: {
-              attributionsrc: 'https://adtech.example',
+              attributiondestination: 'https://example.com',
+              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+              attributionreportto: 'https://google.com',
             },
           },
         };

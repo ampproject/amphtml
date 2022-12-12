@@ -27,6 +27,5 @@ declare global {
 
   interface AmpModeObject {
     esm: boolean;
-    noCssBinary: boolean;
   }
 }

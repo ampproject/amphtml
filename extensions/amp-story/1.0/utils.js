@@ -358,18 +358,3 @@ export function dependsOnStoryServices(klass) {
     }
   };
 }
-
-/**
- * Handles hiding or showing content from screen readers.
- * @param {!Element} el
- * @param {boolean} isVisible
- */
-export function toggleA11yReadable(el, isVisible) {
-  if (isVisible) {
-    el.removeAttribute('tab-index');
-    el.removeAttribute('aria-hidden');
-  } else {
-    el.setAttribute('tab-index', '-1');
-    el.setAttribute('aria-hidden', 'true');
-  }
-}

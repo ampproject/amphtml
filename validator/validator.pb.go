@@ -3028,14 +3028,14 @@ type TagSpec struct {
 	AlsoRequiresTagWarning []string `protobuf:"bytes,22,rep,name=also_requires_tag_warning,json=alsoRequiresTagWarning" json:"also_requires_tag_warning,omitempty"`
 	// Expresses a generic condition which is satisfied if this tag is found. Used
 	// in combination with the `requires` attribute on a different tag.
-	SatisfiesCondition []string `protobuf:"bytes,23,rep,name=satisfies_condition" json:"satisfies_condition,omitempty"`
+	Satisfies []string `protobuf:"bytes,23,rep,name=satisfies" json:"satisfies,omitempty"`
 	// Expresses a generic condition which must be satisfied if this tag is found.
 	// Used in combination with the `satisfies` attributes on a different tag.
-	RequiresCondition []string `protobuf:"bytes,24,rep,name=requires_condition" json:"requires_condition,omitempty"`
+	Requires []string `protobuf:"bytes,24,rep,name=requires" json:"requires,omitempty"`
 	// The excludes field is a generic condition, which must not be satisfied if
 	// this tag is found. Otherwise a TAG_EXCLUDED_BY_TAG error will be generated.
 	// Used in combination with the `satisfies` attributes on a different tag.
-	ExcludesCondition []string `protobuf:"bytes,32,rep,name=excludes_condition" json:"excludes_condition,omitempty"`
+	Excludes []string `protobuf:"bytes,32,rep,name=excludes" json:"excludes,omitempty"`
 	// If set, generates a DEPRECATED_TAG error with severity WARNING.
 	// The value of the deprecation field indicates what to use instead,
 	// e.g. the name of a tag.
@@ -3252,23 +3252,23 @@ func (x *TagSpec) GetAlsoRequiresTagWarning() []string {
 	return nil
 }
 
-func (x *TagSpec) GetSatisfiesCondition() []string {
+func (x *TagSpec) GetSatisfies() []string {
 	if x != nil {
-		return x.SatisfiesCondition
+		return x.Satisfies
 	}
 	return nil
 }
 
-func (x *TagSpec) GetRequiresCondition() []string {
+func (x *TagSpec) GetRequires() []string {
 	if x != nil {
-		return x.RequiresCondition
+		return x.Requires
 	}
 	return nil
 }
 
-func (x *TagSpec) GetExcludesCondition() []string {
+func (x *TagSpec) GetExcludes() []string {
 	if x != nil {
-		return x.ExcludesCondition
+		return x.Excludes
 	}
 	return nil
 }

@@ -7,5 +7,4 @@ declare global {
   var IS_PROD: boolean;
   var INTERNAL_RUNTIME_VERSION: string;
   var AMP_STORY_SUPPORTED_LANGUAGES: string[];
-  var IS_SSR_CSS: boolean;
 }

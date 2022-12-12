@@ -6,7 +6,6 @@ amp-story-shopping-tag {
   width: auto !important;
   color: white !important;
   position: absolute !important;
-  pointer-events: auto !important;
   /* Height and width ensures layoutCallback is called. */
   min-height: 1px !important;
   min-width: 1px !important;

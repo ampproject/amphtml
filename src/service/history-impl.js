@@ -413,30 +413,22 @@ export class HistoryBindingNatural_ {
         history.originalReplaceState || history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        try {
-          this.origPushState_(
-            state,
-            opt_title,
-            // A bug in edge causes paths to become undefined if URL is
-            // undefined, filed here: https://goo.gl/KlImZu
-            opt_url || null
-          );
-        } catch (e) {
-          dev().error(TAG_, 'pushState failed: ' + e.message);
-        }
+        this.origPushState_(
+          state,
+          opt_title,
+          // A bug in edge causes paths to become undefined if URL is
+          // undefined, filed here: https://goo.gl/KlImZu
+          opt_url || null
+        );
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
         // NOTE: check for `undefined` since IE11 and Edge
         // unexpectedly coerces it into a `string`.
-        try {
-          if (opt_url !== undefined) {
-            this.origReplaceState_(state, opt_title, opt_url);
-          } else {
-            this.origReplaceState_(state, opt_title);
-          }
-        } catch (e) {
-          dev().error(TAG_, 'replaceState failed: ' + e.message);
+        if (opt_url !== undefined) {
+          this.origReplaceState_(state, opt_title, opt_url);
+        } else {
+          this.origReplaceState_(state, opt_title);
         }
       };
       if (!history.originalPushState) {

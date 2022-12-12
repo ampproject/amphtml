@@ -4,8 +4,6 @@
 #include <functional>
 #include <sstream>
 
-#include "absl/strings/str_join.h"
-#include "absl/strings/string_view.h"
 #include "cpp/htmlparser/atomutil.h"
 #include "cpp/htmlparser/elements.h"
 #include "cpp/htmlparser/logging.h"
@@ -377,33 +375,35 @@ bool Node::IsBlockElementNode() {
 }
 
 std::string Node::InnerText() const {
-  static std::function<void(const Node*, std::vector<absl::string_view>&)>
-      output =
-          [](const Node* node, std::vector<absl::string_view>& output_content) {
-            switch (node->Type()) {
-              case NodeType::TEXT_NODE: {
-                output_content.push_back(absl::string_view(
-                    node->Data().data(), node->Data().size()));
-                return;
-              }
-              case NodeType::COMMENT_NODE: {
-                // Ignore comments.
-                return;
-              }
-              default:
-                break;
-            }
+  static std::function<void(const Node*, std::string*)> output;
+  output = [](const Node* node, std::string* buf) {
+    switch (node->Type()) {
+      case NodeType::TEXT_NODE: {
+        buf->append(node->Data());
+        buf->append(" ");
+        return;
+      }
+      case NodeType::COMMENT_NODE: {
+        // Ignore comments.
+        return;
+      }
+      default:
+        break;
+    }
 
-            for (Node* child = node->FirstChild(); child;
-                 child = child->NextSibling()) {
-              output(child, output_content);
-            }
-          };
+    for (Node* child = node->FirstChild(); child;
+         child = child->NextSibling()) {
+      output(child, buf);
+    }
+  };
 
-  std::vector<absl::string_view> buffer;
-  output(this, buffer);
+  std::string buffer;
+  output(this, &buffer);
 
-  return absl::StrJoin(buffer, " ");
+  if (!buffer.empty() && buffer.at(buffer.size() - 1) == ' ') {
+    buffer.erase(buffer.size() - 1);
+  }
+  return buffer;
 }
 
 void Node::UpdateChildNodesPositions(Node* relative_node) {

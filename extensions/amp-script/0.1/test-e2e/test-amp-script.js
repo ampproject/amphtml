@@ -4,7 +4,7 @@ describes.endtoend(
     fixture: 'amp-script/basic.amp.html',
     initialRect: {width: 600, height: 600},
     environments: ['single'],
-    browsers: ['chrome'],
+    browsers: ['chrome', 'safari'],
   },
   (env) => {
     let controller;

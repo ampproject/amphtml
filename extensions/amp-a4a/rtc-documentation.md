@@ -147,9 +147,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Nexx360.io
 -   OpenX
 -   PubMatic OpenWrap
--   [PubWise](https://www.pubwise.io)
 -   Purch
--   RichAudience
 -   Rubicon
 -   Salesforce
 -   [Snigel](https://www.snigel.com)

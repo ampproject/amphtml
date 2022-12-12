@@ -54,10 +54,6 @@ const GET_STATE_CONFIGURATIONS = {
     dataSource: DataSources.VARIABLE_SERVICE,
     property: AnalyticsVariable.STORY_PROGRESS,
   },
-  'STORY_PAGE_COUNT': {
-    dataSource: DataSources.VARIABLE_SERVICE,
-    property: AnalyticsVariable.STORY_PAGE_COUNT,
-  },
 };
 
 /** @typedef {{action: !Action, isValueValid: function(*):boolean}} */

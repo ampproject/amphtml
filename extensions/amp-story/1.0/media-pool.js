@@ -168,10 +168,10 @@ export class MediaPool {
     this.audioContext_ = null;
 
     /**
-     * Maps a media element's ID to its audio gain node.
+     * Maps a media element's ID to its audio source.
      * @private @const {!Object<string, !MediaElementAudioSourceNode>}
      */
-    this.audioGainNodes_ = {};
+    this.audioSources_ = {};
 
     /**
      * Maps a media element's ID to the element.  This is necessary, as elements
@@ -544,10 +544,6 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    if (this.audioGainNodes_[componentEl.id]) {
-      this.setVolume_(componentEl, 1);
-    }
-
     return componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
@@ -558,17 +554,15 @@ export class MediaPool {
   /**
    * @param {!PoolBoundElementDef} poolMediaEl The element whose source should
    *     be reset.
-   * @param {!Sources=} sources Optional sources for the media element.
    * @return {!Promise} A promise that is resolved when the pool media element
    *     has been reset.
    */
-  resetPoolMediaElementSource_(
-    poolMediaEl,
-    sources = this.getDefaultSource_()
-  ) {
+  resetPoolMediaElementSource_(poolMediaEl) {
+    const defaultSources = this.getDefaultSource_();
+
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new UpdateSourcesTask(this.win_, sources)
+      new UpdateSourcesTask(this.win_, defaultSources)
     ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
   }
 
@@ -670,50 +664,23 @@ export class MediaPool {
   }
 
   /**
-   * Reregisters the specified element to be usable by the media pool. This
-   * is useful in cases where the element's sources have updated since the
-   * previous registration and a reload of the element using these new sources
-   * is desired.
-   * @param {!DomElementDef} domMediaEl The media element to be reregistered.
-   * @return {!Promise} A promise that is resolved when the element has been
-   *     successfully reregistered, or rejected otherwise.
-   */
-  reregister(domMediaEl) {
-    return this.register(domMediaEl, true /** isReregistration */);
-  }
-
-  /**
    * Registers the specified element to be usable by the media pool.  Elements
    * should be registered as early as possible, in order to prevent them from
-   * being played while not managed by the media pool. Registering elements
-   * from within the pool is not allowed, and will also be a no-op.
-   *
-   * If the media element is already registered and `isReregistration` is true,
-   * then the media element will be loaded. However, if the element is
-   * registered and `isReregistration` is false, then this is a no-op.
+   * being played while not managed by the media pool.  If the media element is
+   * already registered, this is a no-op.  Registering elements from within the
+   * pool is not allowed, and will also be a no-op.
    * @param {!DomElementDef} domMediaEl The media element to be
    *     registered.
-   * @param {boolean=} isReregistration Whether the given element has already
-   *     been registered.
    * @return {!Promise} A promise that is resolved when the element has been
    *     successfully registered, or rejected otherwise.
    */
-  register(domMediaEl, isReregistration = false) {
+  register(domMediaEl) {
     const parent = domMediaEl.parentNode;
     if (parent && parent.signals) {
       this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
     }
 
     if (this.isPoolMediaElement_(domMediaEl)) {
-      // In the case of a reregistration, `UpdateSourcesTask` and `LoadTask`
-      // are used to load the element using its sources (which may have changed
-      // since the previous registration).
-      if (isReregistration) {
-        const sources = Sources.removeFrom(this.win_, domMediaEl);
-        this.sources_[domMediaEl.id] = sources;
-        return this.resetPoolMediaElementSource_(domMediaEl, sources);
-      }
-
       // This media element originated from the media pool.
       return Promise.resolve();
     }
@@ -867,9 +834,9 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    const audioGainNode = this.audioGainNodes_[domMediaEl.id];
-    if (audioGainNode) {
-      audioGainNode.gain.value = 0;
+    const audioSource = this.audioSources_[domMediaEl.id];
+    if (audioSource) {
+      audioSource.disconnect();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
@@ -879,7 +846,7 @@ export class MediaPool {
    * Unmutes the specified media element in the DOM.
    * @param {!DomElementDef} domMediaEl The media element to be unmuted.
    * @return {!Promise} A promise that is resolved when the specified media
-   *     element has been successfully unmuted.
+   *     element has been successfully paused.
    */
   unmute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -895,13 +862,13 @@ export class MediaPool {
     if (mediaType == MediaType_Enum.VIDEO) {
       const ampVideoEl = domMediaEl.parentElement;
       if (ampVideoEl) {
-        const volume = parseFloat(ampVideoEl.getAttribute('volume'));
-        const isMuted = volume <= 0 || ampVideoEl.hasAttribute('noaudio');
-        if (isMuted) {
-          return Promise.resolve();
-        }
-        if (volume < 1) {
-          this.setVolume_(domMediaEl, volume);
+        if (ampVideoEl.hasAttribute('noaudio')) {
+          this.setVolume_(domMediaEl, 0);
+        } else {
+          const volume = ampVideoEl.getAttribute('volume');
+          if (volume) {
+            this.setVolume_(domMediaEl, parseFloat(volume));
+          }
         }
       }
     }
@@ -925,16 +892,13 @@ export class MediaPool {
     }
 
     if (this.audioContext_) {
-      if (!this.audioGainNodes_[domMediaEl.id]) {
-        const audioSource =
-          this.audioContext_.createMediaElementSource(domMediaEl);
-        const audioGainNode = this.audioContext_.createGain();
-        this.audioGainNodes_[domMediaEl.id] = audioGainNode;
-        audioSource
-          .connect(audioGainNode)
-          .connect(this.audioContext_.destination);
-      }
-      this.audioGainNodes_[domMediaEl.id].gain.value = volume;
+      const audioSource =
+        this.audioSources_[domMediaEl.id] ||
+        this.audioContext_.createMediaElementSource(domMediaEl);
+      this.audioSources_[domMediaEl.id] = audioSource;
+      const gainNode = this.audioContext_.createGain();
+      gainNode.gain.value = volume;
+      audioSource.connect(gainNode).connect(this.audioContext_.destination);
     }
   }
 

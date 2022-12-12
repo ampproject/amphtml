@@ -8,6 +8,7 @@
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},
         {name: 'erwinmombay', notify: true},
+        {name: 'jridgewell', notify: true},
       ],
     },
   ],
