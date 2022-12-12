@@ -27,6 +27,7 @@ export function getA4ARegistry() {
       'dianomi': () => true,
       'doubleclick': () => true,
       'fake': () => true,
+      'mgid': () => true,
       'nws': () => true,
       'smartadserver': () => true,
       'valueimpression': () => true,
