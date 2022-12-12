@@ -123,7 +123,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
             'cbuster':
               Date.now().toString() +
               Math.floor(Math.random() * 1000000000 + 1),
-            'v': 'x|y|0|' + this.mgidMetadata_.h,
+            'v': '412|915|0|' + this.mgidMetadata_.h,
           },
         },
       },
