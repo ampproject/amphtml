@@ -4,9 +4,10 @@ const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
-const {bgWhite, cyan} = require('kleur/colors');
+const {bgWhite, cyan, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
+const {S3} = require('@aws-sdk/client-s3');
 const {Storage} = require('@google-cloud/storage');
 const {ApiError} = require('@google-cloud/common');
 const {timedExecOrDie} = require('../pr-check/utils');
@@ -173,18 +174,79 @@ function ignoreErrorWhenFileAlreadyExists_(error) {
 }
 
 /**
- * Uploads release files to Google Cloud Storage.
+ * Ensures the presence of env variables or throws an error.
+ * @param  {...string} vars
+ * @return {string[]}
+ */
+function ensureEnvVariable_(...vars) {
+  const ret = [];
+  for (const v of vars) {
+    const value = process.env[v];
+    if (!value) {
+      throw new Error(`CircleCI job is missing the ${v} env variable`);
+    }
+    ret.push(value);
+  }
+  return ret;
+}
+
+/**
+ * Uploads release files to Cloudflare R2.
  * @return {Promise<void>}
  */
-async function uploadFiles_() {
-  const {GCLOUD_SERVICE_KEY} = process.env;
-  if (!GCLOUD_SERVICE_KEY) {
-    throw new Error(
-      'CircleCI job is missing the GCLOUD_SERVICE_KEY env variable'
+async function uploadFilesR2_() {
+  const [accountId, accessKeyId, secretAccessKey] = ensureEnvVariable_(
+    'R2_ACCOUNT_ID',
+    'R2_ACCESS_KEY_ID',
+    'R2_SECRET_ACCESS_KEY'
+  );
+
+  const s3 = new S3({
+    region: 'auto',
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+  });
+
+  let totalFiles = 0;
+  for await (const {stats} of klaw(DEST_DIR)) {
+    if (stats.isFile()) {
+      totalFiles++;
+    }
+  }
+
+  log('Uploading', cyan(totalFiles), 'files to R2:');
+  const uploadsPromises = [];
+  let uploadedFiles = 0;
+  for await (const {path, stats} of klaw(DEST_DIR)) {
+    if (!stats.isFile()) {
+      continue;
+    }
+
+    const key = path.slice(DEST_DIR.length + 1);
+    uploadsPromises.push(
+      s3
+        .putObject({Bucket: 'ampjs', Key: key, Body: fs.createReadStream(path)})
+        .then(() => {
+          logProgress_(totalFiles, ++uploadedFiles);
+        })
     );
   }
 
-  const credentials = JSON.parse(GCLOUD_SERVICE_KEY);
+  await Promise.all(uploadsPromises);
+  log('Finished uploading all files.');
+}
+
+/**
+ * Uploads release files to Google Cloud Storage.
+ * @return {Promise<void>}
+ */
+async function uploadFilesGCS_() {
+  const [gcloudServiceKey] = ensureEnvVariable_('GCLOUD_SERVICE_KEY');
+
+  const credentials = JSON.parse(gcloudServiceKey);
   if (
     !credentials.client_email ||
     !credentials.private_key ||
@@ -205,7 +267,7 @@ async function uploadFiles_() {
     }
   }
 
-  log('Uploading', cyan(totalFiles), 'files to storage:');
+  log('Uploading', cyan(totalFiles), 'files to GCS:');
   const uploadsPromises = [];
   let uploadedFiles = 0;
   for await (const {path, stats} of klaw(DEST_DIR)) {
@@ -237,7 +299,15 @@ runReleaseJob(jobName, async () => {
   }
 
   await brotliCompressAll_();
-  await uploadFiles_();
+  try {
+    await uploadFilesR2_();
+  } catch (error) {
+    log(red('R2 Error:'), error);
+    log(
+      yellow('Ignoring this error for now while R2 storage is in development')
+    );
+  }
+  await uploadFilesGCS_();
 
   log('Archiving releases to', cyan(ARTIFACT_FILE_NAME));
   timedExecOrDie(`cd ${DEST_DIR} && tar -czf ${ARTIFACT_FILE_NAME} *`);
