@@ -50,14 +50,21 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
   }
 
   /** @override */
+  isValidElement() {
+    const id = this.element.getAttribute('data-widget');
+    if (!id || parseInt(id, 10) != id) {
+      user().warn(TAG, 'Undefined or non-numeric data-widget param!');
+      return false;
+    }
+    return true;
+  }
+
+  /** @override */
   getAdUrl(consentTuple, opt_rtcResponsesPromise) {
     let adUrlParams = [];
 
     const consentParams = this.getConsents_(consentTuple);
-    if (consentParams.length === 0) {
-      user().info(TAG, 'Ad request suppressed due to unknown consent');
-      return Promise.resolve('');
-    } else {
+    if (consentParams.length !== 0) {
       adUrlParams = adUrlParams.concat(consentParams);
     }
 
@@ -199,11 +206,17 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       );
     }
 
-    if (consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING) {
+    if (
+      consentString &&
+      consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+    ) {
       result.push('consentData=' + consentString);
     }
 
-    if (consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING) {
+    if (
+      consentString &&
+      consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+    ) {
       result.push('uspString=' + consentString);
     }
 
@@ -299,7 +312,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
    */
   getRefParam_() {
     return this.getReferrer_(10).then((referrer) => {
-      return 'ref=' + referrer;
+      return 'ref=' + encodeURIComponent(referrer);
     });
   }
 
