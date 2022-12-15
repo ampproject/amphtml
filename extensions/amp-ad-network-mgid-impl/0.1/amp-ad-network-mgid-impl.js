@@ -51,12 +51,14 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
 
   /** @override */
   getAdUrl(consentTuple, opt_rtcResponsesPromise) {
-    const adUrlParams = [];
+    let adUrlParams = [];
 
     const consentParams = this.getConsents_(consentTuple);
     if (consentParams.length === 0) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
       return Promise.resolve('');
+    } else {
+      adUrlParams = adUrlParams.concat(consentParams);
     }
 
     const widget = this.element.getAttribute('data-widget');
@@ -64,7 +66,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     let servicerUrl = BASE_URL_ + widget + '/' + this.getPageParam_();
     let pvUrl = PV_URL_ + 'pv/';
 
-    adUrlParams.concat(this.getNetworkInfoParams_());
+    adUrlParams = adUrlParams.concat(this.getNetworkInfoParams_());
     adUrlParams.push(this.getCacheBusterParam_());
     adUrlParams.push(this.getDevicePixelRatioParam_());
     adUrlParams.push(this.getRefParam_());
@@ -190,22 +192,20 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       return result;
     }
 
-    result.push(
-      'gdprApplies=' +
-        (gdprApplies === true ? '1' : gdprApplies === false ? '0' : null)
-    );
-    result.push(
-      'consentData=' +
-        (consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
-          ? consentString
-          : null)
-    );
-    result.push(
-      'uspString=' +
-        (consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
-          ? consentString
-          : null)
-    );
+    if (gdprApplies) {
+      result.push(
+        'gdprApplies=' +
+          (gdprApplies === true ? '1' : gdprApplies === false ? '0' : null)
+      );
+    }
+
+    if (consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING) {
+      result.push('consentData=' + consentString);
+    }
+
+    if (consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING) {
+      result.push('uspString=' + consentString);
+    }
 
     return result;
   }
