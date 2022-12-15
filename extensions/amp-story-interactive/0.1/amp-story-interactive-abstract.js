@@ -763,7 +763,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     }
     const numOptions = this.getNumberOfOptions();
     // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateComponentWithData(response['options'].slice(0, numOptions));
+    response["options"] && this.updateComponentWithData(response['options'].slice(0, numOptions));
   }
 
   /**
