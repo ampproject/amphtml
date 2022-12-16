@@ -451,7 +451,6 @@ const forbiddenTermsGlobal = {
       'src/service/index.js',
       'src/service/cid-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
-      'extensions/amp-ad-network-mgid-impl/0.1/amp-ad-network-mgid-impl.js',
       'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
