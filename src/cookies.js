@@ -255,7 +255,7 @@ function checkOriginForSettingCookie(win, options, name) {
   const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
   const metaTag = win.document.querySelector("meta[name='runtime-host']");
   userAssert(
-    !(current == proxy || endsWith(current, '.' + proxy)) || metaTag != null,
+    !(current == proxy || endsWith(current, '.' + proxy) || metaTag != null),
     'Should never attempt to set cookie on proxy origin. (in depth check): ' +
       name
   );
