@@ -1,6 +1,7 @@
 # amp-ad-network-mgid-impl
 
-Mgid implementation of AMP Ad, which is only used for amp-stories. 3p-iframe implementation is used for all other cases.
+Mgid implementation of AMP Ad, which is only used for amp-stories.
+3p iframe implementation is used for all other cases.
 
 <table>
   <tr>
@@ -30,4 +31,3 @@ Mgid implementation of AMP Ad, which is only used for amp-stories. 3p-iframe imp
   ...
 </amp-story>
 ```
-
