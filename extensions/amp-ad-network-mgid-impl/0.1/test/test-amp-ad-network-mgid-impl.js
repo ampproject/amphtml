@@ -99,5 +99,33 @@ describes.realWin(
         });
       });
     });
+
+    it('test sendXhrRequest', async () => {
+      env.win.fetch = env.fetchMock.realFetch;
+      const creative = `
+      <!doctype html>
+      <html ⚡4ads>
+      <head></head>
+      <body>
+        <script id="mgid_metadata" type=application/json>
+          {"h":"hash", "h2": "hash2", "rid": "request_id", "tt": "tt123", "ts": "ts456", "muidn": "muidn123456"}
+        </script>
+      </body>
+      </html>
+      `;
+
+      env.fetchMock.mock('begin:https://fake.local', creative);
+
+      mgidImplElem.setAttribute('data-widget', '100');
+
+      const mgidImpl = new AmpAdNetworkMgidImpl(mgidImplElem);
+      await mgidImpl.sendXhrRequest('https://fake.local');
+      expect(mgidImpl.mgidMetadata_.h).to.equal('hash');
+      expect(mgidImpl.mgidMetadata_.h2).to.equal('hash2');
+      expect(mgidImpl.mgidMetadata_.rid).to.equal('request_id');
+      expect(mgidImpl.mgidMetadata_.tt).to.equal('tt123');
+      expect(mgidImpl.mgidMetadata_.ts).to.equal('ts456');
+      expect(mgidImpl.mgidMetadata_.muidn).to.equal('muidn123456');
+    });
   }
 );
