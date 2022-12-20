@@ -807,6 +807,8 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask()).then(
       () => {
         if (rewindToBeginning) {
+          // TODO: https://github.com/ampproject/amphtml/issues/38595 implement
+          // proper fix to frame management.
           // We add a 100 second delay to rewinding as sometimes this causes an
           // interlacing/glitch/frame jump when a new video is starting to play.
           // A 0 delay isn't enough as we need to push the "seeking" event
