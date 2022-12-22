@@ -69,6 +69,7 @@ tags: {  # <amp-dailymotion>
     mandatory: true
     value_regex_casei: "[a-z0-9]+"
   }
+  attrs: { name: "referrerpolicy" }
   attrs: {
     name: "dock"
     requires_extension: "amp-video-docking"
