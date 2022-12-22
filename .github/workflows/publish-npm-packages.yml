@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "AMP version: ${{ github.event.inputs.amp-version }}"
           echo "npm tag: ${{ github.event.inputs.tag }}"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.events.inputs.amp-version }}
       - name: Get latest scripts
@@ -59,10 +59,10 @@ jobs:
     outputs:
       core-version: ${{ steps.build-core.outputs.core-version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.events.inputs.amp-version }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           registry-url: https://registry.npmjs.org
           node-version: lts/*
@@ -108,10 +108,10 @@ jobs:
       matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.events.inputs.amp-version }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           registry-url: https://registry.npmjs.org
           node-version: lts/*
