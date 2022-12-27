@@ -92,13 +92,17 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       servicerUrl += joinedParams;
       pvUrl += joinedParams;
 
-      this.getAmpDoc()
-        .getBody()
-        .appendChild(
-          createElementWithAttributes(this.win.document, 'amp-pixel', {
-            'src': pvUrl,
-          })
-        );
+      if (typeof this.win['_mgAmpStoryPV'] == 'undefined') {
+        this.getAmpDoc()
+          .getBody()
+          .appendChild(
+            createElementWithAttributes(this.win.document, 'amp-pixel', {
+              'src': pvUrl,
+            })
+          );
+
+        this.win['_mgAmpStoryPV'] = 1;
+      }
 
       return servicerUrl;
     });
