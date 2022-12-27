@@ -76,7 +76,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     adUrlParams = adUrlParams.concat(this.getNetworkInfoParams_());
     adUrlParams.push(this.getCacheBusterParam_());
     adUrlParams.push(this.getDevicePixelRatioParam_());
-    adUrlParams.push(this.getRefParam_());
     adUrlParams.push(this.getPrParam_());
     adUrlParams.push(this.getLuParam_());
     adUrlParams.push(this.getSessionIdParam_());
@@ -304,16 +303,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     }
 
     return 'dpr=' + ratio;
-  }
-
-  /**
-   * @return {string} Referrer info for ad request
-   * @private
-   */
-  getRefParam_() {
-    return this.getReferrer_(10).then((referrer) => {
-      return 'ref=' + encodeURIComponent(referrer);
-    });
   }
 
   /**
