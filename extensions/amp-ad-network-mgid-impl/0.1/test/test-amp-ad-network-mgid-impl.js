@@ -55,9 +55,10 @@ describes.realWin(
           /(\?|&)nisd=(0|1)(&|$)/,
           /(\?|&)cbuster=\d+(&|$)/,
           /(\?|&)dpr=\d+(&|$)/,
-          /(\?|&)ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar(&|$)/,
+          /(\?|&)cxurl=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)pr=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar(&|$)/,
           /(\?|&)lu=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
+          /(\?|&)pvid=[A-z0-9\-_]+(&|$)/,
           /(\?|&)sessionId=[0-9a-f]{8}-[0-9a-f]{5}(&|$)/,
           /(\?|&)implVersion=15(&|$)/,
         ].forEach((regexp) => {
@@ -74,6 +75,9 @@ describes.realWin(
         .stub(viewer, 'getReferrerUrl')
         .returns(Promise.resolve('http://fake.example/?foo=bar'));
 
+      const documentInfo = Services.documentInfoForDoc(mgidImplElem);
+      documentInfo.canonicalUrl = 'http://canonical.example/?abc=xyz';
+
       sessionStorage['MG_Session_pr'] = 'http://stored-pr.example/?foo=bar';
       sessionStorage['MG_Session_lu'] = 'http://stored-lu.example/?abc=xyz';
       sessionStorage['MG_Session_Id'] = 'stored-session';
@@ -88,10 +92,11 @@ describes.realWin(
           /(\?|&)nisd=(0|1)(&|$)/,
           /(\?|&)cbuster=\d+(&|$)/,
           /(\?|&)dpr=\d+(&|$)/,
-          /(\?|&)ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar(&|$)/,
+          /(\?|&)cxurl=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)pr=http%3A%2F%2Fstored-pr.example%2F%3Ffoo%3Dbar(&|$)/,
           /(\?|&)lu=http%3A%2F%2Fstored-lu.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)sessionId=stored-session(&|$)/,
+          /(\?|&)pvid=[A-z0-9\-_]+(&|$)/,
           /(\?|&)muid=qwerty123456(&|$)/,
           /(\?|&)implVersion=15(&|$)/,
         ].forEach((regexp) => {
