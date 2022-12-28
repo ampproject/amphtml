@@ -53,9 +53,9 @@ function prBuildWorkflow() {
     timedExecOrDie('amp validator');
   }
 
-  if (buildTargetsInclude(Targets.VALIDATOR)) {
-    timedExecOrDie('amp validator-cpp');
-  }
+  // if (buildTargetsInclude(Targets.VALIDATOR)) {
+  timedExecOrDie('amp validator-cpp');
+  // }
 
   if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
     timedExecOrDie('amp validate-html-fixtures');
