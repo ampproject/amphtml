@@ -74,6 +74,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     adUrlParams = adUrlParams.concat(this.getNetworkInfoParams_());
     adUrlParams.push(this.getCacheBusterParam_());
     adUrlParams.push(this.getDevicePixelRatioParam_());
+    adUrlParams.push(this.getCxurlParam_());
     adUrlParams.push(this.getPrParam_());
     adUrlParams.push(this.getLuParam_());
     adUrlParams.push(this.getSessionIdParam_());
@@ -298,6 +299,15 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
   }
 
   /**
+   * @return {string} Current page url for ad request
+   * @private
+   */
+  getCxurlParam_() {
+    const url = Services.documentInfoForDoc(this.element).canonicalUrl;
+    return 'cxurl=' + encodeURIComponent(url);
+  }
+
+  /**
    * @return {string} Session id info for ad request
    * @private
    */
@@ -319,10 +329,12 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
    * @private
    */
   getPvidParam_() {
-    Services.documentInfoForDoc(this.element).pageViewId64.then((pvid) => {
-      this.mgidMetadata_.pvid = pvid;
-      return 'pvid=' + pvid;
-    });
+    return Services.documentInfoForDoc(this.element).pageViewId64.then(
+      (pvid) => {
+        this.mgidMetadata_.pvid = pvid;
+        return 'pvid=' + pvid;
+      }
+    );
   }
 
   /**
