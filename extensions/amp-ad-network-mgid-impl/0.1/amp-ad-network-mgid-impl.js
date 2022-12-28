@@ -28,12 +28,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
 
     /** @private */
     this.mgidMetadata_ = {
-      'h': '',
       'muidn': '',
-      'h2': '',
-      'rid': '',
-      'tt': '',
-      'ts': '',
       'pvid': '',
     };
   }
@@ -122,6 +117,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
         const meta = root.querySelector('#mgid_metadata');
         if (meta) {
           this.mgidMetadata_ = JSON.parse(meta./*OK*/ innerHTML);
+          this.mgidMetadata_.muidn = this.mgidMetadata_.muidn.trim();
           if (this.mgidMetadata_.muidn != '') {
             localStorage.mgMuidn = this.mgidMetadata_.muidn;
           }
