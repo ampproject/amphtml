@@ -8,7 +8,6 @@ import {Services} from '#service';
 
 import {user} from '#utils/log';
 
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @const {string} */
@@ -16,7 +15,6 @@ const TAG = 'amp-ad-network-mgid-impl';
 
 const BASE_URL_ = 'https://servicer.mgid.com/';
 const PV_URL_ = 'https://c.mgid.com/';
-const CAPPING_URL_ = 'https://c.mgid.com/';
 
 export class AmpAdNetworkMgidImpl extends AmpA4A {
   /**
@@ -106,47 +104,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
 
       return servicerUrl;
     });
-  }
-
-  /** @override */
-  onCreativeRender(creativeMetaData, opt_onLoadPromise) {
-    super.onCreativeRender(creativeMetaData);
-
-    const config = {
-      'transport': {'beacon': false, 'xhrpost': false, 'image': true},
-      'requests': {
-        'base': CAPPING_URL_ + 'c',
-      },
-      'triggers': {
-        'storyAdView': {
-          'on': 'story-ad-view',
-          'request': 'base',
-          'extraUrlParams': {
-            'f': 1,
-            'cid': this.element.getAttribute('data-widget'),
-            'h2': this.mgidMetadata_.h2,
-            'rid': this.mgidMetadata_.rid,
-            'tt': this.mgidMetadata_.tt,
-            'ts': this.mgidMetadata_.ts,
-            'iv': 13,
-            'pageImp': 1,
-            'pvid': this.mgidMetadata_.pvid,
-            'muid': this.mgidMetadata_.muidn,
-            'cbuster':
-              Date.now().toString() +
-              Math.floor(Math.random() * 1000000000 + 1),
-            'v': '412|915|0|' + this.mgidMetadata_.h,
-          },
-        },
-      },
-    };
-
-    this.ampAnalyticsElement_ = insertAnalyticsElement(
-      this.element,
-      config,
-      /*loadAnalytics*/ true,
-      false
-    );
   }
 
   /** @override */
