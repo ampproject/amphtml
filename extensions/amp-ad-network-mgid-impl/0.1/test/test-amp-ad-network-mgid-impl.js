@@ -56,7 +56,7 @@ describes.realWin(
           /(\?|&)cbuster=\d+(&|$)/,
           /(\?|&)dpr=\d+(&|$)/,
           /(\?|&)cxurl=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
-          /(\?|&)pr=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar(&|$)/,
+          /(\?|&)pr=fake.example(&|$)/,
           /(\?|&)lu=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)pvid=[A-z0-9\-_]+(&|$)/,
           /(\?|&)sessionId=[0-9a-f]{8}-[0-9a-f]{5}(&|$)/,
@@ -78,7 +78,7 @@ describes.realWin(
       const documentInfo = Services.documentInfoForDoc(mgidImplElem);
       documentInfo.canonicalUrl = 'http://canonical.example/?abc=xyz';
 
-      sessionStorage['MG_Session_pr'] = 'http://stored-pr.example/?foo=bar';
+      sessionStorage['MG_Session_pr'] = 'stored-pr.example';
       sessionStorage['MG_Session_lu'] = 'http://stored-lu.example/?abc=xyz';
       sessionStorage['MG_Session_Id'] = 'stored-session';
       localStorage.mgMuidn = 'qwerty123456';
@@ -93,7 +93,7 @@ describes.realWin(
           /(\?|&)cbuster=\d+(&|$)/,
           /(\?|&)dpr=\d+(&|$)/,
           /(\?|&)cxurl=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
-          /(\?|&)pr=http%3A%2F%2Fstored-pr.example%2F%3Ffoo%3Dbar(&|$)/,
+          /(\?|&)pr=stored-pr.example(&|$)/,
           /(\?|&)lu=http%3A%2F%2Fstored-lu.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)sessionId=stored-session(&|$)/,
           /(\?|&)pvid=[A-z0-9\-_]+(&|$)/,
