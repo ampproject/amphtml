@@ -275,7 +275,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
         const matchDomain = referrer.match(/:\/\/([^\/:]+)/i);
         sessionStorage['MG_Session_pr'] =
           matchDomain && matchDomain[1] ? matchDomain[1] : '';
-        return 'pr=' + encodeURIComponent(referrer);
+        return 'pr=' + encodeURIComponent(sessionStorage['MG_Session_pr']);
       });
     }
   }
