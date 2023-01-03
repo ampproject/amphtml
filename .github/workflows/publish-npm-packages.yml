@@ -50,7 +50,7 @@ jobs:
         id: get-extensions
         run: |
           EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
-          echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
+          echo "extensions={\"include\":${EXTENSIONS}}" >> $GITHUB_OUTPUT
   publish-core:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
@@ -79,7 +79,7 @@ jobs:
           CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
           cd ./src/bento/core
           npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
-          echo "::set-output name=core-version::${CORE_VERSION}"
+          echo "core-version=${CORE_VERSION}" >> $GITHUB_OUTPUT
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
