@@ -44,9 +44,9 @@ let NavigationTargetDef;
  * @enum
  */
 const AttributionReportingStatus = {
-  ATTRIBUTION_MACRO_PRESENT: 1,
-  ATTRIBUTION_DATA_PRESENT: 2,
-  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 3,
+  ATTRIBUTION_MACRO_PRESENT: 4,
+  ATTRIBUTION_DATA_PRESENT: 5,
+  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 6,
 };
 
 export class AmpAdExit extends AMP.BaseElement {
@@ -170,7 +170,11 @@ export class AmpAdExit extends AMP.BaseElement {
         target.behaviors.clickTarget == '_top'
           ? '_top'
           : '_blank';
-      openWindowDialog(this.win, finalUrl, clickTarget, target.windowFeatures);
+
+      const substitutedFeatures = substituteVariables(
+        target.windowFeatures || ''
+      );
+      openWindowDialog(this.win, finalUrl, clickTarget, substitutedFeatures);
     }
   }
 
@@ -599,7 +603,7 @@ export function getAttributionReportingStatus(
     isAttributionReportingSupported
   ) {
     return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
-  } else if (target?.behaviors?.browserAdConversion) {
+  } else if (target?.behaviors?.browserAdConversion?.attributionsrc) {
     return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
   }
   return AttributionReportingStatus.ATTRIBUTION_MACRO_PRESENT;

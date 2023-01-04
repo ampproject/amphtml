@@ -23,14 +23,14 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Set Up Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: lts/*
 
       - name: Set Up Environment
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
@@ -50,19 +50,19 @@ jobs:
           title="${title//'%'/'%25'}"
           title="${title//$'\n'/'%0A'}"
           title="${title//$'\r'/'%0D'}"
-          echo "::set-output name=title::$(echo "$title")"
+          echo "title=$(echo "$title")" >> $GITHUB_OUTPUT
 
           body=$(git log -1 --format=%b)
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}"
-          echo "::set-output name=body::$(echo "$body")"
+          echo "body=$(echo "$body")" >> $GITHUB_OUTPUT
 
           hash=$(git log -1 --format=%h)
           hash="${hash//'%'/'%25'}"
           hash="${hash//$'\n'/'%0A'}"
           hash="${hash//$'\r'/'%0D'}"
-          echo "::set-output name=branch::$(echo "sweep-experiments-${hash}")"
+          echo "branch=$(echo "sweep-experiments-${hash}")" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         id: pull-request
