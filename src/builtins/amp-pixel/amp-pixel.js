@@ -18,12 +18,28 @@ export class AmpPixel extends BaseElement {
 
     /** @private {?Promise<!Image>} */
     this.triggerPromise_ = null;
+
+    /** @private @const {boolean} */
+    this.isAttributionReportingSupported_ =
+      this.detectAttributionReportingSupport();
   }
 
   /** @override */
   isLayoutSupported(unusedLayout) {
     // No matter what layout is: the pixel is always non-displayed.
     return true;
+  }
+
+  /**
+   * Determine if `attribution-reporting` is supported by user-agent. Should only return
+   * true for Chrome 92+.
+   * @visibleForTesting
+   * @return {boolean}
+   */
+  detectAttributionReportingSupport() {
+    return this.win.document.featurePolicy?.allowsFeature(
+      'attribution-reporting'
+    );
   }
 
   /** @override */
@@ -80,7 +96,11 @@ export class AmpPixel extends BaseElement {
             if (!this.win) {
               return;
             }
-            const pixel = createPixel(this.win, src, this.referrerPolicy_);
+
+            const pixel =
+                  createPixel(this.win, src, this.referrerPolicy_,
+                    this.detectAttributionReportingSupport(),
+                    this.element.getAttribute('attributionsrc'));
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });
