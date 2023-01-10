@@ -25,10 +25,10 @@ jobs:
     environment: release_tagger
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: 16
-      - uses: actions/checkout@v2
+          node-version: lts/*
+      - uses: actions/checkout@v3
       - run: bash ./.github/workflows/install_dependencies.sh
       - name: Run tagger
         run: |
