@@ -338,7 +338,8 @@ amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound:not(
 }
 
 /** Make clickable elements in light dom accept pointer events */
-amp-story-grid-layer a, amp-story-grid-layer amp-twitter {
+amp-story-grid-layer a, amp-story-grid-layer amp-twitter,
+amp-story-grid-layer amp-ad {
   pointer-events: auto !important;
 }
 
