@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.240 */
+/** Version: b4808644 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -567,6 +567,10 @@ const AnalyticsEvent = {
   IMPRESSION_SUBSCRIPTION_LINKING_COMPLETE: 40,
   IMPRESSION_SUBSCRIPTION_LINKING_ERROR: 41,
   IMPRESSION_SURVEY: 42,
+  IMPRESSION_REGWALL_ERROR: 43,
+  IMPRESSION_NEWSLETTER_ERROR: 44,
+  IMPRESSION_SURVEY_ERROR: 45,
+  IMPRESSION_METER_TOAST_ERROR: 46,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -627,7 +631,7 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
-  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
+  ACTION_SHOWCASE_REGWALL_SIWG_CLICK: 1060,
   ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
   ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
   ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
@@ -638,6 +642,10 @@ const AnalyticsEvent = {
   ACTION_SURVEY_SUBMIT_CLICK: 1068,
   ACTION_SURVEY_CLOSED: 1069,
   ACTION_SURVEY_DATA_TRANSFER: 1070,
+  ACTION_REGWALL_PAGE_REFRESH: 1071,
+  ACTION_NEWSLETTER_PAGE_REFRESH: 1072,
+  ACTION_SURVEY_PAGE_REFRESH: 1073,
+  ACTION_METER_TOAST_PAGE_REFRESH: 1074,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -646,6 +654,7 @@ const AnalyticsEvent = {
   EVENT_SUBSCRIPTION_LINKING_FAILED: 2005,
   EVENT_SURVEY_ALREADY_SUBMITTED: 2006,
   EVENT_SURVEY_SUBMIT_FAILED: 2007,
+  EVENT_SURVEY_DATA_TRANSFER_FAILED: 2008,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -675,6 +684,8 @@ const AnalyticsEvent = {
   EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
   EVENT_SUBSCRIPTION_LINKING_SUCCESS: 3027,
   EVENT_SURVEY_SUBMITTED: 3028,
+  EVENT_LINK_ACCOUNT_SUCCESS: 3029,
+  EVENT_SAVE_SUBSCRIPTION_SUCCESS: 3030,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -1490,8 +1501,11 @@ const POST_MESSAGE_COMMAND_USER = 'user';
 /** Error command for post messages. */
 const POST_MESSAGE_COMMAND_ERROR = 'error';
 
-/** Button click command for post messages. */
-const POST_MESSAGE_COMMAND_BUTTON_CLICK = 'button-click';
+/** GSI Button click command for post messages. */
+const POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK = 'gsi-button-click';
+
+/** SIWG Button click command for post messages. */
+const POST_MESSAGE_COMMAND_SIWG_BUTTON_CLICK = 'siwg-button-click';
 
 /** 3P button click command for post messages. */
 const POST_MESSAGE_COMMAND_3P_BUTTON_CLICK = '3p-button-click';
@@ -2251,11 +2265,21 @@ class GaaMeteringRegwall {
     self.addEventListener('message', (e) => {
       if (
         e.data.stamp === POST_MESSAGE_STAMP &&
-        e.data.command === POST_MESSAGE_COMMAND_BUTTON_CLICK
+        e.data.command === POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK
       ) {
         // Log button click event.
         logEvent({
           analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+          isFromUserAction: true,
+        });
+      }
+      if (
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_SIWG_BUTTON_CLICK
+      ) {
+        // Log button click event.
+        logEvent({
+          analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SIWG_CLICK,
           isFromUserAction: true,
         });
       }
@@ -2319,13 +2343,12 @@ class GaaMeteringRegwall {
     });
     parentElement.appendChild(buttonEl);
 
-    // Track button clicks.
-    buttonEl.addEventListener('click', () => {
+    function logButtonClicks() {
       logEvent({
-        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SWIG_CLICK,
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SIWG_CLICK,
         isFromUserAction: true,
       });
-    });
+    }
 
     return new Promise((resolve) => {
       self.google.accounts.id.initialize({
@@ -2339,6 +2362,7 @@ class GaaMeteringRegwall {
         'theme': 'outline',
         'text': 'continue_with',
         'logo_alignment': 'center',
+        'click_listener': logButtonClicks,
       });
     });
   }
@@ -2474,7 +2498,7 @@ class GaaGoogleSignInButton {
               sendMessageToParentFnPromise.then((sendMessageToParent) => {
                 sendMessageToParent({
                   stamp: POST_MESSAGE_STAMP,
-                  command: POST_MESSAGE_COMMAND_BUTTON_CLICK,
+                  command: POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK,
                 });
               });
             });

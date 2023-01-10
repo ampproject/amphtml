@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   browser-tools: circleci/browser-tools@1.2.3
   codecov: codecov/codecov@3.2.3
-  node: circleci/node@4.7.0
+  node: circleci/node@5.0.3
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -93,9 +93,9 @@ commands:
   setup_node_environment:
     steps:
       - node/install:
-          lts: true
-          install-npm: false
-      - node/install-packages
+          node-version: 'lts'
+      - node/install-packages:
+          with-cache: false
   setup_vm:
     parameters:
       save-git-cache:

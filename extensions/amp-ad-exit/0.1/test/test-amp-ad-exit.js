@@ -1020,7 +1020,7 @@ describes.realWin(
             true /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(3);
+        ).to.equal(6);
       });
 
       it('should return ATTRIBUTION_DATA_PRESENT if browserAdConfig is present and no browser support', () => {
@@ -1036,7 +1036,7 @@ describes.realWin(
             false /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(2);
+        ).to.equal(5);
       });
 
       it('should return ATTRIBUTION_MACRO_PRESENT if browserAdConfig not present', () => {
@@ -1048,7 +1048,7 @@ describes.realWin(
             false /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(1);
+        ).to.equal(4);
       });
     });
   }

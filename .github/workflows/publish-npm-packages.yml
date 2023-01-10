@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "AMP version: ${{ github.event.inputs.amp-version }}"
           echo "npm tag: ${{ github.event.inputs.tag }}"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.events.inputs.amp-version }}
       - name: Get latest scripts
@@ -50,7 +50,7 @@ jobs:
         id: get-extensions
         run: |
           EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
-          echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
+          echo "extensions={\"include\":${EXTENSIONS}}" >> $GITHUB_OUTPUT
   publish-core:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
@@ -59,10 +59,10 @@ jobs:
     outputs:
       core-version: ${{ steps.build-core.outputs.core-version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.events.inputs.amp-version }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           registry-url: https://registry.npmjs.org
           node-version: lts/*
@@ -79,7 +79,7 @@ jobs:
           CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
           cd ./src/bento/core
           npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
-          echo "::set-output name=core-version::${CORE_VERSION}"
+          echo "core-version=${CORE_VERSION}" >> $GITHUB_OUTPUT
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
@@ -108,10 +108,10 @@ jobs:
       matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.events.inputs.amp-version }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           registry-url: https://registry.npmjs.org
           node-version: lts/*
