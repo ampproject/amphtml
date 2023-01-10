@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.243 */
+/** Version: b4808644 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5420,7 +5420,9 @@ function getCanonicalUrl(doc) {
   const rootNode = doc.getRootNode();
   const canonicalTag = rootNode.querySelector("link[rel='canonical']");
   return (
-    canonicalTag?.href || rootNode.location.origin + rootNode.location.pathname
+    canonicalTag?.href ||
+    rootNode.location?.origin + rootNode.location?.pathname ||
+    ''
   );
 }
 
@@ -5620,7 +5622,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.243',
+    '_client': 'SwG b4808644',
   });
 }
 
@@ -6962,7 +6964,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.243',
+        '_client': 'SwG b4808644',
         'supportsEventManager': true,
       },
       args || {}
@@ -7931,7 +7933,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.243');
+    context.setClientVersion('SwG b4808644');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());

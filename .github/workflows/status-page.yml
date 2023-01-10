@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: status_page
     steps:
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: 16
-      - uses: actions/checkout@v2
+          node-version: lts/*
+      - uses: actions/checkout@v3
       - name: Add progress comment to cherry-pick issue for Stable and LTS
         if: github.event_name == 'issues' && github.event.action == 'opened'
         run: |

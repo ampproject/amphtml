@@ -39,7 +39,21 @@ export function createShadowRoot(hostElement) {
 
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
-    existingRoot./*OK*/ innerHTML = '';
+    if (self.trustedTypes && self.trustedTypes.createPolicy) {
+      // Create Trusted Types policy that only returns the empty string as
+      // TrustedHTML
+      const policy = self.trustedTypes.createPolicy(
+        'shadow-embed#createShadowRoot',
+        {
+          createHTML: function (unused) {
+            return '';
+          },
+        }
+      );
+      existingRoot./*OK*/ innerHTML = policy.createHTML('');
+    } else {
+      existingRoot./*OK*/ innerHTML = '';
+    }
     return existingRoot;
   }
 

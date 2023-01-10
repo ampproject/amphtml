@@ -243,7 +243,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     if (elementsPlayer) {
       this.iframeDomain_ = 'https://cdm.elements.video';
     } else {
-      this.iframeDomain_ = 'https://cdm.connatix.com';
+      this.iframeDomain_ = 'https://amp.cntxcdm.com';
     }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
