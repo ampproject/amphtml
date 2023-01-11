@@ -28,8 +28,6 @@
   text-align: center !important;
   text-decoration: none !important;
   width: clamp(min(120px), 40%, max(calc(100vw - 64px)));
-  /* min-width: 120px !important;
-  max-width: calc(100vw - 64px); */
 }
 
 [cta-active].i-amphtml-story-ad-link {
