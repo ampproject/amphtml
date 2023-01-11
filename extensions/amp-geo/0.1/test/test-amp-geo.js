@@ -24,7 +24,8 @@ describes.realWin(
         unknown: ['unknown'],
         eea: ['preset-eea'],
         myGroup: ['preset-eea', 'us'],
-        usSubdivisions: ['us-al', 'us-ny'],
+        usSubdivisions: ['us-al', 'us-ny', 'us-va'],
+        usVA: ['us-va'],
         canadaSubdivisions: ['ca-mb', 'ca-nb'],
         anz: ['au', 'nz'],
         uscaGroup: ['preset-us-ca'],
@@ -360,6 +361,34 @@ describes.realWin(
             'amp-geo-group-uscaGroup',
             'amp-geo-group-california',
             'amp-iso-subdivision-us-ca',
+          ],
+          true
+        );
+      });
+    });
+
+    it('should allow us-va subdivision', () => {
+      setGeoOverrideHash('us us-va');
+      addConfigElement('script', 'application/json', JSON.stringify(config));
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('us-va');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-usVA',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-va',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-usVA',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-va',
           ],
           true
         );
@@ -980,6 +1009,7 @@ describes.realWin(
           'eea',
           'myGroup',
           'usSubdivisions',
+          'usVA',
           'canadaSubdivisions',
           'anz',
           'uscaGroup',
