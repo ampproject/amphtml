@@ -398,7 +398,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   open(shouldAnimate = true) {
-    // If link is a branch, go directly to the page.
+    // If branching link, trigger click and skip drawer opening logic.
     const pageOutlinkChild = this.element.parentElement
       .querySelector('amp-story-page-outlink')
       ?.querySelector('a');
