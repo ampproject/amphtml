@@ -6,7 +6,7 @@
     {
       owners: [
         {name: 'ampproject/wg-ads-reviewers'},
-        {name: 'jeffkaufman', notify: true},
+        {name: 'zombifier', notify: true},
       ],
     },
   ],
