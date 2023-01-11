@@ -398,6 +398,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   open(shouldAnimate = true) {
+    // If link is a branch, go directly to the page.
+    const pageOutlinkChild = this.element.parentElement
+      .querySelector('amp-story-page-outlink')
+      ?.querySelector('a');
+    const isBranchingLink = pageOutlinkChild.href.includes('#page=');
+    if (isBranchingLink) {
+      pageOutlinkChild.click();
+      return;
+    }
+
     if (this.state === DrawerState.OPEN) {
       return;
     }
