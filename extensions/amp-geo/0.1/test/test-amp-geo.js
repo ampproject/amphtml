@@ -369,11 +369,7 @@ describes.realWin(
 
     it('should allow us-va subdivision', () => {
       setGeoOverrideHash('us us-va');
-      addConfigElement(
-        'script',
-        'application/json',
-        JSON.stringify(config)
-      );
+      addConfigElement('script', 'application/json', JSON.stringify(config));
       geo.buildCallback();
 
       return Services.geoForDocOrNull(el).then((geo) => {
