@@ -57,75 +57,13 @@ describes.realWin(
           /(\?|&)dpr=\d+(&|$)/,
           /(\?|&)cxurl=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)pr=fake.example(&|$)/,
-          /(\?|&)lu=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)pvid=[A-z0-9\-_]+(&|$)/,
-          /(\?|&)sessionId=[0-9a-f]{8}-[0-9a-f]{5}(&|$)/,
+          /(\?|&)muid=amp-[A-z0-9\-_]+(&|$)/,
           /(\?|&)implVersion=15(&|$)/,
         ].forEach((regexp) => {
           expect(url).to.match(regexp);
         });
       });
-    });
-
-    it('generates correct adUrl (data from storage)', () => {
-      mgidImplElem.setAttribute('data-widget', '100');
-
-      const viewer = Services.viewerForDoc(mgidImplElem);
-      env.sandbox
-        .stub(viewer, 'getReferrerUrl')
-        .returns(Promise.resolve('http://fake.example/?foo=bar'));
-
-      const documentInfo = Services.documentInfoForDoc(mgidImplElem);
-      documentInfo.canonicalUrl = 'http://canonical.example/?abc=xyz';
-
-      sessionStorage['MG_Session_pr'] = 'stored-pr.example';
-      sessionStorage['MG_Session_lu'] = 'http://stored-lu.example/?abc=xyz';
-      sessionStorage['MG_Session_Id'] = 'stored-session';
-      localStorage.mgMuidn = 'qwerty123456';
-
-      const mgidImpl = new AmpAdNetworkMgidImpl(mgidImplElem);
-
-      return mgidImpl.getAdUrl().then((url) => {
-        [
-          /^https:\/\/servicer\.mgid\.com\/100\/2/,
-          /(\?|&)niet=(slow-2g|2g|3g|4g)(&|$)/,
-          /(\?|&)nisd=(0|1)(&|$)/,
-          /(\?|&)cbuster=\d+(&|$)/,
-          /(\?|&)dpr=\d+(&|$)/,
-          /(\?|&)cxurl=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
-          /(\?|&)pr=stored-pr.example(&|$)/,
-          /(\?|&)lu=http%3A%2F%2Fstored-lu.example%2F%3Fabc%3Dxyz(&|$)/,
-          /(\?|&)sessionId=stored-session(&|$)/,
-          /(\?|&)pvid=[A-z0-9\-_]+(&|$)/,
-          /(\?|&)muid=qwerty123456(&|$)/,
-          /(\?|&)implVersion=15(&|$)/,
-        ].forEach((regexp) => {
-          expect(url).to.match(regexp);
-        });
-      });
-    });
-
-    it('test sendXhrRequest', async () => {
-      env.win.fetch = env.fetchMock.realFetch;
-      const creative = `
-      <!doctype html>
-      <html ⚡4ads>
-      <head></head>
-      <body>
-        <script id="mgid_metadata" type=application/json>
-          {"muidn": "muidn123456"}
-        </script>
-      </body>
-      </html>
-      `;
-
-      env.fetchMock.mock('begin:https://fake.local', creative);
-
-      mgidImplElem.setAttribute('data-widget', '100');
-
-      const mgidImpl = new AmpAdNetworkMgidImpl(mgidImplElem);
-      await mgidImpl.sendXhrRequest('https://fake.local');
-      expect(mgidImpl.mgidMetadata_.muidn).to.equal('muidn123456');
     });
   }
 );

@@ -25,12 +25,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
 
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
-
-    /** @private */
-    this.mgidMetadata_ = {
-      'muidn': '',
-      'pvid': '',
-    };
   }
 
   /** @override */
@@ -71,12 +65,8 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     adUrlParams.push(this.getDevicePixelRatioParam_());
     adUrlParams.push(this.getCxurlParam_());
     adUrlParams.push(this.getPrParam_());
-    adUrlParams.push(this.getLuParam_());
-    adUrlParams.push(this.getSessionIdParam_());
     adUrlParams.push(this.getPvidParam_());
-    if (localStorage.mgMuidn) {
-      adUrlParams.push('muid=' + localStorage.mgMuidn);
-    }
+    adUrlParams.push(this.getMuidParam_());
     adUrlParams.push('implVersion=15');
 
     return Promise.allSettled(adUrlParams).then((params) => {
@@ -99,35 +89,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       }
 
       return servicerUrl;
-    });
-  }
-
-  /** @override */
-  sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then((response) => {
-      if (!response) {
-        return null;
-      }
-      const {headers, status} =
-        /** @type {{status: number, headers: !Headers}} */ (response);
-
-      return response.text().then((responseText) => {
-        const doc = new DOMParser().parseFromString(responseText, 'text/html');
-        const root = doc.documentElement;
-        const meta = root.querySelector('#mgid_metadata');
-        if (meta) {
-          this.mgidMetadata_ = JSON.parse(meta./*OK*/ innerHTML);
-          this.mgidMetadata_.muidn = this.mgidMetadata_.muidn.trim();
-          if (this.mgidMetadata_.muidn != '') {
-            localStorage.mgMuidn = this.mgidMetadata_.muidn;
-          }
-        }
-
-        return new Response(responseText, {
-          status,
-          headers,
-        });
-      });
     });
   }
 
@@ -185,18 +146,12 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
    * @private
    */
   getPageParam_() {
-    const widget = this.element.getAttribute('data-widget');
-    let page = 1;
-    if (sessionStorage[`MG_widget_${widget}_page`]) {
-      page = sessionStorage[`MG_widget_${widget}_page`];
-      if (page++ > 20) {
-        page = 1;
-      }
-    }
-
-    sessionStorage[`MG_widget_${widget}_page`] = page;
-
-    return page;
+    const counter = Services.urlReplacementsForDoc(
+      this.element
+    )./*OK*/ expandStringSync('COUNTER', undefined, {
+      'COUNTER': true,
+    });
+    return parseInt(counter, 10) % 20;
   }
 
   /**
@@ -264,34 +219,17 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
   }
 
   /**
-   * @return {string} Primary referrer info for ad request
+   * @return {string} Referrer info for ad request
    * @private
    */
   getPrParam_() {
-    if (sessionStorage['MG_Session_pr']) {
-      return 'pr=' + encodeURIComponent(sessionStorage['MG_Session_pr']);
-    } else {
-      return this.getReferrer_(10).then((referrer) => {
-        const matchDomain = referrer.match(/:\/\/([^\/:]+)/i);
-        sessionStorage['MG_Session_pr'] =
-          matchDomain && matchDomain[1] ? matchDomain[1] : '';
-        return 'pr=' + encodeURIComponent(sessionStorage['MG_Session_pr']);
-      });
-    }
-  }
-
-  /**
-   * @return {string} First session page info for ad request
-   * @private
-   */
-  getLuParam_() {
-    if (sessionStorage['MG_Session_lu']) {
-      return 'lu=' + encodeURIComponent(sessionStorage['MG_Session_lu']);
-    } else {
-      const url = Services.documentInfoForDoc(this.element).canonicalUrl;
-      sessionStorage['MG_Session_lu'] = url;
-      return 'lu=' + encodeURIComponent(url);
-    }
+    return this.getReferrer_(10).then((referrer) => {
+      const matchDomain = referrer.match(/:\/\/([^\/:]+)/i);
+      return (
+        'pr=' +
+        encodeURIComponent(matchDomain && matchDomain[1] ? matchDomain[1] : '')
+      );
+    });
   }
 
   /**
@@ -304,33 +242,29 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
   }
 
   /**
-   * @return {string} Session id info for ad request
-   * @private
-   */
-  getSessionIdParam_() {
-    if (sessionStorage['MG_Session_Id']) {
-      return 'sessionId=' + sessionStorage['MG_Session_Id'];
-    } else {
-      const sessionId =
-        Math.round(Date.now() / 1000).toString(16) +
-        '-' +
-        ('00000' + Math.round(Math.random() * 100000).toString(16)).slice(-5);
-      sessionStorage['MG_Session_Id'] = sessionId;
-      return 'sessionId=' + sessionId;
-    }
-  }
-
-  /**
    * @return {string} Pageview info for ad request
    * @private
    */
   getPvidParam_() {
     return Services.documentInfoForDoc(this.element).pageViewId64.then(
       (pvid) => {
-        this.mgidMetadata_.pvid = pvid;
         return 'pvid=' + pvid;
       }
     );
+  }
+
+  /**
+   * @return {string} Muidn info for ad request
+   * @private
+   */
+  getMuidParam_() {
+    return Services.urlReplacementsForDoc(this.element)
+      ./*OK*/ expandStringAsync('CLIENT_ID(muidn)', undefined, {
+        'CLIENT_ID': true,
+      })
+      .then((r) => {
+        return 'muid=' + r;
+      });
   }
 
   /**

@@ -43,7 +43,6 @@ The following AMP components and service are using the localStorage.
 -   `<amp-consent>` : Store the user decision and granular information on consent
 -   Client ID Service : Store the user decision to opt-out CID service.
 -   Consent Instance : Store the user consent decision.
--   `<amp-ad-network-mgid-impl>` : Store user ID for proper ad targeting.
 
 ## Guidance on localStorage Usage in AMP
 

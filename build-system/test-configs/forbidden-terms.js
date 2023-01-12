@@ -461,7 +461,6 @@ const forbiddenTermsGlobal = {
     message: requiresReviewPrivacy,
     allowlist: [
       'extensions/amp-access/0.1/amp-access-iframe.js',
-      'extensions/amp-ad-network-mgid-impl/0.1/amp-ad-network-mgid-impl.js',
       'extensions/amp-script/0.1/amp-script.js',
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
@@ -480,7 +479,6 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-accordion/0.1/amp-accordion.js',
-      'extensions/amp-ad-network-mgid-impl/0.1/amp-ad-network-mgid-impl.js',
       'extensions/amp-script/0.1/amp-script.js',
       'testing/fake-dom.js',
     ],
