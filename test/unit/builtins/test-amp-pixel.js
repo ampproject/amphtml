@@ -151,7 +151,8 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
 
   it('should allow attribution reporting with empty attributionsrc', () => {
     env.sandbox
-        .stub(AmpPixel.prototype, 'detectAttributionReportingSupport')
+        .stub(win.document.featurePolicy, 'allowsFeature')
+        .withArgs('attribution-reporting')
         .returns(true);
     const attributionSrc = '';
     return trigger(null, attributionSrc).then((img) => {
@@ -165,7 +166,8 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
 
   it('should allow attribution reporting with attributionsrc defined', () => {
     env.sandbox
-        .stub(AmpPixel.prototype, 'detectAttributionReportingSupport')
+        .stub(win.document.featurePolicy, 'allowsFeature')
+        .withArgs('attribution-reporting')
         .returns(true);
     const attributionSrc = 'https://adtech.example';
     return trigger(null, attributionSrc).then((img) => {

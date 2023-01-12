@@ -10,12 +10,10 @@ const TAG = 'pixel';
  * @param {!Window} win
  * @param {string} src
  * @param {?string=} referrerPolicy
- * @param {?boolean=} attributionReportingEligible
  * @param {string=} attributionsrc
  * @return {!Element}
  */
 export function createPixel(win, src, referrerPolicy,
-                             attributionReportingEligible,
                              attributionSrc) {
   // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
@@ -23,8 +21,8 @@ export function createPixel(win, src, referrerPolicy,
   }
 
   return referrerPolicy === 'no-referrer'
-    ? createNoReferrerPixel(win, src, attributionReportingEligible, attributionSrc)
-    : createImagePixel(win, src, false, attributionReportingEligible, attributionSrc);
+    ? createNoReferrerPixel(win, src, attributionSrc)
+    : createImagePixel(win, src, false, attributionSrc);
 }
 
 /**
@@ -35,10 +33,9 @@ export function createPixel(win, src, referrerPolicy,
  * @return {!Element}
  */
 function createNoReferrerPixel(win, src,
-                                attributionReportingEligible,
                                 attributionSrc) {
   if (isReferrerPolicySupported()) {
-    return createImagePixel(win, src, true, attributionReportingEligible, attributionSrc);
+    return createImagePixel(win, src, true, attributionSrc);
   } else {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
@@ -51,7 +48,7 @@ function createNoReferrerPixel(win, src,
       }
     );
     iframe.onload = () => {
-      createImagePixel(iframe.contentWindow, src, false, attributionReportingEligible, attributionSrc);
+      createImagePixel(iframe.contentWindow, src, false);
     };
     win.document.body.appendChild(iframe);
     return iframe;
@@ -67,7 +64,6 @@ function createNoReferrerPixel(win, src,
  * @return {!Image}
  */
 function createImagePixel(win, src, noReferrer = false,
-                           attributionReportingEligible = false,
                            attributionSrc) {
   const Image = WindowInterface.getImage(win);
   const image = new Image();
@@ -75,7 +71,7 @@ function createImagePixel(win, src, noReferrer = false,
     image.referrerPolicy = 'no-referrer';
   }
   image.src = src;
-  if (attributionReportingEligible) {
+  if (win.document.featurePolicy?.allowsFeature('attribution-reporting')) {
     image.attributionsrc = attributionSrc;
   }
   return image;

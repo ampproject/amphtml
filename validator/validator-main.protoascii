@@ -4064,6 +4064,13 @@ tags: {  # <amp-pixel>
     }
     disallowed_value_regex: "__amp_source_origin"
   }
+  attrs: {
+    name: "attributionsrc"
+    value_url: {
+      protocol: "https"
+      allow_empty: true
+    }
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-pixel/"
   amp_layout {
