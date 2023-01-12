@@ -14,5 +14,6 @@ PASS
 |  <body>
 |    Hello, world.
 |    <amp-pixel src="https://pixel.me?yes=please" attributionsrc=""></amp-pixel>
+|    <amp-pixel src="https://pixel.me?yes=please" attributionsrc="https://adtech.example"></amp-pixel>
 |  </body>
 |  </html>
