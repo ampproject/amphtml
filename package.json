@@ -117,7 +117,7 @@
     "esprima": "4.0.1",
     "event-stream": "4.0.1",
     "events": "3.3.0",
-    "express": "4.17.1",
+    "express": "4.17.3",
     "fast-glob": "3.2.7",
     "fetch-mock": "9.11.0",
     "formidable": "1.2.2",
