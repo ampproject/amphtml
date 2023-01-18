@@ -1,7 +1,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
 const {BUILD_CONSTANTS} = require('../compile/build-constants');
 
@@ -53,18 +52,6 @@ function getReplacePlugin(opt_overrides) {
   if (experimentConstant) {
     replacements.push(createReplacement(experimentConstant, true));
   }
-
-  // default each experiment flag constant to false
-  Object.keys(experimentsConfig).forEach((experiment) => {
-    const experimentDefine =
-      experimentsConfig[experiment]['define_experiment_constant'];
-    const flagExists = (element) =>
-      element['identifierName'] === experimentDefine;
-    // only add default replacement if it already doesn't exist in array
-    if (experimentDefine && !replacements.some(flagExists)) {
-      replacements.push(createReplacement(experimentDefine, false));
-    }
-  });
 
   // default each backup experiment constant to the customized value
   const experimentsConstantBackupEntries = Object.entries(

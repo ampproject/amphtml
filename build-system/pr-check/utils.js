@@ -277,14 +277,6 @@ function storeModuleBuildToWorkspace() {
 }
 
 /**
- * Stores an experiment's build files to the CI workspace.
- * @param {string} exp one of 'experimentA', 'experimentB', or 'experimentC'.
- */
-function storeExperimentBuildToWorkspace(exp) {
-  storeBuildToWorkspace_(exp);
-}
-
-/**
  * Generates a file with a comma-separated list of test file paths that CircleCI
  * should execute in a parallelized job shard.
  *
@@ -320,6 +312,5 @@ module.exports = {
   storeUnminifiedBuildToWorkspace,
   storeNomoduleBuildToWorkspace,
   storeModuleBuildToWorkspace,
-  storeExperimentBuildToWorkspace,
   generateCircleCiShardTestFileList,
 };

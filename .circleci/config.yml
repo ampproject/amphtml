@@ -33,15 +33,6 @@ pr_builds_only: &pr_builds_only
         - /^amp-release-.*$/
         - nightly
 
-experiment_job: &experiment_job
-  parameters:
-    exp:
-      description: 'Which of the three (A/B/C) experiments to use'
-      type: enum
-      enum: ['A', 'B', 'C']
-  environment:
-    FLAVOR: experiment<< parameters.exp >>
-
 executors:
   base-docker-small:
     docker:
@@ -407,56 +398,15 @@ jobs:
           command: node build-system/pr-check/performance-tests.js
       - store_test_output
       - teardown_vm
-  experiment_build:
-    executor:
-      name: node-docker-xlarge
-    <<: *experiment_job
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐ Experiment << parameters.exp >> Build ⭐'
-          command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
-      - teardown_vm
-  experiment_integration_tests:
-    executor:
-      name: node-docker-large
-    <<: *experiment_job
-    steps:
-      - setup_vm
-      - install_chrome
-      - run:
-          name: '⭐ Experiment << parameters.exp >> Integration Tests ⭐'
-          command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
-      - store_test_output
-      - teardown_vm
-  experiment_end_to_end_tests:
-    executor:
-      name: node-docker-large
-    <<: *experiment_job
-    parallelism: 6
-    steps:
-      - setup_vm
-      - install_chrome
-      - run:
-          name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
-          command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
-      - store_test_output
-      - store_filelist
-      - teardown_vm
   amp_release:
     executor:
       name: node-docker-xlarge
     parameters:
-      flavor:
-        description: 'Which of the release flavors to build'
-        type: enum
-        enum: ['base', 'experimentA', 'experimentB', 'experimentC']
       esm:
         description: 'Whether to build module or nomodule release'
         type: enum
         enum: ['no-esm', 'esm']
     environment:
-      FLAVOR: << parameters.flavor >>
       ESM: << parameters.esm >>
     steps:
       - setup_vm
@@ -592,30 +542,6 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
-      - experiment_build:
-          name: 'Experiment << matrix.exp >> Build'
-          matrix:
-            parameters:
-              exp: ['A', 'B', 'C']
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - experiment_integration_tests:
-          name: 'Exp. << matrix.exp >> Integration Tests'
-          matrix:
-            parameters:
-              exp: ['A', 'B', 'C']
-          <<: *push_and_pr_builds
-          requires:
-            - 'Experiment << matrix.exp >> Build'
-      - experiment_end_to_end_tests:
-          name: '⛓️ Exp. << matrix.exp >> End-to-End Tests'
-          matrix:
-            parameters:
-              exp: ['A', 'B', 'C']
-          <<: *push_and_pr_builds
-          requires:
-            - 'Experiment << matrix.exp >> Build'
       # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
       # - performance_tests:
       #     <<: *push_builds_only
@@ -628,10 +554,9 @@ workflows:
           name: 'Initialize Repository'
           <<: *release_builds_only
       - amp_release:
-          name: '<< matrix.flavor >> << matrix.esm >>'
+          name: '<< matrix.esm >>'
           matrix:
             parameters:
-              flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
               esm: ['no-esm', 'esm']
           <<: *release_builds_only
           requires:

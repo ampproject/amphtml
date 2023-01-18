@@ -11,7 +11,7 @@ const {timedExecOrThrow} = require('../pr-check/utils');
 const jobName = 'build-release.js';
 
 runReleaseJob(jobName, async () => {
-  const {ESM, FLAVOR} = process.env;
+  const {ESM} = process.env;
 
   // TODO(danielrozenberg): remove temporary custom-config when ampjs.org
   // becomes the default runtime CDN.
@@ -19,7 +19,7 @@ runReleaseJob(jobName, async () => {
     'cdnUrl': 'https://ampjs.org',
   });
 
-  timedExecOrThrow(`amp release --flavor=${FLAVOR} --${ESM} --dedup_v0`);
-  fs.ensureDirSync(`/tmp/workspace/releases/${FLAVOR}/${ESM}`);
-  fs.copySync('release/', `/tmp/workspace/releases/${FLAVOR}/${ESM}`);
+  timedExecOrThrow(`amp release --${ESM} --dedup_v0`);
+  fs.ensureDirSync(`/tmp/workspace/releases/${ESM}`);
+  fs.copySync('release/', `/tmp/workspace/releases/${ESM}`);
 });

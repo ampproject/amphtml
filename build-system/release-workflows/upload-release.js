@@ -24,13 +24,12 @@ const ARTIFACT_FILE_NAME = '/tmp/release.tar.gz';
 const PROGRESS_WIDTH = 40;
 
 /**
- * Merge the outputs of the flavor (both module/nomodule) into the dest dir.
- * @param {string} flavor
+ * Merge the outputs of module/nomodule into the dest dir.
  */
-function mergeOutputs_(flavor) {
-  for (const esm of fs.readdirSync(path.join(SRCS_DIR, flavor))) {
-    log('Merging', cyan(flavor), 'flavor', cyan(esm), 'build');
-    fs.copySync(path.join(SRCS_DIR, flavor, esm), DEST_DIR, {
+function mergeOutputs_() {
+  for (const esm of fs.readdirSync(path.join(SRCS_DIR))) {
+    log('Merging', cyan(esm), 'build');
+    fs.copySync(path.join(SRCS_DIR, esm), DEST_DIR, {
       overwrite: true,
       filter: (src) => !src.endsWith('/files.txt'),
     });
@@ -38,14 +37,13 @@ function mergeOutputs_(flavor) {
 }
 
 /**
- * Merge the files.txt files for the flavor's module/nomodule outputs.
- * @param {string} flavor
+ * Merge the files.txt files for the module/nomodule outputs.
  */
-function mergeFilesTxt_(flavor) {
+function mergeFilesTxt_() {
   const /** @type Map<string, Set<string>> */ filesByRtv = new Map();
 
   const filesTxtPaths = fastGlob.sync(
-    path.join(SRCS_DIR, flavor, '*/org-cdn/rtv/*/files.txt')
+    path.join(SRCS_DIR, '*/org-cdn/rtv/*/files.txt')
   );
   for (const filesTxtPath of filesTxtPaths) {
     // filesTxtPath is guaranteed to end with '/<15-digits-rtv>/files.txt', so
@@ -226,10 +224,8 @@ async function uploadFiles_() {
 runReleaseJob(jobName, async () => {
   fs.ensureDirSync(DEST_DIR);
 
-  for (const flavor of fs.readdirSync(SRCS_DIR)) {
-    mergeOutputs_(flavor);
-    mergeFilesTxt_(flavor);
-  }
+  mergeOutputs_();
+  mergeFilesTxt_();
 
   await brotliCompressAll_();
   await uploadFiles_();

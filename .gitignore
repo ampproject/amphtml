@@ -17,7 +17,6 @@ firebase.json
 # User configuration files
 # Keep this list in sync with clean.js
 /build-system/global-configs/custom-config.json
-/build-system/global-configs/custom-flavors-config.json
 
 # [GLOBALLY IGNORED]
 # (Don't edit or remove the above comment!)

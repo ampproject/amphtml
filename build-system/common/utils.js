@@ -1,5 +1,4 @@
 const argv = require('minimist')(process.argv.slice(2));
-const experimentsConfig = require('../global-configs/experiments-config.json');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const {clean} = require('../tasks/clean');
@@ -23,21 +22,6 @@ async function buildRuntime(opt_minified = false) {
   } else {
     execOrDie(`amp build --fortesting`);
   }
-}
-
-/**
- * Extracts and validates the config for the given experiment.
- * @param {string} experiment
- * @return {?Object}
- */
-function getExperimentConfig(experiment) {
-  const config = experimentsConfig[experiment];
-  const valid =
-    config?.name &&
-    config?.define_experiment_constant &&
-    config?.expiration_date_utc &&
-    new Number(new Date(config.expiration_date_utc)) >= Date.now();
-  return valid ? config : null;
 }
 
 /**
@@ -165,7 +149,6 @@ function usesFilesOrLocalChanges(taskName) {
 
 module.exports = {
   buildRuntime,
-  getExperimentConfig,
   getFilesFromArgv,
   getFilesFromFileList,
   getFilesToCheck,

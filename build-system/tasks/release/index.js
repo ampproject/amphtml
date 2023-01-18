@@ -1,74 +1,20 @@
 'use strict';
 
-/**
- * @typedef {{
- *  name: string,
- *  environment: string,
- *  issue?: string,
- *  expiration_date_utc?: string,
- *  define_experiment_constant?: string,
- * }}
- */
-let ExperimentConfigDef;
-
-/**
- * @typedef {{
- *  experimentA: ExperimentConfigDef | {},
- *  experimentB: ExperimentConfigDef | {},
- *  experimentC: ExperimentConfigDef | {},
- * }}
- */
-let ExperimentsConfigDef;
-
-/**
- * @typedef {ExperimentConfigDef & {
- *  flavorType: string;
- *  rtvPrefixes: string[];
- *  command: string;
- * }}
- */
-let DistFlavorDef;
-
 const argv = require('minimist')(process.argv.slice(2));
-/** @type {ExperimentsConfigDef} */
-const experimentsConfig = require('../../global-configs/experiments-config.json');
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green, red, yellow} = require('kleur/colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../prepend-global');
 const {VERSION} = require('../../compile/internal-version');
 
-// Flavor config for the base flavor type.
-/** @type {DistFlavorDef} */
-const BASE_FLAVOR_CONFIG = {
-  flavorType: 'base',
-  name: 'base',
-  rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
-  command: 'amp dist --noconfig',
-  environment: 'AMP',
-};
-
-// Deep map from [environment][flavorType] to an RTV prefix.
-const EXPERIMENTAL_RTV_PREFIXES = {
-  AMP: {
-    experimentA: '10',
-    experimentB: '11',
-    experimentC: '12',
-  },
-  INABOX: {
-    'experimentA-control': '20',
-    experimentA: '21',
-    'experimentB-control': '22',
-    experimentB: '23',
-    'experimentC-control': '24',
-    experimentC: '25',
-  },
-};
+/** @type {ReadonlyArray<string>} */
+const RTV_PREFIXES = ['00', '01', '02', '03', '04', '05'];
+const DIST_COMMAND = 'amp dist --noconfig';
 
 // Directory containing multiple static files to dist/.
 const STATIC_FILES_DIR = path.resolve(__dirname, 'static');
@@ -87,7 +33,7 @@ const POST_BUILD_MOVES = {
 // URL to the JSON info API for the amp-sw package on the npm registry.
 const AMP_SW_NPM_PACKAGE_URL = 'https://registry.npmjs.org/@ampproject/amp-sw';
 
-// List of directories to keep in the temp directory from each flavor's build.
+// List of directories to keep in the temp output directory from the build.
 const DIST_DIRS = ['dist', 'dist.3p', 'dist.tools'];
 
 // Mapping from a channel's RTV prefix, to an object with channel configuration
@@ -105,36 +51,10 @@ const CHANNEL_CONFIGS = {
   '03': {type: 'rc', configBase: 'prod'}, // Spec name: 'beta'
   '04': {type: 'nightly', configBase: 'prod'},
   '05': {type: 'nightly-control', configBase: 'prod'},
-  '10': {type: 'experimentA', configBase: 'prod'},
-  '11': {type: 'experimentB', configBase: 'prod'},
-  '12': {type: 'experimentC', configBase: 'prod'},
-  '20': {type: 'experimentA-control', configBase: 'prod'}, // Spec name: 'inabox-experimentA-control'
-  '21': {type: 'experimentA', configBase: 'prod'}, // Spec name: 'inabox-experimentA'
-  '22': {type: 'experimentB-control', configBase: 'prod'}, // Spec name: 'inabox-experimentB-control'
-  '23': {type: 'experimentB', configBase: 'prod'}, // Spec name: 'inabox-experimentB'
-  '24': {type: 'experimentC-control', configBase: 'prod'}, // Spec name: 'inabox-experimentC-control'
-  '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
-/** @type {ReadonlySet<string>} */
-const V0_DEDUP_RTV_PREFIXES = new Set([
-  '00',
-  '02',
-  '03',
-  '04',
-  '05',
-  '20',
-  '22',
-  '24',
-]);
-
-/**
- * Path to custom flavors config, see: build-system/global-configs/README.md
- */
-const CUSTOM_FLAVORS_CONFIG_PATH = path.resolve(
-  __dirname,
-  '../../global-configs/custom-flavors-config.json'
-);
+/** @type {ReadonlyArray<string>} */
+const V0_DEDUP_RTV_PREFIXES = ['00', '02', '03', '04', '05'];
 
 /**
  * Path to custom overlay config, see: build-system/global-configs/README.md
@@ -166,115 +86,40 @@ async function prepareEnvironment_(outputDir, tempDir) {
 }
 
 /**
- * Discovers which AMP flavors are defined in the current working directory.
+ * Compiles AMP.
  *
- * The returned list of flavors will always contain the base flavor, and any
- * defined experiments in ../../global-configs/experiments-config.json, as well
- * as custom flavors in ../../global-configs/custom-flavors-config.json.
- *
- * @return {!Array<!DistFlavorDef>} list of AMP flavors to build.
- */
-function discoverDistFlavors_() {
-  let customFlavorsConfig = [];
-  if (fs.existsSync(CUSTOM_FLAVORS_CONFIG_PATH)) {
-    const flavorsFilename = path.basename(CUSTOM_FLAVORS_CONFIG_PATH);
-    try {
-      customFlavorsConfig = require(CUSTOM_FLAVORS_CONFIG_PATH);
-      log(
-        yellow('Notice:'),
-        'release flavors supplemented by',
-        cyan(flavorsFilename)
-      );
-    } catch (ex) {
-      log(red('Could not load custom flavors from:'), cyan(flavorsFilename));
-    }
-  }
-
-  const experimentConfigDefs = Object.entries(experimentsConfig);
-  const distFlavors = [
-    BASE_FLAVOR_CONFIG,
-    ...experimentConfigDefs
-      .filter(
-        // Only include experiments that have a `define_experiment_constant` field.
-        ([, experimentConfig]) =>
-          'define_experiment_constant' in experimentConfig &&
-          experimentConfig.define_experiment_constant
-      )
-      .map(
-        (
-          /** @type {[string, ExperimentConfigDef]} // guaranteed by .filter */ [
-            flavorType,
-            experimentConfig,
-          ]
-        ) => ({
-          command: `amp dist --noconfig --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
-          flavorType,
-          rtvPrefixes: [
-            EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
-          ],
-          ...experimentConfig,
-        })
-      ),
-    ...customFlavorsConfig,
-  ].filter(
-    // If --flavor is defined, filter out the rest.
-    ({flavorType}) => !argv.flavor || flavorType == argv.flavor
-  );
-
-  log(
-    'The following',
-    cyan('amp dist'),
-    'commands will be executed to compile each',
-    `${green('flavor')}:`
-  );
-  distFlavors.forEach(({command, flavorType, name}) => {
-    log('-', `(${green(flavorType)}, ${green(name)})`, cyan(command));
-  });
-
-  logSeparator_();
-
-  return distFlavors;
-}
-
-/**
- * Compiles all AMP flavors sequentially.
- *
- * @param {string} flavorType AMP flavor to build.
- * @param {string} command `amp` command to build the flavor.
  * @param {string} tempDir full directory path to temporary working directory.
  * @return {Promise<void>}
  */
-async function compileDistFlavors_(flavorType, command, tempDir) {
+async function compileDist_(tempDir) {
+  let command = DIST_COMMAND;
   if (argv.esm) {
     command += ' --esm';
   }
   if (argv.full_sourcemaps) {
     command += ' --full_sourcemaps';
   }
-  log('Compiling flavor', green(flavorType), 'using', cyan(command));
+  log('Compiling using', cyan(command));
 
   execOrDie('amp clean --exclude release');
   execOrDie(command);
 
-  const flavorTempDistDir = path.join(tempDir, flavorType);
-  log('Moving build artifacts to', `${cyan(flavorTempDistDir)}...`);
-  await fs.ensureDir(flavorTempDistDir);
+  log('Moving build artifacts to', `${cyan(tempDir)}...`);
+  await fs.ensureDir(tempDir);
 
   await Promise.all(
-    DIST_DIRS.map((distDir) =>
-      fs.move(distDir, path.join(flavorTempDistDir, distDir))
-    )
+    DIST_DIRS.map((distDir) => fs.move(distDir, path.join(tempDir, distDir)))
   );
 
   log('Copying static files...');
   const staticFilesPromises = [
     // Directory-to-directory copy from the ./static sub-directory.
-    fs.copy(STATIC_FILES_DIR, path.join(flavorTempDistDir, 'dist')),
+    fs.copy(STATIC_FILES_DIR, path.join(tempDir, 'dist')),
     // Individual files to copy from the Git repository.
     ...STATIC_FILE_PATHS.map((staticFilePath) =>
       fs.copy(
         staticFilePath,
-        path.join(flavorTempDistDir, 'dist', path.basename(staticFilePath))
+        path.join(tempDir, 'dist', path.basename(staticFilePath))
       )
     ),
   ];
@@ -283,10 +128,7 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
         // Individual files to copy from the resulting build artifacts.
         // This is only relevant for nomodule builds.
         ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
-          fs.copy(
-            path.join(flavorTempDistDir, from),
-            path.join(flavorTempDistDir, to)
-          )
+          fs.copy(path.join(tempDir, from), path.join(tempDir, to))
         ),
       ]
     : [Promise.resolve()];
@@ -298,15 +140,14 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
 /**
  * Fetches latest AMP service-worker package from the npm registry.
  *
- * @param {string} flavorType AMP flavor to build.
  * @param {string} tempDir full directory path to temporary working directory.
  * @return {Promise<void>}
  */
-async function fetchAmpSw_(flavorType, tempDir) {
+async function fetchAmpSw_(tempDir) {
   const ampSwTempDir = path.join(tempDir, 'ampproject/amp-sw');
   await Promise.all([
     fs.ensureDir(ampSwTempDir),
-    fs.ensureDir(path.join(tempDir, flavorType, 'dist/sw')),
+    fs.ensureDir(path.join(tempDir, 'dist/sw')),
   ]);
 
   const ampSwNpmPackageResponse = await fetch(AMP_SW_NPM_PACKAGE_URL);
@@ -324,7 +165,7 @@ async function fetchAmpSw_(flavorType, tempDir) {
     tarWritableStream.on('end', resolve);
   });
 
-  await fs.copy(ampSwTempDir, path.join(tempDir, flavorType, 'dist/sw'));
+  await fs.copy(ampSwTempDir, path.join(tempDir, 'dist/sw'));
 
   logSeparator_();
 }
@@ -332,44 +173,19 @@ async function fetchAmpSw_(flavorType, tempDir) {
 /**
  * Copies compiled build artifacts to RTV-based directories.
  *
- * Each flavor translates to one or more RTV numbers, for a detailed explanation
- * see spec/amp-framework-hosting.md.
- *
- * @param {string} flavorType AMP flavor to build.
- * @param {!Array<string>} rtvPrefixes list of 2-digit RTV prefixes to generate.
  * @param {string} tempDir full directory path to temporary working directory.
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @return {Promise<void>}
  */
-async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
+async function populateOrgCdn_(tempDir, outputDir) {
   const rtvCopyingPromise = async (/** @type {string} */ rtvPrefix) => {
     const rtvNumber = `${rtvPrefix}${VERSION}`;
     const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
     await fs.ensureDir(rtvPath);
-    return fs.copy(path.join(tempDir, flavorType, 'dist'), rtvPath);
+    return fs.copy(path.join(tempDir, 'dist'), rtvPath);
   };
 
-  const rtvCopyingPromises = rtvPrefixes.map(rtvCopyingPromise);
-
-  // Special handling for INABOX experiments when compiling the base flavor.
-  // INABOX experiments need to have their control population be created from
-  // the base flavor.
-  if (flavorType == 'base') {
-    rtvCopyingPromises.push(
-      ...Object.entries(experimentsConfig)
-        .filter(
-          ([, experimentConfig]) =>
-            'environment' in experimentConfig &&
-            experimentConfig.environment == 'INABOX'
-        )
-        .map(
-          ([experimentFlavor]) =>
-            EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`]
-        )
-        .map(rtvCopyingPromise)
-    );
-  }
-  await Promise.all(rtvCopyingPromises);
+  await Promise.all(RTV_PREFIXES.map(rtvCopyingPromise));
 
   logSeparator_();
 }
@@ -377,19 +193,16 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
 /**
  * Removes the V0 directory from all RTVs except for the Stable (01-prefixed) channel,
  *
- * @param {!Array<string>} rtvPrefixes list of 2-digit RTV prefixes to generate.
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @return {Promise<void>}
  */
-async function dedupV0_(rtvPrefixes, outputDir) {
+async function dedupV0_(outputDir) {
   await Promise.all(
-    rtvPrefixes
-      .filter((rtvPrefix) => V0_DEDUP_RTV_PREFIXES.has(rtvPrefix))
-      .map((rtvPrefix) => {
-        const rtvNumber = `${rtvPrefix}${VERSION}`;
-        const v0Path = path.join(outputDir, 'org-cdn/rtv', rtvNumber, 'v0');
-        return fs.rm(v0Path, {recursive: true});
-      })
+    V0_DEDUP_RTV_PREFIXES.map((rtvPrefix) => {
+      const rtvNumber = `${rtvPrefix}${VERSION}`;
+      const v0Path = path.join(outputDir, 'org-cdn/rtv', rtvNumber, 'v0');
+      return fs.rm(v0Path, {recursive: true});
+    })
   );
 
   logSeparator_();
@@ -537,31 +350,17 @@ async function release() {
   log('Preparing environment for release build in', `${cyan(outputDir)}...`);
   await prepareEnvironment_(outputDir, tempDir);
 
-  log('Discovering release', `${green('flavors')}...`);
-  const distFlavors = discoverDistFlavors_();
+  await compileDist_(tempDir);
 
-  if (argv.flavor && distFlavors.length == 0) {
-    log('Flavor', cyan(argv.flavor), 'is inactive. Quitting...');
-    return;
-  }
+  log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
+  await fetchAmpSw_(tempDir);
 
-  if (!argv.flavor) {
-    log('Compiling all', `${green('flavors')}...`);
-  }
+  log('Copying from temporary directory to', cyan('org-cdn'));
+  await populateOrgCdn_(tempDir, outputDir);
 
-  for (const {command, flavorType, rtvPrefixes} of distFlavors) {
-    await compileDistFlavors_(flavorType, command, tempDir);
-
-    log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
-    await fetchAmpSw_(flavorType, tempDir);
-
-    log('Copying from temporary directory to', cyan('org-cdn'));
-    await populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir);
-
-    if (argv.dedup_v0) {
-      log('Deduplicating', cyan('v0/'), 'directory...');
-      await dedupV0_(rtvPrefixes, outputDir);
-    }
+  if (argv.dedup_v0) {
+    log('Deduplicating', cyan('v0/'), 'directory...');
+    await dedupV0_(outputDir);
   }
 
   log('Generating', cyan('files.txt'), 'files in', cyan('org-cdn/rtv/*'));
@@ -570,11 +369,8 @@ async function release() {
   log('Prepending config to entry files...');
   await prependConfig_(outputDir);
 
-  if (!argv.flavor || argv.flavor == 'base') {
-    // Only populate the net-wildcard directory if --flavor=base or if --flavor is not set.
-    log('Copying from temporary directory to', cyan('net-wildcard'));
-    await populateNetWildcard_(tempDir, outputDir);
-  }
+  log('Copying from temporary directory to', cyan('net-wildcard'));
+  await populateNetWildcard_(tempDir, outputDir);
 
   log('Cleaning up temp dir...');
   await cleanup_(tempDir);
@@ -591,8 +387,7 @@ release.description = 'Generate a release build';
 release.flags = {
   'output_dir':
     'Directory path to emplace release files (defaults to "./release")',
-  'flavor':
-    'Limit this release build to a single flavor (can be used to split the release work across multiple build machines)',
+  'flavor': 'Deprecated. No effect.', // TODO(danielrozenberg): remove this once the release platform no longer sends this flag.
   'esm': 'Compile with --esm if true, without --esm if false or unspecified',
   'full_sourcemaps': 'Include source code content in sourcemaps',
   'dedup_v0':

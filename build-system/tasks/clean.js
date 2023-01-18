@@ -63,10 +63,7 @@ async function clean() {
 
   // User configuration files
   // Keep this list in sync with .gitignore
-  const customConfigs = [
-    'build-system/global-configs/custom-config.json',
-    'build-system/global-configs/custom-flavors-config.json',
-  ];
+  const customConfigs = ['build-system/global-configs/custom-config.json'];
   if (argv.include_custom_configs) {
     pathsFromArgv.push(...customConfigs);
   } else {

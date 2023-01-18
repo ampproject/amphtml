@@ -70,45 +70,6 @@ where
 
 Important: `build-system/global-configs/custom-config.json` is not part of checked-in source. If it exists, it _always_ applies at build time, overlaying the active config. Don't forget about it! The build system emits warnings like `Notice: prod config overlaid with custom-config.json` to remind you that your build will differ from the default.
 
-#### Define a custom release flavor
-
-Release flavors define the runtime version prefix(es) that should be built and the command line that should be used to build each runtime version. When the build system prepares a release, it supplements the built runtime with static files and pre-compiled resources. See [build-system/global-configs/README.md](../../build-system/global-configs/README.md#custom-flavors-configjson) for information about adding a custom release flavor.
-
-Create JSON file `build-system/global-configs/custom-flavors-config.json` with the following contents:
-
-```json
-[
-  {
-    "flavorType": "self-host-prod",
-    "name": "Self-hosted production release",
-    "environment": "AMP",
-    "rtvPrefixes": [ "01" ],
-    "command": "amp dist --noconfig"
-  }
-]
-
-```
-
-If your AMP runtime will be built with code customizations, consider using flag `--sourcemap_url` with `amp dist`:
-
--   `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `https://raw.githubusercontent.com/ampproject/amphtml/{version}/`.
-
-**Tips:**
-
--   Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.).
--   Flag `--version_override` is not supported.
--   `build-system/global-configs/custom-flavors-config.json` is not part of checked-in source. If it exists, the custom flavors are automatically made available to `amp release`.
-
-#### Build the framework
-
-Build an AMP release with
-
-```sh
-amp release --flavor="self-host-prod"
-```
-
-The built framework can be found in directory `release/org-cdn/rtv/<rtv>/`. The version assigned to the build is in `version.txt` and a listing of all files included in build is in `files.txt`. The framework is ready to be moved to and served from your host.
-
 ### Option 2: Download the framework with an AMP Toolbox tool
 
 [AMP Toolbox](https://github.com/ampproject/amp-toolbox) has both a Node.js module and a command line tool that will fetch a complete AMP framework from `cdn.ampproject.org`. Pick the tool best suited to your release workflow.
