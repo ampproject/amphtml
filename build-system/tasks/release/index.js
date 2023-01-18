@@ -323,7 +323,7 @@ async function prependConfig_(outputDir) {
 async function populateNetWildcard_(tempDir, outputDir) {
   const netWildcardDir = path.join(outputDir, 'net-wildcard', VERSION);
   await fs.ensureDir(netWildcardDir);
-  await fs.copy(path.join(tempDir, 'base/dist.3p', VERSION), netWildcardDir);
+  await fs.copy(path.join(tempDir, 'dist.3p', VERSION), netWildcardDir);
 
   logSeparator_();
 }
