@@ -177,6 +177,7 @@ function ensureEnvVariable_(...vars) {
  * @return {Promise<void>}
  */
 async function uploadFiles_() {
+  return; // DO NOT MERGE
   const [accountId, accessKeyId, secretAccessKey] = ensureEnvVariable_(
     'R2_ACCOUNT_ID',
     'R2_ACCESS_KEY_ID',

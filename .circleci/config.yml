@@ -22,6 +22,7 @@ release_builds_only: &release_builds_only
   filters:
     branches:
       only:
+        - pull/38637 # DO NOT MERGE
         - nightly
         - /^amp-release-.*$/
 
@@ -425,15 +426,15 @@ jobs:
       - store_artifacts:
           path: /tmp/release.tar.gz
       - teardown_vm
-  trigger_promote:
-    executor:
-      name: base-docker-small
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐ Trigger Promote Workflow ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
-      - teardown_vm
+  # trigger_promote:
+  #   executor:
+  #     name: base-docker-small
+  #   steps:
+  #     - setup_vm
+  #     - run:
+  #         name: '⭐ Trigger Promote Workflow ⭐'
+  #         command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
+  #     - teardown_vm
 
 workflows:
   version: 2
@@ -568,10 +569,10 @@ workflows:
             - amp_release
           context:
             - release-build-uploader
-      - trigger_promote:
-          name: 'Trigger Promote'
-          <<: *release_builds_only
-          requires:
-            - 'Upload Release'
-          context:
-            - release-build-uploader
+      # - trigger_promote:
+      #     name: 'Trigger Promote'
+      #     <<: *release_builds_only
+      #     requires:
+      #       - 'Upload Release'
+      #     context:
+      #       - release-build-uploader
