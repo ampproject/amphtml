@@ -1,6 +1,7 @@
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {VariableSource} from '#service/variable-source';
 import {AmpPixel} from '../../../src/builtins/amp-pixel/amp-pixel';
+import * as privacySandboxUtils from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
 
 describes.realWin('amp-pixel', {amp: true}, (env) => {
   const urlErrorRegex = /src attribute must start with/;
@@ -151,8 +152,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
 
   it('should allow attribution reporting with empty attributionsrc', () => {
     env.sandbox
-        .stub(win.document.featurePolicy, 'allowsFeature')
-        .withArgs('attribution-reporting')
+        .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
         .returns(true);
     const attributionSrc = '';
     return trigger(null, attributionSrc).then((img) => {
@@ -166,8 +166,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
 
   it('should allow attribution reporting with attributionsrc defined', () => {
     env.sandbox
-        .stub(win.document.featurePolicy, 'allowsFeature')
-        .withArgs('attribution-reporting')
+        .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
         .returns(true);
     const attributionSrc = 'https://adtech.example';
     return trigger(null, attributionSrc).then((img) => {
