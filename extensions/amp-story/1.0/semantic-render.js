@@ -148,7 +148,22 @@ function extractTextContentWebVtt(text) {
     .join(' ');
   // Super loose HTML parsing to get HTML entity parsing and removal
   // of WebVTT elements.
-  const div = <div />;
-  div./* element is never added to DOM */ innerHTML = text;
-  return div.textContent;
+  // Assigning .innerHTML of a <template> node to prevent XSS risk.
+  const wrapperTemplate = <template />;
+  // Make innerHTML assignment Trusted Types compliant for compatible browsers
+  if (self.trustedTypes && self.trustedTypes.createPolicy) {
+    const policy = self.trustedTypes.createPolicy(
+      'semantic-render#extractTextContentWebVtt',
+      {
+        createHTML: function (unused) {
+          return text;
+        },
+      }
+    );
+    wrapperTemplate./* element is never added to DOM */ innerHTML =
+      policy.createHTML('ignored');
+  } else {
+    wrapperTemplate./* element is never added to DOM */ innerHTML = text;
+  }
+  return wrapperTemplate.content.textContent;
 }

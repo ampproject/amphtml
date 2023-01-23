@@ -67,6 +67,7 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '#experiments';
+import {AttributionReporting} from '#experiments/attribution-reporting';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -75,6 +76,8 @@ import {Navigation} from '#service/navigation';
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 
 import {dev, devAssert, user} from '#utils/log';
+
+import {isAttributionReportingAllowed} from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
 
 import {
   FlexibleAdSlotDataTypeDef,
@@ -474,6 +477,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             );
           },
           branches: Object.values(IDLE_CWV_EXP_BRANCHES),
+        },
+        {
+          experimentId: AttributionReporting.ID,
+          isTrafficEligible: () =>
+            isAttributionReportingAllowed(this.win.document),
+          branches: [
+            AttributionReporting.ENABLE,
+            AttributionReporting.DISABLE,
+            AttributionReporting.ENABLE_NO_ASYNC,
+            AttributionReporting.DISABLE_NO_ASYNC,
+          ],
         },
       ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);

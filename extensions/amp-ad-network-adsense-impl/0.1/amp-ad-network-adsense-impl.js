@@ -42,6 +42,7 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '#experiments';
+import {AttributionReporting} from '#experiments/attribution-reporting';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -50,6 +51,8 @@ import {Navigation} from '#service/navigation';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
+
+import {isAttributionReportingAllowed} from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
 
 import {AdsenseSharedState} from './adsense-shared-state';
 import {ResponsiveState} from './responsive-state';
@@ -223,7 +226,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoList =
-      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([]);
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: AttributionReporting.ID,
+          isTrafficEligible: () =>
+            isAttributionReportingAllowed(this.win.document),
+          branches: [
+            AttributionReporting.ENABLE,
+            AttributionReporting.DISABLE,
+            AttributionReporting.ENABLE_NO_ASYNC,
+            AttributionReporting.DISABLE_NO_ASYNC,
+          ],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList
