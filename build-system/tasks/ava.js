@@ -7,7 +7,6 @@ const {sync: globbySync} = require('globby');
 
 const testFiles = [
   'build-system/compile/generate/test/*.test.js',
-  'build-system/release-tagger/test/*test*.js',
   'build-system/server/app-index/test/*test*.js',
   'build-system/server/test/app-utils.test.js',
   'build-system/tasks/css/test/bento-css.test.js',
