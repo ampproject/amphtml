@@ -32,11 +32,8 @@ import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {processHead} from './head-validation';
-import {
-  createSecureDocSkeleton,
-  createSecureFrame,
-  isAttributionReportingSupported,
-} from './secure-frame';
+import {isAttributionReportingAllowed} from './privacy-sandbox-utils';
+import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {whenWithinViewport} from './within-viewport';
 
@@ -2037,7 +2034,7 @@ export class AmpA4A extends AMP.BaseElement {
     // request completes.
     let featurePolicies = "sync-xhr 'none';";
 
-    if (isAttributionReportingSupported(this.win.document)) {
+    if (isAttributionReportingAllowed(this.win.document)) {
       featurePolicies += "attribution-reporting 'src';";
     }
 
