@@ -1,6 +1,6 @@
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {VariableSource} from '#service/variable-source';
-import {AmpPixel} from '../../../src/builtins/amp-pixel/amp-pixel';
+
 import * as privacySandboxUtils from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
 
 describes.realWin('amp-pixel', {amp: true}, (env) => {
@@ -140,7 +140,8 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
   });
 
   it('should not allow attribution reporting', () => {
-    const attributionSrc = '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
+    const attributionSrc =
+      '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
     return trigger(null, attributionSrc).then((img) => {
       // Protocol is resolved to `http:` relative to test server.
       expect(img.src).to.equal(
@@ -152,8 +153,8 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
 
   it('should allow attribution reporting with empty attributionsrc', () => {
     env.sandbox
-        .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-        .returns(true);
+      .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
+      .returns(true);
     const attributionSrc = '';
     return trigger(null, attributionSrc).then((img) => {
       // Protocol is resolved to `http:` relative to test server.
@@ -166,17 +167,15 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
 
   it('should allow attribution reporting with attributionsrc defined', () => {
     env.sandbox
-        .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-        .returns(true);
+      .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
+      .returns(true);
     const attributionSrc = 'https://adtech.example';
     return trigger(null, attributionSrc).then((img) => {
       // Protocol is resolved to `http:` relative to test server.
       expect(img.src).to.equal(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
       );
-      expect(img.attributionsrc).to.equal(
-        'https://adtech.example'
-      );
+      expect(img.attributionsrc).to.equal('https://adtech.example');
     });
   });
 });

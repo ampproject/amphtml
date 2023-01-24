@@ -1,8 +1,9 @@
 import {createElementWithAttributes} from '#core/dom';
 import {WindowInterface} from '#core/window/interface';
-import {isAttributionReportingAllowed} from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
 
 import {user} from '#utils/log';
+
+import {isAttributionReportingAllowed} from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
 
 /** @const {string} */
 const TAG = 'pixel';
@@ -11,11 +12,10 @@ const TAG = 'pixel';
  * @param {!Window} win
  * @param {string} src
  * @param {?string=} referrerPolicy
- * @param {string=} attributionsrc
+ * @param {string=} attributionSrc
  * @return {!Element}
  */
-export function createPixel(win, src, referrerPolicy,
-                             attributionSrc) {
+export function createPixel(win, src, referrerPolicy, attributionSrc) {
   // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
@@ -29,12 +29,10 @@ export function createPixel(win, src, referrerPolicy,
 /**
  * @param {!Window} win
  * @param {string} src
- * @param {?boolean=} attributionReportingEligible
- * @param {string=} attributionsrc
+ * @param {string=} attributionSrc
  * @return {!Element}
  */
-function createNoReferrerPixel(win, src,
-                                attributionSrc) {
+function createNoReferrerPixel(win, src, attributionSrc) {
   if (isReferrerPolicySupported()) {
     return createImagePixel(win, src, true, attributionSrc);
   } else {
@@ -60,12 +58,10 @@ function createNoReferrerPixel(win, src,
  * @param {!Window} win
  * @param {string} src
  * @param {boolean=} noReferrer
- * @param {?boolean=} attributionReportingEligible
- * @param {string=} attributionsrc
+ * @param {string=} attributionSrc
  * @return {!Image}
  */
-function createImagePixel(win, src, noReferrer = false,
-                           attributionSrc) {
+function createImagePixel(win, src, noReferrer = false, attributionSrc) {
   const Image = WindowInterface.getImage(win);
   const image = new Image();
   if (noReferrer) {
