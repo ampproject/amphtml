@@ -56,7 +56,7 @@
     "@jridgewell/doctrine": "3.0.2",
     "@jridgewell/resolve-uri": "3.0.5",
     "@octokit/graphql": "4.8.0",
-    "@octokit/rest": "18.12.0",
+    "@octokit/rest": "19.0.7",
     "@sinonjs/fake-timers": "7.1.2",
     "@types/chai": "4.2.22",
     "@types/dompurify": "2.3.2",
