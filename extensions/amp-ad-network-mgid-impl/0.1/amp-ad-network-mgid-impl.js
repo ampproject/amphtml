@@ -3,6 +3,7 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {createElementWithAttributes, removeElement} from '#core/dom';
+import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -14,7 +15,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 const TAG = 'amp-ad-network-mgid-impl';
 
 const BASE_URL_ = 'https://servicer.mgid.com/';
-const PV_URL_ = 'https://c.mgid.com/';
+const PV_URL_ = 'https://c.mgid.com/pv/';
 
 export class AmpAdNetworkMgidImpl extends AmpA4A {
   /**
@@ -58,7 +59,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     const widget = this.element.getAttribute('data-widget');
 
     let servicerUrl = BASE_URL_ + widget + '/' + this.getPageParam_();
-    let pvUrl = PV_URL_ + 'pv/';
 
     adUrlParams = adUrlParams.concat(this.getNetworkInfoParams_());
     adUrlParams.push(this.getCacheBusterParam_());
@@ -74,14 +74,13 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       params.forEach((result) => data.push(result.value));
       const joinedParams = '?' + data.join('&');
       servicerUrl += joinedParams;
-      pvUrl += joinedParams;
 
-      if (typeof this.win['_mgAmpStoryPV'] == 'undefined') {
+      if (!hasOwn(this.win, '_mgAmpStoryPV')) {
         this.getAmpDoc()
           .getBody()
           .appendChild(
             createElementWithAttributes(this.win.document, 'amp-pixel', {
-              'src': pvUrl,
+              'src': PV_URL_ + joinedParams,
             })
           );
 
