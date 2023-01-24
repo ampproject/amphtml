@@ -8,11 +8,12 @@ const {getRelease, updateRelease} = require('./utils');
 /**
  * Publish a GitHub release
  * @param {string} tag
+ * @param {boolean} latest
  * @return {Promise<Object>}
  */
-async function publishRelease(tag) {
+async function publishRelease(tag, latest) {
   const release = await getRelease(tag);
-  const changes = {prerelease: false};
+  const changes = {prerelease: false, make_latest: latest};
   return await updateRelease(release.id, changes);
 }
 

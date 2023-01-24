@@ -50,7 +50,8 @@ async function _promote() {
   }
 
   if (['stable', 'lts'].includes(channel)) {
-    const {'html_url': url} = await publishRelease(head);
+    const latest = channel == 'stable';
+    const {'html_url': url} = await publishRelease(head, latest);
     log('Published release', magenta(head), 'at', cyan(url));
   }
 

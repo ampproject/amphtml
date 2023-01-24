@@ -15,10 +15,10 @@ test('publish', async (t) => {
     .reply(200, {id: 1})
 
     // https://docs.github.com/en/rest/reference/repos#update-a-release
-    .patch('/repos/ampproject/amphtml/releases/1', {prerelease: false})
+    .patch('/repos/ampproject/amphtml/releases/1', {prerelease: false, make_latest: true})
     .reply(200, {id: 1});
 
-  await publishRelease('2107210123000');
+  await publishRelease('2107210123000', true);
   t.true(scope.isDone());
 });
 
