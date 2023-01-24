@@ -49,6 +49,9 @@ For help with configuration, please contact Revcontent or refer to their documen
 
 -   `data-sub-ids`
 -   `data-gam-enabled`
+-   `data-gdpr`
+-   `data-gdpr-consent`
+-   `data-us-privacy`
 
 ### Evergreen Tag Options
 
