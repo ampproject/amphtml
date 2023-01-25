@@ -241,6 +241,8 @@ window.AMP_DEV_MODE;
 
 window.AMP;
 window.AMP._ = {};
+window.AMP.addGlobalConsentListener;
+window.AMP.addGranularConsentListener;
 window.AMP.push;
 window.AMP.title;
 window.AMP.canonicalUrl;
@@ -261,7 +263,6 @@ window.AMP.viewport;
 window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
-
 /**
  * This symbol is exposed by bundles transformed by `scoped-require.js` to avoid
  * polluting the global namespace with `require`.
