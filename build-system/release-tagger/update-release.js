@@ -13,7 +13,7 @@ const {getRelease, updateRelease} = require('./utils');
  */
 async function publishRelease(tag, latest) {
   const release = await getRelease(tag);
-  const changes = {prerelease: false, make_latest: latest};
+  const changes = {prerelease: false, 'make_latest': latest};
   return await updateRelease(release.id, changes);
 }
 
