@@ -28,11 +28,11 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {DomTransformStream} from '#utils/dom-tranform-stream';
 import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {processHead} from './head-validation';
-import {isAttributionReportingAllowed} from './privacy-sandbox-utils';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {whenWithinViewport} from './within-viewport';
