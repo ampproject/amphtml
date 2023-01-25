@@ -14,6 +14,7 @@ import {Services} from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
@@ -440,9 +441,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   detectAttributionReportingSupport() {
-    return this.win.document.featurePolicy?.allowsFeature(
-      'attribution-reporting'
-    );
+    return isAttributionReportingAllowed(this.win);
   }
 
   /**

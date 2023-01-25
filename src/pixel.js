@@ -3,7 +3,7 @@ import {WindowInterface} from '#core/window/interface';
 
 import {user} from '#utils/log';
 
-import {isAttributionReportingAllowed} from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
+import {isAttributionReportingAllowed} from './utils/privacy-sandbox-utils';
 
 /** @const {string} */
 const TAG = 'pixel';

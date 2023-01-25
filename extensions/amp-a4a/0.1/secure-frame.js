@@ -1,6 +1,6 @@
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 
-import {isAttributionReportingAllowed} from './privacy-sandbox-utils';
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 

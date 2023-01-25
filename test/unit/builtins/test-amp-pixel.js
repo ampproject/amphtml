@@ -1,7 +1,7 @@
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {VariableSource} from '#service/variable-source';
 
-import * as privacySandboxUtils from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
+import * as privacySandboxUtils from 'src/utils/privacy-sandbox-utils';
 
 describes.realWin('amp-pixel', {amp: true}, (env) => {
   const urlErrorRegex = /src attribute must start with/;
