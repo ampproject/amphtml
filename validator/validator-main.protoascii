@@ -1347,6 +1347,13 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "A"
+  attrs: {
+    name: "attributionsrc"
+    value_url: {
+      protocol: "https"
+      allow_empty: true
+    }
+  }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "download" }
   attrs: {
