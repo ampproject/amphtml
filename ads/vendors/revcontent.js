@@ -174,11 +174,12 @@ function createOverflowElement(global, container, height) {
  */
 export function revcontent(global, data) {
   global.revcontent = global.revcontent || {
-    renderedWidgets: [],
+    boundingClientRect: {},
+    detectedWidth: 0,
+    detectedHeight: 0,
     widgetData: {
       ...data,
     },
-    intersections: [],
     requestedSize: 0,
   };
 
@@ -207,9 +208,12 @@ export function revcontent(global, data) {
     global.context.observeIntersection(function (changes) {
       /** @type {!Array} */ changes.forEach(function (c) {
         if (c.intersectionRect.height) {
-          global.revcontent?.intersections?.push({
-            entries: c,
-          });
+          if (global.revcontent?.boundingClientRect !== c.boundingClientRect) {
+            Object.assign(
+              global.revcontent?.boundingClientRect,
+              c.boundingClientRect
+            );
+          }
 
           if (c.boundingClientRect.height < global.revcontent.requestedSize) {
             handleResize(global, containerDiv, global.revcontent.requestedSize);
