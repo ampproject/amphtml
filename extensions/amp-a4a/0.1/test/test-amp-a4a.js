@@ -20,6 +20,7 @@ import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real
 
 import * as analytics from '#utils/analytics';
 import {dev, user} from '#utils/log';
+import * as privacySandboxUtils from '#utils/privacy-sandbox-utils';
 
 import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
@@ -50,7 +51,6 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import * as privacySandboxUtils from '../privacy-sandbox-utils';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {

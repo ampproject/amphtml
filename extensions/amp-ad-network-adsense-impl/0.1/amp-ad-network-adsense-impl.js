@@ -51,8 +51,7 @@ import {Navigation} from '#service/navigation';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
-
-import {isAttributionReportingAllowed} from 'extensions/amp-a4a/0.1/privacy-sandbox-utils';
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {AdsenseSharedState} from './adsense-shared-state';
 import {ResponsiveState} from './responsive-state';
