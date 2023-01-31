@@ -125,7 +125,6 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 
 -   Admax
 -   Adpushup
--   AppNexus
 -   AppNexus PSP
 -   APS
 -   Automatad
