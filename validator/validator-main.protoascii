@@ -1347,6 +1347,13 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "A"
+  attrs: {
+    name: "attributionsrc"
+    value_url: {
+      protocol: "https"
+      allow_empty: true
+    }
+  }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "download" }
   attrs: {
@@ -4063,6 +4070,13 @@ tags: {  # <amp-pixel>
       allow_empty: true
     }
     disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "attributionsrc"
+    value_url: {
+      protocol: "https"
+      allow_empty: true
+    }
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-pixel/"
