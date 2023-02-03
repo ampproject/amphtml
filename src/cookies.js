@@ -261,18 +261,9 @@ function checkOriginForSettingCookie(win, options, name) {
   userAssert(
     !(current == proxy || endsWith(current, '.' + proxy)) || metaTag != null,
     'Should never attempt to set cookie on proxy origin. (in depth check): ' +
-      name +
-      ' ' +
-      current +
-      ' ' +
-      proxy +
-      ' ' +
-      metaTag
+      name
   );
 }
-
-// !(current == proxy || endsWith(current, '.' + proxy) || metaTag == null),
-
 /**
  * Return a temporary cookie name for testing only
  * @param {!Window} win
