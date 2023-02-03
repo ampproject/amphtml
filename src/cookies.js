@@ -247,8 +247,6 @@ function checkOriginForSettingCookie(win, options, name) {
     );
     return;
   }
-  const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
-  const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
   const metaTag =
     win.document.head &&
     win.document.head.querySelector("meta[name='runtime-host']");
@@ -257,6 +255,8 @@ function checkOriginForSettingCookie(win, options, name) {
     !isProxyOrigin(win.location.href) || metaTag != null,
     `Should never attempt to set cookie on proxy origin: ${name}`
   );
+  const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
+  const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
 
   userAssert(
     !(current == proxy || endsWith(current, '.' + proxy)) || metaTag != null,
@@ -264,6 +264,7 @@ function checkOriginForSettingCookie(win, options, name) {
       name
   );
 }
+
 /**
  * Return a temporary cookie name for testing only
  * @param {!Window} win

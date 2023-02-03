@@ -76,9 +76,6 @@ describes.fakeWin('test-cookies', {amp: true}, (env) => {
     expect(doc.lastSetCookieRaw).to.equal(
       'c%261=v%261; path=/; expires=Tue, 01 Jan 2019 08:00:00 GMT'
     );
-
-    win.location.href = ' http://localhost:9876/context.html​​​';
-    meta.remove();
   });
 
   it('should respect the secure option', () => {
