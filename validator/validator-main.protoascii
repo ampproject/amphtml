@@ -4085,6 +4085,13 @@ tags: {  # <amp-pixel>
       allow_empty: true
     }
   }
+  attrs: {
+    name: "attributionsrc"
+    value_url: {
+      protocol: "https"
+      allow_empty: true
+    }
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-pixel/"
   amp_layout {
