@@ -64,6 +64,23 @@ describes.fakeWin('test-cookies', {amp: true}, (env) => {
     expect(doc.cookie).to.equal('c%261=v%261');
   });
 
+  it('should write cookie using hosted runtime exception', () => {
+    const meta = doc.createElement('meta');
+    meta.setAttribute('name', 'runtime-host');
+    meta.setAttribute('content', 'foo.bar.com');
+    win.document.head.appendChild(meta);
+
+    win.location.href = 'https://cdn.ampproject.org​​​';
+    setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS);
+
+    expect(doc.lastSetCookieRaw).to.equal(
+      'c%261=v%261; path=/; expires=Tue, 01 Jan 2019 08:00:00 GMT'
+    );
+
+    win.location.href = ' http://localhost:9876/context.html​​​';
+    meta.remove();
+  });
+
   it('should respect the secure option', () => {
     const date = Date.now() + BASE_CID_MAX_AGE_MILLIS;
     const utcDate = new Date(date).toUTCString();
