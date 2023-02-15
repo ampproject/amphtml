@@ -497,6 +497,12 @@ export class AmpStory extends AMP.BaseElement {
         '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
       }
     );
+    setImportantStyles(
+      document.querySelector('.i-amphtml-story-player-panel'),
+      {
+        '--i-amphtml-story-player-panel-ratio': desktopAspectRatio,
+      }
+    );
   }
 
   /**
