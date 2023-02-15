@@ -127,6 +127,18 @@ const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
+/**
+ * Minimum custom aspect ratio for desktop one panel.
+ * @private @const {string}
+ * */
+const MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = '1/2';
+
+/**
+ * Maximum custom aspect ratio for desktop one panel.
+ * @private @const {string}
+ * */
+const MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = '3/4';
+
 /** @enum {string} */
 const Attributes = {
   AD_SHOWING: 'ad-showing',
@@ -448,9 +460,38 @@ export class AmpStory extends AMP.BaseElement {
       );
     }
 
+    this.applyDesktopAspectRatioAttribute_();
+
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
+  }
+
+  /**
+   * Grab the desktop-aspect-ratio attribute and apply to CSS variable as a fraction.
+   * @private
+   */
+  applyDesktopAspectRatioAttribute_() {
+    if (!this.element.hasAttribute('desktop-aspect-ratio')) {
+      return;
+    }
+
+    const desktopAspectRatio =
+      'clamp(' +
+      MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO +
+      ', ' +
+      this.element.getAttribute('desktop-aspect-ratio').replace(':', '/') +
+      ', ' +
+      MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO +
+      ')';
+    setImportantStyles(
+      document.querySelector(
+        ':root:not([data-story-supports-landscape]):not([i-amphtml-story-mobile])'
+      ),
+      {
+        '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
+      }
+    );
   }
 
   /**
