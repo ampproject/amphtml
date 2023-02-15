@@ -128,16 +128,16 @@ const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
 /**
- * Minimum custom aspect ratio for desktop one panel.
- * @private @const {string}
+ * Minimum custom aspect ratio for desktop one panel, i.e. 1:2.
+ * @private @const {number}
  * */
-const MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = '1/2';
+const MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = 0.5;
 
 /**
- * Maximum custom aspect ratio for desktop one panel.
- * @private @const {string}
+ * Maximum custom aspect ratio for desktop one panel, i.e. 3:4.
+ * @private @const {number}
  * */
-const MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = '3/4';
+const MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = 0.75;
 
 /** @enum {string} */
 const Attributes = {
@@ -477,32 +477,39 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   applyDesktopAspectRatioAttribute_() {
-    if (!this.element.hasAttribute('desktop-aspect-ratio')) {
+    if (
+      this.isLandscapeSupported_() ||
+      !this.element.hasAttribute('desktop-aspect-ratio')
+    ) {
       return;
     }
 
-    const desktopAspectRatio =
-      'clamp(' +
-      MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO +
-      ', ' +
-      this.element.getAttribute('desktop-aspect-ratio').replace(':', '/') +
-      ', ' +
-      MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO +
-      ')';
-    setImportantStyles(
-      document.querySelector(
-        ':root:not([data-story-supports-landscape]):not([i-amphtml-story-mobile])'
+    const splittedRatio = this.element
+      .getAttribute('desktop-aspect-ratio')
+      .split(':');
+    if (splittedRatio.length != 2 || splittedRatio[1] == 0) {
+      return;
+    }
+
+    const desktopAspectRatio = Math.min(
+      Math.max(
+        splittedRatio[0] / splittedRatio[1],
+        MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO
       ),
-      {
-        '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
-      }
+      MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO
     );
-    setImportantStyles(
-      document.querySelector('.i-amphtml-story-player-panel'),
-      {
+    setImportantStyles(document.querySelector(':root'), {
+      '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
+    });
+
+    const playerPanelEl = document.querySelector(
+      '.i-amphtml-story-player-panel'
+    );
+    if (playerPanelEl) {
+      setImportantStyles(playerPanelEl, {
         '--i-amphtml-story-player-panel-ratio': desktopAspectRatio,
-      }
-    );
+      });
+    }
   }
 
   /**
