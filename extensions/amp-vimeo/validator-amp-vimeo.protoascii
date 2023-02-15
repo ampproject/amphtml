@@ -1,8 +1,8 @@
 tags: {  # amp-vimeo
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-vimeo 0.1"
-  excludes: "amp-vimeo 1.0"
+  satisfies_condition: "amp-vimeo 0.1"
+  excludes_condition: "amp-vimeo 1.0"
   extension_spec: {
     name: "amp-vimeo"
     version_name: "v0.1"
@@ -17,8 +17,8 @@ tags: {  # amp-vimeo
 tags: {  # amp-vimeo 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-vimeo 1.0"
-  excludes: "amp-vimeo 0.1"
+  satisfies_condition: "amp-vimeo 1.0"
+  excludes_condition: "amp-vimeo 0.1"
   extension_spec: {
     name: "amp-vimeo"
     version_name: "v1.0"
@@ -32,6 +32,10 @@ tags: {  # <amp-vimeo>
   requires_extension: "amp-vimeo"
   attrs: {
     name: "autoplay"
+    value: ""
+  }
+  attrs: {
+    name: "do-not-track"
     value: ""
   }
   attrs: {

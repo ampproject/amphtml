@@ -104,7 +104,7 @@ const CDN_PROXY_REGEXP =
 
 /** @const {string} */
 const TOKEN_VALUE_3P =
-  'AxOH8+XUqIxXfDG7Bxf7YR6oBTF4f73xWZNTyqhrkvIEgEmpxrpX8rzEqe9/yOsCGW9ChT05U9t++yH/aCYKCAgAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
+  'A1AmDEtc9EqFhFKlOOGGHrYWSU9kAAGyaN97Wcm9TASPANVGSpEThTpVd4Y557pAzN6Ft/ql91eXYh2lhP141QQAAACEeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2ODA2NTI3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9';
 
 /**
  * Inserts origin-trial token for `attribution-reporting` if not already

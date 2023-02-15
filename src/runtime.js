@@ -139,6 +139,17 @@ function adoptShared(global, callback) {
     },
   };
 
+  /**
+   *
+   * NOTE(erwinm, #38644): placeholder for global consent listeners.
+   */
+  global.AMP.addGlobalConsentListener = function () {};
+
+  /**
+   * NOTE(erwinm, #38644): placeholder for global consent listeners.
+   */
+  global.AMP.addGranularConsentListener = function () {};
+
   global.AMP.BaseElement = BaseElement;
 
   /**

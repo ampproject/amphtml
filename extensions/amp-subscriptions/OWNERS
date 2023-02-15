@@ -5,9 +5,11 @@
   rules: [
     {
       owners: [
+        {name: 'alin04'},
         {name: 'chrisantaki'},
-        {name: 'jpettitt'},
-        {name: 'mmmicedcoffee'},
+        {name: 'fikus'},
+        {name: 'hartmannr76'},
+        {name: 'jpettitt', notify: true},
       ],
     },
   ],

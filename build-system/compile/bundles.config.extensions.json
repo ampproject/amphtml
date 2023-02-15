@@ -114,6 +114,11 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-ad-network-mgid-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-ad-network-nws-impl",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -1033,6 +1038,16 @@
     "latestVersion": "1.0",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": false,
+      "additionalSuffix": "ssr-css",
+      "ssrCss": true
     }
   },
   {

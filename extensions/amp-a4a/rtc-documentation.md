@@ -137,6 +137,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Future Plc
 -   Galaxie Media
 -   Highfivve
+-   [Improve Digital](https://www.improvedigital.com)
 -   IndexExchange
 -   Kargo
 -   NewsPassID

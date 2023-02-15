@@ -1,8 +1,8 @@
 tags: {  # amp-brightcove 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-brightcove 1.0"
-  excludes: "amp-brightcove 0.1"
+  satisfies_condition: "amp-brightcove 1.0"
+  excludes_condition: "amp-brightcove 0.1"
   extension_spec: {
     name: "amp-brightcove"
     version_name: "v1.0"
@@ -14,8 +14,8 @@ tags: {  # amp-brightcove 1.0
 tags: {  # amp-brightcove 0.1 and latest
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-brightcove 0.1"
-  excludes: "amp-brightcove 1.0"
+  satisfies_condition: "amp-brightcove 0.1"
+  excludes_condition: "amp-brightcove 1.0"
   extension_spec: {
     name: "amp-brightcove"
     version_name: "v0.1"

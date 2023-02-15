@@ -7,7 +7,7 @@ const path = require('path');
 const {bgWhite, cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
-const {Storage} = require('@google-cloud/storage');
+const {S3} = require('@aws-sdk/client-s3');
 const {timedExecOrDie} = require('../pr-check/utils');
 const zlib = require('zlib');
 
@@ -158,30 +158,41 @@ async function brotliCompressAll_() {
 }
 
 /**
- * Uploads release files to Google Cloud Storage.
+ * Ensures the presence of env variables or throws an error.
+ * @param  {...string} vars
+ * @return {string[]}
+ */
+function ensureEnvVariable_(...vars) {
+  const ret = [];
+  for (const v of vars) {
+    const value = process.env[v];
+    if (!value) {
+      throw new Error(`CircleCI job is missing the ${v} env variable`);
+    }
+    ret.push(value);
+  }
+  return ret;
+}
+
+/**
+ * Uploads release files to Cloudflare R2.
  * @return {Promise<void>}
  */
 async function uploadFiles_() {
-  const {GCLOUD_SERVICE_KEY} = process.env;
-  if (!GCLOUD_SERVICE_KEY) {
-    throw new Error(
-      'CircleCI job is missing the GCLOUD_SERVICE_KEY env variable'
-    );
-  }
+  const [accountId, accessKeyId, secretAccessKey] = ensureEnvVariable_(
+    'R2_ACCOUNT_ID',
+    'R2_ACCESS_KEY_ID',
+    'R2_SECRET_ACCESS_KEY'
+  );
 
-  const credentials = JSON.parse(GCLOUD_SERVICE_KEY);
-  if (
-    !credentials.client_email ||
-    !credentials.private_key ||
-    !credentials.project_id
-  ) {
-    throw new Error(
-      'GCLOUD_SERVICE_KEY is not a Google Cloud JSON service key'
-    );
-  }
-
-  const storage = new Storage({credentials, projectId: credentials.project_id});
-  const bucket = storage.bucket('org-cdn');
+  const s3 = new S3({
+    region: 'auto',
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+  });
 
   let totalFiles = 0;
   for await (const {stats} of klaw(DEST_DIR)) {
@@ -190,7 +201,7 @@ async function uploadFiles_() {
     }
   }
 
-  log('Uploading', cyan(totalFiles), 'files to storage:');
+  log('Uploading', cyan(totalFiles), 'files to R2:');
   const uploadsPromises = [];
   let uploadedFiles = 0;
   for await (const {path, stats} of klaw(DEST_DIR)) {
@@ -198,11 +209,13 @@ async function uploadFiles_() {
       continue;
     }
 
-    const destination = path.slice(DEST_DIR.length + 1);
+    const key = path.slice(DEST_DIR.length + 1);
     uploadsPromises.push(
-      bucket.upload(path, {destination, resumable: false}).then(() => {
-        logProgress_(totalFiles, ++uploadedFiles);
-      })
+      s3
+        .putObject({Bucket: 'ampjs', Key: key, Body: fs.createReadStream(path)})
+        .then(() => {
+          logProgress_(totalFiles, ++uploadedFiles);
+        })
     );
   }
 

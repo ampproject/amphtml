@@ -102,17 +102,20 @@ function addCompanionAvElement(
   consentObj
 ) {
   const size = getCompanionVideoAdSize(apesterElement);
-  const refreshInterval = 30;
   const ampAvAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
-    'amp-ad',
+    'amp-iframe',
     {
+      'scrolling': 'no',
+      'id': 'amp-iframe',
+      'title': 'Ads',
+      'layout': 'responsive',
+      'sandbox': 'allow-scripts allow-same-origin allow-popups',
+      'allowfullscreen': 'false',
+      'frameborder': '0',
       'width': size.width,
       'height': size.height,
-      'type': 'aniview',
-      'data-publisherid': '5fabb425e5d4cb4bbc0ca7e4',
-      'data-channelid': playerOptions.aniviewChannelId,
-      'data-enable-refresh': `${refreshInterval}`,
+      'src': `https://player.avplayer.com/amp/ampiframe.html?AV_TAGID=${playerOptions.aniviewPlayerId}&AV_PUBLISHERID=5fabb425e5d4cb4bbc0ca7e4`,
     }
   );
 

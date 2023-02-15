@@ -46,11 +46,14 @@ echo "$(GREEN "Chrome version history URL is") $(CYAN "${CHROME_VERSION_HISTORY_
 # Determine the Chrome version
 # See https://developer.chrome.com/docs/versionhistory/guide
 echo "$(GREEN "Determining Chrome version...")"
-CHROME_VERSION="$(curl -sS --retry 3 ${CHROME_VERSION_HISTORY_URL} | jq -r ".versions[]|.version" | grep -m 1 "${CHROME_MAJOR_VERSION}\.")"
-if [[ -z "$CHROME_VERSION" ]]; then
-  echo "$(RED "Could not determine Chrome version")"
-  exit 1
+# TODO(estherkim): remove bandaid
+# CHROME_VERSION_HISTORY_URL does not list a version over 88 for some reason
+if [[ "$CHROME_MAJOR_VERSION" == "95" ]]; then
+  CHROME_VERSION="95.0.4638.69"
+else
+  CHROME_VERSION="$(curl -sS --retry 3 ${CHROME_VERSION_HISTORY_URL} | jq -r ".versions[]|.version" | grep -m 1 "${CHROME_MAJOR_VERSION}\.[[:digit:]]\+.[[:digit:]]\+.[[:digit:]]\+")"
 fi
+
 echo "$(GREEN "Chrome version is") $(CYAN "${CHROME_VERSION}")"
 
 echo "export CHROME_VERSION=$CHROME_VERSION" >> $BASH_ENV

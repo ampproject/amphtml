@@ -3,6 +3,8 @@ import {WindowInterface} from '#core/window/interface';
 
 import {user} from '#utils/log';
 
+import {isAttributionReportingAllowed} from './utils/privacy-sandbox-utils';
+
 /** @const {string} */
 const TAG = 'pixel';
 
@@ -10,27 +12,29 @@ const TAG = 'pixel';
  * @param {!Window} win
  * @param {string} src
  * @param {?string=} referrerPolicy
+ * @param {string=} attributionSrc
  * @return {!Element}
  */
-export function createPixel(win, src, referrerPolicy) {
+export function createPixel(win, src, referrerPolicy, attributionSrc) {
   // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
 
   return referrerPolicy === 'no-referrer'
-    ? createNoReferrerPixel(win, src)
-    : createImagePixel(win, src);
+    ? createNoReferrerPixel(win, src, attributionSrc)
+    : createImagePixel(win, src, false, attributionSrc);
 }
 
 /**
  * @param {!Window} win
  * @param {string} src
+ * @param {string=} attributionSrc
  * @return {!Element}
  */
-function createNoReferrerPixel(win, src) {
+function createNoReferrerPixel(win, src, attributionSrc) {
   if (isReferrerPolicySupported()) {
-    return createImagePixel(win, src, true);
+    return createImagePixel(win, src, true, attributionSrc);
   } else {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
@@ -54,15 +58,19 @@ function createNoReferrerPixel(win, src) {
  * @param {!Window} win
  * @param {string} src
  * @param {boolean=} noReferrer
+ * @param {string=} attributionSrc
  * @return {!Image}
  */
-function createImagePixel(win, src, noReferrer = false) {
+function createImagePixel(win, src, noReferrer = false, attributionSrc) {
   const Image = WindowInterface.getImage(win);
   const image = new Image();
   if (noReferrer) {
     image.referrerPolicy = 'no-referrer';
   }
   image.src = src;
+  if (isAttributionReportingAllowed(win)) {
+    image.attributionsrc = attributionSrc;
+  }
   return image;
 }
 

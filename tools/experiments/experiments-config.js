@@ -193,4 +193,9 @@ export const EXPERIMENTS = [
     name: 'Enable paywall experiences in web stories by turning on amp-story-subscriptions extension',
     spec: 'https://github.com/ampproject/amphtml/pull/38179',
   },
+  {
+    id: 'attribution-reporting',
+    name: 'Enable new privacy preserving attribution reporting APIs',
+    spec: 'https://github.com/ampproject/amphtml/pull/35347',
+  },
 ];
