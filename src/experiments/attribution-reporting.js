@@ -4,8 +4,8 @@
  */
 export const AttributionReporting = {
   ID: 'attribution-reporting',
-  DISABLE: '44776500',
-  ENABLE: '44776501',
-  DISABLE_NO_ASYNC: '44776502',
-  ENABLE_NO_ASYNC: '44776503',
+  DISABLE: '42531928',
+  ENABLE: '42531929',
+  DISABLE_NO_ASYNC: '42531930',
+  ENABLE_NO_ASYNC: '42531931',
 };
