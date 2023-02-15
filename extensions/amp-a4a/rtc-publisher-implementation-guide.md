@@ -23,7 +23,6 @@ To use RTC, you must meet the following requirements:
 
 -   Admax
 -   Adpushup
--   AppNexus
 -   AppNexus PSP
 -   APS
 -   Automatad
