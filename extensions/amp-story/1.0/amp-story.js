@@ -472,7 +472,8 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Grab the desktop-aspect-ratio attribute and apply to CSS variable as a fraction.
+   * Grab the desktop-aspect-ratio attribute, clamp the value
+   * between 1/2 and 3/4 aspect ratios, and apply it to the root element.
    * @private
    */
   applyDesktopAspectRatioAttribute_() {
