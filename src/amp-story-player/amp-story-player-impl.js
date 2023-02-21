@@ -6,13 +6,7 @@ import {devAssertElement} from '#core/assert';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, toggleAttribute, tryFocus} from '#core/dom';
-import {
-  computedStyle,
-  resetStyles,
-  setImportantStyles,
-  setStyle,
-  setStyles,
-} from '#core/dom/style';
+import {computedStyle, resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
 import {isEnumValue} from '#core/types/enum';
 import {parseJson} from '#core/types/object/json';
@@ -1183,12 +1177,14 @@ export class AmpStoryPlayer {
         story.storyContentLoaded = true;
         this.currentStoryLoadDeferred_.resolve();
 
-        setStyles(this.rootEl_, {
-          '--i-amphtml-story-player-panel-ratio': computedStyle(
-            story.iframe.contentWindow,
-            story.iframe.contentWindow.document.documentElement
-          ).getPropertyValue('--i-amphtml-story-desktop-one-panel-ratio'),
-        });
+        if (story.iframe.contentWindow.document.documentElement) {
+          setStyles(this.rootEl_, {
+            '--i-amphtml-story-player-panel-ratio': computedStyle(
+              story.iframe.contentWindow,
+              story.iframe.contentWindow.document.documentElement
+            ).getPropertyValue('--i-amphtml-story-desktop-one-panel-ratio'),
+          });
+        }
       })
     );
 
