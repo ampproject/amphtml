@@ -121,6 +121,7 @@ let DocumentStateTypeDef;
  *   posterImage: (?string),
  *   storyContentLoaded: ?boolean,
  *   connectedDeferred: !Deferred
+ *   desktopAspectRatio: ?number,
  * }}
  */
 let StoryDef;
@@ -619,6 +620,9 @@ export class AmpStoryPlayer {
 
           messaging.registerHandler('storyContentLoaded', () => {
             story.storyContentLoaded = true;
+
+            // Store aspect ratio so that it can be updated when the story becomes active.
+            this.storeAspectRatio_(story);
           });
 
           messaging.sendRequest(
@@ -1147,6 +1151,34 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Store aspect ratio of the loaded story.
+   * @param {!StoryDef} story
+   * @private
+   */
+  storeAspectRatio_(story) {
+    if (story.iframe.contentWindow.document.documentElement) {
+      story.desktopAspectRatio = computedStyle(
+        story.iframe.contentWindow,
+        story.iframe.contentWindow.document.documentElement
+      ).getPropertyValue('--i-amphtml-story-desktop-one-panel-ratio');
+    }
+  }
+
+  /**
+   * Update player aspect ratio based on the active story aspect ratio.
+   * @param {!StoryDef} story
+   * @private
+   */
+  updateAspectRatio_(story) {
+    if (story.distance === 0) {
+      setStyles(this.rootEl_, {
+        '--i-amphtml-story-player-panel-ratio':
+          this.stories_[this.currentIdx_].desktopAspectRatio,
+      });
+    }
+  }
+
+  /**
    * Returns a promise that makes sure that the current story gets loaded first
    * before any others. When the given story is not the current story, it will
    * block until the current story has finished loading. When the given story
@@ -1157,6 +1189,9 @@ export class AmpStoryPlayer {
    */
   currentStoryPromise_(story) {
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
+      // Set aspect ratio that was stored when the story was loaded.
+      this.updateAspectRatio_(story);
+
       return Promise.resolve();
     }
 
@@ -1177,14 +1212,9 @@ export class AmpStoryPlayer {
         story.storyContentLoaded = true;
         this.currentStoryLoadDeferred_.resolve();
 
-        if (story.iframe.contentWindow.document.documentElement) {
-          setStyles(this.rootEl_, {
-            '--i-amphtml-story-player-panel-ratio': computedStyle(
-              story.iframe.contentWindow,
-              story.iframe.contentWindow.document.documentElement
-            ).getPropertyValue('--i-amphtml-story-desktop-one-panel-ratio'),
-          });
-        }
+        // Store and update the player aspect ratio based on the active story aspect ratio.
+        this.storeAspectRatio_(story);
+        this.updateAspectRatio_(story);
       })
     );
 
