@@ -82,7 +82,7 @@ amp-live-list/0.1/test/validator-amp-live-list.html:66:2 The mandatory reference
 amp-live-list/0.1/test/validator-amp-live-list.html:67:4 The tag 'foo' is disallowed.
 |      <script items>
 >>     ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:68:4 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+amp-live-list/0.1/test/validator-amp-live-list.html:68:4 The parent tag of tag 'amphtml engine script' is 'foo', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |        document.writeln('1, 2, 3');
 |      </script>
 |    </amp-live-list>
