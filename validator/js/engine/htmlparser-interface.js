@@ -196,7 +196,7 @@ const ScriptTag = class {
         }
 
         // For AMP Extensions, validate path and extract name and version.
-        if (!this.isOpenjsDomian && this.isExtension && extensionScriptPathRegex.test(this.path)) {
+        if (this.isExtension && extensionScriptPathRegex.test(this.path)) {
           this.hasValidPath = true;
           const reResult = extensionScriptPathRegex.exec(this.path);
           if (reResult != null) {
