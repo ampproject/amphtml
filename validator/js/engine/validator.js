@@ -4799,7 +4799,7 @@ function validateClassAttr(attr, tagSpec, context, result) {
  * @param {!generated.ValidationResult} result
  */
 function validateAmpScriptSrcAttr(tag, attrValue, tagSpec, context, result) {
-  if (!tag.isAmpDomain()) {
+  if (!(tag.isAmpDomain() || tag.isOpenjsDomain)) {
     context.addError(
         generated.ValidationError.Code.DISALLOWED_AMP_DOMAIN,
         context.getLineCol(), /* params */[], /* spec_url*/ '', result);
