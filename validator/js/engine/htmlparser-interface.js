@@ -71,6 +71,8 @@ exports.ScriptReleaseVersion = ScriptReleaseVersion;
 
 // AMP domain
 const /** string */ ampProjectDomain = 'https://cdn.ampproject.org/';
+// Openjs domain
+const /** string */ openjsDomain = 'https://openjsf.org/';
 
 // Standard and Nomodule JavaScript:
 // v0.js
@@ -173,9 +175,13 @@ const ScriptTag = class {
 
     // Determine if this has a valid AMP domain and separate the path from the
     // attribute 'src'.
-    if (src.startsWith(ampProjectDomain)) {
+    if (src.startsWith(ampProjectDomain) || src.startsWith(openjsDomain)) {
       this.isAmpDomain = true;
-      this.path = src.substr(ampProjectDomain.length);
+      if (src.startsWith(ampProjectDomain)) {
+        this.path = src.substr(ampProjectDomain.length);
+      } else {
+        this.path == src.substr(openjsDomain.length);
+      }
 
       // Only look at script tags that have attribute 'async'.
       if (isAsync) {
