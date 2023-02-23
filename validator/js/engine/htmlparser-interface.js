@@ -72,6 +72,9 @@ exports.ScriptReleaseVersion = ScriptReleaseVersion;
 // AMP domain
 const /** string */ ampProjectDomain = 'https://cdn.ampproject.org/';
 
+// Openjs domain
+const /** string */ openjsDomain = 'https://openjsf.org/';
+
 // Standard and Nomodule JavaScript:
 // v0.js
 // v0/amp-ad-0.1.js
@@ -134,6 +137,8 @@ const ScriptTag = class {
     /** @type {boolean} */
     this.isAmpDomain = false;
     /** @type {boolean} */
+    this.isOpenjsDomain = false;
+    /** @type {boolean} */
     this.isExtension = false;
     /** @type {boolean} */
     this.isRuntime = false;
@@ -171,12 +176,17 @@ const ScriptTag = class {
       }
     }
 
-    // Determine if this has a valid AMP domain and separate the path from the
-    // attribute 'src'.
-    if (src.startsWith(ampProjectDomain)) {
+    if (src.startsWith(openjsDomain)) {
+      this.isOpenjsDomain = true;
+      this.path = src.substr(openjsDomain.length);
+    } else if (src.startsWith(ampProjectDomain)) {
       this.isAmpDomain = true;
       this.path = src.substr(ampProjectDomain.length);
+    }
 
+    // Determine if this has a valid AMP domain and separate the path from the
+    // attribute 'src'.
+    if (this.isAmpDomain || this.isOpenjsDomain) {
       // Only look at script tags that have attribute 'async'.
       if (isAsync) {
         // Determine if this is the AMP Runtime.
@@ -186,7 +196,7 @@ const ScriptTag = class {
         }
 
         // For AMP Extensions, validate path and extract name and version.
-        if (this.isExtension && extensionScriptPathRegex.test(this.path)) {
+        if (!this.isOpenjsDomian && this.isExtension && extensionScriptPathRegex.test(this.path)) {
           this.hasValidPath = true;
           const reResult = extensionScriptPathRegex.exec(this.path);
           if (reResult != null) {
