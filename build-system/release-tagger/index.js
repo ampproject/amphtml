@@ -43,7 +43,7 @@ async function _promote() {
 
   const release = await getRelease(head);
   if (!release) {
-    const {'html_url': url} = await makeRelease(head, base, channel, sha);
+    const {'html_url': url} = await makeRelease(head, base, channel, sha, undefined, undefined);
     log('Created release', magenta(head), 'at', cyan(url));
   } else {
     log('Found release', magenta(head), 'at', cyan(release['html_url']));

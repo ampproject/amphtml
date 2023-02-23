@@ -5,10 +5,11 @@
 
 const dedent = require('dedent');
 const {
-  createRelease,
-  createTag,
-  getPullRequestsBetweenCommits,
-  getRef,
+  // createRelease,
+  // createTag,
+  // getPullRequestsBetweenCommits,
+  // getRef,
+  GitHubApi,
 } = require('./utils');
 const {getExtensionsAndComponents, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -231,18 +232,19 @@ function _createBody(head, base, prs) {
  * @param {string} sha
  * @return {Promise<Object>}
  */
-async function makeRelease(head, base, channel, sha) {
+async function makeRelease(head, base, channel, sha, octokitRest, octokitGraphQl) {
+  const api = new GitHubApi(octokitRest, octokitGraphQl);
   let headRef;
   try {
-    headRef = (await getRef(head)).object;
+    headRef = (await api.getRef(head)).object;
   } catch (_) {
-    headRef = (await createTag(head, sha)).object;
+    headRef = (await api.createTag(head, sha)).object;
   }
-  const {object: baseRef} = await getRef(base);
-  const prs = await getPullRequestsBetweenCommits(headRef.sha, baseRef.sha);
+  const {object: baseRef} = await api.getRef(base);
+  const prs = await api.getPullRequestsBetweenCommits(headRef.sha, baseRef.sha);
   const body = _createBody(head, base, prs);
   const prerelease = prereleaseConfig[channel];
-  return await createRelease(head, headRef.sha, body, prerelease);
+  return await api.createRelease(head, headRef.sha, body, prerelease);
 }
 
 module.exports = {makeRelease};
