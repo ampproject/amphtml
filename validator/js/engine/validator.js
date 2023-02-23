@@ -1,4 +1,5 @@
 goog.module('amp.validator');
+
 const VALIDATE_CSS = goog.require('amp.validator.VALIDATE_CSS');
 const amp4ads = goog.require('amp.validator.validateAmp4AdsCss');
 const asserts = goog.require('goog.asserts');
@@ -6726,7 +6727,9 @@ class ParsedValidatorRules {
     for (const [requiredKey, errors] of context.valueSetsRequired()) {
       if (!providedKeys.has(/** @type {string} */ (requiredKey))) {
         for (const error of errors)
-          context.addBuiltError(error, validationResult);
+          // Should ensure that error is not a string here.
+          context.addBuiltError(
+              /** @type {?} */ (error), validationResult);
       }
     }
   }
