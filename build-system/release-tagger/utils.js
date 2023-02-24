@@ -7,13 +7,22 @@ const dedent = require('dedent');
 const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {Octokit} = require('@octokit/rest');
 
+/**
+ * GitHub API util functions
+ */
 class GitHubApi {
+  /**
+   * @param {Object} octokitRest
+   * @param {Object} octokitGraphQl
+   */
   constructor(octokitRest, octokitGraphQl) {
-    this.octokit = octokitRest ? octokitRest: new Octokit({
-        auth: process.env.GITHUB_TOKEN,
-        userAgent: 'amp release tagger',
-        timeZone: 'America/Los_Angeles',
-      });
+    this.octokit = octokitRest
+      ? octokitRest
+      : new Octokit({
+          auth: process.env.GITHUB_TOKEN,
+          userAgent: 'amp release tagger',
+          timeZone: 'America/Los_Angeles',
+        });
     this.octokit.hook.error('request', (error) => {
       // don't throw an error if resource is not found
       if (error.status === 404) {
@@ -21,11 +30,13 @@ class GitHubApi {
       }
     });
 
-    this.graphqlWithAuth = octokitGraphQl ? octokitGraphQl : graphql.defaults({
-      headers: {
-        authorization: `token ${process.env.GITHUB_TOKEN}`,
-      },
-    });
+    this.graphqlWithAuth = octokitGraphQl
+      ? octokitGraphQl
+      : graphql.defaults({
+          headers: {
+            authorization: `token ${process.env.GITHUB_TOKEN}`,
+          },
+        });
 
     this.info = {owner: 'ampproject', repo: 'amphtml'};
     this.config = {
@@ -51,7 +62,7 @@ class GitHubApi {
       const data = await this.graphqlWithAuth({query});
       responses.push(...Object.values(data));
     }
-      return responses;
+    return responses;
   }
 
   /**
@@ -111,12 +122,14 @@ class GitHubApi {
   /**
    * Get a GitHub release by tag name
    * @param {string} tag
-   * @return {Promise<Object|undefined>}
+   * @return {Promise<Object>}
    */
   async getRelease(tag) {
-    const response = await this.octokit.rest.repos.getReleaseByTag({...this.info, tag});
+    const response = await this.octokit.rest.repos.getReleaseByTag({
+      ...this.info,
+      tag,
+    });
     return response.data;
-    //return response?.data;
   }
 
   /**
@@ -157,15 +170,15 @@ class GitHubApi {
    * Get a list of commits between two commits
    * @param {string} head
    * @param {string} base
-   * @return {Promise<Object|undefined>}
+   * @return {Promise<Object>}
    */
   async compareCommits(head, base) {
-    const response = await this.octokit.rest.repos.compareCommits({
+    const {data} = await this.octokit.rest.repos.compareCommits({
       ...this.info,
       base,
       head,
     });
-    return response?.data;
+    return data;
   }
 
   /**
@@ -214,11 +227,14 @@ class GitHubApi {
   /**
    * Get label
    * @param {string} name
-   * @return {Promise<Object|undefined>}
+   * @return {Promise<Object>}
    */
   async getLabel(name) {
-    const response = await this.octokit.rest.issues.getLabel({...this.info, name});
-    return response?.data;
+    const {data} = await this.octokit.rest.issues.getLabel({
+      ...this.info,
+      name,
+    });
+    return data;
   }
 
   /**
@@ -262,15 +278,15 @@ class GitHubApi {
   /**
    * Get a git ref
    * @param {string} tag
-   * @return {Promise<Object|undefined>}
+   * @return {Promise<Object>}
    */
   async getRef(tag) {
-    const response = await this.octokit.rest.git.getRef({
+    const {data} = await this.octokit.rest.git.getRef({
       ...this.info,
       ref: `tags/${tag}`,
     });
 
-    return response.data;
+    return data;
   }
 
   /**
@@ -289,12 +305,12 @@ class GitHubApi {
     });
 
     // once a tag object is created, create a reference
-    const response = await this.octokit.rest.git.createRef({
+    const {data} = await this.octokit.rest.git.createRef({
       ...this.info,
       ref: `refs/tags/${tag}`,
       sha,
     });
-    return response.data;
+    return data;
   }
 }
 

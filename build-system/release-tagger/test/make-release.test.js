@@ -3,35 +3,50 @@ const sinon = require('sinon');
 const {getExtensionsAndComponents} = require('../../npm-publish/utils');
 const {makeRelease} = require('../make-release');
 
-test('create', async (t) => {
-  const octokitRest = {
+test.beforeEach((t) => {
+  t.context.octokitRest = {
     rest: {
       git: {
-        createRef: () => {},
-        createTag: () => {},
-        getRef: sinon.stub()
-          .onFirstCall().resolves({data: { 
-            id: 2,
-            object: {sha: '3abcdef'}}})
-          .onSecondCall().resolves({data: {
-            id: 1,
-            object: {sha: '1abcdef'},
-          }})
+        createRef: sinon.stub(),
+        createTag: sinon.stub(),
+        getRef: sinon.stub(),
       },
       repos: {
-        createRelease: sinon.stub().resolves({data: {}}),
-        compareCommits: sinon.stub()
-          .resolves({data: {
-            commits: [{sha: '1abcdef'}, {sha: '2abcdef'}, {sha: '3abcdef'}],
-          }
-        }),
-    }},
+        createRelease: sinon.stub(),
+        compareCommits: sinon.stub(),
+      },
+    },
     hook: {
-      error: () => {},
-    }
+      error: sinon.stub(),
+    },
   };
-  
-  const octokitGraphQl = sinon.stub().resolves({
+  t.context.octokitGraphQl = sinon.stub();
+});
+
+test('create', async (t) => {
+  t.context.octokitRest.rest.git.getRef
+    .onFirstCall()
+    .resolves({
+      data: {
+        id: 2,
+        object: {sha: '3abcdef'},
+      },
+    })
+    .onSecondCall()
+    .resolves({
+      data: {
+        id: 1,
+        object: {sha: '1abcdef'},
+      },
+    });
+  t.context.octokitRest.rest.repos.createRelease.resolves({data: {}});
+  t.context.octokitRest.rest.repos.compareCommits.resolves({
+    data: {
+      commits: [{sha: '1abcdef'}, {sha: '2abcdef'}, {sha: '3abcdef'}],
+    },
+  });
+
+  t.context.octokitGraphQl.resolves({
     pr0: {
       nodes: [
         {
@@ -60,8 +75,7 @@ test('create', async (t) => {
             ],
           },
           mergeCommit: {
-            commitUrl:
-              'https://github.com/ampproject/amphtml/commit/1abcdef',
+            commitUrl: 'https://github.com/ampproject/amphtml/commit/1abcdef',
             oid: '1abcdef',
             abbreviatedOid: '1abc',
           },
@@ -85,14 +99,12 @@ test('create', async (t) => {
                 'path': 'third_party/tasks/e2e/readme.md',
               },
               {
-                'path':
-                  'src/bento/components/bento-accordion/1.0/README.md',
+                'path': 'src/bento/components/bento-accordion/1.0/README.md',
               },
             ],
           },
           mergeCommit: {
-            commitUrl:
-              'https://github.com/ampproject/amphtml/commit/2abcdef',
+            commitUrl: 'https://github.com/ampproject/amphtml/commit/2abcdef',
             oid: '2abcdef',
             abbreviatedOid: '2abc',
           },
@@ -118,8 +130,7 @@ test('create', async (t) => {
             ],
           },
           mergeCommit: {
-            commitUrl:
-              'https://github.com/ampproject/amphtml/commit/3abcdef',
+            commitUrl: 'https://github.com/ampproject/amphtml/commit/3abcdef',
             oid: '3abcdef',
             abbreviatedOid: '3abc',
           },
@@ -144,67 +155,71 @@ test('create', async (t) => {
     (package) => !packageChanged.has(package)
   );
 
-  await makeRelease('2107280123000', '2107210123000', 'beta-percent', '1abcdef', octokitRest, octokitGraphQl);
+  await makeRelease(
+    '2107280123000',
+    '2107210123000',
+    'beta-percent',
+    '1abcdef',
+    t.context.octokitRest,
+    t.context.octokitGraphQl
+  );
 
-  t.true(octokitRest.rest.repos.createRelease.calledWith({
-    owner: 'ampproject',
-    repo: 'amphtml',
-    name: '2107280123000',
-    'tag_name': '2107280123000',
-    'target_commitish': '3abcdef',
-    prerelease: true,
-    body:
-      '<h2>Changelog</h2>\n<p>\n' +
-      '<a href="https://github.com/ampproject/amphtml/compare/' +
-      '2107210123000...2107280123000">\n' +
-      '<code>2107210123000...2107280123000</code>\n</a>\n</p>\n\n' +
-      '<h2>npm packages @ 1.2107280123.0</h2>\n' +
-      `<b>${Array.from(packageChanged).join(', ')}</b>\n` +
-      `<ul><li>${pr2}</li></ul>\n\n` +
-      `<b>Packages not changed:</b> <i>${packagesNotChanged.join(
-        ', '
-      )}</i>\n\n` +
-      '<h2>Changes by component</h2>\n' +
-      `<details><summary>ads (1)</summary>${pr1}</details>` +
-      `<details><summary>amp-test1 (1)</summary>${pr1}</details>` +
-      `<details><summary>bento-accordion (1)</summary>${pr2}</details>` +
-      `<details><summary>build-system (1)</summary>${pr2}</details>` +
-      `<details><summary>package updates (1)</summary>${pr3}</details>` +
-      `<details><summary>src (2)</summary>${pr1}<br />${pr2}</details>` +
-      `<details><summary>third_party (2)</summary>${pr1}<br />${pr2}</details>` +
-      `<details><summary>validator (1)</summary>${pr1}</details>`,
-  }))
+  t.true(
+    t.context.octokitRest.rest.repos.createRelease.calledWith({
+      owner: 'ampproject',
+      repo: 'amphtml',
+      name: '2107280123000',
+      'tag_name': '2107280123000',
+      'target_commitish': '3abcdef',
+      prerelease: true,
+      body:
+        '<h2>Changelog</h2>\n<p>\n' +
+        '<a href="https://github.com/ampproject/amphtml/compare/' +
+        '2107210123000...2107280123000">\n' +
+        '<code>2107210123000...2107280123000</code>\n</a>\n</p>\n\n' +
+        '<h2>npm packages @ 1.2107280123.0</h2>\n' +
+        `<b>${Array.from(packageChanged).join(', ')}</b>\n` +
+        `<ul><li>${pr2}</li></ul>\n\n` +
+        `<b>Packages not changed:</b> <i>${packagesNotChanged.join(
+          ', '
+        )}</i>\n\n` +
+        '<h2>Changes by component</h2>\n' +
+        `<details><summary>ads (1)</summary>${pr1}</details>` +
+        `<details><summary>amp-test1 (1)</summary>${pr1}</details>` +
+        `<details><summary>bento-accordion (1)</summary>${pr2}</details>` +
+        `<details><summary>build-system (1)</summary>${pr2}</details>` +
+        `<details><summary>package updates (1)</summary>${pr3}</details>` +
+        `<details><summary>src (2)</summary>${pr1}<br />${pr2}</details>` +
+        `<details><summary>third_party (2)</summary>${pr1}<br />${pr2}</details>` +
+        `<details><summary>validator (1)</summary>${pr1}</details>`,
+    })
+  );
 });
 
 test('cherry-pick', async (t) => {
-  const octokitRest = {
-    rest: {
-      git: {
-        createRef: () => {},
-        createTag: () => {},
-        getRef: sinon.stub()
-          .onFirstCall().resolves({data: { 
-            id: 2,
-            object: {sha: '2abcdef'}}})
-          .onSecondCall().resolves({data: {
-            id: 1,
-            object: {sha: '1abcdef'},
-          }})
+  t.context.octokitRest.rest.git.getRef
+    .onFirstCall()
+    .resolves({
+      data: {
+        id: 2,
+        object: {sha: '2abcdef'},
       },
-      repos: {
-        createRelease: sinon.stub().resolves({data: {}}),
-        compareCommits: sinon.stub()
-          .resolves({data:{
-            commits: [{sha: '2abcdef'}],
-          }
-        }),
-    }},
-    hook: {
-      error: () => {},
-    }
-  };
-  
-  const octokitGraphQl = sinon.stub().resolves({
+    })
+    .onSecondCall()
+    .resolves({
+      data: {
+        id: 1,
+        object: {sha: '1abcdef'},
+      },
+    });
+  t.context.octokitRest.rest.repos.createRelease.resolves({data: {}});
+  t.context.octokitRest.rest.repos.compareCommits.resolves({
+    data: {
+      commits: [{sha: '2abcdef'}],
+    },
+  });
+
+  t.context.octokitGraphQl.resolves({
     pr0: {
       nodes: [
         {
@@ -221,8 +236,7 @@ test('cherry-pick', async (t) => {
             ],
           },
           mergeCommit: {
-            commitUrl:
-              'https://github.com/ampproject/amphtml/commit/2abcdef',
+            commitUrl: 'https://github.com/ampproject/amphtml/commit/2abcdef',
             oid: '2abcdef',
             abbreviatedOid: '2abc',
           },
@@ -237,33 +251,42 @@ test('cherry-pick', async (t) => {
 
   const packages = getExtensionsAndComponents().map((e) => e.extension);
 
-  await makeRelease('2107280123001', '2107210123000', 'stable', '', octokitRest, octokitGraphQl);
-  
-  t.true(octokitRest.rest.repos.createRelease.calledWith({
-    owner: 'ampproject',
-    repo: 'amphtml',
-    name: '2107280123001',
-    'tag_name': '2107280123001',
-    'target_commitish': '2abcdef',
-    prerelease: false,
-    body:
-      '<h2>🌸 Cherry-picked release 🌸</h2>\n' +
-      '<a href="https://github.com/ampproject/amphtml/releases/tag/2107280123000">' +
-      '2107280123000</a> was patched and published as <b>2107280123001</b>. ' +
-      'Refer to the <a href="https://amp-release-calendar.appspot.com">' +
-      'release calendar</a> for additional channel information.\n\n' +
-      '<h2>Changelog</h2>\n<p>\n' +
-      '<a href="https://github.com/ampproject/amphtml/compare/' +
-      '2107210123000...2107280123001">\n' +
-      '<code>2107210123000...2107280123001</code>\n</a>\n</p>\n\n' +
-      '<h2>npm packages @ 1.2107280123.1</h2>\n\n\n' +
-      `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
-      '<h2>Changes by component</h2>\n' +
-      '<details><summary>ads (0)</summary></details>' +
-      '<details><summary>build-system (0)</summary></details>' +
-      '<details><summary>package updates (0)</summary></details>' +
-      `<details><summary>src (1)</summary>${pr1}</details>` +
-      '<details><summary>third_party (0)</summary></details>' +
-      '<details><summary>validator (0)</summary></details>', 
-  }));
+  await makeRelease(
+    '2107280123001',
+    '2107210123000',
+    'stable',
+    '',
+    t.context.octokitRest,
+    t.context.octokitGraphQl
+  );
+
+  t.true(
+    t.context.octokitRest.rest.repos.createRelease.calledWith({
+      owner: 'ampproject',
+      repo: 'amphtml',
+      name: '2107280123001',
+      'tag_name': '2107280123001',
+      'target_commitish': '2abcdef',
+      prerelease: false,
+      body:
+        '<h2>🌸 Cherry-picked release 🌸</h2>\n' +
+        '<a href="https://github.com/ampproject/amphtml/releases/tag/2107280123000">' +
+        '2107280123000</a> was patched and published as <b>2107280123001</b>. ' +
+        'Refer to the <a href="https://amp-release-calendar.appspot.com">' +
+        'release calendar</a> for additional channel information.\n\n' +
+        '<h2>Changelog</h2>\n<p>\n' +
+        '<a href="https://github.com/ampproject/amphtml/compare/' +
+        '2107210123000...2107280123001">\n' +
+        '<code>2107210123000...2107280123001</code>\n</a>\n</p>\n\n' +
+        '<h2>npm packages @ 1.2107280123.1</h2>\n\n\n' +
+        `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
+        '<h2>Changes by component</h2>\n' +
+        '<details><summary>ads (0)</summary></details>' +
+        '<details><summary>build-system (0)</summary></details>' +
+        '<details><summary>package updates (0)</summary></details>' +
+        `<details><summary>src (1)</summary>${pr1}</details>` +
+        '<details><summary>third_party (0)</summary></details>' +
+        '<details><summary>validator (0)</summary></details>',
+    })
+  );
 });

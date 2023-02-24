@@ -17,9 +17,8 @@ const {action, base, channel, head, sha} = require('minimist')(
 );
 const {addLabels, removeLabels} = require('./label-pull-requests');
 const {cyan, magenta} = require('kleur/colors');
-const {getRelease} = require('./utils');
 const {log} = require('../common/logging');
-const {makeRelease} = require('./make-release');
+const {getRelease, makeRelease} = require('./make-release');
 const {publishRelease, rollbackRelease} = require('./update-release');
 
 /**
@@ -43,7 +42,7 @@ async function _promote() {
 
   const release = await getRelease(head);
   if (!release) {
-    const {'html_url': url} = await makeRelease(head, base, channel, sha, undefined, undefined);
+    const {'html_url': url} = await makeRelease(head, base, channel, sha);
     log('Created release', magenta(head), 'at', cyan(url));
   } else {
     log('Found release', magenta(head), 'at', cyan(release['html_url']));

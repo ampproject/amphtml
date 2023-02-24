@@ -230,9 +230,18 @@ function _createBody(head, base, prs) {
  * @param {string} base
  * @param {string} channel
  * @param {string} sha
+ * @param {Object} octokitRest
+ * @param {Object} octokitGraphQl
  * @return {Promise<Object>}
  */
-async function makeRelease(head, base, channel, sha, octokitRest, octokitGraphQl) {
+async function makeRelease(
+  head,
+  base,
+  channel,
+  sha,
+  octokitRest,
+  octokitGraphQl
+) {
   const api = new GitHubApi(octokitRest, octokitGraphQl);
   let headRef;
   try {
