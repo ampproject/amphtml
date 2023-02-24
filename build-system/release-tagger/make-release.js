@@ -4,13 +4,7 @@
  */
 
 const dedent = require('dedent');
-const {
-  // createRelease,
-  // createTag,
-  // getPullRequestsBetweenCommits,
-  // getRef,
-  GitHubApi,
-} = require('./utils');
+const {GitHubApi} = require('./utils');
 const {getExtensionsAndComponents, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
 
