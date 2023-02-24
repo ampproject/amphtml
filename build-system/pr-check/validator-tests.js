@@ -16,8 +16,7 @@ const jobName = 'validator-tests.js';
 function pushBuildWorkflow() {
   timedExecOrDie('amp validator-webui');
   timedExecOrDie('amp validator');
-  // TODO(#38610): fix for bazel 6.0 or use older version
-  // timedExecOrDie('amp validator-cpp');
+  timedExecOrDie('amp validator-cpp');
   timedExecOrDie('amp validate-html-fixtures');
 }
 
@@ -54,10 +53,9 @@ function prBuildWorkflow() {
     timedExecOrDie('amp validator');
   }
 
-  // TODO(#38610): fix for bazel 6.0 or use older version
-  // if (buildTargetsInclude(Targets.VALIDATOR)) {
-  //   timedExecOrDie('amp validator-cpp');
-  // }
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator-cpp');
+  }
 
   if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
     timedExecOrDie('amp validate-html-fixtures');
