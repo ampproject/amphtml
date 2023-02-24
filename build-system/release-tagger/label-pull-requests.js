@@ -16,7 +16,7 @@ const labelConfig = {
  * @param {string} head
  * @param {string} base
  * @param {string} channel
- * @param api
+ * @param {Object} api
  * @return {Promise<Object>}
  */
 async function _setup(head, base, channel, api) {
@@ -37,11 +37,17 @@ async function _setup(head, base, channel, api) {
  * @param {string} head
  * @param {string} base
  * @param {string} channel
- * @param octokitRest
- * @param octokitGraphQl
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<void>}
  */
-async function addLabels(head, base, channel, octokitRest, octokitGraphQl) {
+async function addLabels(
+  head,
+  base,
+  channel,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
   const api = new GitHubApi(octokitRest, octokitGraphQl);
   const {labelId, prs} = await _setup(head, base, channel, api);
   await api.labelPullRequests(prs, labelId);
@@ -52,11 +58,17 @@ async function addLabels(head, base, channel, octokitRest, octokitGraphQl) {
  * @param {string} head
  * @param {string} base
  * @param {string} channel
- * @param octokitRest
- * @param octokitGraphQl
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<void>}
  */
-async function removeLabels(head, base, channel, octokitRest, octokitGraphQl) {
+async function removeLabels(
+  head,
+  base,
+  channel,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
   const api = new GitHubApi(octokitRest, octokitGraphQl);
   const {labelId, prs} = await _setup(head, base, channel, api);
   await api.unlabelPullRequests(prs, labelId);

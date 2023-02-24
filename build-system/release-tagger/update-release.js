@@ -9,11 +9,16 @@ const {GitHubApi} = require('./utils');
  * Publish a GitHub release
  * @param {string} tag
  * @param {boolean} latest
- * @param {Object} octokitRest
- * @param {Object} octokitGraphQl
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<Object>}
  */
-async function publishRelease(tag, latest, octokitRest, octokitGraphQl) {
+async function publishRelease(
+  tag,
+  latest,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
   const api = new GitHubApi(octokitRest, octokitGraphQl);
   const release = await api.getRelease(tag);
   const changes = {prerelease: false, 'make_latest': latest};
@@ -23,11 +28,15 @@ async function publishRelease(tag, latest, octokitRest, octokitGraphQl) {
 /**
  * Roll back a GitHub release
  * @param {string} tag
- * @param {Object} octokitRest
- * @param {Object} octokitGraphQl
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<Object>}
  */
-async function rollbackRelease(tag, octokitRest, octokitGraphQl) {
+async function rollbackRelease(
+  tag,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
   const api = new GitHubApi(octokitRest, octokitGraphQl);
   const release = await api.getRelease(tag);
   const body = '#### :back: This release was rolled back.\n' + release.body;

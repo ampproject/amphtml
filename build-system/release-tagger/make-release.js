@@ -230,8 +230,8 @@ function _createBody(head, base, prs) {
  * @param {string} base
  * @param {string} channel
  * @param {string} sha
- * @param {Object} octokitRest
- * @param {Object} octokitGraphQl
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<Object>}
  */
 async function makeRelease(
@@ -239,8 +239,8 @@ async function makeRelease(
   base,
   channel,
   sha,
-  octokitRest,
-  octokitGraphQl
+  octokitRest = undefined,
+  octokitGraphQl = undefined
 ) {
   const api = new GitHubApi(octokitRest, octokitGraphQl);
   let headRef;
@@ -256,4 +256,20 @@ async function makeRelease(
   return await api.createRelease(head, headRef.sha, body, prerelease);
 }
 
-module.exports = {makeRelease};
+/**
+ * Get a release
+ * @param {string} head
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
+ * @return {Promise<Object>}
+ */
+async function getRelease(
+  head,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
+  const api = new GitHubApi(octokitRest, octokitGraphQl);
+  return await api.getRelease(head);
+}
+
+module.exports = {getRelease, makeRelease};
