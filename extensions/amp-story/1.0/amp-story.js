@@ -501,15 +501,6 @@ export class AmpStory extends AMP.BaseElement {
     setImportantStyles(document.querySelector(':root'), {
       '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
     });
-
-    const playerPanelEl = document.querySelector(
-      '.i-amphtml-story-player-panel'
-    );
-    if (playerPanelEl) {
-      setImportantStyles(playerPanelEl, {
-        '--i-amphtml-story-player-panel-ratio': desktopAspectRatio,
-      });
-    }
   }
 
   /**
