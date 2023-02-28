@@ -67,7 +67,6 @@ export const DENYLISTED_TAGS = {
   'frame': true,
   'frameset': true,
   'iframe': true,
-  'img': true,
   'link': true,
   'meta': true,
   'object': true,
