@@ -122,14 +122,14 @@ class GitHubApi {
   /**
    * Get a GitHub release by tag name
    * @param {string} tag
-   * @return {Promise<Object>}
+   * @return {Promise<Object|undefined>}
    */
   async getRelease(tag) {
     const response = await this.octokit.rest.repos.getReleaseByTag({
       ...this.info,
       tag,
     });
-    return response.data;
+    return response?.data;
   }
 
   /**
@@ -227,14 +227,14 @@ class GitHubApi {
   /**
    * Get label
    * @param {string} name
-   * @return {Promise<Object>}
+   * @return {Promise<Object|undefined>}
    */
   async getLabel(name) {
-    const {data} = await this.octokit.rest.issues.getLabel({
+    const response = await this.octokit.rest.issues.getLabel({
       ...this.info,
       name,
     });
-    return data;
+    return response?.data;
   }
 
   /**
@@ -278,15 +278,15 @@ class GitHubApi {
   /**
    * Get a git ref
    * @param {string} tag
-   * @return {Promise<Object>}
+   * @return {Promise<Object|undefined>}
    */
   async getRef(tag) {
-    const {data} = await this.octokit.rest.git.getRef({
+    const response = await this.octokit.rest.git.getRef({
       ...this.info,
       ref: `tags/${tag}`,
     });
 
-    return data;
+    return response?.data;
   }
 
   /**
