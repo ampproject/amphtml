@@ -39,6 +39,13 @@ http_archive(
     urls = ["https://github.com/google/re2/archive/d826d9fcb68c62996c1b7c0a45d604e22d814952.zip"],
 )
 
+http_archive(
+    name = "com_google_fuzztest",
+    sha256 = "c75f224b34c3c62ee901381fb743f6326f7b91caae0ceb8fe62f3fd36f187627",
+    strip_prefix = "fuzztest-58b4e7065924f1a284952b84ea827ce35a87e4dc",
+    urls = ["https://github.com/google/fuzztest/archive/58b4e7065924f1a284952b84ea827ce35a87e4dc.zip"],
+)
+
 # rules_cc defines rules for generating C++ code from Protocol Buffers.
 http_archive(
     name = "rules_cc",

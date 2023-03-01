@@ -555,3 +555,14 @@ cc_test(
         "@com_google_absl//absl/flags:flag",
     ],
 )
+
+cc_test(
+    name = "parser_fuzz",
+    srcs = ["parser_fuzz.cc"],
+    deps = [
+        ":parser",
+        "@com_google_fuzztest//fuzztest",
+        "@com_google_fuzztest//fuzztest:fuzztest_gtest_main",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
