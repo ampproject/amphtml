@@ -464,7 +464,7 @@ export class AmpStory extends AMP.BaseElement {
       );
     }
 
-    this.applyDesktopAspectRatioAttribute_();
+    this.maybeApplyDesktopAspectRatioAttribute_();
 
     if (this.maybeLoadStoryDevTools_()) {
       return;
@@ -476,7 +476,7 @@ export class AmpStory extends AMP.BaseElement {
    * between 1/2 and 3/4 aspect ratios, and apply it to the root element.
    * @private
    */
-  applyDesktopAspectRatioAttribute_() {
+  maybeApplyDesktopAspectRatioAttribute_() {
     if (
       this.isLandscapeSupported_() ||
       !this.element.hasAttribute('desktop-aspect-ratio')
@@ -491,11 +491,9 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const desktopAspectRatio = Math.min(
-      Math.max(
-        splittedRatio[0] / splittedRatio[1],
-        MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO
-      ),
+    const desktopAspectRatio = clamp(
+      splittedRatio[0] / splittedRatio[1],
+      MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO,
       MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO
     );
     setImportantStyles(document.querySelector(':root'), {
