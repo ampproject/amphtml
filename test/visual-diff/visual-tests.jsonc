@@ -828,7 +828,9 @@
       "url": "examples/visual-tests/amp-story-player/player-local-story-custom-desktop-aspect-ratio.html",
       "name": "amp-story-player: custom desktop aspect ratio",
       "viewport": {"width": 1440, "height": 900},
-      "loading_complete_selectors": [".i-amphtml-story-player-loaded"]
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
     }
   ]
 }
