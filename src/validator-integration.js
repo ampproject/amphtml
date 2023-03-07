@@ -51,9 +51,7 @@ export function loadScript(doc, url) {
       {
         createScriptURL: function (url) {
           // Only allow trusted URLs
-          if (
-            url === 'cdn.ampproject.org/v0/validator_wasm.js'
-          ) {
+          if (url === 'cdn.ampproject.org/v0/validator_wasm.js') {
             return url;
           } else {
             return '';
