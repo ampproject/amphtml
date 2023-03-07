@@ -71,7 +71,7 @@ describes.fakeWin('validator-integration', {}, (env) => {
         .stub(eventHelper, 'loadPromise')
         .returns(Promise.resolve());
 
-      loadScript(win.document, 'http://example.com');
+      loadScript(win.document, 'cdn.ampproject.org/v0/validator_wasm.js');
 
       expect(loadScriptStub).calledWith(
         env.sandbox.match((el) => el.nonce === '123')

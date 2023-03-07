@@ -44,7 +44,27 @@ export function loadScript(doc, url) {
   const script = /** @type {!HTMLScriptElement} */ (
     doc.createElement('script')
   );
-  script.src = url;
+  // Make script.src assignment Trusted Types compatible for compatible browsers
+  if (self.trustedTypes && self.trustedTypes.createPolicy) {
+    const policy = self.trustedTypes.createPolicy(
+      'validator-integration#loadScript',
+      {
+        createScriptURL: function (url) {
+          // Only allow trusted URLs
+          if (
+            url === 'cdn.ampproject.org/v0/validator_wasm.js'
+          ) {
+            return url;
+          } else {
+            return '';
+          }
+        },
+      }
+    );
+    script.src = policy.createScriptURL(url);
+  } else {
+    script.src = url;
+  }
   propagateNonce(doc, script);
 
   const promise = loadPromise(script).then(
