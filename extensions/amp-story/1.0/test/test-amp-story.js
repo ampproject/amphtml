@@ -5,7 +5,7 @@ import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import {setImportantStyles} from '#core/dom/style';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
 
 import {toggleExperiment} from '#experiments';
 
@@ -2221,6 +2221,45 @@ describes.realWin(
             await localizationService.getLocalizedStringAsync('35')
           ).to.be.equal('REMOTE-STRING');
         });
+      });
+    });
+
+    describe('custom desktop aspect ratio', () => {
+      beforeEach(async () => {
+        await createStoryWithPages(3, ['cover', 'page-1', 'page-2']);
+      });
+
+      it('should apply custom desktop aspect ratio is there is one', async () => {
+        story.element.setAttribute('desktop-aspect-ratio', '9:16');
+        await story.buildCallback();
+
+        expect(
+          computedStyle(win, document.querySelector(':root')).getPropertyValue(
+            '--i-amphtml-story-desktop-one-panel-ratio'
+          )
+        ).equal('0.5625');
+      });
+
+      it('should apply minimum desktop aspect ratio if the custom one is too small', async () => {
+        story.element.setAttribute('desktop-aspect-ratio', '1:10');
+        await story.buildCallback();
+
+        expect(
+          computedStyle(win, document.querySelector(':root')).getPropertyValue(
+            '--i-amphtml-story-desktop-one-panel-ratio'
+          )
+        ).equal('0.5');
+      });
+
+      it('should apply maximum desktop aspect ratio if the custom one is too big', async () => {
+        story.element.setAttribute('desktop-aspect-ratio', '1:1');
+        await story.buildCallback();
+
+        expect(
+          computedStyle(win, document.querySelector(':root')).getPropertyValue(
+            '--i-amphtml-story-desktop-one-panel-ratio'
+          )
+        ).equal('0.75');
       });
     });
   }

@@ -127,6 +127,18 @@ const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
+/**
+ * Minimum custom aspect ratio for desktop one panel, i.e. 1:2.
+ * @private @const {number}
+ * */
+const MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = 0.5;
+
+/**
+ * Maximum custom aspect ratio for desktop one panel, i.e. 3:4.
+ * @private @const {number}
+ * */
+const MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = 0.75;
+
 /** @enum {string} */
 const Attributes = {
   AD_SHOWING: 'ad-showing',
@@ -452,9 +464,41 @@ export class AmpStory extends AMP.BaseElement {
       );
     }
 
+    this.maybeApplyDesktopAspectRatioAttribute_();
+
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
+  }
+
+  /**
+   * Grab the desktop-aspect-ratio attribute, clamp the value
+   * between 1/2 and 3/4 aspect ratios, and apply it to the root element.
+   * @private
+   */
+  maybeApplyDesktopAspectRatioAttribute_() {
+    if (
+      this.isLandscapeSupported_() ||
+      !this.element.hasAttribute('desktop-aspect-ratio')
+    ) {
+      return;
+    }
+
+    const splittedRatio = this.element
+      .getAttribute('desktop-aspect-ratio')
+      .split(':');
+    if (splittedRatio.length != 2 || splittedRatio[1] == 0) {
+      return;
+    }
+
+    const desktopAspectRatio = clamp(
+      splittedRatio[0] / splittedRatio[1],
+      MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO,
+      MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO
+    );
+    setImportantStyles(document.querySelector(':root'), {
+      '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
+    });
   }
 
   /**
