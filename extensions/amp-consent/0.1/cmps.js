@@ -47,7 +47,8 @@ CMP_CONFIG['iubenda'] = {
 
 CMP_CONFIG['sirdata'] = {
   'consentInstanceId': 'sirdata',
-  'checkConsentHref': 'https://choices.consentframework.com/api/v1/public/amp/check',
+  'checkConsentHref':
+    'https://choices.consentframework.com/api/v1/public/amp/check',
   'promptUISrc': 'https://ui.consentframework.com/amp/loader.html',
 };
 
