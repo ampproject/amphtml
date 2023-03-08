@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: b4808644 */
+/** Version: 0.1.22.232 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -67,17 +67,6 @@ const AnalyticsEvent = {
   IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
   IMPRESSION_REGWALL_OPT_IN: 34,
   IMPRESSION_NEWSLETTER_OPT_IN: 35,
-  IMPRESSION_SUBSCRIPTION_OFFERS_ERROR: 36,
-  IMPRESSION_CONTRIBUTION_OFFERS_ERROR: 37,
-  IMPRESSION_TWG_SHORTENED_STICKER_FLOW: 38,
-  IMPRESSION_SUBSCRIPTION_LINKING_LOADING: 39,
-  IMPRESSION_SUBSCRIPTION_LINKING_COMPLETE: 40,
-  IMPRESSION_SUBSCRIPTION_LINKING_ERROR: 41,
-  IMPRESSION_SURVEY: 42,
-  IMPRESSION_REGWALL_ERROR: 43,
-  IMPRESSION_NEWSLETTER_ERROR: 44,
-  IMPRESSION_SURVEY_ERROR: 45,
-  IMPRESSION_METER_TOAST_ERROR: 46,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -138,30 +127,15 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
-  ACTION_SHOWCASE_REGWALL_SIWG_CLICK: 1060,
+  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
   ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
   ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
   ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
-  ACTION_SUBSCRIPTION_OFFERS_RETRY: 1064,
-  ACTION_CONTRIBUTION_OFFERS_RETRY: 1065,
-  ACTION_TWG_SHORTENED_STICKER_FLOW_STICKER_SELECTION_CLICK: 1066,
-  ACTION_INITIATE_UPDATED_SUBSCRIPTION_LINKING: 1067,
-  ACTION_SURVEY_SUBMIT_CLICK: 1068,
-  ACTION_SURVEY_CLOSED: 1069,
-  ACTION_SURVEY_DATA_TRANSFER: 1070,
-  ACTION_REGWALL_PAGE_REFRESH: 1071,
-  ACTION_NEWSLETTER_PAGE_REFRESH: 1072,
-  ACTION_SURVEY_PAGE_REFRESH: 1073,
-  ACTION_METER_TOAST_PAGE_REFRESH: 1074,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_REGWALL_ALREADY_OPT_IN: 2003,
   EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
-  EVENT_SUBSCRIPTION_LINKING_FAILED: 2005,
-  EVENT_SURVEY_ALREADY_SUBMITTED: 2006,
-  EVENT_SURVEY_SUBMIT_FAILED: 2007,
-  EVENT_SURVEY_DATA_TRANSFER_FAILED: 2008,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -189,10 +163,6 @@ const AnalyticsEvent = {
   EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SHOWCASE_METERING_INIT: 3025,
   EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
-  EVENT_SUBSCRIPTION_LINKING_SUCCESS: 3027,
-  EVENT_SURVEY_SUBMITTED: 3028,
-  EVENT_LINK_ACCOUNT_SUCCESS: 3029,
-  EVENT_SAVE_SUBSCRIPTION_SUCCESS: 3030,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -1143,12 +1113,6 @@ class EntitlementsRequest {
 
     /** @private {?boolean} */
     this.isUserRegistered_ = data[5 + base] == null ? null : data[5 + base];
-
-    /** @private {?Timestamp} */
-    this.subscriptionTimestamp_ =
-      data[6 + base] == null || data[6 + base] == undefined
-        ? null
-        : new Timestamp(data[6 + base], includesLabel);
   }
 
   /**
@@ -1236,20 +1200,6 @@ class EntitlementsRequest {
   }
 
   /**
-   * @return {?Timestamp}
-   */
-  getSubscriptionTimestamp() {
-    return this.subscriptionTimestamp_;
-  }
-
-  /**
-   * @param {!Timestamp} value
-   */
-  setSubscriptionTimestamp(value) {
-    this.subscriptionTimestamp_ = value;
-  }
-
-  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -1262,7 +1212,6 @@ class EntitlementsRequest {
         this.entitlementResult_, // field 4 - entitlement_result
         this.token_, // field 5 - token
         this.isUserRegistered_, // field 6 - is_user_registered
-        this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 7 - subscription_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1381,12 +1330,6 @@ class EventParams {
 
     /** @private {?string} */
     this.subscriptionFlow_ = data[6 + base] == null ? null : data[6 + base];
-
-    /** @private {?Timestamp} */
-    this.subscriptionTimestamp_ =
-      data[7 + base] == null || data[7 + base] == undefined
-        ? null
-        : new Timestamp(data[7 + base], includesLabel);
   }
 
   /**
@@ -1488,20 +1431,6 @@ class EventParams {
   }
 
   /**
-   * @return {?Timestamp}
-   */
-  getSubscriptionTimestamp() {
-    return this.subscriptionTimestamp_;
-  }
-
-  /**
-   * @param {!Timestamp} value
-   */
-  setSubscriptionTimestamp(value) {
-    this.subscriptionTimestamp_ = value;
-  }
-
-  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -1515,7 +1444,6 @@ class EventParams {
         this.oldTransactionId_, // field 5 - old_transaction_id
         this.isUserRegistered_, // field 6 - is_user_registered
         this.subscriptionFlow_, // field 7 - subscription_flow
-        this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 8 - subscription_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1811,9 +1739,6 @@ class SkuSelectedResponse {
 
     /** @private {?boolean} */
     this.anonymous_ = data[6 + base] == null ? null : data[6 + base];
-
-    /** @private {?boolean} */
-    this.sharingPolicyEnabled_ = data[7 + base] == null ? null : data[7 + base];
   }
 
   /**
@@ -1915,20 +1840,6 @@ class SkuSelectedResponse {
   }
 
   /**
-   * @return {?boolean}
-   */
-  getSharingPolicyEnabled() {
-    return this.sharingPolicyEnabled_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setSharingPolicyEnabled(value) {
-    this.sharingPolicyEnabled_ = value;
-  }
-
-  /**
    * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
@@ -1942,7 +1853,6 @@ class SkuSelectedResponse {
         this.oldPlayOffer_, // field 5 - old_play_offer
         this.customMessage_, // field 6 - custom_message
         this.anonymous_, // field 7 - anonymous
-        this.sharingPolicyEnabled_, // field 8 - sharing_policy_enabled
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2062,432 +1972,6 @@ class SubscribeResponse$1 {
    */
   label() {
     return 'SubscribeResponse';
-  }
-}
-
-/**
- * @implements {Message}
- */
-class SubscriptionLinkingCompleteResponse {
-  /**
-   * @param {!Array<*>=} data
-   * @param {boolean=} includesLabel
-   */
-  constructor(data = [], includesLabel = true) {
-    const base = includesLabel ? 1 : 0;
-
-    /** @private {?string} */
-    this.publisherProvidedId_ = data[base] == null ? null : data[base];
-
-    /** @private {?boolean} */
-    this.success_ = data[1 + base] == null ? null : data[1 + base];
-  }
-
-  /**
-   * @return {?string}
-   */
-  getPublisherProvidedId() {
-    return this.publisherProvidedId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setPublisherProvidedId(value) {
-    this.publisherProvidedId_ = value;
-  }
-
-  /**
-   * @return {?boolean}
-   */
-  getSuccess() {
-    return this.success_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setSuccess(value) {
-    this.success_ = value;
-  }
-
-  /**
-   * @param {boolean=} includeLabel
-   * @return {!Array<?>}
-   * @override
-   */
-  toArray(includeLabel = true) {
-    const arr = [
-        this.publisherProvidedId_, // field 1 - publisher_provided_id
-        this.success_, // field 2 - success
-    ];
-    if (includeLabel) {
-      arr.unshift(this.label());
-    }
-    return arr;
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'SubscriptionLinkingCompleteResponse';
-  }
-}
-
-/**
- * @implements {Message}
- */
-class SubscriptionLinkingResponse {
-  /**
-   * @param {!Array<*>=} data
-   * @param {boolean=} includesLabel
-   */
-  constructor(data = [], includesLabel = true) {
-    const base = includesLabel ? 1 : 0;
-
-    /** @private {?string} */
-    this.publisherProvidedId_ = data[base] == null ? null : data[base];
-  }
-
-  /**
-   * @return {?string}
-   */
-  getPublisherProvidedId() {
-    return this.publisherProvidedId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setPublisherProvidedId(value) {
-    this.publisherProvidedId_ = value;
-  }
-
-  /**
-   * @param {boolean=} includeLabel
-   * @return {!Array<?>}
-   * @override
-   */
-  toArray(includeLabel = true) {
-    const arr = [
-        this.publisherProvidedId_, // field 1 - publisher_provided_id
-    ];
-    if (includeLabel) {
-      arr.unshift(this.label());
-    }
-    return arr;
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'SubscriptionLinkingResponse';
-  }
-}
-
-/**
- * @implements {Message}
- */
-class SurveyAnswer {
-  /**
-   * @param {!Array<*>=} data
-   * @param {boolean=} includesLabel
-   */
-  constructor(data = [], includesLabel = true) {
-    const base = includesLabel ? 1 : 0;
-
-    /** @private {?number} */
-    this.answerId_ = data[base] == null ? null : data[base];
-
-    /** @private {?string} */
-    this.answerText_ = data[1 + base] == null ? null : data[1 + base];
-
-    /** @private {?string} */
-    this.answerCategory_ = data[2 + base] == null ? null : data[2 + base];
-  }
-
-  /**
-   * @return {?number}
-   */
-  getAnswerId() {
-    return this.answerId_;
-  }
-
-  /**
-   * @param {number} value
-   */
-  setAnswerId(value) {
-    this.answerId_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getAnswerText() {
-    return this.answerText_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setAnswerText(value) {
-    this.answerText_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getAnswerCategory() {
-    return this.answerCategory_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setAnswerCategory(value) {
-    this.answerCategory_ = value;
-  }
-
-  /**
-   * @param {boolean=} includeLabel
-   * @return {!Array<?>}
-   * @override
-   */
-  toArray(includeLabel = true) {
-    const arr = [
-        this.answerId_, // field 1 - answer_id
-        this.answerText_, // field 2 - answer_text
-        this.answerCategory_, // field 3 - answer_category
-    ];
-    if (includeLabel) {
-      arr.unshift(this.label());
-    }
-    return arr;
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'SurveyAnswer';
-  }
-}
-
-/**
- * @implements {Message}
- */
-class SurveyDataTransferRequest {
-  /**
-   * @param {!Array<*>=} data
-   * @param {boolean=} includesLabel
-   */
-  constructor(data = [], includesLabel = true) {
-    const base = includesLabel ? 1 : 0;
-
-    /** @private {!Array<!SurveyQuestion>} */
-    this.surveyQuestions_ = (data[base] || []).map(item => new SurveyQuestion(item, includesLabel));
-  }
-
-  /**
-   * @return {!Array<!SurveyQuestion>}
-   */
-  getSurveyQuestionsList() {
-    return this.surveyQuestions_;
-  }
-
-  /**
-   * @param {!Array<!SurveyQuestion>} value
-   */
-  setSurveyQuestionsList(value) {
-    this.surveyQuestions_ = value;
-  }
-
-  /**
-   * @param {boolean=} includeLabel
-   * @return {!Array<?>}
-   * @override
-   */
-  toArray(includeLabel = true) {
-    const arr = [
-        this.surveyQuestions_ ? this.surveyQuestions_.map(item => item.toArray(includeLabel)) : [], // field 1 - survey_questions
-    ];
-    if (includeLabel) {
-      arr.unshift(this.label());
-    }
-    return arr;
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'SurveyDataTransferRequest';
-  }
-}
-
-/**
- * @implements {Message}
- */
-class SurveyDataTransferResponse {
-  /**
-   * @param {!Array<*>=} data
-   * @param {boolean=} includesLabel
-   */
-  constructor(data = [], includesLabel = true) {
-    const base = includesLabel ? 1 : 0;
-
-    /** @private {?boolean} */
-    this.success_ = data[base] == null ? null : data[base];
-  }
-
-  /**
-   * @return {?boolean}
-   */
-  getSuccess() {
-    return this.success_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setSuccess(value) {
-    this.success_ = value;
-  }
-
-  /**
-   * @param {boolean=} includeLabel
-   * @return {!Array<?>}
-   * @override
-   */
-  toArray(includeLabel = true) {
-    const arr = [
-        this.success_, // field 1 - success
-    ];
-    if (includeLabel) {
-      arr.unshift(this.label());
-    }
-    return arr;
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'SurveyDataTransferResponse';
-  }
-}
-
-/**
- * @implements {Message}
- */
-class SurveyQuestion {
-  /**
-   * @param {!Array<*>=} data
-   * @param {boolean=} includesLabel
-   */
-  constructor(data = [], includesLabel = true) {
-    const base = includesLabel ? 1 : 0;
-
-    /** @private {?number} */
-    this.questionId_ = data[base] == null ? null : data[base];
-
-    /** @private {?string} */
-    this.questionText_ = data[1 + base] == null ? null : data[1 + base];
-
-    /** @private {?string} */
-    this.questionCategory_ = data[2 + base] == null ? null : data[2 + base];
-
-    /** @private {!Array<!SurveyAnswer>} */
-    this.surveyAnswers_ = (data[3 + base] || []).map(item => new SurveyAnswer(item, includesLabel));
-  }
-
-  /**
-   * @return {?number}
-   */
-  getQuestionId() {
-    return this.questionId_;
-  }
-
-  /**
-   * @param {number} value
-   */
-  setQuestionId(value) {
-    this.questionId_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getQuestionText() {
-    return this.questionText_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setQuestionText(value) {
-    this.questionText_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getQuestionCategory() {
-    return this.questionCategory_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setQuestionCategory(value) {
-    this.questionCategory_ = value;
-  }
-
-  /**
-   * @return {!Array<!SurveyAnswer>}
-   */
-  getSurveyAnswersList() {
-    return this.surveyAnswers_;
-  }
-
-  /**
-   * @param {!Array<!SurveyAnswer>} value
-   */
-  setSurveyAnswersList(value) {
-    this.surveyAnswers_ = value;
-  }
-
-  /**
-   * @param {boolean=} includeLabel
-   * @return {!Array<?>}
-   * @override
-   */
-  toArray(includeLabel = true) {
-    const arr = [
-        this.questionId_, // field 1 - question_id
-        this.questionText_, // field 2 - question_text
-        this.questionCategory_, // field 3 - question_category
-        this.surveyAnswers_ ? this.surveyAnswers_.map(item => item.toArray(includeLabel)) : [], // field 4 - survey_answers
-    ];
-    if (includeLabel) {
-      arr.unshift(this.label());
-    }
-    return arr;
-  }
-
-  /**
-   * @return {string}
-   * @override
-   */
-  label() {
-    return 'SurveyQuestion';
   }
 }
 
@@ -2688,12 +2172,6 @@ const PROTO_MAP = {
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse$1,
-  'SubscriptionLinkingCompleteResponse': SubscriptionLinkingCompleteResponse,
-  'SubscriptionLinkingResponse': SubscriptionLinkingResponse,
-  'SurveyAnswer': SurveyAnswer,
-  'SurveyDataTransferRequest': SurveyDataTransferRequest,
-  'SurveyDataTransferResponse': SurveyDataTransferResponse,
-  'SurveyQuestion': SurveyQuestion,
   'Timestamp': Timestamp,
   'ToastCloseRequest': ToastCloseRequest,
   'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
@@ -2776,7 +2254,7 @@ class ClientEventManagerApi {
   /**
    * Call this function to log an event. The registered listeners will be
    * invoked unless the event is filtered.
-   * @param {!function(!ClientEvent, (!ClientEventParams|undefined)=)} listener
+   * @param {!function(!ClientEvent)} listener
    */
   registerEventListener(listener) {}
 
@@ -2795,10 +2273,10 @@ class ClientEventManagerApi {
    * stop the event if a filterer cancels it.  After that, it will call each
    * listener asynchronously.
    * @param {!ClientEvent} event
-   * @param {(!ClientEventParams|undefined)=} eventParams
    */
-  logEvent(event, eventParams = undefined) {}
+  logEvent(event) {}
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4079,8 +3557,6 @@ const Constants$1 = {};
  */
 Constants$1.USER_TOKEN = 'USER_TOKEN';
 
-Constants$1.READ_TIME = 'READ_TIME';
-
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4499,15 +3975,8 @@ class Entitlement {
    * @param {!Array<string>} products
    * @param {string} subscriptionToken
    * @param {JsonObject|null|undefined} subscriptionTokenContents
-   * @param {!Timestamp|null} subscriptionTimestamp
    */
-  constructor(
-    source,
-    products,
-    subscriptionToken,
-    subscriptionTokenContents,
-    subscriptionTimestamp
-  ) {
+  constructor(source, products, subscriptionToken, subscriptionTokenContents) {
     /** @const {string} */
     this.source = source;
     /** @const {!Array<string>} */
@@ -4516,8 +3985,6 @@ class Entitlement {
     this.subscriptionToken = subscriptionToken;
     /** @const {JsonObject|null|undefined} */
     this.subscriptionTokenContents = subscriptionTokenContents;
-    /** @const {!Timestamp|null} */
-    this.subscriptionTimestamp = subscriptionTimestamp;
   }
 
   /**
@@ -4528,8 +3995,7 @@ class Entitlement {
       this.source,
       this.products.slice(0),
       this.subscriptionToken,
-      this.subscriptionTokenContents,
-      this.subscriptionTimestamp
+      this.subscriptionTokenContents
     );
   }
 
@@ -4595,23 +4061,11 @@ class Entitlement {
     } catch (e) {
       subscriptionTokenContents = null;
     }
-
-    const timestampJson = json['subscriptionTimestamp'];
-    let subscriptionTimestamp;
-    try {
-      subscriptionTimestamp = new Timestamp(
-        [timestampJson.seconds_, timestampJson.nanos_],
-        false
-      );
-    } catch (e) {
-      subscriptionTimestamp = null;
-    }
     return new Entitlement(
       source,
       products,
       subscriptionToken,
-      subscriptionTokenContents,
-      subscriptionTimestamp
+      subscriptionTokenContents
     );
   }
 
@@ -5338,15 +4792,17 @@ function parseUrlWithA(a, url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
-    origin: a.protocol + '//' + a.host,
+    origin: '', // Set below.
   };
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin !== 'null') {
+  if (a.origin && a.origin != 'null') {
     info.origin = a.origin;
-  } else if (info.protocol === 'data:' || !info.host) {
+  } else if (info.protocol == 'data:' || !info.host) {
     info.origin = info.href;
+  } else {
+    info.origin = info.protocol + '//' + info.host;
   }
   return info;
 }
@@ -5411,19 +4867,12 @@ function serializeProtoMessageForUrl(message) {
 }
 
 /**
- * Returns the canonical URL from the canonical tag. If the canonical tag is
- * not present, treat the doc URL itself as canonical.
  * @param {!../model/doc.Doc} doc
  * @return {string}
  */
 function getCanonicalUrl(doc) {
-  const rootNode = doc.getRootNode();
-  const canonicalTag = rootNode.querySelector("link[rel='canonical']");
-  return (
-    canonicalTag?.href ||
-    rootNode.location?.origin + rootNode.location?.pathname ||
-    ''
-  );
+  const node = doc.getRootNode().querySelector("link[rel='canonical']");
+  return (node && node.href) || '';
 }
 
 const PARSED_URL = parseUrl(self.window.location.href);
@@ -5577,7 +5026,7 @@ function adsUrl(url) {
 function feUrl(
   url,
   params = {},
-  usePrefixedHostPath = true,
+  usePrefixedHostPath = false,
   prefix = ''
 ) {
   // Add cache param.
@@ -5622,7 +5071,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG b4808644',
+    '_client': 'SwG 0.1.22.232',
   });
 }
 
@@ -6044,10 +5493,6 @@ class PayCompleteFlow {
       true,
       getEventParams$1(this.sku_ || '')
     );
-    const now = Date.now().toString();
-    this.deps_
-      .storage()
-      .set(Constants$1.READ_TIME, now, /*useLocalStorage=*/ false);
     this.deps_.entitlementsManager().unblockNextNotification();
     return Promise.all([
       this.activityIframeViewPromise_,
@@ -6964,7 +6409,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG b4808644',
+        '_client': 'SwG 0.1.22.232',
         'supportsEventManager': true,
       },
       args || {}
@@ -7242,7 +6687,7 @@ class ClientEventManager {
    * @param {!Promise} configuredPromise
    */
   constructor(configuredPromise) {
-    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent, (!../api/client-event-manager-api.ClientEventParams|undefined)=)>} */
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
     this.listeners_ = [];
 
     /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
@@ -7278,9 +6723,8 @@ class ClientEventManager {
   /**
    * @overrides
    * @param {!../api/client-event-manager-api.ClientEvent} event
-   * @param {(!../api/client-event-manager-api.ClientEventParams|undefined)=} eventParams
    */
-  logEvent(event, eventParams = undefined) {
+  logEvent(event) {
     validateEvent(event);
     this.lastAction_ = this.isReadyPromise_.then(() => {
       for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
@@ -7294,7 +6738,7 @@ class ClientEventManager {
       }
       for (let listener = 0; listener < this.listeners_.length; listener++) {
         try {
-          this.listeners_[listener](event, eventParams);
+          this.listeners_[listener](event);
         } catch (e) {
           log(e);
         }
@@ -7406,7 +6850,7 @@ const ExperimentFlags = {
   /**
    * Experiment flag for disabling the miniprompt icon on desktop screens wider than 480px.
    */
-  DISABLE_DESKTOP_MINIPROMPT: 'disable-desktop-miniprompt',
+  DISABLE_DESKTOP_MINIPROMPT: 'disable_desktop_miniprompt',
 };
 
 /**
@@ -7677,25 +7121,6 @@ function toTimestamp(millis) {
 }
 
 /**
- * @param {!number} timestamp represented as seconds, milliseconds or microseconds
- * @return {!number}
- */
-function convertPotentialTimestampToMilliseconds(timestamp) {
-  let timestampInMilliseconds;
-  if (timestamp >= 1e14 || timestamp <= -1e14) {
-    // Microseconds
-    timestampInMilliseconds = Math.floor(timestamp / 1000);
-  } else if (timestamp >= 1e11 || timestamp <= -3e10) {
-    // Milliseconds
-    timestampInMilliseconds = timestamp;
-  } else {
-    // Seconds
-    timestampInMilliseconds = Math.floor(timestamp * 1000);
-  }
-  return timestampInMilliseconds;
-}
-
-/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -7933,7 +7358,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG b4808644');
+    context.setClientVersion('SwG 0.1.22.232');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8216,7 +7641,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'Google के ज़रिये सदस्यता',
     'id': 'Berlangganan dengan Google',
     'it': 'Abbonati con Google',
-    'ja': 'Google で購読',
+    'jp': 'Google で購読',
     'ko': 'Google 을 통한구독',
     'ms': 'Langgan dengan Google',
     'nl': 'Abonneren via Google',
@@ -8225,7 +7650,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Subscrever com o Google',
     'pt-br': 'Assine com o Google',
     'ru': 'Подпиcка через Google',
-    'sv': 'Prenumerera med Google',
+    'se': 'Prenumerera med Google',
     'th': 'สมัครฟาน Google',
     'tr': 'Google ile Abone Ol',
     'uk': 'Підписатися через Google',
@@ -8250,7 +7675,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'Google खाते की मदद से योगदान करें',
     'id': 'Berkontribusi dengan Google',
     'it': 'Contribuisci con Google',
-    'ja': 'Google で寄付',
+    'jp': 'Google で寄付',
     'ko': 'Google을 통해 참여하기',
     'ms': 'Sumbangkan dengan Google',
     'nl': 'Bijdragen met Google',
@@ -8259,7 +7684,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Contribuir utilizando o Google',
     'pt-br': 'Contribua usando o Google',
     'ru': 'Внести средства через Google',
-    'sv': 'Bidra med Google',
+    'se': 'Bidra med Google',
     'th': 'มีส่วนร่วมผ่าน Google',
     'tr': 'Google ile Katkıda Bulun',
     'uk': 'Зробити внесок через Google',
@@ -8282,7 +7707,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'आपने पहले ही इसके लिए रजिस्टर कर लिया है.',
     'id': 'Anda telah mendaftar sebelumnya.',
     'it': 'Registrazione già effettuata in precedenza.',
-    'ja': 'すでに登録済みです。',
+    'jp': 'すでに登録済みです。',
     'ko': '이전에 등록한 사용자입니다.',
     'ms': 'Anda telah mendaftar sebelum ini.',
     'nl': 'Je hebt je al eerder geregistreerd.',
@@ -8291,7 +7716,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Já se registou anteriormente.',
     'pt-br': 'Você já tem um cadastro.',
     'ru': 'Вы уже зарегистрированы.',
-    'sv': 'Du har redan registrerat dig.',
+    'se': 'Du har redan registrerat dig.',
     'th': 'คุณเคยลงทะเบียนแล้ว',
     'tr': 'Daha önce kaydolmuştunuz.',
     'uk': 'Ви вже зареєструвалися раніше.',
@@ -8314,7 +7739,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'न्यूज़लेटर के लिए पहले ही साइन अप किया जा चुका है.',
     'id': 'Anda telah mendaftar sebelumnya.',
     'it': "Hai già effettuato l'iscrizione.",
-    'ja': 'すでに登録されています。',
+    'jp': 'すでに登録されています。',
     'ko': '이전에 가입한 사용자입니다.',
     'ms': 'Anda sudah mendaftar sebelum ini.',
     'nl': 'Je hebt je al eerder aangemeld.',
@@ -8323,7 +7748,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Já se inscreveu anteriormente.',
     'pt-br': 'Você se inscreveu anteriormente.',
     'ru': 'Вы уже зарегистрированы.',
-    'sv': 'Du har redan registrerat dig.',
+    'se': 'Du har redan registrerat dig.',
     'th': 'คุณสมัครรับข้อมูลมาก่อนแล้ว',
     'tr': 'Daha önce kaydolmuştunuz.',
     'uk': 'Ви вже зареєструвалися.',
@@ -8346,7 +7771,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'रजिस्ट्रेशन नहीं हो सका. फिर से रजिस्टर करने की कोशिश करें.',
     'id': 'Pendaftaran gagal. Coba daftar lagi.',
     'it': 'Registrazione non riuscita. Prova a registrarti di nuovo.',
-    'ja': '登録できませんでした。もう一度お試しください。',
+    'jp': '登録できませんでした。もう一度お試しください。',
     'ko': '등록에 실패했습니다. 다시 등록해 보세요.',
     'ms': 'Pendaftaran gagal. Cuba mendaftar lagi.',
     'nl': 'Registratie mislukt. Probeer opnieuw te registreren.',
@@ -8355,7 +7780,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Falha no registo. Tente registar-se novamente.',
     'pt-br': 'Não foi possível fazer o registro. Tente novamente.',
     'ru': 'Ошибка регистрации. Повторите попытку.',
-    'sv': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
     'th': 'ลงทะเบียนไม่สำเร็จ ลองลงทะเบียนอีกครั้ง',
     'tr': 'Kayıt işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
     'uk': 'Помилка реєстрації. Повторіть спробу.',
@@ -8378,7 +7803,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'साइन अप नहीं किया जा सका. फिर से साइन अप करने की कोशिश करें.',
     'id': 'Pendaftaran gagal. Coba daftar lagi.',
     'it': 'Iscrizione non riuscita. Prova a iscriverti di nuovo.',
-    'ja': '登録できませんでした。もう一度お試しください。',
+    'jp': '登録できませんでした。もう一度お試しください。',
     'ko': '가입에 실패했습니다. 다시 가입해 보세요.',
     'ms': 'Daftar gagal. Cuba daftar lagi.',
     'nl': 'Aanmelding mislukt. Probeer opnieuw aan te melden.',
@@ -8387,7 +7812,7 @@ const SWG_I18N_STRINGS = {
     'pt': 'Falha na inscrição. Tente inscrever-se novamente.',
     'pt-br': 'Não foi possível se inscrever. Tente novamente.',
     'ru': 'Не удалось зарегистрироваться. Повторите попытку.',
-    'sv': 'Registreringen misslyckades. Försök att registrera dig igen.',
+    'se': 'Registreringen misslyckades. Försök att registrera dig igen.',
     'th': 'ลงชื่อสมัครใช้ไม่สำเร็จ ลองลงชื่อสมัครใช้อีกครั้ง',
     'tr': 'Kaydolma işlemi başarısız oldu. Tekrar kaydolmayı deneyin.',
     'uk': 'Помилка реєстрації. Повторіть спробу.',
@@ -8416,7 +7841,7 @@ const SWG_I18N_STRINGS = {
     'hi': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> का इस्तेमाल करके, एक खाता बनाया गया',
     'id': 'Membuat akun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'it': 'È stato creato un account con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
-    'ja': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でアカウントを作成しました',
+    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でアカウントを作成しました',
     'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 계정을 만들었습니다.',
     'ms': 'Membuat akaun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'nl': 'Account gemaakt met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -8426,7 +7851,7 @@ const SWG_I18N_STRINGS = {
     'pt-br':
       'Conta criada com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'ru': 'Вы зарегистрировали аккаунт на адрес <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
-    'sv': 'Du skapade ett konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'se': 'Du skapade ett konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'th': 'สร้างบัญชีด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'tr': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile bir hesap oluşturun',
     'uk': 'Обліковий запис створено за допомогою електронної адреси <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -8455,7 +7880,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'न्यूज़लेटर पाने के लिए, <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> से साइन अप किया गया',
     'id': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk mendapatkan newsletter',
     'it': 'Iscrizione alla newsletter con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> effettuata',
-    'ja': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でニュースレターを登録しました',
+    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でニュースレターを登録しました',
     'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 뉴스레터에 가입했습니다.',
     'ms': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk surat berita',
     'nl': 'Aangemeld met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> voor de nieuwsbrief',
@@ -8465,7 +7890,7 @@ const SWG_I18N_STRINGS = {
     'pt-br':
       'Inscrição na newsletter feita com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'ru': 'Вы подписались на новостную рассылку, используя аккаунт <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
-    'sv': 'Du registrerade dig för nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'se': 'Du registrerade dig för nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
     'th': 'ลงชื่อเข้าใช้ด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> สำหรับจดหมายข่าว',
     'tr': 'Bülten için <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile kaydoldunuz',
     'uk': 'Ви підписалися на інформаційні листи на електронну адресу <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
@@ -8473,38 +7898,6 @@ const SWG_I18N_STRINGS = {
     'zh-hk': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 註冊通訊',
     'zh-tw':
       '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 訂閱電子報',
-  },
-  'NO_MEMBERSHIP_FOUND_LANG_MAP': {
-    'en': 'No membership found',
-    'ar': 'لم يتم العثور على أي اشتراك.',
-    'de': 'Keine Mitgliedschaftsdaten gefunden',
-    'en-au': 'No membership found',
-    'en-ca': 'No membership found',
-    'en-gb': 'No membership found',
-    'en-us': 'No membership found',
-    'es': 'No se han encontrado suscripciones',
-    'es-419': 'No se encontró ninguna membresía',
-    'fr': 'Aucun abonnement trouvé',
-    'fr-ca': 'Aucun abonnement trouvé',
-    'hi': 'पैसे चुकाकर ली जाने वाली कोई सदस्यता नहीं मिली',
-    'id': 'Langganan tidak ditemukan',
-    'it': 'Nessun abbonamento trovato',
-    'ja': 'メンバーシップが見つかりません',
-    'ko': '멤버십 정보를 찾을 수 없습니다.',
-    'ms': 'Tiada keahlian ditemukan',
-    'nl': 'Geen lidmaatschap gevonden',
-    'no': 'Fant ingen abonnementer',
-    'pl': 'Nie znaleziono subskrypcji',
-    'pt': 'Nenhuma subscrição encontrada',
-    'pt-br': 'Nenhuma assinatura foi encontrada',
-    'ru': 'Подписка не найдена.',
-    'se': 'Inget medlemskap hittades',
-    'th': 'ไม่พบการเป็นสมาชิก',
-    'tr': 'Üyelik bulunamadı',
-    'uk': 'Немає підписок',
-    'zh-cn': '未找到会员资料',
-    'zh-hk': '找不到會籍',
-    'zh-tw': '找不到會員資料',
   },
 };
 
@@ -9642,7 +9035,6 @@ class ClientConfigManager {
     /** @private @const {ClientConfig} */
     this.defaultConfig_ = new ClientConfig({
       skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
-      usePrefixedHostPath: true,
     });
   }
 
@@ -11575,17 +10967,6 @@ const IFRAME_BOX_SHADOW =
   'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
 const MINIMIZED_IFRAME_SIZE = '420px';
 const ANONYMOUS_USER_ATTRIBUTE = 'anonymous_user';
-
-/**
- * Values of meterClientUserAttribute for which to show the Known MeterType.
- * @const {Array<string>}
- */
-const KNOWN_USER_ATTRIBUTES = [
-  'known_user',
-  'newsletter_user',
-  'registration_user',
-];
-
 /**
  * The iframe URLs to be used per MeterClientType
  * @type {Object.<MeterClientTypes, string>}
@@ -11598,7 +10979,6 @@ const IframeUrlByMeterClientType = {
 const MeterType = {
   UNKNOWN: 'UNKNOWN',
   KNOWN: 'KNOWN',
-  SUPPRESSED: 'SUPPRESSED',
 };
 
 class MeterToastApi {
@@ -11665,16 +11045,8 @@ class MeterToastApi {
       additionalArguments['meterType'] =
         this.meterClientUserAttribute_ === ANONYMOUS_USER_ATTRIBUTE
           ? MeterType.UNKNOWN
-          : KNOWN_USER_ATTRIBUTES.includes(this.meterClientUserAttribute_)
-          ? MeterType.KNOWN
-          : MeterType.SUPPRESSED;
+          : MeterType.KNOWN;
     }
-
-    // Exit flow and do not show prompt for Suppressed MeterType
-    if (additionalArguments['meterType'] === MeterType.SUPPRESSED) {
-      return Promise.resolve();
-    }
-
     const iframeArgs =
       this.activityPorts_.addDefaultArguments(additionalArguments);
 
@@ -11683,19 +11055,11 @@ class MeterToastApi {
         this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
       ];
 
-    const iframeUrlParams = {
-      'origin': parseUrl(this.win_.location.href).origin,
-    };
-
-    if (this.deps_.clientConfigManager().shouldForceLangInIframes()) {
-      iframeUrlParams['hl'] = this.deps_.clientConfigManager().getLanguage();
-    }
-
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
-      feUrl(iframeUrl, iframeUrlParams),
+      feUrl(iframeUrl, {'origin': parseUrl(this.win_.location.href).origin}),
       iframeArgs,
       /* shouldFadeBody */ false
     );
@@ -12247,12 +11611,6 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
     'success',
     false
   ),
-  [AnalyticsEvent.ACTION_SURVEY_DATA_TRANSFER]: createGoogleAnalyticsEvent(
-    '',
-    'survey submission',
-    '',
-    false
-  ),
 };
 
 /** @const {!Object<?AnalyticsEvent,?Object>} */
@@ -12677,15 +12035,12 @@ class EntitlementsManager {
     const token = this.getGaaToken_();
     const isUserRegistered =
       event?.additionalParameters?.getIsUserRegistered?.();
-    const subscriptionTimestamp =
-      event?.additionalParameters?.getSubscriptionTimestamp?.();
     this.postEntitlementsRequest_(
       new EntitlementJwt(),
       result,
       source,
       token,
-      isUserRegistered,
-      subscriptionTimestamp
+      isUserRegistered
     );
   }
 
@@ -12696,8 +12051,7 @@ class EntitlementsManager {
     entitlementResult,
     entitlementSource,
     optionalToken = '',
-    optionalIsUserRegistered = null,
-    optionalSubscriptionTimestamp = null
+    optionalIsUserRegistered = null
   ) {
     const message = new EntitlementsRequest();
     message.setUsedEntitlement(usedEntitlement);
@@ -12707,9 +12061,6 @@ class EntitlementsManager {
     message.setToken(optionalToken);
     if (typeof optionalIsUserRegistered === 'boolean') {
       message.setIsUserRegistered(optionalIsUserRegistered);
-    }
-    if (optionalSubscriptionTimestamp) {
-      message.setSubscriptionTimestamp(optionalSubscriptionTimestamp);
     }
 
     let url =
@@ -13068,9 +12419,6 @@ class EntitlementsManager {
 
     const params = new EventParams();
     params.setIsUserRegistered(true);
-    if (entitlement.subscriptionTimestamp) {
-      params.setSubscriptionTimestamp(entitlement.subscriptionTimestamp);
-    }
 
     // Log unlock event.
     const eventType =
@@ -13164,24 +12512,16 @@ class EntitlementsManager {
     // Get swgUserToken from local storage
     const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
 
-    // Get read_time from session storage
-    const readTimePromise = this.storage_.get(
-      Constants$1.READ_TIME,
-      /*useLocalStorage=*/ false
-    );
-
     let url =
       '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
 
     return Promise.all([
       hash(getCanonicalUrl(this.deps_.doc())),
       swgUserTokenPromise,
-      readTimePromise,
     ])
       .then((values) => {
         const hashedCanonicalUrl = values[0];
         const swgUserToken = values[1];
-        const readTime = values[2];
 
         url = addDevModeParamsToUrl(this.win_.location, url);
 
@@ -13209,21 +12549,6 @@ class EntitlementsManager {
           params.publisherProvidedId.length > 0
         ) {
           url = addQueryParam(url, 'ppid', params.publisherProvidedId);
-        }
-
-        // Add interaction_age param.
-        if (readTime) {
-          const last = parseInt(readTime, 10);
-          if (last) {
-            const interactionAge = Math.floor((Date.now() - last) / 1000);
-            if (interactionAge >= 0) {
-              url = addQueryParam(
-                url,
-                'interaction_age',
-                interactionAge.toString()
-              );
-            }
-          }
         }
 
         /** @type {!GetEntitlementsParamsInternalDef|undefined} */
@@ -13867,15 +13192,14 @@ class XhrFetcher {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-enable no-unused-vars */
 
 class GoogleAnalyticsEventListener {
   /**
    * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {!./deps.DepsDef} deps */
-    this.deps_ = deps;
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
 
     /** @private @const {!./client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
@@ -13893,24 +13217,15 @@ class GoogleAnalyticsEventListener {
   /**
    *  Listens for new events from the events manager and logs appropriate events to Google Analytics.
    * @param {!../api/client-event-manager-api.ClientEvent} event
-   * @param {(!../api/client-event-manager-api.ClientEventParams|undefined)=} eventParams
    */
-  handleClientEvent_(event, eventParams = undefined) {
-    // Require either ga function (analytics.js) or gtag function (gtag.js).
-    const gaIsEligible = GoogleAnalyticsEventListener.isGaEligible(this.deps_);
-    const gtagIsEligible = GoogleAnalyticsEventListener.isGtagEligible(
-      this.deps_
-    );
-    const neitherIsEligible = !gaIsEligible && !gtagIsEligible;
-    if (neitherIsEligible) {
+  handleClientEvent_(event) {
+    // Bail immediately if neither ga function (analytics.js) nor gtag function (gtag.js) exists in Window.
+    if (
+      typeof this.win_.ga !== 'function' &&
+      typeof this.win_.gtag !== 'function'
+    ) {
       return;
     }
-
-    // Extract methods from window.
-    const {ga, gtag} = /** @type {!WindowWithAnalyticsMethods} */ (
-      this.deps_.win()
-    );
-
     let subscriptionFlow = '';
     if (event.additionalParameters) {
       // additionalParameters isn't strongly typed so checking for both object and class notation.
@@ -13918,7 +13233,7 @@ class GoogleAnalyticsEventListener {
         event.additionalParameters.subscriptionFlow ||
         event.additionalParameters.getSubscriptionFlow();
     }
-    let gaEvent = analyticsEventToGoogleAnalyticsEvent(
+    const gaEvent = analyticsEventToGoogleAnalyticsEvent(
       event.eventType,
       subscriptionFlow
     );
@@ -13926,49 +13241,18 @@ class GoogleAnalyticsEventListener {
       return;
     }
 
-    const analyticsParams = eventParams?.googleAnalyticsParameters || {};
-    gaEvent = {
-      ...gaEvent,
-      eventCategory: analyticsParams.event_category || gaEvent.eventCategory,
-      eventLabel: analyticsParams.event_label || gaEvent.eventLabel,
-    };
-
-    // TODO(b/234825847): Remove this once universal analytics is deprecated in 2023.
-    if (gaIsEligible) {
-      ga('send', 'event', gaEvent);
+    // TODO(b/234825847): Remove it once universal analytics is deprecated in 2023.
+    if (typeof this.win_.ga === 'function') {
+      this.win_.ga('send', 'event', gaEvent);
     }
 
-    if (gtagIsEligible) {
-      const gtagEvent = {
+    if (typeof this.win_.gtag === 'function') {
+      this.win_.gtag('event', gaEvent.eventAction, {
         'event_category': gaEvent.eventCategory,
         'event_label': gaEvent.eventLabel,
         'non_interaction': gaEvent.nonInteraction,
-        ...analyticsParams,
-      };
-      gtag('event', gaEvent.eventAction, gtagEvent);
+      });
     }
-  }
-
-  /**
-   * Function to determine whether event is eligible for GA logging.
-   * @param {!./deps.DepsDef} deps
-   * @returns {boolean}
-   */
-  static isGaEligible(deps) {
-    return isFunction(
-      /** @type {!WindowWithAnalyticsMethods} */ (deps.win()).ga
-    );
-  }
-
-  /**
-   * Function to determine whether event is eligible for gTag logging.
-   * @param {!./deps.DepsDef} deps
-   * @returns {boolean}
-   */
-  static isGtagEligible(deps) {
-    return isFunction(
-      /** @type {!WindowWithAnalyticsMethods} */ (deps.win()).gtag
-    );
   }
 }
 
@@ -14175,9 +13459,6 @@ class LinkCompleteFlow {
           deps
             .eventManager()
             .logSwgEvent(AnalyticsEvent.ACTION_LINK_CONTINUE, true);
-          deps
-            .eventManager()
-            .logSwgEvent(AnalyticsEvent.EVENT_LINK_ACCOUNT_SUCCESS);
           const flow = new LinkCompleteFlow(deps, response);
           flow.start();
         },
@@ -14227,11 +13508,32 @@ class LinkCompleteFlow {
     /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
+    const index = (response && response['index']) || '0';
+
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
 
-    /** @private {!Object} */
-    this.response_ = response || {};
+    /** @private @const {!Promise<!ActivityIframeView>} */
+    this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then(
+        (clientConfig) =>
+          new ActivityIframeView(
+            this.win_,
+            this.activityPorts_,
+            feUrl(
+              '/linkconfirmiframe',
+              {},
+              clientConfig.usePrefixedHostPath,
+              'u/' + index
+            ),
+            feArgs({
+              'productId': deps.pageConfig().getProductId(),
+              'publicationId': deps.pageConfig().getPublicationId(),
+            }),
+            /* shouldFadeBody */ true
+          )
+      );
 
     /** @private {?function()} */
     this.completeResolver_ = null;
@@ -14247,28 +13549,8 @@ class LinkCompleteFlow {
    * @return {!Promise}
    */
   start() {
-    if (this.response_['saveAndRefresh']) {
-      this.complete_(this.response_, this.response_['linked']);
-      return Promise.resolve();
-    }
-
-    return this.clientConfigManager_.getClientConfig().then((clientConfig) => {
-      const index = this.response_['index'] || '0';
-      this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl(
-          '/linkconfirmiframe',
-          {},
-          clientConfig.usePrefixedHostPath,
-          'u/' + index
-        ),
-        feArgs({
-          'productId': this.deps_.pageConfig().getProductId(),
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-        }),
-        /* shouldFadeBody */ true
-      );
+    return this.activityIframeViewPromise_.then((activityIframeView) => {
+      this.activityIframeView_ = activityIframeView;
 
       const promise = this.activityIframeView_.acceptResultAndVerify(
         feOrigin(),
@@ -14276,8 +13558,8 @@ class LinkCompleteFlow {
         /* requireSecureChannel */ true
       );
       promise
-        .then((response = {}) => {
-          this.complete_(response, !!response['success']);
+        .then((response) => {
+          this.complete_(response);
         })
         .catch((reason) => {
           // Rethrow async.
@@ -14300,11 +13582,10 @@ class LinkCompleteFlow {
   }
 
   /**
-   * @param {!Object} response
-   * @param {boolean} success
+   * @param {?Object} response
    * @private
    */
-  complete_(response, success) {
+  complete_(response) {
     this.deps_
       .eventManager()
       .logSwgEvent(AnalyticsEvent.ACTION_GOOGLE_UPDATED_CLOSE, true);
@@ -14316,7 +13597,7 @@ class LinkCompleteFlow {
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
     this.entitlementsManager_.unblockNextNotification();
-    this.entitlementsManager_.reset(success);
+    this.entitlementsManager_.reset((response && response['success']) || false);
     if (response && response['entitlements']) {
       this.entitlementsManager_.pushNextEntitlements(response['entitlements']);
     }
@@ -14396,9 +13677,6 @@ class LinkSaveFlow {
       this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.LINK_ACCOUNT);
       linkConfirm = new LinkCompleteFlow(this.deps_, result);
       startPromise = linkConfirm.start();
-      this.deps_
-        .eventManager()
-        .logSwgEvent(AnalyticsEvent.EVENT_SAVE_SUBSCRIPTION_SUCCESS);
     } else {
       startPromise = Promise.reject(createCancelError(this.win_, 'not linked'));
     }
@@ -18716,7 +17994,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}html>body.swg-disable-scroll{height:100vh!important;overflow:hidden!important}html>body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}body.swg-disable-scroll{height:100%!important}body.swg-disable-scroll,body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -19560,15 +18838,6 @@ class ConfiguredRuntime {
       showcaseEventToAnalyticsEvents(entitlement.entitlement) || [];
     const params = new EventParams();
     params.setIsUserRegistered(entitlement.isUserRegistered);
-    if (entitlement.subscriptionTimestamp) {
-      params.setSubscriptionTimestamp(
-        toTimestamp(
-          convertPotentialTimestampToMilliseconds(
-            entitlement.subscriptionTimestamp
-          )
-        )
-      );
-    }
 
     for (let i = 0; i < eventsToLog.length; i++) {
       this.eventManager().logEvent({

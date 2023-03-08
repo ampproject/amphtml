@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: b4808644 */
+/** Version: 0.1.22.232 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -560,17 +560,6 @@ const AnalyticsEvent = {
   IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
   IMPRESSION_REGWALL_OPT_IN: 34,
   IMPRESSION_NEWSLETTER_OPT_IN: 35,
-  IMPRESSION_SUBSCRIPTION_OFFERS_ERROR: 36,
-  IMPRESSION_CONTRIBUTION_OFFERS_ERROR: 37,
-  IMPRESSION_TWG_SHORTENED_STICKER_FLOW: 38,
-  IMPRESSION_SUBSCRIPTION_LINKING_LOADING: 39,
-  IMPRESSION_SUBSCRIPTION_LINKING_COMPLETE: 40,
-  IMPRESSION_SUBSCRIPTION_LINKING_ERROR: 41,
-  IMPRESSION_SURVEY: 42,
-  IMPRESSION_REGWALL_ERROR: 43,
-  IMPRESSION_NEWSLETTER_ERROR: 44,
-  IMPRESSION_SURVEY_ERROR: 45,
-  IMPRESSION_METER_TOAST_ERROR: 46,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -631,30 +620,15 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
-  ACTION_SHOWCASE_REGWALL_SIWG_CLICK: 1060,
+  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
   ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
   ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
   ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
-  ACTION_SUBSCRIPTION_OFFERS_RETRY: 1064,
-  ACTION_CONTRIBUTION_OFFERS_RETRY: 1065,
-  ACTION_TWG_SHORTENED_STICKER_FLOW_STICKER_SELECTION_CLICK: 1066,
-  ACTION_INITIATE_UPDATED_SUBSCRIPTION_LINKING: 1067,
-  ACTION_SURVEY_SUBMIT_CLICK: 1068,
-  ACTION_SURVEY_CLOSED: 1069,
-  ACTION_SURVEY_DATA_TRANSFER: 1070,
-  ACTION_REGWALL_PAGE_REFRESH: 1071,
-  ACTION_NEWSLETTER_PAGE_REFRESH: 1072,
-  ACTION_SURVEY_PAGE_REFRESH: 1073,
-  ACTION_METER_TOAST_PAGE_REFRESH: 1074,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_REGWALL_ALREADY_OPT_IN: 2003,
   EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
-  EVENT_SUBSCRIPTION_LINKING_FAILED: 2005,
-  EVENT_SURVEY_ALREADY_SUBMITTED: 2006,
-  EVENT_SURVEY_SUBMIT_FAILED: 2007,
-  EVENT_SURVEY_DATA_TRANSFER_FAILED: 2008,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -682,10 +656,6 @@ const AnalyticsEvent = {
   EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SHOWCASE_METERING_INIT: 3025,
   EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
-  EVENT_SUBSCRIPTION_LINKING_SUCCESS: 3027,
-  EVENT_SURVEY_SUBMITTED: 3028,
-  EVENT_LINK_ACCOUNT_SUCCESS: 3029,
-  EVENT_SAVE_SUBSCRIPTION_SUCCESS: 3030,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -843,15 +813,17 @@ function parseUrlWithA(a, url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
-    origin: a.protocol + '//' + a.host,
+    origin: '', // Set below.
   };
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin !== 'null') {
+  if (a.origin && a.origin != 'null') {
     info.origin = a.origin;
-  } else if (info.protocol === 'data:' || !info.host) {
+  } else if (info.protocol == 'data:' || !info.host) {
     info.origin = info.href;
+  } else {
+    info.origin = info.protocol + '//' + info.host;
   }
   return info;
 }
@@ -1501,11 +1473,8 @@ const POST_MESSAGE_COMMAND_USER = 'user';
 /** Error command for post messages. */
 const POST_MESSAGE_COMMAND_ERROR = 'error';
 
-/** GSI Button click command for post messages. */
-const POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK = 'gsi-button-click';
-
-/** SIWG Button click command for post messages. */
-const POST_MESSAGE_COMMAND_SIWG_BUTTON_CLICK = 'siwg-button-click';
+/** Button click command for post messages. */
+const POST_MESSAGE_COMMAND_BUTTON_CLICK = 'button-click';
 
 /** 3P button click command for post messages. */
 const POST_MESSAGE_COMMAND_3P_BUTTON_CLICK = '3p-button-click';
@@ -2265,21 +2234,11 @@ class GaaMeteringRegwall {
     self.addEventListener('message', (e) => {
       if (
         e.data.stamp === POST_MESSAGE_STAMP &&
-        e.data.command === POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK
+        e.data.command === POST_MESSAGE_COMMAND_BUTTON_CLICK
       ) {
         // Log button click event.
         logEvent({
           analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
-          isFromUserAction: true,
-        });
-      }
-      if (
-        e.data.stamp === POST_MESSAGE_STAMP &&
-        e.data.command === POST_MESSAGE_COMMAND_SIWG_BUTTON_CLICK
-      ) {
-        // Log button click event.
-        logEvent({
-          analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SIWG_CLICK,
           isFromUserAction: true,
         });
       }
@@ -2343,12 +2302,13 @@ class GaaMeteringRegwall {
     });
     parentElement.appendChild(buttonEl);
 
-    function logButtonClicks() {
+    // Track button clicks.
+    buttonEl.addEventListener('click', () => {
       logEvent({
-        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SIWG_CLICK,
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SWIG_CLICK,
         isFromUserAction: true,
       });
-    }
+    });
 
     return new Promise((resolve) => {
       self.google.accounts.id.initialize({
@@ -2362,7 +2322,6 @@ class GaaMeteringRegwall {
         'theme': 'outline',
         'text': 'continue_with',
         'logo_alignment': 'center',
-        'click_listener': logButtonClicks,
       });
     });
   }
@@ -2498,7 +2457,7 @@ class GaaGoogleSignInButton {
               sendMessageToParentFnPromise.then((sendMessageToParent) => {
                 sendMessageToParent({
                   stamp: POST_MESSAGE_STAMP,
-                  command: POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK,
+                  command: POST_MESSAGE_COMMAND_BUTTON_CLICK,
                 });
               });
             });
