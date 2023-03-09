@@ -515,5 +515,10 @@ module.exports = {
       ],
       'rules': {'local/preact': [2, '#core/dom/jsx']},
     },
+    {
+      // Allow sinon stub for release tagger tests
+      'files': ['build-system/release-tagger/test/**'],
+      'rules': {'local/no-forbidden-terms': 0},
+    },
   ],
 };

@@ -68,7 +68,7 @@ function createImagePixel(win, src, noReferrer = false, attributionSrc) {
     image.referrerPolicy = 'no-referrer';
   }
   image.src = src;
-  if (isAttributionReportingAllowed(win)) {
+  if (isAttributionReportingAllowed(win.document)) {
     image.attributionsrc = attributionSrc;
   }
   return image;

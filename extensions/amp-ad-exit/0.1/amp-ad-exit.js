@@ -441,7 +441,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   detectAttributionReportingSupport() {
-    return isAttributionReportingAllowed(this.win);
+    return isAttributionReportingAllowed(this.win.document);
   }
 
   /**

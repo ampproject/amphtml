@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: b4808644 */
+/** Version: 216488bf */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5574,18 +5574,9 @@ function adsUrl(url) {
  * @param {Object<string, string>=} params List of extra params to append to the URL.
  * @return {string} The complete URL.
  */
-function feUrl(
-  url,
-  params = {},
-  usePrefixedHostPath = true,
-  prefix = ''
-) {
+function feUrl(url, params = {}, prefix = '') {
   // Add cache param.
-  const prefixed = prefix
-    ? usePrefixedHostPath
-      ? `swg/${prefix}`
-      : `${prefix}/swg`
-    : 'swg';
+  const prefixed = prefix ? `swg/${prefix}` : 'swg';
   url = feCached(`${getSwgMode().frontEnd}/${prefixed}/_/ui/v1${url}`);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
@@ -5622,7 +5613,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG b4808644',
+    '_client': 'SwG 216488bf',
   });
 }
 
@@ -6964,7 +6955,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG b4808644',
+        '_client': 'SwG 216488bf',
         'supportsEventManager': true,
       },
       args || {}
@@ -7933,7 +7924,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG b4808644');
+    context.setClientVersion('SwG 216488bf');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -9522,7 +9513,6 @@ class ClientConfig {
     autoPromptConfig,
     paySwgVersion,
     uiPredicates,
-    usePrefixedHostPath,
     useUpdatedOfferFlows,
     skipAccountCreationScreen,
   } = {}) {
@@ -9531,9 +9521,6 @@ class ClientConfig {
 
     /** @const {string|undefined} */
     this.paySwgVersion = paySwgVersion;
-
-    /** @const {boolean} */
-    this.usePrefixedHostPath = usePrefixedHostPath || false;
 
     /** @const {boolean} */
     this.useUpdatedOfferFlows = useUpdatedOfferFlows || false;
@@ -9642,7 +9629,6 @@ class ClientConfigManager {
     /** @private @const {ClientConfig} */
     this.defaultConfig_ = new ClientConfig({
       skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
-      usePrefixedHostPath: true,
     });
   }
 
@@ -9833,7 +9819,6 @@ class ClientConfigManager {
     return new ClientConfig({
       autoPromptConfig,
       paySwgVersion,
-      usePrefixedHostPath: json['usePrefixedHostPath'],
       useUpdatedOfferFlows: json['useUpdatedOfferFlows'],
       skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
       uiPredicates,
@@ -14212,9 +14197,6 @@ class LinkCompleteFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!./client-config-manager.ClientConfigManager} */
-    this.clientConfigManager_ = deps.clientConfigManager();
-
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
@@ -14252,51 +14234,45 @@ class LinkCompleteFlow {
       return Promise.resolve();
     }
 
-    return this.clientConfigManager_.getClientConfig().then((clientConfig) => {
-      const index = this.response_['index'] || '0';
-      this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl(
-          '/linkconfirmiframe',
-          {},
-          clientConfig.usePrefixedHostPath,
-          'u/' + index
-        ),
-        feArgs({
-          'productId': this.deps_.pageConfig().getProductId(),
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-        }),
-        /* shouldFadeBody */ true
-      );
+    // Show confirmation.
+    const index = this.response_['index'] || '0';
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/linkconfirmiframe', {}, 'u/' + index),
+      feArgs({
+        'productId': this.deps_.pageConfig().getProductId(),
+        'publicationId': this.deps_.pageConfig().getPublicationId(),
+      }),
+      /* shouldFadeBody */ true
+    );
 
-      const promise = this.activityIframeView_.acceptResultAndVerify(
-        feOrigin(),
-        /* requireOriginVerified */ true,
-        /* requireSecureChannel */ true
-      );
-      promise
-        .then((response = {}) => {
-          this.complete_(response, !!response['success']);
-        })
-        .catch((reason) => {
-          // Rethrow async.
-          setTimeout(() => {
-            throw reason;
-          });
-        })
-        .then(() => {
-          // The flow is complete.
-          this.dialogManager_.completeView(this.activityIframeView_);
+    const promise = this.activityIframeView_.acceptResultAndVerify(
+      feOrigin(),
+      /* requireOriginVerified */ true,
+      /* requireSecureChannel */ true
+    );
+    promise
+      .then((response = {}) => {
+        this.complete_(response, !!response['success']);
+      })
+      .catch((reason) => {
+        // Rethrow async.
+        setTimeout(() => {
+          throw reason;
         });
-      this.deps_
-        .eventManager()
-        .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
-      this.deps_
-        .eventManager()
-        .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
-      return this.dialogManager_.openView(this.activityIframeView_);
-    });
+      })
+      .then(() => {
+        // The flow is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
+      });
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
+    return this.dialogManager_.openView(this.activityIframeView_);
   }
 
   /**
