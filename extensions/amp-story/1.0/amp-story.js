@@ -487,7 +487,7 @@ export class AmpStory extends AMP.BaseElement {
     const splittedRatio = this.element
       .getAttribute('desktop-aspect-ratio')
       .split(':');
-    if (splittedRatio.length != 2 || splittedRatio[1] == 0) {
+    if (splittedRatio[1] == 0) {
       return;
     }
 
