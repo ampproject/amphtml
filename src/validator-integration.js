@@ -51,6 +51,9 @@ export function loadScript(doc, url) {
       {
         createScriptURL: function (url) {
           // Only allow trusted URLs
+          // Using explicit cdn domain as no other AMP Cache hosts validator_
+          // wasm so we can assume the explicit cdn domain is cdn.ampproject.org
+          // instead of using the dynamic cdn value from src/config/urls.js
           // eslint-disable-next-line local/no-forbidden-terms
           if (url === 'https://cdn.ampproject.org/v0/validator_wasm.js') {
             return url;
