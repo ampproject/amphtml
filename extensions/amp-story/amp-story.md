@@ -550,7 +550,7 @@ Used with the `live-story` attribute. Time interval (in milliseconds) between ch
 
 ### desktop-aspect-ratio (optional)
 
-The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the story in desktop one panel mode is set to conform to the specified proportions.
+The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the story in desktop one panel mode is set to conform to the specified proportions. The accepted ratio is between 1:2 and 3:4, and any values outside of the range would be clamped.
 
 ## Animations
 
