@@ -10,4 +10,3 @@ amp-story-audio-sticker {
 amp-story:not([muted]) amp-story-audio-sticker {
   display: none  !important;
 }
-
