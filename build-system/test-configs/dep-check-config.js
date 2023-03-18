@@ -275,6 +275,9 @@ exports.rules = [
       'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
       'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/story-analytics.js',
 
+      // AMP Story audio sticker.
+      'extensions/amp-story-audio-sticker/0.1/amp-story-audio-sticker.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
       // Story localization.
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-localization-service.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
