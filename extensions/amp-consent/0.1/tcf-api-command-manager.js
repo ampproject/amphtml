@@ -66,24 +66,25 @@ export class TcfApiCommandManager {
    * @param {!Window} win
    */
   handleTcfCommand(data, win) {
-    if (!this.isValidTcfApiCall_(data['__tcfapiCall'])) {
+    const payload = data['__tcfapiCall'];
+
+    if (!this.isValidTcfApiCall_(payload)) {
       return;
     }
 
-    const payload = data['__tcfapiCall'];
-    const {command} = payload;
+    const {callId, command, parameter} = payload;
     switch (command) {
       case TCF_POST_MESSAGE_API_COMMANDS.PING:
-        this.handlePingEvent_(payload, win);
+        this.handlePingEvent_(callId, win);
         break;
       case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
-        this.handleGetTcData_(payload, win);
+        this.handleGetTcData_(callId, win);
         break;
       case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
         this.handleAddEventListner_(payload, win);
         break;
       case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
-        this.handleRemoveEventListner_(payload, win);
+        this.handleRemoveEventListner_(callId, parameter, win);
         break;
       default:
         return;
@@ -92,7 +93,7 @@ export class TcfApiCommandManager {
 
   /**
    * Add a entry to our changeListeners to signify that there
-   * is another iframe intrested in listening for TCData changes.
+   * is another iframe interested in listening for TCData changes.
    *
    * Each entry has a unique `listenerId` that will be sent
    * back to the 3p iframe.
@@ -111,11 +112,11 @@ export class TcfApiCommandManager {
   }
 
   /**
-   * @param {!Object} payload
+   * @param {string} callId
+   * @param {number|string} parameter
    * @param {!Window} win
    */
-  handleRemoveEventListner_(payload, win) {
-    const {callId, parameter} = payload;
+  handleRemoveEventListner_(callId, parameter, win) {
     const success = !!this.changeListeners_[parameter];
     if (success) {
       delete this.changeListeners_[parameter];
@@ -182,13 +183,12 @@ export class TcfApiCommandManager {
   /**
    * Create minimal PingReturn object. Send to original iframe
    * once object has been filled.
-   * @param {!Object} payload
+   * @param {string} callId
    * @param {!Window} win
    */
-  handleGetTcData_(payload, win) {
+  handleGetTcData_(callId, win) {
     this.getTcDataPromises_().then((arr) => {
       const returnValue = this.getMinimalTcData_(arr[0], arr[1], arr[2]);
-      const {callId} = payload;
 
       this.sendTcfApiReturn_(win, returnValue, callId, true);
     });
@@ -226,13 +226,13 @@ export class TcfApiCommandManager {
   /**
    * Create minimal PingReturn object. Send to original iframe
    * once object has been filled.
-   * @param {!Object} payload
+   *
+   * @param {string} callId
    * @param {!Window} win
    */
-  handlePingEvent_(payload, win) {
+  handlePingEvent_(callId, win) {
     this.policyManager_.getConsentMetadataInfo('default').then((metadata) => {
       const returnValue = this.getMinimalPingReturn_(metadata);
-      const {callId} = payload;
 
       this.sendTcfApiReturn_(win, returnValue, callId);
     });
@@ -293,12 +293,12 @@ export class TcfApiCommandManager {
       return false;
     }
     if (
-      parameter &&
-      command != TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER
+      (!parameter || isNaN(parameter)) &&
+      command == TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER
     ) {
       user().error(
         TAG,
-        `Unsupported parameter found in "tcfapiCall": ${parameter}`
+        `Found incorrect parameter in "tcfapiCall": ${parameter}. Please provide a valid number.`
       );
       return false;
     }
