@@ -68,16 +68,17 @@ describes.realWin(
           );
           errorSpy.resetHistory();
 
-          msg.__tcfapiCall.command = 'ping';
+          msg.__tcfapiCall.command = 'removeEventListener';
           msg.__tcfapiCall.parameter = [1, 2, 3];
           expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
             .be.false;
           expect(errorSpy.args[0][1]).to.match(
-            /Unsupported parameter found in "tcfapiCall": [1,2,3]/
+            /Found incorrect parameter in "tcfapiCall": 1,2,3. Please provide a valid number./
           );
           errorSpy.resetHistory();
 
-          msg.__tcfapiCall.parameter = undefined;
+          msg.__tcfapiCall.command = 'getTCData';
+          msg.__tcfapiCall.parameter = [1, 2, 3];
           msg.__tcfapiCall.version = 1;
           expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
             .be.false;
@@ -87,6 +88,34 @@ describes.realWin(
           errorSpy.resetHistory();
 
           msg.__tcfapiCall.version = 2;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.true;
+          expect(errorSpy).to.not.be.called;
+        });
+
+        it('parameter value should be ignore if command is different from removeEventListener', () => {
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          msg = {
+            __tcfapiCall: {
+              'command': 'getTCData',
+              'parameter': '30',
+              'version': 2,
+              'callId': 'callId',
+            },
+          };
+          const errorSpy = env.sandbox.stub(user(), 'error');
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.true;
+          expect(errorSpy).to.not.be.called;
+          errorSpy.resetHistory();
+
+          msg.__tcfapiCall.command = 'ping';
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.true;
+          expect(errorSpy).to.not.be.called;
+          errorSpy.resetHistory();
+
+          msg.__tcfapiCall.command = 'addEventListener';
           expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
             .be.true;
           expect(errorSpy).to.not.be.called;
