@@ -97,6 +97,10 @@ tags: {  # <amp-story>
     name: "live-story-disabled"
     value: ""
   }
+  attrs: {
+    name: "desktop-aspect-ratio"
+    value_regex: "\\d+:\\d+"
+  }
   siblings_disallowed: true
   child_tags: {
     mandatory_min_num_child_tags: 1

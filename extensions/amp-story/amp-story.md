@@ -548,6 +548,10 @@ Disables the [Live story](#Live-story) functionality.
 
 Used with the `live-story` attribute. Time interval (in milliseconds) between checks for new content. If no `data-poll-interval` is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
 
+### desktop-aspect-ratio (optional)
+
+The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the story in desktop one panel mode is set to conform to the specified proportions. The accepted ratio is between 1:2 and 3:4, and any values outside of the range would be clamped.
+
 ## Animations
 
 Every element inside an `<amp-story-page>` can have an entrance animation.
