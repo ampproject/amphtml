@@ -1,6 +1,6 @@
 amp-story-audio-sticker {
   z-index: 3 !important;
-  pointer-events: visible !important;
+  pointer-events: auto !important;
 
   position: absolute;
   max-width: 100%;
