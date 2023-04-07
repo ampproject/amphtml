@@ -1,7 +1,4 @@
 amp-story-audio-sticker {
-  z-index: 3 !important;
-  position: absolute !important;
-  height: auto !important;
   overflow: hidden !important;
 }
 
