@@ -3,8 +3,6 @@ import '../amp-story-audio-sticker';
 
 import {Services} from '#service';
 
-import {afterRenderPromise} from '#testing/helpers';
-
 import {
   AmpStoryStoreService,
   StateProperty,
@@ -20,13 +18,22 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let doc;
     let storeService;
+    let stickerEl;
+    let stickerImpl;
 
     const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
-    function buildStory() {
-      return (
+    beforeEach(async () => {
+      win = env.win;
+
+      storeService = new AmpStoryStoreService(win);
+      env.sandbox
+        .stub(Services, 'storyStoreServiceForOrNull')
+        .returns(Promise.resolve(storeService));
+      env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
+
+      const storyEl = (
         <amp-story>
           <amp-story-page>
             <amp-story-grid-layer>
@@ -35,27 +42,16 @@ describes.realWin(
           </amp-story-page>
         </amp-story>
       );
-    }
 
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
-
-      storeService = new AmpStoryStoreService(win);
-      env.sandbox
-        .stub(Services, 'storyStoreServiceForOrNull')
-        .returns(Promise.resolve(storeService));
-      env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
-
-      win.document.body.appendChild(buildStory());
+      win.document.body.appendChild(storyEl);
+      stickerEl = storyEl.querySelector('amp-story-audio-sticker');
+      stickerImpl = await stickerEl.getImpl();
     });
 
     it('should unmute the story when clicking on the audio sticker', async () => {
-      await afterRenderPromise();
+      await stickerImpl.layoutCallback();
 
-      const stickerEl = doc.querySelector('amp-story-audio-sticker');
       stickerEl.click();
-
       await nextTick();
 
       expect(storeService.get(StateProperty.MUTED_STATE)).to.equal(false);

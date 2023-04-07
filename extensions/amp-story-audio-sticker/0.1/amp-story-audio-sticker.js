@@ -14,23 +14,15 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
   }
 
   /** @override */
-  buildCallback() {
+  layoutCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
-        this.storeService_ = storeService;
-
-        this.element.addEventListener('click', (event) => {
-          if (this.storeService_.get(StateProperty.MUTED_STATE)) {
-            this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-            event.stopPropagation();
-          }
-        });
+        this.element.addEventListener('click', () =>
+          storeService.dispatch(Action.TOGGLE_MUTED, false)
+        );
       }
     );
   }

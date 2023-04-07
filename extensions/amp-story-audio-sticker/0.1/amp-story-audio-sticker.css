@@ -1,12 +1,18 @@
 amp-story-audio-sticker {
   z-index: 3 !important;
-  pointer-events: auto !important;
+  position: absolute !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
 
-  position: absolute;
-  max-width: 100%;
-  height: auto;
+amp-story[muted] amp-story-audio-sticker {
+  pointer-events: auto !important;
 }
 
 amp-story:not([muted]) amp-story-audio-sticker {
   display: none  !important;
+}
+
+amp-story-audio-sticker * {
+  pointer-events: none !important;
 }
