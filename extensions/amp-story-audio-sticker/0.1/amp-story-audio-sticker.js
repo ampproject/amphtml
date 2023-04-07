@@ -3,10 +3,7 @@ import {Layout_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-story-audio-sticker-0.1.css';
-import {
-  Action,
-  StateProperty,
-} from '../../amp-story/1.0/amp-story-store-service';
+import {Action} from '../../amp-story/1.0/amp-story-store-service';
 
 const TAG = 'amp-story-audio-sticker';
 
