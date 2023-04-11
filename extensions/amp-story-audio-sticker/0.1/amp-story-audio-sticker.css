@@ -1,0 +1,15 @@
+amp-story-audio-sticker {
+  overflow: hidden !important;
+}
+
+amp-story[muted] amp-story-audio-sticker {
+  pointer-events: auto !important;
+}
+
+amp-story:not([muted]) amp-story-audio-sticker {
+  display: none  !important;
+}
+
+amp-story-audio-sticker * {
+  pointer-events: none !important;
+}
