@@ -1,6 +1,6 @@
-import * as Preact from '#core/dom/jsx';
 import '../amp-story-audio-sticker';
 
+import * as Preact from '#core/dom/jsx';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
