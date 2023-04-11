@@ -1,6 +1,8 @@
 import * as Preact from '#core/dom/jsx';
 import '../amp-story-audio-sticker';
 
+import {computedStyle} from '#core/dom/style';
+
 import {Services} from '#service';
 
 import {
@@ -18,6 +20,7 @@ describes.realWin(
   },
   (env) => {
     let win;
+    let doc;
     let storeService;
     let stickerEl;
     let stickerImpl;
@@ -26,6 +29,7 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
+      doc = win.document;
 
       storeService = new AmpStoryStoreService(win);
       env.sandbox
@@ -43,9 +47,19 @@ describes.realWin(
         </amp-story>
       );
 
-      win.document.body.appendChild(storyEl);
+      doc.body.appendChild(storyEl);
       stickerEl = storyEl.querySelector('amp-story-audio-sticker');
       stickerImpl = await stickerEl.getImpl();
+    });
+
+    it('should add all necessary sticker elements', async () => {
+      expect(doc.querySelector('.i-amphtml-amp-story-audio-sticker-component'))
+        .to.not.be.null;
+      expect(doc.querySelector('.i-amphtml-amp-story-audio-sticker-tap-hint'))
+        .to.not.be.null;
+      expect(
+        doc.querySelector('.i-amphtml-amp-story-audio-sticker-container.large')
+      ).to.not.be.null;
     });
 
     it('should unmute the story when clicking on the audio sticker', async () => {
@@ -55,6 +69,12 @@ describes.realWin(
       await nextTick();
 
       expect(storeService.get(StateProperty.MUTED_STATE)).to.equal(false);
+      expect(
+        computedStyle(
+          win,
+          doc.querySelector('.i-amphtml-amp-story-audio-sticker-component')
+        ).getPropertyValue('display')
+      ).equal('none');
     });
   }
 );
