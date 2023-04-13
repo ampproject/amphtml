@@ -4,7 +4,7 @@ This is an HTML5 compliant parser written in C++.
 
 ## Maintainers
 
-This parser is maintained by [Amaltas Bohra](http://who/amaltas) and [Erwin Mombay](http://who/erwinm)
+This parser is maintained by Amaltas Bohra and Erwin Mombay.
 
 ## Current Status
 
