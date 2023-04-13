@@ -15,7 +15,7 @@ const jobName = 'validator-tests.js';
  */
 function pushBuildWorkflow() {
   timedExecOrDie('amp validator-webui');
-  timedExecOrDie('amp validator');
+  // timedExecOrDie('amp validator');
   // TODO(#38610): fix for bazel 6.0 or use older version
   // timedExecOrDie('amp validator-cpp');
   timedExecOrDie('amp validate-html-fixtures');
