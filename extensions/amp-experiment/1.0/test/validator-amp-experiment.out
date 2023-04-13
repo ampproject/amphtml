@@ -54,7 +54,7 @@ FAIL
 amp-experiment/1.0/test/validator-amp-experiment.html:51:0 The tag 'amp-experiment' appears more than once in the document. (see https://amp.dev/documentation/components/amp-experiment/)
 |      <script type="invalidtype"></script>
 >>     ^~~~~~~~~
-amp-experiment/1.0/test/validator-amp-experiment.html:52:4 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+amp-experiment/1.0/test/validator-amp-experiment.html:52:4 The parent tag of tag 'amphtml engine script' is 'amp-experiment', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  </amp-experiment>
 |
 |  <!-- Too large of JSON -->
