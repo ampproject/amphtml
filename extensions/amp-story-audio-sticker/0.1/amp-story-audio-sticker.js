@@ -23,9 +23,10 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
         </div>
         <div
           class={
-            this.element.getAttribute('size') === 'small'
-              ? 'i-amphtml-amp-story-audio-sticker-container small'
-              : 'i-amphtml-amp-story-audio-sticker-container large'
+            'i-amphtml-amp-story-audio-sticker-container' +
+            (this.element.getAttribute('size') === 'small'
+              ? ' small'
+              : ' large')
           }
         >
           {this.element}
