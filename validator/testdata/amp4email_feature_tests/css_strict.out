@@ -20,42 +20,42 @@ FAIL
 |        align-self: foo;
 |        alignment-baseline: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:20:6 CSS syntax error in tag 'style amp-custom' - invalid property 'alignment-baseline'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:20:6 CSS syntax error in tag 'style amp-custom' - invalid property 'alignment-baseline'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        all: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:21:6 CSS syntax error in tag 'style amp-custom' - invalid property 'all'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:21:6 CSS syntax error in tag 'style amp-custom' - invalid property 'all'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-delay: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:22:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-delay'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:22:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-delay'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-direction: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:23:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-direction'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:23:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-direction'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-duration: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:24:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-duration'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:24:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-duration'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-fill-mode: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:25:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-fill-mode'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:25:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-fill-mode'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-iteration-count: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:26:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-iteration-count'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:26:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-iteration-count'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-name: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:27:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-name'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:27:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-name'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-play-state: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:28:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-play-state'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:28:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-play-state'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation-timing-function: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:29:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-timing-function'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:29:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation-timing-function'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        animation: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:30:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:30:6 CSS syntax error in tag 'style amp-custom' - invalid property 'animation'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        appearance: foo;
 |        azimuth: foo;
 |        backface-visibility: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:33:6 CSS syntax error in tag 'style amp-custom' - invalid property 'backface-visibility'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:33:6 CSS syntax error in tag 'style amp-custom' - invalid property 'backface-visibility'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        background-attachment: foo;
 |        background-blend-mode: foo;
 |        background-clip: foo;
@@ -68,7 +68,7 @@ amp4email_feature_tests/css_strict.html:33:6 CSS syntax error in tag 'style amp-
 |        background: foo;
 |        baseline-shift: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:44:6 CSS syntax error in tag 'style amp-custom' - invalid property 'baseline-shift'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:44:6 CSS syntax error in tag 'style amp-custom' - invalid property 'baseline-shift'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        border-bottom-color: foo;
 |        border-bottom-left-radius: foo;
 |        border-bottom-right-radius: foo;
@@ -79,22 +79,22 @@ amp4email_feature_tests/css_strict.html:44:6 CSS syntax error in tag 'style amp-
 |        border-color: foo;
 |        border-image-outset: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:53:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-outset'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:53:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-outset'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        border-image-repeat: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:54:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-repeat'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:54:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-repeat'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        border-image-slice: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:55:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-slice'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:55:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-slice'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        border-image-source: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:56:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-source'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:56:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-source'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        border-image-width: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:57:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-width'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:57:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image-width'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        border-image: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:58:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:58:6 CSS syntax error in tag 'style amp-custom' - invalid property 'border-image'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        border-left-color: foo;
 |        border-left-style: foo;
 |        border-left-width: foo;
@@ -117,7 +117,7 @@ amp4email_feature_tests/css_strict.html:58:6 CSS syntax error in tag 'style amp-
 |        bottom: foo;
 |        box-decoration-break: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:79:6 CSS syntax error in tag 'style amp-custom' - invalid property 'box-decoration-break'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:79:6 CSS syntax error in tag 'style amp-custom' - invalid property 'box-decoration-break'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        box-shadow: foo;
 |        box-sizing: foo;
 |        break-after: foo;
@@ -128,26 +128,26 @@ amp4email_feature_tests/css_strict.html:79:6 CSS syntax error in tag 'style amp-
 |        clear: foo;
 |        clip-path: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:88:6 CSS syntax error in tag 'style amp-custom' - invalid property 'clip-path'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:88:6 CSS syntax error in tag 'style amp-custom' - invalid property 'clip-path'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        clip-rule: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:89:6 CSS syntax error in tag 'style amp-custom' - invalid property 'clip-rule'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:89:6 CSS syntax error in tag 'style amp-custom' - invalid property 'clip-rule'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        clip: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:90:6 CSS syntax error in tag 'style amp-custom' - invalid property 'clip'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:90:6 CSS syntax error in tag 'style amp-custom' - invalid property 'clip'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        color-adjust: foo;
 |        color-interpolation-filters: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:92:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-interpolation-filters'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:92:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-interpolation-filters'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        color-interpolation: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:93:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-interpolation'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:93:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-interpolation'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        color-profile: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:94:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-profile'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:94:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-profile'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        color-rendering: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:95:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:95:6 CSS syntax error in tag 'style amp-custom' - invalid property 'color-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        color: foo;
 |        column-count: foo;
 |        column-fill: foo;
@@ -161,34 +161,34 @@ amp4email_feature_tests/css_strict.html:95:6 CSS syntax error in tag 'style amp-
 |        columns: foo;
 |        content: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:107:6 CSS syntax error in tag 'style amp-custom' - invalid property 'content'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:107:6 CSS syntax error in tag 'style amp-custom' - invalid property 'content'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        counter-increment: foo;
 |        counter-reset: foo;
 |        cursor: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:110:6 CSS syntax error in tag 'style amp-custom' - the property 'cursor' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:110:6 CSS syntax error in tag 'style amp-custom' - the property 'cursor' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        direction: foo;
 |        display: foo;
 |        dominant-baseline: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:113:6 CSS syntax error in tag 'style amp-custom' - invalid property 'dominant-baseline'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:113:6 CSS syntax error in tag 'style amp-custom' - invalid property 'dominant-baseline'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        elevation: foo;
 |        empty-cells: foo;
 |        enable-background: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:116:6 CSS syntax error in tag 'style amp-custom' - invalid property 'enable-background'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:116:6 CSS syntax error in tag 'style amp-custom' - invalid property 'enable-background'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        fill-opacity: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:117:6 CSS syntax error in tag 'style amp-custom' - invalid property 'fill-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:117:6 CSS syntax error in tag 'style amp-custom' - invalid property 'fill-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        fill-rule: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:118:6 CSS syntax error in tag 'style amp-custom' - invalid property 'fill-rule'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:118:6 CSS syntax error in tag 'style amp-custom' - invalid property 'fill-rule'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        fill: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:119:6 CSS syntax error in tag 'style amp-custom' - invalid property 'fill'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:119:6 CSS syntax error in tag 'style amp-custom' - invalid property 'fill'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        filter: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:120:6 CSS syntax error in tag 'style amp-custom' - the property 'filter' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:120:6 CSS syntax error in tag 'style amp-custom' - the property 'filter' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        flex-basis: foo;
 |        flex-direction: foo;
 |        flex-flow: foo;
@@ -199,16 +199,16 @@ amp4email_feature_tests/css_strict.html:120:6 CSS syntax error in tag 'style amp
 |        float: foo;
 |        flood-color: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:129:6 CSS syntax error in tag 'style amp-custom' - invalid property 'flood-color'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:129:6 CSS syntax error in tag 'style amp-custom' - invalid property 'flood-color'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        flood-opacity: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:130:6 CSS syntax error in tag 'style amp-custom' - invalid property 'flood-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:130:6 CSS syntax error in tag 'style amp-custom' - invalid property 'flood-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        font-family: foo;
 |        font-feature-settings: foo;
 |        font-kerning: foo;
 |        font-language-override: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:134:6 CSS syntax error in tag 'style amp-custom' - invalid property 'font-language-override'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:134:6 CSS syntax error in tag 'style amp-custom' - invalid property 'font-language-override'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        font-size-adjust: foo;
 |        font-size: foo;
 |        font-stretch: foo;
@@ -221,7 +221,7 @@ amp4email_feature_tests/css_strict.html:134:6 CSS syntax error in tag 'style amp
 |        font-variant-numeric: foo;
 |        font-variant-position: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:145:6 CSS syntax error in tag 'style amp-custom' - invalid property 'font-variant-position'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:145:6 CSS syntax error in tag 'style amp-custom' - invalid property 'font-variant-position'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        font-variant: foo;
 |        font-variation-settings: foo;
 |        font-weight: foo;
@@ -229,10 +229,10 @@ amp4email_feature_tests/css_strict.html:145:6 CSS syntax error in tag 'style amp
 |        gap: foo;
 |        glyph-orientation-horizontal: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:151:6 CSS syntax error in tag 'style amp-custom' - invalid property 'glyph-orientation-horizontal'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:151:6 CSS syntax error in tag 'style amp-custom' - invalid property 'glyph-orientation-horizontal'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        glyph-orientation-vertical: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:152:6 CSS syntax error in tag 'style amp-custom' - invalid property 'glyph-orientation-vertical'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:152:6 CSS syntax error in tag 'style amp-custom' - invalid property 'glyph-orientation-vertical'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        grid-area: foo;
 |        grid-auto-columns: foo;
 |        grid-auto-flow: foo;
@@ -240,16 +240,16 @@ amp4email_feature_tests/css_strict.html:152:6 CSS syntax error in tag 'style amp
 |        grid-column-end: foo;
 |        grid-column-gap: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:158:6 CSS syntax error in tag 'style amp-custom' - invalid property 'grid-column-gap'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:158:6 CSS syntax error in tag 'style amp-custom' - invalid property 'grid-column-gap'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        grid-column-start: foo;
 |        grid-column: foo;
 |        grid-gap: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:161:6 CSS syntax error in tag 'style amp-custom' - invalid property 'grid-gap'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:161:6 CSS syntax error in tag 'style amp-custom' - invalid property 'grid-gap'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        grid-row-end: foo;
 |        grid-row-gap: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:163:6 CSS syntax error in tag 'style amp-custom' - invalid property 'grid-row-gap'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:163:6 CSS syntax error in tag 'style amp-custom' - invalid property 'grid-row-gap'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        grid-row-start: foo;
 |        grid-row: foo;
 |        grid-template-areas: foo;
@@ -259,13 +259,13 @@ amp4email_feature_tests/css_strict.html:163:6 CSS syntax error in tag 'style amp
 |        grid: foo;
 |        hanging-punctuation: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:171:6 CSS syntax error in tag 'style amp-custom' - invalid property 'hanging-punctuation'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:171:6 CSS syntax error in tag 'style amp-custom' - invalid property 'hanging-punctuation'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        height: foo;
 |        hyphens: foo;
 |        image-orientation: foo;
 |        image-rendering: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:175:6 CSS syntax error in tag 'style amp-custom' - invalid property 'image-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:175:6 CSS syntax error in tag 'style amp-custom' - invalid property 'image-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        image-resolution: foo;
 |        inline-size: foo;
 |        isolation: foo;
@@ -274,17 +274,17 @@ amp4email_feature_tests/css_strict.html:175:6 CSS syntax error in tag 'style amp
 |        justify-self: foo;
 |        kerning: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:182:6 CSS syntax error in tag 'style amp-custom' - invalid property 'kerning'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:182:6 CSS syntax error in tag 'style amp-custom' - invalid property 'kerning'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        left: foo;
 |        letter-spacing: foo;
 |        lighting-color: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:185:6 CSS syntax error in tag 'style amp-custom' - invalid property 'lighting-color'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:185:6 CSS syntax error in tag 'style amp-custom' - invalid property 'lighting-color'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        line-break: foo;
 |        line-height: foo;
 |        list-style-image: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:188:6 CSS syntax error in tag 'style amp-custom' - invalid property 'list-style-image'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:188:6 CSS syntax error in tag 'style amp-custom' - invalid property 'list-style-image'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        list-style-position: foo;
 |        list-style-type: foo;
 |        list-style: foo;
@@ -295,19 +295,19 @@ amp4email_feature_tests/css_strict.html:188:6 CSS syntax error in tag 'style amp
 |        margin: foo;
 |        marker-end: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:197:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker-end'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:197:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker-end'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        marker-mid: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:198:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker-mid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:198:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker-mid'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        marker-start: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:199:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker-start'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:199:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker-start'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        marker: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:200:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:200:6 CSS syntax error in tag 'style amp-custom' - invalid property 'marker'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        mask: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:201:6 CSS syntax error in tag 'style amp-custom' - invalid property 'mask'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:201:6 CSS syntax error in tag 'style amp-custom' - invalid property 'mask'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        max-height: foo;
 |        max-width: foo;
 |        min-height: foo;
@@ -320,7 +320,7 @@ amp4email_feature_tests/css_strict.html:201:6 CSS syntax error in tag 'style amp
 |        order: foo;
 |        orphans: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:212:6 CSS syntax error in tag 'style amp-custom' - invalid property 'orphans'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:212:6 CSS syntax error in tag 'style amp-custom' - invalid property 'orphans'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        outline-color: foo;
 |        outline-offset: foo;
 |        outline-style: foo;
@@ -337,13 +337,13 @@ amp4email_feature_tests/css_strict.html:212:6 CSS syntax error in tag 'style amp
 |        padding: foo;
 |        page-break-after: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:227:6 CSS syntax error in tag 'style amp-custom' - invalid property 'page-break-after'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:227:6 CSS syntax error in tag 'style amp-custom' - invalid property 'page-break-after'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        page-break-before: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:228:6 CSS syntax error in tag 'style amp-custom' - invalid property 'page-break-before'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:228:6 CSS syntax error in tag 'style amp-custom' - invalid property 'page-break-before'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        page-break-inside: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:229:6 CSS syntax error in tag 'style amp-custom' - invalid property 'page-break-inside'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:229:6 CSS syntax error in tag 'style amp-custom' - invalid property 'page-break-inside'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        pause: foo;
 |        pause-after: foo;
 |        pause-before: foo;
@@ -354,7 +354,7 @@ amp4email_feature_tests/css_strict.html:229:6 CSS syntax error in tag 'style amp
 |        place-items: foo;
 |        pointer-events: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:238:6 CSS syntax error in tag 'style amp-custom' - invalid property 'pointer-events'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:238:6 CSS syntax error in tag 'style amp-custom' - invalid property 'pointer-events'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        position: foo;
 |        quotes: foo;
 |        resize: foo;
@@ -363,7 +363,7 @@ amp4email_feature_tests/css_strict.html:238:6 CSS syntax error in tag 'style amp
 |        row-gap: foo;
 |        shape-rendering: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:245:6 CSS syntax error in tag 'style amp-custom' - invalid property 'shape-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:245:6 CSS syntax error in tag 'style amp-custom' - invalid property 'shape-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        speak-header: foo;
 |        speak-numeral: foo;
 |        speak-punctuation: foo;
@@ -371,50 +371,50 @@ amp4email_feature_tests/css_strict.html:245:6 CSS syntax error in tag 'style amp
 |        speech-rate: foo;
 |        stop-color: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:251:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stop-color'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:251:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stop-color'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stop-opacity: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:252:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stop-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:252:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stop-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stress: foo;
 |        stroke-dasharray: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:254:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-dasharray'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:254:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-dasharray'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stroke-dashoffset: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:255:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-dashoffset'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:255:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-dashoffset'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stroke-linecap: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:256:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-linecap'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:256:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-linecap'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stroke-linejoin: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:257:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-linejoin'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:257:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-linejoin'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stroke-miterlimit: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:258:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-miterlimit'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:258:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-miterlimit'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stroke-opacity: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:259:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:259:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-opacity'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stroke-width: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:260:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-width'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:260:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke-width'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        stroke: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:261:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:261:6 CSS syntax error in tag 'style amp-custom' - invalid property 'stroke'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        tab-size: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:262:6 CSS syntax error in tag 'style amp-custom' - invalid property 'tab-size'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:262:6 CSS syntax error in tag 'style amp-custom' - invalid property 'tab-size'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        table-layout: foo;
 |        text-align-last: foo;
 |        text-align: foo;
 |        text-anchor: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:266:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-anchor'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:266:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-anchor'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        text-combine-upright: foo;
 |        text-decoration-color: foo;
 |        text-decoration-line: foo;
 |        text-decoration-skip-ink: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:270:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-decoration-skip-ink'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:270:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-decoration-skip-ink'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        text-decoration-skip: foo;
 |        text-decoration-style: foo;
 |        text-decoration: foo;
@@ -424,24 +424,24 @@ amp4email_feature_tests/css_strict.html:270:6 CSS syntax error in tag 'style amp
 |        text-emphasis: foo;
 |        text-fill-color: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:278:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-fill-color'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:278:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-fill-color'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        text-indent: foo;
 |        text-justify: foo;
 |        text-orientation: foo;
 |        text-overflow: foo;
 |        text-rendering: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:283:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:283:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-rendering'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        text-shadow: foo;
 |        text-stroke-color: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:285:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-stroke-color'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:285:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-stroke-color'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        text-stroke-width: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:286:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-stroke-width'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:286:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-stroke-width'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        text-stroke: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:287:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-stroke'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:287:6 CSS syntax error in tag 'style amp-custom' - invalid property 'text-stroke'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        text-transform: foo;
 |        text-underline-position: foo;
 |        top: foo;
@@ -453,24 +453,24 @@ amp4email_feature_tests/css_strict.html:287:6 CSS syntax error in tag 'style amp
 |        transition-duration: foo;
 |        transition-property: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:297:6 CSS syntax error in tag 'style amp-custom' - the property 'transition-property' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:297:6 CSS syntax error in tag 'style amp-custom' - the property 'transition-property' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        transition-timing-function: foo;
 |        transition: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:299:6 CSS syntax error in tag 'style amp-custom' - the property 'transition' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:299:6 CSS syntax error in tag 'style amp-custom' - the property 'transition' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        unicode-bidi: foo;
 |        user-select: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:301:6 CSS syntax error in tag 'style amp-custom' - invalid property 'user-select'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:301:6 CSS syntax error in tag 'style amp-custom' - invalid property 'user-select'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        vertical-align: foo;
 |        visibility: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:303:6 CSS syntax error in tag 'style amp-custom' - the property 'visibility' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:303:6 CSS syntax error in tag 'style amp-custom' - the property 'visibility' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        voice-family: foo;
 |        white-space: foo;
 |        widows: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:306:6 CSS syntax error in tag 'style amp-custom' - invalid property 'widows'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:306:6 CSS syntax error in tag 'style amp-custom' - invalid property 'widows'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        width: foo;
 |        word-break: foo;
 |        word-spacing: foo;
@@ -478,22 +478,22 @@ amp4email_feature_tests/css_strict.html:306:6 CSS syntax error in tag 'style amp
 |        writing-mode: foo;
 |        z-index: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:312:6 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:312:6 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        z-index: auto;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:313:6 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'auto'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:313:6 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'auto'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        z-index: -1;
 |      }
 |      madeupdecls {
 |        amplitude: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:317:6 CSS syntax error in tag 'style amp-custom' - invalid property 'amplitude'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:317:6 CSS syntax error in tag 'style amp-custom' - invalid property 'amplitude'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        barometric-pressure: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:318:6 CSS syntax error in tag 'style amp-custom' - invalid property 'barometric-pressure'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:318:6 CSS syntax error in tag 'style amp-custom' - invalid property 'barometric-pressure'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |        degrees-celsius: foo;
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:319:6 CSS syntax error in tag 'style amp-custom' - invalid property 'degrees-celsius'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:319:6 CSS syntax error in tag 'style amp-custom' - invalid property 'degrees-celsius'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |      }
 |      /* valid media queries */
 |      @media all {}
@@ -624,7 +624,7 @@ amp4email_feature_tests/css_strict.html:353:10 CSS error in tag 'style amp-custo
 |      .a { margin: 1px; }
 |      .a { -webkit-margin: 1px; }
 >>          ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:424:9 CSS syntax error in tag 'style amp-custom' - invalid property '-webkit-margin'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:424:9 CSS syntax error in tag 'style amp-custom' - invalid property '-webkit-margin'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |
 |      /* Three specific prefixes are explicitly allowlisted */
 |      .a {
@@ -636,7 +636,7 @@ amp4email_feature_tests/css_strict.html:424:9 CSS syntax error in tag 'style amp
 |      /* Not all properties are automatically allowed */
 |      .a { invalid: 1px; }
 >>          ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:434:9 CSS syntax error in tag 'style amp-custom' - invalid property 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:434:9 CSS syntax error in tag 'style amp-custom' - invalid property 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |
 |      /* Some properties are allowed, but only certain values */
 |      .a { position: absolute; }
@@ -644,7 +644,7 @@ amp4email_feature_tests/css_strict.html:434:9 CSS syntax error in tag 'style amp
 |      .a { z-index: -1; }
 |      .a { z-index: invalid; }
 >>          ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:440:9 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:440:9 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |
 |      /* Important is not allowed */
 |      .a { color: red !important; }

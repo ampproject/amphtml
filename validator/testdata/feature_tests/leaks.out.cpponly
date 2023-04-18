@@ -238,16 +238,16 @@ feature_tests/leaks.html:133:4 The tag 'param' is disallowed.
 |  -->
 |  <script src="https://leaking.via/script-src"></script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:140:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:140:0 The parent tag of tag 'amphtml engine script' is 'isindex', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  <svg><script href="https://leaking.via/svg-script-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:141:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:141:5 The parent tag of tag 'amphtml engine script' is 'svg', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  <svg><script xlink:href="https://leaking.via/svg-script-xlink-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:142:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:142:5 The parent tag of tag 'amphtml engine script' is 'svg', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  <script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:143:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:143:0 The parent tag of tag 'amphtml engine script' is 'isindex', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  //# sourceMappingURL=https://leaking.via/javascript-source-map
 |  </script>
 |
