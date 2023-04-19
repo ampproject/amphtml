@@ -1,0 +1,96 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /build-system/tasks/e2e
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /build-system/tasks/performance
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /build-system/tasks/storybook/env/amp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /build-system/tasks/storybook/env/preact
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /build-system/tasks/storybook/env/react
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /build-system/tasks/storybook
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /build-system/tasks/visual-diff
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /extensions/amp-access/0.1/iframe-api
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /extensions/amp-viewer-integration/0.1/messaging
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /src/bento/core
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /src/bento/core/preact
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /src/bento/core/react
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /third_party/amp-toolbox-cache-url
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /validator/js/gulpjs
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /validator/js/nodejs
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /validator/js/webui
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /validator
+    schedule:
+      interval: daily
