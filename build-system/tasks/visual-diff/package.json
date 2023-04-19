@@ -12,6 +12,6 @@
     "inquirer": "8.2.4",
     "puppeteer": "14.3.0",
     "puppeteer-extra": "3.2.3",
-    "puppeteer-extra-plugin-user-preferences": "2.3.1"
+    "puppeteer-extra-plugin-user-preferences": "2.4.1"
   }
 }
