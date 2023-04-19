@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Dev dependencies used by `amp performance`",
   "devDependencies": {
-    "chai": "4.3.4",
+    "chai": "4.3.7",
     "mocha": "9.2.2",
     "puppeteer": "13.1.2"
   }
