@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+paths-ignore:
+  - 'extensions/**/test/**'
+
 jobs:
   analyze:
     name: Analyze
