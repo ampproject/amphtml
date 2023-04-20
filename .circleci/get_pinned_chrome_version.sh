@@ -49,5 +49,6 @@ echo "$(GREEN "Determining Chrome version...")"
 CHROME_VERSION="$(curl -sS --retry 3 ${CHROME_VERSION_HISTORY_URL} | jq -r ".versions[]|.version" | grep -m 1 "${CHROME_MAJOR_VERSION}\.[[:digit:]]\+.[[:digit:]]\+.[[:digit:]]\+")"
 echo "$(GREEN "Chrome version is") $(CYAN "${CHROME_VERSION}")"
 
-echo "export CHROME_VERSION=$CHROME_VERSION" >> $BASH_ENV
+# Workaround for https://github.com/CircleCI-Public/browser-tools-orb/issues/70
+echo "export ORB_PARAM_CHROME_VERSION=$CHROME_VERSION" >> $BASH_ENV
 echo $(GREEN "Successfully determined pinned version of Chrome")

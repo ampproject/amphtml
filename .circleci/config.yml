@@ -133,7 +133,7 @@ commands:
           name: 'Get Pinned Chrome Version'
           command: ./.circleci/get_pinned_chrome_version.sh
       - browser-tools/install-chrome:
-          chrome-version: ${CHROME_VERSION}
+          # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
           replace-existing: true
       - browser-tools/install-chromedriver
   install_firefox:
