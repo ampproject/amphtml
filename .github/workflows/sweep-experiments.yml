@@ -80,7 +80,7 @@ jobs:
 
       - name: Comment on Pull Request
         if: ${{ steps.pull-request.outputs.pull-request-number }}
-        uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae # v1.4.5
+        uses: peter-evans/create-or-update-comment@3383acd359705b10cb1eeef05c0e88c056ea4666 # v3.0.0
         with:
           issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
           body: |
