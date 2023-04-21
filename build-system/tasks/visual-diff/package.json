@@ -10,7 +10,7 @@
     "@types/inquirer": "8.2.6",
     "@types/puppeteer": "5.4.7",
     "inquirer": "8.2.5",
-    "puppeteer": "14.4.1",
+    "puppeteer": "19.10.1",
     "puppeteer-extra": "3.3.6",
     "puppeteer-extra-plugin-user-preferences": "2.4.1"
   }
