@@ -203,6 +203,27 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    this.element.parentNode.appendChild(
+      <div class="i-amphtml-amp-story-audio-sticker-component">
+        <div class="i-amphtml-amp-story-audio-sticker-tap-hint">
+          <span>tap to unmute</span>
+        </div>
+        <div
+          class={
+            'i-amphtml-amp-story-audio-sticker-container' +
+            (this.element.getAttribute('size') === 'small'
+              ? ' small'
+              : ' large')
+          }
+        >
+          {this.element}
+        </div>
+      </div>
+    );
+  }
+
+  /** @override */
   layoutCallback() {
     if (this.useDefaultSticker_) {
       const pretapImage = scopedQuerySelector(
