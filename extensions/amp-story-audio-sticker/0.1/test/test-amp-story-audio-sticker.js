@@ -1,5 +1,4 @@
 import * as Preact from '#core/dom/jsx';
-import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
