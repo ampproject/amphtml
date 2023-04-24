@@ -93,7 +93,7 @@
     "css-imports": "0.3.1",
     "css-selector-tokenizer": "0.8.0",
     "css-what": "5.1.0",
-    "cssnano": "5.0.8",
+    "cssnano": "6.0.0",
     "dedent": "0.7.0",
     "del": "6.0.0",
     "enzyme": "3.11.0",
