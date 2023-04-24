@@ -129,15 +129,17 @@ describes.realWin(
         storeService.dispatch(Action.TOGGLE_MUTED, true);
         await nextTick();
 
-        doc
-          .querySelectorAll(
-            'amp-story:not([muted]) .i-amphtml-amp-story-audio-sticker-tap-hint'
-          )
-          .forEach((el) =>
-            expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
-              '1'
-            )
-          );
+        // Wait until the animation is finished to check the opacitiy value.
+        setTimeout(() => {
+          doc
+            .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
+            .forEach((el) =>
+              expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
+                '1'
+              )
+            );
+        }, 500);
+
         doc.querySelectorAll('amp-story-audio-sticker-pretap').forEach((el) => {
           expect(computedStyle(win, el).getPropertyValue('opacity')).equal('1');
         });
