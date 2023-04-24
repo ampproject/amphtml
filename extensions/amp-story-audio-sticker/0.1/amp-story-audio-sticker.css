@@ -60,10 +60,10 @@ amp-story[muted] amp-story-audio-sticker {
   pointer-events: auto !important;
 }
 
-/* 
+/*
   Hide the sticker after the story gets unmuted:
   1) if the sticker is on the active page, hide it after showing posttap sticker for 4 seconds.
-  2) if the sticker is not on the active page, hide it immediately since it is in the background. 
+  2) if the sticker is not on the active page, hide it immediately since it is in the background.
 */
 amp-story:not([muted]) amp-story-audio-sticker.on-active-page {
   transition: opacity 0.5s ease 4s !important;

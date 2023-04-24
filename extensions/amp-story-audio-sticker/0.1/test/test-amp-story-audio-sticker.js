@@ -81,7 +81,7 @@ describes.realWin(
       ).equal(2);
       expect(
         doc.querySelectorAll(
-          '.i-amphtml-amp-story-audio-sticker-container.large'
+          '.i-amphtml-amp-story-audio-sticker-container.small'
         ).length
       ).equal(2);
       expect(
