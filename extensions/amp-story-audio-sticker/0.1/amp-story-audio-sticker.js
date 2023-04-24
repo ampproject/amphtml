@@ -16,17 +16,21 @@ import {
 const TAG = 'amp-story-audio-sticker';
 
 /**
+ * Sticker pretap tag
+ * @const {string}
+ */
+const STICKER_PRETAP_TAG = 'amp-story-audio-sticker-pretap';
+/**
+ * Sticker posttap tag
+ * @const {string}
+ */
+const STICKER_POSTTAP_TAG = 'amp-story-audio-sticker-posttap';
+
+/**
  * The gstatic URL prefix of the sticker assets.
  * @const {string}
  */
 const ASSET_URL_PREFIX = 'https://www.gstatic.com/amphtml/stamp/audio-sticker/';
-
-/** Fallback default sticker. It would be used if both of below happen:
- * 1) no default sticker is specified
- * 2) the custom sticker data is not provided completely.
- * @const {string}
- */
-const FALLBACK_DEFAULT_STICKER = 'cat-sticker';
 
 /** @const {!Object}
  * List of default stickers.
@@ -58,6 +62,13 @@ const DEFAULT_STICKERS = {
   },
 };
 
+/** Fallback default sticker. It would be used if both of below happen:
+ * 1) no default sticker is specified
+ * 2) the custom sticker data is not provided completely.
+ * @const {string}
+ */
+const FALLBACK_DEFAULT_STICKER = 'cat-sticker';
+
 /**
  * The number of milliseconds to wait before hiding the sticker after the story is unmuted.
  * @const {number}
@@ -72,20 +83,8 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @private {boolean} whether to use default sticker. True if any default sticker is specified or there's no custom sticker provided */
-    this.useDefaultSticker_ =
-      this.element.hasAttribute('sticker') ||
-      !this.element.querySelector('amp-story-audio-sticker-pretap') ||
-      !this.element.querySelector('amp-story-audio-sticker-posttap');
-
-    /** @private {?string} the default sticker that is used */
-    this.sticker_ = null;
-
-    /** @private {?string} the page id of the page where the sticker is on */
-    this.pageId_ = null;
-
-    /** @private {?number} the timeout to hide the sticker after delay */
-    this.hideStickerTimeout_ = null;
+    /** @private {?string} the default sticker to use if no custom sticker provided */
+    this.defaultSticker_ = null;
   }
 
   /** @override */
@@ -115,32 +114,33 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       this.element,
       'amp-story-page'
     );
-    this.pageId_ = pageEl.getAttribute('id');
+    const pageId = pageEl.getAttribute('id');
 
     Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
       this.storeService_ = storeService;
-      this.storeService_.subscribe(StateProperty.MUTED_STATE, (muted) => {
-        this.onMutedStateChange_(muted);
-      });
       this.initializeListeners_();
+      this.storeService_.subscribe(
+        StateProperty.CURRENT_PAGE_ID,
+        (currentPageId) =>
+          this.toggleStickerState_('on-active-page', pageId === currentPageId)
+      );
     });
   }
 
   /** @private */
   maybeInitializeDefaultSticker_() {
-    if (!this.useDefaultSticker_) {
+    this.defaultSticker_ = this.getDefaultSticker_();
+    if (!this.defaultSticker_) {
       return;
     }
-    this.sticker_ =
-      this.element.getAttribute('sticker') || FALLBACK_DEFAULT_STICKER;
 
     // Remove all existing child elements and add only pretap and posttap elements.
     this.element.replaceChildren();
     this.element.appendChild(
       <amp-story-audio-sticker-pretap>
         <amp-img
-          width={DEFAULT_STICKERS[this.sticker_].width}
-          height={DEFAULT_STICKERS[this.sticker_].height}
+          width={DEFAULT_STICKERS[this.defaultSticker_].width}
+          height={DEFAULT_STICKERS[this.defaultSticker_].height}
           layout="responsive"
         ></amp-img>
       </amp-story-audio-sticker-pretap>
@@ -148,8 +148,8 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     this.element.appendChild(
       <amp-story-audio-sticker-posttap>
         <amp-img
-          width={DEFAULT_STICKERS[this.sticker_].width}
-          height={DEFAULT_STICKERS[this.sticker_].height}
+          width={DEFAULT_STICKERS[this.defaultSticker_].width}
+          height={DEFAULT_STICKERS[this.defaultSticker_].height}
           layout="responsive"
         ></amp-img>
       </amp-story-audio-sticker-posttap>
@@ -157,29 +157,21 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
   }
 
   /**
-   * Hide the sticker after the story gets unmuted:
-   * 1) if the sticker is on the active page, hide it after showing posttap sticker for 4 seconds.
-   * 2) if the sticker is not on the active page, hide it immediately since it is in the background.
-   * @param {boolean} muted
+   * Return the specified default sticker or null if there's custom sticker provided.
+   * Return fallback sticker is both default and custom sticker config are not specified at all.
    * @private
+   * @return {string}
    */
-  onMutedStateChange_(muted) {
-    if (!muted) {
-      if (
-        this.pageId_ === this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
-      ) {
-        this.hideStickerTimeout_ = setTimeout(
-          () => this.toggleStickerState_('hide', true),
-          HIDE_STICKER_DELAY_DURATION
-        );
-      } else {
-        this.toggleStickerState_('hide', true);
-      }
-    } else {
-      this.toggleStickerState_('hide', false);
-      this.hideStickerTimeout_ && clearTimeout(this.hideStickerTimeout_);
-      this.hideStickerTimeout_ = null;
+  getDefaultSticker_() {
+    if (
+      scopedQuerySelector(this.element, STICKER_PRETAP_TAG) &&
+      scopedQuerySelector(this.element, STICKER_POSTTAP_TAG)
+    ) {
+      return null;
     }
+
+    const stickerAttr = this.element.getAttribute('sticker');
+    return stickerAttr || FALLBACK_DEFAULT_STICKER;
   }
 
   /**
@@ -204,14 +196,14 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.useDefaultSticker_) {
+    if (this.defaultSticker_) {
       const pretapImage = scopedQuerySelector(
         this.element,
         'amp-story-audio-sticker-pretap amp-img'
       );
       pretapImage.setAttribute(
         'src',
-        DEFAULT_STICKERS[this.sticker_].pretapUrl
+        DEFAULT_STICKERS[this.defaultSticker_].pretapUrl
       );
       const posttapImage = scopedQuerySelector(
         this.element,
@@ -219,7 +211,7 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       );
       posttapImage.setAttribute(
         'src',
-        DEFAULT_STICKERS[this.sticker_].posttapUrl
+        DEFAULT_STICKERS[this.defaultSticker_].posttapUrl
       );
     }
   }

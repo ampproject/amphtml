@@ -131,14 +131,15 @@ describes.realWin(
         await nextTick();
 
         doc
-          .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
+          .querySelectorAll(
+            'amp-story:not([muted]) .i-amphtml-amp-story-audio-sticker-tap-hint'
+          )
           .forEach((el) =>
             expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
               '1'
             )
           );
         doc.querySelectorAll('amp-story-audio-sticker-pretap').forEach((el) => {
-          // console.log(el.style);
           expect(computedStyle(win, el).getPropertyValue('opacity')).equal('1');
         });
         doc
@@ -164,14 +165,10 @@ describes.realWin(
       await nextTick();
 
       doc.querySelectorAll('amp-story-audio-sticker').forEach((el) => {
-        const currentPageId = closestAncestorElementBySelector(
-          el,
-          'amp-story-page'
-        ).getAttribute('id');
-        if (currentPageId === activePageId) {
+        if (el.classList.contains('on-active-page')) {
           clock.tick(HIDE_STICKER_DELAY_DURATION);
         }
-        expect(el.classList.contains('hide')).equal(true);
+        expect(computedStyle(win, el).getPropertyValue('opacity')).equal('0');
       });
     });
   }
