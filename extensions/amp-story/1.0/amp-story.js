@@ -128,6 +128,13 @@ const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
 /**
+ * Default desktop one panel ratio.
+ * NOTE: If updated here, update in amp-story-desktop-one-panel.css
+ * @private @const {string}
+ */
+const DEFAULT_DESKTOP_ONE_PANEL_ASPECT_RATIO = 69 / 116;
+
+/**
  * Minimum custom aspect ratio for desktop one panel, i.e. 1:2.
  * @private @const {number}
  * */
@@ -481,6 +488,11 @@ export class AmpStory extends AMP.BaseElement {
       this.isLandscapeSupported_() ||
       !this.element.hasAttribute('desktop-aspect-ratio')
     ) {
+      // Store default desktop aspect ratio
+      this.storeService_.dispatch(
+        Action.SET_DESKTOP_ASPECT_RATIO,
+        DEFAULT_DESKTOP_ONE_PANEL_ASPECT_RATIO
+      );
       return;
     }
 
@@ -499,6 +511,10 @@ export class AmpStory extends AMP.BaseElement {
     setImportantStyles(document.querySelector(':root'), {
       '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
     });
+    this.storeService_.dispatch(
+      Action.SET_DESKTOP_ASPECT_RATIO,
+      desktopAspectRatio
+    );
   }
 
   /**

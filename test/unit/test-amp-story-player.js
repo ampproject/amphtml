@@ -218,26 +218,21 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should apply desktop aspect ratio based on the active story', async () => {
     const numStories = 2;
+    const storyAspectRatios = ['0.75', '0.5'];
     buildStoryPlayer(numStories);
     await manager.loadPlayers();
     await nextTick();
 
-    const storyAspectRatios = ['0.75', '0.5'];
-    const storyIframes = playerEl.querySelectorAll('iframe');
-    for (let i = 0; i < numStories; i++) {
-      const doc = storyIframes[i].contentWindow.document;
-      doc.open();
-      doc.write(
-        '<html style="--i-amphtml-story-desktop-one-panel-ratio:' +
-          storyAspectRatios[i] +
-          ' !important;"></html>'
-      );
-      doc.close();
-    }
-
     // Aspect ratio should be applied after the first story is loaded.
+    fakeMessaging.sendRequest = () =>
+      Promise.resolve({value: storyAspectRatios[0]});
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
     fireHandler['storyContentLoaded']('storyContentLoaded', {});
     await nextTick();
+
+    expect(sendRequestSpy).to.have.been.calledWith('getDocumentState', {
+      'state': 'DESKTOP_ASPECT_RATIO',
+    });
     let playerContainer = win.document.querySelector(
       '.i-amphtml-story-player-main-container'
     );
@@ -248,6 +243,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     ).equal(storyAspectRatios[0]);
 
     // Aspect ratio should be applied after navigating to the second story and it's loaded.
+    fakeMessaging.sendRequest = () =>
+      Promise.resolve({value: storyAspectRatios[1]});
     fireHandler['selectDocument']('selectDocument', {next: true});
     await nextTick();
     fireHandler['storyContentLoaded']('storyContentLoaded', {});
