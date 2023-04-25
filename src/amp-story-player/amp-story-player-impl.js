@@ -6,7 +6,7 @@ import {devAssertElement} from '#core/assert';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, toggleAttribute, tryFocus} from '#core/dom';
-import {computedStyle, resetStyles, setStyle, setStyles} from '#core/dom/style';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
 import {isEnumValue} from '#core/types/enum';
 import {parseJson} from '#core/types/object/json';
