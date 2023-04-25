@@ -1,9 +1,9 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.2.3
-  codecov: codecov/codecov@3.2.3
-  node: circleci/node@5.0.3
+  browser-tools: circleci/browser-tools@1.4.1
+  codecov: codecov/codecov@3.2.4
+  node: circleci/node@5.1.0
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -133,7 +133,7 @@ commands:
           name: 'Get Pinned Chrome Version'
           command: ./.circleci/get_pinned_chrome_version.sh
       - browser-tools/install-chrome:
-          chrome-version: ${CHROME_VERSION}
+          # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
           replace-existing: true
       - browser-tools/install-chromedriver
   install_firefox:
