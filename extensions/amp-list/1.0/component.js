@@ -100,18 +100,18 @@ function getItemsFromPage(pageData, itemsKey) {
  */
 export function BentoListWithRef(
   {
-    src = null,
+    errorTemplate = defaultErrorTemplate,
     fetchJson = xhrUtils.fetchJson,
     itemsKey = 'items',
-    maxItems = 0,
     loadMore: loadMoreMode = 'none',
     loadMoreBookmark = 'load-more-src',
-    viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 viewports of data
-    template: itemTemplate = defaultItemTemplate,
-    wrapperTemplate = defaultWrapperTemplate,
     loadMoreTemplate = defaultLoadMoreTemplate,
-    loadingTemplate = defaultLoadingTemplate,
-    errorTemplate = defaultErrorTemplate,
+    loadingTemplate = defaultLoadingTemplate, // When loadMore === 'auto', keep loading up to 2 viewports of data
+    maxItems = 0,
+    src = null,
+    template: itemTemplate = defaultItemTemplate,
+    viewportBuffer = 2.0,
+    wrapperTemplate = defaultWrapperTemplate,
     ...rest
   },
   ref

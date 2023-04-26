@@ -47,18 +47,18 @@ export function BentoAutocomplete({
   highlightUserEntry = false,
   id,
   inline: inlineTrigger,
-  items = [],
   itemTemplate,
+  items = [],
   maxItems,
   minChars = 1,
   onError = () => {},
   onSelect = () => {},
   parseJson = getItems,
   prefetch = false,
+  query,
   src,
   submitOnEnter = false,
   suggestFirst = false,
-  query,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
   const containerId = useValueRef<string>(

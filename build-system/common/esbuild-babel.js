@@ -38,7 +38,7 @@ let transformCache;
 function getEsbuildBabelPlugin(
   callerName,
   enableCache,
-  {preSetup = () => {}, postLoad = () => {}, plugins} = {}
+  {plugins, postLoad = () => {}, preSetup = () => {}} = {}
 ) {
   const babelMaps = new Map();
 

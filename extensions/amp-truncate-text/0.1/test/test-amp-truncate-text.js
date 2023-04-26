@@ -56,7 +56,7 @@ describes.realWin(
 
       async function createElement(
         content,
-        {width, height, layout = 'fixed', container = doc.body}
+        {container = doc.body, height, layout = 'fixed', width}
       ) {
         const element = win.document.createElement('amp-truncate-text');
         element.setAttribute('layout', layout);

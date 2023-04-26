@@ -1,6 +1,6 @@
 import {BUBBLE_MESSAGE_EVENTS} from '#bento/apis/video-iframe-api';
-import {BaseElement} from '#bento/components/bento-video-iframe/1.0/base-element';
 import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
+import {BaseElement} from '#bento/components/bento-video-iframe/1.0/base-element';
 
 import {measureIntersection} from '#core/dom/layout/intersection';
 
