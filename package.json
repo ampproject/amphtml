@@ -180,7 +180,7 @@
     "sync-rpc": "1.3.6",
     "tar": "6.1.11",
     "tempy": "1.0.1",
-    "terser": "5.9.0",
+    "terser": "5.14.2",
     "traverse": "0.6.6",
     "typescript": "4.5.4",
     "util": "0.12.4",
