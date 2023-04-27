@@ -28,7 +28,7 @@ const sandboxVals =
   'allow-top-navigation';
 
 const TOKEN_VALUE_1P =
-  'AlQOrFnZiFdI61JEjqDm5lg07gKrnYgXL9jDD/w7EHNFBE60/++yfetyABuyjCD917535XXwd9JHzjrKK36TDg0AAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2ODA2NTI3OTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
+  'ApOvjV1JJJiKYK4MP/D8NP1voJFNXHeKLUO5rW8JIMfBsw0JdciNfRfci8bf2++aqywaKUkyUUuMWZoaOgxtFQwAAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2ODgwODMxOTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
 
 /**
  * Create the starting html for all FIE ads. If streaming is supported body will be

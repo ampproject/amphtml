@@ -1,8 +1,8 @@
 /**
  * @fileoverview
- * Logs Bento components to publish.
+ * Logs AMP extensions to publish. Excludes Bento components.
  */
 
-const {getExtensionsAndComponents} = require('./utils');
+const {getExtensions} = require('./utils');
 console /*OK*/
-  .log(JSON.stringify(getExtensionsAndComponents()));
+  .log(JSON.stringify(getExtensions()));

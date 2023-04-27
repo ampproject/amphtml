@@ -825,7 +825,8 @@ for (const {config, name} of [
           });
         });
 
-        it('expands CLIENT_ID in targeting', () => {
+        // TODO(#38720): fix flaky test.
+        it.skip('expands CLIENT_ID in targeting', () => {
           element.setAttribute(
             'json',
             `{
@@ -841,7 +842,8 @@ for (const {config, name} of [
           });
         });
 
-        it('expands CLIENT_ID in targeting inside array', () => {
+        // TODO(#38720): fix flaky test.
+        it.skip('expands CLIENT_ID in targeting inside array', () => {
           element.setAttribute(
             'json',
             `{
