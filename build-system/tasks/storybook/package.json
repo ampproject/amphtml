@@ -12,6 +12,6 @@
     "@storybook/client-api": "6.5.16",
     "babel-loader": "8.3.0",
     "core-js": "3.30.1",
-    "styled-jsx": "4.0.1"
+    "styled-jsx": "5.0.0"
   }
 }
