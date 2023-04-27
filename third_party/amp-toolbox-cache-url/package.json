@@ -29,7 +29,7 @@
   "files": ["dist", "package.json", "../LICENSE", "README.md"],
   "dependencies": {
     "punycode": "2.1.1",
-    "url-parse": "1.5.3"
+    "url-parse": "1.5.10"
   },
   "devDependencies": {
     "@ampproject/rollup-plugin-closure-compiler": "0.27.0",
