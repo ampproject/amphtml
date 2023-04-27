@@ -1,4 +1,5 @@
 import * as Preact from '#core/dom/jsx';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -33,18 +34,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
 
-      storeService = new AmpStoryStoreService(win);
-      storeService.subscribe(StateProperty.MUTED_STATE, (muted) => {
-        const storeEl = doc.querySelector('amp-story');
-        muted
-          ? storeEl.setAttribute('muted', '')
-          : storeEl.removeAttribute('muted');
-      });
-      env.sandbox
-        .stub(Services, 'storyStoreServiceForOrNull')
-        .returns(Promise.resolve(storeService));
-      env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
-
       const storyEl = (
         <amp-story>
           <amp-story-page id="page-1">
@@ -60,6 +49,17 @@ describes.realWin(
         </amp-story>
       );
       doc.body.appendChild(storyEl);
+
+      storeService = new AmpStoryStoreService(win);
+      storeService.subscribe(StateProperty.MUTED_STATE, (muted) => {
+        muted
+          ? storyEl.setAttribute('muted', '')
+          : storyEl.removeAttribute('muted');
+      });
+      env.sandbox
+        .stub(Services, 'storyStoreServiceForOrNull')
+        .returns(Promise.resolve(storeService));
+      env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
 
       stickerEl = doc.querySelector('amp-story-audio-sticker');
       stickerImpl = await stickerEl.getImpl();
@@ -166,7 +166,8 @@ describes.realWin(
       await nextTick();
 
       doc.querySelectorAll('amp-story-audio-sticker').forEach((el) => {
-        if (el.classList.contains('on-active-page')) {
+        const pageEl = closestAncestorElementBySelector(el, 'amp-story-page');
+        if (pageEl.hasAttribute('active')) {
           clock.tick(4000);
         }
         expect(computedStyle(win, el).getPropertyValue('opacity')).equal('0');

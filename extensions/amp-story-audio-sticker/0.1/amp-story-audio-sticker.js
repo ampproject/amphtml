@@ -8,10 +8,7 @@ import {
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-story-audio-sticker-0.1.css';
-import {
-  Action,
-  StateProperty,
-} from '../../amp-story/1.0/amp-story-store-service';
+import {Action} from '../../amp-story/1.0/amp-story-store-service';
 
 const TAG = 'amp-story-audio-sticker';
 
@@ -100,22 +97,16 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
         </div>
       </div>
     );
+  }
 
-    const pageEl = closestAncestorElementBySelector(
-      this.element,
-      'amp-story-page'
+  /** @override */
+  layoutCallback() {
+    return Services.storyStoreServiceForOrNull(this.win).then(
+      (storeService) => {
+        this.storeService_ = storeService;
+        this.initializeListeners_();
+      }
     );
-    const pageId = pageEl.getAttribute('id');
-
-    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-      this.storeService_ = storeService;
-      this.initializeListeners_();
-      this.storeService_.subscribe(
-        StateProperty.CURRENT_PAGE_ID,
-        (currentPageId) =>
-          this.toggleStickerState_('on-active-page', pageId === currentPageId)
-      );
-    });
   }
 
   /** @private */
@@ -168,16 +159,6 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       ? stickerAttr
       : '';
     return stickerAttr || FALLBACK_DEFAULT_STICKER;
-  }
-
-  /**
-   * Toggle sticker states.
-   * @param {string} stateName
-   * @param {boolean} force
-   * @private
-   */
-  toggleStickerState_(stateName, force) {
-    this.mutateElement(() => this.element.classList.toggle(stateName, force));
   }
 
   /** @private */
