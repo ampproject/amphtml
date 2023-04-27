@@ -76,9 +76,6 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
-
-    /** @private {?string} the default sticker to use if no custom sticker provided */
-    this.defaultSticker_ = null;
   }
 
   /** @override */
@@ -123,8 +120,8 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
 
   /** @private */
   maybeInitializeDefaultSticker_() {
-    this.defaultSticker_ = this.getDefaultSticker_();
-    if (!this.defaultSticker_) {
+    const defaultSticker = this.getDefaultSticker_();
+    if (!defaultSticker) {
       return;
     }
 
@@ -133,8 +130,9 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     this.element.appendChild(
       <amp-story-audio-sticker-pretap>
         <amp-img
-          width={DEFAULT_STICKERS[this.defaultSticker_].width}
-          height={DEFAULT_STICKERS[this.defaultSticker_].height}
+          width={DEFAULT_STICKERS[defaultSticker].width}
+          height={DEFAULT_STICKERS[defaultSticker].height}
+          src={DEFAULT_STICKERS[defaultSticker].pretapUrl}
           layout="responsive"
         ></amp-img>
       </amp-story-audio-sticker-pretap>
@@ -142,8 +140,9 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     this.element.appendChild(
       <amp-story-audio-sticker-posttap>
         <amp-img
-          width={DEFAULT_STICKERS[this.defaultSticker_].width}
-          height={DEFAULT_STICKERS[this.defaultSticker_].height}
+          width={DEFAULT_STICKERS[defaultSticker].width}
+          height={DEFAULT_STICKERS[defaultSticker].height}
+          src={DEFAULT_STICKERS[defaultSticker].posttapUrl}
           layout="responsive"
         ></amp-img>
       </amp-story-audio-sticker-posttap>
@@ -189,28 +188,6 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       true
     );
     // TODO: add listeners for click animations.
-  }
-
-  /** @override */
-  layoutCallback() {
-    if (this.defaultSticker_) {
-      const pretapImage = scopedQuerySelector(
-        this.element,
-        'amp-story-audio-sticker-pretap amp-img'
-      );
-      pretapImage.setAttribute(
-        'src',
-        DEFAULT_STICKERS[this.defaultSticker_].pretapUrl
-      );
-      const posttapImage = scopedQuerySelector(
-        this.element,
-        'amp-story-audio-sticker-posttap amp-img'
-      );
-      posttapImage.setAttribute(
-        'src',
-        DEFAULT_STICKERS[this.defaultSticker_].posttapUrl
-      );
-    }
   }
 
   /** @override */
