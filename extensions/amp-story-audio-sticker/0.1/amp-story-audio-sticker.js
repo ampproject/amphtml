@@ -69,12 +69,6 @@ const DEFAULT_STICKERS = {
  */
 const FALLBACK_DEFAULT_STICKER = 'cat-sticker';
 
-/**
- * The number of milliseconds to wait before hiding the sticker after the story is unmuted.
- * @const {number}
- */
-export const HIDE_STICKER_DELAY_DURATION = 4000;
-
 export class AmpStoryAudioSticker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -170,7 +164,10 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       return null;
     }
 
-    const stickerAttr = this.element.getAttribute('sticker');
+    let stickerAttr = this.element.getAttribute('sticker');
+    stickerAttr = Object.keys(DEFAULT_STICKERS).includes(stickerAttr)
+      ? stickerAttr
+      : '';
     return stickerAttr || FALLBACK_DEFAULT_STICKER;
   }
 

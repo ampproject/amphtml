@@ -8,7 +8,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {HIDE_STICKER_DELAY_DURATION} from '../amp-story-audio-sticker';
+import {} from '../amp-story-audio-sticker';
 
 describes.realWin(
   'amp-story-audio-sticker-v0.1',
@@ -167,7 +167,7 @@ describes.realWin(
 
       doc.querySelectorAll('amp-story-audio-sticker').forEach((el) => {
         if (el.classList.contains('on-active-page')) {
-          clock.tick(HIDE_STICKER_DELAY_DURATION);
+          clock.tick(4000);
         }
         expect(computedStyle(win, el).getPropertyValue('opacity')).equal('0');
       });
