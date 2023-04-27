@@ -1,9 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {
-  closestAncestorElementBySelector,
-  scopedQuerySelector,
-} from '#core/dom/query';
+import {scopedQuerySelector} from '#core/dom/query';
 
 import {Services} from '#service';
 
