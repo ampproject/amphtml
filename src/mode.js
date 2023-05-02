@@ -9,6 +9,7 @@ import {getHashParams} from '#core/types/string/url';
  *   development: boolean,
  *   esm: boolean,
  *   test: boolean,
+ *   ssrCss: boolean,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined)
@@ -54,6 +55,7 @@ function getMode_(win) {
     esm: coreMode.isEsm(),
     test: coreMode.isTest(win),
     rtvVersion: getRtvVersion(win),
+    ssrReady: coreMode.isSsrCss(),
   };
 }
 

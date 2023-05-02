@@ -1,7 +1,7 @@
 import {propagateNonce} from '#core/dom';
 import * as mode from '#core/mode';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
@@ -50,6 +50,25 @@ export function calculateExtensionScriptUrl(
 }
 
 /**
+ * Calculate url for a file in the v0/ extension directory.
+ * @param {!Window} win The window
+ * @param {!Location} location The window's location
+ * @param {string} filename
+ * @param {boolean=} opt_isLocalDev
+ * @return {string}
+ */
+export function calculateExtensionFileUrl(
+  win,
+  location,
+  filename,
+  opt_isLocalDev
+) {
+  const base = calculateScriptBaseUrl(location, opt_isLocalDev);
+  const rtv = getMode(win).rtvVersion;
+  return `${base}/rtv/${rtv}/v0/${filename}`;
+}
+
+/**
  * Calculate script url for an entry point.
  * If `opt_rtv` is true, returns the URL matching the current RTV.
  * @param {!Location} location The window's location
@@ -86,7 +105,7 @@ export function parseExtensionUrl(scriptUrl) {
   }
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
-    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)(?:\?ssr-css=[0|1])?$/i
   );
   const extensionId = matches ? matches[2] : undefined;
   const extensionVersion = matches ? matches[3] : undefined;

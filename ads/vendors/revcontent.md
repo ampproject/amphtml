@@ -1,49 +1,67 @@
 # Revcontent
 
-## Example
+## Examples
+
+### Standard Tag
+
+The standard AMP tag for Revcontent is the basic AMP ads integration and is used as shown here:
 
 ```html
 <amp-ad
-  width="400"
-  height="260"
+  width="{APPROPRIATE_WIDTH}"
+  height="{APPROPRIATE_HEIGHT}"
   layout="responsive"
+  data-revcontent
   type="revcontent"
-  heights="(max-width: 320px) 933px,
-      (max-width: 360px) 1087px,
-      (max-width: 375px) 1138px,
-      (max-width: 412px) 1189px,
-      (max-width: 414px) 1072px,
-      (max-width: 568px) 1151px,
-      (max-width: 640px) 1128px,
-      (max-width: 667px) 1151px,
-      (max-width: 732px) 1211px,
-      (max-width: 736px) 1151px,
-      (max-width: 768px) 633px,
-      (max-width: 1024px) 711px,
-      86vw"
-  data-wrapper="rcjsload_2ff711"
-  data-id="203"
->
-  <div placeholder="">Loading ...</div>
+  data-id="{YOUR_WIDGET_ID}">
+</amp-ad>
+```
+
+### Evergreen Tag
+
+The evergreen AMP tag leverages new and improved ad code from Revcontent and supports greater performance and customization capabilities:
+
+```html
+<amp-ad
+  data-widget-id="{YOUR_WIDGET_ID}"
+  data-pub-id="{YOUR_PUB_ID}"
+  data-placement-type="evergreen"
+  width="{APPROPRIATE_WIDTH}"
+  height="{APPROPRIATE_HEIGHT}"
+  layout="responsive"
+  type="revcontent">
 </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see [Revcontent's documentation](https://faq.revcontent.com/).
+For help with configuration, please contact Revcontent or refer to their documentation.
 
-Supported parameters:
+### Standard Tag Options
+
+#### Required Parameters
 
 -   `data-id`
--   `data-revcontent`
--   `data-env`
--   `data-wrapper`
--   `data-endpoint`
--   `data-ssl`
--   `data-testing`
--   `data-loadscript`
+-   `width`
+-   `height`
+
+#### Optional Parameters
+
 -   `data-sub-ids`
+-   `data-gam-enabled`
+-   `data-gdpr`
+-   `data-gdpr-consent`
+-   `data-us-privacy`
 
-## Auto-sizing of Ads
+### Evergreen Tag Options
 
-Revcontent's AMP service will be updated to support resizing of ads for improved rendering, no additional tag parameters are required at this time.
+#### Required Parameters
+
+-   `data-widget-id`
+-   `data-pub-id`
+-   `width`
+-   `height`
+
+#### Optional Parameters
+
+Please contact Revcontent for more information about optional parameters for evergreen tags.

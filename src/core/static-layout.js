@@ -30,7 +30,6 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '0px', height: '0px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
-  // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null,
   'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
@@ -76,6 +75,7 @@ export function getNaturalDimensions(element) {
     };
     doc.body.removeChild(temp);
   }
+
   return /** @type {import('./dom/layout').DimensionsDef} */ (
     naturalDimensions_[tagName]
   );

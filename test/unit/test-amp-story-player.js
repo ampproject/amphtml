@@ -1,6 +1,8 @@
 import {Messaging} from '@ampproject/viewer-messaging';
 import {expect} from 'chai';
 
+import {computedStyle} from '#core/dom/style';
+
 import {createCustomEvent, listenOncePromise} from '#utils/event-helper';
 
 import {macroTask} from '#testing/helpers';
@@ -212,6 +214,64 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(storyIframes[1].getAttribute('src')).to.include(
       '#visibilityState=prerender'
     );
+  });
+
+  it('should apply desktop aspect ratio based on the active story', async () => {
+    const numStories = 2;
+    buildStoryPlayer(numStories);
+    await manager.loadPlayers();
+    await nextTick();
+
+    const storyAspectRatios = ['0.75', '0.5'];
+    const storyIframes = playerEl.querySelectorAll('iframe');
+    for (let i = 0; i < numStories; i++) {
+      const doc = storyIframes[i].contentWindow.document;
+      doc.open();
+      doc.write(
+        '<html style="--i-amphtml-story-desktop-one-panel-ratio:' +
+          storyAspectRatios[i] +
+          ' !important;"></html>'
+      );
+      doc.close();
+    }
+
+    // Aspect ratio should be applied after the first story is loaded.
+    fireHandler['storyContentLoaded']('storyContentLoaded', {});
+    await nextTick();
+    let playerContainer = win.document.querySelector(
+      '.i-amphtml-story-player-main-container'
+    );
+    expect(
+      computedStyle(win, playerContainer)
+        .getPropertyValue('--i-amphtml-story-player-panel-ratio')
+        .trim()
+    ).equal(storyAspectRatios[0]);
+
+    // Aspect ratio should be applied after navigating to the second story and it's loaded.
+    fireHandler['selectDocument']('selectDocument', {next: true});
+    await nextTick();
+    fireHandler['storyContentLoaded']('storyContentLoaded', {});
+    await nextTick();
+    playerContainer = win.document.querySelector(
+      '.i-amphtml-story-player-main-container'
+    );
+    expect(
+      computedStyle(win, playerContainer)
+        .getPropertyValue('--i-amphtml-story-player-panel-ratio')
+        .trim()
+    ).equal(storyAspectRatios[1]);
+
+    // Aspect ratio should be applied after navigating back to the already loaded first story.
+    fireHandler['selectDocument']('selectDocument', {previous: true});
+    await nextTick();
+    playerContainer = win.document.querySelector(
+      '.i-amphtml-story-player-main-container'
+    );
+    expect(
+      computedStyle(win, playerContainer)
+        .getPropertyValue('--i-amphtml-story-player-panel-ratio')
+        .trim()
+    ).equal(storyAspectRatios[0]);
   });
 
   it('should not load next story if first one has not finished loading', async () => {

@@ -28,17 +28,25 @@ on:
 env:
   SCRIPTS_REPO: 'https://raw.githubusercontent.com/ampproject/amphtml/main'
   SCRIPTS_DIR: 'build-system/npm-publish'
+permissions:
+  contents: read
+
 jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
       extensions: ${{ steps.get-extensions.outputs.extensions }}
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
       - name: Print inputs
         run: |
           echo "AMP version: ${{ github.event.inputs.amp-version }}"
           echo "npm tag: ${{ github.event.inputs.tag }}"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           ref: ${{ github.events.inputs.amp-version }}
       - name: Get latest scripts
@@ -47,17 +55,24 @@ jobs:
         id: get-extensions
         run: |
           EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
-          echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
+          echo "extensions={\"include\":${EXTENSIONS}}" >> $GITHUB_OUTPUT
   publish-core:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
     needs: setup
     runs-on: ubuntu-latest
+    outputs:
+      core-version: ${{ steps.build-core.outputs.core-version }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           ref: ${{ github.events.inputs.amp-version }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           registry-url: https://registry.npmjs.org
           node-version: lts/*
@@ -67,12 +82,14 @@ jobs:
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-core-version.js" -O ${{ env.SCRIPTS_DIR }}/get-core-version.js
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
       - name: Build package
+        id: build-core
         run: |
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
           CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
           cd ./src/bento/core
           npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
+          echo "core-version=${CORE_VERSION}" >> $GITHUB_OUTPUT
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
@@ -101,10 +118,15 @@ jobs:
       matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           ref: ${{ github.events.inputs.amp-version }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           registry-url: https://registry.npmjs.org
           node-version: lts/*
@@ -118,7 +140,7 @@ jobs:
         run: |
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
-          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }}
+          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }} ${{ needs.publish-core.outputs.core-version }}
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
@@ -140,3 +162,30 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: publish
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@e27dddc79c92bc6e4562f268fffa5ed752639abd # v2.9.1
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

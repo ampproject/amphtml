@@ -319,6 +319,17 @@ window.andbeyond.initAmp = function (
   extras
 ) {};
 
+// affinity.js
+window.affinity = {};
+window.affinity.initAMP = function (global, data) {};
+data.width;
+data.height;
+data.adtype;
+data.adslot;
+data['multi-size'];
+data.jsontargeting;
+data.extras;
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -615,6 +626,19 @@ data.section;
 
 // pulsepoint.js
 window.PulsePointHeaderTag;
+
+// r9x.js
+window.r9x = {};
+window.r9x.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots,
+  jsontargeting,
+  extras
+) {};
 
 // rubicon.js
 data.method;

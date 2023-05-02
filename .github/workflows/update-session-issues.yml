@@ -9,14 +9,24 @@ on:
     - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
     - cron: '0 21,22 * * 3' # Americas
 
+permissions:
+  contents: read
+
 jobs:
   update-session-issues:
+    permissions:
+      issues: write
     if: github.repository == 'ampproject/amphtml'
     name: Update Session Issues
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
       - name: Update Session Issues
         run: |
           node ./build-system/common/update-session-issues

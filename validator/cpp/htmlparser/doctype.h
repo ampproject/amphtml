@@ -9,11 +9,6 @@
 
 namespace htmlparser {
 
-// Controls if lang=.* parameter or any combinations of it are allowed in the
-// doctype declarations. We have seen several web pages with lang attribute in
-// doctype.
-#define ALLOW_LANG_ATTRIBUTE_IN_DOCTYPE 1
-
 // Parses the data from a DoctypeToken into a name,
 // public identifier, and system identifier. It returns a Node whose Type
 // is DoctypeNode, whose Data is the name, and which has attributes

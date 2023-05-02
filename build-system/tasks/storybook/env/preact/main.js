@@ -1,14 +1,13 @@
-const {globExcludeDisabledStorybookFiles} = require('../disabled-stories');
 const {getStaticDirs} = require('../static-dirs');
 
 const rootDir = '../../../../..';
 
 module.exports = {
   staticDirs: getStaticDirs(rootDir),
-  stories: globExcludeDisabledStorybookFiles([
+  stories: [
     `${rootDir}/src/**/storybook/!(*.amp).js`,
     `${rootDir}/extensions/**/*.*/storybook/!(*.amp).js`,
-  ]),
+  ],
   addons: [
     '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',

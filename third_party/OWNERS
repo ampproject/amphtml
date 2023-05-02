@@ -4,12 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'rsimha'},
-        {name: 'erwinmombay'},
-        {name: 'choumx'},
-        {name: 'jridgewell'},
-      ],
+      owners: [{name: 'erwinmombay'}, {name: 'choumx'}],
     },
   ],
 }

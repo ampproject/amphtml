@@ -167,6 +167,30 @@ example below.
 </amp-geo>
 ```
 
+#### U.S. Virginia Detection
+
+The `amp-geo` component provides the
+[ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when it
+determines a request is from Virginia. The `us-va` (`${country}-${subdivision}` format) value from the
+list supports this feature.
+
+Additional countries/subdivision may be included with the preset list as in the `usWithSubdivisions`
+example below.
+
+```html
+<amp-geo layout="nodisplay">
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+        "usca": ["preset-us-ca"],
+        "usva":["us-va"],
+        "usWithSubdivisions": ["us-ca", "us-va"]
+      }
+    }
+  </script>
+</amp-geo>
+```
+
 ### Render Blocking
 
 By default, the `amp-geo` component is not render blocking. That is, the page

@@ -13,7 +13,7 @@ import {Services} from '#service';
 import {loadPromise} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';

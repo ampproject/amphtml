@@ -6,7 +6,7 @@ import {devAssertElement} from '#core/assert';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, toggleAttribute, tryFocus} from '#core/dom';
-import {resetStyles, setStyle, setStyles} from '#core/dom/style';
+import {computedStyle, resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
 import {isEnumValue} from '#core/types/enum';
 import {parseJson} from '#core/types/object/json';
@@ -20,7 +20,7 @@ import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 import {
   addParamsToUrl,
@@ -121,6 +121,7 @@ let DocumentStateTypeDef;
  *   posterImage: (?string),
  *   storyContentLoaded: ?boolean,
  *   connectedDeferred: !Deferred
+ *   desktopAspectRatio: ?number,
  * }}
  */
 let StoryDef;
@@ -176,7 +177,7 @@ const LOG_TYPE_ENUM = {
  * NOTE: If udpated here, update in amp-story.js
  * @private @const {number}
  */
-const PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+const PANEL_ASPECT_RATIO_THRESHOLD = 31 / 40;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -251,6 +252,9 @@ export class AmpStoryPlayer {
 
     /** @private {?Element} */
     this.nextButton_ = null;
+
+    /** @private {boolean} */
+    this.pageAttachmentOpen_ = false;
 
     return this.element_;
   }
@@ -616,6 +620,9 @@ export class AmpStoryPlayer {
 
           messaging.registerHandler('storyContentLoaded', () => {
             story.storyContentLoaded = true;
+
+            // Store aspect ratio so that it can be updated when the story becomes active.
+            this.storeAspectRatio_(story);
           });
 
           messaging.sendRequest(
@@ -1144,6 +1151,34 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Store aspect ratio of the loaded story.
+   * @param {!StoryDef} story
+   * @private
+   */
+  storeAspectRatio_(story) {
+    if (story.iframe.contentWindow.document.documentElement) {
+      story.desktopAspectRatio = computedStyle(
+        story.iframe.contentWindow,
+        story.iframe.contentWindow.document.documentElement
+      ).getPropertyValue('--i-amphtml-story-desktop-one-panel-ratio');
+    }
+  }
+
+  /**
+   * Update player aspect ratio based on the active story aspect ratio.
+   * @param {!StoryDef} story
+   * @private
+   */
+  updateAspectRatio_(story) {
+    if (story.distance === 0) {
+      setStyles(this.rootEl_, {
+        '--i-amphtml-story-player-panel-ratio':
+          this.stories_[this.currentIdx_].desktopAspectRatio,
+      });
+    }
+  }
+
+  /**
    * Returns a promise that makes sure that the current story gets loaded first
    * before any others. When the given story is not the current story, it will
    * block until the current story has finished loading. When the given story
@@ -1154,6 +1189,9 @@ export class AmpStoryPlayer {
    */
   currentStoryPromise_(story) {
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
+      // Set aspect ratio that was stored when the story was loaded.
+      this.updateAspectRatio_(story);
+
       return Promise.resolve();
     }
 
@@ -1173,6 +1211,10 @@ export class AmpStoryPlayer {
         // event anymore, which is why we need this sync property.
         story.storyContentLoaded = true;
         this.currentStoryLoadDeferred_.resolve();
+
+        // Store and update the player aspect ratio based on the active story aspect ratio.
+        this.storeAspectRatio_(story);
+        this.updateAspectRatio_(story);
       })
     );
 
@@ -1616,6 +1658,7 @@ export class AmpStoryPlayer {
    */
   onPageAttachmentStateUpdate_(pageAttachmentOpen) {
     this.updateButtonVisibility_(!pageAttachmentOpen);
+    this.pageAttachmentOpen_ = pageAttachmentOpen;
     this.dispatchPageAttachmentEvent_(pageAttachmentOpen);
   }
 
@@ -1791,7 +1834,7 @@ export class AmpStoryPlayer {
    * @param {!Object} gesture
    */
   onSwipeX_(gesture) {
-    if (this.stories_.length <= 1) {
+    if (this.stories_.length <= 1 || this.pageAttachmentOpen_) {
       return;
     }
 

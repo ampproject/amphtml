@@ -1,5 +1,6 @@
 import {toggleExperiment} from '#experiments';
 
+import {Services} from '#service';
 import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 
@@ -36,9 +37,9 @@ const EXIT_CONFIG = {
     },
     variables: {
       'finalUrl':
-        'http://localhost:8000/vars?foo=bar&ampdoc=AMPDOC_HOST&r=RANDOM&x=CLICK_X&y=CLICK_Y',
+        'http://localhost:8000/vars?foo=bar&ampdoc=AMPDOC_HOST&r=RANDOM&x=CLICK_X&y=CLICK_Y&uap=UACH(platform)',
       'trackingUrls': [
-        'http://localhost:8000/tracking?r=RANDOM&x=CLICK_X&y=CLICK_Y',
+        'http://localhost:8000/tracking?r=RANDOM&x=CLICK_X&y=CLICK_Y&uap=UACH(platform)',
       ],
     },
     customVars: {
@@ -356,12 +357,10 @@ describes.realWin(
       const config = {
         targets: {
           landingPage: {
-            finalUrl: 'https://example.com',
+            finalUrl: 'https://advertiser.example',
             behaviors: {
               browserAdConversion: {
-                attributiondestination: 'https://example.com',
-                attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
-                attributionreportto: 'https://google.com',
+                attributionsrc: 'https://adtech.example',
               },
             },
           },
@@ -378,9 +377,43 @@ describes.realWin(
       });
 
       expect(openStub).calledWithExactly(
-        'https://example.com',
+        'https://advertiser.example',
         '_blank',
-        'noopener,attributiondestination=https://example.com,attributionsourceeventid=EFnZ8GunL1xrwNTIHbXrvQ==,attributionreportto=https://google.com'
+        'noopener,attributionsrc=https%3A%2F%2Fadtech.example'
+      );
+    });
+
+    it('should handle empty attributionsrc when given `browserAdConversion`', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const openStub = env.sandbox.stub(win, 'open').returns(win);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://adtech.example',
+            behaviors: {
+              browserAdConversion: {
+                attributionsrc: '',
+              },
+            },
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(openStub).calledWithExactly(
+        'https://adtech.example',
+        '_blank',
+        'noopener,attributionsrc='
       );
     });
 
@@ -527,6 +560,11 @@ describes.realWin(
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => true);
 
+      // Mock UACH on URL replacement service directly since amp-ad-exit is sync
+      // only.
+      const replacements = Services.urlReplacementsForDoc(element);
+      replacements.variableSource_.cachedUach_['platform'] = 'TEST_PLATFORM';
+
       impl.executeAction({
         method: 'exit',
         args: {target: 'variables'},
@@ -537,13 +575,13 @@ describes.realWin(
       const urlMatcher = env.sandbox.match(
         new RegExp(
           'http:\\/\\/localhost:8000\\/vars\\?' +
-            'foo=bar&ampdoc=AMPDOC_HOST&r=[0-9\\.]+&x=101&y=102'
+            'foo=bar&ampdoc=AMPDOC_HOST&r=[0-9\\.]+&x=101&y=102&uap=TEST_PLATFORM'
         )
       );
       expect(open).to.have.been.calledWith(urlMatcher, '_blank');
 
       const trackingMatcher = env.sandbox.match(
-        /http:\/\/localhost:8000\/tracking\?r=[0-9\.]+&x=101&y=102/
+        /http:\/\/localhost:8000\/tracking\?r=[0-9\.]+&x=101&y=102&uap=TEST_PLATFORM/
       );
       expect(sendBeacon).to.have.been.calledWith(trackingMatcher, '');
     });
@@ -973,9 +1011,7 @@ describes.realWin(
         const target = {
           behaviors: {
             browserAdConversion: {
-              attributiondestination: 'https://example.com',
-              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
-              attributionreportto: 'https://google.com',
+              attributionsrc: 'https://adtech.example',
             },
           },
         };
@@ -984,16 +1020,14 @@ describes.realWin(
             true /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(3);
+        ).to.equal(6);
       });
 
       it('should return ATTRIBUTION_DATA_PRESENT if browserAdConfig is present and no browser support', () => {
         const target = {
           behaviors: {
             browserAdConversion: {
-              attributiondestination: 'https://example.com',
-              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
-              attributionreportto: 'https://google.com',
+              attributionsrc: 'https://adtech.example',
             },
           },
         };
@@ -1002,7 +1036,7 @@ describes.realWin(
             false /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(2);
+        ).to.equal(5);
       });
 
       it('should return ATTRIBUTION_MACRO_PRESENT if browserAdConfig not present', () => {
@@ -1014,7 +1048,7 @@ describes.realWin(
             false /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(1);
+        ).to.equal(4);
       });
     });
   }

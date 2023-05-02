@@ -11,7 +11,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <style amp-custom>
 >>   ^~~~~~~~~
-amp4email_feature_tests/css_i_amphtml.html:11:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_i_amphtml.html:11:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
 |      i-amphtml-sizer {}
 |      .i-amphtml-hidden {}
 |      #i-amphtml-wrapper {}

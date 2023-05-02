@@ -67,7 +67,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
-      'validator/js/engine/validator_test.js',
+      //'validator/js/engine/validator_test.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -130,8 +130,8 @@ const forbiddenTermsGlobal = {
       'build-system/common/logging.js',
       'build-system/task-runner/amp-cli-runner.js',
       'src/purifier/noop.js',
-      'validator/js/engine/validator-in-browser.js',
-      'validator/js/engine/validator.js',
+      //'validator/js/engine/validator-in-browser.js',
+      //'validator/js/engine/validator.js',
     ],
     checkInTestFolder: true,
   },
@@ -221,7 +221,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -430,6 +430,7 @@ const forbiddenTermsGlobal = {
       'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
       'extensions/amp-video/0.1/video-cache.js',
+      'extensions/amp-story/1.0/amp-story.js',
       'src/utils/xhr-utils.js',
     ],
   },
@@ -469,7 +470,7 @@ const forbiddenTermsGlobal = {
       'src/service/cid-impl.js',
       'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/fake-dom.js',
     ],
   },
@@ -632,13 +633,13 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/build.js',
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
-      'src/config.js',
+      'src/config/urls.js',
       'src/experiments/index.js',
       'src/mode.js',
       'src/core/mode/test.js',
       'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -673,7 +674,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['testing/init-tests.js'],
+    allowlist: ['testing/init-tests-helpers.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -707,29 +708,19 @@ const forbiddenTermsGlobal = {
       // Non test files. These can remain.
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
-      'validator/js/engine/amp4ads-parse-css_test.js',
-      'validator/js/engine/htmlparser_test.js',
-      'validator/js/engine/keyframes-parse-css_test.js',
-      'validator/js/engine/parse-css_test.js',
-      'validator/js/engine/parse-srcset_test.js',
-      'validator/js/engine/parse-url_test.js',
-      'validator/js/engine/validator_test.js',
+      //'validator/js/engine/amp4ads-parse-css_test.js',
+      //'validator/js/engine/htmlparser_test.js',
+      //'validator/js/engine/keyframes-parse-css_test.js',
+      //'validator/js/engine/parse-css_test.js',
+      //'validator/js/engine/parse-srcset_test.js',
+      //'validator/js/engine/parse-url_test.js',
+      //'validator/js/engine/validator_test.js',
       'validator/js/gulpjs/test/validate.js',
     ],
     checkInTestFolder: true,
   },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
-  '@storybook/addon-knobs': {
-    message:
-      'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
-    allowlist: [
-      // TODO(#35923): Update existing files to use Controls instead.
-      'src/builtins/storybook/amp-layout.amp.js',
-      'src/preact/storybook/Context.js',
-      'src/preact/storybook/Wrappers.js',
-    ],
-  },
 };
 
 const bannedTermsHelpString =
@@ -818,9 +809,9 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       '3p/integration-lib.js',
       'examples/pwa/pwa.js',
-      'validator/js/engine/parse-url.js',
-      'validator/js/engine/validator.js',
-      'validator/js/webui/webui.js',
+      //'validator/js/engine/parse-url.js',
+      //'validator/js/engine/validator.js',
+      //'validator/js/webui/webui.js',
       'src/url.js',
       'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
@@ -931,7 +922,7 @@ const forbiddenTermsSrcInclusive = {
   '(cdn|3p)\\.ampproject\\.': {
     message:
       'The CDN domain should typically not be hardcoded in source ' +
-      'code. Use a property of urls from src/config.js instead.',
+      'code. Use urls from src/config/urls.js instead.',
     allowlist: [
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
@@ -945,12 +936,12 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
       'src/amp-story-player/amp-story-player-impl.js',
-      'src/config.js',
+      'src/config/urls.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/experiments/experiments.js',
       'validator/js/engine/htmlparser-interface.js',
-      'validator/js/engine/validator-in-browser.js',
-      'validator/js/engine/validator.js',
+      //'validator/js/engine/validator-in-browser.js',
+      //'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
       'validator/js/webui/serve-standalone.go',
     ],
@@ -969,7 +960,7 @@ const forbiddenTermsSrcInclusive = {
     'use endsWith helper in src/core/types/string',
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
-    allowlist: ['validator/js/engine/validator.js'],
+    //allowlist: ['validator/js/engine/validator.js'],
   },
   "process\\.env(\\.|\\[\\')(GITHUB_ACTIONS|CIRCLECI)": {
     message:

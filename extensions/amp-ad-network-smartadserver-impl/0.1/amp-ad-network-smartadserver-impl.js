@@ -17,8 +17,8 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import {hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
-import {includes} from '#core/types/string';
 
 import {Services} from '#service';
 
@@ -33,9 +33,6 @@ const TAG = 'amp-ad-network-smartadserver-impl';
 
 /** @const {number} */
 const MAX_URL_LENGTH = 15360;
-
-/** @type {string} */
-const SAS_NO_AD_STR = '<html><head></head><body></body></html>';
 
 /**
  * @const {!./shared/url-builder.QueryParameterDef}
@@ -53,6 +50,14 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /**
+     * @private {string}
+     * Additional key-value target appended by extension
+     */
+    this.exTgt_ = '';
+
+    this.addListener();
   }
 
   /** @override */
@@ -66,6 +71,10 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
       return opt_rtcResponsesPromise.then((result) => {
         checkStillCurrent();
+        if (result) {
+          result = this.modifyVendorResponse(result);
+        }
+
         const rtc = this.getBestRtcCallout_(result);
         const urlParams = {};
 
@@ -73,20 +82,26 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_bid'] = rtc.hb_bidder || '';
           urlParams['hb_cpm'] = rtc.hb_pb;
           urlParams['hb_ccy'] = 'USD';
-          urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
-          urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
-          urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
+          if (hasOwn(rtc, 'hb_cache_url')) {
+            urlParams['hb_cache_url'] = rtc.hb_cache_url;
+          } else {
+            urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
+            urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
+            urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
+          }
           urlParams['hb_width'] = this.element.getAttribute('width');
           urlParams['hb_height'] = this.element.getAttribute('height');
+          urlParams['hb_cache_content_type'] = rtc.hb_cache_content_type;
         }
 
         const schain = this.element.getAttribute('data-schain');
         if (schain) {
           urlParams['schain'] = schain;
         }
-
+        urlParams['isasync'] =
+          this.element.getAttribute('data-isasync') === 'false' ? 0 : 1;
         const formatId = this.element.getAttribute('data-format');
-        const tagId = 'sas_' + formatId;
+
         return buildUrl(
           (this.element.getAttribute('data-domain') ||
             'https://www.smartadserver.com') + '/ac',
@@ -94,13 +109,14 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'siteid': this.element.getAttribute('data-site'),
             'pgid': this.element.getAttribute('data-page'),
             'fmtid': formatId,
-            'tgt': this.element.getAttribute('data-target'),
-            'tag': tagId,
+            'tgt':
+              this.exTgt_ + (this.element.getAttribute('data-target') || ''),
+            'tag': 'sas_' + formatId,
             'out': 'amp-hb',
             ...urlParams,
             'gdpr_consent': consentString,
             'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
-            'tmstp': Date.now(),
+            'tmstp': this.sentinel,
           },
           MAX_URL_LENGTH,
           TRUNCATION_PARAM
@@ -114,23 +130,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     return Services.platformFor(this.win).isIos()
       ? XORIGIN_MODE.IFRAME_GET
       : super.getNonAmpCreativeRenderingMethod(headerValue);
-  }
-
-  /** @override */
-  isValidElement() {
-    return this.isAmpAdElement();
-  }
-
-  /** @override */
-  sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then((response) => {
-      return response.text().then((responseText) => {
-        if (includes(responseText, SAS_NO_AD_STR)) {
-          this./*OK*/ collapse();
-        }
-        return new Response(response);
-      });
-    });
   }
 
   /** @override */
@@ -180,6 +179,32 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     };
   }
 
+  /** @override */
+  isValidElement() {
+    return this.isAmpAdElement();
+  }
+
+  /** @override */
+  isXhrAllowed() {
+    return false;
+  }
+
+  /**
+   * Adds message event listener and triggers collapsing
+   */
+  addListener() {
+    const messageListener = (event) => {
+      if (
+        event.data.sentinel === this.sentinel &&
+        event.data.type === 'collapse'
+      ) {
+        this.attemptCollapse().catch(() => {});
+        this.win.removeEventListener('message', messageListener);
+      }
+    };
+    this.win.addEventListener('message', messageListener);
+  }
+
   /**
    * Chooses RTC callout with highest bid price
    * @param {Array<Object>} rtcResponseArray
@@ -204,6 +229,46 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     });
 
     return highestOffer;
+  }
+
+  /**
+   *
+   * Modify the response from vendors to have one standard response
+   * @param {Object} vendorsResponses
+   * @return {*}
+   * @memberof AmpAdNetworkSmartadserverImpl
+   */
+  modifyVendorResponse(vendorsResponses) {
+    vendorsResponses.forEach((item) => {
+      if (item.response && item.response.targeting) {
+        switch (item.callout) {
+          case 'aps':
+            const tgt = item.response.targeting;
+            if (Object.keys(tgt).length) {
+              const bid = tgt.amznbid.replace('amp_', '');
+              this.exTgt_ += `amzniid=${tgt.amzniid};amznp=${tgt.amznp};amznbid=${bid};`;
+            }
+            break;
+
+          case 'criteo':
+            if (item.response.targeting.crt_display_url === undefined) {
+              return;
+            }
+            item.response.targeting['hb_bidder'] = item.callout;
+            item.response.targeting['hb_pb'] =
+              item.response.targeting.crt_amp_rtc_pb;
+            item.response.targeting['hb_cache_url'] =
+              item.response.targeting.crt_display_url;
+            item.response.targeting['hb_cache_content_type'] =
+              'application/javascript';
+            break;
+
+          default:
+            return item;
+        }
+      }
+    });
+    return vendorsResponses;
   }
 }
 

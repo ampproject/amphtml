@@ -1,0 +1,61 @@
+@import '../../amp-story/1.0/amp-story-shadow-reset.css';
+
+/*
+  auto append
+  Used when captions are provided from cache.
+*/
+.i-amphtml-amp-story-captions-auto-append {
+  position: absolute !important;
+  z-index: 1 !important;
+  bottom: 5em !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 3em !important;
+}
+
+/* default */
+
+.amp-story-captions-default .amp-story-captions-cue-wrapper {
+  font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
+  font-family: 'Roboto', sans-serif !important;
+  margin: 1em 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.amp-story-captions-default .amp-story-captions-cue {
+  text-align: center !important;
+  color: #fff !important;
+  border-radius: .94em !important;
+  padding: 0.35em 0.94em !important;
+  background-color: hsla(0, 0%, 10%, 0.6) !important;
+  max-width: calc(var(--story-page-vw) * 92) !important;
+}
+
+.amp-story-captions-default .amp-story-captions-future {
+  color: #fff !important;
+}
+
+/* appear */
+
+.amp-story-captions-appear .amp-story-captions-cue-wrapper  {
+  font-size: var(--story-captions-font-size, calc(2.5 * var(--story-page-vh, 8px))) !important;
+  font-family: var(--story-captions-font-family, 'Roboto'), 'Roboto', sans-serif !important;
+}
+
+.amp-story-captions-appear .amp-story-captions-cue {
+  color: #fff !important;
+  text-shadow: .06em .06em black !important;
+}
+
+.amp-story-captions-appear .amp-story-captions-cue span {
+  transition: opacity .3s cubic-bezier(0.3, 0, 0, 1) !important;
+  opacity: 1 !important;
+}
+
+.amp-story-captions-appear .amp-story-captions-cue span.amp-story-captions-future {
+  opacity: .1 !important;
+}

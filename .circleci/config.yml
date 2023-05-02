@@ -1,8 +1,9 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.2.3
-  node: circleci/node@4.7.0
+  browser-tools: circleci/browser-tools@1.4.1
+  codecov: codecov/codecov@3.2.4
+  node: circleci/node@5.1.0
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -58,13 +59,13 @@ executors:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: xlarge
-  jdk-docker-xlarge:
+  jdk-docker-2xlarge:
     docker:
-      - image: cimg/openjdk:17.0-node
-    resource_class: xlarge
+      - image: cimg/openjdk:19.0-node
+    resource_class: 2xlarge
   macos-medium:
     macos:
-      xcode: 12.4.0
+      xcode: 13.4.1
     resource_class: macos.x86.medium.gen2
 
 commands:
@@ -92,9 +93,9 @@ commands:
   setup_node_environment:
     steps:
       - node/install:
-          lts: true
-          install-npm: false
-      - node/install-packages
+          node-version: 'lts'
+      - node/install-packages:
+          with-cache: false
   setup_vm:
     parameters:
       save-git-cache:
@@ -132,7 +133,7 @@ commands:
           name: 'Get Pinned Chrome Version'
           command: ./.circleci/get_pinned_chrome_version.sh
       - browser-tools/install-chrome:
-          chrome-version: ${CHROME_VERSION}
+          # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
           replace-existing: true
       - browser-tools/install-chromedriver
   install_firefox:
@@ -147,10 +148,7 @@ commands:
     steps:
       - run:
           name: 'Enable Safari Automation'
-          command: |
-            defaults write com.apple.Safari AllowRemoteAutomation 1
-            defaults write com.apple.Safari IncludeDevelopMenu 1
-            sudo safaridriver --enable
+          command: sudo /usr/bin/safaridriver --enable
   store_test_output:
     steps:
       - store_artifacts:
@@ -245,17 +243,6 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/bundle-size-module-build.js
       - teardown_vm
-  pr_deploy:
-    executor:
-      name: node-docker-medium
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐ PR Deploy ⭐'
-          command: node build-system/pr-check/pr-deploy.js
-      - store_artifacts:
-          path: /tmp/artifacts/amp_nomodule_build.tar.gz
-      - teardown_vm
   bundle_size:
     executor:
       name: node-docker-medium
@@ -267,7 +254,7 @@ jobs:
       - teardown_vm
   validator_tests:
     executor:
-      name: jdk-docker-xlarge
+      name: jdk-docker-2xlarge
     steps:
       - setup_vm
       - run:
@@ -310,6 +297,9 @@ jobs:
       - run:
           name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
+      - codecov/upload:
+          file: test/coverage/lcov-unit.info
+          flags: unit_tests
       - store_test_output
       - store_filelist
       - teardown_vm
@@ -322,6 +312,9 @@ jobs:
       - run:
           name: '⭐ Unminified Tests ⭐'
           command: node build-system/pr-check/unminified-tests.js
+      - codecov/upload:
+          file: test/coverage/lcov-integration.info
+          flags: integration_tests
       - store_test_output
       - teardown_vm
   nomodule_tests:
@@ -530,11 +523,6 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - pr_deploy:
-          name: 'PR Deploy'
-          <<: *pr_builds_only
-          requires:
-            - 'Nomodule Build (Test)'
       - bundle_size:
           name: 'Bundle Size'
           <<: *push_and_pr_builds

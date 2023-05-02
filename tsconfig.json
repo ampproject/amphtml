@@ -4,7 +4,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "dist",
-    "checkJs": false
+    "checkJs": false,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
   },
 
   "include": ["src", "3p", "ads", "extensions", "test", "testing"],

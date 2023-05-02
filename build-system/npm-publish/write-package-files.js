@@ -3,21 +3,25 @@
  * Creates npm package files for a given component and AMP version.
  */
 
-const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const [extension, ampVersion, extensionVersion, corePkgVersion] =
+  process.argv.slice(2);
 const fastGlob = require('fast-glob');
 const marked = require('marked');
 const path = require('path');
 const posthtml = require('posthtml');
-const {copyFile, pathExists, readFile} = require('fs-extra');
+const {
+  copyFile,
+  ensureFile,
+  pathExists,
+  readFile,
+  writeJson,
+} = require('fs-extra');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getPackageDir, getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
-const {
-  name: corePkgName,
-  version: corePkgVersion,
-} = require('../../src/bento/core/package.json');
+const {name: corePkgName} = require('../../src/bento/core/package.json');
 
 const packageName = getNameWithoutComponentPrefix(extension);
 
@@ -164,7 +168,7 @@ async function writePackageJson() {
     main: './dist/web-component.js',
     module: './dist/web-component.module.js',
     exports,
-    files: ['dist/*', 'react.js', 'styles.css'],
+    files: ['dist/*', 'styles.css', 'preact', 'react'],
     repository: {
       type: 'git',
       url: 'https://github.com/ampproject/amphtml.git',
@@ -196,18 +200,35 @@ async function writePackageJson() {
 }
 
 /**
- * Write react.js
+ * Writes sparse package.jsons for preact/react entry points to support tooling better
+ *
+ * @param {string} compDir
+ * @param {string} compName
  * @return {Promise<void>}
  */
-async function writeReactJs() {
-  const content = "module.exports = require('./dist/component-react');";
-  try {
-    await writeFile(`${dir}/react.js`, content);
-    log(packageName, extensionVersion, ': created react.js');
-  } catch (e) {
-    log(e);
-    process.exitCode = 1;
-    return;
+async function writePreactReactPackageJson(compDir, compName) {
+  const modes = ['preact', 'react'];
+  for (const mode of modes) {
+    const packageFilePath = `${compDir}/${mode}/package.json`;
+    await ensureFile(packageFilePath);
+    const nomodBinaryPath = `../dist/component-${mode}.js`;
+    const modBinaryPath = `../dist/component-${mode}.module.js`;
+    await writeJson(
+      packageFilePath,
+      {
+        name: `@bentoproject/${compName}/${mode}`,
+        main: nomodBinaryPath,
+        module: modBinaryPath,
+        browser: nomodBinaryPath,
+        exports: {
+          '.': {
+            import: modBinaryPath,
+            require: nomodBinaryPath,
+          },
+        },
+      },
+      {replacer: null, spaces: 2}
+    );
   }
 }
 
@@ -242,7 +263,7 @@ async function main() {
     return;
   }
   await writePackageJson();
-  await writeReactJs();
+  await writePreactReactPackageJson(dir, packageName);
   await copyCssToRoot();
 }
 

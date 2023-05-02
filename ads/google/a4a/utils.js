@@ -104,7 +104,7 @@ const CDN_PROXY_REGEXP =
 
 /** @const {string} */
 const TOKEN_VALUE_3P =
-  'AxOH8+XUqIxXfDG7Bxf7YR6oBTF4f73xWZNTyqhrkvIEgEmpxrpX8rzEqe9/yOsCGW9ChT05U9t++yH/aCYKCAgAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
+  'A0hogl7CXDyf1stjzky0+HsnEnbrckIn1oj3aOzmNWv0mrjKqmeeZhaeMCQdxtaW2ZxzVsAY9Z9TdLOMgMEWMwQAAACEeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2ODgwODMxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9';
 
 /**
  * Inserts origin-trial token for `attribution-reporting` if not already
@@ -368,6 +368,8 @@ export function googlePageParameters(a4a, startTime) {
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
       'uab': uaDataValues?.bitness,
+      'uafvl': JSON.stringify(uaDataValues?.fullVersionList),
+      'uaw': uaDataValues?.wow64,
     };
   });
 }

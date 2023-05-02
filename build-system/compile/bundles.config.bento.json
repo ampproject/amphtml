@@ -8,11 +8,20 @@
     }
   },
   {
+    "name": "bento-autocomplete",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
     "name": "bento-base-carousel",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -20,7 +29,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -28,11 +38,21 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
     "name": "bento-facebook",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
+    "name": "bento-imgur",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
@@ -44,7 +64,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -52,14 +73,16 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
     "name": "bento-jwplayer",
     "version": "1.0",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -67,7 +90,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -75,7 +99,26 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
+    "name": "bento-mega-menu",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
+    "name": "bento-mustache",
+    "version": "1.0",
+    "options": {
+      "// 1": "This is a dependency for CDN builds, not to be published on NPM.",
+      "// 2": "(NPM builds depend on the third-party `mustache` directly.)",
+      "npm": false
     }
   },
   {
@@ -83,7 +126,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -91,7 +135,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -99,7 +144,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -107,7 +153,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -115,7 +162,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -123,7 +171,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -131,7 +180,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -139,7 +189,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   }
 ]

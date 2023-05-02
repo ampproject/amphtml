@@ -5,9 +5,10 @@ import {
   childElementByTag,
   closestAncestorElementBySelector,
 } from '#core/dom/query';
-import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+
+import {HistoryState, setHistoryState} from 'extensions/amp-story/1.0/history';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
@@ -19,7 +20,9 @@ import {
   ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -59,6 +62,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.shoppingTagEl_ = null;
     /** @private {?Element} */
     this.pageEl_ = null;
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.variableService_ = Services.storyVariableService(this.win);
   }
 
   /** @override */
@@ -162,51 +171,20 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });
+
+    setHistoryState(this.win, HistoryState.SHOPPING_DATA, this.tagData_);
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+      this.tagData_.productId
+    );
+
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_TAG_CLICK);
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout_Enum.CONTAINER;
-  }
-
-  /**
-   * This function counts the number of lines in the shopping tag
-   * and sets the styling properties dynamically based on the number of lines.
-   * @private
-   */
-  styleTagText_() {
-    const pillEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill'
-    );
-
-    const textEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill-text'
-    );
-
-    if (!pillEl || !textEl) {
-      return;
-    }
-
-    const fontSize = parseInt(
-      computedStyle(window, textEl).getPropertyValue('font-size'),
-      10
-    );
-    const ratioOfLineHeightToFontSize = 1.5;
-    const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-
-    let numLines = 1;
-
-    this.measureElement(() => {
-      const height = textEl./*OK*/ clientHeight;
-      numLines = Math.ceil(height / lineHeight);
-    });
-
-    this.mutateElement(() => {
-      pillEl.classList.toggle(
-        'i-amphtml-amp-story-shopping-tag-pill-multi-line',
-        numLines > 1
-      );
-    });
   }
 
   /**
@@ -297,7 +275,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       shoppingSharedCSS + shoppingTagCSS
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
-    this.styleTagText_();
     this.initializeTagStateListeners_();
   }
 }

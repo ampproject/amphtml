@@ -11,7 +11,8 @@
   --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh)) !important;
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
   --story-100dvh: calc(var(--story-dvh, 1vh) * 100) !important;
-  font-size: calc(2.5 * var(--story-page-vh, 8px));
+  --story-font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
+  font-size: var(--story-font-size);
 }
 
 @supports (height: 1dvh) {
@@ -149,6 +150,9 @@ amp-story[standalone] {
   max-width: initial !important;
   min-height: initial !important;
   min-width: initial !important;
+
+  /* Unblocks rendering when this CSS file is installed. Info on #37990. */
+  visibility: visible !important;
 }
 
 amp-story[standalone].amp-notbuilt {
@@ -329,11 +333,13 @@ amp-story-grid-layer amp-img img {
  * Prevents amp-video to layout until its element has been swapped by the media
  * pool. See #26718 for context.
  */
-amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound:not(.i-amphtml-layout) {
   display: none !important;
 }
 
-amp-story-grid-layer > * {
+/** Make clickable elements in light dom accept pointer events */
+amp-story-grid-layer a, amp-story-grid-layer amp-twitter,
+amp-story-grid-layer amp-ad {
   pointer-events: auto !important;
 }
 
@@ -723,4 +729,8 @@ amp-story .amp-video-eq,
 
 .i-amphtml-story-page-play-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4a20 20 0 1 0 0 40 20 20 0 0 0 0-40zm-4 29V15l12 9-12 9z"/></svg>') !important;
+}
+
+amp-bodymovin-animation, amp-bodymovin-animation * {
+  pointer-events: none !important;
 }
