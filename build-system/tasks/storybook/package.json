@@ -6,7 +6,7 @@
     "@babel/core": "7.21.4",
     "@babel/preset-react": "7.18.6",
     "@babel/runtime-corejs3": "7.21.0",
-    "@storybook/addon-a11y": "6.5.16",
+    "@storybook/addon-a11y": "7.0.7",
     "@storybook/addon-controls": "6.5.16",
     "@storybook/addon-viewport": "6.5.16",
     "@storybook/client-api": "6.5.16",
