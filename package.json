@@ -156,7 +156,7 @@
     "markdown-toc": "1.2.0",
     "marked": "3.0.8",
     "minimatch": "3.0.5",
-    "minimist": "1.2.5",
+    "minimist": "1.2.6",
     "mocha": "9.2.2",
     "mocha-junit-reporter": "2.0.2",
     "mocha-silent-reporter": "1.0.0",
