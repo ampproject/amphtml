@@ -151,11 +151,8 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       return null;
     }
 
-    let stickerAttr = this.element.getAttribute('sticker');
-    stickerAttr = Object.keys(DEFAULT_STICKERS).includes(stickerAttr)
-      ? stickerAttr
-      : '';
-    return stickerAttr || FALLBACK_DEFAULT_STICKER;
+    const stickerAttr = this.element.getAttribute('sticker');
+    return DEFAULT_STICKERS[stickerAttr] ? stickerAttr : FALLBACK_DEFAULT_STICKER;
   }
 
   /** @private */
