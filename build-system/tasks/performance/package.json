@@ -6,6 +6,6 @@
   "devDependencies": {
     "chai": "4.3.7",
     "mocha": "10.2.0",
-    "puppeteer": "19.11.1"
+    "puppeteer": "20.1.0"
   }
 }
