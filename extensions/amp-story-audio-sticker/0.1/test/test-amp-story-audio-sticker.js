@@ -1,14 +1,15 @@
-import '../amp-story-audio-sticker';
-
 import * as Preact from '#core/dom/jsx';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
 import {
+  Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {} from '../amp-story-audio-sticker';
 
 describes.realWin(
   'amp-story-audio-sticker-v0.1',
@@ -19,6 +20,8 @@ describes.realWin(
     },
   },
   (env) => {
+    const activePageId = 'page-1';
+
     let win;
     let doc;
     let storeService;
@@ -31,50 +34,144 @@ describes.realWin(
       win = env.win;
       doc = win.document;
 
-      storeService = new AmpStoryStoreService(win);
-      env.sandbox
-        .stub(Services, 'storyStoreServiceForOrNull')
-        .returns(Promise.resolve(storeService));
-      env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
-
       const storyEl = (
         <amp-story>
-          <amp-story-page>
+          <amp-story-page id="page-1">
+            <amp-story-grid-layer>
+              <amp-story-audio-sticker></amp-story-audio-sticker>
+            </amp-story-grid-layer>
+          </amp-story-page>
+          <amp-story-page id="page-2">
             <amp-story-grid-layer>
               <amp-story-audio-sticker></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
         </amp-story>
       );
-
       doc.body.appendChild(storyEl);
-      stickerEl = storyEl.querySelector('amp-story-audio-sticker');
+
+      storeService = new AmpStoryStoreService(win);
+      storeService.subscribe(StateProperty.MUTED_STATE, (muted) => {
+        muted
+          ? storyEl.setAttribute('muted', '')
+          : storyEl.removeAttribute('muted');
+      });
+      env.sandbox
+        .stub(Services, 'storyStoreServiceForOrNull')
+        .returns(Promise.resolve(storeService));
+      env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
+
+      stickerEl = doc.querySelector('amp-story-audio-sticker');
       stickerImpl = await stickerEl.getImpl();
+
+      env.sandbox
+        .stub(stickerImpl, 'mutateElement')
+        .callsFake((fn) => Promise.resolve(fn()));
     });
 
     it('should add all necessary sticker elements', async () => {
-      expect(doc.querySelector('.i-amphtml-amp-story-audio-sticker-component'))
-        .to.not.be.null;
-      expect(doc.querySelector('.i-amphtml-amp-story-audio-sticker-tap-hint'))
-        .to.not.be.null;
       expect(
-        doc.querySelector('.i-amphtml-amp-story-audio-sticker-container.large')
-      ).to.not.be.null;
+        doc.querySelectorAll('.i-amphtml-amp-story-audio-sticker-component')
+          .length
+      ).equal(2);
+      expect(
+        doc.querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
+          .length
+      ).equal(2);
+      expect(
+        doc.querySelectorAll(
+          '.i-amphtml-amp-story-audio-sticker-container.small'
+        ).length
+      ).equal(2);
+      expect(
+        doc.querySelectorAll('amp-story-audio-sticker-pretap').length
+      ).equal(2);
+      expect(
+        doc.querySelectorAll('amp-story-audio-sticker-posttap').length
+      ).equal(2);
     });
 
-    it('should unmute the story when clicking on the audio sticker', async () => {
+    describe('visibilities of different sticker components after a click on the audio sticker', () => {
+      beforeEach(async () => {
+        await stickerImpl.layoutCallback();
+
+        stickerEl.click();
+        await nextTick();
+      });
+
+      it('should unmute the story and switch from pretap to posttap state for all stickers', async () => {
+        expect(storeService.get(StateProperty.MUTED_STATE)).equal(false);
+
+        doc
+          .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
+          .forEach((el) =>
+            expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
+              '0'
+            )
+          );
+        doc
+          .querySelectorAll('amp-story-audio-sticker-pretap')
+          .forEach((el) =>
+            expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
+              '0'
+            )
+          );
+        doc
+          .querySelectorAll('amp-story-audio-sticker-posttap')
+          .forEach((el) =>
+            expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
+              '1'
+            )
+          );
+      });
+
+      it('should switch from posttap back to pretap state for all stickers', async () => {
+        storeService.dispatch(Action.TOGGLE_MUTED, true);
+        await nextTick();
+
+        // Wait until the animation is finished to check the opacitiy value.
+        setTimeout(() => {
+          doc
+            .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
+            .forEach((el) =>
+              expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
+                '1'
+              )
+            );
+        }, 500);
+
+        doc.querySelectorAll('amp-story-audio-sticker-pretap').forEach((el) => {
+          expect(computedStyle(win, el).getPropertyValue('opacity')).equal('1');
+        });
+        doc
+          .querySelectorAll('amp-story-audio-sticker-posttap')
+          .forEach((el) =>
+            expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
+              '0'
+            )
+          );
+      });
+    });
+
+    it('should hide the posttap sticker after 4 seconds or immediately if the sticker is on the active page or not', async () => {
+      const clock = env.sandbox.useFakeTimers();
+      env.sandbox
+        .stub(storeService, 'get')
+        .withArgs(StateProperty.CURRENT_PAGE_ID)
+        .returns(activePageId);
+
       await stickerImpl.layoutCallback();
 
       stickerEl.click();
       await nextTick();
 
-      expect(storeService.get(StateProperty.MUTED_STATE)).to.equal(false);
-      expect(
-        computedStyle(
-          win,
-          doc.querySelector('.i-amphtml-amp-story-audio-sticker-component')
-        ).getPropertyValue('display')
-      ).equal('none');
+      doc.querySelectorAll('amp-story-audio-sticker').forEach((el) => {
+        const pageEl = closestAncestorElementBySelector(el, 'amp-story-page');
+        if (pageEl.hasAttribute('active')) {
+          clock.tick(4000);
+        }
+        expect(computedStyle(win, el).getPropertyValue('opacity')).equal('0');
+      });
     });
   }
 );
