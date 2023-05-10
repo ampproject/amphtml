@@ -24,7 +24,7 @@ describes.realWin(
         unknown: ['unknown'],
         eea: ['preset-eea'],
         myGroup: ['preset-eea', 'us'],
-        usSubdivisions: ['us-al', 'us-ny', 'us-va'],
+        usSubdivisions: ['us-al', 'us-ny', 'us-va', 'us-co', 'us-ct'],
         usVA: ['us-va'],
         usCO: ['us-co'],
         usCT: ['us-ct'],
@@ -403,7 +403,7 @@ describes.realWin(
       geo.buildCallback();
 
       return Services.geoForDocOrNull(el).then((geo) => {
-        expect(geo.ISOSubdivision).to.equal('us-co');
+        expect(geo.ISOSubdivision).to.equal('us-ct');
         expectElementHasClass(
           doc.body,
           [
@@ -1068,6 +1068,8 @@ describes.realWin(
           'myGroup',
           'usSubdivisions',
           'usVA',
+          'usCO',
+          'usCT',
           'canadaSubdivisions',
           'anz',
           'uscaGroup',
