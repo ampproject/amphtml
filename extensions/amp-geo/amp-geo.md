@@ -175,9 +175,9 @@ determines a request is from Virginia, Colorado, or Connecticut.
 The values are in a `${country}-${subdivision}` format and the following codes
 are supported.
 
-  * `us-co` - Colorado
-  * `us-ct` - Connecticut
-  * `us-va` - Virginia
+- `us-co` - Colorado
+- `us-ct` - Connecticut
+- `us-va` - Virginia
 
 Additional countries/subdivision may be included with the preset list as in the `usWithSubdivisions`
 example below.
