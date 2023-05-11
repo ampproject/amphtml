@@ -38,6 +38,7 @@ const REQUEST_OVERLAY = 'requestFullOverlay';
 const ALLOWED_SANDBOX_ATTRIBUTES = [
   'allow-popups-to-escape-sandbox',
   'allow-top-navigation-by-user-activation',
+  'allow-top-navigation',
 ];
 
 const IFRAME_RUNNING_TIMEOUT = 1000;
