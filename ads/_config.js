@@ -1188,6 +1188,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://c.imedia.cz/js/amp.js',
   },
 
+  'skoiy': {
+    preconnect: ['https://svas.skoiy.xyz'],
+  },
+
   'slimcutmedia': {
     preconnect: [
       'https://sb.freeskreen.com',

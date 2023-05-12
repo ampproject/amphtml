@@ -457,6 +457,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Sharethrough](../../ads/vendors/sharethrough.md)
 -   [SHE Media](../../ads/vendors/shemedia.md)
 -   [Sklik](../../ads/vendors/sklik.md)
+-   [Skoiy](../../ads/vendors/skoiy.md)
 -   [SSP](../../ads/vendors/ssp.md)
 -   [SlimCut Media](../../ads/vendors/slimcutmedia.md)
 -   [Smart AdServer](../amp-ad-network-smartadserver-impl/amp-ad-network-smartadserver-impl-internal.md)
