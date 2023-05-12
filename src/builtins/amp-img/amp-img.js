@@ -7,20 +7,31 @@ import {
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {scopedQuerySelector} from '#core/dom/query';
-import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
+import {
+  childElementsByAttr,
+  lastChildElement,
+  scopedQuerySelector,
+} from '#core/dom/query';
+import {
+  propagateObjectFitStyles,
+  setImportantStyles,
+  toggle,
+} from '#core/dom/style';
 import * as mode from '#core/mode';
 
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
-import {listen} from '#utils/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 import {BaseElement} from '../../base-element';
 
 /** @const {string} */
 const TAG = 'amp-img';
+
+/** @const {string} */
+const EVENT_TRAILER_PLAY = 'video-trailer-play';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -94,6 +105,12 @@ export class AmpImg extends BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenTrailerTouchStart_;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenTrailerPlay_;
 
     /**
      * The current width used by the automatically generated sizes attribute
@@ -358,6 +375,37 @@ export class AmpImg extends BaseElement {
     if (width <= 0) {
       return Promise.resolve();
     }
+
+    const trailer = this.getTrailer();
+    if (trailer) {
+      this.toggleTrailer(false);
+
+      this.unlistenTrailerTouchStart_ = listen(
+        this.element,
+        'touchstart',
+        () => {
+          this.win.dispatchEvent(
+            createCustomEvent(this.win, EVENT_TRAILER_PLAY, {
+              context: this,
+            })
+          );
+          this.toggleTrailer(true);
+          this.toggleImage(false);
+        }
+      );
+
+      this.unlistenTrailerPlay_ = listen(
+        this.win,
+        EVENT_TRAILER_PLAY,
+        (event) => {
+          if (event.detail.context !== this) {
+            this.toggleImage(true);
+            this.toggleTrailer(false);
+          }
+        }
+      );
+    }
+
     return this.loadPromise(img);
   }
 
@@ -378,6 +426,16 @@ export class AmpImg extends BaseElement {
       this.unlistenLoad_ = null;
     }
 
+    if (this.unlistenTrailerTouchStart_) {
+      this.unlistenTrailerTouchStart_();
+      this.unlistenTrailerTouchStart_ = null;
+    }
+
+    if (this.unlistenTrailerPlay_) {
+      this.unlistenTrailerPlay_();
+      this.unlistenTrailerPlay_ = null;
+    }
+
     // Interrupt retrieval of incomplete images to free network resources when
     // navigating pages in a PWA. Opt for tiny dataURI image instead of empty
     // src to prevent the viewer from detecting a load error.
@@ -390,6 +448,46 @@ export class AmpImg extends BaseElement {
     }
 
     return true;
+  }
+
+  /**
+   * Hides or shows the trailer, if available.
+   * @param {boolean} show
+   * @package @final
+   */
+  toggleTrailer(show) {
+    if (show) {
+      const trailer = this.getTrailer();
+
+      if (trailer) {
+        setImportantStyles(trailer, {'opacity': 1});
+      }
+    } else {
+      const trailers = childElementsByAttr(this.element, 'trailer');
+      for (let i = 0; i < trailers.length; i++) {
+        setImportantStyles(trailers[i], {'opacity': 0});
+      }
+    }
+  }
+
+  /**
+   * Hides or shows the image, if available.
+   * @param {boolean} show
+   * @package @final
+   */
+  toggleImage(show) {
+    toggle(this.img_, show);
+  }
+
+  /**
+   * Returns an optional trailer element.
+   * @return {?Element}
+   * @package @final
+   */
+  getTrailer() {
+    return lastChildElement(this.element, (el) => {
+      return el.hasAttribute('trailer');
+    });
   }
 
   /** @override */

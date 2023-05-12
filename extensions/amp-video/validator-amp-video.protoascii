@@ -68,6 +68,7 @@ attr_lists: {
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
+  attrs: { name: "trailer" }
   attrs: {
     name: "preload"
     value: "auto"

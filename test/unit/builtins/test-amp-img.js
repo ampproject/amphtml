@@ -491,6 +491,129 @@ describes.sandboxed('amp-img', {}, (env) => {
     impl.unlayoutCallback();
   });
 
+  describe('Image video trailer', () => {
+    let el;
+    let impl;
+    let toggleTrailerSpy;
+    let toggleImageSpy;
+
+    beforeEach(() => {
+      el = document.createElement('amp-img');
+      el.getLayoutSize = () => ({width: 100, height: 100});
+
+      impl = new AmpImg(el);
+      sandbox
+        .stub(impl, 'getTrailer')
+        .returns(document.createElement('amp-video'));
+
+      toggleTrailerSpy = sandbox.spy(impl, 'toggleTrailer');
+      toggleImageSpy = sandbox.spy(impl, 'toggleImage');
+    });
+
+    afterEach(() => {
+      impl.unlayoutCallback();
+    });
+
+    it('should not return a trailer if no a video trailer', async () => {
+      const ampImg = await getImg({
+        src: '/examples/img/sample.jpg',
+        srcset: SRCSET_STRING,
+        width: 300,
+        height: 200,
+      });
+      const impl = await ampImg.getImpl(false);
+
+      expect(impl.getTrailer()).to.be.null;
+    });
+
+    it('should not return a trailer if no a trailer attribute', async () => {
+      const trailer = document.createElement('amp-video');
+
+      const ampImg = await getImg(
+        {
+          src: '/examples/img/sample.jpg',
+          srcset: SRCSET_STRING,
+          width: 300,
+          height: 200,
+        },
+        [trailer]
+      );
+      const impl = await ampImg.getImpl(false);
+
+      expect(impl.getTrailer()).to.be.null;
+    });
+
+    it('should return a trailer if have a video trailer', async () => {
+      const trailer = document.createElement('amp-video');
+      trailer.setAttribute('trailer', '');
+
+      const ampImg = await getImg(
+        {
+          src: '/examples/img/sample.jpg',
+          srcset: SRCSET_STRING,
+          width: 300,
+          height: 200,
+        },
+        [trailer]
+      );
+      const impl = await ampImg.getImpl(false);
+
+      expect(impl.getTrailer()).to.be.equal(trailer);
+    });
+
+    it('should initially hide a trailer', async () => {
+      impl.buildCallback();
+      expect(toggleTrailerSpy).to.have.not.been.called;
+
+      await impl.layoutCallback();
+
+      expect(toggleTrailerSpy).to.have.been.calledWith(false);
+    });
+
+    it('should show a trailer after touch an image', async () => {
+      const touchStartEvent = createCustomEvent(fixture.win, 'touchstart');
+
+      impl.buildCallback();
+      expect(toggleTrailerSpy).to.have.not.been.called;
+
+      await impl.layoutCallback();
+
+      impl.element.dispatchEvent(touchStartEvent);
+
+      expect(toggleTrailerSpy.firstCall).to.have.been.calledWith(false);
+      expect(toggleTrailerSpy.secondCall).to.have.been.calledWith(true);
+      expect(toggleImageSpy).to.have.been.calledWith(false);
+    });
+
+    it('should hide other trailers if touch a trailer', async () => {
+      const secondImg = document.createElement('amp-img');
+      secondImg.getLayoutSize = () => ({width: 100, height: 100});
+
+      const secondImpl = new AmpImg(secondImg);
+
+      sandbox
+        .stub(secondImpl, 'getTrailer')
+        .returns(document.createElement('amp-video'));
+
+      const toggleTrailerSpy2 = sandbox.spy(secondImpl, 'toggleTrailer');
+      const toggleImageSpy2 = sandbox.spy(secondImpl, 'toggleImage');
+
+      const touchStartEvent = createCustomEvent(fixture.win, 'touchstart');
+
+      impl.buildCallback();
+      secondImpl.buildCallback();
+
+      await impl.layoutCallback();
+      await secondImpl.layoutCallback();
+
+      impl.element.dispatchEvent(touchStartEvent);
+
+      expect(toggleTrailerSpy2.firstCall).to.have.been.calledWith(false);
+      expect(toggleTrailerSpy2.secondCall).to.have.been.calledWith(false);
+      expect(toggleImageSpy2).to.have.been.calledWith(true);
+    });
+  });
+
   describe('blurred image placeholder', () => {
     /**
      * Creates an amp-img with an image child that could potentially be a
