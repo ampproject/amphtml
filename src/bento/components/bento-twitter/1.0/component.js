@@ -1,10 +1,14 @@
+import objstr from 'obj-str';
+
 import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
 
 import * as Preact from '#preact';
-import {useCallback, useMemo, useState} from '#preact';
+import {useCallback, useMemo, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
+
+import {useStyles} from './component.jss';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -40,6 +44,9 @@ function BentoTwitterWithRef(
   const [height, setHeight] = useState(null);
   const onLoadRef = useValueRef(onLoad);
   const onErrorRef = useValueRef(onError);
+  const iframeRef = useRef(ref);
+  const classes = useStyles();
+  const [isLoading, setIsLoading] = useState(true);
 
   const messageHandler = useCallback(
     (event) => {
@@ -48,6 +55,10 @@ function BentoTwitterWithRef(
         const height = data['height'];
         if (requestResize) {
           requestResize(height);
+
+          // Remove the load wrapper styling from embed after the resize is complete.
+          setIsLoading(false);
+
           setHeight(FULL_HEIGHT);
         } else {
           setHeight(height);
@@ -90,7 +101,7 @@ function BentoTwitterWithRef(
   return (
     <ProxyIframeEmbed
       allowfullscreen
-      ref={ref}
+      ref={iframeRef}
       title={title}
       {...rest}
       // non-overridable props
@@ -98,6 +109,9 @@ function BentoTwitterWithRef(
       messageHandler={messageHandler}
       options={options}
       type={TYPE}
+      class={objstr({
+        [classes.loadWrapper]: isLoading,
+      })}
       style={height ? {...style, height} : style}
     />
   );

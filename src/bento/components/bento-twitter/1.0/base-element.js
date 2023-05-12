@@ -2,6 +2,7 @@ import {PreactBaseElement} from '#preact/base-element';
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoTwitter} from './component';
+import {CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -25,3 +26,6 @@ BaseElement['usesShadowDom'] = true;
 
 /** @override */
 BaseElement['loadable'] = true;
+
+/** @override */
+BaseElement['shadowCss'] = CSS;
