@@ -1,3 +1,4 @@
+import {Deferred} from '#core/data-structures/promise';
 import * as Preact from '#core/dom/jsx';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
@@ -129,7 +130,8 @@ describes.realWin(
         storeService.dispatch(Action.TOGGLE_MUTED, true);
         await nextTick();
 
-        // Wait until the animation is finished to check the opacitiy value.
+        // Wait until the animation is finished to check the opacity value.
+        const deferred = new Deferred();
         setTimeout(() => {
           doc
             .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
@@ -138,7 +140,8 @@ describes.realWin(
                 '1'
               )
             );
-        }, 500);
+          deferred.resolve();
+        }, 750);
 
         doc.querySelectorAll('amp-story-audio-sticker-pretap').forEach((el) => {
           expect(computedStyle(win, el).getPropertyValue('opacity')).equal('1');
@@ -150,6 +153,7 @@ describes.realWin(
               '0'
             )
           );
+        return deferred.promise;
       });
     });
 
