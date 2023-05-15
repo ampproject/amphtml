@@ -54,8 +54,8 @@ amp-story-audio-sticker {
   max-width: 100% !important; /* Set the maximum width of the image to 100% to ensure it fits within the container */
   max-height: 100% !important; /* Set the maximum height of the image to 100% to ensure it fits within the container */
 
-  --amp-story-audio-sticker-outline-color: white;
-  --amp-story-audio-sticker-dropshadow-color: white;
+  --story-audio-sticker-outline-color: white !important;
+  --story-audio-sticker-dropshadow-color: white !important;
 }
 
 amp-story[muted] amp-story-audio-sticker {
@@ -71,11 +71,11 @@ amp-story[muted] amp-story-audio-sticker {
 }
 
 amp-story-audio-sticker.outline {
-  border: 4px solid var(--amp-story-audio-sticker-outline-color) !important;
+  border: 4px solid var(--story-audio-sticker-outline-color) !important;
 }
 
 amp-story-audio-sticker.dropshadow {
-  box-shadow: 4px 4px 20px var(--amp-story-audio-sticker-dropshadow-color) !important;
+  box-shadow: 4px 4px 20px var(--story-audio-sticker-dropshadow-color) !important;
 }
 
 amp-story[muted] amp-story-audio-sticker.clicking {

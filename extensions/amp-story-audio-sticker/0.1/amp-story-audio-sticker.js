@@ -175,13 +175,13 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     const outlineColor = this.element.getAttribute('outline-color');
     if (this.isValidRGBColor_(outlineColor)) {
       setImportantStyles(this.element, {
-        '--amp-story-audio-sticker-outline-color': outlineColor,
+        '--story-audio-sticker-outline-color': outlineColor,
       });
     }
     const dropshadowColor = this.element.getAttribute('dropshadow-color');
     if (this.isValidRGBColor_(dropshadowColor)) {
       setImportantStyles(this.element, {
-        '--amp-story-audio-sticker-dropshadow-color': dropshadowColor,
+        '--story-audio-sticker-dropshadow-color': dropshadowColor,
       });
     }
   }

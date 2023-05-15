@@ -196,7 +196,7 @@ describes.realWin(
         );
         expect(
           computedStyle(win, stickerWithOutline).getPropertyValue(
-            '--amp-story-audio-sticker-outline-color'
+            '--story-audio-sticker-outline-color'
           )
         ).equal('rgb(0, 200, 0)');
 
@@ -206,7 +206,7 @@ describes.realWin(
         );
         expect(
           computedStyle(win, stickerWithDropshadow).getPropertyValue(
-            '--amp-story-audio-sticker-dropshadow-color'
+            '--story-audio-sticker-dropshadow-color'
           )
         ).equal('#fff');
         deferred.resolve();
