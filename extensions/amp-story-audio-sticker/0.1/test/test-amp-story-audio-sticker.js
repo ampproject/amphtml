@@ -129,17 +129,6 @@ describes.realWin(
         storeService.dispatch(Action.TOGGLE_MUTED, true);
         await nextTick();
 
-        // Wait until the animation is finished to check the opacitiy value.
-        setTimeout(() => {
-          doc
-            .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
-            .forEach((el) =>
-              expect(computedStyle(win, el).getPropertyValue('opacity')).equal(
-                '1'
-              )
-            );
-        }, 500);
-
         doc.querySelectorAll('amp-story-audio-sticker-pretap').forEach((el) => {
           expect(computedStyle(win, el).getPropertyValue('opacity')).equal('1');
         });
@@ -150,6 +139,20 @@ describes.realWin(
               '0'
             )
           );
+
+        // Wait until the animation is finished to check the opacitiy value.
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            doc
+              .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
+              .forEach((el) =>
+                expect(
+                  computedStyle(win, el).getPropertyValue('opacity')
+                ).equal('1')
+              );
+            resolve();
+          }, 600)
+        );
       });
     });
 
