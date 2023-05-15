@@ -32,7 +32,6 @@ amp-story:not([muted]) .i-amphtml-amp-story-audio-sticker-tap-hint {
 
 .i-amphtml-amp-story-audio-sticker-container {
   position: relative !important;
-  overflow: hidden !important;
 }
 
 .i-amphtml-amp-story-audio-sticker-container.large {
@@ -54,10 +53,34 @@ amp-story-audio-sticker {
   width: 100% !important;
   max-width: 100% !important; /* Set the maximum width of the image to 100% to ensure it fits within the container */
   max-height: 100% !important; /* Set the maximum height of the image to 100% to ensure it fits within the container */
+
+  --amp-story-audio-sticker-outline-color: white;
+  --amp-story-audio-sticker-dropshadow-color: white;
 }
 
 amp-story[muted] amp-story-audio-sticker {
   pointer-events: auto !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container.large amp-story-audio-sticker {
+  border-radius: 40px !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container.small amp-story-audio-sticker {
+  border-radius: 25px !important;
+}
+
+amp-story-audio-sticker.outline {
+  border: 4px solid var(--amp-story-audio-sticker-outline-color) !important;
+}
+
+amp-story-audio-sticker.dropshadow {
+  box-shadow: 4px 4px 20px var(--amp-story-audio-sticker-dropshadow-color) !important;
+}
+
+amp-story[muted] amp-story-audio-sticker.clicking {
+  transition: transform 0.5s ease !important;
+  transform: scale(0.8) !important;
 }
 
 /*

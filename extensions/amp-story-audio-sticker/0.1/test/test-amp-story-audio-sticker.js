@@ -39,12 +39,18 @@ describes.realWin(
         <amp-story>
           <amp-story-page id="page-1">
             <amp-story-grid-layer>
-              <amp-story-audio-sticker></amp-story-audio-sticker>
+              <amp-story-audio-sticker
+                style="outline"
+                outline-color="rgb(0, 200, 0)"
+              ></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
           <amp-story-page id="page-2">
             <amp-story-grid-layer>
-              <amp-story-audio-sticker></amp-story-audio-sticker>
+              <amp-story-audio-sticker
+                style="dropshadow"
+                dropshadow-color="red"
+              ></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
         </amp-story>
@@ -176,6 +182,36 @@ describes.realWin(
         }
         expect(computedStyle(win, el).getPropertyValue('opacity')).equal('0');
       });
+    });
+
+    it('should not override the default style color if the custom color is invalid RGB format ', async () => {
+      await stickerImpl.layoutCallback();
+
+      // Wait for 0.1 second to make sure the element is initialized.
+      const deferred = new Deferred();
+      setTimeout(() => {
+        // Valid RGB value should override default color.
+        const stickerWithOutline = doc.querySelector(
+          'amp-story-audio-sticker.outline'
+        );
+        expect(
+          computedStyle(win, stickerWithOutline).getPropertyValue(
+            '--amp-story-audio-sticker-outline-color'
+          )
+        ).equal('rgb(0, 200, 0)');
+
+        // Invalid RGB value should not override default color.
+        const stickerWithDropshadow = doc.querySelector(
+          'amp-story-audio-sticker.dropshadow'
+        );
+        expect(
+          computedStyle(win, stickerWithDropshadow).getPropertyValue(
+            '--amp-story-audio-sticker-dropshadow-color'
+          )
+        ).equal('#fff');
+        deferred.resolve();
+      }, 100);
+      return deferred.promise;
     });
   }
 );

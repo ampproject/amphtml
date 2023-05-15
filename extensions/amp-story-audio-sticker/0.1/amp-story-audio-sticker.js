@@ -1,6 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {scopedQuerySelector} from '#core/dom/query';
+import {setImportantStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 
@@ -75,6 +76,7 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.maybeInitializeDefaultSticker_();
+    this.maybeInitializeStickerStyle_();
 
     // Build sticker component structure.
     this.element.parentNode.appendChild(
@@ -157,6 +159,42 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       : FALLBACK_DEFAULT_STICKER;
   }
 
+  /**
+   * @private
+   */
+  maybeInitializeStickerStyle_() {
+    this.toggleStickerState_(
+      'outline',
+      this.element.getAttribute('style') === 'outline'
+    );
+    this.toggleStickerState_(
+      'dropshadow',
+      this.element.getAttribute('style') === 'dropshadow'
+    );
+
+    const outlineColor = this.element.getAttribute('outline-color');
+    if (this.isValidRGBColor_(outlineColor)) {
+      setImportantStyles(this.element, {
+        '--amp-story-audio-sticker-outline-color': outlineColor,
+      });
+    }
+    const dropshadowColor = this.element.getAttribute('dropshadow-color');
+    if (this.isValidRGBColor_(dropshadowColor)) {
+      setImportantStyles(this.element, {
+        '--amp-story-audio-sticker-dropshadow-color': dropshadowColor,
+      });
+    }
+  }
+
+  /**
+   * @private
+   * @param {string} RGBColor
+   * @return {boolean}
+   */
+  isValidRGBColor_(RGBColor) {
+    return RGBColor && RGBColor.match(/rgba?\((\d{1,3}), (\d{1,3}), (\d{1,3})/);
+  }
+
   /** @private */
   initializeListeners_() {
     this.element.addEventListener(
@@ -164,7 +202,36 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       () => this.storeService_.dispatch(Action.TOGGLE_MUTED, false),
       true
     );
-    // TODO: add listeners for click animations.
+    this.element.addEventListener(
+      'touchstart',
+      () => this.toggleStickerState_('clicking', true),
+      {passive: true}
+    );
+    this.element.addEventListener(
+      'mousedown',
+      () => this.toggleStickerState_('clicking', true),
+      {passive: true}
+    );
+    this.element.addEventListener(
+      'touchend',
+      () => this.toggleStickerState_('clicking', false),
+      {passive: true}
+    );
+    this.element.addEventListener(
+      'mouseup',
+      () => this.toggleStickerState_('clicking', false),
+      {passive: true}
+    );
+  }
+
+  /**
+   * Toggle sticker states.
+   * @param {string} stateName
+   * @param {boolean} force
+   * @private
+   */
+  toggleStickerState_(stateName, force) {
+    this.mutateElement(() => this.element.classList.toggle(stateName, force));
   }
 
   /** @override */
