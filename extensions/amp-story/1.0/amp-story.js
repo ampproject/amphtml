@@ -499,6 +499,10 @@ export class AmpStory extends AMP.BaseElement {
     setImportantStyles(document.querySelector(':root'), {
       '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
     });
+    this.storeService_.dispatch(
+      Action.SET_DESKTOP_ASPECT_RATIO,
+      desktopAspectRatio
+    );
   }
 
   /**
