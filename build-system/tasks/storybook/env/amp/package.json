@@ -6,6 +6,6 @@
     "@ampproject/storybook-addon": "1.1.10",
     "@storybook/preact": "7.0.7",
     "preact-render-to-string": "5.2.6",
-    "preact": "10.13.2"
+    "preact": "10.14.1"
   }
 }
