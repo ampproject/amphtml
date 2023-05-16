@@ -13,6 +13,7 @@ import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 import {Performance} from '#service/performance-impl';
 
+import {macroTask} from '#testing/helpers';
 import {waitFor} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
 
@@ -58,8 +59,6 @@ describes.realWin(
     let localizationService;
     let fetchJson = {};
     let fetchStub;
-
-    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     /**
      * @param {number} count
@@ -1451,7 +1450,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await nextTick();
+          await macroTask(win.setTimeout);
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
@@ -1465,7 +1464,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.GRANTED
           );
-          await nextTick();
+          await macroTask(win.setTimeout);
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
@@ -1484,7 +1483,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await nextTick();
+          await macroTask(win.setTimeout);
           clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
@@ -1495,7 +1494,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await nextTick();
+          await macroTask(win.setTimeout);
 
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
@@ -1534,7 +1533,7 @@ describes.realWin(
           storeService.get(StateProperty.CURRENT_PAGE_ID)
         );
         paywallPage.element.dispatchEvent(clickRightEvent);
-        await nextTick();
+        await macroTask(win.setTimeout);
 
         it('should not show paywall', () => {
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
@@ -2114,7 +2113,7 @@ describes.realWin(
         expect(pages[1].hasAttribute('distance')).to.be.false;
 
         signals.signal(CommonSignals_Enum.LOAD_END);
-        await nextTick();
+        await macroTask(win.setTimeout);
 
         // Check page 1 is loaded with distance 1.
         expect(pages[1].getAttribute('distance')).to.be.equal('1');

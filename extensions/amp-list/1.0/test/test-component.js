@@ -4,6 +4,7 @@ import * as Preact from '#preact';
 import * as intersectionObserver from '#preact/component/intersection-observer';
 import {xhrUtils} from '#preact/utils/xhr';
 
+import {macroTask} from '#testing/helpers';
 import {cleanHtml} from '#testing/helpers/cleanHtml';
 import {waitFor} from '#testing/helpers/service';
 
@@ -29,7 +30,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         (callCount > 1 ? ` ${callCount} times` : '')
     );
     // Ensure everything has settled:
-    await new Promise((r) => setTimeout(r, 0));
+    await macroTask();
     component.update();
   }
 

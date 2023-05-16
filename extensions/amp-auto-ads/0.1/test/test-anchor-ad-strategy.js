@@ -3,6 +3,8 @@ import {waitForChild} from '#core/dom';
 
 import {Services} from '#service';
 
+import {sleep} from '#testing/helpers';
+
 import {AnchorAdStrategy} from '../anchor-ad-strategy';
 
 describes.realWin(
@@ -112,30 +114,23 @@ describes.realWin(
         return Promise.all([strategyPromise, expectPromise]);
       });
 
-      it('should not insert sticky ad if not opted in anchor ad', () => {
+      it('should not insert sticky ad if not opted in anchor ad', async () => {
         const anchorAdStrategy = new AnchorAdStrategy(
           env.ampdoc,
           attributes,
           configObj
         );
 
-        const strategyPromise = anchorAdStrategy.run().then((placed) => {
-          expect(placed).to.equal(false);
-        });
+        const placed = await anchorAdStrategy.run();
+        await expect(placed).to.equal(false);
 
-        const expectPromise = new Promise((resolve) => {
-          setTimeout(() => {
-            expect(
-              env.win.document.getElementsByTagName('AMP-STICKY-AD')
-            ).to.have.lengthOf(0);
-            resolve();
-          }, 500);
-        });
-
-        return Promise.all([strategyPromise, expectPromise]);
+        await sleep(500);
+        expect(
+          env.win.document.getElementsByTagName('AMP-STICKY-AD')
+        ).to.have.lengthOf(0);
       });
 
-      it('should not insert sticky ad if exists one', () => {
+      it('should not insert sticky ad if exists one', async () => {
         configObj['optInStatus'].push(2);
 
         const existingStickyAd =
@@ -148,20 +143,13 @@ describes.realWin(
           configObj
         );
 
-        const strategyPromise = anchorAdStrategy.run().then((placed) => {
-          expect(placed).to.equal(false);
-        });
+        const placed = await anchorAdStrategy.run();
+        await expect(placed).to.equal(false);
 
-        const expectPromise = new Promise((resolve) => {
-          setTimeout(() => {
-            expect(
-              env.win.document.getElementsByTagName('AMP-STICKY-AD')
-            ).to.have.lengthOf(1);
-            resolve();
-          }, 500);
-        });
-
-        return Promise.all([strategyPromise, expectPromise]);
+        await sleep(500);
+        expect(
+          env.win.document.getElementsByTagName('AMP-STICKY-AD')
+        ).to.have.lengthOf(1);
       });
     });
   }
