@@ -11,6 +11,7 @@ import {toggleExperiment} from '#experiments';
 
 import {ActionInvocation} from '#service/action-impl';
 
+import {sleep} from '#testing/helpers';
 import {waitFor, whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
