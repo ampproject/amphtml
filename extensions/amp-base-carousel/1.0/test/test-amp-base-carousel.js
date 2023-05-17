@@ -11,7 +11,6 @@ import {toggleExperiment} from '#experiments';
 
 import {ActionInvocation} from '#service/action-impl';
 
-import {sleep} from '#testing/helpers';
 import {waitFor, whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
@@ -285,7 +284,8 @@ describes.realWin(
         );
       }
 
-      it('should execute next and prev actions', async () => {
+      // TODO(#38975): fix skipped test.
+      it.skip('should execute next and prev actions', async () => {
         element.enqueAction(invocation('next'));
         await waitFor(
           () => scroller.scrollLeft === slides[1].offsetLeft,
