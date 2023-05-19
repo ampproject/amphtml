@@ -165,13 +165,17 @@ describes.realWin(
     });
 
     it('config is passed', () => {
-      return getBridPlayer({
-        'data-partner': '264',
-        'data-player': '4144',
-        'data-video': '13663',
-      }, null, {
-        'debug': 1
-      }).then((bc) => {
+      return getBridPlayer(
+        {
+          'data-partner': '264',
+          'data-player': '4144',
+          'data-video': '13663',
+        },
+        null,
+        {
+          'debug': 1,
+        }
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
