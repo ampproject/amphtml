@@ -124,58 +124,6 @@ async function compileCoreRuntime(options) {
 }
 
 /**
- * Compiles the "core" utilies used by all bento extensions
- *
- * Outputs 2 scripts:
- * 1) for direct consumption in the browser
- * 2) for consumption by npm package users
- * @param {!Object} options
- * @return {Promise<void>}
- */
-async function compileBentoRuntimeAndCore(options) {
-  const bundleName = 'bento.js';
-  const {srcDir, srcFilename} = jsBundles[bundleName];
-  await Promise.all([
-    // cdn
-    doBuildJs(jsBundles, bundleName, {
-      ...options,
-      outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
-    }),
-    // npm - standalone
-    compileJs(srcDir, srcFilename, 'src/bento/core/dist', {
-      ...options,
-      toName: maybeToNpmEsmName('bento.core.max.js'),
-      minifiedName: maybeToNpmEsmName('bento.core.js'),
-      outputFormat: argv.esm ? 'esm' : 'cjs',
-    }),
-    // npm - preact
-    compileJs(srcDir, srcFilename, 'src/bento/core/preact/dist', {
-      ...options,
-      toName: maybeToNpmEsmName('bento-preact.core.max.js'),
-      minifiedName: maybeToNpmEsmName('bento-preact.core.js'),
-      outputFormat: argv.esm ? 'esm' : 'cjs',
-      remapDependencies: {'preact/dom': 'preact'},
-      externalDependencies: ['preact'],
-    }),
-    // npm - react
-    compileJs(srcDir, srcFilename, 'src/bento/core/react/dist', {
-      ...options,
-      toName: maybeToNpmEsmName('bento-react.core.max.js'),
-      minifiedName: maybeToNpmEsmName('bento-react.core.js'),
-      outputFormat: argv.esm ? 'esm' : 'cjs',
-      remapDependencies: {
-        'preact': 'react',
-        'preact/compat': 'react',
-        './src/preact/compat/internal.js': './src/preact/compat/external.js',
-        'preact/hooks': 'react',
-        'preact/dom': 'react-dom',
-      },
-      externalDependencies: ['react', 'react-dom'],
-    }),
-  ]);
-}
-
-/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  *
@@ -189,7 +137,6 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    compileBentoRuntimeAndCore(options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -746,7 +693,6 @@ async function getDependencies(entryPoint, options) {
 module.exports = {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
   esbuildCompile,

@@ -140,10 +140,9 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
 
 /**
  * Computes the list of unit tests to run under difference scenarios
- * @param {{bentoOnly?: boolean}} [options]
  * @return {Array<string>|void}
  */
-function getUnitTestsToRun({bentoOnly = false} = {}) {
+function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -154,7 +153,7 @@ function getUnitTestsToRun({bentoOnly = false} = {}) {
     return;
   }
 
-  const tests = unitTestsToRun({bentoOnly});
+  const tests = unitTestsToRun();
   if (tests.length == 0) {
     log(
       green('INFO:'),
@@ -182,17 +181,15 @@ function getUnitTestsToRun({bentoOnly = false} = {}) {
  * Extracts the list of unit tests to run based on the changes in the local
  * branch. Return value is cached to optimize for multiple calls.
  *
- * @param {{bentoOnly?: boolean}} [options]
  * @return {!Array<string>}
  */
-function unitTestsToRun({bentoOnly = false} = {}) {
+function unitTestsToRun() {
   if (testsToRun) {
     return testsToRun;
   }
   const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMain();
-  const {bentoUnitTestPaths, unitTestPaths: nonBentoUnitTestPaths} = testConfig;
-  const unitTestPaths = bentoOnly ? bentoUnitTestPaths : nonBentoUnitTestPaths;
+  const {unitTestPaths} = testConfig;
   testsToRun = [];
   let srcFiles = [];
 

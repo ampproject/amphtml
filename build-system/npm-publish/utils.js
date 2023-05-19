@@ -27,33 +27,11 @@ function getComponents() {
 }
 
 /**
- * Sets package config for @bentoproject/core.
- * Follows interface used in bundle configs above
- * @type {{name: string, version: string}}
- */
-const coreConfig = {
-  name: 'core',
-  version: '0.1',
-};
-
-/**
  * Get bento components and extensions to be published on npm
  * @return {Array<any>}
  */
 function getExtensionsAndComponents() {
   return [...getExtensions(), ...getComponents()];
-}
-
-/**
- * Gets the directory of the component or extension.
- * @param {string} extension
- * @param {string} version
- * @return {string}
- */
-function getPackageDir(extension, version) {
-  return extension.startsWith('bento')
-    ? `src/bento/components/${extension}/${version}`
-    : `extensions/${extension}/${version}`;
 }
 
 /**
@@ -71,10 +49,6 @@ function getSemver(extensionVersion, ampVersion) {
 }
 
 module.exports = {
-  getComponents,
-  getExtensions,
   getExtensionsAndComponents,
-  getPackageDir,
   getSemver,
-  coreConfig,
 };
