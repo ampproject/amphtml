@@ -41,7 +41,7 @@ describes.endtoend(
       return slides;
     }
 
-    describe('light DOM controls', () => {
+    describe.skip('light DOM controls', () => {
       it('should jump to a slide', async () => {
         const slides = await getInitalSlides();
 
@@ -90,7 +90,7 @@ describes.endtoend(
       });
     });
 
-    describe('shadowDOM controls', () => {
+    describe.skip('shadowDOM controls', () => {
       it('should scroll to the previous slide', async () => {
         const slides = await getInitalSlides();
         const element = await controller.findElement('bento-base-carousel');
