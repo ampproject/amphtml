@@ -150,6 +150,7 @@ export let ShoppingDataDef;
  *    pageSize: {width: number, height: number},
  *    subscriptionsDialogState: boolean,
  *    subscriptionsPageIndex: number,
+ *    desktopAspectRatio: number,
  * }}
  */
 export let State;
@@ -195,6 +196,7 @@ const StateProperty = mangleObjectValues({
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
+  DESKTOP_ASPECT_RATIO: 'desktopAspectRatio',
 
   // App data.
   ACTIONS_ALLOWLIST: 'actionsAllowlist',
@@ -231,6 +233,7 @@ const Action = mangleObjectValues({
   SET_PAGE_SIZE: 'updatePageSize',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
   SET_SUBSCRIPTIONS_PAGE_INDEX: 'setSubscriptionsPageIndex',
+  SET_DESKTOP_ASPECT_RATIO: 'setDesktopAspectRatio',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -496,6 +499,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.SUBSCRIPTIONS_STATE]: data,
       });
+    case Action.SET_DESKTOP_ASPECT_RATIO:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.DESKTOP_ASPECT_RATIO]: data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -638,6 +646,7 @@ export class AmpStoryStoreService {
       [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.DISABLED,
       [StateProperty.SUBSCRIPTIONS_PAGE_INDEX]: -1,
+      [StateProperty.DESKTOP_ASPECT_RATIO]: 0,
     });
   }
 

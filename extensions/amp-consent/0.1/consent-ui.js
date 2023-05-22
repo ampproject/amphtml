@@ -35,6 +35,10 @@ const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
 const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 const CANCEL_OVERLAY = 'cancelFullOverlay';
 const REQUEST_OVERLAY = 'requestFullOverlay';
+const ALLOWED_SANDBOX_ATTRIBUTES = [
+  'allow-popups-to-escape-sandbox',
+  'allow-top-navigation-by-user-activation',
+];
 
 const IFRAME_RUNNING_TIMEOUT = 1000;
 
@@ -465,16 +469,30 @@ export class ConsentUI {
    */
   createPromptIframe_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
-    const sandbox = ['allow-scripts', 'allow-popups'];
-    const allowSameOrigin = this.allowSameOrigin_(promptUISrc);
-    if (allowSameOrigin) {
-      sandbox.push('allow-same-origin');
-    }
-    iframe.setAttribute('sandbox', sandbox.join(' '));
+    const sandbox = this.getSandboxAttribute_(promptUISrc);
+    iframe.setAttribute('sandbox', sandbox);
     const {classList} = iframe;
     classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.
     return iframe;
+  }
+
+  /**
+   * Determines the sandbox attribute for the prompt iframe
+   * @param {string} src
+   * @return {string}
+   */
+  getSandboxAttribute_(src) {
+    const sandbox = ['allow-scripts', 'allow-popups'];
+    const allowSameOrigin = this.allowSameOrigin_(src);
+    if (allowSameOrigin) {
+      sandbox.push('allow-same-origin');
+    }
+
+    const additional = this.getAdditionalSandboxAttributes_();
+    Array.prototype.push.apply(sandbox, additional);
+
+    return sandbox.join(' ');
   }
 
   /**
@@ -487,6 +505,26 @@ export class ConsentUI {
     const srcUrl = urlService.parse(src);
     const containerUrl = urlService.parse(this.ampdoc_.getUrl());
     return srcUrl.origin != containerUrl.origin;
+  }
+
+  /**
+   * Retrieve additional sandbox restrictions to be removed from the iframe.
+   * @return {Array<string>}
+   */
+  getAdditionalSandboxAttributes_() {
+    return (this.config_['sandbox'] || '')
+      .split(' ')
+      .filter(Boolean)
+      .filter((attribute) => {
+        const isAllowed = ALLOWED_SANDBOX_ATTRIBUTES.indexOf(attribute) !== -1;
+        if (!isAllowed) {
+          user().error(
+            TAG,
+            `The sandbox attribute "${attribute}" is not allowed`
+          );
+        }
+        return isAllowed;
+      });
   }
 
   /**

@@ -218,7 +218,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
 
-    expect(data.localeString).to.equal('上午4:05');
+    expect(data.localeString).to.equal('凌晨4:05');
   });
 
   const expectedTimeZoneNamesAmericaNewYork = {
