@@ -4,7 +4,7 @@ Provides support for [Fairground](https://thefairground.com) ads.
 
 ### Required parameters
 
-- `src`
+-   `src`
 
 ## Example
 
