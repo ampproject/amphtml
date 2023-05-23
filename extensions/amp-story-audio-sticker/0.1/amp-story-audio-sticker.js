@@ -165,11 +165,11 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
   maybeInitializeStickerStyle_() {
     this.toggleStickerState_(
       'outline',
-      this.element.getAttribute('style') === 'outline'
+      this.element.getAttribute('sticker-style') === 'outline'
     );
     this.toggleStickerState_(
       'dropshadow',
-      this.element.getAttribute('style') === 'dropshadow'
+      this.element.getAttribute('sticker-style') === 'dropshadow'
     );
 
     const outlineColor = this.element.getAttribute('outline-color');
@@ -203,22 +203,12 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       true
     );
     this.element.addEventListener(
-      'touchstart',
+      'pointerdown',
       () => this.toggleStickerState_('clicking', true),
       {passive: true}
     );
     this.element.addEventListener(
-      'mousedown',
-      () => this.toggleStickerState_('clicking', true),
-      {passive: true}
-    );
-    this.element.addEventListener(
-      'touchend',
-      () => this.toggleStickerState_('clicking', false),
-      {passive: true}
-    );
-    this.element.addEventListener(
-      'mouseup',
+      'pointerup',
       () => this.toggleStickerState_('clicking', false),
       {passive: true}
     );

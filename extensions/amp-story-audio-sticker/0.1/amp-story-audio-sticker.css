@@ -71,7 +71,7 @@ amp-story[muted] amp-story-audio-sticker {
 }
 
 amp-story-audio-sticker.outline {
-  border: 4px solid var(--story-audio-sticker-outline-color) !important;
+  box-shadow: inset 0 0 0 4px var(--story-audio-sticker-outline-color) !important;
 }
 
 amp-story-audio-sticker.dropshadow {
