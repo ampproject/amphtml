@@ -24,7 +24,7 @@ function BentoDatePickerWithRef(
   props: BentoDatePickerProps,
   ref: Ref<SingleDatePickerAPI | DateRangePickerAPI>
 ) {
-  const {children, type = 'single', onError = DEFAULT_ON_ERROR} = props;
+  const {children, onError = DEFAULT_ON_ERROR, type = 'single'} = props;
 
   const DatePicker = datePickerForType[type];
 
