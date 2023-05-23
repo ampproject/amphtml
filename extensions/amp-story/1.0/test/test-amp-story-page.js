@@ -301,7 +301,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await macroTask(win.setTimeout);
+    await macroTask();
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -331,7 +331,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await macroTask(win.setTimeout);
+    await macroTask();
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -350,7 +350,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await macroTask(win.setTimeout);
+    await macroTask();
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -380,7 +380,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     deferred.resolve();
-    await macroTask(win.setTimeout);
+    await macroTask();
 
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(videoEl);
   });
@@ -407,7 +407,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     // Not calling deferred.resolve();
 
-    await macroTask(win.setTimeout);
+    await macroTask();
 
     expect(mediaPoolRegister).to.not.have.been.called;
   });
@@ -620,7 +620,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.layoutCallback();
 
     page.setState(PageState.PLAYING);
-    await macroTask(win.setTimeout);
+    await macroTask();
 
     const playButtonEl = element.querySelector(
       '.i-amphtml-story-page-play-button'
@@ -668,7 +668,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    await macroTask(win.setTimeout);
+    await macroTask();
 
     const poolVideoEl = element.querySelector('video');
     // Not called with the original video.
@@ -693,7 +693,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
-    await macroTask(win.setTimeout);
+    await macroTask();
     page.setState(PageState.NOT_ACTIVE);
 
     const poolVideoEl = element.querySelector('video');

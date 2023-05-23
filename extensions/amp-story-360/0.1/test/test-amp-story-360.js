@@ -101,7 +101,7 @@ describes.realWin(
         '.i-amphtml-story-360-activate-button'
       );
 
-      await macroTask(win.setTimeout);
+      await macroTask();
 
       expect(activationEl.getAttribute('role')).to.eql('button');
     });
