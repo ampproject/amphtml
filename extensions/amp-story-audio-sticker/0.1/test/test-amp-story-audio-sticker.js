@@ -40,7 +40,7 @@ describes.realWin(
           <amp-story-page id="page-1">
             <amp-story-grid-layer>
               <amp-story-audio-sticker
-                style="outline"
+                sticker-style="outline"
                 outline-color="rgb(0, 200, 0)"
               ></amp-story-audio-sticker>
             </amp-story-grid-layer>
@@ -48,7 +48,7 @@ describes.realWin(
           <amp-story-page id="page-2">
             <amp-story-grid-layer>
               <amp-story-audio-sticker
-                style="dropshadow"
+                sticker-style="dropshadow"
                 dropshadow-color="red"
               ></amp-story-audio-sticker>
             </amp-story-grid-layer>
