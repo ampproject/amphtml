@@ -141,7 +141,7 @@ export class Transport {
         getRequest(false),
         suppressWarnings,
         /** @type {string|undefined} */ (this.referrerPolicy_),
-	/** @type {string|undefined} */ (this.attributionSrc_)
+        /** @type {string|undefined} */ (this.attributionSrc_)
       );
       return;
     }
@@ -249,7 +249,13 @@ export class Transport {
    * @param {string|undefined} referrerPolicy
    * @param {string|undefined} attributionSrc
    */
-  static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy, attributionSrc) {
+  static sendRequestUsingImage(
+    win,
+    request,
+    suppressWarnings,
+    referrerPolicy,
+    attributionSrc
+  ) {
     if (!win) {
       return;
     }

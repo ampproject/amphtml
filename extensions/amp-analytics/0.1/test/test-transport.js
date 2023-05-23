@@ -11,11 +11,11 @@ import {
   mockWindowInterface,
 } from '#testing/helpers/service';
 
+import * as privacySandboxUtils from 'src/utils/privacy-sandbox-utils';
+
 import {getMode} from '../../../../src/mode';
 import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {Transport} from '../transport';
-
-import * as privacySandboxUtils from 'src/utils/privacy-sandbox-utils';
 
 describes.realWin(
   'amp-analytics.transport',
@@ -117,7 +117,11 @@ describes.realWin(
       });
       expectNoBeacon();
       expectNoXhr();
-      expectImagePixel('https://example.test/test', 'no-referrer', 'https://example.test/attributionsrc');
+      expectImagePixel(
+        'https://example.test/test',
+        'no-referrer',
+        'https://example.test/attributionsrc'
+      );
     });
 
     it('carries empty attributionSrc over to image pixel', () => {
