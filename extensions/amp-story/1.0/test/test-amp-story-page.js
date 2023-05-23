@@ -12,7 +12,7 @@ import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise, macroTask} from '#testing/helpers';
 
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -34,8 +34,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let story;
   let storeService;
   let isPerformanceTrackingOn;
-
-  const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
   beforeEach(() => {
     win = env.win;
@@ -303,7 +301,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask(win.setTimeout);
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -333,7 +331,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask(win.setTimeout);
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -352,7 +350,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask(win.setTimeout);
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -382,7 +380,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     deferred.resolve();
-    await nextTick();
+    await macroTask(win.setTimeout);
 
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(videoEl);
   });
@@ -409,7 +407,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     // Not calling deferred.resolve();
 
-    await nextTick();
+    await macroTask(win.setTimeout);
 
     expect(mediaPoolRegister).to.not.have.been.called;
   });
@@ -622,7 +620,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.layoutCallback();
 
     page.setState(PageState.PLAYING);
-    await nextTick();
+    await macroTask(win.setTimeout);
 
     const playButtonEl = element.querySelector(
       '.i-amphtml-story-page-play-button'
@@ -670,7 +668,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask(win.setTimeout);
 
     const poolVideoEl = element.querySelector('video');
     // Not called with the original video.
@@ -695,7 +693,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
-    await nextTick();
+    await macroTask(win.setTimeout);
     page.setState(PageState.NOT_ACTIVE);
 
     const poolVideoEl = element.querySelector('video');

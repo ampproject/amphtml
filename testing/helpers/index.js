@@ -16,9 +16,9 @@ export function configureHelpers(env) {
  * @param {number} ms
  * @return {Promise<void>}
  */
-export function sleep(ms) {
+export function sleep(ms, setTimeoutFunc = setTimeout) {
   return new Promise((resolve) => {
-    setTimeout(resolve, ms);
+    setTimeoutFunc(resolve, ms);
   });
 }
 
@@ -27,8 +27,8 @@ export function sleep(ms) {
  * `yield macroTask()` in your test.
  * @return {Promise<void>}
  */
-export function macroTask() {
-  return sleep(0);
+export function macroTask(setTimeoutFunc = setTimeout) {
+  return sleep(0, setTimeoutFunc);
 }
 
 /**

@@ -2,6 +2,8 @@ import {Services} from '#service';
 
 import * as utilsStory from '#utils/story';
 
+import {sleep} from '#testing/helpers';
+
 import {
   PageConfig,
   PageConfigResolver,
@@ -917,7 +919,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     it('should report failure if platform timeouts', (done) => {
       env.sandbox
         .stub(platform, 'getEntitlements')
-        .callsFake(() => new Promise((resolve) => setTimeout(resolve, 8000)));
+        .callsFake(() => sleep(8000));
       const failureStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
