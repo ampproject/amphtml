@@ -33,6 +33,7 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  fairground: true,
   firstimpression: true,
   forkmedia: true,
   gecko: true,
