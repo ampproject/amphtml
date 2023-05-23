@@ -1,30 +1,15 @@
 # Fairground
 
-Provides support for [Fairground](https://thefairground.com/) widgets.
+Provides support for [Fairground](https://thefairground.com) ads.
 
 ### Required parameters
 
--   `data-ad-type`
--   `data-id`
+- `src`
 
 ## Example
 
 ```html
-  <amp-embed width="640"
-             height="100"
-             layout="fixed"
-             style="border: none"
-             type="fairground"
-             data-ad-type="campaign"
-             data-id="fa68d786-0b4f-437d-9b6b-fc1f54209cfd"
-></amp-embed>
-
-<amp-embed width="640"
-           height="800"
-           layout="fixed"
-           style="border: none"
-           type="fairground"
-           data-ad-type="embed"
-           data-id="21f04688-ca8b-4b73-86a7-f0663e86d3a3"
-></amp-embed>
+<amp-ad width="320" height="100" layout="fixed" type="fairground"
+        src="https://amp.thefairground.com/campaigns/4189dd42-f853-4535-aedd-7130ea601fd8/amp.script.js">
+</amp-ad>
 ```
