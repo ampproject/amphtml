@@ -1,6 +1,6 @@
 # Fairground
 
-Provides support for [Fairground](https://thefairground.com) ads.
+Provides support for Fairground ads.
 
 ### Required parameters
 
