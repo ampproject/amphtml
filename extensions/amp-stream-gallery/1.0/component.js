@@ -28,18 +28,18 @@ const OUTSET_ARROWS_WIDTH = 100;
  */
 function BentoStreamGalleryWithRef(props, ref) {
   const {
-    arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
+    arrowPrevAs = DefaultArrow,
     children,
-    [propName('class')]: className,
     extraSpace,
     maxItemWidth = Number.MAX_VALUE,
-    minItemWidth = 1,
     maxVisibleCount = Number.MAX_VALUE,
+    minItemWidth = 1,
     minVisibleCount = 1,
     outsetArrows,
     peek = 0,
     slideAlign = 'start',
+    [propName('class')]: className,
     ...rest
   } = props;
   const classes = useStyles();

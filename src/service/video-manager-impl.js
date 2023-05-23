@@ -23,9 +23,9 @@ import {
 } from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {VideoSessionManager} from './video-session-manager';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
+import {VideoSessionManager} from './video-session-manager';
 
 import {
   EMPTY_METADATA,

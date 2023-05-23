@@ -670,7 +670,7 @@ function getDriver({headless = false}, browserName, deviceName) {
  */
 async function setUpTest(
   {ampDriver, controller, environment},
-  {testUrl = '', version, experiments = [], initialRect}
+  {experiments = [], initialRect, testUrl = '', version}
 ) {
   const url = new URL(testUrl);
 

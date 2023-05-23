@@ -181,10 +181,10 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       const def = propDefs[match];
       const {
         as = false,
-        single,
-        name = match,
         clone,
+        name = match,
         props: slotProps = {},
+        single,
       } = def;
       devAssert(clone || Ctor['usesShadowDom']);
       const parsedSlotProps = {};

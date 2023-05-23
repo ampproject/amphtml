@@ -13,11 +13,11 @@ const FULL_HEIGHT = '100%';
  * @return {PreactDef.Renderable}
  */
 export function BentoGist({
-  gistId,
   file,
-  title = DEFAULT_TITLE,
+  gistId,
   requestResize,
   style,
+  title = DEFAULT_TITLE,
   ...rest
 }) {
   const iframeRef = useRef(null);
