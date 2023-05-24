@@ -3,12 +3,18 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const puppeteer = require('puppeteer');
-const PuppeteerExtraPluginUserPreferences = require('puppeteer-extra-plugin-user-preferences');
-const {addExtra} = require('puppeteer-extra');
+const {
+  Browser: BrowserEnum,
+  computeExecutablePath,
+  getInstalledBrowsers,
+  install,
+} = require('@puppeteer/browsers');
 const {cyan, yellow} = require('kleur/colors');
 const {HOST} = require('./consts');
 const {log} = require('./log');
+const puppeteer = require('puppeteer-core');
+
+const cacheDir = path.join(__dirname, '.cache');
 
 // REPEATING TODO(@ampproject/wg-infra): Update this whenever the Percy backend
 // starts using a new version of Chrome to render DOM snapshots.
@@ -32,14 +38,10 @@ const VIEWPORT_HEIGHT = 100000;
 /**
  * Launches a Puppeteer controlled browser.
  *
- * Waits until the browser is up and reachable, and ties its lifecycle to this
- * process's lifecycle.
- *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
- * @return {Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
+ * @param {string} executablePath browser executable path.
+ * @return {!Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
  */
-async function launchBrowser(browserFetcher) {
+async function launchBrowser(executablePath) {
   /** @type {"new" | false} */
   const headless = !argv.dev && 'new';
   const browserOptions = {
@@ -55,24 +57,10 @@ async function launchBrowser(browserFetcher) {
     ],
     dumpio: argv.chrome_debug,
     headless,
-    executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
-      .executablePath,
+    executablePath,
     waitForInitialPage: false,
   };
-
-  const puppeteerExtra = addExtra(puppeteer);
-  puppeteerExtra.use(
-    PuppeteerExtraPluginUserPreferences({
-      userPrefs: {
-        devtools: {
-          preferences: {
-            currentDockState: '"undocked"',
-          },
-        },
-      },
-    })
-  );
-  return await puppeteerExtra.launch(browserOptions);
+  return puppeteer.launch(browserOptions);
 }
 
 /**
@@ -158,19 +146,20 @@ async function resetPage(page, viewport = null) {
 }
 
 /**
- * Loads task-specific dependencies are returns an instance of BrowserFetcher.
+ * Returns the executable path of the browser, potentially installing and caching it.
  *
- * @return {Promise<!puppeteer.BrowserFetcher>}
+ * @return {Promise<string>}
  */
-async function loadBrowserFetcher() {
-  // @ts-ignore Valid method in Puppeteer's nodejs interface.
-  // https://github.com/puppeteer/puppeteer/blob/main/src/node/Puppeteer.ts
-  const browserFetcher = puppeteer.createBrowserFetcher();
-  const chromiumRevisions = await browserFetcher.localRevisions();
-  if (chromiumRevisions.includes(PUPPETEER_CHROMIUM_REVISION)) {
+async function fetchBrowserExecutablePath() {
+  const installedBrowsers = await getInstalledBrowsers({cacheDir});
+  const installedBrowser = installedBrowsers.find(
+    ({browser, buildId}) =>
+      browser == BrowserEnum.CHROMIUM && buildId == PUPPETEER_CHROMIUM_REVISION
+  );
+  if (installedBrowser) {
     log(
       'info',
-      'Using Percy-compatible version of Chromium',
+      'Using cached Percy-compatible version of Chromium',
       cyan(PUPPETEER_CHROMIUM_REVISION)
     );
   } else {
@@ -178,23 +167,41 @@ async function loadBrowserFetcher() {
       'info',
       'Percy-compatible version of Chromium',
       cyan(PUPPETEER_CHROMIUM_REVISION),
-      'was not found. Downloading...'
+      'was not found in cache. Downloading...'
     );
-    await browserFetcher.download(
-      PUPPETEER_CHROMIUM_REVISION,
-      (/* downloadedBytes, totalBytes */) => {
-        // TODO(@ampproject/wg-infra): display download progress.
-        // Logging every call is too verbose.
-      }
-    );
+    let logThrottler = true;
+    await install({
+      cacheDir,
+      browser: BrowserEnum.CHROMIUM,
+      buildId: PUPPETEER_CHROMIUM_REVISION,
+      downloadProgressCallback(downloadedBytes, totalBytes) {
+        if (logThrottler) {
+          log('info', downloadedBytes, '/', totalBytes, 'bytes');
+          logThrottler = false;
+          setTimeout(() => {
+            logThrottler = true;
+          }, 1000);
+        } else if (downloadedBytes == totalBytes) {
+          log(
+            'info',
+            'Finished downloading Chromium version',
+            cyan(PUPPETEER_CHROMIUM_REVISION)
+          );
+        }
+      },
+    });
   }
-  return browserFetcher;
+  return computeExecutablePath({
+    cacheDir,
+    browser: BrowserEnum.CHROMIUM,
+    buildId: PUPPETEER_CHROMIUM_REVISION,
+  });
 }
 
 module.exports = {
   PUPPETEER_CHROMIUM_REVISION,
   launchBrowser,
-  loadBrowserFetcher,
+  fetchBrowserExecutablePath,
   newPage,
   resetPage,
 };
