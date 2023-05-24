@@ -8,7 +8,7 @@
     "@babel/runtime-corejs3": "7.21.0",
     "@storybook/addon-a11y": "6.5.16",
     "@storybook/addon-controls": "6.5.16",
-    "@storybook/addon-viewport": "6.5.16",
+    "@storybook/addon-viewport": "7.0.17",
     "@storybook/client-api": "6.5.16",
     "babel-loader": "9.1.2",
     "core-js": "3.30.1",
