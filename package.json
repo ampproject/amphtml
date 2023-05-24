@@ -78,7 +78,7 @@
     "ava": "4.0.0",
     "babel-plugin-istanbul": "6.0.0",
     "babel-plugin-minify-replace": "0.5.0",
-    "babel-plugin-module-resolver": "4.1.0",
+    "babel-plugin-module-resolver": "5.0.0",
     "babel-plugin-optimize-objstr": "1.0.0",
     "baconipsum": "0.1.2",
     "base62": "2.0.1",
