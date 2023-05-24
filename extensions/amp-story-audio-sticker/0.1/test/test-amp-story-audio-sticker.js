@@ -47,10 +47,7 @@ describes.realWin(
           </amp-story-page>
           <amp-story-page id="page-2">
             <amp-story-grid-layer>
-              <amp-story-audio-sticker
-                sticker-style="dropshadow"
-                dropshadow-color="red"
-              ></amp-story-audio-sticker>
+              <amp-story-audio-sticker></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
         </amp-story>
@@ -184,34 +181,18 @@ describes.realWin(
       });
     });
 
-    it('should not override the default style color if the custom color is invalid RGB format ', async () => {
+    it('should override the default style color if the custom color is in valid RGB/RGBA format ', async () => {
       await stickerImpl.layoutCallback();
+      await nextTick();
 
-      // Wait for 0.1 second to make sure the element is initialized.
-      const deferred = new Deferred();
-      setTimeout(() => {
-        // Valid RGB value should override default color.
-        const stickerWithOutline = doc.querySelector(
-          'amp-story-audio-sticker.outline'
-        );
-        expect(
-          computedStyle(win, stickerWithOutline).getPropertyValue(
-            '--story-audio-sticker-outline-color'
-          )
-        ).equal('rgb(0, 200, 0)');
-
-        // Invalid RGB value should not override default color.
-        const stickerWithDropshadow = doc.querySelector(
-          'amp-story-audio-sticker.dropshadow'
-        );
-        expect(
-          computedStyle(win, stickerWithDropshadow).getPropertyValue(
-            '--story-audio-sticker-dropshadow-color'
-          )
-        ).equal('#fff');
-        deferred.resolve();
-      }, 100);
-      return deferred.promise;
+      const stickerWithOutline = doc.querySelector(
+        'amp-story-audio-sticker[sticker-style="outline"]'
+      );
+      expect(
+        computedStyle(win, stickerWithOutline).getPropertyValue(
+          '--story-audio-sticker-outline-color'
+        )
+      ).equal('rgb(0, 200, 0)');
     });
   }
 );

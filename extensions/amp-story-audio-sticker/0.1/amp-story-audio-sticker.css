@@ -70,15 +70,15 @@ amp-story[muted] amp-story-audio-sticker {
   border-radius: 25px !important;
 }
 
-amp-story-audio-sticker.outline {
+amp-story-audio-sticker[sticker-style="outline"] {
   box-shadow: inset 0 0 0 4px var(--story-audio-sticker-outline-color) !important;
 }
 
-amp-story-audio-sticker.dropshadow {
+amp-story-audio-sticker[sticker-style="dropshadow"] {
   box-shadow: 4px 4px 20px var(--story-audio-sticker-dropshadow-color) !important;
 }
 
-amp-story[muted] amp-story-audio-sticker.clicking {
+amp-story[muted] amp-story-audio-sticker:active {
   transition: transform 0.5s ease !important;
   transform: scale(0.8) !important;
 }

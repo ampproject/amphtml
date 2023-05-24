@@ -103,7 +103,11 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
-        this.initializeListeners_();
+        this.element.addEventListener(
+          'click',
+          () => this.storeService_.dispatch(Action.TOGGLE_MUTED, false),
+          true
+        );
       }
     );
   }
@@ -163,65 +167,18 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
    * @private
    */
   maybeInitializeStickerStyle_() {
-    this.toggleStickerState_(
-      'outline',
-      this.element.getAttribute('sticker-style') === 'outline'
-    );
-    this.toggleStickerState_(
-      'dropshadow',
-      this.element.getAttribute('sticker-style') === 'dropshadow'
-    );
-
     const outlineColor = this.element.getAttribute('outline-color');
-    if (this.isValidRGBColor_(outlineColor)) {
+    if (outlineColor) {
       setImportantStyles(this.element, {
         '--story-audio-sticker-outline-color': outlineColor,
       });
     }
     const dropshadowColor = this.element.getAttribute('dropshadow-color');
-    if (this.isValidRGBColor_(dropshadowColor)) {
+    if (dropshadowColor) {
       setImportantStyles(this.element, {
         '--story-audio-sticker-dropshadow-color': dropshadowColor,
       });
     }
-  }
-
-  /**
-   * @private
-   * @param {string} RGBColor
-   * @return {boolean}
-   */
-  isValidRGBColor_(RGBColor) {
-    return RGBColor && RGBColor.match(/rgba?\((\d{1,3}), (\d{1,3}), (\d{1,3})/);
-  }
-
-  /** @private */
-  initializeListeners_() {
-    this.element.addEventListener(
-      'click',
-      () => this.storeService_.dispatch(Action.TOGGLE_MUTED, false),
-      true
-    );
-    this.element.addEventListener(
-      'pointerdown',
-      () => this.toggleStickerState_('clicking', true),
-      {passive: true}
-    );
-    this.element.addEventListener(
-      'pointerup',
-      () => this.toggleStickerState_('clicking', false),
-      {passive: true}
-    );
-  }
-
-  /**
-   * Toggle sticker states.
-   * @param {string} stateName
-   * @param {boolean} force
-   * @private
-   */
-  toggleStickerState_(stateName, force) {
-    this.mutateElement(() => this.element.classList.toggle(stateName, force));
   }
 
   /** @override */
