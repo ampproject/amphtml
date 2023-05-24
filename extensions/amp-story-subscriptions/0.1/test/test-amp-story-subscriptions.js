@@ -201,7 +201,7 @@ describes.realWin(
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(false));
 
-      await macroTask(win.setTimeout);
+      await macroTask();
 
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
         SubscriptionsState.BLOCKED
@@ -213,7 +213,7 @@ describes.realWin(
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(true));
 
-      await macroTask(win.setTimeout);
+      await macroTask();
 
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
         SubscriptionsState.GRANTED
@@ -285,7 +285,7 @@ describes.realWin(
       buttonEl.click();
 
       doc.body.appendChild(<swg-popup-background></swg-popup-background>);
-      await macroTask(win.setTimeout);
+      await macroTask();
 
       const swgPopupBackgroundEl = doc.querySelector('swg-popup-background');
       expect(
