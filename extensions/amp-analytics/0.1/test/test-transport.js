@@ -11,6 +11,8 @@ import {
   mockWindowInterface,
 } from '#testing/helpers/service';
 
+import * as privacySandboxUtils from 'src/utils/privacy-sandbox-utils';
+
 import {getMode} from '../../../../src/mode';
 import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {Transport} from '../transport';
@@ -99,6 +101,44 @@ describes.realWin(
       expectNoBeacon();
       expectNoXhr();
       expectImagePixel('https://example.test/test', 'no-referrer');
+    });
+
+    it('carries attributionSrc over to image pixel', () => {
+      setupStubs(true, true);
+      env.sandbox
+        .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
+        .returns(true);
+      sendRequest(win, 'https://example.test/test', {
+        beacon: true,
+        xhrpost: true,
+        image: true,
+        referrerPolicy: 'no-referrer',
+        attributionsrc: 'https://example.test/attributionsrc',
+      });
+      expectNoBeacon();
+      expectNoXhr();
+      expectImagePixel(
+        'https://example.test/test',
+        'no-referrer',
+        'https://example.test/attributionsrc'
+      );
+    });
+
+    it('carries empty attributionSrc over to image pixel', () => {
+      setupStubs(true, true);
+      env.sandbox
+        .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
+        .returns(true);
+      sendRequest(win, 'https://example.test/test', {
+        beacon: true,
+        xhrpost: true,
+        image: true,
+        referrerPolicy: 'no-referrer',
+        attributionsrc: '',
+      });
+      expectNoBeacon();
+      expectNoXhr();
+      expectImagePixel('https://example.test/test', 'no-referrer', '');
     });
 
     it('falls back to xhrpost when enabled and beacon is not available', () => {
@@ -536,8 +576,8 @@ describes.realWin(
       expect(sendXhrStub).to.not.be.called;
     }
 
-    function expectImagePixel(url, referrerPolicy) {
-      imagePixelVerifier.verifyRequest(url, referrerPolicy);
+    function expectImagePixel(url, referrerPolicy, attributionSrc) {
+      imagePixelVerifier.verifyRequest(url, referrerPolicy, attributionSrc);
     }
 
     function expectNoImagePixel() {
