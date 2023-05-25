@@ -56,21 +56,6 @@ updates:
       interval: daily
 
   - package-ecosystem: npm
-    directory: /src/bento/core
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
-    directory: /src/bento/core/preact
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
-    directory: /src/bento/core/react
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
     directory: /third_party/amp-toolbox-cache-url
     schedule:
       interval: daily

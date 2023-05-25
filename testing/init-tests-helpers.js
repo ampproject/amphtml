@@ -42,14 +42,6 @@ import {activateChunkingForTesting} from '../src/chunk';
 import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';
 import {adoptWithMultidocDeps} from '../src/runtime';
 
-let bentoOnly = true;
-export function bentoOnlyMode() {
-  return bentoOnly;
-}
-export function setBentoMode(mode) {
-  bentoOnly = mode;
-}
-
 /** @fileoverview
  * This file initializes AMP's Karma + Mocha based unit & integration tests.
  * TODO(wg-infra): Do a detailed inventory and remove unnecessary steps.
@@ -62,9 +54,7 @@ export function initializeTests() {
   initializeTestConstructs();
   exposeKarmaConfig();
   resetTestingState();
-  if (!bentoOnlyMode()) {
-    overrideAmpExtensionInstaller();
-  }
+  overrideAmpExtensionInstaller();
 }
 
 /**
@@ -160,9 +150,7 @@ function resetTestingState() {
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   Services.resourcesForDoc(ampdoc).ampInitComplete();
-  if (!bentoOnlyMode()) {
-    adoptWithMultidocDeps(window);
-  }
+  adoptWithMultidocDeps(window);
   configureEnzyme({adapter: new PreactEnzyme()});
 }
 

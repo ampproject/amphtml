@@ -88,7 +88,7 @@
       "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
-      "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "labels": ["WG: components", "WG: performance"],
       "rebaseWhen": "never",
       "automerge": true
     },
@@ -97,7 +97,7 @@
       "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
-      "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "labels": ["WG: components", "WG: performance"],
       "rebaseWhen": "never",
       "automerge": false,
       "schedule": null
@@ -107,7 +107,7 @@
       "matchFiles": ["package.json"],
       "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
-      "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "labels": ["WG: components", "WG: performance"],
       "rebaseWhen": "never",
       "automerge": false
     }

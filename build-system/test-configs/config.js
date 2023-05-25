@@ -10,7 +10,6 @@
  * }>
  */
 const initTestsPath = ['testing/init-tests.js'];
-const initBentoTestsPaths = ['testing/init-bento-tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
@@ -67,17 +66,14 @@ const karmaJsPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-  'src/bento/components/**/test/**/*.js',
   'testing/**/*.js',
 ];
 
 /**
- * @param {{bentoOnly?: boolean}} [options]
  * @return {Array<*>}
  */
-function getCommonUnitTestPaths({bentoOnly = false} = {}) {
-  const initTestPaths = bentoOnly ? initBentoTestsPaths : initTestsPath;
-  return initTestPaths.concat(fixturesExamplesPaths);
+function getCommonUnitTestPaths() {
+  return initTestsPath.concat(fixturesExamplesPaths);
 }
 
 const commonIntegrationTestPaths = initTestsPath.concat(
@@ -89,7 +85,6 @@ const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-  'src/bento/components/**/test/*.js',
 ]);
 
 const unitTestPaths = [
@@ -98,15 +93,6 @@ const unitTestPaths = [
   'ads/**/test/unit/test-*.js',
   'extensions/**/test/*.js',
   'extensions/**/test/unit/*.js',
-  'src/bento/components/**/test/*.js',
-  'src/bento/components/**/test/unit/*.js',
-];
-
-const bentoUnitTestPaths = [
-  'extensions/**/test/standalone/*.js',
-  'extensions/**/test/standalone/unit/*.js',
-  'src/bento/components/**/test/standalone/*.js',
-  'src/bento/components/**/test/standalone/unit/*.js',
 ];
 
 // TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
@@ -118,14 +104,9 @@ const unitTestCrossBrowserPaths = [
 const integrationTestPaths = [
   'test/integration/**/*.js',
   'extensions/**/test/integration/**/*.js',
-  'src/bento/components/**/test/integration/*.js',
 ];
 
-const e2eTestPaths = [
-  'test/e2e/*.js',
-  'extensions/**/test-e2e/test-*.js',
-  'src/bento/components/**/test-e2e/test-*.js',
-];
+const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/test-*.js'];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
@@ -155,7 +136,6 @@ const presubmitGlobs = [
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
   '!extensions/**/dist/*',
-  '!src/bento/components/**/dist/*',
   '!examples/**/*',
   '!examples/visual-tests/**/*',
   '!test/coverage/**/*.*',
@@ -213,7 +193,6 @@ const htmlFixtureGlobs = [
   'test/fixtures/e2e/**/*.html',
 
   // The following are not AMP documents and are not meant to validate.
-  '!**/bento/**/*.html',
   '!examples/amp-video-iframe/frame*.html',
   '!examples/viewer-iframe-poll.html',
   '!examples/viewer-webview.html',
@@ -482,7 +461,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 
 /** @const  */
 module.exports = {
-  bentoUnitTestPaths,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   getCommonUnitTestPaths,

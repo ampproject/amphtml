@@ -32,13 +32,12 @@ class Runner extends RuntimeTestRunner {
  * @return {Promise<void>}
  */
 async function unit() {
-  const {bento_only: bentoOnly} = argv;
   maybePrintArgvMessages();
-  if (argv.local_changes && !(await getUnitTestsToRun({bentoOnly}))) {
+  if (argv.local_changes && !(await getUnitTestsToRun())) {
     return;
   }
 
-  const config = new RuntimeTestConfig('unit', {bentoOnly});
+  const config = new RuntimeTestConfig('unit');
   const runner = new Runner(config);
 
   await runner.setup();
@@ -52,7 +51,6 @@ module.exports = {
 
 unit.description = 'Run unit tests';
 unit.flags = {
-  'bento_only': 'Run only bento standalone tests',
   'chrome_canary': 'Run tests on Chrome Canary',
   'chrome_flags': 'Use the given flags to launch Chrome',
   'coverage': 'Run tests in code coverage mode',
