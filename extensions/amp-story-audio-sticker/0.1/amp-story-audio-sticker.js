@@ -76,7 +76,6 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.maybeInitializeDefaultSticker_();
-    this.maybeInitializeStickerStyle_();
 
     // Build sticker component structure.
     this.element.parentNode.appendChild(
@@ -161,24 +160,6 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     return DEFAULT_STICKERS[stickerAttr]
       ? stickerAttr
       : FALLBACK_DEFAULT_STICKER;
-  }
-
-  /**
-   * @private
-   */
-  maybeInitializeStickerStyle_() {
-    const outlineColor = this.element.getAttribute('outline-color');
-    if (outlineColor) {
-      setImportantStyles(this.element, {
-        '--story-audio-sticker-outline-color': outlineColor,
-      });
-    }
-    const dropshadowColor = this.element.getAttribute('dropshadow-color');
-    if (dropshadowColor) {
-      setImportantStyles(this.element, {
-        '--story-audio-sticker-dropshadow-color': dropshadowColor,
-      });
-    }
   }
 
   /** @override */

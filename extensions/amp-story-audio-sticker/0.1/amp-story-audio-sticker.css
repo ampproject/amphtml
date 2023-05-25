@@ -54,8 +54,8 @@ amp-story-audio-sticker {
   max-width: 100% !important; /* Set the maximum width of the image to 100% to ensure it fits within the container */
   max-height: 100% !important; /* Set the maximum height of the image to 100% to ensure it fits within the container */
 
-  --story-audio-sticker-outline-color: white !important;
-  --story-audio-sticker-dropshadow-color: white !important;
+  --story-audio-sticker-outline-color: white;
+  --story-audio-sticker-dropshadow-color: white;
 }
 
 amp-story[muted] amp-story-audio-sticker {
