@@ -75,7 +75,7 @@ amp-story-audio-sticker[sticker-style="outline"] {
 }
 
 amp-story-audio-sticker[sticker-style="dropshadow"] {
-  box-shadow: 4px 4px 20px var(--story-audio-sticker-dropshadow-color) !important;
+  filter: drop-shadow(4px 4px 20px var(--story-audio-sticker-dropshadow-color)) !important;
 }
 
 amp-story[muted] amp-story-audio-sticker:active {
