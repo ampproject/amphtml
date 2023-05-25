@@ -53,9 +53,14 @@ amp-story-audio-sticker {
   width: 100% !important;
   max-width: 100% !important; /* Set the maximum width of the image to 100% to ensure it fits within the container */
   max-height: 100% !important; /* Set the maximum height of the image to 100% to ensure it fits within the container */
+  transition: transform 0.5s ease !important;
 
   --story-audio-sticker-outline-color: white;
   --story-audio-sticker-dropshadow-color: white;
+}
+
+amp-story-audio-sticker:active {
+  transform: scale(0.8) !important;
 }
 
 amp-story[muted] amp-story-audio-sticker {
@@ -78,18 +83,13 @@ amp-story-audio-sticker[sticker-style="dropshadow"] {
   filter: drop-shadow(4px 4px 20px var(--story-audio-sticker-dropshadow-color)) !important;
 }
 
-amp-story[muted] amp-story-audio-sticker:active {
-  transition: transform 0.5s ease !important;
-  transform: scale(0.8) !important;
-}
-
 /*
   Hide the sticker after the story gets unmuted:
   1) if the sticker is on the active page, hide it after showing posttap sticker for 4 seconds.
   2) if the sticker is not on the active page, hide it immediately since it is in the background.
 */
 amp-story:not([muted]) amp-story-page[active] amp-story-audio-sticker {
-  transition: opacity 0.5s ease 4s !important;
+  transition: transform 0.5s ease, opacity 0.5s ease 4s !important;
 }
 amp-story:not([muted]) amp-story-audio-sticker {
   opacity: 0 !important;
