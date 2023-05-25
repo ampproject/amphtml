@@ -1,5 +1,4 @@
 const express = require('express');
-const fetch = require('node-fetch');
 const fs = require('fs');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
@@ -129,7 +128,7 @@ async function requestFromUrl(template, url, query) {
   const response = await fetch(url);
   if (
     !response.headers.has('Content-Type') ||
-    response.headers.get('Content-Type').startsWith('text/html')
+    response.headers.get('Content-Type')?.startsWith('text/html')
   ) {
     return fillTemplate(template, url, query, await response.text());
   }

@@ -3,7 +3,6 @@
  * Sync status.amp.dev with cherry-pick progress
  */
 
-const fetch = require('node-fetch');
 const {getChannels, getFormats, steps} = require('./common');
 const {log} = require('../common/logging');
 
