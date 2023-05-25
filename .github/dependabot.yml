@@ -11,11 +11,6 @@ updates:
       interval: daily
 
   - package-ecosystem: npm
-    directory: /build-system/tasks/performance
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
     directory: /build-system/tasks/storybook/env/amp
     schedule:
       interval: daily

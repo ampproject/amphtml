@@ -131,7 +131,6 @@ const presubmitGlobs = [
   '!validator/validator.pb.go',
   '!validator/dist/**/*.*',
   '!validator/htmlparser/**/*.*',
-  '!build-system/tasks/performance/cache/**/*.*',
   '!build-system/runner/build/**/*.*',
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
