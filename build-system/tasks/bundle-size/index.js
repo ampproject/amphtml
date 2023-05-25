@@ -2,7 +2,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
-const fetch = require('node-fetch');
 const path = require('path');
 const url = require('url');
 const {

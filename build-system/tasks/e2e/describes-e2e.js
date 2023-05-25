@@ -4,7 +4,6 @@ require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
-const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const selenium = require('selenium-webdriver');
 const {

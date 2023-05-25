@@ -1,6 +1,5 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {cyan, red, yellow} = require('kleur/colors');
-const fetch = require('node-fetch');
 const {exec} = require('../../common/exec');
 const {log} = require('../../common/logging');
 

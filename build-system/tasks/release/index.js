@@ -32,7 +32,6 @@ let DistFlavorDef;
 const argv = require('minimist')(process.argv.slice(2));
 /** @type {ExperimentsConfigDef} */
 const experimentsConfig = require('../../global-configs/experiments-config.json');
-const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
