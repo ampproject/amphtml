@@ -188,19 +188,7 @@ function toEsmName(name) {
  * @return {string}
  */
 function maybeToEsmName(name) {
-  // Npm esm names occur at an earlier stage.
-  if (name.includes('.module')) {
-    return name;
-  }
   return argv.esm ? toEsmName(name) : name;
-}
-
-/**
- * @param {string} name
- * @return {string}
- */
-function maybeToNpmEsmName(name) {
-  return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
 }
 
 /**
@@ -243,11 +231,7 @@ async function finishBundle(destDir, destFilename, options, startTime) {
     );
     endBuildStep(logPrefix, `${destFilename} → ${aliasName}`, startTime);
   } else {
-    const loggingName =
-      options.npm && !destFilename.startsWith('amp-')
-        ? `${options.name} → ${destFilename}`
-        : destFilename;
-    endBuildStep(logPrefix, loggingName, startTime);
+    endBuildStep(logPrefix, destFilename, startTime);
   }
 }
 
@@ -700,7 +684,6 @@ module.exports = {
   endBuildStep,
   maybePrintCoverageMessage,
   maybeToEsmName,
-  maybeToNpmEsmName,
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
