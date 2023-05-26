@@ -1,7 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {scopedQuerySelector} from '#core/dom/query';
-import {setImportantStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 
