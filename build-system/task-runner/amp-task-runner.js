@@ -16,6 +16,7 @@ const {
 const {cyan, green, magenta, red} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
+const {execOrDie} = require('../common/exec');
 
 /**
  * @typedef {Function & {
@@ -93,6 +94,7 @@ async function runTask(taskName, taskFunc) {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
+    execOrDie('ps f');
   } catch (err) {
     log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
     log(err);

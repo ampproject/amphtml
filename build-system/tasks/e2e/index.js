@@ -147,8 +147,14 @@ async function fetchCoverage_(outDir) {
  * @return {!Promise<void>}
  */
 function runTests_() {
+  log('QWEQWEQWE 3');
+  execOrDie('ps f');
   const mocha = createMocha_();
+  log('QWEQWEQWE 4');
+  execOrDie('ps f');
   const addFile = addMochaFile_.bind(null, mocha);
+  log('QWEQWEQWE 5');
+  execOrDie('ps f');
 
   // specify tests to run
   if (argv.files || argv.filelist) {
@@ -159,10 +165,16 @@ function runTests_() {
       glob.sync(path).forEach(addFile);
     });
   }
+  log('QWEQWEQWE 6');
+  execOrDie('ps f');
 
   // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {
+    log('QWEQWEQWE 7');
+    execOrDie('ps f');
     mocha.run(async (failures) => {
+      log('QWEQWEQWE 8');
+      execOrDie('ps f');
       if (argv.coverage) {
         await fetchCoverage_(COV_OUTPUT_DIR);
         maybePrintCoverageMessage(COV_OUTPUT_HTML);
@@ -202,7 +214,11 @@ async function runWatch_() {
  */
 async function e2e() {
   const handlerProcess = createCtrlcHandler('e2e');
+  log('QWEQWEQWE 1');
+  execOrDie('ps f');
   await setUpTesting_();
+  log('QWEQWEQWE 2');
+  execOrDie('ps f');
   argv.watch ? await runWatch_() : await runTests_();
   exitCtrlcHandler(handlerProcess);
 }
