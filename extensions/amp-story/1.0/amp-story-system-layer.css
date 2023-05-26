@@ -295,7 +295,6 @@
   animation: expand-fade 10s ease-in-out forwards;
 }
 
-/* fade-out 0.5s ease-in-out forwards 8s */
 @keyframes expand-fade {
   0%, 40% {
     transform: scale(0);
