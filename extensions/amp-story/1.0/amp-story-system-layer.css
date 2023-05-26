@@ -292,21 +292,16 @@
   bottom: 0;
   margin: auto;
   /* expand to full circle and then fade out */
-  animation: expand 1s ease-in-out forwards 4s, fade-out 0.5s ease-in-out forwards 8s;
+  animation: expand-fade 10s ease-in-out forwards;
 }
 
-@keyframes expand {
-  0% {
+/* fade-out 0.5s ease-in-out forwards 8s */
+@keyframes expand-fade {
+  0%, 40% {
     transform: scale(0);
   }
-  100% {
+  50%, 90% {
     transform: scale(1);
-    opacity: 0.5;
-  }
-}
-
-@keyframes fade-out {
-  0% {
     opacity: 0.5;
   }
   100% {

@@ -36,13 +36,10 @@ describes.realWin(
       doc = win.document;
 
       const storyEl = (
-        <amp-story>
+        <amp-story style="--story-audio-sticker-outline-color:rgb(0, 200, 0)">
           <amp-story-page id="page-1">
             <amp-story-grid-layer>
-              <amp-story-audio-sticker
-                sticker-style="outline"
-                style="--story-audio-sticker-outline-color:rgb(0, 200, 0)"
-              ></amp-story-audio-sticker>
+              <amp-story-audio-sticker sticker-style="outline"></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
           <amp-story-page id="page-2">
