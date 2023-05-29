@@ -1045,11 +1045,6 @@ const adConfig = jsonConfiguration({
   },
 
   'pubscale': {
-    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-    preconnect: [
-      'https://partner.googleadservices.com',
-      'https://tpc.googlesyndication.com',
-    ],
     renderStartImplemented: true,
   },
 
