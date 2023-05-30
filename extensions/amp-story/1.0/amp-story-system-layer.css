@@ -278,21 +278,18 @@
 }
 
 .i-amphtml-story-mute-audio-control::before {
-  content: "";
-  position: absolute;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background-color: #b1b1b1;
-  opacity: 0;
+  content: "" !important;
+  position: absolute !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  background-color: #b1b1b1 !important;
   /* centered position */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
+  inset: 0 !important;
+  margin: auto !important;
   /* expand to full circle and then fade out */
-  animation: expand-fade 10s ease-in-out forwards;
+  opacity: 0;
+  animation: expand-fade 10s ease-in-out forwards !important;
 }
 
 @keyframes expand-fade {
