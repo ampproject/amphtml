@@ -21,7 +21,7 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function adsviu(global, data) {
-  global._adsviu_amp = { data };
+  global.adsviuAmp = { data };
 
   validateData(
     data,
