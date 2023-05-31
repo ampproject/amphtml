@@ -30,7 +30,6 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp dep-check');
   timedExecOrDie('amp check-types');
   timedExecOrDie('amp check-sourcemaps');
-  timedExecOrDie('amp performance-urls');
   timedExecOrDie('amp check-analytics-vendors-list');
   timedExecOrDie('amp check-video-interface-list');
   timedExecOrDie('amp get-zindex');
@@ -108,7 +107,6 @@ function prBuildWorkflow() {
     timedExecOrDie('amp dep-check');
     timedExecOrDie('amp check-types');
     timedExecOrDie('amp check-sourcemaps');
-    timedExecOrDie('amp performance-urls');
     timedExecOrDie('amp check-analytics-vendors-list');
     timedExecOrDie('amp check-video-interface-list');
     timedExecOrDie('amp get-zindex');
