@@ -83,7 +83,7 @@ function ensureUpdatedPackages(taskSourceFileName) {
  * Runs an AMP task with logging and timing after installing its subpackages.
  * @param {string} taskName
  * @param {TaskFuncDef} taskFunc
- * @return {Promise<void>}
+ * @return {Promise<boolean>} true if task finished successfully.
  */
 async function runTask(taskName, taskFunc) {
   const taskFile = path.relative(os.homedir(), 'amp.js');
@@ -93,11 +93,11 @@ async function runTask(taskName, taskFunc) {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
-    process.exit(0);
+    return true;
   } catch (err) {
     log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
     log(err);
-    process.exit(1);
+    return false;
   }
 }
 
@@ -229,7 +229,8 @@ function createTask(
     }
     task.action(async () => {
       validateUsage(task, taskName, taskFunc);
-      await runTask(taskName, taskFunc);
+      const success = await runTask(taskName, taskFunc);
+      process.exit(Number(!success));
     });
   }
 }
