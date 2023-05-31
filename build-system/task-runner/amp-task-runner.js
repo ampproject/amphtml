@@ -93,6 +93,7 @@ async function runTask(taskName, taskFunc) {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
+    process.exit(0);
   } catch (err) {
     log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
     log(err);
