@@ -13,6 +13,7 @@
   data-pid="/22387492205/Banner_Test_300x250"
   data-format="banner"
   data-size="[[300,250]]"
+  data-strategy="async"
   >
 </amp-ad>
 ```
