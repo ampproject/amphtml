@@ -535,6 +535,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'fairground': {},
+
   'fake': {},
 
   'fake-delayed': {

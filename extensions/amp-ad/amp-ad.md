@@ -521,6 +521,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Dable](../../ads/vendors/dable.md)
 -   [Engageya](../../ads/vendors/engageya.md)
 -   [Epeex](../../ads/vendors/epeex.md)
+-   [Fairground](../../ads/vendors/fairground.md)
 -   [Gecko](../../ads/vendors/gecko.md)
 -   [Idealmedia](../../ads/vendors/idealmedia.md)
 -   [Insticator](../../ads/vendors/insticator.md)

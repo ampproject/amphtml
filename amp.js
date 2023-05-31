@@ -49,8 +49,6 @@ createTask('integration');
 createTask('lint');
 createTask('make-extension', 'makeExtension');
 createTask('markdown-toc', 'markdownToc');
-createTask('performance');
-createTask('performance-urls', 'performanceUrls');
 createTask('pr-check', 'prCheck');
 createTask('prepend-global', 'prependGlobal');
 createTask('presubmit', 'presubmit');
