@@ -21,13 +21,9 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function adsviu(global, data) {
-  global.adsviuAmp = { data };
+  global.adsviuAmp = {data};
 
-  validateData(
-    data,
-    ['src', 'siteId'],
-    ['src', 'siteId']
-  );
+  validateData(data, ['src', 'siteId'], ['src', 'siteId']);
 
   loadScript(global, 'https://widget.adsviu.com/adsviuAMP.js');
 }
