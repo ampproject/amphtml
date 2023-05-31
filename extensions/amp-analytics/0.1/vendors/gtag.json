@@ -13,6 +13,12 @@
         "hasExtRef": "$IF(EXTERNAL_REFERRER, 1, 0)",
         "hasDocRef": "$IF(DOCUMENT_REFERRER, 1, 0)",
         "enabled": true
+      },
+      "session": {
+        "st": "SESSION_TIMESTAMP",
+        "ct": "TIMESTAMP",
+        "sc": "SESSION_COUNT",
+        "enabled": true
       }
     }
   },
