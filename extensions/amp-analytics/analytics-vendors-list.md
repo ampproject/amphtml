@@ -411,8 +411,7 @@ Type attribute value: `navegg`
 
 Type attribute value: `neodata`
 
-Adds support for Neodata Audience Platform. Please contact our support team to get set up with your `sysId`, `tagId` and `advId` parameters in the `vars` section. 
-For more information, see [Neodata's support documentation](https://www.neodatagroup.com/soluzioni/exaudi-audience-platform/amp-analytics/).
+Adds support for Neodata Audience Platform. Please contact our support team to get set up with your `sysId`, `tagId` and `advId` parameters in the `vars` section. For more information, see [Neodata's support documentation](https://www.neodatagroup.com/soluzioni/exaudi-audience-platform/amp-analytics/).
 
 ### New Relic
 
