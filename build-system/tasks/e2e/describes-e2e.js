@@ -131,18 +131,17 @@ function createDriver(browserName, args, deviceName) {
         .setFirefoxOptions(firefoxOptions)
         .build();
     case 'chrome':
+      // @ts-ignore incorrect in type library.
       const chromeOptions = new chrome.Options(capabilities);
-      chromeOptions.addArguments(args);
+      chromeOptions.addArguments(...args);
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
-      const driver = chrome.Driver.createSession(chromeOptions);
-      //TODO(estherkim): workaround. `onQuit()` was added in selenium-webdriver v4.0.0-alpha.5
-      //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
-      driver.onQuit = null;
-      return driver;
+      return chrome.Driver.createSession(chromeOptions);
     case 'safari':
       return new Builder().forBrowser(browserName).build();
+    default:
+      throw new Error(`Unsupported browser ${browserName}`);
   }
 }
 
@@ -490,6 +489,7 @@ function describeEnv(factory) {
       });
 
       after(async () => {
+        await fixture.after();
         if (argv.coverage) {
           await reportCoverage();
         }
@@ -555,7 +555,12 @@ function describeEnv(factory) {
   return mainFunc;
 }
 
+/** @typedef {{[key: string]: {controller: SeleniumWebDriverController, ampDriver: AmpDriver}}} EndToEndFixtureCache */
+
 class EndToEndFixture {
+  /** @type {EndToEndFixtureCache} */
+  static cache_ = {};
+
   /** @param {!TestSpec} spec */
   constructor(spec) {
     /** @const */
@@ -569,21 +574,26 @@ class EndToEndFixture {
    * @return {Promise<void>}
    */
   async setup(env, browserName, retries = 0) {
-    const config = getConfig();
-    const driver = getDriver(config, browserName, this.spec.deviceName);
-    const controller = new SeleniumWebDriverController(driver);
-    const ampDriver = new AmpDriver(controller);
-    env.controller = controller;
-    env.ampDriver = ampDriver;
-    env.version = this.spec.version;
+    const controllerCacheKey = `${this.spec.deviceName ?? ''}-${browserName}`;
+    if (!(controllerCacheKey in EndToEndFixture.cache_)) {
+      const config = getConfig();
+      const driver = getDriver(config, browserName, this.spec.deviceName);
+      const controller = new SeleniumWebDriverController(driver);
+      const ampDriver = new AmpDriver(controller);
 
-    installBrowserAssertions(controller.networkLogger);
+      EndToEndFixture.cache_[controllerCacheKey] = {controller, ampDriver};
+      installBrowserAssertions(controller.networkLogger);
+    }
+
+    env.controller = EndToEndFixture.cache_[controllerCacheKey].controller;
+    env.ampDriver = EndToEndFixture.cache_[controllerCacheKey].ampDriver;
+    env.version = this.spec.version;
 
     try {
       await setUpTest(env, this.spec);
       // Set env props that require the fixture to be set up.
       if (env.environment === AmpdocEnvironment.VIEWER_DEMO) {
-        env.receivedMessages = await controller.evaluate(() => {
+        env.receivedMessages = await env.controller.evaluate(() => {
           return window.parent.viewer?.receivedMessages;
         });
       }
@@ -601,10 +611,17 @@ class EndToEndFixture {
    * @return {Promise<void>}
    */
   async teardown(env) {
-    const {controller} = env;
-    if (controller && controller.driver) {
-      await controller.switchToParent();
+    await env.controller?.reset();
+  }
+
+  /**
+   * @return {Promise<void>}
+   */
+  async after() {
+    for (const [key, value] of Object.entries(EndToEndFixture.cache_)) {
+      const {controller} = value;
       await controller.dispose();
+      delete EndToEndFixture.cache_[key];
     }
   }
 

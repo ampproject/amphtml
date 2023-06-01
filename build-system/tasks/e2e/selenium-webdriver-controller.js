@@ -32,7 +32,7 @@ const KeyToSeleniumMap = {
  * @param {function(): !Promise<T1>} valueFn
  * @param {function(T2): boolean} condition
  * @param {function(T1): T2} opt_mutate
- * @return {!Condition}
+ * @return {!selenium.Condition}
  * @template T1
  * @template T2
  */
@@ -449,14 +449,14 @@ class SeleniumWebDriverController {
   async getWindowRect() {
     const htmlElement = this.driver.findElement(By.tagName('html'));
     return await Promise.all([
-      htmlElement.getAttribute('clientWidth'),
-      htmlElement.getAttribute('clientHeight'),
+      Number(htmlElement.getAttribute('clientWidth')),
+      Number(htmlElement.getAttribute('clientHeight')),
     ]);
   }
 
   /**
    * Sets width/height of the browser area.
-   * @param {!selenium.WindowRectDef} rect
+   * @param {!selenium.IRectangle} rect
    * @return {!Promise}
    */
   async setWindowRect(rect) {
@@ -629,8 +629,26 @@ class SeleniumWebDriverController {
    * @return {!Promise}
    */
   async switchToParent() {
-    // await this.driver.switchTo().parentFrame();
     await this.driver.switchTo().defaultContent();
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  async reset() {
+    await this.driver.switchTo().newWindow('window');
+    const newWindowHandle = await this.driver.getWindowHandle();
+
+    for (const windowHandle of await this.getAllWindows()) {
+      if (windowHandle == newWindowHandle) {
+        continue;
+      }
+
+      await this.driver.switchTo().window(windowHandle);
+      await this.driver.close();
+    }
+
+    await this.driver.switchTo().window(newWindowHandle);
   }
 
   /**
@@ -685,7 +703,7 @@ class SeleniumWebDriverController {
 
   /**
    * Shutdown the driver.
-   * @return {void}
+   * @return {Promise<void>}
    */
   dispose() {
     return this.driver.quit();
