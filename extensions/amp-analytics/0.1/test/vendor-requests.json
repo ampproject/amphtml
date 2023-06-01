@@ -344,6 +344,10 @@
     "pageview": "https://amp.navdmp.com/amp?aid=_client_id(navegg_id)_&url=_canonical_url_&ref=_document_referrer_&tit=_title_&lan=_browser_language_&acc=!account&v=7"
   },
   "neodata": {
+    "base": "https://tra.neodatagroup.com",
+    "sysId": "999",
+    "tagId": "12321",
+    "advId": "56785",
     "pageview": "https://tra.neodatagroup.com/pv?sid=999&rnd=0.003673986998453893&id=12321&ad=56785&rs=1920x1080&lg=it-it&tz=-120&re=http%3A%2F%2F127.0.0.1%3A5501%2FStudy%2Famp%2Findex.html&co=24&ur=http%3A%2F%2F127.0.0.1%3A5501%2FStudy%2Famp%2Findex.html",
     "cmDbm": "https://cm.g.doubleclick.net/pixel?google_nid=neodata_dmp&google_cm&pv=dbm&sid=999&rt=img&rnd=0.17392488431480935"
   },
