@@ -58,12 +58,12 @@ const DEFAULT_RENDER = (data) =>
  * @return {PreactDef.Renderable}
  */
 export function BentoDateCountdown({
-  datetime,
-  whenEnded = DEFAULT_WHEN_ENDED,
-  locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
   countUp = DEFAULT_COUNT_UP,
+  datetime,
+  locale = DEFAULT_LOCALE,
   render = DEFAULT_RENDER,
+  whenEnded = DEFAULT_WHEN_ENDED,
   ...rest
 }) {
   useResourcesNotify();

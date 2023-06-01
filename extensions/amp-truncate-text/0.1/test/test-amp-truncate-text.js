@@ -4,6 +4,8 @@ import {toArray} from '#core/types/array';
 
 import {toggleExperiment} from '#experiments';
 
+import {macroTask} from '#testing/helpers';
+
 // Lint complains about a template string due to lines being too long.
 const loremText =
   '        \r\n' +
@@ -44,19 +46,9 @@ describes.realWin(
         }
       });
 
-      /**
-       * @return {!Promise} A Promise that resolves after the MutationObserver has
-       *    run and we have re-truncateed.
-       */
-      function afterMutationAndClamp() {
-        return new Promise((resolve) => {
-          setTimeout(resolve);
-        });
-      }
-
       async function createElement(
         content,
-        {width, height, layout = 'fixed', container = doc.body}
+        {container = doc.body, height, layout = 'fixed', width}
       ) {
         const element = win.document.createElement('amp-truncate-text');
         element.setAttribute('layout', layout);
@@ -70,7 +62,7 @@ describes.realWin(
         container.appendChild(element);
         await element.buildInternal();
         await element.layoutCallback();
-        await afterMutationAndClamp();
+        await macroTask();
 
         return element;
       }
@@ -335,7 +327,7 @@ describes.realWin(
               height: '600px',
             });
             element.layoutCallback();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(button.offsetHeight).to.equal(0);
             expect(button.offsetWidth).to.equal(0);
@@ -378,7 +370,7 @@ describes.realWin(
             const collapseEl = element.querySelector('[slot="expanded"]');
 
             expandEl.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.scrollHeight).to.be.gt(26);
             expect(element.scrollHeight).to.equal(element.offsetHeight);
@@ -410,7 +402,7 @@ describes.realWin(
             });
 
             expandEl.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(sizer.getBoundingClientRect()).to.include({
               width: 0,
@@ -436,9 +428,9 @@ describes.realWin(
             const collapseEl = element.querySelector('[slot="expanded"]');
 
             expandEl.click();
-            await afterMutationAndClamp();
+            await macroTask();
             collapseEl.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.offsetHeight).to.equal(26);
             expect(element.scrollHeight).to.equal(26);
@@ -498,7 +490,7 @@ describes.realWin(
             const expandSpan = element.querySelector('[slot="collapsed"] span');
 
             expandSpan.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.offsetHeight).to.equal(26);
           });
@@ -521,7 +513,7 @@ describes.realWin(
             const expandSpan = element.querySelector('[slot="collapsed"]');
 
             expandSpan.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.offsetHeight).to.equal(26);
           });
@@ -541,7 +533,7 @@ describes.realWin(
             const expandSpan = element.querySelector('[slot="collapsed"]');
 
             expandSpan.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.offsetHeight).to.equal(26);
           });
@@ -561,7 +553,7 @@ describes.realWin(
             const expandSpan = element.querySelector('[slot="collapsed"] span');
 
             expandSpan.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.offsetHeight).to.equal(26);
           });
@@ -581,7 +573,7 @@ describes.realWin(
             const expandSpan = element.querySelector('[slot="collapsed"] span');
 
             expandSpan.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.offsetHeight).to.equal(26);
           });
@@ -605,7 +597,7 @@ describes.realWin(
             const expandSpan = element.querySelector('[slot="collapsed"]');
 
             expandSpan.click();
-            await afterMutationAndClamp();
+            await macroTask();
 
             expect(element.offsetHeight).to.equal(26);
           });

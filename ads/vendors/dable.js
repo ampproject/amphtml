@@ -31,10 +31,22 @@ export function dable(global, data) {
 
   const itemId = data['itemId'] || '';
   const channel = data['channel'] || '';
+  const articleSection = data['articleSection'] || '';
+  const articleSection2 = data['articleSection2'] || '';
+  const articleSection3 = data['articleSection3'] || '';
   const opts = {};
 
   if (channel) {
     opts.channel = channel;
+  }
+  if (articleSection) {
+    opts.category1 = articleSection;
+  }
+  if (articleSection2) {
+    opts.category2 = articleSection2;
+  }
+  if (articleSection3) {
+    opts.category3 = articleSection3;
   }
 
   if (itemId) {

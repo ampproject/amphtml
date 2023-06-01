@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
@@ -15,6 +14,9 @@ const {sleep} = require('./helpers');
 const {WebpageDef} = require('./types');
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
+
+/** @typedef {import('puppeteer-core')} puppeteer */
+/** @typedef {import('puppeteer-core').Browser} puppeteer.Browser */
 
 /**
  * Runs a development mode.

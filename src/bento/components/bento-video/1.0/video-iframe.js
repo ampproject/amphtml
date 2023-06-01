@@ -54,18 +54,18 @@ function postWhenReady(iframe, ready, makeMessageCb) {
  */
 function VideoIframeInternalWithRef(
   {
-    loading,
-    unloadOnPause = false,
-    sandbox = DEFAULT_SANDBOX,
-    muted = false,
     controls = false,
-    origin,
-    onCanPlay,
-    onMessage,
-    playerStateRef,
-    makeMethodMessage: makeMethodMessageProp,
+    loading,
     makeFullscreenMessage: makeFullscreenMessageProp,
+    makeMethodMessage: makeMethodMessageProp,
+    muted = false,
+    onCanPlay,
     onIframeLoad,
+    onMessage,
+    origin,
+    playerStateRef,
+    sandbox = DEFAULT_SANDBOX,
+    unloadOnPause = false,
     ...rest
   },
   ref

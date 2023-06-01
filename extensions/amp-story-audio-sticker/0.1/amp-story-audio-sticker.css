@@ -19,6 +19,11 @@
   justify-content: center !important;
   align-items: center !important;
   margin-bottom: 4px !important;
+  transition: opacity 0.5s ease !important;
+}
+
+amp-story:not([muted]) .i-amphtml-amp-story-audio-sticker-tap-hint {
+  opacity: 0 !important;
 }
 
 .i-amphtml-amp-story-audio-sticker-tap-hint span {
@@ -40,20 +45,41 @@
   height: 120px !important;
 }
 
-amp-story-audio-sticker {
-  max-width: 100% !important; /* Set the maximum width of the image to 100% to ensure it fits within the container */
-  max-height: 100% !important; /* Set the maximum height of the image to 100% to ensure it fits within the container */
-  margin: auto !important; /* Center the image horizontally and vertically within the container */
+.i-amphtml-amp-story-audio-sticker-container * {
+  pointer-events: none !important;
 }
 
-amp-story-audio-sticker * {
-  pointer-events: none !important;
+amp-story-audio-sticker {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important; /* Set the maximum width of the image to 100% to ensure it fits within the container */
+  max-height: 100% !important; /* Set the maximum height of the image to 100% to ensure it fits within the container */
 }
 
 amp-story[muted] amp-story-audio-sticker {
   pointer-events: auto !important;
 }
 
-amp-story:not([muted]) .i-amphtml-amp-story-audio-sticker-component {
-  display: none !important;
+/*
+  Hide the sticker after the story gets unmuted:
+  1) if the sticker is on the active page, hide it after showing posttap sticker for 4 seconds.
+  2) if the sticker is not on the active page, hide it immediately since it is in the background.
+*/
+amp-story:not([muted]) amp-story-page[active] amp-story-audio-sticker {
+  transition: opacity 0.5s ease 4s !important;
+}
+amp-story:not([muted]) amp-story-audio-sticker {
+  opacity: 0 !important;
+}
+
+amp-story-audio-sticker > * {
+  position: absolute !important; /* Child divs should have absolute position to make them stacked */
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+amp-story:not([muted]) amp-story-audio-sticker-pretap, amp-story[muted] amp-story-audio-sticker-posttap {
+  opacity: 0 !important;
 }

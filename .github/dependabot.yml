@@ -11,11 +11,6 @@ updates:
       interval: daily
 
   - package-ecosystem: npm
-    directory: /build-system/tasks/performance
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
     directory: /build-system/tasks/storybook/env/amp
     schedule:
       interval: daily
@@ -52,21 +47,6 @@ updates:
 
   - package-ecosystem: npm
     directory: /
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
-    directory: /src/bento/core
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
-    directory: /src/bento/core/preact
-    schedule:
-      interval: daily
-
-  - package-ecosystem: npm
-    directory: /src/bento/core/react
     schedule:
       interval: daily
 

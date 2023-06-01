@@ -25,8 +25,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     'https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
   let fakeMessaging;
 
-  const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
-
   function buildStoryPlayer(
     numStories = 1,
     url = DEFAULT_CACHE_URL,
@@ -159,7 +157,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should correctly append params at the end of the story url', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const storyIframe = playerEl.querySelector('iframe');
 
@@ -176,7 +174,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1, DEFAULT_CACHE_URL + existingQuery + existingHash);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const storyIframe = playerEl.querySelector('iframe');
 
@@ -195,7 +193,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     buildStoryPlayer(3);
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
       'state': 'visible',
@@ -205,10 +203,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should prerender next story after first one is loaded', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     fireHandler['storyContentLoaded']('storyContentLoaded', {});
-    await nextTick();
+    await macroTask();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
@@ -218,26 +216,21 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should apply desktop aspect ratio based on the active story', async () => {
     const numStories = 2;
+    const storyAspectRatios = ['0.75', '0.5'];
     buildStoryPlayer(numStories);
     await manager.loadPlayers();
-    await nextTick();
-
-    const storyAspectRatios = ['0.75', '0.5'];
-    const storyIframes = playerEl.querySelectorAll('iframe');
-    for (let i = 0; i < numStories; i++) {
-      const doc = storyIframes[i].contentWindow.document;
-      doc.open();
-      doc.write(
-        '<html style="--i-amphtml-story-desktop-one-panel-ratio:' +
-          storyAspectRatios[i] +
-          ' !important;"></html>'
-      );
-      doc.close();
-    }
+    await macroTask();
 
     // Aspect ratio should be applied after the first story is loaded.
+    fakeMessaging.sendRequest = () =>
+      Promise.resolve({value: storyAspectRatios[0]});
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
     fireHandler['storyContentLoaded']('storyContentLoaded', {});
-    await nextTick();
+    await macroTask();
+
+    expect(sendRequestSpy).to.have.been.calledWith('getDocumentState', {
+      'state': 'DESKTOP_ASPECT_RATIO',
+    });
     let playerContainer = win.document.querySelector(
       '.i-amphtml-story-player-main-container'
     );
@@ -248,10 +241,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     ).equal(storyAspectRatios[0]);
 
     // Aspect ratio should be applied after navigating to the second story and it's loaded.
+    fakeMessaging.sendRequest = () =>
+      Promise.resolve({value: storyAspectRatios[1]});
     fireHandler['selectDocument']('selectDocument', {next: true});
-    await nextTick();
+    await macroTask();
     fireHandler['storyContentLoaded']('storyContentLoaded', {});
-    await nextTick();
+    await macroTask();
     playerContainer = win.document.querySelector(
       '.i-amphtml-story-player-main-container'
     );
@@ -263,7 +258,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     // Aspect ratio should be applied after navigating back to the already loaded first story.
     fireHandler['selectDocument']('selectDocument', {previous: true});
-    await nextTick();
+    await macroTask();
     playerContainer = win.document.querySelector(
       '.i-amphtml-story-player-main-container'
     );
@@ -277,7 +272,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should not load next story if first one has not finished loading', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
 
@@ -287,11 +282,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should load new story if user navigated before first finished loading', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     // Swiping without waiting for story loaded event.
     swipeLeft();
-    await nextTick();
+    await macroTask();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.exist;
@@ -303,7 +298,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     async () => {
       buildStoryPlayer(4);
       await manager.loadPlayers();
-      await nextTick();
+      await macroTask();
 
       const stories = playerEl.getStories();
 
@@ -325,7 +320,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     async () => {
       buildStoryPlayer(4);
       await manager.loadPlayers();
-      await nextTick();
+      await macroTask();
 
       const stories = playerEl.getStories();
 
@@ -346,7 +341,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     buildStoryPlayer();
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     expect(registerHandlerSpy).to.have.been.calledWith('touchstart');
     expect(registerHandlerSpy).to.have.been.calledWith('touchmove');
@@ -361,7 +356,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     buildStoryPlayer();
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
       'state': 'PAGE_ATTACHMENT_STATE',
@@ -375,7 +370,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(2);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const navigationSpy = env.sandbox.spy();
     playerEl.addEventListener('navigation', navigationSpy);
@@ -396,7 +391,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const noNextSpy = env.sandbox.spy();
     playerEl.addEventListener('noNextStory', noNextSpy);
@@ -410,7 +405,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(2);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const noNextSpy = env.sandbox.spy();
     playerEl.addEventListener('noNextStory', noNextSpy);
@@ -425,7 +420,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     playerEl.appendChild(buildCircularWrappingConfig());
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const noNextSpy = env.sandbox.spy();
     playerEl.addEventListener('noNextStory', noNextSpy);
@@ -446,10 +441,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const touchEndSpy = env.sandbox.spy(PageScroller.prototype, 'onTouchEnd');
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     swipeDown();
-    await nextTick();
+    await macroTask();
 
     expect(touchStartSpy).to.have.been.called;
     expect(touchMoveSpy).to.have.been.called;
@@ -468,10 +463,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const touchEndSpy = env.sandbox.spy(PageScroller.prototype, 'onTouchEnd');
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     swipeDown();
-    await nextTick();
+    await macroTask();
 
     expect(touchStartSpy).to.not.have.been.called;
     expect(touchMoveSpy).to.not.have.been.called;
@@ -485,7 +480,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     expect(sendRequestSpy).to.not.have.been.calledWith('visibilitychange', {
       'state': 'visible',
@@ -498,10 +493,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     playerEl.appendChild(buildAutoplayConfig(/* autoplay */ false));
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     playerEl.play();
-    await nextTick();
+    await macroTask();
 
     expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
       'state': 'visible',
@@ -515,7 +510,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
       'state': 'visible',
@@ -526,7 +521,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const noPreviousSpy = env.sandbox.spy();
     playerEl.addEventListener('noPreviousStory', noPreviousSpy);
@@ -540,7 +535,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(2);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const noPreviousSpy = env.sandbox.spy();
     playerEl.addEventListener('noPreviousStory', noPreviousSpy);
@@ -556,7 +551,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     playerEl.appendChild(buildCircularWrappingConfig());
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const noPreviousSpy = env.sandbox.spy();
     playerEl.addEventListener('noPreviousStory', noPreviousSpy);
@@ -570,13 +565,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const touchSpy = env.sandbox.spy();
     playerEl.addEventListener('amp-story-player-touchstart', touchSpy);
 
     await swipeDown();
-    await nextTick();
+    await macroTask();
 
     expect(touchSpy).to.have.been.called;
   });
@@ -585,13 +580,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const touchSpy = env.sandbox.spy();
     playerEl.addEventListener('amp-story-player-touchmove', touchSpy);
 
     await swipeLeft();
-    await nextTick();
+    await macroTask();
 
     expect(touchSpy).to.have.been.calledWithMatch({
       type: 'amp-story-player-touchmove',
@@ -611,13 +606,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const touchSpy = env.sandbox.spy();
     playerEl.addEventListener('amp-story-player-touchmove', touchSpy);
 
     await swipeDown();
-    await nextTick();
+    await macroTask();
 
     expect(touchSpy).to.have.been.calledWithMatch({
       type: 'amp-story-player-touchmove',
@@ -637,13 +632,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const touchSpy = env.sandbox.spy();
     playerEl.addEventListener('amp-story-player-touchend', touchSpy);
 
     await swipeDown();
-    await nextTick();
+    await macroTask();
 
     expect(touchSpy).to.have.been.called;
   });
@@ -651,7 +646,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should navigate when swiping', async () => {
     buildStoryPlayer(4);
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const navigationSpy = env.sandbox.spy();
     playerEl.addEventListener('navigation', navigationSpy);
@@ -670,7 +665,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should not navigate when swiping last story', async () => {
     buildStoryPlayer(2);
     await manager.loadPlayers();
-    await nextTick();
+    await macroTask();
 
     const navigationSpy = env.sandbox.spy();
     playerEl.addEventListener('navigation', navigationSpy);
@@ -687,7 +682,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'cdn.ampproject.org');
       await manager.loadPlayers();
 
-      await nextTick();
+      await macroTask();
 
       const storyIframe = playerEl.querySelector('iframe');
 
@@ -702,7 +697,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer(1, DEFAULT_ORIGIN_URL);
       await manager.loadPlayers();
 
-      await nextTick();
+      await macroTask();
 
       const storyIframe = playerEl.querySelector('iframe');
 
@@ -720,7 +715,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.tacos.org');
 
       await manager.loadPlayers();
-      await nextTick();
+      await macroTask();
 
       expect(console.error).to.be.calledWithMatch(
         /\[amp-story-player\]/,
@@ -809,10 +804,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       player.show('https://example.com/story3.html');
-      await nextTick();
+      await macroTask();
 
       fireHandler['storyContentLoaded']('storyContentLoaded', {});
-      await nextTick();
+      await macroTask();
 
       const stories = playerEl.getStories();
 
@@ -832,10 +827,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       player.show('https://example.com/story3.html');
-      await nextTick();
+      await macroTask();
 
       fireHandler['storyContentLoaded']('storyContentLoaded', {});
-      await nextTick();
+      await macroTask();
 
       const storyIframes = playerEl.querySelectorAll('iframe');
 
@@ -857,12 +852,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       player.rewind('https://example.com/story0.html');
 
-      await nextTick();
+      await macroTask();
 
       expect(sendRequestSpy).to.have.been.calledWith('rewind', {});
     });
@@ -874,7 +869,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       return expect(() =>
         player.rewind('https://example.com/story6.html')
@@ -890,13 +885,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       player.rewind('https://example.com/story2.html');
 
       await player.go(2);
-      await nextTick();
+      await macroTask();
 
       expect(sendRequestSpy).to.have.been.calledWith('rewind', {});
     });
@@ -984,7 +979,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       async () => {
         buildStoryPlayer(3);
         await manager.loadPlayers();
-        await nextTick();
+        await macroTask();
 
         swipeLeft();
         swipeLeft();
@@ -1005,7 +1000,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
 
       playerEl.pause();
-      await nextTick();
+      await macroTask();
 
       expect(spy).to.have.been.calledWith('visibilitychange', {
         state: 'paused',
@@ -1018,7 +1013,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
 
       playerEl.play();
-      await nextTick();
+      await macroTask();
 
       expect(spy).to.have.been.calledWith('visibilitychange', {
         state: 'visible',
@@ -1031,7 +1026,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
 
       await playerEl.mute();
-      await nextTick();
+      await macroTask();
 
       expect(spy).to.have.been.calledWith('setDocumentState', {
         state: 'MUTED_STATE',
@@ -1045,7 +1040,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
 
       await playerEl.unmute();
-      await nextTick();
+      await macroTask();
 
       expect(spy).to.have.been.calledWith('setDocumentState', {
         state: 'MUTED_STATE',
@@ -1138,7 +1133,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       fakeResponse = {value: true};
       await playerEl.getStoryState('page-attachment');
 
-      await nextTick();
+      await macroTask();
 
       expect(sendRequestSpy).to.have.been.calledWith('getDocumentState', {
         'state': 'PAGE_ATTACHMENT_STATE',
@@ -1161,7 +1156,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer();
       playerEl.setAttribute('exit-control', 'back-button');
       await manager.loadPlayers();
-      await nextTick();
+      await macroTask();
 
       openPageAttachment();
 
@@ -1172,7 +1167,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('should fire page attachment open event once', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
-      await nextTick();
+      await macroTask();
 
       const pageAttachmentSpy = env.sandbox.spy();
       playerEl.addEventListener('page-attachment-open', pageAttachmentSpy);
@@ -1185,7 +1180,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('should fire page attachment close event once', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
-      await nextTick();
+      await macroTask();
 
       const pageAttachmentSpy = env.sandbox.spy();
       playerEl.addEventListener('page-attachment-close', pageAttachmentSpy);
@@ -1202,7 +1197,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
@@ -1225,7 +1220,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
@@ -1249,7 +1244,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
@@ -1286,11 +1281,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       player.go(0, 4);
-      await nextTick();
+      await macroTask();
 
       expect(sendRequestSpy).to.have.been.calledWith('selectPage', {
         'delta': 4,
@@ -1304,13 +1299,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
       player.show('', 'page-2');
 
-      await nextTick();
+      await macroTask();
 
       expect(sendRequestSpy).to.have.been.calledWith('selectPage', {
         'id': 'page-2',
@@ -1325,7 +1320,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
@@ -1350,7 +1345,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
@@ -1374,7 +1369,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
@@ -1399,7 +1394,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
@@ -1422,7 +1417,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const spy = env.sandbox.spy();
       playerEl.addEventListener('amp-story-muted-state', spy);
@@ -1430,7 +1425,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const fakeData = {state: 'MUTED_STATE', value: false};
       fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
 
-      await nextTick();
+      await macroTask();
 
       expect(spy).to.have.been.calledWithMatch({
         type: 'amp-story-muted-state',
@@ -1447,7 +1442,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const spy = env.sandbox.spy();
       playerEl.addEventListener('amp-story-muted-state', spy);
@@ -1455,7 +1450,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const fakeData = {state: 'MUTED_STATE', value: true};
       fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
 
-      await nextTick();
+      await macroTask();
 
       expect(spy).to.have.been.calledWithMatch({
         type: 'amp-story-muted-state',
@@ -1472,7 +1467,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('storyNavigation', navigationSpy);
@@ -1481,7 +1476,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const fakeData = {state: 'CURRENT_PAGE_ID', value: 'page-2'};
       fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
 
-      await nextTick();
+      await macroTask();
 
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'storyNavigation',
@@ -1500,7 +1495,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       player.go(1, 0, {animate: false});
 
@@ -1520,7 +1515,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       player.go(1, 0, {animate: true});
 
@@ -1540,7 +1535,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      await nextTick();
+      await macroTask();
 
       player.go(1, 0, {animate: false});
 
@@ -1586,7 +1581,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
       win.dispatchEvent(createCustomEvent(win, 'resize', null));
-      await nextTick();
+      await macroTask();
 
       expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
         'state': 'UI_STATE',

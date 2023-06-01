@@ -31,12 +31,12 @@ function SingleDatePickerWithRef(
   const {
     blockedDates,
     formatDate,
-    parseDate,
     initialVisibleMonth,
     inputSelector = DEFAULT_INPUT_SELECTOR,
     mode,
     openAfterClear,
     openAfterSelect,
+    parseDate,
     today,
   } = useDatePickerContext();
 

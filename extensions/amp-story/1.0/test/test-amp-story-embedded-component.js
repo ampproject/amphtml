@@ -5,6 +5,8 @@ import {LocalizationService} from '#service/localization';
 
 import * as analyticsApi from '#utils/analytics';
 
+import {sleep} from '#testing/helpers';
+
 import {
   getAmpdoc,
   registerServiceBuilder,
@@ -103,7 +105,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before showing tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(component.focusedStateOverlay_).to.not.have.class(
       'i-amphtml-hidden'
     );
@@ -176,7 +178,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(tooltipIconEl.style['background-image']).to.equal(
       'url("http://localhost:9876/my-icon")'
     );
@@ -210,7 +212,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(tooltipTextEl.textContent).to.equal('my cool text');
   });
 
@@ -223,7 +225,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(tooltipTextEl.textContent).to.equal('google.com');
   });
 
@@ -317,11 +319,3 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
   });
 });
-
-/**
- * @param {number} ms
- * @return {!Promise}
- */
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}

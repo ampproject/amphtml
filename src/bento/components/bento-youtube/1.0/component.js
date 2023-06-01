@@ -69,12 +69,12 @@ function createDefaultInfo() {
 function BentoYoutubeWithRef(
   {
     autoplay,
-    loop,
-    videoid,
+    credentials,
     liveChannelid,
+    loop,
     onLoad,
     params = {},
-    credentials,
+    videoid,
     ...rest
   },
   ref

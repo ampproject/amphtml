@@ -390,19 +390,22 @@ export class AmpAdExit extends AMP.BaseElement {
         const /** !JsonObject */ target = config['targets'][name];
         this.targets_[name] = {
           finalUrl: target['finalUrl'],
-          trackingUrls: target['trackingUrls'] || [],
           vars: target['vars'] || {},
           filters: (target['filters'] || [])
             .map((f) => this.userFilters_[f])
             .filter(Boolean),
           behaviors: target['behaviors'] || {},
         };
-
-        if (this.isAttributionReportingSupported_) {
+        if (
+          this.isAttributionReportingSupported_ &&
+          target?.behaviors?.browserAdConversion
+        ) {
           this.targets_[name]['windowFeatures'] =
             this.getAttributionReportingValues_(
               target?.behaviors?.browserAdConversion
             );
+        } else {
+          this.targets_[name]['trackingUrls'] = target['trackingUrls'] || [];
         }
 
         // Build a map of {vendor, origin} for 3p custom variables in the config

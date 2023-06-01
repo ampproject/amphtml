@@ -114,21 +114,6 @@ test('makeExtensionFromTemplates does not print unit test blurb if a test file i
     );
   }));
 
-test('makeExtensionFromTemplates prints unit test blurb if a test file is created', (t) =>
-  tempy.directory.task(async (dir) => {
-    const {makeExtensionFromTemplates} = require('..');
-    await makeExtensionFromTemplates(
-      [path.join(__dirname, '../template/bento')],
-      dir,
-      {name: 'my-extension-name'}
-    );
-    t.true(
-      !!stubbedCalls.logLocalDev.find((args) =>
-        args.find((arg) => arg.includes('amp unit --files'))
-      )
-    );
-  }));
-
 test('makeExtensionFromTemplates does not print Storybook blurb if a Storybook file is not created', (t) =>
   tempy.directory.task(async (dir) => {
     const {makeExtensionFromTemplates} = require('..');
@@ -138,21 +123,6 @@ test('makeExtensionFromTemplates does not print Storybook blurb if a Storybook f
       {name: 'my-extension-name'}
     );
     t.false(
-      !!stubbedCalls.logLocalDev.find((args) =>
-        args.find((arg) => arg.includes('amp storybook'))
-      )
-    );
-  }));
-
-test('makeExtensionFromTemplates prints Storybook blurb if a Storybook file is created', (t) =>
-  tempy.directory.task(async (dir) => {
-    const {makeExtensionFromTemplates} = require('..');
-    await makeExtensionFromTemplates(
-      [path.join(__dirname, '../template/bento')],
-      dir,
-      {name: 'my-extension-name'}
-    );
-    t.true(
       !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp storybook'))
       )

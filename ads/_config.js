@@ -540,6 +540,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'fairground': {},
+
   'fake': {},
 
   'fake-delayed': {
@@ -1191,6 +1193,10 @@ const adConfig = jsonConfiguration({
 
   'sklik': {
     prefetch: 'https://c.imedia.cz/js/amp.js',
+  },
+
+  'skoiy': {
+    preconnect: ['https://svas.skoiy.xyz'],
   },
 
   'slimcutmedia': {

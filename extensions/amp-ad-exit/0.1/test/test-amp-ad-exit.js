@@ -417,6 +417,148 @@ describes.realWin(
       );
     });
 
+    it('should ignore trackingUrls when attribution tracking enabled', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const openStub = env.sandbox.stub(win, 'open').returns(win);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://advertiser.example',
+            behaviors: {
+              browserAdConversion: {
+                attributionsrc: 'https://adtech.example',
+              },
+            },
+            'trackingUrls': [
+              'http://localhost:8000/tracking?1',
+              'http://localhost:8000/tracking?2',
+              'http://localhost:8000/tracking?3',
+            ],
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(openStub).calledWithExactly(
+        'https://advertiser.example',
+        '_blank',
+        'noopener,attributionsrc=https%3A%2F%2Fadtech.example'
+      );
+    });
+
+    it('should fallback to tracking URLS when reporting API disabled', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(false);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://adtech.example',
+            behaviors: {
+              browserAdConversion: {
+                attributionsrc: 'https://adtech.example',
+              },
+            },
+            'trackingUrls': [
+              'http://localhost:8000/tracking?1',
+              'http://localhost:8000/tracking?2',
+              'http://localhost:8000/tracking?3',
+            ],
+          },
+        },
+      };
+
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.calledOnce;
+      expect(sendBeacon).to.have.been.calledThrice;
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?1',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?2',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?3',
+        ''
+      );
+    });
+
+    it('should fallback to tracking URLS when no `browserAdConversion` data', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://adtech.example',
+            'trackingUrls': [
+              'http://localhost:8000/tracking?1',
+              'http://localhost:8000/tracking?2',
+              'http://localhost:8000/tracking?3',
+            ],
+          },
+        },
+      };
+
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.calledOnce;
+      expect(sendBeacon).to.have.been.calledThrice;
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?1',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?2',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?3',
+        ''
+      );
+    });
+
     it('should ping tracking URLs with sendBeacon', async () => {
       const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};

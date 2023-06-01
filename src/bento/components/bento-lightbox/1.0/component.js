@@ -169,7 +169,7 @@ export {BentoLightbox};
  * @param {!BentoLightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
+function CloseButton({as: Comp = ScreenReaderCloseButton, onClick}) {
   return <Comp aria-label={DEFAULT_CLOSE_LABEL} onClick={onClick} />;
 }
 

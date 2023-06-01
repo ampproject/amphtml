@@ -7,6 +7,8 @@ import {toArray} from '#core/types/array';
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 
+import {macroTask} from '#testing/helpers';
+
 import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
 import {
   AnimationManager,
@@ -21,9 +23,6 @@ const querySelectorAllAnimateIn = (element) =>
 describes.realWin('amp-story animations', {}, (env) => {
   let html;
   let ampdoc;
-
-  const nextTick = () =>
-    new Promise((resolve) => env.win.setTimeout(resolve, 0));
 
   beforeEach(() => {
     html = htmlFor(env.win.document);
@@ -221,7 +220,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await nextTick();
+      await macroTask();
 
       expect(
         webAnimationBuilder.createRunner.withArgs(
@@ -266,7 +265,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await nextTick();
+      await macroTask();
 
       expect(webAnimationBuilder.createRunner.withArgs(spec)).to.have.been
         .calledOnce;
@@ -304,7 +303,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       runner.start();
 
-      await nextTick();
+      await macroTask();
       expect(webAnimationRunner.start).to.have.been.calledOnce;
     });
 
@@ -346,14 +345,14 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       runner.start();
 
-      await nextTick();
+      await macroTask();
 
       expect(sequence.waitFor.withArgs(startAfterId)).to.have.been.calledOnce;
       expect(webAnimationRunner.start).to.not.have.been.called;
 
       resolveWaitFor();
 
-      await nextTick();
+      await macroTask();
 
       expect(webAnimationRunner.start).to.have.been.calledOnce;
     });
@@ -394,7 +393,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await nextTick();
+      await macroTask();
 
       expect(sequence.notifyFinish).to.not.have.been.called;
 
@@ -440,7 +439,7 @@ describes.realWin('amp-story animations', {}, (env) => {
     it('creates WebAnimation Builder with options', async () => {
       const page = html`<div></div>`;
       new AnimationManager(page, ampdoc);
-      await nextTick();
+      await macroTask();
       expect(
         webAnimationService.createBuilder.withArgs(
           env.sandbox.match({
@@ -803,11 +802,11 @@ describes.realWin('amp-story animations', {}, (env) => {
       const notified = env.sandbox.spy();
 
       sequence.waitFor('test-notify-id').then(notified);
-      await nextTick();
+      await macroTask();
       expect(notified).to.not.have.been.called;
 
       sequence.notifyFinish('test-notify-id');
-      await nextTick();
+      await macroTask();
       expect(notified).to.have.been.calledOnce;
     });
 
@@ -816,16 +815,16 @@ describes.realWin('amp-story animations', {}, (env) => {
       const notified = env.sandbox.spy();
 
       sequence.waitFor('test-notify-id').then(notified);
-      await nextTick();
+      await macroTask();
 
       sequence.notifyFinish('test-notify-id');
-      await nextTick();
+      await macroTask();
 
       sequence.notifyFinish('test-notify-id');
-      await nextTick();
+      await macroTask();
 
       sequence.notifyFinish('test-notify-id');
-      await nextTick();
+      await macroTask();
 
       expect(notified).to.have.been.calledOnce;
     });
@@ -835,11 +834,11 @@ describes.realWin('amp-story animations', {}, (env) => {
       const notified = env.sandbox.spy();
 
       sequence.waitFor('test-notify-id').then(notified);
-      await nextTick();
+      await macroTask();
       expect(notified).to.not.have.been.called;
 
       sequence.notifyFinish('a-different-test-notify-id');
-      await nextTick();
+      await macroTask();
       expect(notified).to.not.have.been.called;
     });
   });

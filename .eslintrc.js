@@ -383,8 +383,6 @@ module.exports = {
         'test/**/*.js',
         'extensions/**/test/**/*.js',
         'extensions/**/test-e2e/*.js',
-        'src/bento/components/**/test/**/*.js',
-        'src/bento/components/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
         'build-system/**/test/*.js',
@@ -492,12 +490,7 @@ module.exports = {
       'rules': {'import/order': 0},
     },
     {
-      'files': [
-        'extensions/**/1.0/**',
-        'src/bento/**',
-        'src/preact/**',
-        '**/storybook/**',
-      ],
+      'files': ['extensions/**/1.0/**', 'src/preact/**', '**/storybook/**'],
       'rules': {'local/preact-preferred-props': 2},
     },
     {

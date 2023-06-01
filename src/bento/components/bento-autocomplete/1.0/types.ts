@@ -9,7 +9,7 @@ const filterTypes = [
   'none',
 ] as const;
 
-export type FilterType = typeof filterTypes[number];
+export type FilterType = (typeof filterTypes)[number];
 
 export function isValidFilterType(filterType: any): filterType is FilterType {
   return filterTypes.includes(filterType);

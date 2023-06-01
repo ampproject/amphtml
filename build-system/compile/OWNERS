@@ -16,7 +16,6 @@
     {
       pattern: 'bundles.config.*',
       owners: [
-        {name: 'ampproject/wg-bento'},
         {name: 'ampproject/wg-components'},
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},

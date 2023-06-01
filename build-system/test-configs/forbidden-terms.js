@@ -933,7 +933,6 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
-      'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
       'src/amp-story-player/amp-story-player-impl.js',
       'src/config/urls.js',

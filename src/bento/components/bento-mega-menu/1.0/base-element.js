@@ -1,8 +1,8 @@
 import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoMegaMenu} from './component';
-import {CSS as COMPONENT_CSS} from './component.jss';
 import {BentoItem} from './component/BentoItem';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
