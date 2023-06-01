@@ -7,7 +7,7 @@
   "triggers": {
     "trackPageview": {
       "on": "visible",
-      "request": ["pageview", "cmDbm"]
+      "request": ["pageview","cmDbm"]
     }
   },
   "transport": {
