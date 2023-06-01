@@ -111,7 +111,9 @@ export function BentoAudioWithRef(
      * once validation step for video components on Bento are included
      */
 
-    setMediaSession(win, metadata, play, pause);
+    if (win) {
+      setMediaSession(win, metadata, play, pause);
+    }
   }, [metadata, play, pause]);
 
   return (
