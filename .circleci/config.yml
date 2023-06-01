@@ -396,17 +396,6 @@ jobs:
           command: node build-system/pr-check/browser-tests.js --browser=edge
       - store_test_output
       - teardown_vm
-  performance_tests:
-    executor:
-      name: node-docker-xlarge
-    steps:
-      - setup_vm
-      - install_chrome
-      - run:
-          name: '⭐ Performance Tests ⭐'
-          command: node build-system/pr-check/performance-tests.js
-      - store_test_output
-      - teardown_vm
   experiment_build:
     executor:
       name: node-docker-xlarge
@@ -616,11 +605,6 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Experiment << matrix.exp >> Build'
-      # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
-      # - performance_tests:
-      #     <<: *push_builds_only
-      #     requires:
-      #       - 'Nomodule Build (Test)'
 
   'Release':
     jobs:
