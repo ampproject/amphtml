@@ -255,6 +255,7 @@ class SeleniumWebDriverController {
   getCurrentUrl() {
     return new ControllerPromise(
       this.driver.getCurrentUrl(),
+      // @ts-ignore TODO fix this!
       this.getWaitFn_(() => this.driver.getCurrentUrl())
     );
   }
@@ -312,6 +313,7 @@ class SeleniumWebDriverController {
     const webElement = handle.getElement();
     return new ControllerPromise(
       webElement.getText(),
+      // @ts-ignore TODO fix this!
       this.getWaitFn_(() => webElement.getText())
     );
   }
