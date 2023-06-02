@@ -240,6 +240,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'adsviu': {
+    prefetch: 'https://widget.adsviu.com/adsviuAMP.js',
+    preconnect: ['https://api.adsviu.com'],
+  },
+
   'adunity': {
     preconnect: ['https://content.adunity.com'],
     renderStartImplemented: true,
@@ -534,6 +539,8 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://img.ak.impact-ad.jp',
     renderStartImplemented: true,
   },
+
+  'fairground': {},
 
   'fake': {},
 

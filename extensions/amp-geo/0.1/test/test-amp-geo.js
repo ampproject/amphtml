@@ -24,8 +24,10 @@ describes.realWin(
         unknown: ['unknown'],
         eea: ['preset-eea'],
         myGroup: ['preset-eea', 'us'],
-        usSubdivisions: ['us-al', 'us-ny', 'us-va'],
+        usSubdivisions: ['us-al', 'us-ny', 'us-va', 'us-co', 'us-ct'],
         usVA: ['us-va'],
+        usCO: ['us-co'],
+        usCT: ['us-ct'],
         canadaSubdivisions: ['ca-mb', 'ca-nb'],
         anz: ['au', 'nz'],
         uscaGroup: ['preset-us-ca'],
@@ -361,6 +363,62 @@ describes.realWin(
             'amp-geo-group-uscaGroup',
             'amp-geo-group-california',
             'amp-iso-subdivision-us-ca',
+          ],
+          true
+        );
+      });
+    });
+
+    it('should allow us-co subdivision', () => {
+      setGeoOverrideHash('us us-co');
+      addConfigElement('script', 'application/json', JSON.stringify(config));
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('us-co');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-usCO',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-co',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-usCO',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-co',
+          ],
+          true
+        );
+      });
+    });
+
+    it('should allow us-ct subdivision', () => {
+      setGeoOverrideHash('us us-ct');
+      addConfigElement('script', 'application/json', JSON.stringify(config));
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('us-ct');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-usCT',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-ct',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-usCT',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-ct',
           ],
           true
         );
@@ -1010,6 +1068,8 @@ describes.realWin(
           'myGroup',
           'usSubdivisions',
           'usVA',
+          'usCO',
+          'usCT',
           'canadaSubdivisions',
           'anz',
           'uscaGroup',

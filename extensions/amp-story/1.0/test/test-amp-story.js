@@ -1450,7 +1450,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await macroTask(win.setTimeout);
+          await macroTask();
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
@@ -1464,7 +1464,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.GRANTED
           );
-          await macroTask(win.setTimeout);
+          await macroTask();
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
@@ -1494,7 +1494,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await macroTask(win.setTimeout);
+          await macroTask();
 
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
@@ -1533,7 +1533,7 @@ describes.realWin(
           storeService.get(StateProperty.CURRENT_PAGE_ID)
         );
         paywallPage.element.dispatchEvent(clickRightEvent);
-        await macroTask(win.setTimeout);
+        await macroTask();
 
         it('should not show paywall', () => {
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
@@ -2113,7 +2113,7 @@ describes.realWin(
         expect(pages[1].hasAttribute('distance')).to.be.false;
 
         signals.signal(CommonSignals_Enum.LOAD_END);
-        await macroTask(win.setTimeout);
+        await macroTask();
 
         // Check page 1 is loaded with distance 1.
         expect(pages[1].getAttribute('distance')).to.be.equal('1');

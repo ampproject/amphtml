@@ -220,7 +220,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       expect(
         webAnimationBuilder.createRunner.withArgs(
@@ -265,7 +265,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       expect(webAnimationBuilder.createRunner.withArgs(spec)).to.have.been
         .calledOnce;
@@ -303,7 +303,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       runner.start();
 
-      await macroTask(env.win.setTimeout);
+      await macroTask();
       expect(webAnimationRunner.start).to.have.been.calledOnce;
     });
 
@@ -345,14 +345,14 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       runner.start();
 
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       expect(sequence.waitFor.withArgs(startAfterId)).to.have.been.calledOnce;
       expect(webAnimationRunner.start).to.not.have.been.called;
 
       resolveWaitFor();
 
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       expect(webAnimationRunner.start).to.have.been.calledOnce;
     });
@@ -393,7 +393,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       expect(sequence.notifyFinish).to.not.have.been.called;
 
@@ -439,7 +439,7 @@ describes.realWin('amp-story animations', {}, (env) => {
     it('creates WebAnimation Builder with options', async () => {
       const page = html`<div></div>`;
       new AnimationManager(page, ampdoc);
-      await macroTask(env.win.setTimeout);
+      await macroTask();
       expect(
         webAnimationService.createBuilder.withArgs(
           env.sandbox.match({
@@ -802,11 +802,11 @@ describes.realWin('amp-story animations', {}, (env) => {
       const notified = env.sandbox.spy();
 
       sequence.waitFor('test-notify-id').then(notified);
-      await macroTask(env.win.setTimeout);
+      await macroTask();
       expect(notified).to.not.have.been.called;
 
       sequence.notifyFinish('test-notify-id');
-      await macroTask(env.win.setTimeout);
+      await macroTask();
       expect(notified).to.have.been.calledOnce;
     });
 
@@ -815,16 +815,16 @@ describes.realWin('amp-story animations', {}, (env) => {
       const notified = env.sandbox.spy();
 
       sequence.waitFor('test-notify-id').then(notified);
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       sequence.notifyFinish('test-notify-id');
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       sequence.notifyFinish('test-notify-id');
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       sequence.notifyFinish('test-notify-id');
-      await macroTask(env.win.setTimeout);
+      await macroTask();
 
       expect(notified).to.have.been.calledOnce;
     });
@@ -834,11 +834,11 @@ describes.realWin('amp-story animations', {}, (env) => {
       const notified = env.sandbox.spy();
 
       sequence.waitFor('test-notify-id').then(notified);
-      await macroTask(env.win.setTimeout);
+      await macroTask();
       expect(notified).to.not.have.been.called;
 
       sequence.notifyFinish('a-different-test-notify-id');
-      await macroTask(env.win.setTimeout);
+      await macroTask();
       expect(notified).to.not.have.been.called;
     });
   });

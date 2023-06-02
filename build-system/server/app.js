@@ -10,7 +10,6 @@ const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index');
 const express = require('express');
-const fetch = require('node-fetch');
 const formidable = require('formidable');
 const fs = require('fs');
 const jsdom = require('jsdom');

@@ -3,6 +3,8 @@
  */
 let env_;
 
+/** @typedef {typeof setTimeout} SetTimeoutFunctionType */
+
 /**
  * Sets up the helper environment.
  * @param {*} env
@@ -13,7 +15,11 @@ export function configureHelpers(env) {
 
 /**
  * Returns a Promise that resolves after the specified number of milliseconds.
+ *
+ * Pass an optional alternative `setTimeout` function when using fake timers in
+ * your test environment, and you want to perform the sleep in that env.
  * @param {number} ms
+ * @param {SetTimeoutFunctionType} setTimeoutFunc
  * @return {Promise<void>}
  */
 export function sleep(ms, setTimeoutFunc = setTimeout) {
@@ -23,8 +29,12 @@ export function sleep(ms, setTimeoutFunc = setTimeout) {
 }
 
 /**
- * A convenient method so you can flush the event queue by doing
- * `yield macroTask()` in your test.
+ * A convenience method to flush the event queue by calling `await macroTask()`
+ * in your test.
+ *
+ * Pass an optional alternative `setTimeout` function when using fake timers in
+ * your test environment, and you want to perform the sleep in that env.
+ * @param {SetTimeoutFunctionType} setTimeoutFunc
  * @return {Promise<void>}
  */
 export function macroTask(setTimeoutFunc = setTimeout) {

@@ -5,8 +5,8 @@
 
 const dedent = require('dedent');
 const {GitHubApi} = require('./utils');
-const {getExtensionsAndComponents, getSemver} = require('../npm-publish/utils');
-const {GraphQlQueryResponseData} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
+
+/** @typedef {import('@octokit/graphql').GraphQlQueryResponseData} GraphQlQueryResponseData */
 
 const prereleaseConfig = {
   'beta-opt-in': true,
@@ -35,45 +35,6 @@ function _formatPullRequestLine(pr) {
   const {abbreviatedOid, commitUrl} = mergeCommit;
   return dedent`\
    <a href="${commitUrl}"><code>${abbreviatedOid}</code></a> - ${title}`;
-}
-
-/**
- * Organize bento changes into sections
- * @param {Array<GraphQlQueryResponseData>} prs
- * @return {PackageMetadata}
- */
-function _createPackageSections(prs) {
-  const bundles = getExtensionsAndComponents();
-  const majors = [...new Set(bundles.map((b) => b.version))];
-  /** @type PackageMetadata */
-  const metadata = {};
-  for (const major of majors) {
-    metadata[major] = {
-      packages: {},
-      unchanged: new Set(),
-    };
-    bundles
-      .filter((b) => b.version == major)
-      .map((b) => metadata[major].unchanged.add(b.extension));
-  }
-
-  for (const pr of prs) {
-    for (const node of pr.files.nodes) {
-      for (const {extension, version} of bundles) {
-        if (isComponentPath(node.path, extension, version)) {
-          if (!Object.keys(metadata[version].packages).includes(extension)) {
-            metadata[version].packages[extension] = new Set();
-            metadata[version].unchanged.delete(extension);
-          }
-          metadata[version].packages[extension].add(
-            `<li>${_formatPullRequestLine(pr)}</li>`
-          );
-        }
-      }
-    }
-  }
-
-  return metadata;
 }
 
 /**
@@ -134,22 +95,6 @@ function _createComponentSections(prs) {
 }
 
 /**
- * Determines if a path is a path to a component directory.
- * @param {string} path
- * @param {?string=} name
- * @param {?string=} version
- * @return {boolean}
- */
-function isComponentPath(path, name, version) {
-  const nameDir = name ? `${name}/` : '';
-  const versionDir = version ? `${version}/` : '';
-  return (
-    path.startsWith(`extensions/${nameDir}${versionDir}`) ||
-    path.startsWith(`src/bento/components/${nameDir}${versionDir}`)
-  );
-}
-
-/**
  * Gets the name of a component from its directory path.
  * Returns undefined if the path is not a component directory.
  * @param {string} path
@@ -173,7 +118,6 @@ function getComponentNameFromPath(path) {
  * @return {string}
  */
 function _createBody(head, base, prs) {
-  const bento = _createPackageSections(prs);
   const components = _createComponentSections(prs);
   const template = dedent`\
      <h2>Changelog</h2>
@@ -182,25 +126,6 @@ function _createBody(head, base, prs) {
      <code>${base}...${head}</code>
      </a>
      </p>
- 
-     ${Object.entries(bento)
-       .map(
-         // eslint-disable-next-line local/no-deep-destructuring
-         ([major, {packages, unchanged}]) => dedent`\
-         <h2>npm packages @ ${getSemver(major, head)}</h2>
-         ${Object.entries(packages)
-           .sort()
-           .map(
-             ([extension, prs]) =>
-               `<b>${extension}</b>\n<ul>${[...prs].join('\n')}</ul>`
-           )
-           .join('\n')}
-   
-         <b>Packages not changed:</b> <i>${[...unchanged]
-           .sort()
-           .join(', ')}</i>`
-       )
-       .join('\n')}
  
      <h2>Changes by component</h2>
      ${components.sort().join('')}\
