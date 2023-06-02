@@ -25,6 +25,7 @@ const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {watch} = require('chokidar');
+const {disposeOfDrivers} = require('./driver-manager');
 
 const SLOW_TEST_THRESHOLD_MS = isCiBuild() ? 5000 : 2500;
 const TEST_RETRIES = isCiBuild() ? 3 : 0;
@@ -204,6 +205,7 @@ async function e2e() {
   const handlerProcess = createCtrlcHandler('e2e');
   await setUpTesting_();
   argv.watch ? await runWatch_() : await runTests_();
+  await disposeOfDrivers();
   exitCtrlcHandler(handlerProcess);
 }
 

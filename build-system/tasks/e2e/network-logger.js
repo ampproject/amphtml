@@ -1,4 +1,4 @@
-import selenium from 'selenium-webdriver';
+const selenium = require('selenium-webdriver');
 
 const {logging} = selenium;
 
@@ -13,7 +13,7 @@ const PerformanceMethods = {
   'WINDOW_OPEN': 'Network.windowOpen',
 };
 
-export class NetworkLogger {
+class NetworkLogger {
   /** @param {!selenium.WebDriver} driver */
   constructor(driver) {
     /** @type {selenium.WebDriver} */
@@ -33,6 +33,7 @@ export class NetworkLogger {
     return entries.filter((entry) => {
       const json = JSON.parse(entry.message);
       entry.message = json.message;
+      // @ts-ignore incorrect in type library.
       return entry.message.method == networkMethod;
     });
   }
@@ -52,3 +53,7 @@ export class NetworkLogger {
     return entries;
   }
 }
+
+module.exports = {
+  NetworkLogger,
+};

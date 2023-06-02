@@ -462,12 +462,7 @@ class SeleniumWebDriverController {
   async setWindowRect(rect) {
     const {height, width} = rect;
 
-    await this.driver.manage().window().setRect({
-      x: 0,
-      y: 0,
-      width,
-      height,
-    });
+    await this.driver.manage().window().setRect(rect);
 
     // Check to make sure we resized the content to the correct size.
     const htmlElement = this.driver.findElement(By.tagName('html'));

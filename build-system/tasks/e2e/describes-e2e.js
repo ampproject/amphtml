@@ -3,23 +3,14 @@ require('chromedriver');
 require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
-const chrome = require('selenium-webdriver/chrome');
-const firefox = require('selenium-webdriver/firefox');
-const selenium = require('selenium-webdriver');
-const {
-  clearLastExpectError,
-  getLastExpectError,
-  installBrowserAssertions,
-} = require('./expect');
-const {
-  SeleniumWebDriverController,
-} = require('./selenium-webdriver-controller');
-const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
+const {clearLastExpectError, getLastExpectError} = require('./expect');
+const {AmpdocEnvironment} = require('./amp-driver');
 const {configureHelpers} = require('../../../testing/helpers');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isCiBuild} = require('../../common/ci');
-const {Builder, Capabilities, logging} = selenium;
+const {configure, getConfig} = require('./describes-config');
+const {getDriverFor} = require('./driver-manager');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -28,7 +19,6 @@ const TEST_TIMEOUT = 3000;
 // in extensions/amp-script/0.1/test-e2e/test-amp-script.js to run faster
 const SETUP_TIMEOUT = 10000;
 const SETUP_RETRIES = 3;
-const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 
@@ -40,144 +30,8 @@ if (argv.coverage) {
   istanbulMiddleware = require('istanbul-middleware/lib/core');
 }
 
-/**
- * @typedef {{
- *  browsers: string,
- *  headless: boolean,
- * }}
- */
-let DescribesConfigDef;
-
-/**
- * @typedef {{
- *  headless?: boolean,
- * }}
- */
-let SeleniumConfigDef;
-
-/** @const {?DescribesConfigDef} */
-let describesConfig = null;
-
-/**
- * Configure all tests. This may only be called once, since it is only read once
- * and writes after reading will not have any effect.
- * @param {!DescribesConfigDef} config
- */
-function configure(config) {
-  if (describesConfig) {
-    throw new Error('describes.configure should only be called once');
-  }
-
-  describesConfig = {...config};
-}
-
-/**
- * Retrieve the describes config if set.
- * If not set, it sets the config to an empty object and returns it.
- * After getting the config the first time, the config may not be changed.
- * @return {!DescribesConfigDef}
- */
-function getConfig() {
-  if (!describesConfig) {
-    describesConfig = {};
-  }
-
-  return describesConfig;
-}
-
-/**
- * Configure and launch a Selenium instance
- * @param {string} browserName
- * @param {!SeleniumConfigDef=} args
- * @param {string=} deviceName
- * @return {!selenium.WebDriver}
- */
-function createSelenium(browserName, args = {}, deviceName) {
-  switch (browserName) {
-    case 'safari':
-      // Safari's only option is setTechnologyPreview
-      return createDriver(browserName, [], deviceName);
-    case 'firefox':
-      return createDriver(browserName, getFirefoxArgs(args), deviceName);
-    case 'chrome':
-    default:
-      return createDriver(browserName, getChromeArgs(args), deviceName);
-  }
-}
-
-/**
- *
- * @param {string} browserName
- * @param {!string[]} args
- * @param {string=} deviceName
- * @return {!selenium.WebDriver}
- */
-function createDriver(browserName, args, deviceName) {
-  const capabilities = Capabilities[browserName]();
-
-  const prefs = new logging.Preferences();
-  prefs.setLevel(logging.Type.PERFORMANCE, logging.Level.ALL);
-  capabilities.setLoggingPrefs(prefs);
-  switch (browserName) {
-    case 'firefox':
-      const firefoxOptions = new firefox.Options();
-      firefoxOptions.addArguments(...args);
-      firefoxOptions.windowSize({
-        width: DEFAULT_E2E_INITIAL_RECT.width,
-        height: DEFAULT_E2E_INITIAL_RECT.height,
-      });
-      return new Builder()
-        .forBrowser('firefox')
-        .setFirefoxOptions(firefoxOptions)
-        .build();
-    case 'chrome':
-      // @ts-ignore incorrect in type library.
-      const chromeOptions = new chrome.Options(capabilities);
-      chromeOptions.addArguments(...args);
-      if (deviceName) {
-        chromeOptions.setMobileEmulation({deviceName});
-      }
-      return chrome.Driver.createSession(chromeOptions);
-    case 'safari':
-      return new Builder().forBrowser(browserName).build();
-    default:
-      throw new Error(`Unsupported browser ${browserName}`);
-  }
-}
-
-/**
- * Configure chrome args.
- *
- * @param {!SeleniumConfigDef} config
- * @return {!Array<string>}
- */
-function getChromeArgs(config) {
-  const args = [
-    '--no-sandbox',
-    '--disable-gpu',
-    `--window-size=${DEFAULT_E2E_INITIAL_RECT.width},${DEFAULT_E2E_INITIAL_RECT.height}`,
-  ];
-
-  if (config.headless) {
-    args.push('--headless');
-  }
-  return args;
-}
-
-/**
- * Configure firefox args.
- *
- * @param {!SeleniumConfigDef} config
- * @return {!Array<string>}
- */
-function getFirefoxArgs(config) {
-  const args = [];
-
-  if (config.headless) {
-    args.push('--headless');
-  }
-  return args;
-}
+/** @typedef {import('./amp-driver').AmpDriver} AmpDriver */
+/** @typedef {import('./selenium-webdriver-controller').SeleniumWebDriverController} SeleniumWebDriverController */
 
 /**
  * @typedef {{
@@ -489,7 +343,6 @@ function describeEnv(factory) {
       });
 
       after(async () => {
-        await fixture.after();
         if (argv.coverage) {
           await reportCoverage();
         }
@@ -555,12 +408,7 @@ function describeEnv(factory) {
   return mainFunc;
 }
 
-/** @typedef {{[key: string]: {controller: SeleniumWebDriverController, ampDriver: AmpDriver}}} EndToEndFixtureCache */
-
 class EndToEndFixture {
-  /** @type {EndToEndFixtureCache} */
-  static cache_ = {};
-
   /** @param {!TestSpec} spec */
   constructor(spec) {
     /** @const */
@@ -574,19 +422,12 @@ class EndToEndFixture {
    * @return {Promise<void>}
    */
   async setup(env, browserName, retries = 0) {
-    const controllerCacheKey = `${this.spec.deviceName ?? ''}-${browserName}`;
-    if (!(controllerCacheKey in EndToEndFixture.cache_)) {
-      const config = getConfig();
-      const driver = getDriver(config, browserName, this.spec.deviceName);
-      const controller = new SeleniumWebDriverController(driver);
-      const ampDriver = new AmpDriver(controller);
-
-      EndToEndFixture.cache_[controllerCacheKey] = {controller, ampDriver};
-      installBrowserAssertions(controller.networkLogger);
-    }
-
-    env.controller = EndToEndFixture.cache_[controllerCacheKey].controller;
-    env.ampDriver = EndToEndFixture.cache_[controllerCacheKey].ampDriver;
+    const {ampDriver, controller} = getDriverFor(
+      browserName,
+      this.spec.deviceName ?? ''
+    );
+    env.controller = controller;
+    env.ampDriver = ampDriver;
     env.version = this.spec.version;
 
     try {
@@ -615,17 +456,6 @@ class EndToEndFixture {
   }
 
   /**
-   * @return {Promise<void>}
-   */
-  async after() {
-    for (const [key, value] of Object.entries(EndToEndFixture.cache_)) {
-      const {controller} = value;
-      await controller.dispose();
-      delete EndToEndFixture.cache_[key];
-    }
-  }
-
-  /**
    * Translate relative fixture specs into localhost test URL.
    * @param {!TestSpec} spec
    * @return {!TestSpec}
@@ -647,21 +477,10 @@ class EndToEndFixture {
 }
 
 /**
- * Get the driver for the configured engine.
- * @param {!DescribesConfigDef} describesConfig
- * @param {string} browserName
- * @param {string|undefined} deviceName
- * @return {!selenium.WebDriver}
- */
-function getDriver({headless = false}, browserName, deviceName) {
-  return createSelenium(browserName, {headless}, deviceName);
-}
-
-/**
  * @param {{
  *  environment: *,
- *  ampDriver: *,
- *  controller: *,
+ *  ampDriver: AmpDriver,
+ *  controller: SeleniumWebDriverController,
  * }} param0
  * @param {TestSpec} param1
  * @return {Promise<void>}
@@ -690,7 +509,7 @@ async function setUpTest(
 
   if (initialRect) {
     const {height, width} = initialRect;
-    await controller.setWindowRect({width, height});
+    await controller.setWindowRect({width, height, x: 0, y: 0});
   }
 
   await ampDriver.navigateToEnvironment(environment, url.href);
