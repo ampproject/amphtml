@@ -111,9 +111,9 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
           StateProperty.SYSTEM_UI_IS_BUILT_STATE,
           (isBuilt) => {
             if (isBuilt) {
-              this.systemLayerEl_ = this.getAmpDoc()
-                .getRootNode()
-                .documentElement.querySelector('.i-amphtml-system-layer-host');
+              this.systemLayerEl_ = this.element
+                .closest('amp-story')
+                .querySelector('.i-amphtml-system-layer-host');
               this.element.addEventListener(
                 'click',
                 this.onClick_.bind(this),

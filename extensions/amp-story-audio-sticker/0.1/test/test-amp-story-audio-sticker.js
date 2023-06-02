@@ -47,6 +47,7 @@ describes.realWin(
               <amp-story-audio-sticker></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
+          <div class="i-amphtml-system-layer-host"></div>
         </amp-story>
       );
       doc.body.appendChild(storyEl);
@@ -57,6 +58,7 @@ describes.realWin(
           ? storyEl.setAttribute('muted', '')
           : storyEl.removeAttribute('muted');
       });
+      storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_BUILT, true);
       env.sandbox
         .stub(Services, 'storyStoreServiceForOrNull')
         .returns(Promise.resolve(storeService));
