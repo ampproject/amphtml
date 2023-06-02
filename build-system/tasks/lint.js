@@ -42,8 +42,7 @@ async function runLinter(filesToLint) {
     results.errorCount += result.errorCount;
     results.warningCount += result.warningCount;
     const formatter = await eslint.loadFormatter('stylish');
-    const resultText = formatter
-      .format(lintResult)
+    const resultText = (await formatter.format(lintResult))
       .replace(`${process.cwd()}/`, '')
       .trim();
     if (resultText.length) {
