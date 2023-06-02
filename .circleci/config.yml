@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.4.1
-  codecov: codecov/codecov@3.2.4
+  codecov: codecov/codecov@3.2.5
   node: circleci/node@5.1.0
 
 push_and_pr_builds: &push_and_pr_builds
