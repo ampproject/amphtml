@@ -5,7 +5,10 @@ import {scopedQuerySelector} from '#core/dom/query';
 import {Services} from '#service';
 
 import {CSS} from '../../../build/amp-story-audio-sticker-0.1.css';
-import {Action} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+} from '../../amp-story/1.0/amp-story-store-service';
 
 const TAG = 'amp-story-audio-sticker';
 
@@ -70,6 +73,9 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+
+    /** @private {?HTMLElement} */
+    this.systemLayerEl_ = null;
   }
 
   /** @override */
@@ -101,13 +107,55 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
-        this.element.addEventListener(
-          'click',
-          () => this.storeService_.dispatch(Action.TOGGLE_MUTED, false),
-          true
+        storeService.subscribe(
+          StateProperty.SYSTEM_UI_IS_BUILT_STATE,
+          (isBuilt) => {
+            if (isBuilt) {
+              this.systemLayerEl_ = this.getAmpDoc()
+                .getRootNode()
+                .documentElement.querySelector('.i-amphtml-system-layer-host');
+              this.element.addEventListener(
+                'click',
+                this.onClick_.bind(this),
+                true
+              );
+              this.storeService_.subscribe(
+                StateProperty.MUTED_STATE,
+                this.onMutedStateChange_.bind(this)
+              );
+            }
+          },
+          true /** callToInitialize */
         );
       }
     );
+  }
+
+  /**
+   * When the sticker is clicked, toggle muted state and highlight
+   * the mute control on system layer.
+   * @private
+   */
+  onClick_() {
+    this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+    this.systemLayerEl_.classList.toggle(
+      'i-amphtml-story-highlight-mute-audio-control',
+      true
+    );
+  }
+
+  /**
+   * Disable highlight once the story gets muted again.
+   * @private
+   * @param {boolean} isMuted
+   */
+  onMutedStateChange_(isMuted) {
+    if (isMuted) {
+      this.systemLayerEl_.classList.toggle(
+        'i-amphtml-story-highlight-mute-audio-control',
+        false
+      );
+    }
   }
 
   /** @private */

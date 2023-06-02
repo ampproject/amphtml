@@ -277,7 +277,7 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="M28.47 17.14c1.15.2 5.46 1.98 5.46 6.92 0 4.95-4.39 6.63-5.46 6.83"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.8" d="M28.47 21.24c.37.08 1.75.79 1.75 2.78 0 1.99-1.4 2.67-1.75 2.74"/><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="m18.36 27.48 4.88 4.9a.65.65 0 0 0 1.1-.46V16.09c0-.58-.7-.87-1.1-.45l-4.88 4.94h-2.59c-.94 0-1.7.77-1.7 1.7v3.45c0 .93.75 1.69 1.67 1.7l2.62.05Z"/></svg>') !important;
 }
 
-.i-amphtml-story-mute-audio-control::before {
+:host(.i-amphtml-story-highlight-mute-audio-control) .i-amphtml-story-mute-audio-control::before {
   content: "" !important;
   position: absolute !important;
   width: 42px !important;

@@ -643,6 +643,7 @@ export class AmpStory extends AMP.BaseElement {
     this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId, isVisible));
+    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_BUILT, true);
   }
 
   /** @private */

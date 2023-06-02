@@ -139,6 +139,7 @@ export let ShoppingDataDef;
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    systemUiIsVisibleState: boolean,
+ *    systemUiIsBuiltState: boolean,
  *    uiState: !UIType_Enum,
  *    viewportWarningState: boolean,
  *    actionsAllowlist: !Array<{tagOrTarget: string, method: string}>,
@@ -195,6 +196,7 @@ const StateProperty = mangleObjectValues({
   // Any page has elements with playback.
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
+  SYSTEM_UI_IS_BUILT_STATE: 'systemUiIsBuiltState',
   UI_STATE: 'uiState',
   DESKTOP_ASPECT_RATIO: 'desktopAspectRatio',
 
@@ -253,6 +255,7 @@ const Action = mangleObjectValues({
   TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE: 'toggleSubscriptionsDialogUiState',
   TOGGLE_SUBSCRIPTIONS_STATE: 'toggleSubscriptionsState',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
+  TOGGLE_SYSTEM_UI_IS_BUILT: 'toggleSystemUiIsBuilt',
   TOGGLE_UI: 'toggleUi',
 });
 
@@ -429,6 +432,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
+      });
+    case Action.TOGGLE_SYSTEM_UI_IS_BUILT:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SYSTEM_UI_IS_BUILT_STATE]: !!data,
       });
     case Action.TOGGLE_UI:
       if (
@@ -630,6 +638,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
+      [StateProperty.SYSTEM_UI_IS_BUILT_STATE]: false,
       [StateProperty.UI_STATE]: UIType_Enum.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
