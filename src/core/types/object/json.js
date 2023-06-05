@@ -16,7 +16,7 @@ let JSONScalarDef;
 
 /**
  * JSON object. It's a map with string keys and JSON values.
- * @typedef {Object<string, ?*>} (* should be JSONValueDef)
+ * @typedef {{[key: string]: ?*}} (* should be JSONValueDef)
  */
 let JSONObjectDef;
 

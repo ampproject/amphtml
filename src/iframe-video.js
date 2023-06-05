@@ -43,7 +43,7 @@ export function originMatches(event, iframe, host) {
  *
  * @param {!AmpElement} element
  * @param {string} event
- * @param {!Object<string, (string|?Array<string>)>} events
+ * @param {!{[key: string]: (string|?Array<string>)}} events
  * @return {boolean}
  */
 export function redispatch(element, event, events) {

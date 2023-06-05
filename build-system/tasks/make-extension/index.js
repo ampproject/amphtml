@@ -55,7 +55,7 @@ function dashToPascalCase(name) {
 /**
  * Replaces from a map of keys/values.
  * @param {string} inputText
- * @param {Object<string, string>} replacements
+ * @param {{[key: string]: string}} replacements
  * @return {string}
  */
 const replace = (inputText, replacements) =>
@@ -87,7 +87,7 @@ const getTemplateDir = (template) =>
 
 /**
  * @param {string} templateDir
- * @param {Object<string, string>} replacements
+ * @param {{[key: string]: string}} replacements
  * @param {string=} destinationDir
  * @return {Promise<Array<string>>}
  */

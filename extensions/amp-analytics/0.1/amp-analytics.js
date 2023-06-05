@@ -62,7 +62,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.isSandbox_ = false;
 
     /**
-     * @private {Object<string, RequestHandler>} A map of request handler with requests
+     * @private {{[key: string]: RequestHandler}} A map of request handler with requests
      */
     this.requests_ = {};
 
@@ -458,8 +458,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * Replace the names of keys in params object with the values in replace map.
    *
-   * @param {!Object<string, string>} params The params that need to be renamed.
-   * @param {!Object<string, string>} replaceMap A map of pattern and replacement
+   * @param {!{[key: string]: string}} params The params that need to be renamed.
+   * @param {!{[key: string]: string}} replaceMap A map of pattern and replacement
    *    value.
    * @private
    */

@@ -27,9 +27,9 @@ let PlatformWeightDef;
 export class PlatformStore {
   /**
    * @param {!Array<string>} platformKeys
-   * @param {!JsonObject|Object<string, number>} scoreConfig
+   * @param {!JsonObject|{[key: string]: number}} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
-   * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
+   * @param {{[key: string]: !./subscription-platform.SubscriptionPlatform}=} opt_Platforms
    * @param {!Observable<!EntitlementChangeEventDef>} opt_externalOnEntitlementResolvedCallbacks
    */
   constructor(
@@ -39,18 +39,18 @@ export class PlatformStore {
     opt_Platforms,
     opt_externalOnEntitlementResolvedCallbacks
   ) {
-    /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
+    /** @private @const {!{[key: string]: !./subscription-platform.SubscriptionPlatform}} */
     this.subscriptionPlatforms_ = opt_Platforms || {};
 
     /** @private @const {!Array<string>} */
     this.platformKeys_ = platformKeys;
 
-    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
+    /** @private @const {!{[key: string]: !./entitlement.Entitlement}} */
     this.entitlements_ = {};
 
     /**
      * @private @const
-     * {!Object<string, !Deferred<!./entitlement.Entitlement>>}
+     * {!{[key: string]: !Deferred<!./entitlement.Entitlement>}}
      */
     this.entitlementDeferredMap_ = {};
     platformKeys.forEach((platformKey) => {
@@ -81,7 +81,7 @@ export class PlatformStore {
     /** @private @const {!./entitlement.Entitlement} */
     this.fallbackEntitlement_ = fallbackEntitlement;
 
-    /** @private @const {!Object<string, number>} */
+    /** @private @const {!{[key: string]: number}} */
     this.scoreConfig_ = Object.assign(DEFAULT_SCORE_CONFIG, scoreConfig);
 
     /** @private @const {!Observable<!EntitlementChangeEventDef>} */

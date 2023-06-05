@@ -7,7 +7,7 @@ import {
 import {parseJson} from '#core/types/object/json';
 
 /**
- * @const {Object<string, string>}
+ * @const {{[key: string]: string}}
  */
 const ADO_JS_PATHS = {
   'sync': '/files/js/ado.js',

@@ -46,7 +46,7 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  * }
  *
- * @const {!Object<string, !JsonObject>}
+ * @const {!{[key: string]: !JsonObject}}
  */
 const adConfig = jsonConfiguration({
   '_ping_': {

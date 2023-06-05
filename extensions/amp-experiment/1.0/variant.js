@@ -21,7 +21,7 @@ export class Variants {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @private @const {!Deferred<!Object<string, ?string>>} */
+    /** @private @const {!Deferred<!{[key: string]: ?string}>} */
     this.variantsDeferred_ = new Deferred();
   }
 
@@ -36,7 +36,7 @@ export class Variants {
 
   /**
    * Returns a promise for the experiment variants.
-   * @return {!Promise<!Object<string, ?string>>}
+   * @return {!Promise<!{[key: string]: ?string}>}
    */
   getVariants() {
     return this.variantsDeferred_.promise;

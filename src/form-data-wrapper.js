@@ -52,7 +52,7 @@ export function isFormDataWrapper(o) {
 export class PolyfillFormDataWrapper {
   /** @override */
   constructor(opt_form = undefined) {
-    /** @private @const {!Object<string, !Array<string>>} */
+    /** @private @const {!{[key: string]: !Array<string>}} */
     this.fieldValues_ = opt_form ? getFormAsObject(opt_form) : map();
   }
 

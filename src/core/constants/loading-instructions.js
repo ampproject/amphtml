@@ -43,7 +43,7 @@ const ORDER = [
 ];
 
 /**
- * @type {Object<string, number>}
+ * @type {{[key: string]: number}}
  * @const
  */
 const MAP = {

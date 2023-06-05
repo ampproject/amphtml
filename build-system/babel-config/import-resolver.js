@@ -21,7 +21,7 @@ let tsConfigPaths = null;
  *   '#foo': './src/foo',
  *   '#bar': './bar',
  * }
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function readJsconfigPaths() {
   if (!tsConfigPaths) {
@@ -82,7 +82,7 @@ function getImportResolver(buildFor = 'preact') {
  * Produces an alias map with paths relative to the provided root.
  * @param {string} rootDir
  * @param {'preact' | 'react'} buildFor
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function getRelativeAliasMap(rootDir, buildFor = 'preact') {
   return Object.fromEntries(

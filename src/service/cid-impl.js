@@ -57,7 +57,7 @@ const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
 
 /**
  * The mapping from analytics providers to CID scopes.
- * @const @private {Object<string, string>}
+ * @const @private {{[key: string]: string}}
  */
 const CID_API_SCOPE_ALLOWLIST = {
   'googleanalytics': 'AMP_ECID_GOOGLE',
@@ -65,7 +65,7 @@ const CID_API_SCOPE_ALLOWLIST = {
 
 /**
  * The mapping from analytics providers to their CID API service keys.
- * @const @private {Object<string, string>}
+ * @const @private {{[key: string]: string}}
  */
 const API_KEYS = {
   'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
@@ -150,7 +150,7 @@ class Cid {
     /**
      * Cache to store external cids. Scope is used as the key and cookie value
      * is the value.
-     * @private {!Object<string, !Promise<string>>}
+     * @private {!{[key: string]: !Promise<string>}}
      * @restricted
      */
     this.externalCidCache_ = Object.create(null);
@@ -167,7 +167,7 @@ class Cid {
 
     this.cidApi_ = new GoogleCidApi(ampdoc);
 
-    /** @private {?Object<string, string>} */
+    /** @private {?{[key: string]: string}} */
     this.apiKeyMap_ = null;
   }
 
@@ -295,7 +295,7 @@ class Cid {
   /**
    * Reads meta tags for opted in scopes.  Meta tags will have the form
    * <meta name="provider-api-name" content="provider-name">
-   * @return {!Object<string, string>}
+   * @return {!{[key: string]: string}}
    */
   getOptedInScopes_() {
     const apiKeyMap = {};

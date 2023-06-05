@@ -115,7 +115,7 @@ export class SubscriptionService {
     /** @private @const {!Promise<!../../../src/service/cid-impl.CidDef>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
-    /** @private {!Object<string, ?Promise<string>>} */
+    /** @private {!{[key: string]: ?Promise<string>}} */
     this.platformKeyToReaderIdPromiseMap_ = {};
 
     /** @private {!CryptoHandler} */

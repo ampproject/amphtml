@@ -4,7 +4,7 @@ goog.module('amp.htmlparser.interface');
  * @param {string} str The string to lower case.
  * @return {string} The str in lower case format.
  */
-const toLowerCase = function(str) {
+const toLowerCase = function (str) {
   // htmlparser heavily relies on the length of the strings, and
   // unfortunately some characters change their length when
   // lowercased; for instance, the Turkish İ has a length of 1, but
@@ -15,7 +15,7 @@ const toLowerCase = function(str) {
   if (lowerCased.length == str.length) {
     return lowerCased;
   }
-  return str.replace(/[A-Z]/g, function(ch) {
+  return str.replace(/[A-Z]/g, function (ch) {
     return String.fromCharCode(ch.charCodeAt(0) | 32);
   });
 };
@@ -25,7 +25,7 @@ exports.toLowerCase = toLowerCase;
  * @param {string} str The string to upper case.
  * @return {string} The str in upper case format.
  */
-const toUpperCase = function(str) {
+const toUpperCase = function (str) {
   // htmlparser heavily relies on the length of the strings, and
   // unfortunately some characters change their length when
   // lowercased; for instance, the Turkish İ has a length of 1, but
@@ -36,7 +36,7 @@ const toUpperCase = function(str) {
   if (upperCased.length == str.length) {
     return upperCased;
   }
-  return str.replace(/[a-z]/g, function(ch) {
+  return str.replace(/[a-z]/g, function (ch) {
     return String.fromCharCode(ch.charCodeAt(0) & 223);
   });
 };
@@ -76,25 +76,25 @@ const /** string */ ampProjectDomain = 'https://cdn.ampproject.org/';
 // v0.js
 // v0/amp-ad-0.1.js
 const /** !RegExp */ standardScriptPathRegex =
-    new RegExp('^(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+  new RegExp('^(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
 
 // LTS and Nomodule LTS JavaScript:
 // lts/v0.js
 // lts/v0/amp-ad-0.1.js
 const /** !RegExp */ ltsScriptPathRegex =
-    new RegExp('^lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+  new RegExp('^lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
 
 // Module JavaScript:
 // v0.mjs
 // amp-ad-0.1.mjs
 const /** !RegExp */ moduleScriptPathRegex =
-    new RegExp('^(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+  new RegExp('^(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
 
 // Module LTS JavaScript:
 // lts/v0.mjs
 // lts/v0/amp-ad-0.1.mjs
 const /** !RegExp */ moduleLtsScriptPathRegex =
-    new RegExp('^lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+  new RegExp('^lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
 
 // Runtime JavaScript:
 // v0.js
@@ -104,7 +104,7 @@ const /** !RegExp */ moduleLtsScriptPathRegex =
 // lts/v0.js?f=sxg
 // lts/v0.mjs
 const /** !RegExp */ runtimeScriptPathRegex =
-    new RegExp('^(lts/)?v0\\.m?js(\\?f=sxg)?$', 'i');
+  new RegExp('^(lts/)?v0\\.m?js(\\?f=sxg)?$', 'i');
 
 // Extension JavaScript:
 // lts/v0/amp-ad-0.1.js
@@ -114,7 +114,7 @@ const /** !RegExp */ runtimeScriptPathRegex =
 // v0/amp-ad-0.1.js?f=sxg
 // v0/am-ad-0.1.mjs
 const /** !RegExp */ extensionScriptPathRegex = new RegExp(
-    '^(?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\\.(?:m)?js(?:\\?f=sxg)?$', 'i');
+  '^(?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\\.(?:m)?js(?:\\?f=sxg)?$', 'i');
 
 /**
  * Represents the state of a script tag.
@@ -159,8 +159,8 @@ const ScriptTag = class {
       if (attr.name === 'async') {
         isAsync = true;
       } else if (
-          (attr.name === 'custom-element') ||
-          (attr.name === 'custom-template') || (attr.name === 'host-service')) {
+        (attr.name === 'custom-element') ||
+        (attr.name === 'custom-template') || (attr.name === 'host-service')) {
         this.isExtension = true;
       } else if (attr.name === 'nomodule') {
         isNomodule = true;
@@ -197,11 +197,11 @@ const ScriptTag = class {
 
         // Determine the release version (LTS, module, standard, etc).
         if ((isModule && moduleLtsScriptPathRegex.test(this.path)) ||
-            (isNomodule && ltsScriptPathRegex.test(this.path))) {
+          (isNomodule && ltsScriptPathRegex.test(this.path))) {
           this.releaseVersion = ScriptReleaseVersion.MODULE_NOMODULE_LTS;
         } else if (
-            (isModule && moduleScriptPathRegex.test(this.path)) ||
-            (isNomodule && standardScriptPathRegex.test(this.path))) {
+          (isModule && moduleScriptPathRegex.test(this.path)) ||
+          (isNomodule && standardScriptPathRegex.test(this.path))) {
           this.releaseVersion = ScriptReleaseVersion.MODULE_NOMODULE;
         } else if (ltsScriptPathRegex.test(this.path)) {
           this.releaseVersion = ScriptReleaseVersion.LTS;
@@ -252,7 +252,7 @@ const ParsedHtmlTag = class {
       this.attrs_.push(attr);
     }
     // Sort the attribute array by (lower case) name.
-    this.attrs_.sort(function(a, b) {
+    this.attrs_.sort(function (a, b) {
       if (a.name > b.name) {
         return 1;
       }
@@ -264,7 +264,7 @@ const ParsedHtmlTag = class {
     });
 
     // Lazily allocated map from attribute name to value.
-    /** @private @type {?Object<string, string>} */
+    /** @private @type {?{[key: string]: string}} */
     this.attrsByKey_ = null;
 
     /** @private @type {?ScriptTag} */
@@ -300,7 +300,7 @@ const ParsedHtmlTag = class {
   /**
    * Returns an object mapping attribute name to attribute value. This is
    * populated lazily, as it's not used for most tags.
-   * @return {Object<string, string>}
+   * @return {{[key: string]: string}}
    * */
   attrsByKey() {
     if (this.attrsByKey_ === null) {
@@ -309,7 +309,7 @@ const ParsedHtmlTag = class {
         this.attrsByKey_[attr.name] = attr.value;
       }
     }
-    return /** @type{Object<string, string>} */ (this.attrsByKey_);
+    return /** @type{{[key: string]: string}} */ (this.attrsByKey_);
   }
 
   /**
@@ -439,48 +439,48 @@ const HtmlSaxHandler = class {
    * Handler called when the parser found a new tag.
    * @param {!ParsedHtmlTag} tag
    */
-  startTag(tag) {}
+  startTag(tag) { }
 
   /**
    * Handler called when the parser found a closing tag.
    * @param {!ParsedHtmlTag} tag
    */
-  endTag(tag) {}
+  endTag(tag) { }
 
   /**
    * Handler called when PCDATA is found.
    * @param {string} text The PCDATA text found.
    */
-  pcdata(text) {}
+  pcdata(text) { }
 
   /**
    * Handler called when RCDATA is found.
    * @param {string} text The RCDATA text found.
    */
-  rcdata(text) {}
+  rcdata(text) { }
 
   /**
    * Handler called when CDATA is found.
    * @param {string} text The CDATA text found.
    */
-  cdata(text) {}
+  cdata(text) { }
 
   /**
    * Handler called when the parser is starting to parse the document.
    */
-  startDoc() {}
+  startDoc() { }
 
   /**
    * Handler called when the parsing is done.
    */
-  endDoc() {}
+  endDoc() { }
 
   /**
    * Callback for informing that the parser is manufacturing a <body> tag not
    * actually found on the page. This will be followed by a startTag() with the
    * actual body tag in question.
    */
-  markManufacturedBody() {}
+  markManufacturedBody() { }
 
   /**
    * HTML5 defines how parsers treat documents with multiple body tags: they
@@ -489,7 +489,7 @@ const HtmlSaxHandler = class {
    * event which will provide the attributes from the effective body tag
    * to the client (the handler).
    */
-  effectiveBodyTag(attributes) {}
+  effectiveBodyTag(attributes) { }
 };
 exports.HtmlSaxHandler = HtmlSaxHandler;
 
@@ -500,7 +500,7 @@ exports.HtmlSaxHandler = HtmlSaxHandler;
  * the `HtmlSaxHandler#setDocLocator` method.
  */
 const DocLocator = class {
-  constructor() {}
+  constructor() { }
 
   /**
    * The current line in the HTML source from which the most recent SAX event
@@ -509,7 +509,7 @@ const DocLocator = class {
    * HtmlSaxHandler methods - e.g., startTag, pcdata, etc.
    * @return {number} line The current line.
    */
-  getLine() {}
+  getLine() { }
 
   /**
    * The current column in the HTML source from which the most recent SAX event
@@ -518,13 +518,13 @@ const DocLocator = class {
    * HtmlSaxHandler methods - e.g., startTag, pcdata, etc.
    * @return {number} line The current column.
    */
-  getCol() {}
+  getCol() { }
 
   /**
    * The size of the document in bytes.
    * @return {number}.
    */
-  getDocByteSize() {}
+  getDocByteSize() { }
 };
 exports.DocLocator = DocLocator;
 
@@ -544,6 +544,6 @@ const HtmlSaxHandlerWithLocation = class extends HtmlSaxHandler {
    *   provides access to the line/column information while SAX events
    *   are being received by the handler.
    */
-  setDocLocator(locator) {}
+  setDocLocator(locator) { }
 };
 exports.HtmlSaxHandlerWithLocation = HtmlSaxHandlerWithLocation;

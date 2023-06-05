@@ -22,12 +22,12 @@ const CUSTOM_FUNCTIONS = 'custom-functions';
 
 /**
  * Map of object type to function name to allowlisted function.
- * @private {!Object<string, !Object<string, Function>>}
+ * @private {!{[key: string]: !{[key: string]: Function}}}
  */
 let FUNCTION_ALLOWLIST;
 
 /**
- * @return {!Object<string, !Object<string, Function>>}
+ * @return {!{[key: string]: !{[key: string]: Function}}}
  * @private
  */
 function generateFunctionAllowlist() {
@@ -200,7 +200,7 @@ function generateFunctionAllowlist() {
 export class BindExpression {
   /**
    * @param {string} expressionString
-   * @param {!Object<string, !./bind-macro.BindMacro>} macros
+   * @param {!{[key: string]: !./bind-macro.BindMacro}} macros
    * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
@@ -212,7 +212,7 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @private @const {!Object<string, !./bind-macro.BindMacro>} */
+    /** @private @const {!{[key: string]: !./bind-macro.BindMacro}} */
     this.macros_ = macros;
 
     /** @const @private {!./bind-expr-defines.AstNode} */

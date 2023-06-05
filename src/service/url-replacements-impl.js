@@ -66,7 +66,7 @@ function screenProperty(screen, property) {
 
 /**
  *
- * @param {Object<string,(string|Array<string>)>|null} geo
+ * @param {{[key: string]: (string|Array<string})>|null} geo
  * @param {string} geoType
  * @return {string}
  */
@@ -93,10 +93,10 @@ export class GlobalVariableSource extends VariableSource {
   constructor(ampdoc) {
     super(ampdoc);
 
-    /** @private {Object<string,(string|Array<string>)>|null} */
+    /** @private {{[key: string]: (string|Array<string})>|null} */
     this.cachedGeo_ = null;
 
-    /** @private {Object<string,string>}*/
+    /** @private {{[key: string]: string}}*/
     this.cachedUach_ = {};
   }
 
@@ -283,7 +283,7 @@ export class GlobalVariableSource extends VariableSource {
     /**
      * Stores client ids that were generated during this page view
      * indexed by scope.
-     * @type {?Object<string, string>}
+     * @type {?{[key: string]: string}}
      */
     let clientIds = null;
     // Synchronous alternative. Only works for scopes that were previously
@@ -754,7 +754,7 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-experiment's variants service.
-   * @param {function(!Object<string, string>):(?string)} getter
+   * @param {function(!{[key: string]: string}):(?string)} getter
    * @param {string} expr
    * @return {!Promise<?string>}
    * @template T
@@ -777,7 +777,7 @@ export class GlobalVariableSource extends VariableSource {
    * Resolves the value via geo service.
    * @param {function(!../../extensions/amp-geo/0.1/amp-geo.GeoDef)} getter
    * @param {string} expr
-   * @return {!Promise<Object<string,(string|Array<string>)>>}
+   * @return {!Promise<{[key: string]: (string|Array<string})>>}
    * @template T
    * @private
    */
@@ -842,8 +842,8 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
+   * @param {!{[key: string]: (ResolverReturnDef|!SyncResolverDef)}=} opt_bindings
+   * @param {!{[key: string]: boolean}=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -865,8 +865,8 @@ export class UrlReplacements {
    * resolved values. Optional `opt_bindings` can be used to add new variables
    * or override existing ones.
    * @param {string} source
-   * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist
+   * @param {!{[key: string]: *}=} opt_bindings
+   * @param {!{[key: string]: boolean}=} opt_allowlist
    * @return {!Promise<string>}
    */
   expandStringAsync(source, opt_bindings, opt_allowlist) {
@@ -887,8 +887,8 @@ export class UrlReplacements {
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
+   * @param {!{[key: string]: (ResolverReturnDef|!SyncResolverDef)}=} opt_bindings
+   * @param {!{[key: string]: boolean}=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -912,8 +912,8 @@ export class UrlReplacements {
    * resolved values. Optional `opt_bindings` can be used to add new variables
    * or override existing ones.
    * @param {string} url
-   * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
+   * @param {!{[key: string]: *}=} opt_bindings
+   * @param {!{[key: string]: boolean}=} opt_allowlist Optional allowlist of names
    *     that can be substituted.
    * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
@@ -996,9 +996,9 @@ export class UrlReplacements {
   /**
    * Returns a replacement allowlist from elements' data-amp-replace attribute.
    * @param {!Element} element
-   * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
+   * @param {!{[key: string]: boolean}=} opt_supportedReplacement Optional supported
    * replacement that filters allowlist to a subset.
-   * @return {!Object<string, boolean>|undefined}
+   * @return {!{[key: string]: boolean}|undefined}
    */
   getAllowlistForElement_(element, opt_supportedReplacement) {
     const allowlist = element.getAttribute('data-amp-replace');
@@ -1136,7 +1136,7 @@ export class UrlReplacements {
 
   /**
    * @param {string} href
-   * @param {!Object<string, boolean>|undefined} allowlist
+   * @param {!{[key: string]: boolean}|undefined} allowlist
    * @return {string}
    */
   expandSyncIfAllowedList_(href, allowlist) {
@@ -1154,8 +1154,8 @@ export class UrlReplacements {
    * values for known variables. Optional `opt_bindings` can be used to add
    * new variables or override existing ones.
    * @param {string} url
-   * @param {!Object<string, *>=} opt_bindings
-   * @return {!Promise<!Object<string, *>>}
+   * @param {!{[key: string]: *}=} opt_bindings
+   * @return {!Promise<!{[key: string]: *}>}
    */
   collectVars(url, opt_bindings) {
     const vars = Object.create(null);

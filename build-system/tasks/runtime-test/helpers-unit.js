@@ -33,12 +33,12 @@ function isLargeRefactor() {
  * Extracts extension info and creates a mapping from CSS files in different
  * source directories to their equivalent JS files in the 'build/' directory.
  *
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function extractCssJsFileMap() {
   execOrDie('amp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(EXTENSIONS);
-  /** @type {Object<string, string>} */
+  /** @type {{[key: string]: string}} */
   const cssJsFileMap = {};
 
   /**
@@ -115,7 +115,7 @@ function getImports(jsFile) {
  * Retrieves the set of JS source files that import the given CSS file.
  *
  * @param {string} cssFile
- * @param {!Object<string, string>} cssJsFileMap
+ * @param {!{[key: string]: string}} cssJsFileMap
  * @return {!Array<string>}
  */
 function getJsFilesFor(cssFile, cssJsFileMap) {

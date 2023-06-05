@@ -1,6 +1,6 @@
 /**
  * @const
- * @type {Object<string, string>}
+ * @type {{[key: string]: string}}
  */
 export const StoryAdSegmentExp = {
   ID: 'story-ad-auto-advance',
