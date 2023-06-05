@@ -102,7 +102,7 @@
     "enzyme-adapter-preact-pure": "3.1.0",
     "esbuild": "0.13.9",
     "escodegen": "2.0.0",
-    "eslint": "8.41.0",
+    "eslint": "8.42.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-import-resolver-babel-module": "5.3.2",
     "eslint-plugin-chai-expect": "3.0.0",
