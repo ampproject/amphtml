@@ -136,7 +136,7 @@ export function deepEquals(a, b, depth = 5) {
  * configuration to be transformed into an efficient JSON-parsed representation
  * in the dist build. See https://v8.dev/blog/cost-of-javascript-2019#json
  *
- * @param {Object} obj
+ * @param {object} obj
  * @return {JsonObject}
  */
 export function jsonConfiguration(obj) {

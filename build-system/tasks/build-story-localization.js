@@ -55,7 +55,7 @@ async function getLanguageStrings() {
 /**
  * Retrieves the fallback language codes for each current locale
  * and merges any strings from the fallback language.
- * @param {Object} languages
+ * @param {object} languages
  */
 function mergeFallbacks(languages) {
   for (const langKey in languages) {

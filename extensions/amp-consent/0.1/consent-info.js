@@ -386,7 +386,7 @@ export function getConsentStateValue(enumState) {
  * {'ga': true, 'cst': 2}
  *
  * @param {ConsentMetadataDef=} consentInfoMetadata
- * @return {Object}
+ * @return {object}
  */
 export function composeMetadataStoreValue(consentInfoMetadata) {
   const storageMetadata = map();

@@ -278,7 +278,7 @@ envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
 class ItConfig {
   /**
    * @param {function} it
-   * @param {Object} env
+   * @param {object} env
    */
   constructor(it, env) {
     this.it = /** @type {Mocha.it} */ (it);
@@ -449,7 +449,7 @@ function describeEnv(factory) {
     /**
      *
      * @param {string} _name
-     * @param {Object} variant
+     * @param {object} variant
      * @param {string} browserName
      */
     function doTemplate(_name, variant, browserName) {

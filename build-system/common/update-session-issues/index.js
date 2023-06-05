@@ -84,7 +84,7 @@ function parseYyyyMmDd(yyyyMmDd, hours = 0, minutes = 0) {
 
 /**
  * @param {string} url
- * @param {Object} options
+ * @param {object} options
  * @param {string=} data
  * @return {!Promise<{res: *, body: string}>}
  */
@@ -165,7 +165,7 @@ async function postGithub(token, url, data) {
 /**
  * @param {string} token
  * @param {string} repo
- * @param {Object} data
+ * @param {object} data
  * @return {Promise<Object>}
  */
 function postGithubIssue(token, repo, data) {
@@ -299,7 +299,7 @@ const timeZ = (yyyy, mm, dd, hours, minutes) =>
 
 /**
  * @param {TemplateDef} template
- * @return {Object}
+ * @return {object}
  */
 function getNextIssueData(template) {
   const {

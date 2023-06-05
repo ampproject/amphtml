@@ -59,11 +59,11 @@ export function ownProperty(obj, key) {
 /**
  * Deep merges source into target.
  *
- * @param {Object} target
- * @param {Object} source
+ * @param {object} target
+ * @param {object} source
  * @param {number} depth The maximum merge depth. If exceeded, Object.assign
  *                       will be used instead.
- * @return {Object}
+ * @return {object}
  * @throws {Error} If source contains a circular reference.
  * Note: Only nested objects are deep-merged, primitives and arrays are not.
  */

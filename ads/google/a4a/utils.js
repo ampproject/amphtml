@@ -98,7 +98,7 @@ export let NameframeExperimentConfig;
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
-/** @const {Object} */
+/** @const {object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 

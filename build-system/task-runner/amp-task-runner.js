@@ -235,7 +235,7 @@ function createTask(
 
 /**
  * Validates usage by examining task and flag invocation.
- * @param {Object} task
+ * @param {object} task
  * @param {string} taskName
  * @param {TaskFuncDef} taskFunc
  */

@@ -44,7 +44,7 @@ function readJsconfigPaths() {
 /**
  * Remap external modules that rely on React if building for Preact.
  * @param {'preact' | 'react'} buildFor
- * @return {Object}
+ * @return {object}
  */
 function moduleAliases(buildFor) {
   if (buildFor === 'react') {
@@ -59,7 +59,7 @@ function moduleAliases(buildFor) {
 /**
  * Import map configuration.
  * @param {'preact' | 'react' | null} buildFor determines whether to include preact or react aliases or neither. By default, uses preact aliases (in addition to jsconfig paths).
- * @return {Object}
+ * @return {object}
  */
 function getImportResolver(buildFor = 'preact') {
   return {

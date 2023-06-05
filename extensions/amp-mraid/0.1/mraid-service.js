@@ -16,7 +16,7 @@ import {
  */
 export class MraidService {
   /**
-   * @param {Object} mraid validated global mraid object
+   * @param {object} mraid validated global mraid object
    */
   constructor(mraid) {
     /** @private */

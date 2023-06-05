@@ -25,7 +25,7 @@ const TAG = 'amp-ad-network-valueimpression-impl';
 const DOUBLECLICK_BASE_URL =
   'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @const {Object} */
+/** @const {object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
