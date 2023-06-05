@@ -17,7 +17,7 @@ let a4aRegistry;
 
 /**
  * Returns the a4a registry map
- * @return {Object}
+ * @return {object}
  */
 export function getA4ARegistry() {
   if (!a4aRegistry) {

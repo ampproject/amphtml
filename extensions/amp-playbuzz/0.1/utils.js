@@ -115,7 +115,7 @@ function parsePlaybuzzEventData(data) {
 }
 
 /**
- * @param {Object} options
+ * @param {object} options
  * @return {string} playbuzzEmbedUrl
  */
 export function composeEmbedUrl(options) {

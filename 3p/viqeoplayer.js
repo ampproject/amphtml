@@ -7,7 +7,7 @@ import {loadScript} from './3p';
 
 /**
  * @param {Window} global
- * @param {Object} VIQEO
+ * @param {object} VIQEO
  * @private
  */
 function viqeoPlayerInitLoaded(global, VIQEO) {

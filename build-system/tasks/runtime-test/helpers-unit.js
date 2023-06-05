@@ -44,9 +44,9 @@ function extractCssJsFileMap() {
   /**
    * Adds an entry that maps a CSS file to a JS file
    *
-   * @param {Object} cssData
+   * @param {object} cssData
    * @param {string} cssBinaryName
-   * @param {Object} cssJsFileMap
+   * @param {object} cssJsFileMap
    */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =

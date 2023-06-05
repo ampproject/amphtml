@@ -995,7 +995,7 @@ let WebAnimationTimingDef;
  * specified as properties with the name in the format of `--varName`.
  *
  * @mixin
- * @typedef {Object}
+ * @typedef {object}
  */
 let WebAnimationVarsDef;
 

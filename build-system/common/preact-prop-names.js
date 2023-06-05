@@ -6,8 +6,8 @@
  */
 
 /**
- * @param {Object} obj
- * @return {Object}
+ * @param {object} obj
+ * @return {object}
  */
 function objectFlip(obj) {
   const ret = {};

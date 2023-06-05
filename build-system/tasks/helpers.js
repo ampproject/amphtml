@@ -1,7 +1,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
-/** @type {Object} */
+/** @type {object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const open = require('open');
@@ -264,7 +264,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   /**
    * Splits up the wrapper to compute the banner and footer
-   * @return {Object}
+   * @return {object}
    */
   function splitWrapper() {
     const wrapper = options.wrapper ?? wrappers.none;
@@ -517,7 +517,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
 
   /**
    * Actually performs the steps to compile the entry point.
-   * @param {Object} options
+   * @param {object} options
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {

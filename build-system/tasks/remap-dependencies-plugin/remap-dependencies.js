@@ -13,7 +13,7 @@ const {resolvePath} = require('../../babel-config/import-resolver');
  *
  * `resolve` is function that will return the absolute path of a module given the import path, directory of the importer, and repo root
  * @param {{remaps: Object, externals: Array<string>, resolve: AmpResolve}} remapDependenciesPluginConfig
- * @return {Object}
+ * @return {object}
  */
 function remapDependenciesPlugin({externals, remaps, resolve}) {
   const remapArr = Object.entries(remaps).map(([path, value]) => ({
