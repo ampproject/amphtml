@@ -728,7 +728,7 @@ export class SanitizerImpl {
     /** @private @const {!Purifier} */
     this.purifier_ = getService(this.win_, 'purifier-inplace');
 
-    /** @private @const {!Object<string, boolean>} */
+    /** @private @const {!{[key: string]: boolean}} */
     this.allowedTags_ = this.purifier_.getAllowedTags();
 
     /**

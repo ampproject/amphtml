@@ -6,7 +6,7 @@ import {user} from '#utils/log';
 const TAG = 'amp-auto-ads';
 
 /**
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'type': true,

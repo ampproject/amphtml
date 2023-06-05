@@ -261,7 +261,7 @@ export {Action};
 /**
  * Functions to compare a data structure from the previous to the new state and
  * detect a mutation, when a simple equality test would not work.
- * @private @const {!Object<string, !function(*, *):boolean>}
+ * @private @const {!{[key: string]: !function(*, *):boolean}}
  */
 const stateComparisonFunctions = {
   [StateProperty.ACTIONS_ALLOWLIST]: (old, curr) => old.length !== curr.length,
@@ -269,6 +269,7 @@ const stateComparisonFunctions = {
     /**
      * @param {InteractiveComponentDef} old
      * @param {InteractiveComponentDef} curr
+     * @return {boolean}
      */
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
@@ -521,7 +522,7 @@ export class AmpStoryStoreService {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {!Object<string, !Observable>} */
+    /** @private {!{[key: string]: !Observable}} */
     this.listeners_ = {};
 
     /** @private {!State} */
@@ -653,7 +654,7 @@ export class AmpStoryStoreService {
   // @TODO(gmajoulet): These should get their own file if they start growing.
   /**
    * Retrieves the embed mode config, that will override the default state.
-   * @return {!Object<StateProperty, *>} Partial state
+   * @return {!{[key: StateProperty]: *}} Partial state
    * @protected
    */
   getEmbedOverrides_() {

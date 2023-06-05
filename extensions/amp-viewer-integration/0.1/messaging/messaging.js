@@ -239,11 +239,11 @@ export class Messaging {
 
     /** @private {number} */
     this.requestIdCounter_ = 0;
-    /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
+    /** @private {!{[key: number]: {resolve: function(*), reject: function(!Error)}}} */
     this.waitingForResponse_ = {};
     /**
      * A map from message names to request handlers.
-     * @private {!Object<string, !RequestHandler>}
+     * @private {!{[key: string]: !RequestHandler}}
      */
     this.messageHandlers_ = {};
 
@@ -382,7 +382,7 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    const /** Object<string, *> */ finalMessage = Object.assign(message, {});
+    const /** {[key: string]: *} */ finalMessage = Object.assign(message, {});
     if (this.token_ && !this.verifyToken_) {
       finalMessage.messagingToken = this.token_;
     }

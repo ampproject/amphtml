@@ -24,7 +24,7 @@ const RESERVED_KEYS = {
   'cookieDomain': true,
 };
 
-/** @const @type {!Object<string, boolean>} */
+/** @const @type {!{[key: string]: boolean}} */
 const CONSENT_COOKIE_WRITE_VARS_ALLOWED_LIST = {
   'LINKER_PARAM': true,
 };

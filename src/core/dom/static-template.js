@@ -117,7 +117,7 @@ function createNode(container, strings) {
  * Returns a named map of all ref elements.
  *
  * @param {HTMLElement} root
- * @return {Object<string, HTMLElement>}
+ * @return {{[key: string]: HTMLElement}}
  */
 export function htmlRefs(root) {
   const elements = root.querySelectorAll('[ref]');

@@ -1,6 +1,6 @@
 /**
  * Used for inserted scoped analytics element.
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 export const SANDBOX_AVAILABLE_VARS = {
   'AMPDOC_HOST': true,

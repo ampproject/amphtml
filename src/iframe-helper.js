@@ -19,7 +19,7 @@ const UNLISTEN_SENTINEL = 'unlisten';
 /**
  * @typedef {{
  *   frame: !Element,
- *   events: !Object<string, !Array<function(!JsonObject)>>
+ *   events: !{[key: string]: !Array<function(!JsonObject)}>
  * }}
  */
 let WindowEventsDef;
@@ -29,7 +29,7 @@ let WindowEventsDef;
  * listenFor listeners.
  * @param {?Window} parentWin the window that created the iframe
  * @param {boolean=} opt_create create the mapping if it does not exist
- * @return {?Object<string, !Array<!WindowEventsDef>>}
+ * @return {?{[key: string]: !Array<!WindowEventsDef>}}
  */
 function getListenFors(parentWin, opt_create) {
   let {listeningFors} = parentWin;
@@ -67,7 +67,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
+ * @return {?{[key: string]: !Array<function(!JsonObject, !Window, string, !MessageEvent)>}}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   const sentinel = getSentinel_(iframe, opt_is3P);
@@ -99,7 +99,7 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
  * @param {string} sentinel the sentinel of the message
  * @param {string} origin the source window's origin
  * @param {?Window} triggerWin the window that triggered the event
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
+ * @return {?{[key: string]: !Array<function(!JsonObject, !Window, string, !MessageEvent)>}}
  */
 function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   const listenSentinel = getListenForSentinel(parentWin, sentinel);

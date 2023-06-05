@@ -340,7 +340,7 @@ export class AmpGeo extends AMP.BaseElement {
    *   "subdivision": "ca"
    * }
    *
-   * @return {Promise<?Object.<string, ?string>>}
+   * @return {Promise<?{[key: string]: ?string}>}
    * @private
    */
   fetchCountry_() {
@@ -397,7 +397,7 @@ export class AmpGeo extends AMP.BaseElement {
    */
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
-    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */ (
+    const ISOCountryGroups = /** @type {!{[key: string]: !Array<string>}} */ (
       config['ISOCountryGroups']
     );
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size

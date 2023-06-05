@@ -104,7 +104,7 @@ const MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_ORIGIN__';
 export const REPLACED_MEDIA_PROPERTY_NAME = 'replaced-media';
 
 /**
- * @type {!Object<string, !MediaPool>}
+ * @type {!{[key: string]: !MediaPool}}
  */
 const instances = {};
 
@@ -120,7 +120,7 @@ let nextInstanceId = 0;
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
-   * @param {!Object<!MediaType_Enum, number>} maxCounts The maximum amount of each
+   * @param {!{[key: !MediaType_Enum]: number}} maxCounts The maximum amount of each
    *     media element that can be allocated by the pool.
    * @param {!ElementDistanceFnDef} distanceFn A function that, given an
    *     element, returns the distance of that element from the current position
@@ -143,21 +143,21 @@ export class MediaPool {
 
     /**
      * Holds all of the pool-bound media elements that have been allocated.
-     * @const {!Object<!MediaType_Enum, !Array<!PoolBoundElementDef>>}
+     * @const {!{[key: !MediaType_Enum]: !Array<!PoolBoundElementDef>}}
      * @visibleForTesting
      */
     this.allocated = {};
 
     /**
      * Holds all of the pool-bound media elements that have not been allocated.
-     * @const {!Object<!MediaType_Enum, !Array<!PoolBoundElementDef>>}
+     * @const {!{[key: !MediaType_Enum]: !Array<!PoolBoundElementDef>}}
      * @visibleForTesting
      */
     this.unallocated = {};
 
     /**
      * Maps a media element's ID to the object containing its sources.
-     * @private @const {!Object<string, !Sources>}
+     * @private @const {!{[key: string]: !Sources}}
      */
     this.sources_ = {};
 
@@ -169,14 +169,14 @@ export class MediaPool {
 
     /**
      * Maps a media element's ID to its audio gain node.
-     * @private @const {!Object<string, !MediaElementAudioSourceNode>}
+     * @private @const {!{[key: string]: !MediaElementAudioSourceNode}}
      */
     this.audioGainNodes_ = {};
 
     /**
      * Maps a media element's ID to the element.  This is necessary, as elements
      * are kept in memory when they are swapped out of the DOM.
-     * @private @const {!Object<string, !PlaceholderElementDef>}
+     * @private @const {!{[key: string]: !PlaceholderElementDef}}
      */
     this.placeholderEls_ = {};
 
@@ -196,7 +196,7 @@ export class MediaPool {
     /** @private {?Array<!AmpElement>} */
     this.ampElementsToBless_ = null;
 
-    /** @const {!Object<string, (function(): !PoolBoundElementDef)>} */
+    /** @const {!{[key: string]: (function(): !PoolBoundElementDef)}} */
     this.mediaFactory_ = {
       [MediaType_Enum.AUDIO]: () => {
         const audioEl = this.win_.document.createElement('audio');
@@ -225,7 +225,7 @@ export class MediaPool {
    * each of the types of media elements.  We need to create these eagerly so
    * that all media elements exist by the time that blessAll() is invoked,
    * thereby "blessing" all media elements for playback without user gesture.
-   * @param {!Object<!MediaType_Enum, number>} maxCounts The maximum amount of each
+   * @param {!{[key: !MediaType_Enum]: number}} maxCounts The maximum amount of each
    *     media element that can be allocated by the pool.
    * @private
    */
@@ -1088,7 +1088,7 @@ export class MediaPoolRoot {
   getElementDistance(unusedElement) {}
 
   /**
-   * @return {!Object<!MediaType_Enum, number>} The maximum amount of each media
+   * @return {!{[key: !MediaType_Enum]: number}} The maximum amount of each media
    *     type to allow within this element.
    */
   getMaxMediaElementCounts() {}

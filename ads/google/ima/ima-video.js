@@ -214,7 +214,7 @@ function toggleRootDataAttribute(state, active) {
 
 /**
  * @param {Document} elementOrDoc
- * @return {!Object<string, !Element>}
+ * @return {!{[key: string]: !Element}}
  */
 function renderElements(elementOrDoc) {
   const html = htmlFor(elementOrDoc);

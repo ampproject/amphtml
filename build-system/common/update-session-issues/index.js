@@ -20,7 +20,7 @@ const https = require('https');
 const {relative} = require('path');
 const {RotationItemDef, TemplateDef} = require('./types');
 
-/** @return {Promise<Object<string, TemplateDef>>} */
+/** @return {Promise<{[key: string]: TemplateDef}>} */
 async function getTemplates() {
   const dir = relative(process.cwd(), __dirname) + '/template';
   const files = (await readdir(dir)).filter((basename) =>

@@ -12,7 +12,7 @@ import {dev, devAssert} from '#utils/log';
 
 const TAG = 'amp-video';
 
-/** @const {!Object<string, number>} */
+/** @const {!{[key: string]: number}} */
 const BITRATE_BY_EFFECTIVE_TYPE = {
   // We assign low values to 2G in general. None of these will likely be able
   // to stream any bitrates we see in the wild.

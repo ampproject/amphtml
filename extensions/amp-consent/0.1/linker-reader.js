@@ -16,7 +16,7 @@ export class ConsentLinkerReader {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {!Object<string, ?Object<string, string>>} */
+    /** @private {!{[key: string]: ?{[key: string]: string}}} */
     this.linkerParams_ = {};
   }
 
@@ -48,7 +48,7 @@ export class ConsentLinkerReader {
    * if found, null otherwise. Do no remove LINKER_PARAM from
    * window location.
    * @param {string} name
-   * @return {?Object<string, string>}
+   * @return {?{[key: string]: string}}
    */
   maybeParseQueryString_(name) {
     const params = parseQueryString(this.win_.location.search);

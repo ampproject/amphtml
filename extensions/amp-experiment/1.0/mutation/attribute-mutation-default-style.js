@@ -12,7 +12,7 @@ const NON_SPACE_REGEX = /\S/;
 /** @const {RegExp} */
 const ALL_VALUE_REGEX = /.*/;
 
-/** @const {Object<string, RegExp>} */
+/** @const {{[key: string]: RegExp}} */
 const SUPPORTED_STYLE_VALUE = {
   'color': ALL_VALUE_REGEX,
   'background-color': ALL_VALUE_REGEX,
@@ -26,7 +26,7 @@ const SUPPORTED_STYLE_VALUE = {
   'border-color': ALL_VALUE_REGEX,
 };
 
-/** @const {Object<string, RegExp>} */
+/** @const {{[key: string]: RegExp}} */
 const SUPPORTE_NON_AMP_STYLE_VALUE = {
   'width': ALL_VALUE_REGEX,
   'height': ALL_VALUE_REGEX,

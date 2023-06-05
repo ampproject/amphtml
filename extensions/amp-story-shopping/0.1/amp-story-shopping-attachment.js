@@ -159,7 +159,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /**
    * Handles template changes when there is activeProductData.
    * This happens when a product tag or PLP card is clicked.
-   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
+   * @param {!{[key: string]: !ShoppingConfigDataDef}} shoppingData
    * @private
    */
   onShoppingDataUpdate_(shoppingData) {
@@ -196,7 +196,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Updates template based on shopping data.
-   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
+   * @param {!{[key: string]: !ShoppingConfigDataDef}} shoppingData
    * @private
    */
   updateTemplate_(shoppingData) {

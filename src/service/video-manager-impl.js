@@ -571,7 +571,7 @@ class VideoEntry {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars
+   * @param {!{[key: string]: string}} vars
    */
   logCustomAnalytics_(eventType, vars) {
     const prefixedVars = {[videoAnalyticsCustomEventTypeKey]: eventType};
@@ -1599,7 +1599,7 @@ export class AnalyticsPercentageTracker {
 /**
  * @param {!VideoEntry} entry
  * @param {!VideoAnalyticsEvents_Enum} eventType
- * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ * @param {!{[key: string]: string}=} opt_vars A map of vars and their values.
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {

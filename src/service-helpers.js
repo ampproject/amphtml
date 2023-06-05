@@ -470,7 +470,7 @@ function getServicePromiseOrNullInternal(holder, id) {
 /**
  * Returns the object that holds the services registered in a holder.
  * @param {!Object} holder
- * @return {!Object<string,!ServiceHolderDef>}
+ * @return {!{[key: string]: !ServiceHolderDef}}
  */
 function getServices(holder) {
   let services = holder.__AMP_SERVICES;

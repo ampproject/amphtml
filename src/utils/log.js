@@ -79,7 +79,7 @@ const externalMessageUrl = (id, interpolatedParts) =>
   );
 
 /**
- * URL to simple log messages table JSON file, which contains an Object<string, string>
+ * URL to simple log messages table JSON file, which contains an {[key: string]: string}
  * which maps message id to full message template.
  * @return {string}
  */

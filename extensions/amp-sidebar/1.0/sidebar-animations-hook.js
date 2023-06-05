@@ -26,7 +26,7 @@ const ANIMATION_STYLES_BACKDROP_FINAL = {'opacity': ''};
 
 /**
  * @param {!Element} element
- * @param {!Object<string, *>} styles
+ * @param {!{[key: string]: *}} styles
  */
 function safelySetStyles(element, styles) {
   setStyles(element, assertDoesNotContainDisplay(styles));

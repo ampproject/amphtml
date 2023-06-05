@@ -72,7 +72,7 @@ const LAUNCHABLE_COMPONENTS = {
 /**
  * Gets the list of components with their respective selectors.
  * @param {!Object} components
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function getComponentSelectors(components) {
   const componentSelectors = {};

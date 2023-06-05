@@ -41,7 +41,7 @@ export function concat(transitions, opt_delimiter = ' ') {
  * a specified as a map from CSS property names to transition functions for
  * each of these properties.
  * @param {HTMLElement} element
- * @param {Object<string, TransitionDef<?>>} styles
+ * @param {{[key:string]: TransitionDef<?>}} styles
  * @return {TransitionDef<void>}
  */
 export function setStyles(element, styles) {

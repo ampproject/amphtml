@@ -23,7 +23,7 @@ const TAG = 'amp-ad-network-adsense-impl';
 
 /**
  * Value of &rafmt= URL parameter depending on data-auto-format.
- * @const {!Object<string, number>}
+ * @const {!{[key: string]: number}}
  */
 const RAFMT_PARAMS = {
   [ADSENSE_RSPV_TAG]: 13,

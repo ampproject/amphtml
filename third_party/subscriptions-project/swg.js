@@ -260,7 +260,7 @@ class AccountCreationRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.complete_, // field 1 - complete
+      this.complete_, // field 1 - complete
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -313,7 +313,7 @@ class ActionRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.action_, // field 1 - action
+      this.action_, // field 1 - action
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -383,8 +383,8 @@ class AlreadySubscribedResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.subscriberOrMember_, // field 1 - subscriber_or_member
-        this.linkRequested_, // field 2 - link_requested
+      this.subscriberOrMember_, // field 1 - subscriber_or_member
+      this.linkRequested_, // field 2 - link_requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -661,20 +661,20 @@ class AnalyticsContext {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.embedderOrigin_, // field 1 - embedder_origin
-        this.transactionId_, // field 2 - transaction_id
-        this.referringOrigin_, // field 3 - referring_origin
-        this.utmSource_, // field 4 - utm_source
-        this.utmCampaign_, // field 5 - utm_campaign
-        this.utmMedium_, // field 6 - utm_medium
-        this.sku_, // field 7 - sku
-        this.readyToPay_, // field 8 - ready_to_pay
-        this.label_, // field 9 - label
-        this.clientVersion_, // field 10 - client_version
-        this.url_, // field 11 - url
-        this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
-        this.readerSurfaceType_, // field 13 - reader_surface_type
-        this.integrationVersion_, // field 14 - integration_version
+      this.embedderOrigin_, // field 1 - embedder_origin
+      this.transactionId_, // field 2 - transaction_id
+      this.referringOrigin_, // field 3 - referring_origin
+      this.utmSource_, // field 4 - utm_source
+      this.utmCampaign_, // field 5 - utm_campaign
+      this.utmMedium_, // field 6 - utm_medium
+      this.sku_, // field 7 - sku
+      this.readyToPay_, // field 8 - ready_to_pay
+      this.label_, // field 9 - label
+      this.clientVersion_, // field 10 - client_version
+      this.url_, // field 11 - url
+      this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
+      this.readerSurfaceType_, // field 13 - reader_surface_type
+      this.integrationVersion_, // field 14 - integration_version
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -744,8 +744,8 @@ class AnalyticsEventMeta {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.eventOriginator_, // field 1 - event_originator
-        this.isFromUserAction_, // field 2 - is_from_user_action
+      this.eventOriginator_, // field 1 - event_originator
+      this.isFromUserAction_, // field 2 - is_from_user_action
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -858,10 +858,10 @@ class AnalyticsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
-        this.event_, // field 2 - event
-        this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
-        this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
+      this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
+      this.event_, // field 2 - event
+      this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
+      this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -914,7 +914,7 @@ class AudienceActivityClientLogsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.event_, // field 1 - event
+      this.event_, // field 1 - event
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1018,10 +1018,10 @@ class CompleteAudienceActionResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.swgUserToken_, // field 1 - swg_user_token
-        this.actionCompleted_, // field 2 - action_completed
-        this.userEmail_, // field 3 - user_email
-        this.alreadyCompleted_, // field 4 - already_completed
+      this.swgUserToken_, // field 1 - swg_user_token
+      this.actionCompleted_, // field 2 - action_completed
+      this.userEmail_, // field 3 - user_email
+      this.alreadyCompleted_, // field 4 - already_completed
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1091,8 +1091,8 @@ class EntitlementJwt {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.jwt_, // field 1 - jwt
-        this.source_, // field 2 - source
+      this.jwt_, // field 1 - jwt
+      this.source_, // field 2 - source
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1256,13 +1256,13 @@ class EntitlementsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
-        this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
-        this.entitlementSource_, // field 3 - entitlement_source
-        this.entitlementResult_, // field 4 - entitlement_result
-        this.token_, // field 5 - token
-        this.isUserRegistered_, // field 6 - is_user_registered
-        this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 7 - subscription_timestamp
+      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
+      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
+      this.entitlementSource_, // field 3 - entitlement_source
+      this.entitlementResult_, // field 4 - entitlement_result
+      this.token_, // field 5 - token
+      this.isUserRegistered_, // field 6 - is_user_registered
+      this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 7 - subscription_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1332,8 +1332,8 @@ class EntitlementsResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.jwt_, // field 1 - jwt
-        this.swgUserToken_, // field 2 - swg_user_token
+      this.jwt_, // field 1 - jwt
+      this.swgUserToken_, // field 2 - swg_user_token
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1508,14 +1508,14 @@ class EventParams {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.smartboxMessage_, // field 1 - smartbox_message
-        this.gpayTransactionId_, // field 2 - gpay_transaction_id
-        this.hadLogged_, // field 3 - had_logged
-        this.sku_, // field 4 - sku
-        this.oldTransactionId_, // field 5 - old_transaction_id
-        this.isUserRegistered_, // field 6 - is_user_registered
-        this.subscriptionFlow_, // field 7 - subscription_flow
-        this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 8 - subscription_timestamp
+      this.smartboxMessage_, // field 1 - smartbox_message
+      this.gpayTransactionId_, // field 2 - gpay_transaction_id
+      this.hadLogged_, // field 3 - had_logged
+      this.sku_, // field 4 - sku
+      this.oldTransactionId_, // field 5 - old_transaction_id
+      this.isUserRegistered_, // field 6 - is_user_registered
+      this.subscriptionFlow_, // field 7 - subscription_flow
+      this.subscriptionTimestamp_ ? this.subscriptionTimestamp_.toArray(includeLabel) : [], // field 8 - subscription_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1585,8 +1585,8 @@ class FinishedLoggingResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.complete_, // field 1 - complete
-        this.error_, // field 2 - error
+      this.complete_, // field 1 - complete
+      this.error_, // field 2 - error
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1656,8 +1656,8 @@ class LinkSaveTokenRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.authCode_, // field 1 - auth_code
-        this.token_, // field 2 - token
+      this.authCode_, // field 1 - auth_code
+      this.token_, // field 2 - token
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1710,7 +1710,7 @@ class LinkingInfoResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.requested_, // field 1 - requested
+      this.requested_, // field 1 - requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1763,7 +1763,7 @@ class OpenDialogRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.urlPath_, // field 1 - url_path
+      this.urlPath_, // field 1 - url_path
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1935,14 +1935,14 @@ class SkuSelectedResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.sku_, // field 1 - sku
-        this.oldSku_, // field 2 - old_sku
-        this.oneTime_, // field 3 - one_time
-        this.playOffer_, // field 4 - play_offer
-        this.oldPlayOffer_, // field 5 - old_play_offer
-        this.customMessage_, // field 6 - custom_message
-        this.anonymous_, // field 7 - anonymous
-        this.sharingPolicyEnabled_, // field 8 - sharing_policy_enabled
+      this.sku_, // field 1 - sku
+      this.oldSku_, // field 2 - old_sku
+      this.oneTime_, // field 3 - one_time
+      this.playOffer_, // field 4 - play_offer
+      this.oldPlayOffer_, // field 5 - old_play_offer
+      this.customMessage_, // field 6 - custom_message
+      this.anonymous_, // field 7 - anonymous
+      this.sharingPolicyEnabled_, // field 8 - sharing_policy_enabled
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1995,7 +1995,7 @@ class SmartBoxMessage {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.isClicked_, // field 1 - is_clicked
+      this.isClicked_, // field 1 - is_clicked
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2048,7 +2048,7 @@ class SubscribeResponse$1 {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.subscribe_, // field 1 - subscribe
+      this.subscribe_, // field 1 - subscribe
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2118,8 +2118,8 @@ class SubscriptionLinkingCompleteResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.publisherProvidedId_, // field 1 - publisher_provided_id
-        this.success_, // field 2 - success
+      this.publisherProvidedId_, // field 1 - publisher_provided_id
+      this.success_, // field 2 - success
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2172,7 +2172,7 @@ class SubscriptionLinkingResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.publisherProvidedId_, // field 1 - publisher_provided_id
+      this.publisherProvidedId_, // field 1 - publisher_provided_id
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2259,9 +2259,9 @@ class SurveyAnswer {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.answerId_, // field 1 - answer_id
-        this.answerText_, // field 2 - answer_text
-        this.answerCategory_, // field 3 - answer_category
+      this.answerId_, // field 1 - answer_id
+      this.answerText_, // field 2 - answer_text
+      this.answerCategory_, // field 3 - answer_category
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2314,7 +2314,7 @@ class SurveyDataTransferRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.surveyQuestions_ ? this.surveyQuestions_.map(item => item.toArray(includeLabel)) : [], // field 1 - survey_questions
+      this.surveyQuestions_ ? this.surveyQuestions_.map(item => item.toArray(includeLabel)) : [], // field 1 - survey_questions
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2367,7 +2367,7 @@ class SurveyDataTransferResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.success_, // field 1 - success
+      this.success_, // field 1 - success
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2471,10 +2471,10 @@ class SurveyQuestion {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.questionId_, // field 1 - question_id
-        this.questionText_, // field 2 - question_text
-        this.questionCategory_, // field 3 - question_category
-        this.surveyAnswers_ ? this.surveyAnswers_.map(item => item.toArray(includeLabel)) : [], // field 4 - survey_answers
+      this.questionId_, // field 1 - question_id
+      this.questionText_, // field 2 - question_text
+      this.questionCategory_, // field 3 - question_category
+      this.surveyAnswers_ ? this.surveyAnswers_.map(item => item.toArray(includeLabel)) : [], // field 4 - survey_answers
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2544,8 +2544,8 @@ class Timestamp {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.seconds_, // field 1 - seconds
-        this.nanos_, // field 2 - nanos
+      this.seconds_, // field 1 - seconds
+      this.nanos_, // field 2 - nanos
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2598,7 +2598,7 @@ class ToastCloseRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.close_, // field 1 - close
+      this.close_, // field 1 - close
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2651,7 +2651,7 @@ class ViewSubscriptionsResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.native_, // field 1 - native
+      this.native_, // field 1 - native
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2778,7 +2778,7 @@ class ClientEventManagerApi {
    * invoked unless the event is filtered.
    * @param {!function(!ClientEvent, (!ClientEventParams|undefined)=)} listener
    */
-  registerEventListener(listener) {}
+  registerEventListener(listener) { }
 
   /**
    * Register a filterer for events if you need to potentially prevent the
@@ -2787,7 +2787,7 @@ class ClientEventManagerApi {
    * event.
    * @param {!function(!ClientEvent):FilterResult} filterer
    */
-  registerEventFilterer(filterer) {}
+  registerEventFilterer(filterer) { }
 
   /**
    * Call this function to log an event.  It will immediately throw an error if
@@ -2797,7 +2797,7 @@ class ClientEventManagerApi {
    * @param {!ClientEvent} event
    * @param {(!ClientEventParams|undefined)=} eventParams
    */
-  logEvent(event, eventParams = undefined) {}
+  logEvent(event, eventParams = undefined) { }
 }
 
 /**
@@ -2825,21 +2825,21 @@ class View {
   /**
    * Empty constructor.
    */
-  constructor() {}
+  constructor() { }
 
   /**
    * Gets the iframe element.
    * @return {!Element}
    * @abstract
    */
-  getElement() {}
+  getElement() { }
 
   /**
    * @param {!./dialog.Dialog} unusedDialog
    * @return {!Promise}
    * @abstract
    */
-  init(unusedDialog) {}
+  init(unusedDialog) { }
 
   /**
    * Resizes the content.
@@ -2853,19 +2853,19 @@ class View {
    * @return {!Promise}
    * @abstract
    */
-  whenComplete() {}
+  whenComplete() { }
 
   /**
    * @return {boolean}
    * @abstract
    */
-  shouldFadeBody() {}
+  shouldFadeBody() { }
 
   /**
    * @return {boolean}
    * @abstract
    */
-  hasLoadingIndicator() {}
+  hasLoadingIndicator() { }
 }
 
 /**
@@ -3103,8 +3103,8 @@ function getRandomInts(numInts, maxVal) {
     maxVal < 256
       ? new Uint8Array(numInts)
       : maxVal < 32768
-      ? new Uint16Array(numInts)
-      : new Uint32Array(numInts);
+        ? new Uint16Array(numInts)
+        : new Uint32Array(numInts);
 
   const isIE = !!self['msCrypto'];
   const localCrypto = isIE ? self['msCrypto'] : self.crypto;
@@ -3141,15 +3141,15 @@ function getRandomInts(numInts, maxVal) {
 
 /**
  * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
-const base64UrlDecodeSubs = {'-': '+', '_': '/'};
+const base64UrlDecodeSubs = { '-': '+', '_': '/' };
 
 /**
  * Character mapping from base64 to base64url.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
-const base64UrlEncodeSubs = {'+': '-', '/': '_', '=': ''};
+const base64UrlEncodeSubs = { '+': '-', '/': '_', '=': '' };
 
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
@@ -3373,7 +3373,7 @@ function hash(stringToHash) {
  * limitations under the License.
  */
 
-/** @type {Object<string, string>} */
+/** @type {{[key: string]: string}} */
 let propertyNameCache;
 
 /** @const {!Array<string>} */
@@ -3384,7 +3384,7 @@ const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
  * Some attributes are not included such as height, left, margin-left; since
  * these attributes are updated by @media queries and having these values
  * defined here as !important does not work on IE/edge browsers.
- * @const {!Object<string, string|number>}
+ * @const {!{[key: string]: string|number}}
  */
 const defaultStyles = {
   'align-content': 'normal',
@@ -3577,7 +3577,7 @@ function getVendorJsPropertyName(style, camelCase, bypassCache) {
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
  * @param {!Element} element
- * @param {!Object<string, string|number>} styles
+ * @param {!{[key: string]: string|number}} styles
  */
 function setImportantStyles$1(element, styles) {
   for (const k in styles) {
@@ -3614,7 +3614,7 @@ function setStyle(element, property, value, units, bypassCache) {
  * Sets the CSS styles of the specified element. The styles
  * a specified as a map from CSS property names to their values.
  * @param {!Element} element
- * @param {!Object<string, ?string|number|boolean>} styles
+ * @param {!{[key: string]: ?string|number|boolean}} styles
  */
 function setStyles(element, styles) {
   for (const k in styles) {
@@ -3666,7 +3666,7 @@ const styleType = 'text/css';
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!Object<string, string|number|boolean|!Object<string, string|number|boolean>>} attributes
+ * @param {!{[key: string]: string|number|boolean|!{[key: string]: string|number|boolean}}} attributes
  * @return {!Element} updated element.
  */
 function addAttributesToElement(element, attributes) {
@@ -3674,13 +3674,13 @@ function addAttributesToElement(element, attributes) {
     if (attr == 'style') {
       setStyles(
         element,
-        /** @type {!Object<string, string|boolean|number>} */
+        /** @type {!{[key: string]: string|boolean|number}} */
         (attributes[attr])
       );
     } else {
       element.setAttribute(
         attr,
-        /** @type {string|boolean|number} */ (attributes[attr])
+        /** @type {string|boolean|number} */(attributes[attr])
       );
     }
   }
@@ -3691,7 +3691,7 @@ function addAttributesToElement(element, attributes) {
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!Object<string, string>} attributes
+ * @param {!{[key: string]: string}} attributes
  * @param {?(string|!Node|!ArrayLike<!Node>|!Array<!Node>)=} content
  * @return {!Element} created element.
  */
@@ -3702,7 +3702,7 @@ function createElement(doc, tagName, attributes, content) {
     if (typeof content == 'string') {
       element.textContent = content;
     } else if (content.nodeType) {
-      element.appendChild(/** @type {!Node} */ (content));
+      element.appendChild(/** @type {!Node} */(content));
     } else if ('length' in content) {
       for (let i = 0; i < content.length; i++) {
         element.appendChild(content[i]);
@@ -3852,7 +3852,7 @@ class ErrorUtils {
  * limitations under the License.
  */
 
-/** @const {!Object<string, string>} */
+/** @const {!{[key: string]: string}} */
 const iframeAttributes$2 = {
   'frameborder': '0',
   'scrolling': 'no',
@@ -3866,7 +3866,7 @@ class ActivityIframeView extends View {
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {string} src
-   * @param {!Object<string, ?>=} args Additional data to be passed to the iframe.
+   * @param {!{[key: string]: ?}=} args Additional data to be passed to the iframe.
    * @param {boolean=} shouldFadeBody
    * @param {boolean=} hasLoadingIndicator
    */
@@ -3897,7 +3897,7 @@ class ActivityIframeView extends View {
     /** @private @const {string} */
     this.src_ = src;
 
-    /** @private @const {!Object<string, ?>} */
+    /** @private @const {!{[key: string]: ?}} */
     this.args_ = args || {};
 
     /** @private @const {boolean} */
@@ -4110,7 +4110,7 @@ Constants$1.READ_TIME = 'READ_TIME';
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */(json)));
 }
 
 /**
@@ -4165,7 +4165,7 @@ function getPropertyFromJsonString(jsonString, propertyName) {
  * Provides helper methods to decode and verify JWT tokens.
  */
 class JwtHelper {
-  constructor() {}
+  constructor() { }
 
   /**
    * Decodes JWT token and returns its payload.
@@ -5290,7 +5290,7 @@ let a;
  * We cached all parsed URLs. As of now there are no use cases
  * of AMP docs that would ever parse an actual large number of URLs,
  * but we often parse the same one over and over again.
- * @type {Object<string, !LocationDef>}
+ * @type {{[key: string]: !LocationDef}}
  */
 let cache;
 
@@ -5354,7 +5354,7 @@ function parseUrlWithA(a, url) {
 /**
  * Parses and builds Object of URL query string.
  * @param {string} query The URL query string.
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function parseQueryString(query) {
   if (!query) {
@@ -5459,7 +5459,7 @@ function isSecure(parsedUrl) {
  * Have to put these in the map to avoid compiler optimization. Due to
  * optimization issues, this map only allows property-style keys. E.g. "hr1",
  * as opposed to "1hr".
- * @type {!Object<string, number>}
+ * @type {!{[key: string]: number}}
  * @package Visible for testing only.
  */
 const CACHE_KEYS = {
@@ -5571,7 +5571,7 @@ function adsUrl(url) {
 /**
  * @param {string} url Relative URL, e.g. "/offersiframe".
  * @param {string=} prefix
- * @param {Object<string, string>=} params List of extra params to append to the URL.
+ * @param {{[key: string]: string}=} params List of extra params to append to the URL.
  * @return {string} The complete URL.
  */
 function feUrl(url, params = {}, prefix = '') {
@@ -5608,8 +5608,8 @@ function feCached(url) {
 }
 
 /**
- * @param {!Object<string, ?>} args
- * @return {!Object<string, ?>}
+ * @param {!{[key: string]: ?}} args
+ * @return {!{[key: string]: ?}}
  */
 function feArgs(args) {
   return Object.assign(args, {
@@ -5660,7 +5660,7 @@ function cacheParam(cacheKey) {
 
 /**
  * String values input by the publisher are mapped to the number values.
- * @type {!Object<string, number>}
+ * @type {!{[key: string]: number}}
  */
 const ReplaceSkuProrationModeMapping = {
   // The replacement takes effect immediately, and the remaining time will
@@ -5744,9 +5744,9 @@ class PayStartFlow {
    */
   start_(paySwgVersion) {
     const /** @type {SwgPaymentRequest} */ swgPaymentRequest = {
-        'skuId': this.subscriptionRequest_['skuId'],
-        'publicationId': this.pageConfig_.getPublicationId(),
-      };
+      'skuId': this.subscriptionRequest_['skuId'],
+      'publicationId': this.pageConfig_.getPublicationId(),
+    };
 
     if (paySwgVersion) {
       swgPaymentRequest['swgVersion'] = paySwgVersion;
@@ -5950,7 +5950,7 @@ class PayCompleteFlow {
       args['loginHint'] = response.userData && response.userData.email;
     }
 
-    const /* {!Object<string, string>} */ urlParams = {};
+    const /* {!{[key: string]: string}} */ urlParams = {};
     if (args.productType === ProductType.VIRTUAL_GIFT) {
       Object.assign(urlParams, {
         productType: args.productType,
@@ -6180,7 +6180,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   if (!swgData) {
     throw new Error('unexpected payment response');
   }
-  raw = JSON.stringify(/** @type {!JsonObject} */ (swgData));
+  raw = JSON.stringify(/** @type {!JsonObject} */(swgData));
   return new SubscribeResponse(
     raw,
     parsePurchaseData(swgData),
@@ -6368,12 +6368,12 @@ class OffersFlow {
       (clientConfig) => {
         return this.shouldShow_(clientConfig)
           ? new ActivityIframeView(
-              this.win_,
-              this.activityPorts_,
-              this.getUrl_(clientConfig, deps.pageConfig()),
-              feArgsObj,
+            this.win_,
+            this.activityPorts_,
+            this.getUrl_(clientConfig, deps.pageConfig()),
+            feArgsObj,
               /* shouldFadeBody */ true
-            )
+          )
           : null;
       }
     );
@@ -6387,9 +6387,9 @@ class OffersFlow {
     const sku = response.getSku();
     if (sku) {
       const /** @type {../api/subscriptions.SubscriptionRequest} */ subscriptionRequest =
-          {
-            'skuId': sku,
-          };
+      {
+        'skuId': sku,
+      };
       const oldSku = response.getOldSku();
       if (oldSku) {
         subscriptionRequest['oldSku'] = oldSku;
@@ -6508,9 +6508,9 @@ class OffersFlow {
   getDialogConfig_(clientConfig, shouldAllowScroll) {
     return clientConfig.useUpdatedOfferFlows
       ? {
-          desktopConfig: {isCenterPositioned: true, supportsWideScreen: true},
-          shouldDisableBodyScrolling: !shouldAllowScroll,
-        }
+        desktopConfig: { isCenterPositioned: true, supportsWideScreen: true },
+        shouldDisableBodyScrolling: !shouldAllowScroll,
+      }
       : {};
   }
 
@@ -6525,7 +6525,7 @@ class OffersFlow {
       return feUrl('/offersiframe');
     }
 
-    const params = {'publicationId': pageConfig.getPublicationId()};
+    const params = { 'publicationId': pageConfig.getPublicationId() };
 
     if (this.clientConfigManager_.shouldForceLangInIframes()) {
       params['hl'] = this.clientConfigManager_.getLanguage();
@@ -6805,7 +6805,7 @@ class ActivityIframePort$1 {
   constructor(iframe, url, deps, args) {
     /** @private @const {!web-activities/activity-ports.ActivityIframePort} */
     this.iframePort_ = new WebActivityIframePort(iframe, url, args);
-    /** @private @const {!Object<string, function(!../proto/api_messages.Message)>} */
+    /** @private @const {!{[key: string]: function(!../proto/api_messages.Message)}} */
     this.callbackMap_ = {};
 
     /** @private @const {../runtime/deps.DepsDef} */
@@ -6896,7 +6896,7 @@ class ActivityIframePort$1 {
    * @param {!../proto/api_messages.Message} request
    */
   execute(request) {
-    this.iframePort_.message({'REQUEST': request.toArray()});
+    this.iframePort_.message({ 'REQUEST': request.toArray() });
   }
 
   /**
@@ -7474,14 +7474,14 @@ let experimentsString = '';
 
 /**
  * A parsed map of experiments.
- * @type {?Object<string, boolean>}
+ * @type {?{[key: string]: boolean}}
  */
 let experimentMap = null;
 
 /**
  * Ensures that the experiments have been initialized and returns them.
  * @param {!Window} win
- * @return {!Object<string, boolean>}
+ * @return {!{[key: string]: boolean}}
  */
 function getExperiments(win) {
   if (!experimentMap) {
@@ -7518,7 +7518,7 @@ function getExperiments(win) {
 
 /**
  * @param {!Window} win
- * @param {?Object<string, boolean>} experimentMap
+ * @param {?{[key: string]: boolean}} experimentMap
  * @param {string} spec
  */
 function parseSetExperiment(win, experimentMap, spec) {
@@ -7601,8 +7601,8 @@ function parseSelection(s) {
   return s == Selection.EXPERIMENT
     ? Selection.EXPERIMENT
     : s == Selection.CONTROL
-    ? Selection.CONTROL
-    : null;
+      ? Selection.CONTROL
+      : null;
 }
 
 /**
@@ -7702,7 +7702,7 @@ function convertPotentialTimestampToMilliseconds(timestamp) {
  * limitations under the License.
  */
 
-/** @const {!Object<string, string>} */
+/** @const {!{[key: string]: string}} */
 const iframeStyles = {
   opacity: '0',
   position: 'absolute',
@@ -8010,7 +8010,7 @@ class AnalyticsService {
     // This needs to be current for log analysis.
     this.context_.setClientTimestamp(this.getTimestamp_());
     const request = new AnalyticsRequest();
-    request.setEvent(/** @type {!AnalyticsEvent} */ (event.eventType));
+    request.setEvent(/** @type {!AnalyticsEvent} */(event.eventType));
     request.setContext(this.context_);
     request.setMeta(meta);
     if (event.additionalParameters instanceof EventParams) {
@@ -8515,7 +8515,7 @@ const SWG_I18N_STRINGS = {
  * limitations under the License.
  */
 
-/** @const {!Object<string, string>} */
+/** @const {!{[key: string]: string}} */
 const iframeAttributes$1 = {
   'frameborder': '0',
   'scrolling': 'no',
@@ -8640,7 +8640,7 @@ const DEFAULT_LANGUAGE_CODE = 'en';
 
 /**
  * Gets a message for a given language code, from a map of messages.
- * @param {!Object<string, string>} map
+ * @param {!{[key: string]: string}} map
  * @param {?string|?Element} languageCodeOrElement
  * @return {?string}
  */
@@ -8884,7 +8884,7 @@ class ButtonApi {
    * @param {string} attribute
    * @param {!Array<string>} attributeValues
    * @param {../api/subscriptions.ButtonOptions} options
-   * @param {!Object<string, function()>} attributeValueToCallback
+   * @param {!{[key: string]: function()}} attributeValueToCallback
    */
   attachButtonsWithAttribute(
     attribute,
@@ -8935,7 +8935,7 @@ class ButtonApi {
       /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (
         optionsOrCallback && typeof optionsOrCallback != 'function'
           ? optionsOrCallback
-          : {'theme': Theme.LIGHT}
+          : { 'theme': Theme.LIGHT }
       );
 
     const theme = options['theme'];
@@ -8955,7 +8955,7 @@ class ButtonApi {
   getCallback_(optionsOrCallback, callback) {
     return /** @type {function()|function(Event):boolean} */ (
       (typeof optionsOrCallback == 'function' ? optionsOrCallback : null) ||
-        callback
+      callback
     );
   }
 
@@ -8976,7 +8976,7 @@ class ButtonApi {
       }
     };
     button.addEventListener('click', clickFun);
-    return {options, clickFun};
+    return { options, clickFun };
   }
 
   /**
@@ -9040,9 +9040,9 @@ class Callbacks {
   /**
    */
   constructor() {
-    /** @private @const {!Object<CallbackId, function(*)>} */
+    /** @private @const {!{[key: CallbackId]: function(*)}} */
     this.callbacks_ = {};
-    /** @private @const {!Object<CallbackId, *>} */
+    /** @private @const {!{[key: CallbackId]: *}} */
     this.resultBuffer_ = {};
     /** @private {?Promise} */
     this.paymentResponsePromise_ = null;
@@ -9753,8 +9753,8 @@ class ClientConfigManager {
           // to fetch our own using the internal version.
           const url = serviceUrl(
             '/publication/' +
-              encodeURIComponent(this.publicationId_) +
-              '/clientconfiguration'
+            encodeURIComponent(this.publicationId_) +
+            '/clientconfiguration'
           );
           return this.fetcher_.fetchCredentialedJson(url).then((json) => {
             if (json.errorMessages && json.errorMessages.length > 0) {
@@ -9881,20 +9881,20 @@ class ContributionsFlow {
       .then((clientConfig) => {
         return this.shouldShow_(clientConfig)
           ? new ActivityIframeView(
-              this.win_,
-              this.activityPorts_,
-              this.getUrl_(clientConfig, deps.pageConfig()),
-              feArgs({
-                'productId': deps.pageConfig().getProductId(),
-                'publicationId': deps.pageConfig().getPublicationId(),
-                'productType': ProductType.UI_CONTRIBUTION,
-                'list': (options && options.list) || 'default',
-                'skus': (options && options.skus) || null,
-                'isClosable': isClosable,
-                'supportsEventManager': true,
-              }),
+            this.win_,
+            this.activityPorts_,
+            this.getUrl_(clientConfig, deps.pageConfig()),
+            feArgs({
+              'productId': deps.pageConfig().getProductId(),
+              'publicationId': deps.pageConfig().getPublicationId(),
+              'productType': ProductType.UI_CONTRIBUTION,
+              'list': (options && options.list) || 'default',
+              'skus': (options && options.skus) || null,
+              'isClosable': isClosable,
+              'supportsEventManager': true,
+            }),
               /* shouldFadeBody */ true
-            )
+          )
           : null;
       });
   }
@@ -9918,9 +9918,9 @@ class ContributionsFlow {
     const isOneTime = response.getOneTime();
     if (sku) {
       const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest =
-          {
-            'skuId': sku,
-          };
+      {
+        'skuId': sku,
+      };
       if (isOneTime) {
         contributionRequest['oneTime'] = isOneTime;
       }
@@ -9985,7 +9985,7 @@ class ContributionsFlow {
    */
   getDialogConfig_(clientConfig, shouldAllowScroll) {
     return clientConfig.useUpdatedOfferFlows && !shouldAllowScroll
-      ? {shouldDisableBodyScrolling: true}
+      ? { shouldDisableBodyScrolling: true }
       : {};
   }
 
@@ -10123,7 +10123,7 @@ class DeferredAccountFlow {
       (result) => {
         // The consent part is complete.
         return this.handleConsentResponse_(
-          /** @type {!Object} */ (result.data)
+          /** @type {!Object} */(result.data)
         );
       },
       (reason) => {
@@ -10155,22 +10155,22 @@ class DeferredAccountFlow {
     const productType = data['productType'];
     const entitlements = this.deps_
       .entitlementsManager()
-      .parseEntitlements({'signedEntitlements': entitlementsJwt});
+      .parseEntitlements({ 'signedEntitlements': entitlementsJwt });
     const userData = new UserData(
       idToken,
-      /** @type {!Object} */ (new JwtHelper().decode(idToken))
+      /** @type {!Object} */(new JwtHelper().decode(idToken))
     );
     const purchaseDataList = data['purchaseDataList']
       ? data['purchaseDataList'].map(
-          (pd) => new PurchaseData(pd['data'], pd['signature'])
-        )
+        (pd) => new PurchaseData(pd['data'], pd['signature'])
+      )
       : [
-          // TODO(dvoytenko): cleanup/deprecate.
-          new PurchaseData(
-            data['purchaseData']['data'],
-            data['purchaseData']['signature']
-          ),
-        ];
+        // TODO(dvoytenko): cleanup/deprecate.
+        new PurchaseData(
+          data['purchaseData']['data'],
+          data['purchaseData']['signature']
+        ),
+      ];
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
     // But this can be eventually implemented by the same iframe.
@@ -10234,7 +10234,7 @@ const friendlyIframeAttributes = {
 class FriendlyIframe {
   /**
    * @param {!Document} doc
-   * @param {!Object<string, string|number>=} attrs
+   * @param {!{[key: string]: string|number}=} attrs
    */
   constructor(doc, attrs = {}) {
     const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
@@ -10321,7 +10321,7 @@ class FriendlyIframe {
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
- * @param {!Object<string, string|number>} props - properties to be animated.
+ * @param {!{[key: string]: string|number}} props - properties to be animated.
  * @param {number} durationMillis - duration of animation.
  * @param {string} curve - transition function for the animation.
  * @return {!Promise} Promise which resolves once the animation is done playing.
@@ -10457,10 +10457,10 @@ class Graypane$1 {
         300,
         'ease-out'
       ).then(() => {
-        setImportantStyles$1(this.fadeBackground_, {'display': 'none'});
+        setImportantStyles$1(this.fadeBackground_, { 'display': 'none' });
       });
     }
-    setImportantStyles$1(this.fadeBackground_, {'display': 'none'});
+    setImportantStyles$1(this.fadeBackground_, { 'display': 'none' });
   }
 }
 
@@ -10725,11 +10725,11 @@ class GlobalDoc {
 function resolveDoc(input) {
   // Is it a `Document`
   if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
+    return new GlobalDoc(/** @type {!Document} */(input));
   }
   // Is it a `Window`?
   if (/** @type {!Window} */ (input).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
+    return new GlobalDoc(/** @type {!Window} */(input));
   }
   return /** @type {!Doc} */ (input);
 }
@@ -10756,7 +10756,7 @@ const Z_INDEX = 2147483647;
  * Default iframe important styles.
  * Note: The iframe responsiveness media query style is injected in the
  * publisher's page since style attribute can not include media query.
- * @const {!Object<string, string|number>}
+ * @const {!{[key: string]: string|number}}
  */
 const rootElementImportantStyles = {
   'min-height': '50px',
@@ -10769,7 +10769,7 @@ const rootElementImportantStyles = {
 
 /**
  * Reset view styles.
- * @const {!Object<string, string|number>}
+ * @const {!{[key: string]: string|number}}
  */
 const resetViewStyles = {
   'position': 'absolute',
@@ -10796,8 +10796,8 @@ class Dialog {
   /**
    * Create a dialog for the provided doc.
    * @param {!../model/doc.Doc} doc
-   * @param {!Object<string, string|number>=} importantStyles
-   * @param {!Object<string, string|number>=} styles
+   * @param {!{[key: string]: string|number}=} importantStyles
+   * @param {!{[key: string]: string|number}=} styles
    * @param {!DialogConfig=} dialogConfig Configuration options for the dialog.
    */
   constructor(doc, importantStyles = {}, styles = {}, dialogConfig = {}) {
@@ -10807,9 +10807,8 @@ class Dialog {
     const desktopDialogConfig = dialogConfig.desktopConfig || {};
     const supportsWideScreen = !!desktopDialogConfig.supportsWideScreen;
 
-    const defaultIframeCssClass = `swg-dialog ${
-      supportsWideScreen ? 'swg-wide-dialog' : ''
-    }`;
+    const defaultIframeCssClass = `swg-dialog ${supportsWideScreen ? 'swg-wide-dialog' : ''
+      }`;
     const iframeCssClass =
       dialogConfig.iframeCssClassOverride || defaultIframeCssClass;
 
@@ -10974,8 +10973,8 @@ class Dialog {
     let animating;
     if (animated) {
       const transitionStyles = this.shouldPositionCenter_()
-        ? {'opacity': 0}
-        : {'transform': 'translateY(100%)'};
+        ? { 'opacity': 0 }
+        : { 'transform': 'translateY(100%)' };
 
       animating = this.animate_(() => {
         this.graypane_.hide(/* animate */ true);
@@ -11183,9 +11182,8 @@ class Dialog {
             'height': `${newHeight}px`,
           };
           if (!this.shouldPositionCenter_()) {
-            immediateStyles['transform'] = `translateY(${
-              newHeight - oldHeight
-            }px)`;
+            immediateStyles['transform'] = `translateY(${newHeight - oldHeight
+              }px)`;
           }
           setImportantStyles$1(this.getElement(), immediateStyles);
 
@@ -11204,15 +11202,15 @@ class Dialog {
           const transitionPromise = isStale()
             ? Promise.resolve()
             : transition$1(
-                this.getElement(),
-                {
-                  'transform': this.shouldPositionCenter_()
-                    ? this.getDefaultTranslateY_()
-                    : `translateY(${oldHeight - newHeight}px)`,
-                },
-                300,
-                'ease-out'
-              );
+              this.getElement(),
+              {
+                'transform': this.shouldPositionCenter_()
+                  ? this.getDefaultTranslateY_()
+                  : `translateY(${oldHeight - newHeight}px)`,
+              },
+              300,
+              'ease-out'
+            );
           return transitionPromise.then(() => {
             if (isStale()) {
               return;
@@ -11322,7 +11320,7 @@ class Dialog {
 
   /**
    * Returns the styles required to postion the dialog.
-   * @return {!Object<string, string|number>}
+   * @return {!{[key: string]: string|number}}
    * @private
    */
   getPositionStyle_() {
@@ -11651,8 +11649,8 @@ class MeterToastApi {
         this.meterClientUserAttribute_ === ANONYMOUS_USER_ATTRIBUTE
           ? MeterType.UNKNOWN
           : KNOWN_USER_ATTRIBUTES.includes(this.meterClientUserAttribute_)
-          ? MeterType.KNOWN
-          : MeterType.SUPPRESSED;
+            ? MeterType.KNOWN
+            : MeterType.SUPPRESSED;
     }
 
     // Exit flow and do not show prompt for Suppressed MeterType
@@ -11665,7 +11663,7 @@ class MeterToastApi {
 
     const iframeUrl =
       IframeUrlByMeterClientType[
-        this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
+      this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
       ];
 
     const iframeUrlParams = {
@@ -11819,13 +11817,13 @@ class MeterToastApi {
     );
     const element = this.dialogManager_.getDialog().getElement();
     if (mobileMediaQuery.matches) {
-      setImportantStyles$1(element, {'box-shadow': IFRAME_BOX_SHADOW});
+      setImportantStyles$1(element, { 'box-shadow': IFRAME_BOX_SHADOW });
     }
     mobileMediaQuery.addListener((changed) => {
       if (changed.matches) {
-        setImportantStyles$1(element, {'box-shadow': IFRAME_BOX_SHADOW});
+        setImportantStyles$1(element, { 'box-shadow': IFRAME_BOX_SHADOW });
       } else {
-        setImportantStyles$1(element, {'box-shadow': ''});
+        setImportantStyles$1(element, { 'box-shadow': '' });
       }
     });
   }
@@ -11892,12 +11890,12 @@ class MeterToastApi {
  * limitations under the License.
  */
 
-/** @const {!Object<string, string|number>} */
+/** @const {!{[key: string]: string|number}} */
 const toastImportantStyles = {
   'height': 0,
 };
 
-/** @const {!Object<string, string>} */
+/** @const {!{[key: string]: string}} */
 const iframeAttributes = {
   'frameborder': '0',
   'scrolling': 'no',
@@ -11911,7 +11909,7 @@ class Toast {
   /**
    * @param {!../runtime/deps.DepsDef} deps
    * @param {string} src
-   * @param {?Object<string, ?>=} args
+   * @param {?{[key: string]: ?}=} args
    */
   constructor(deps, src, args) {
     /** @private @const {!../model/doc.Doc} */
@@ -11923,7 +11921,7 @@ class Toast {
     /** @private @const {string} */
     this.src_ = src;
 
-    /** @private {?Object<string, ?>} */
+    /** @private {?{[key: string]: ?}} */
     this.args_ = args || {};
 
     /** @private {?Promise} */
@@ -12007,7 +12005,7 @@ class Toast {
     return (this.animating_ = wait
       .then(() => callback())
       // Ignore errors to make sure animations don't get stuck.
-      .catch(() => {})
+      .catch(() => { })
       .then(() => {
         this.animating_ = null;
       }));
@@ -12055,7 +12053,7 @@ class Toast {
  * limitations under the License.
  */
 
-/** @const {!Object<string,AnalyticsEvent>} */
+/** @const {!{[key: string]: AnalyticsEvent}} */
 const PublisherEventToAnalyticsEvent = {
   [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
   [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
@@ -12069,7 +12067,7 @@ const PublisherEventToAnalyticsEvent = {
   [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
 };
 
-/** @const {!Object<?AnalyticsEvent,?Event>} */
+/** @const {!{[key: ?AnalyticsEvent]: ?Event}} */
 const AnalyticsEventToPublisherEvent = {
   [AnalyticsEvent.UNKNOWN]: null,
   [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
@@ -12090,7 +12088,7 @@ const AnalyticsEventToPublisherEvent = {
   [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
 };
 
-/** @const {!Object<string,?Array<AnalyticsEvent>>} */
+/** @const {!{[key: string]: ?Array<AnalyticsEvent}>} */
 const ShowcaseEvents = {
   // Events related to content being potentially unlockable
   [ShowcaseEvent.EVENT_SHOWCASE_METER_OFFERED]: [
@@ -12128,7 +12126,7 @@ const ShowcaseEvents = {
   ],
 };
 
-/** @const {!Object<?AnalyticsEvent,?Event>} */
+/** @const {!{[key: ?AnalyticsEvent]: ?Event}} */
 const AnalyticsEventToEntitlementResult = {
   [AnalyticsEvent.IMPRESSION_REGWALL]: EntitlementResult.LOCKED_REGWALL,
   [AnalyticsEvent.EVENT_UNLOCKED_BY_METER]: EntitlementResult.UNLOCKED_METER,
@@ -12159,7 +12157,7 @@ const createGoogleAnalyticsEvent = (
   nonInteraction,
 });
 
-/** @const {!Object<?AnalyticsEvent,?Object>} */
+/** @const {!{[key: ?AnalyticsEvent]: ?Object}} */
 const AnalyticsEventToGoogleAnalyticsEvent = {
   [AnalyticsEvent.IMPRESSION_OFFERS]: createGoogleAnalyticsEvent(
     'NTG paywall',
@@ -12240,7 +12238,7 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
   ),
 };
 
-/** @const {!Object<?AnalyticsEvent,?Object>} */
+/** @const {!{[key: ?AnalyticsEvent]: ?Object}} */
 const SubscriptionSpecificAnalyticsEventToGoogleAnalyticsEvent = {
   [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: createGoogleAnalyticsEvent(
     'NTG subscription',
@@ -12250,7 +12248,7 @@ const SubscriptionSpecificAnalyticsEventToGoogleAnalyticsEvent = {
   ),
 };
 
-/** @const {!Object<?AnalyticsEvent,?Object>} */
+/** @const {!{[key: ?AnalyticsEvent]: ?Object}} */
 const ContributionSpecificAnalyticsEventToGoogleAnalyticsEvent = {
   [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: createGoogleAnalyticsEvent(
     'NTG membership',
@@ -12527,7 +12525,7 @@ class EntitlementsManager {
       }
 
       params = {
-        encryption: {encryptedDocumentKey: /**@type {string} */ (params)},
+        encryption: { encryptedDocumentKey: /**@type {string} */ (params) },
       };
     }
 
@@ -12582,7 +12580,7 @@ class EntitlementsManager {
     if (
       entitlement.subscriptionTokenContents &&
       entitlement.subscriptionTokenContents['metering']['clientType'] ===
-        MeterClientTypes.METERED_BY_GOOGLE
+      MeterClientTypes.METERED_BY_GOOGLE
     ) {
       // If clientType is METERED_BY_GOOGLE, this is the appropriate
       // EntitlementSource, and no GAA params are required.
@@ -12705,18 +12703,18 @@ class EntitlementsManager {
     const encodedParamsPromise = this.encodedParams_
       ? Promise.resolve()
       : hash(getCanonicalUrl(this.deps_.doc())).then((hashedCanonicalUrl) => {
-          /** @type {!GetEntitlementsParamsInternalDef} */
-          const encodableParams = {
-            metering: {
-              resource: {
-                hashedCanonicalUrl,
-              },
+        /** @type {!GetEntitlementsParamsInternalDef} */
+        const encodableParams = {
+          metering: {
+            resource: {
+              hashedCanonicalUrl,
             },
-          };
-          this.encodedParams_ = base64UrlEncodeFromBytes(
-            utf8EncodeSync(JSON.stringify(encodableParams))
-          );
-        });
+          },
+        };
+        this.encodedParams_ = base64UrlEncodeFromBytes(
+          utf8EncodeSync(JSON.stringify(encodableParams))
+        );
+      });
 
     // Get swgUserToken from local storage
     const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
@@ -12731,7 +12729,7 @@ class EntitlementsManager {
       url = addQueryParam(
         url,
         this.encodedParamName_,
-        /** @type {!string} */ (this.encodedParams_)
+        /** @type {!string} */(this.encodedParams_)
       );
 
       return this.fetcher_.sendPost(serviceUrl(url), message);
@@ -13127,7 +13125,7 @@ class EntitlementsManager {
             entitlement.subscriptionTokenContents['metering']['clientType'],
           meterClientUserAttribute:
             entitlement.subscriptionTokenContents['metering'][
-              'clientUserAttribute'
+            'clientUserAttribute'
             ],
         });
         meterToastApi.setOnConsumeCallback(onConsumeCallback);
@@ -13214,14 +13212,14 @@ class EntitlementsManager {
         /** @type {!GetEntitlementsParamsInternalDef|undefined} */
         let encodableParams = this.enableMeteredByGoogle_
           ? {
-              metering: {
-                clientTypes: [MeterClientTypes.METERED_BY_GOOGLE],
-                owner: this.publicationId_,
-                resource: {
-                  hashedCanonicalUrl,
-                },
+            metering: {
+              clientTypes: [MeterClientTypes.METERED_BY_GOOGLE],
+              owner: this.publicationId_,
+              resource: {
+                hashedCanonicalUrl,
               },
-            }
+            },
+          }
           : undefined;
 
         // Add metering params.
@@ -13252,7 +13250,7 @@ class EntitlementsManager {
             };
 
             // Collect attributes.
-            function collectAttributes({attributes, category}) {
+            function collectAttributes({ attributes, category }) {
               if (!attributes) {
                 return;
               }
@@ -13590,7 +13588,7 @@ function assertSuccess(response) {
       return resolve(response);
     }
 
-    const {status} = response;
+    const { status } = response;
     const err = new Error(`HTTP error ${status}`);
     err.retriable = isRetriable(status);
     // TODO(@jridgewell, #9448): Callers who need the response should
@@ -13736,21 +13734,21 @@ class Fetcher {
    * @param {string} unusedUrl
    * @return {!Promise<!Object>}
    */
-  fetchCredentialedJson(unusedUrl) {}
+  fetchCredentialedJson(unusedUrl) { }
 
   /**
    * @param {string} unusedUrl
    * @param {!../utils/xhr.FetchInitDef} unusedInit
    * @return {!Promise<!../utils/xhr.FetchResponse>}
    */
-  fetch(unusedUrl, unusedInit) {}
+  fetch(unusedUrl, unusedInit) { }
 
   /**
    * POST data to a URL endpoint, do not wait for a response.
    * @param {!string} unusedUrl
    * @param {!../proto/api_messages.Message} unusedData
    */
-  sendBeacon(unusedUrl, unusedData) {}
+  sendBeacon(unusedUrl, unusedData) { }
 
   /**
    * POST data to a URL endpoint, get a Promise for a response
@@ -13758,7 +13756,7 @@ class Fetcher {
    * @param {!../proto/api_messages.Message} unusedMessage
    * @return {!Promise<!../utils/xhr.FetchResponse>}
    */
-  sendPost(unusedUrl, unusedMessage) {}
+  sendPost(unusedUrl, unusedMessage) { }
 }
 
 /**
@@ -13777,7 +13775,7 @@ class XhrFetcher {
   fetchCredentialedJson(url) {
     const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
-      headers: {'Accept': 'text/plain, application/json'},
+      headers: { 'Accept': 'text/plain, application/json' },
       credentials: 'include',
     });
     return this.fetch(url, init).then((response) => {
@@ -13824,7 +13822,7 @@ class XhrFetcher {
   /** @override */
   sendBeacon(url, data) {
     if (navigator.sendBeacon) {
-      const headers = {type: 'application/x-www-form-urlencoded;charset=UTF-8'};
+      const headers = { type: 'application/x-www-form-urlencoded;charset=UTF-8' };
       const blob = new Blob(
         ['f.req=' + serializeProtoMessageForUrl(data)],
         headers
@@ -13892,7 +13890,7 @@ class GoogleAnalyticsEventListener {
     }
 
     // Extract methods from window.
-    const {ga, gtag} = /** @type {!WindowWithAnalyticsMethods} */ (
+    const { ga, gtag } = /** @type {!WindowWithAnalyticsMethods} */ (
       this.deps_.win()
     );
 
@@ -13941,7 +13939,7 @@ class GoogleAnalyticsEventListener {
    */
   static isGaEligible(deps) {
     return isFunction(
-      /** @type {!WindowWithAnalyticsMethods} */ (deps.win()).ga
+      /** @type {!WindowWithAnalyticsMethods} */(deps.win()).ga
     );
   }
 
@@ -13952,7 +13950,7 @@ class GoogleAnalyticsEventListener {
    */
   static isGtagEligible(deps) {
     return isFunction(
-      /** @type {!WindowWithAnalyticsMethods} */ (deps.win()).gtag
+      /** @type {!WindowWithAnalyticsMethods} */(deps.win()).gtag
     );
   }
 }
@@ -14053,7 +14051,7 @@ function duplicateErrorIfNecessary(error) {
     return error;
   }
 
-  const {message, stack} = error;
+  const { message, stack } = error;
   const e = new Error(message);
   // Copy all the extraneous things we attach.
   for (const prop in error) {
@@ -14114,12 +14112,12 @@ class LinkbackFlow {
       this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
     const args = params.ampReaderId
       ? feArgs({
-          'publicationId': this.pageConfig_.getPublicationId(),
-          'ampReaderId': params.ampReaderId,
-        })
+        'publicationId': this.pageConfig_.getPublicationId(),
+        'ampReaderId': params.ampReaderId,
+      })
       : feArgs({
-          'publicationId': this.pageConfig_.getPublicationId(),
-        });
+        'publicationId': this.pageConfig_.getPublicationId(),
+      });
     const opener = this.activityPorts_.open(
       LINK_REQUEST_ID,
       feUrl('/linkbackstart'),
@@ -14522,7 +14520,7 @@ class Logger {
     ) {
       throw new Error(
         'Entitlements must be provided for users with' +
-          ' active or expired subscriptions'
+        ' active or expired subscriptions'
       );
     }
     if (jsonProducts && !isObject(jsonProducts)) {
@@ -14565,7 +14563,7 @@ class Logger {
       if (!data) {
         data = {};
       }
-      Object.assign(data, {'is_active': userEvent.active});
+      Object.assign(data, { 'is_active': userEvent.active });
     } else if (userEvent.active != null) {
       throw new Error('Event active must be a boolean');
     }
@@ -14786,10 +14784,10 @@ class OffersApi {
   fetch_(productId) {
     const url = serviceUrl(
       '/publication/' +
-        encodeURIComponent(this.config_.getPublicationId()) +
-        '/offers' +
-        '?label=' +
-        encodeURIComponent(productId)
+      encodeURIComponent(this.config_.getPublicationId()) +
+      '/offers' +
+      '?label=' +
+      encodeURIComponent(productId)
     );
     // TODO(dvoytenko): switch to a non-credentialed request after launch.
     return this.fetcher_.fetchCredentialedJson(url).then((json) => {
@@ -14910,16 +14908,16 @@ Constants.STORAGE_KEY_PREFIX = 'google.payments.api.storage';
 
 /** @const {string} */
 Constants.IS_READY_TO_PAY_RESULT_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
+  Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
 
 /** @const {string} */
 Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
+  Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
 
 
 Constants.CLASS_PREFIX = 'google-payments-';
 Constants.IFRAME_ACTIVE_CONTAINER_CLASS =
-    `${Constants.CLASS_PREFIX}activeContainer`;
+  `${Constants.CLASS_PREFIX}activeContainer`;
 Constants.IFRAME_CONTAINER_CLASS = `${Constants.CLASS_PREFIX}dialogContainer`;
 Constants.IFRAME_STYLE_CENTER_CLASS = `${Constants.CLASS_PREFIX}dialogCenter`;
 Constants.IFRAME_STYLE_CLASS = `${Constants.CLASS_PREFIX}dialog`;
@@ -14999,7 +14997,7 @@ Constants.IFRAME_STYLE_CENTER = `
 `;
 
 Constants.GPAY_BUTTON_WITH_CARD_INFO_IMAGE =
-    'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
+  'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
 
 Constants.BUTTON_LOCALE_TO_MIN_WIDTH = {
   'en': 152,
@@ -15103,47 +15101,47 @@ Constants.GPAY_BUTTON_WITH_OFFER_ICON_ADDITIONAL_STYLE = 'position: relative;';
 Constants.GPAY_OFFER_ICON_CLASS = 'gpay-offer-icon';
 
 Constants.GPAY_OFFER_ICON_SVG =
-    "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" " +
-    "version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=" +
-    "\"http://www.w3.org/1999/xlink\" class=\"gpay-offer-icon\"><defs><path d=\"M19.41,9.58 L10.41,0.58 " +
-    "C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 " +
-    "0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 " +
-    "12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77," +
-    "9.94 19.41,9.58 Z\" id=\"path-1\"></path></defs><g id=\"buttons_10.05\"" +
-    " stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">" +
-    "<g id=\"Artboard\" transform=\"translate(-40.000000, -43.000000)\">" +
-    "<g id=\"Group-3\" transform=\"translate(40.000000, 43.000000)\">" +
-    "<g id=\"Group-2-Copy-2\"><g id=\"Group-Copy\"><g id=\"ic_loyalty_24px\">" +
-    "<mask id=\"mask-2\" fill=\"white\"><use xlink:href=\"#path-1\"></use>" +
-    "</mask><use id=\"gpay-Shape\" fill=\"#FF6100\" fill-rule=\"nonzero\" " +
-    "xlink:href=\"#path-1\"></use><path d=\"M3.5,5 C2.67,5 2,4.33 2,3.5 C2," +
-    "2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z\" " +
-    "id=\"Path\" fill=\"#FFFFFF\" fill-rule=\"nonzero\" mask=\"url(#mask-2)\">" +
-    "</path></g></g></g><g id=\"Group-13-Copy-7\" transform=\"translate" +
-    "(6.000000, 6.000000)\" fill=\"#FFFFFF\" fill-rule=\"nonzero\">" +
-    "<g id=\"Group-13-Copy-2\"><path d=\"M2.15217391,4.55172414 C0.963561082," +
-    "4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 " +
-    "C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6." +
-    "30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783," +
-    "2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391," +
-    "4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2." +
-    "84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247," +
-    "1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1" +
-    ".70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3." +
-    "31034483 2.15217391,3.31034483 Z\" id=\"Combined-Shape\"></path>" +
-    "<path d=\"M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217," +
-    "6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609," +
-    "4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184" +
-    " 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465," +
-    "7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696" +
-    ",6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753," +
-    "5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522," +
-    "7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z\" " +
-    "id=\"Combined-Shape\"></path><polygon id=\"Rectangle\" " +
-    "transform=\"translate(4.497720, 4.541938) rotate(34.000000) " +
-    "translate(-4.497720, -4.541938) \" points=\"3.77901778 -0.202295978 " +
-    "4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596\">" +
-    "</polygon></g></g></g></g></g></svg>";
+  "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" " +
+  "version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=" +
+  "\"http://www.w3.org/1999/xlink\" class=\"gpay-offer-icon\"><defs><path d=\"M19.41,9.58 L10.41,0.58 " +
+  "C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 " +
+  "0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 " +
+  "12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77," +
+  "9.94 19.41,9.58 Z\" id=\"path-1\"></path></defs><g id=\"buttons_10.05\"" +
+  " stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">" +
+  "<g id=\"Artboard\" transform=\"translate(-40.000000, -43.000000)\">" +
+  "<g id=\"Group-3\" transform=\"translate(40.000000, 43.000000)\">" +
+  "<g id=\"Group-2-Copy-2\"><g id=\"Group-Copy\"><g id=\"ic_loyalty_24px\">" +
+  "<mask id=\"mask-2\" fill=\"white\"><use xlink:href=\"#path-1\"></use>" +
+  "</mask><use id=\"gpay-Shape\" fill=\"#FF6100\" fill-rule=\"nonzero\" " +
+  "xlink:href=\"#path-1\"></use><path d=\"M3.5,5 C2.67,5 2,4.33 2,3.5 C2," +
+  "2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z\" " +
+  "id=\"Path\" fill=\"#FFFFFF\" fill-rule=\"nonzero\" mask=\"url(#mask-2)\">" +
+  "</path></g></g></g><g id=\"Group-13-Copy-7\" transform=\"translate" +
+  "(6.000000, 6.000000)\" fill=\"#FFFFFF\" fill-rule=\"nonzero\">" +
+  "<g id=\"Group-13-Copy-2\"><path d=\"M2.15217391,4.55172414 C0.963561082," +
+  "4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 " +
+  "C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6." +
+  "30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783," +
+  "2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391," +
+  "4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2." +
+  "84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247," +
+  "1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1" +
+  ".70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3." +
+  "31034483 2.15217391,3.31034483 Z\" id=\"Combined-Shape\"></path>" +
+  "<path d=\"M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217," +
+  "6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609," +
+  "4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184" +
+  " 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465," +
+  "7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696" +
+  ",6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753," +
+  "5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522," +
+  "7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z\" " +
+  "id=\"Combined-Shape\"></path><polygon id=\"Rectangle\" " +
+  "transform=\"translate(4.497720, 4.541938) rotate(34.000000) " +
+  "translate(-4.497720, -4.541938) \" points=\"3.77901778 -0.202295978 " +
+  "4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596\">" +
+  "</polygon></g></g></g></g></g></svg>";
 
 Constants.GPAY_OFFER_ICON_STYLE = `
 .${Constants.GPAY_OFFER_ICON_CLASS} {
@@ -15389,8 +15387,8 @@ class PayFrameHelper {
     // certain cases
     // Can be replaced by iframe.src=... in non Google context.
     iframe.src = PayFrameHelper.getIframeUrl_(
-            window.location.origin,
-            initOptions.merchantInfo && initOptions.merchantInfo.merchantId);
+      window.location.origin,
+      initOptions.merchantInfo && initOptions.merchantInfo.merchantId);
     PayFrameHelper.postMessage({
       'eventType': PostMessageEventType.LOG_PAY_FRAME_REQUESTED,
       'clientLatencyStartMs': Date.now(),
@@ -15399,7 +15397,7 @@ class PayFrameHelper {
     iframe.width = '0';
     iframe.style.display = 'none';
     iframe.style.visibility = 'hidden';
-    iframe.onload = function() {
+    iframe.onload = function () {
       PayFrameHelper.postMessage({
         'eventType': PostMessageEventType.LOG_PAY_FRAME_LOADED_WITH_ALL_JS,
         'clientLatencyStartMs': Date.now(),
@@ -15413,7 +15411,7 @@ class PayFrameHelper {
       PayFrameHelper.initialize_();
     } else {
       document.addEventListener(
-          'DOMContentLoaded', () => PayFrameHelper.initialize_());
+        'DOMContentLoaded', () => PayFrameHelper.initialize_());
     }
   }
 
@@ -15436,7 +15434,7 @@ class PayFrameHelper {
    * @param {function(!Event)} responseHandler
    */
   static sendAndWaitForResponse(
-      data, eventType, responseType, responseHandler) {
+    data, eventType, responseType, responseHandler) {
     function callback(event) {
       if (event.data[responseType]) {
         responseHandler(event);
@@ -15448,7 +15446,7 @@ class PayFrameHelper {
 
     PayFrameHelper.addMessageEventListener_(callback);
 
-    const postMessageData = Object.assign({'eventType': eventType}, data);
+    const postMessageData = Object.assign({ 'eventType': eventType }, data);
     PayFrameHelper.postMessage(postMessageData);
   }
 
@@ -15483,14 +15481,14 @@ class PayFrameHelper {
       return;
     }
     const postMessageData = Object.assign(
-        {
-          'buyFlowActivityMode': buyFlowActivityMode,
-          'googleTransactionId': googleTransactionId,
-          'originTimeMs': originTimeMs,
-        },
-        data);
+      {
+        'buyFlowActivityMode': buyFlowActivityMode,
+        'googleTransactionId': googleTransactionId,
+        'originTimeMs': originTimeMs,
+      },
+      data);
     postMessageService.postMessage(
-        postMessageData, PayFrameHelper.getIframeOrigin_());
+      postMessageData, PayFrameHelper.getIframeOrigin_());
   }
 
   /**
@@ -15553,7 +15551,7 @@ class PayFrameHelper {
    */
   static iframeLoaded() {
     iframeLoaded = true;
-    buffer.forEach(function(data) {
+    buffer.forEach(function (data) {
       PayFrameHelper.postMessage(data);
     });
     buffer.length = 0;
@@ -15605,8 +15603,8 @@ class PayFrameHelper {
   static getIframeUrl_(origin, merchantId) {
     // TrustedResourceUrl header needs to start with https or '//'.
     const iframeUrl = `https://pay${environment == Constants.Environment.PREPROD ?
-             '-preprod.sandbox' :
-             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
+      '-preprod.sandbox' :
+      environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
     return iframeUrl;
   }
 }
@@ -15655,33 +15653,33 @@ class PaymentsRequestDelegate {
     const paymentRequest = this.createPaymentRequest_(isReadyToPayRequest);
     return new Promise((resolve, reject) => {
       paymentRequest.canMakePayment()
-          .then(result => {
-            window.sessionStorage.setItem(
-                Constants.IS_READY_TO_PAY_RESULT_KEY, result.toString());
-            const response = {'result': result};
-            if (isReadyToPayRequest.apiVersion >= 2 &&
-                isReadyToPayRequest.existingPaymentMethodRequired) {
-              // For apiVersion 2, we always use native to only check for
-              // tokenized cards.
-              // For tokenized cards native always does a presence check so
-              // we can say that if canMakePayment is true for native for
-              // tokenizedCards then the user has a payment method which is
-              // present.
-              response['paymentMethodPresent'] = result;
-            }
-            resolve(response);
-          })
-          .catch(function(err) {
-            if (window.sessionStorage.getItem(
-                    Constants.IS_READY_TO_PAY_RESULT_KEY)) {
-              resolve({
-                'result': window.sessionStorage.getItem(
-                              Constants.IS_READY_TO_PAY_RESULT_KEY) == 'true'
-              });
-            } else {
-              resolve({'result': false});
-            }
-          });
+        .then(result => {
+          window.sessionStorage.setItem(
+            Constants.IS_READY_TO_PAY_RESULT_KEY, result.toString());
+          const response = { 'result': result };
+          if (isReadyToPayRequest.apiVersion >= 2 &&
+            isReadyToPayRequest.existingPaymentMethodRequired) {
+            // For apiVersion 2, we always use native to only check for
+            // tokenized cards.
+            // For tokenized cards native always does a presence check so
+            // we can say that if canMakePayment is true for native for
+            // tokenizedCards then the user has a payment method which is
+            // present.
+            response['paymentMethodPresent'] = result;
+          }
+          resolve(response);
+        })
+        .catch(function (err) {
+          if (window.sessionStorage.getItem(
+            Constants.IS_READY_TO_PAY_RESULT_KEY)) {
+            resolve({
+              'result': window.sessionStorage.getItem(
+                Constants.IS_READY_TO_PAY_RESULT_KEY) == 'true'
+            });
+          } else {
+            resolve({ 'result': false });
+          }
+        });
     });
   }
 
@@ -15690,9 +15688,9 @@ class PaymentsRequestDelegate {
     // Creating PaymentRequest instance will call
     // Gcore isReadyToPay internally which will prefetch tempaltes.
     this.createPaymentRequest_(
-        paymentDataRequest, this.environment_,
-        paymentDataRequest.transactionInfo.currencyCode,
-        paymentDataRequest.transactionInfo.totalPrice);
+      paymentDataRequest, this.environment_,
+      paymentDataRequest.transactionInfo.currencyCode,
+      paymentDataRequest.transactionInfo.totalPrice);
   }
 
   /** @override */
@@ -15760,30 +15758,30 @@ class PaymentsRequestDelegate {
    */
   loadPaymentDataThroughPaymentRequest_(paymentDataRequest) {
     const currencyCode = (paymentDataRequest.transactionInfo &&
-                          paymentDataRequest.transactionInfo.currencyCode) ||
-        undefined;
+      paymentDataRequest.transactionInfo.currencyCode) ||
+      undefined;
     const totalPrice = (paymentDataRequest.transactionInfo &&
-                        paymentDataRequest.transactionInfo.totalPrice) ||
-        undefined;
+      paymentDataRequest.transactionInfo.totalPrice) ||
+      undefined;
     const paymentRequest = this.createPaymentRequest_(
-        paymentDataRequest, this.environment_, currencyCode, totalPrice);
+      paymentDataRequest, this.environment_, currencyCode, totalPrice);
     this.callback_(
-        /** @type{!Promise<!PaymentData>} */
-        (paymentRequest.show()
-             .then(
-                 /**
-                  * @param {!PaymentResponse} paymentResponse
-                  * @return {!PaymentData}
-                  */
-                 (paymentResponse) => {
-                   // Should be called to dismiss any remaining UI
-                   paymentResponse.complete('success');
-                   return paymentResponse.details;
-                 })
-             .catch(function(err) {
-               err['statusCode'] = Constants.ResponseStatus.CANCELED;
-               throw err;
-             })));
+      /** @type{!Promise<!PaymentData>} */
+      (paymentRequest.show()
+        .then(
+          /**
+           * @param {!PaymentResponse} paymentResponse
+           * @return {!PaymentData}
+           */
+          (paymentResponse) => {
+            // Should be called to dismiss any remaining UI
+            paymentResponse.complete('success');
+            return paymentResponse.details;
+          })
+        .catch(function (err) {
+          err['statusCode'] = Constants.ResponseStatus.CANCELED;
+          throw err;
+        })));
   }
 }
 
@@ -15874,7 +15872,7 @@ class Graypane {
     return transition(this.element_, {
       'opacity': 0,
     }, 300, 'ease-out').then(() => {
-      setImportantStyles(this.element_, {'display': 'none'});
+      setImportantStyles(this.element_, { 'display': 'none' });
       this.doc_.body.removeChild(this.element_);
     });
   }
@@ -15889,7 +15887,7 @@ class Graypane {
  * from the 3p page's stylesheet.
  *
  * @param {!Element} element
- * @param {!Object<string, string|number>} styles
+ * @param {!{[key: string]: string|number}} styles
  */
 function setImportantStyles(element, styles) {
   for (const k in styles) {
@@ -15901,7 +15899,7 @@ function setImportantStyles(element, styles) {
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
- * @param {!Object<string, string|number>} props - properties to be animated.
+ * @param {!{[key: string]: string|number}} props - properties to be animated.
  * @param {number} durationMillis - duration of animation.
  * @param {string} curve - transition function for the animation.
  * @return {!Promise} Promise which resolves once the animation is done playing.
@@ -15948,21 +15946,21 @@ function transition(el, props, durationMillis, curve) {
 function chromeSupportsPaymentHandler() {
   // Check if feature is enabled for user
   if (typeof google == 'undefined' ||
-      !null) {
+    !null) {
     return false;
   }
 
   // Payment handler isn't supported on mobile
   const mobilePlatform = window.navigator.userAgent.match(
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
   if (mobilePlatform != null) {
     return false;
   }
 
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
   return 'PaymentRequest' in window && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 68 &&
-      window.navigator.vendor == 'Google Inc.';
+    Number(chromeVersion[1]) >= 68 &&
+    window.navigator.vendor == 'Google Inc.';
 }
 
 /**
@@ -15982,10 +15980,10 @@ function chromeSupportsPaymentRequest() {
   const androidPlatform = window.navigator.userAgent.match(/Android/i);
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
   return androidPlatform != null && 'PaymentRequest' in window &&
-      // Make sure skipping PaymentRequest UI when only one PaymentMethod is
-      // supported (starts on Google Chrome 59).
-      window.navigator.vendor == 'Google Inc.' && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 59;
+    // Make sure skipping PaymentRequest UI when only one PaymentMethod is
+    // supported (starts on Google Chrome 59).
+    window.navigator.vendor == 'Google Inc.' && chromeVersion != null &&
+    Number(chromeVersion[1]) >= 59;
 }
 
 /**
@@ -15996,15 +15994,15 @@ function chromeSupportsPaymentRequest() {
 function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
   if (isReadyToPayRequest.apiVersion >= 2) {
     const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
+      extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
     if (allowedAuthMethods && allowedAuthMethods.length == 1 &&
-        allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS) {
+      allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS) {
       return true;
     }
   }
   return isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
-      isReadyToPayRequest.allowedPaymentMethods[0] ==
-      Constants.PaymentMethod.TOKENIZED_CARD;
+    isReadyToPayRequest.allowedPaymentMethods[0] ==
+    Constants.PaymentMethod.TOKENIZED_CARD;
 }
 
 /**
@@ -16014,10 +16012,10 @@ function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
  * @return {boolean} true if the merchant supports pan cards.
  */
 function apiV2DoesMerchantSupportSpecifiedCardType(
-    isReadyToPayRequest, apiV2AuthMethod) {
+  isReadyToPayRequest, apiV2AuthMethod) {
   if (isReadyToPayRequest.apiVersion >= 2) {
     const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
+      extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
     if (allowedAuthMethods && allowedAuthMethods.includes(apiV2AuthMethod)) {
       return true;
     }
@@ -16046,8 +16044,8 @@ function validateSecureContext() {
     return null;
   }
   return window.isSecureContext ?
-      null :
-      'Google Pay APIs should be called in secure context!';
+    null :
+    'Google Pay APIs should be called in secure context!';
 }
 
 /**
@@ -16057,11 +16055,11 @@ function validateSecureContext() {
  */
 function validatePaymentOptions(paymentOptions) {
   if (paymentOptions.environment &&
-      !Object.values(Constants.Environment)
-           .includes(paymentOptions.environment)) {
+    !Object.values(Constants.Environment)
+      .includes(paymentOptions.environment)) {
     throw new Error(
-        'Parameter environment in PaymentOptions can optionally be set to ' +
-        'PRODUCTION, otherwise it defaults to TEST. ' + paymentOptions.environment);
+      'Parameter environment in PaymentOptions can optionally be set to ' +
+      'PRODUCTION, otherwise it defaults to TEST. ' + paymentOptions.environment);
   }
 }
 
@@ -16079,8 +16077,8 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
       return 'apiVersionMinor must be set!';
     }
     if (!isReadyToPayRequest.allowedPaymentMethods ||
-        !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-        isReadyToPayRequest.allowedPaymentMethods.length == 0) {
+      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+      isReadyToPayRequest.allowedPaymentMethods.length == 0) {
       return 'for v2 allowedPaymentMethods must be set to an array containing a list of accepted payment methods';
     }
     for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
@@ -16090,29 +16088,29 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
           return 'Field parameters must be setup in each allowedPaymentMethod';
         }
         var allowedCardNetworks =
-            allowedPaymentMethod['parameters']['allowedCardNetworks'];
+          allowedPaymentMethod['parameters']['allowedCardNetworks'];
         if (!allowedCardNetworks || !Array.isArray(allowedCardNetworks) ||
-            allowedCardNetworks.length == 0) {
+          allowedCardNetworks.length == 0) {
           return 'allowedCardNetworks must be setup in parameters for type CARD';
         }
         var allowedAuthMethods =
-            allowedPaymentMethod['parameters']['allowedAuthMethods'];
+          allowedPaymentMethod['parameters']['allowedAuthMethods'];
         if (!allowedAuthMethods || !Array.isArray(allowedAuthMethods) ||
-            allowedAuthMethods.length == 0 ||
-            !allowedAuthMethods.every(isAuthMethodValid)) {
+          allowedAuthMethods.length == 0 ||
+          !allowedAuthMethods.every(isAuthMethodValid)) {
           return 'allowedAuthMethods must be setup in parameters for type \'CARD\' ' +
-              ' and must contain \'CRYPTOGRAM_3DS\' and/or \'PAN_ONLY\'';
+            ' and must contain \'CRYPTOGRAM_3DS\' and/or \'PAN_ONLY\'';
         }
       }
     }
     return null;
   } else if (
-      !isReadyToPayRequest.allowedPaymentMethods ||
-      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-      isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
-      !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)) {
+    !isReadyToPayRequest.allowedPaymentMethods ||
+    !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+    isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
+    !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)) {
     return 'allowedPaymentMethods must be set to an array containing \'CARD\' ' +
-        'and/or \'TOKENIZED_CARD\'!';
+      'and/or \'TOKENIZED_CARD\'!';
   }
   return null;
 }
@@ -16154,17 +16152,17 @@ function validatePaymentDataRequest(paymentDataRequest) {
   } else if (!paymentDataRequest.transactionInfo.currencyCode) {
     return 'currencyCode in transactionInfo must be set!';
   } else if (
-      !paymentDataRequest.transactionInfo.totalPriceStatus ||
-      !Object.values(Constants.TotalPriceStatus)
-           .includes(paymentDataRequest.transactionInfo.totalPriceStatus)) {
+    !paymentDataRequest.transactionInfo.totalPriceStatus ||
+    !Object.values(Constants.TotalPriceStatus)
+      .includes(paymentDataRequest.transactionInfo.totalPriceStatus)) {
     return 'totalPriceStatus in transactionInfo must be set to one of' +
-        ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!';
+      ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!';
   } else if (
-      paymentDataRequest.transactionInfo.totalPriceStatus !==
-          'NOT_CURRENTLY_KNOWN' &&
-      !paymentDataRequest.transactionInfo.totalPrice) {
+    paymentDataRequest.transactionInfo.totalPriceStatus !==
+    'NOT_CURRENTLY_KNOWN' &&
+    !paymentDataRequest.transactionInfo.totalPrice) {
     return 'totalPrice in transactionInfo must be set when' +
-        ' totalPriceStatus is ESTIMATED or FINAL!';
+      ' totalPriceStatus is ESTIMATED or FINAL!';
   }
 
   // Validate payment data request for UPI payment method
@@ -16185,13 +16183,13 @@ function validatePaymentDataRequest(paymentDataRequest) {
       return 'mcc in allowedPaymentMethod parameters must be set!';
     } else if (!parameters['transactionReferenceId']) {
       return 'transactionReferenceId in allowedPaymentMethod parameters' +
-          ' must be set!';
+        ' must be set!';
     }
 
     if (paymentDataRequest['transactionInfo']['currencyCode'] !== 'INR') {
       return 'currencyCode in transactionInfo must be set to INR!';
     } else if (
-        paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL') {
+      paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL') {
       return 'totalPriceStatus in transactionInfo must be set to FINAL!';
     } else if (!paymentDataRequest['transactionInfo']['transactionNote']) {
       return 'transactionNote in transactionInfo must be set!';
@@ -16209,7 +16207,7 @@ function validatePaymentDataRequest(paymentDataRequest) {
  */
 function getUpiPaymentMethod(request) {
   if (!chromeSupportsPaymentRequest() || request.apiVersion < 2 ||
-      !request.allowedPaymentMethods) {
+    !request.allowedPaymentMethods) {
     return null;
   }
   return getAllowedPaymentMethodForType_(request, Constants.PaymentMethod.UPI);
@@ -16241,7 +16239,7 @@ function validatePaymentDataRequestForSwg(swgParameters) {
 function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
   if (isReadyToPayRequest.allowedPaymentMethods) {
     const allowedPaymentMethod = getAllowedPaymentMethodForType_(
-        isReadyToPayRequest, Constants.PaymentMethod.CARD);
+      isReadyToPayRequest, Constants.PaymentMethod.CARD);
     if (allowedPaymentMethod && allowedPaymentMethod.parameters) {
       return allowedPaymentMethod.parameters['allowedAuthMethods'];
     }
@@ -16257,7 +16255,7 @@ function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
  * @private
  */
 function getAllowedPaymentMethodForType_(
-    isReadyToPayRequest, paymentMethodType) {
+  isReadyToPayRequest, paymentMethodType) {
   for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
     const allowedPaymentMethod = isReadyToPayRequest.allowedPaymentMethods[i];
     if (allowedPaymentMethod.type == paymentMethodType) {
@@ -16303,7 +16301,7 @@ function injectIframe(iframeClassName) {
   iframeContainer.appendChild(iframe);
   container.appendChild(iframeContainer);
   document.body.appendChild(container);
-  return {'container': container, 'iframe': iframe};
+  return { 'container': container, 'iframe': iframe };
 }
 
 /**
@@ -16456,7 +16454,7 @@ class PaymentsWebActivityDelegate {
             inferredError = JSON.parse(
               originalError.substring(ERROR_PREFIX.length)
             );
-          } catch (e) {}
+          } catch (e) { }
           if (
             inferredError['statusCode'] &&
             ['DEVELOPER_ERROR', 'MERCHANT_ACCOUNT_ERROR'].indexOf(
@@ -16530,7 +16528,7 @@ class PaymentsWebActivityDelegate {
   isReadyToPay(isReadyToPayRequest) {
     return new Promise((resolve, reject) => {
       if (doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest)) {
-        resolve({'result': false});
+        resolve({ 'result': false });
         return;
       }
       const userAgent = window.navigator.userAgent;
@@ -16539,12 +16537,12 @@ class PaymentsWebActivityDelegate {
         userAgent.indexOf(BrowserUserAgent.SAFARI) > 0;
       // pop up in IGSA doesn't work.
       if (isIosGsa && !null) {
-        resolve({'result': false});
+        resolve({ 'result': false });
         return;
       }
       const isFirefoxIos = userAgent.indexOf('FxiOS') > 0;
       if (isFirefoxIos) {
-        resolve({'result': false});
+        resolve({ 'result': false });
         return;
       }
       const isSupported =
@@ -16573,7 +16571,7 @@ class PaymentsWebActivityDelegate {
           }
         );
       } else {
-        resolve({'result': isSupported});
+        resolve({ 'result': isSupported });
       }
     });
   }
@@ -16605,7 +16603,7 @@ class PaymentsWebActivityDelegate {
       this.getHostingPageUrl_(),
       this.getRenderMode_(paymentDataRequest),
       paymentDataRequest,
-      {'width': 600, 'height': 600}
+      { 'width': 600, 'height': 600 }
     );
     this.graypane_.show(opener && opener.targetWin);
   }
@@ -16784,7 +16782,7 @@ class PaymentsWebActivityDelegate {
       // TODO: Think about whether this could be just hide instead of
       // disconnect and remove, the tricky part is how to handle the case where
       // payment data request is not the same.
-      this.dismissPromiseResolver_(Promise.reject({'errorCode': 'CANCELED'}));
+      this.dismissPromiseResolver_(Promise.reject({ 'errorCode': 'CANCELED' }));
       this.removeIframeAndContainer_(
         containerAndFrame['container'],
         containerAndFrame['iframe']
@@ -16800,7 +16798,7 @@ class PaymentsWebActivityDelegate {
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
     return (
-      null  
+      null
     );
   }
 
@@ -16939,7 +16937,7 @@ class PaymentsWebActivityDelegate {
  */
 
 class UpiHandler {
-  constructor() {}
+  constructor() { }
 
   /**
    * Returns upi payment method object if it exists in allowed payment methods
@@ -16965,9 +16963,9 @@ class UpiHandler {
     // payment request
     if (getUpiPaymentMethod(request)) {
       if (request.existingPaymentMethodRequired) {
-        return Promise.resolve({'result': true, 'paymentMethodPresent': true});
+        return Promise.resolve({ 'result': true, 'paymentMethodPresent': true });
       } else {
-        return Promise.resolve({'result': true});
+        return Promise.resolve({ 'result': true });
       }
     }
     throw new Error('No Upi payment method found in handler');
@@ -16987,16 +16985,16 @@ class UpiHandler {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
     const supportedInstruments = [{
-          'supportedMethods': ['https://tez.google.com/pay'],
-          'data': {
-            'pa': parameters['payeeVpa'],
-            'pn': parameters['payeeName'],
-            'tr': parameters['transactionReferenceId'],
-            'url': parameters['referenceUrl'],
-            'mc': parameters['mcc'],
-            'tn': transactionInfo['transactionNote'],
-          },
-        }];
+      'supportedMethods': ['https://tez.google.com/pay'],
+      'data': {
+        'pa': parameters['payeeVpa'],
+        'pn': parameters['payeeName'],
+        'tr': parameters['transactionReferenceId'],
+        'url': parameters['referenceUrl'],
+        'mc': parameters['mcc'],
+        'tn': transactionInfo['transactionNote'],
+      },
+    }];
 
     if (parameters['transactionId']) {
       supportedInstruments[0]['data']['tid'] = parameters['transactionId'];
@@ -17022,22 +17020,22 @@ class UpiHandler {
     let request = new PaymentRequest(supportedInstruments, details);
 
     onResultCallback(
-        this.checkCanMakePayment_(request)
-            .then(result => {
-              if (result) {
-                return this.showUi_(request);
-              } else {
-                return this.redirectToGooglePlay_();
-              }
-            })
-            .then(paymentData => {
-              return this.processData_(
-                  paymentData, paymentDataRequest, upiPaymentMethod);
-            })
-            .catch(error => {
-              error['statusCode'] = Constants.ResponseStatus.CANCELED;
-              return Promise.reject(error);
-            }));
+      this.checkCanMakePayment_(request)
+        .then(result => {
+          if (result) {
+            return this.showUi_(request);
+          } else {
+            return this.redirectToGooglePlay_();
+          }
+        })
+        .then(paymentData => {
+          return this.processData_(
+            paymentData, paymentDataRequest, upiPaymentMethod);
+        })
+        .catch(error => {
+          error['statusCode'] = Constants.ResponseStatus.CANCELED;
+          return Promise.reject(error);
+        }));
   }
 
   /**
@@ -17065,7 +17063,7 @@ class UpiHandler {
   checkCanMakePayment_(request) {
     // Checks canMakePayment cache, and use the cache result if it exists.
     const cacheResult =
-        window.sessionStorage.getItem(Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY);
+      window.sessionStorage.getItem(Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY);
     if (cacheResult) {
       return Promise.resolve(cacheResult === 'true');
     }
@@ -17084,7 +17082,7 @@ class UpiHandler {
       // Google Play again after installing Google Pay if Chrome is not closed.
       if (result) {
         window.sessionStorage.setItem(
-            Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY, result.toString());
+          Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY, result.toString());
       }
       return result;
     });
@@ -17098,10 +17096,10 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-        // NOLINT
-            'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
+      // NOLINT
+      'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
     return Promise.reject(
-        {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
+      { 'errorMessage': 'Cannot redirect to Tez page in Google Play.' });
   }
 
   /**
@@ -17140,13 +17138,13 @@ class UpiHandler {
           error = {
             'errorCode': PublicErrorCode.INTERNAL_ERROR,
             'errorMessage':
-                'Payment failure due to transaction timeout or connection' +
-                ' issue.'
+              'Payment failure due to transaction timeout or connection' +
+              ' issue.'
           };
           break;
         default:
           // payment failure due to user cancel or other issues
-          error = {'errorMessage': 'Payment cancelled.'};
+          error = { 'errorMessage': 'Payment cancelled.' };
       }
       return Promise.reject(error);
     }
@@ -17156,10 +17154,10 @@ class UpiHandler {
       'payeeVpa': upiPaymentMethod['parameters']['payeeVpa'],
       'status': tezResponse['Status'],
       'transactionReferenceId':
-          upiPaymentMethod['parameters']['transactionReferenceId'],
+        upiPaymentMethod['parameters']['transactionReferenceId'],
       'transactionId': upiPaymentMethod['parameters']['transactionId'] ?
-          upiPaymentMethod['parameters']['transactionId'] :
-          tezResponse['txnId'],
+        upiPaymentMethod['parameters']['transactionId'] :
+        tezResponse['txnId'],
       'transactionInfo': paymentDataRequest['transactionInfo'],
     };
 
@@ -17217,63 +17215,63 @@ Dual licensed under the MIT and GPL licenses.
  *   "098F4D35"
  */
 
-class Random_uuid {}  // Private array of chars to use
-  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+class Random_uuid { }  // Private array of chars to use
+var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
 
-  Random_uuid.uuid = function (len, radix) {
-    var chars = CHARS, uuid = [], i;
-    radix = radix || chars.length;
+Random_uuid.uuid = function (len, radix) {
+  var chars = CHARS, uuid = [], i;
+  radix = radix || chars.length;
 
-    if (len) {
-      // Compact form
-      for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix];
-    } else {
-      // rfc4122, version 4 form
-      var r;
+  if (len) {
+    // Compact form
+    for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random() * radix];
+  } else {
+    // rfc4122, version 4 form
+    var r;
 
-      // rfc4122 requires these characters
-      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-      uuid[14] = '4';
+    // rfc4122 requires these characters
+    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    uuid[14] = '4';
 
-      // Fill in random data.  At i==19 set the high bits of clock sequence as
-      // per rfc4122, sec. 4.1.5
-      for (i = 0; i < 36; i++) {
-        if (!uuid[i]) {
-          r = 0 | Math.random()*16;
-          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-        }
-      }
-    }
-
-    return uuid.join('');
-  };
-
-  // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
-  // by minimizing calls to random()
-  Random_uuid.uuidFast = function() {
-    var chars = CHARS, uuid = new Array(36), rnd=0, r;
-    for (var i = 0; i < 36; i++) {
-      if (i==8 || i==13 ||  i==18 || i==23) {
-        uuid[i] = '-';
-      } else if (i==14) {
-        uuid[i] = '4';
-      } else {
-        if (rnd <= 0x02) rnd = 0x2000000 + (Math.random()*0x1000000)|0;
-        r = rnd & 0xf;
-        rnd = rnd >> 4;
+    // Fill in random data.  At i==19 set the high bits of clock sequence as
+    // per rfc4122, sec. 4.1.5
+    for (i = 0; i < 36; i++) {
+      if (!uuid[i]) {
+        r = 0 | Math.random() * 16;
         uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
       }
     }
-    return uuid.join('');
-  };
+  }
 
-  // A more compact, but less performant, RFC4122v4 solution:
-  Random_uuid.uuidCompact = function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-      return v.toString(16);
-    });
-  };
+  return uuid.join('');
+};
+
+// A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
+// by minimizing calls to random()
+Random_uuid.uuidFast = function () {
+  var chars = CHARS, uuid = new Array(36), rnd = 0, r;
+  for (var i = 0; i < 36; i++) {
+    if (i == 8 || i == 13 || i == 18 || i == 23) {
+      uuid[i] = '-';
+    } else if (i == 14) {
+      uuid[i] = '4';
+    } else {
+      if (rnd <= 0x02) rnd = 0x2000000 + (Math.random() * 0x1000000) | 0;
+      r = rnd & 0xf;
+      rnd = rnd >> 4;
+      uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+    }
+  }
+  return uuid.join('');
+};
+
+// A more compact, but less performant, RFC4122v4 solution:
+Random_uuid.uuidCompact = function () {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 /**
  * @license
@@ -17363,8 +17361,8 @@ class PaymentsAsyncClient {
       paymentOptions.environment || Constants.Environment.TEST;
     if (!PaymentsAsyncClient.googleTransactionId_) {
       PaymentsAsyncClient.googleTransactionId_ = /** @type {string} */ (this.isInTrustedDomain_() &&
-      paymentOptions['i'] &&
-      paymentOptions['i']['googleTransactionId']
+        paymentOptions['i'] &&
+        paymentOptions['i']['googleTransactionId']
         ? paymentOptions['i']['googleTransactionId']
         : createGoogleTransactionId(this.environment_));
     }
@@ -17528,7 +17526,7 @@ class PaymentsAsyncClient {
    * @private
    */
   isReadyToPayApiV2ForChromePaymentRequest_(isReadyToPayRequest) {
-    let defaultPromise = Promise.resolve({'result': false});
+    let defaultPromise = Promise.resolve({ 'result': false });
     if (isReadyToPayRequest.existingPaymentMethodRequired) {
       defaultPromise = Promise.resolve({
         'result': false,
@@ -17889,7 +17887,7 @@ class Preconnect {
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  * @package Visible for testing only.
  */
 const PAY_ORIGIN = {
@@ -18173,7 +18171,7 @@ class RedirectVerifierHelper {
    * @return {?Promise}
    */
   prepare() {
-    return this.getOrCreatePair_(() => {});
+    return this.getOrCreatePair_(() => { });
   }
 
   /**
@@ -18282,14 +18280,14 @@ class RedirectVerifierHelper {
         const key = btoa(bytesToString(keyBytes));
 
         // 3. Create a hash.
-        crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key)).then(
+        crypto.subtle.digest({ name: 'SHA-384' }, stringToBytes(key)).then(
           (buffer) => {
             const verifier = btoa(
               bytesToString(
-                new Uint8Array(/** @type {!ArrayBuffer} */ (buffer))
+                new Uint8Array(/** @type {!ArrayBuffer} */(buffer))
               )
             );
-            resolve({key, verifier});
+            resolve({ key, verifier });
           },
           (reason) => {
             reject(reason);
@@ -18495,7 +18493,7 @@ class PropensityServer {
     }
     this.sendEvent_(
       propEvent,
-      JSON.stringify(/** @type {?JsonObject} */ (additionalParameters))
+      JSON.stringify(/** @type {?JsonObject} */(additionalParameters))
     );
   }
 
@@ -18508,8 +18506,8 @@ class PropensityServer {
       /** @type {!../api/propensity-api.PropensityScore} */ ({});
     if (!response['header']) {
       defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
-        header: {ok: false},
-        body: {error: 'No valid response'},
+        header: { ok: false },
+        body: { error: 'No valid response' },
       });
       return defaultScore;
     }
@@ -18541,15 +18539,15 @@ class PropensityServer {
       }
       if (scoreDetails) {
         defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
-          header: {ok: true},
-          body: {scores: scoreDetails},
+          header: { ok: true },
+          body: { scores: scoreDetails },
         });
       }
       return defaultScore;
     }
     defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
-      header: {ok: false},
-      body: {error: response['error']},
+      header: { ok: false },
+      body: { error: response['error'] },
     });
     return defaultScore;
   }
@@ -18630,7 +18628,7 @@ class Propensity {
     ) {
       throw new Error(
         'Entitlements must be provided for users with' +
-          ' active or expired subscriptions'
+        ' active or expired subscriptions'
       );
     }
     if (jsonProducts && !isObject(jsonProducts)) {
@@ -18678,7 +18676,7 @@ class Propensity {
       if (!data) {
         data = {};
       }
-      Object.assign(data, {'is_active': userEvent.active});
+      Object.assign(data, { 'is_active': userEvent.active });
     } else if (userEvent.active != null) {
       throw new Error('Event active must be a boolean');
     }
@@ -18725,7 +18723,7 @@ class Storage {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Object<string, !Promise<?string>>} */
+    /** @private @const {!{[key: string]: !Promise<?string>}} */
     this.values_ = {};
   }
 
@@ -19251,7 +19249,7 @@ class ConfiguredRuntime {
             if (skus.length > 0) {
               this.analyticsService_.setSku(skus.join(','));
             }
-          } catch (ex) {}
+          } catch (ex) { }
         }
         return entitlements.clone();
       });
@@ -19400,7 +19398,7 @@ class ConfiguredRuntime {
       'for subscription updates please use the updateSubscription() method';
     assert(typeof sku === 'string', errorMessage);
     return this.documentParsed_.then(() => {
-      return new PayStartFlow(this, {'skuId': sku}).start();
+      return new PayStartFlow(this, { 'skuId': sku }).start();
     });
   }
 
@@ -19432,7 +19430,7 @@ class ConfiguredRuntime {
     /** @type {!../api/subscriptions.SubscriptionRequest} */
     const request =
       typeof skuOrSubscriptionRequest == 'string'
-        ? {'skuId': skuOrSubscriptionRequest}
+        ? { 'skuId': skuOrSubscriptionRequest }
         : skuOrSubscriptionRequest;
     return this.documentParsed_.then(() => {
       return new PayStartFlow(

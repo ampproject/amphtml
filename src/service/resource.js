@@ -194,7 +194,7 @@ export class Resource {
     /**
      * Really, this is a <number, !Deferred> map,
      * but CC's type system can't handle it.
-     * @private {?Object<string, !Deferred>}
+     * @private {?{[key: string]: !Deferred}}
      */
     this.withViewportDeferreds_ = null;
 

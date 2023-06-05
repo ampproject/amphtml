@@ -23,7 +23,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
  * properties they control.
- * @private @const {!Object<string, string>}
+ * @private @const {!{[key: string]: string}}
  */
 const SUPPORTED_CSS_GRID_ATTRIBUTES = {
   'align-content': 'alignContent',

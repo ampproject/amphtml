@@ -16,7 +16,7 @@ import {parseUrlDeprecated} from '../../../src/url';
  *
  * Maps a sentinel value to an instance of the SafeframeHostApi to which that
  * sentinel value belongs.
- * @type {!Object<string, !SafeframeHostApi>}
+ * @type {!{[key: string]: !SafeframeHostApi}}
  */
 export const safeframeHosts = {};
 
