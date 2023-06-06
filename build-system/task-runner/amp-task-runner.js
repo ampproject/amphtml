@@ -16,6 +16,7 @@ const {
 const {cyan, green, magenta, red} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
+const {isCircleciBuild} = require('../common/ci');
 
 /**
  * @typedef {Function & {
@@ -93,6 +94,13 @@ async function runTask(taskName, taskFunc) {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
+    // For some reason, e2e tests get stuck on CircleCI after finishing, despite
+    // reaching this point in the code. This is a temporary workaround until we
+    // understand exactly why and fix the root cause.
+    // TODO(@ampproject/wg-infra): fix this.
+    if (isCircleciBuild() && taskName === 'e2e') {
+      process.exit(0);
+    }
   } catch (err) {
     log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
     log(err);
