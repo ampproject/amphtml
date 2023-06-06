@@ -71,16 +71,22 @@ executors:
 commands:
   checkout_repo:
     parameters:
+      restore-git-cache:
+        type: boolean
+        default: true
       save-git-cache:
         type: boolean
         default: false
     steps:
-      - restore_cache:
-          name: 'Restore Git Cache'
-          keys:
-            - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
-            - git-cache-{{ arch }}-v2-{{ .Branch }}-
-            - git-cache-{{ arch }}-v2-
+      - when:
+          condition: << parameters.restore-git-cache >>
+          steps:
+            - restore_cache:
+                name: 'Restore Git Cache'
+                keys:
+                  - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+                  - git-cache-{{ arch }}-v2-{{ .Branch }}-
+                  - git-cache-{{ arch }}-v2-
       - checkout
       - when:
           condition: << parameters.save-git-cache >>
@@ -98,6 +104,9 @@ commands:
           with-cache: false
   setup_vm:
     parameters:
+      restore-git-cache:
+        type: boolean
+        default: true
       save-git-cache:
         type: boolean
         default: false
@@ -113,6 +122,7 @@ commands:
           name: 'Maybe Gracefully Halt'
           command: /tmp/restored-workspace/maybe_gracefully_halt.sh
       - checkout_repo:
+          restore-git-cache: << parameters.restore-git-cache >>
           save-git-cache: << parameters.save-git-cache >>
       - run:
           name: 'Configure Development Environment'
@@ -367,7 +377,9 @@ jobs:
       name: macos-medium
     steps:
       - setup_vm:
-          save-git-cache: true
+          # Saving and restoring Git cache on MacOS takes much longer than simply cloning the repo from GitHub.
+          restore-git-cache: false
+          save-git-cache: false
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
