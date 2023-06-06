@@ -99,7 +99,7 @@ async function runTask(taskName, taskFunc) {
     // understand exactly why and fix the root cause.
     // TODO(@ampproject/wg-infra): fix this.
     if (isCircleciBuild() && taskName === 'e2e') {
-      process.exit(0);
+      process.exit(); // process.exitCode is set in ../tasks/e2e/index.js:171
     }
   } catch (err) {
     log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
