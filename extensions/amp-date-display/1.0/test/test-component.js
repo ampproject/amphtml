@@ -201,7 +201,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.monthNameShort).to.equal('úno');
     expect(data.dayName).to.equal('sobota');
     expect(data.dayNameShort).to.equal('so');
-    expect(data.timeZoneName).to.equal('Koordinovaný světový čas');
+    expect(data.timeZoneName).to.equal('koordinovaný světový čas');
     expect(data.timeZoneNameShort).to.equal('UTC');
   });
 

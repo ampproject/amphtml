@@ -45,7 +45,7 @@ experiment_job: &experiment_job
 executors:
   base-docker-small:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:current
     resource_class: small
   node-docker-medium:
     docker:
@@ -142,6 +142,9 @@ commands:
       - run:
           name: 'Get Pinned Chrome Version'
           command: ./.circleci/get_pinned_chrome_version.sh
+      - run:
+          name: 'Update list of available apt packages'
+          command: sudo apt update
       - browser-tools/install-chrome:
           # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
           replace-existing: true
