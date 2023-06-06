@@ -46,7 +46,7 @@ function getEsbuildBabelPlugin(
    * @param {string} filename
    * @param {string} contents
    * @param {string} hash
-   * @param {Object} babelOptions
+   * @param {object} babelOptions
    * @return {!Promise<!CacheMessageDef>}
    */
   async function transformContents(filename, contents, hash, babelOptions) {

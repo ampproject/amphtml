@@ -37,11 +37,11 @@ export class Expander {
   /**
    * Link this instance of parser to the calling UrlReplacment
    * @param {?../variable-source.VariableSource} variableSource the keywords to replace
-   * @param {!Object<string, *>=} opt_bindings additional one-off bindings
-   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   * @param {!{[key: string]: *}=} opt_bindings additional one-off bindings
+   * @param {!{[key: string]: *}=} opt_collectVars Object passed in to collect
    *   variable resolutions.
    * @param {boolean=} opt_sync If the method should resolve syncronously.
-   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
+   * @param {!{[key: string]: boolean}=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
    */
@@ -56,17 +56,17 @@ export class Expander {
     /** @const {?../variable-source.VariableSource} */
     this.variableSource_ = variableSource;
 
-    /**@const {!Object<string, *>|undefined} */
+    /**@const {!{[key: string]: *}|undefined} */
     this.bindings_ = opt_bindings;
 
     // TODO(ccordry): Remove this output object passed into constructor.
-    /**@const {!Object<string, *>|undefined} */
+    /**@const {!{[key: string]: *}|undefined} */
     this.collectVars_ = opt_collectVars;
 
     /**@const {boolean|undefined} */
     this.sync_ = opt_sync;
 
-    /**@const {!Object<string, boolean>|undefined} */
+    /**@const {!{[key: string]: boolean}|undefined} */
     this.allowlist_ = opt_allowlist;
 
     /**@const {boolean|undefined} */

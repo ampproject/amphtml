@@ -39,7 +39,7 @@ let ForbiddenTermDef;
 
 /**
  * Terms that must not appear in our source files.
- * @const {Object<string, string|!ForbiddenTermDef>}
+ * @const {{[key: string]: string|!ForbiddenTermDef}}
  */
 const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
@@ -743,7 +743,7 @@ const measurementApiDeprecated =
   ' @ampproject/wg-performance for questions.';
 
 /**
- * @const {Object<string, string|!ForbiddenTermDef>}
+ * @const {{[key: string]: string|!ForbiddenTermDef}}
  */
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
@@ -1092,7 +1092,7 @@ function stripComments(contents) {
  *
  * @param {string} srcFile
  * @param {string} contents
- * @param {!Object<string, string|!ForbiddenTermDef>} terms
+ * @param {!{[key: string]: string|!ForbiddenTermDef}} terms
  * @return {Array<!ForbiddenTermMatchDef>}
  */
 function matchForbiddenTerms(srcFile, contents, terms) {

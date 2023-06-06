@@ -30,7 +30,7 @@ const MAX_MUTATIONS = 70;
  *
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} config
- * @param {!Object<string, ?string>} experimentToVariant
+ * @param {!{[key: string]: ?string}} experimentToVariant
  * @return {!Promise}
  */
 export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
@@ -99,7 +99,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
  *  in the respected experiments
  *
  * @param {!JsonObject} config
- * @param {!Object<string, ?string>} experimentToVariant
+ * @param {!{[key: string]: ?string}} experimentToVariant
  * @return {!Array<!JsonObject>}
  */
 export function getMutationRecordsFromExperimentToVariant(

@@ -246,7 +246,7 @@ export const Curves_Enum = {
 };
 
 /**
- * @type {Object<string, CurveDef>}
+ * @type {{[key: string]: CurveDef}}
  * @const
  */
 const NAME_MAP = {

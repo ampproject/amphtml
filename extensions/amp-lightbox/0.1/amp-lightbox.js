@@ -51,7 +51,7 @@ const LightboxEvents = {
  */
 let AnimationPresetDef;
 
-/** @private @const {!Object<string, !AnimationPresetDef>} */
+/** @private @const {!{[key: string]: !AnimationPresetDef}} */
 const AnimationPresets = {
   'fade-in': {
     openStyle: {'opacity': 1},

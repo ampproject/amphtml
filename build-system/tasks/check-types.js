@@ -12,7 +12,7 @@ const {log} = require('../common/logging');
 /**
  * Object of targets to check with TypeScript.
  *
- * @type {Object<string, string>}
+ * @type {{[key: string]: string}}
  */
 const TSC_TYPECHECK_TARGETS = {
   'carousel': 'extensions/amp-carousel/0.1',

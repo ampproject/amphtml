@@ -57,7 +57,7 @@ let LaterpayConfig_0_1_Def; // eslint-disable-line local/camelcase
 /**
  * @typedef {{
  *   description: string,
- *   price: !Object<string, number>,
+ *   price: !{[key: string]: number},
  *   purchase_type: string,
  *   purchase_url: string,
  *   title: string,
@@ -448,7 +448,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!Object<string, number>} price
+   * @param {!{[key: string]: number}} price
    * @return {!Element}
    * @private
    */

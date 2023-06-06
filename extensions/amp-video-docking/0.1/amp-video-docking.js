@@ -266,7 +266,7 @@ export class VideoDocking {
       this.append_(PlaceholderBackground(html))
     );
 
-    /** @private @const {function():!Object<string, !Element>} */
+    /** @private @const {function():!{[key: string]: !Element}} */
     this.getPlaceholderRefs_ = once(() =>
       htmlRefs(this.getPlaceholderBackground_())
     );

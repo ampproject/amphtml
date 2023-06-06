@@ -25,7 +25,7 @@ const TAG = 'amp-ad-network-valueimpression-impl';
 const DOUBLECLICK_BASE_URL =
   'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @const {Object} */
+/** @const {object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
@@ -49,7 +49,7 @@ const Capability_Enum = {
 
 /**
  * See `VisibilityState_Enum` enum.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
 const visibilityStateCodes = {
   'visible': '1',
@@ -495,7 +495,7 @@ function elapsedTimeWithCeiling(time, start) {
  * Builds a URL from query parameters, truncating to a maximum length if
  * necessary.
  * @param {string} baseUrl scheme, domain, and path for the URL.
- * @param {!Object<string,string|number|null>} queryParams query parameters for
+ * @param {!{[key: string]: string|number|null}} queryParams query parameters for
  *     the URL.
  * @param {number} maxLength length to truncate the URL to if necessary.
  * @param {?QueryParameterDef=} opt_truncationQueryParam query parameter to

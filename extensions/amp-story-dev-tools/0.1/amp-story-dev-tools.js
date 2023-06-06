@@ -92,7 +92,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Object<string, string>} */
+    /** @private {!{[key: string]: string}} */
     this.hashParams_ = parseQueryString(this.win.location.hash);
 
     this.win.document.title = `Story Dev-Tools (${this.win.document.title})`;
@@ -111,7 +111,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
           )
         : null) || DevToolsTab.PREVIEW;
 
-    /** @private {!Object<string, !Element>} maps tabs to contents */
+    /** @private {!{[key: string]: !Element}} maps tabs to contents */
     this.tabContents_ = {};
 
     /** @private {!Array<!Element>} */

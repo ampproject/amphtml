@@ -49,12 +49,12 @@ let FunctionNameArgsDef;
  */
 export class ExpansionOptions {
   /**
-   * @param {!Object<string, *>} vars
+   * @param {!{[key: string]: *}} vars
    * @param {number=} opt_iterations
    * @param {boolean=} opt_noEncode
    */
   constructor(vars, opt_iterations, opt_noEncode) {
-    /** @const {!Object<string, string|Array<string>>} */
+    /** @const {!{[key: string]: string|Array<string>}} */
     this.vars = vars;
     /** @const {number} */
     this.iterations = opt_iterations === undefined ? 2 : opt_iterations;

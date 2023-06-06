@@ -12,8 +12,8 @@ const {Octokit} = require('@octokit/rest');
  */
 class GitHubApi {
   /**
-   * @param {Object} octokitRest
-   * @param {Object} octokitGraphQl
+   * @param {object} octokitRest
+   * @param {object} octokitGraphQl
    */
   constructor(octokitRest, octokitGraphQl) {
     this.octokit = octokitRest
@@ -154,7 +154,7 @@ class GitHubApi {
   /**
    * Update a GitHub release
    * @param {string} id
-   * @param {Object} changes
+   * @param {object} changes
    * @return {Promise<Object>}
    */
   async updateRelease(id, changes) {

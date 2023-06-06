@@ -3,7 +3,7 @@ import {devAssert} from '#core/assert';
 import {devError} from '#core/error';
 import {map} from '#core/types/object';
 
-/** @type {Object<string, string>} */
+/** @type {{[key: string]: string}} */
 let propertyNameCache;
 
 /** @const {Array<string>} */
@@ -48,7 +48,7 @@ export function camelCaseToHyphenCase(camelCase) {
   Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {Object<string, *>} style
+ * @param {{[key: string]: *}} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
@@ -103,7 +103,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
  * @param {HTMLElement} element
- * @param {Object<string, *>} styles
+ * @param {{[key: string]: *}} styles
  */
 export function setImportantStyles(element, styles) {
   const {style} = element;
@@ -163,7 +163,7 @@ export function getStyle(element, property, opt_bypassCache) {
  * Sets the CSS styles of the specified element. The styles
  * a specified as a map from CSS property names to their values.
  * @param {HTMLElement} element
- * @param {Object<string, *>} styles
+ * @param {{[key: string]: *}} styles
  */
 export function setStyles(element, styles) {
   for (const k in styles) {
@@ -366,8 +366,8 @@ export function assertNotDisplay(style) {
  * If you wish to set `display`, use the `toggle` helper instead. This is so
  * changes to display can trigger necessary updates. See #17475.
  *
- * @param {Object<string, *>} styles
- * @return {Object<string, *>}
+ * @param {{[key: string]: *}} styles
+ * @return {{[key: string]: *}}
  */
 export function assertDoesNotContainDisplay(styles) {
   if ('display' in styles) {

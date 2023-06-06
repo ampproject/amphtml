@@ -3,7 +3,7 @@
 /**
  * Changes the values of getMode().test, getMode().localDev to false
  * and getMode().localDev to true.
- * @param {Object} babelTypes
+ * @param {object} babelTypes
  */
 const {dirname, join, relative, resolve} = require('path').posix;
 

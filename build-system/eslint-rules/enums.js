@@ -36,7 +36,7 @@
  *
  * @return {!Object}
  */
-// eslint-disable-next-line
+
 module.exports = function create(context) {
   const renames = [];
   /**

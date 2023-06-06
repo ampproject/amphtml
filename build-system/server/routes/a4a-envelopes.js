@@ -121,7 +121,7 @@ function getInaboxUrl(req, extraExperiment) {
  * If the URL does not return text, returns null.
  * @param {string} template
  * @param {string} url
- * @param {Object} query
+ * @param {object} query
  * @return {!Promise<?string>}
  */
 async function requestFromUrl(template, url, query) {
@@ -139,7 +139,7 @@ async function requestFromUrl(template, url, query) {
  * Fill out a template with some common variables.
  * @param {string} template
  * @param {string} url
- * @param {Object} query
+ * @param {object} query
  * @param {string=} body
  * @return {string}
  */

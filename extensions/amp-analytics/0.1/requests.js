@@ -185,7 +185,7 @@ export class RequestHandler {
   /**
    * @param {string} url
    * @param {!ExpansionOptions} expansionOptions
-   * @param {!Object<string, (!../../../src/service/variable-source.ResolverReturnDef|!../../../src/service/variable-source.SyncResolverDef)>=} bindings
+   * @param {!{[key: string]: (!../../../src/service/variable-source.ResolverReturnDef|!../../../src/service/variable-source.SyncResolverDef)}=} bindings
    * @return {!Promise<string>}
    */
   expandTemplateUrl_(url, expansionOptions, bindings) {

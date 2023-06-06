@@ -22,7 +22,7 @@ import {getMode} from '../../mode';
     disableKeyAppend: boolean}} */
 let RtcVendorDef;
 
-/** @const {!Object<string, RtcVendorDef>} */
+/** @const {!{[key: string]: RtcVendorDef}} */
 const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
   //                                                                //

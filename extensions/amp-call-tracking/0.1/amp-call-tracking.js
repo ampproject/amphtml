@@ -10,7 +10,7 @@ const TAG = 'amp-call-tracking';
 
 /**
  * Bookkeeps all unique URL requests so that no URL is called twice.
- * @type {!Object<string, !Promise>}
+ * @type {!{[key: string]: !Promise}}
  */
 let cachedResponsePromises_ = {};
 

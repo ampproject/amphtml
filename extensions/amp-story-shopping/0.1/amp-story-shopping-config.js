@@ -34,7 +34,7 @@ function validateConfig(productConfig, name) {
   return true;
 }
 
-/** @typedef {!Object<string, !ShoppingConfigDataDef> */
+/** @typedef {!{[key: string]: !ShoppingConfigDataDef} */
 let KeyedShoppingConfigDef;
 
 /**

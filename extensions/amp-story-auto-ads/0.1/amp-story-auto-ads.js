@@ -41,7 +41,7 @@ const MUSTACHE_TAG = 'amp-mustache';
 /**
  * Map of experiment IDs that might be enabled by the player to
  * their experiment names. Used to toggle client side experiment on.
- * @const {Object<string, string>}
+ * @const {{[key: string]: string}}
  * @visibleForTesting
  */
 export const RELEVANT_PLAYER_EXPS = {
@@ -484,7 +484,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Construct an analytics event and trigger it.
    * @param {string} eventType
-   * @param {!Object<string, number>} vars A map of vars and their values.
+   * @param {!{[key: string]: number}} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

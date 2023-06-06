@@ -61,14 +61,14 @@ export const VerificationStatus = {
 export class SignatureVerifier {
   /**
    * @param {!Window} win
-   * @param {!Object<string, string>} signingServerURLs a map from the name of
+   * @param {!{[key: string]: string}} signingServerURLs a map from the name of
    *    each trusted signing service to the URL of its public key endpoint
    */
   constructor(win, signingServerURLs) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Object<string, string>} */
+    /** @private @const {!{[key: string]: string}} */
     this.signingServerURLs_ = signingServerURLs;
 
     /**
@@ -105,7 +105,7 @@ export class SignatureVerifier {
      *    successfully; this most likely indicates signing service misbehavior.
      *    The success case is a `Promise` that resolves to a `CryptoKey`.
      *
-     * @private @const {?Object<string, {promise: !Promise<boolean>, keys: !Object<string, ?Promise<?webCrypto.CryptoKey>>}>}
+     * @private @const {?{[key: string]: {promise: !Promise<boolean>, keys: !{[key: string]: ?Promise<?webCrypto.CryptoKey>}}}}
      */
     this.signers_ = Services.cryptoFor(win).isPkcsAvailable() ? {} : null;
 
@@ -278,7 +278,7 @@ export class SignatureVerifier {
    * Try to download the keyset for the named signing service and add a promise
    * for each key to the `keys` object.
    *
-   * @param {!Object<string, ?Promise<?webCrypto.CryptoKey>>} keys the object to
+   * @param {!{[key: string]: ?Promise<?webCrypto.CryptoKey>}} keys the object to
    *     add each key promise to. This is mutated while the returned promise is
    *     pending.
    * @param {string} signingServiceName

@@ -356,7 +356,7 @@ export class AmpAdUIHandler {
       );
     }
 
-    /** @type {!Object<boolean, number|undefined, number|undefined>} */
+    /** @type {!{[key: boolean]: number|undefined, number|undefined}} */
     const resizeInfo = {
       success: true,
       newWidth,
