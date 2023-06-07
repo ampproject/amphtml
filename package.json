@@ -88,7 +88,7 @@
     "chai": "4.3.4",
     "chai-as-promised": "7.1.1",
     "check-dependencies": "1.1.0",
-    "chokidar": "3.5.2",
+    "chokidar": "3.5.3",
     "cli-highlight": "2.1.11",
     "commander": "7.2.0",
     "connect-header": "0.0.5",
