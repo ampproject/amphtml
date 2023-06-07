@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   browser-tools: circleci/browser-tools@1.4.1
   codecov: codecov/codecov@3.2.5
+  git-shallow-clone: guitarrapc/git-shallow-clone@2.5.0
   node: circleci/node@5.1.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -77,6 +78,9 @@ commands:
       save-git-cache:
         type: boolean
         default: false
+      git-shallow-clone:
+        type: boolean
+        default: false
     steps:
       - when:
           condition: << parameters.restore-git-cache >>
@@ -87,7 +91,15 @@ commands:
                   - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
                   - git-cache-{{ arch }}-v2-{{ .Branch }}-
                   - git-cache-{{ arch }}-v2-
-      - checkout
+      - when:
+          condition: << parameters.git-shallow-clone >>
+          steps:
+            - git-shallow-clone/checkout:
+                no_tags: true
+      - unless:
+          condition: << parameters.git-shallow-clone >>
+          steps:
+            - checkout
       - when:
           condition: << parameters.save-git-cache >>
           steps:
@@ -110,6 +122,9 @@ commands:
       save-git-cache:
         type: boolean
         default: false
+      git-shallow-clone:
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: /tmp
@@ -124,6 +139,7 @@ commands:
       - checkout_repo:
           restore-git-cache: << parameters.restore-git-cache >>
           save-git-cache: << parameters.save-git-cache >>
+          git-shallow-clone: << parameters.git-shallow-clone >>
       - run:
           name: 'Configure Development Environment'
           command: |
