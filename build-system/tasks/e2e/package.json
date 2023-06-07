@@ -8,6 +8,6 @@
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "113.0.0",
     "geckodriver": "4.0.3",
-    "selenium-webdriver": "4.9.2"
+    "selenium-webdriver": "4.10.0"
   }
 }
