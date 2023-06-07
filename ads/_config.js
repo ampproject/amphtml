@@ -1044,6 +1044,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pubscale': {
+    renderStartImplemented: true,
+  },
+
   'puffnetwork': {
     prefetch: 'https://static.puffnetwork.com/amp_ad.js',
     renderStartImplemented: true,
