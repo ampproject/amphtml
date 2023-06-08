@@ -85,6 +85,9 @@ commands:
       - when:
           condition: << parameters.save-git-cache >>
           steps:
+            - run:
+                name: 'Garbage Collection for Git'
+                command: git gc --auto
             - save_cache:
                 name: 'Save Git Cache'
                 key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
