@@ -493,8 +493,6 @@ workflows:
       - initialize_mac_os:
           name: 'Initialize for Mac OS'
           <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
       - checks:
           name: 'Checks'
           <<: *push_and_pr_builds
