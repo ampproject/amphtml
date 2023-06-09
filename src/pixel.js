@@ -3,7 +3,10 @@ import {WindowInterface} from '#core/window/interface';
 
 import {user} from '#utils/log';
 
-import {isAttributionReportingAllowed} from './utils/privacy-sandbox-utils';
+import {
+  AttributionReportingStatus,
+  isAttributionReportingAllowed,
+} from './utils/privacy-sandbox-utils';
 
 /** @const {string} */
 const TAG = 'pixel';
@@ -67,10 +70,25 @@ function createImagePixel(win, src, noReferrer = false, attributionSrc) {
   if (noReferrer) {
     image.referrerPolicy = 'no-referrer';
   }
-  image.src = src;
-  if (isAttributionReportingAllowed(win.document)) {
-    image.attributionsrc = attributionSrc;
+
+  let attributionReportingStatus =
+    AttributionReportingStatus.ATTRIBUTION_DATA_UNSPECIFIED;
+  if (attributionSrc != null) {
+    if (isAttributionReportingAllowed(win.document)) {
+      attributionReportingStatus =
+        AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
+      attributionSrc = attributionSrc.replace(
+        'ATTRIBUTION_REPORTING_STATUS',
+        attributionReportingStatus
+      );
+      image.attributionsrc = attributionSrc;
+    } else {
+      attributionReportingStatus =
+        AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
+    }
   }
+  src = src.replace('ATTRIBUTION_REPORTING_STATUS', attributionReportingStatus);
+  image.src = src;
   return image;
 }
 
