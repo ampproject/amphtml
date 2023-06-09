@@ -38,8 +38,8 @@ function isHttpOrHttpsUrl(url) {
  * @return {Promise<string>}
  */
 function readFromFile(name) {
-  return new Promise(function (resolve, reject) {
-    fs.readFile(name, 'utf8', function (err, data) {
+  return new Promise(function(resolve, reject) {
+    fs.readFile(name, 'utf8', function(err, data) {
       if (err) {
         reject(err);
       } else {
@@ -56,16 +56,16 @@ function readFromFile(name) {
  * @return {Promise<string>}
  */
 function readFromReadable(name, readable) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     const chunks = [];
     readable.setEncoding('utf8');
-    readable.on('data', function (chunk) {
+    readable.on('data', function(chunk) {
       chunks.push(chunk);
     });
-    readable.on('end', function () {
+    readable.on('end', function() {
       resolve(chunks.join(''));
     });
-    readable.on('error', function (error) {
+    readable.on('error', function(error) {
       reject(new Error('Could not read from ' + name + ' - ' + error.message));
     });
   });
@@ -78,7 +78,7 @@ function readFromReadable(name, readable) {
  * @return {Promise<string>}
  */
 function readFromStdin() {
-  return readFromReadable('stdin', process.stdin).then(function (data) {
+  return readFromReadable('stdin', process.stdin).then(function(data) {
     process.stdin.resume();
     return data;
   });
@@ -93,9 +93,9 @@ function readFromStdin() {
  * @return {Promise<string>}
  */
 function readFromUrl(url, userAgent) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     const clientModule = hasPrefix(url, 'http://') ? http : https;
-    const req = clientModule.request(url, function (response) {
+    const req = clientModule.request(url, function(response) {
       if (response.statusCode !== 200) {
         // https://nodejs.org/api/http.html says: "[...] However, if
         // you add a 'response' event handler, then you must consume
@@ -105,20 +105,20 @@ function readFromUrl(url, userAgent) {
         // method."
         response.resume();
         reject(new Error(
-          'Unable to fetch ' + url + ' - HTTP Status ' +
-          response.statusCode));
+            'Unable to fetch ' + url + ' - HTTP Status ' +
+                   response.statusCode));
       } else {
         resolve(response);
       }
     });
     req.setHeader('User-Agent', userAgent);
-    req.on('error', function (error) { // E.g., DNS resolution errors.
+    req.on('error', function(error) { // E.g., DNS resolution errors.
       reject(
-        new Error('Unable to fetch ' + url + ' - ' + error.message));
+          new Error('Unable to fetch ' + url + ' - ' + error.message));
     });
     req.end();
   })
-    .then(readFromReadable.bind(null, url));
+      .then(readFromReadable.bind(null, url));
 }
 
 /**
@@ -221,7 +221,7 @@ function Validator(scriptContents) {
     new vm.Script(scriptContents).runInContext(this.sandbox);
   } catch (error) {
     throw new Error('Could not instantiate validator_wasm.js - ' +
-      error.message);
+        error.message);
   }
 }
 
@@ -229,7 +229,7 @@ function Validator(scriptContents) {
  * Initialize the validator.
  * @return {Promise<undefined>!}
  */
-Validator.prototype.init = function () {
+Validator.prototype.init = function() {
   if (this.sandbox.amp.validator.init) {
     return this.sandbox.amp.validator.init();
   } else {
@@ -245,9 +245,9 @@ Validator.prototype.init = function () {
  * @return {!ValidationResult}
  * @export
  */
-Validator.prototype.validateString = function (inputString, htmlFormat) {
+Validator.prototype.validateString = function(inputString, htmlFormat) {
   const internalResult =
-    this.sandbox.amp.validator.validateString(inputString, htmlFormat);
+      this.sandbox.amp.validator.validateString(inputString, htmlFormat);
   const result = new ValidationResult();
   result.status = internalResult.status;
   for (let ii = 0; ii < internalResult.errors.length; ii++) {
@@ -257,7 +257,7 @@ Validator.prototype.validateString = function (inputString, htmlFormat) {
     error.line = internalError.line;
     error.col = internalError.col;
     error.message =
-      this.sandbox.amp.validator.renderErrorMessage(internalError);
+        this.sandbox.amp.validator.renderErrorMessage(internalError);
     error.specUrl = internalError.specUrl;
     error.code = internalError.code;
     error.params = internalError.params;
@@ -269,7 +269,7 @@ Validator.prototype.validateString = function (inputString, htmlFormat) {
 /**
  * A global static map used by the getInstance function to avoid loading
  * AMP Validators more than once.
- * @type {!Object<string, Validator}
+ * @type {!Object<string, Validator>}
  */
 const instanceByValidatorJs = {};
 
@@ -287,7 +287,7 @@ const instanceByValidatorJs = {};
  */
 function getInstance(opt_validatorJs, opt_userAgent) {
   const validatorJs =
-    opt_validatorJs || 'https://cdn.ampproject.org/v0/validator_wasm.js';
+      opt_validatorJs || 'https://cdn.ampproject.org/v0/validator_wasm.js';
   const userAgent = opt_userAgent || DEFAULT_USER_AGENT;
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return Promise.resolve(instanceByValidatorJs[validatorJs]);
@@ -295,7 +295,7 @@ function getInstance(opt_validatorJs, opt_userAgent) {
   const validatorJsPromise = isHttpOrHttpsUrl(validatorJs) ?
     readFromUrl(validatorJs, userAgent) :
     readFromFile(validatorJs);
-  return validatorJsPromise.then(function (scriptContents) {
+  return validatorJsPromise.then(function(scriptContents) {
     let instance;
     try {
       instance = new Validator(scriptContents);
@@ -308,7 +308,7 @@ function getInstance(opt_validatorJs, opt_userAgent) {
     }
     instanceByValidatorJs[validatorJs] = instance;
     return instance;
-  }).then(function (instance) {
+  }).then(function(instance) {
     return instance.init().then(() => instance);
   });
 }
@@ -351,14 +351,14 @@ exports.newInstance = newInstance;
 function logValidationResult(filename, validationResult, color) {
   if (validationResult.status === 'PASS') {
     process.stdout.write(
-      filename + ': ' + (color ? colors.green('PASS') : 'PASS') + '\n');
+        filename + ': ' + (color ? colors.green('PASS') : 'PASS') + '\n');
   }
   for (let ii = 0; ii < validationResult.errors.length; ii++) {
     const error = validationResult.errors[ii];
     let msg = filename + ':' + error.line + ':' + error.col + ' ';
     if (color) {
       msg += (error.severity === 'ERROR' ? colors.red : colors.magenta)(
-        error.message);
+          error.message);
     } else {
       msg += error.message;
     }
@@ -375,55 +375,55 @@ function logValidationResult(filename, validationResult, color) {
  */
 function main() {
   program
-    .usage(
-      '[options] <fileOrUrlOrMinus...>\n\n' +
-      '  Validates the files or urls provided as arguments. If "-" is\n' +
-      '  specified, reads from stdin instead.')
-    .option(
-      '--validator_js <fileOrUrl>',
-      'The Validator Javascript.\n' +
-      '  Latest published version by default, or\n' +
-      '  dist/validator_minified.js (built with build.py)\n' +
-      '  for development.',
-      'https://cdn.ampproject.org/v0/validator_wasm.js')
-    .option(
-      '--user-agent <userAgent>', 'User agent string to use in requests.',
-      DEFAULT_USER_AGENT)
-    .option(
-      '--html_format <AMP|AMP4ADS|AMP4EMAIL>',
-      'The input format to be validated.\n' +
-      '  AMP by default.',
-      'AMP')
-    .option(
-      '--format <color|text|json>',
-      'How to format the output.\n' +
-      '  "color" displays errors/warnings/success in\n' +
-      '          red/orange/green.\n' +
-      '  "text"  avoids color (e.g., useful in terminals not\n' +
-      '          supporting color).\n' +
-      '  "json"  emits json corresponding to the ValidationResult\n' +
-      '          message in validator.proto.',
-      'color')
-    .parse(process.argv);
+      .usage(
+          '[options] <fileOrUrlOrMinus...>\n\n' +
+          '  Validates the files or urls provided as arguments. If "-" is\n' +
+          '  specified, reads from stdin instead.')
+      .option(
+          '--validator_js <fileOrUrl>',
+          'The Validator Javascript.\n' +
+              '  Latest published version by default, or\n' +
+              '  dist/validator_minified.js (built with build.py)\n' +
+              '  for development.',
+          'https://cdn.ampproject.org/v0/validator_wasm.js')
+      .option(
+          '--user-agent <userAgent>', 'User agent string to use in requests.',
+          DEFAULT_USER_AGENT)
+      .option(
+          '--html_format <AMP|AMP4ADS|AMP4EMAIL>',
+          'The input format to be validated.\n' +
+              '  AMP by default.',
+          'AMP')
+      .option(
+          '--format <color|text|json>',
+          'How to format the output.\n' +
+              '  "color" displays errors/warnings/success in\n' +
+              '          red/orange/green.\n' +
+              '  "text"  avoids color (e.g., useful in terminals not\n' +
+              '          supporting color).\n' +
+              '  "json"  emits json corresponding to the ValidationResult\n' +
+              '          message in validator.proto.',
+          'color')
+      .parse(process.argv);
   const opts = program.opts();
   if (opts.length === 0) {
     program.outputHelp();
     process.exit(1);
   }
   if (opts.html_format !== 'AMP' && opts.html_format !== 'AMP4ADS' &&
-    opts.html_format !== 'AMP4EMAIL') {
+      opts.html_format !== 'AMP4EMAIL') {
     process.stderr.write(
-      '--html_format must be set to "AMP", "AMP4ADS", or "AMP4EMAIL".\n',
-      function () {
-        process.exit(1);
-      });
+        '--html_format must be set to "AMP", "AMP4ADS", or "AMP4EMAIL".\n',
+        function() {
+          process.exit(1);
+        });
   }
   if (opts.format !== 'color' && opts.format !== 'text' &&
-    opts.format !== 'json') {
+      opts.format !== 'json') {
     process.stderr.write(
-      '--format must be set to "color", "text", or "json".\n', function () {
-        process.exit(1);
-      });
+        '--format must be set to "color", "text", or "json".\n', function() {
+          process.exit(1);
+        });
   }
   const inputs = [];
   for (let ii = 0; ii < program.args.length; ii++) {
@@ -437,59 +437,59 @@ function main() {
     }
   }
   getInstance(opts.validator_js, opts.userAgent)
-    .then(function (validator) {
-      Promise.all(inputs)
-        .then(function (resolvedInputs) {
-          const jsonOut = {};
-          let hasError = false;
-          for (let ii = 0; ii < resolvedInputs.length; ii++) {
-            const validationResult = validator.validateString(
-              resolvedInputs[ii], opts.html_format);
-            if (opts.format === 'json') {
-              jsonOut[program.args[ii]] = validationResult;
-            } else {
-              logValidationResult(
-                program.args[ii], validationResult,
-                opts.format === 'color' ? true : false);
-            }
-            if (validationResult.status !== 'PASS') {
-              hasError = true;
-            }
-          }
-          if (opts.format === 'json') {
-            process.stdout.write(
-              JSON.stringify(jsonOut) + '\n', function () {
-                process.exit(hasError ? 1 : 0);
-              });
-          } else if (hasError) {
-            process.stderr.write('', function () {
-              process.exit(1);
+      .then(function(validator) {
+        Promise.all(inputs)
+            .then(function(resolvedInputs) {
+              const jsonOut = {};
+              let hasError = false;
+              for (let ii = 0; ii < resolvedInputs.length; ii++) {
+                const validationResult = validator.validateString(
+                    resolvedInputs[ii], opts.html_format);
+                if (opts.format === 'json') {
+                  jsonOut[program.args[ii]] = validationResult;
+                } else {
+                  logValidationResult(
+                      program.args[ii], validationResult,
+                      opts.format === 'color' ? true : false);
+                }
+                if (validationResult.status !== 'PASS') {
+                  hasError = true;
+                }
+              }
+              if (opts.format === 'json') {
+                process.stdout.write(
+                    JSON.stringify(jsonOut) + '\n', function() {
+                      process.exit(hasError ? 1 : 0);
+                    });
+              } else if (hasError) {
+                process.stderr.write('', function() {
+                  process.exit(1);
+                });
+              } else {
+                process.stdout.write('', function() {
+                  process.exit(0);
+                });
+              }
+            })
+            .catch(function(error) {
+              process.stderr.write(
+                  (opts.format == 'color' ? colors.red(error.message) :
+                    error.message) +
+                      '\n',
+                  function() {
+                    process.exit(1);
+                  });
             });
-          } else {
-            process.stdout.write('', function () {
-              process.exit(0);
-            });
-          }
-        })
-        .catch(function (error) {
-          process.stderr.write(
+      })
+      .catch(function(error) {
+        process.stderr.write(
             (opts.format == 'color' ? colors.red(error.message) :
               error.message) +
-            '\n',
-            function () {
+                '\n',
+            function() {
               process.exit(1);
             });
-        });
-    })
-    .catch(function (error) {
-      process.stderr.write(
-        (opts.format == 'color' ? colors.red(error.message) :
-          error.message) +
-        '\n',
-        function () {
-          process.exit(1);
-        });
-    });
+      });
 }
 
 exports.main = main;
