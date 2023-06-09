@@ -23,7 +23,7 @@ const parserInterface = goog.require('amp.htmlparser.interface');
 /**
  * Some tags have no end tags as per HTML5 spec. These were extracted
  * from the single page spec by looking for "no end tag" with CTRL+F.
- * @type {{[key: string]: ?}}
+ * @type {!Object<string, number>}
  * @private
  */
 const ElementsWithNoEndElements = {
@@ -47,7 +47,7 @@ const ElementsWithNoEndElements = {
 /**
  * Set of HTML tags which should never trigger an implied open of a <head>
  * or <body> element.
- * @type {{[key: string]: ?}}
+ * @type {!Object<string, number>}
  * @private
  */
 const HtmlStructureElements = {
@@ -61,7 +61,7 @@ const HtmlStructureElements = {
 /**
  * The set of HTML tags which are legal in the HTML document <head> and
  * the 'HEAD' tag itself.
- * @type {{[key: string]: ?}}
+ * @type {!Object<string, number>}
  * @private
  */
 const HeadElements = {
@@ -81,7 +81,7 @@ const HeadElements = {
  * The set of HTML tags whose presence will implicitly close a <p> element.
  * For example '<p>foo<h1>bar</h1>' should parse the same as
  * '<p>foo</p><h1>bar</h1>'. See https://www.w3.org/TR/html-markup/p.html
- * @type {{[key: string]: ?}}
+ * @type {!Object<string, number>}
  * @private
  */
 const ElementsWhichClosePTag = {
@@ -716,7 +716,7 @@ exports.HtmlParser = HtmlParser;
 /**
  * HTML entities that are encoded/decoded.
  * TODO(goto): use `goog.string.htmlEncode` instead.
- * @type {!{[key: string]: string}}
+ * @type {!Object<string, string>}
  */
 const Entities = {
   'colon': ':',
@@ -746,7 +746,7 @@ exports.EFlags = EFlags;
 
 /**
  * A map of element to a bitmap of flags it has, used internally on the parser.
- * @type {{[key: string]: ?}}
+ * @type {!Object<string, number>}
  */
 const Elements = {
   'A': 0,

@@ -264,7 +264,7 @@ const ParsedHtmlTag = class {
     });
 
     // Lazily allocated map from attribute name to value.
-    /** @private @type {?{[key: string]: string}} */
+    /** @private @type {?Object<string, string>} */
     this.attrsByKey_ = null;
 
     /** @private @type {?ScriptTag} */
@@ -300,7 +300,7 @@ const ParsedHtmlTag = class {
   /**
    * Returns an object mapping attribute name to attribute value. This is
    * populated lazily, as it's not used for most tags.
-   * @return {{[key: string]: string}}
+   * @return {{!Object<string, string>}
    * */
   attrsByKey() {
     if (this.attrsByKey_ === null) {
@@ -309,7 +309,7 @@ const ParsedHtmlTag = class {
         this.attrsByKey_[attr.name] = attr.value;
       }
     }
-    return /** @type{{[key: string]: string}} */ (this.attrsByKey_);
+    return /** @type{!Object<string, string>} */ (this.attrsByKey_);
   }
 
   /**

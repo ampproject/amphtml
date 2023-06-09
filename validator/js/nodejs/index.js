@@ -269,7 +269,7 @@ Validator.prototype.validateString = function (inputString, htmlFormat) {
 /**
  * A global static map used by the getInstance function to avoid loading
  * AMP Validators more than once.
- * @type {!{[key: string]: Validator}}
+ * @type {!Object<string, Validator}
  */
 const instanceByValidatorJs = {};
 
