@@ -5,7 +5,7 @@
   "devDependencies": {
     "@ampproject/storybook-addon": "1.1.10",
     "@storybook/preact": "7.0.20",
-    "preact-render-to-string": "6.0.3",
+    "preact-render-to-string": "6.1.0",
     "preact": "10.15.1"
   }
 }
