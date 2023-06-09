@@ -89,11 +89,9 @@
     "chai-as-promised": "7.1.1",
     "check-dependencies": "1.1.0",
     "chokidar": "3.5.2",
-    "cli-highlight": "2.1.11",
     "commander": "7.2.0",
     "connect-header": "0.0.5",
     "css-imports": "0.3.1",
-    "css-selector-tokenizer": "0.8.0",
     "css-what": "5.1.0",
     "cssnano": "5.0.8",
     "dedent": "0.7.0",
@@ -156,7 +154,6 @@
     "lodash.debounce": "4.0.8",
     "markdown-link-check": "3.10.1",
     "markdown-toc": "1.2.0",
-    "marked": "4.0.10",
     "minimatch": "3.0.5",
     "minimist": "1.2.6",
     "mocha": "9.2.2",
@@ -184,7 +181,6 @@
     "terser": "5.14.2",
     "traverse": "0.6.6",
     "typescript": "4.5.4",
-    "util": "0.12.4",
-    "vinyl-fs": "3.0.3"
+    "util": "0.12.4"
   }
 }
