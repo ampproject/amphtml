@@ -58,7 +58,6 @@ describes.realWin(
           ? storyEl.setAttribute('muted', '')
           : storyEl.removeAttribute('muted');
       });
-      storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_BUILT, true);
       env.sandbox
         .stub(Services, 'storyStoreServiceForOrNull')
         .returns(Promise.resolve(storeService));

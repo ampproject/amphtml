@@ -107,25 +107,10 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
-        storeService.subscribe(
-          StateProperty.SYSTEM_UI_IS_BUILT_STATE,
-          (isBuilt) => {
-            if (isBuilt) {
-              this.systemLayerEl_ = this.element
-                .closest('amp-story')
-                .querySelector('.i-amphtml-system-layer-host');
-              this.element.addEventListener(
-                'click',
-                this.onClick_.bind(this),
-                true
-              );
-              this.storeService_.subscribe(
-                StateProperty.MUTED_STATE,
-                this.onMutedStateChange_.bind(this)
-              );
-            }
-          },
-          true /** callToInitialize */
+        this.element.addEventListener('click', this.onClick_.bind(this), true);
+        this.storeService_.subscribe(
+          StateProperty.MUTED_STATE,
+          this.onMutedStateChange_.bind(this)
         );
       }
     );
@@ -138,6 +123,8 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
    */
   onClick_() {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+
+    this.getSystemLayerEl_();
     this.systemLayerEl_.classList.toggle(
       'i-amphtml-story-highlight-mute-audio-control',
       true
@@ -151,10 +138,20 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
    */
   onMutedStateChange_(isMuted) {
     if (isMuted) {
+      this.getSystemLayerEl_();
       this.systemLayerEl_.classList.toggle(
         'i-amphtml-story-highlight-mute-audio-control',
         false
       );
+    }
+  }
+
+  /** @private */
+  getSystemLayerEl_() {
+    if (!this.systemLayerEl_) {
+      this.systemLayerEl_ = this.element
+        .closest('amp-story')
+        .querySelector('.i-amphtml-system-layer-host');
     }
   }
 
