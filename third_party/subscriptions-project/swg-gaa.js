@@ -332,9 +332,9 @@ function toString(val) {
 
 /**
  * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
-const base64UrlDecodeSubs = {'-': '+', '_': '/'};
+const base64UrlDecodeSubs = { '-': '+', '_': '/' };
 
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
@@ -421,7 +421,7 @@ function base64UrlDecodeToBytes(str) {
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */(json)));
 }
 
 /**
@@ -464,7 +464,7 @@ function tryParseJson(json, onFailed) {
  * Provides helper methods to decode and verify JWT tokens.
  */
 class JwtHelper {
-  constructor() {}
+  constructor() { }
 
   /**
    * Decodes JWT token and returns its payload.
@@ -795,7 +795,7 @@ let a;
  * We cached all parsed URLs. As of now there are no use cases
  * of AMP docs that would ever parse an actual large number of URLs,
  * but we often parse the same one over and over again.
- * @type {Object<string, !LocationDef>}
+ * @type {{[key: string]: !LocationDef}}
  */
 let cache;
 
@@ -859,7 +859,7 @@ function parseUrlWithA(a, url) {
 /**
  * Parses and builds Object of URL query string.
  * @param {string} query The URL query string.
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function parseQueryString(query) {
   if (!query) {
@@ -931,7 +931,7 @@ const DEFAULT_LANGUAGE_CODE = 'en';
 
 /**
  * Gets a message for a given language code, from a map of messages.
- * @param {!Object<string, string>} map
+ * @param {!{[key: string]: string}} map
  * @param {?string|?Element} languageCodeOrElement
  * @return {?string}
  */
@@ -1036,7 +1036,7 @@ function startsWith(string, prefix) {
  * limitations under the License.
  */
 
-/** @type {Object<string, string>} */
+/** @type {{[key: string]: string}} */
 let propertyNameCache;
 
 /** @const {!Array<string>} */
@@ -1108,7 +1108,7 @@ function getVendorJsPropertyName(style, camelCase, bypassCache) {
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
  * @param {!Element} element
- * @param {!Object<string, string|number>} styles
+ * @param {!{[key: string]: string|number}} styles
  */
 function setImportantStyles(element, styles) {
   for (const k in styles) {
@@ -1145,7 +1145,7 @@ function setStyle(element, property, value, units, bypassCache) {
  * Sets the CSS styles of the specified element. The styles
  * a specified as a map from CSS property names to their values.
  * @param {!Element} element
- * @param {!Object<string, ?string|number|boolean>} styles
+ * @param {!{[key: string]: ?string|number|boolean}} styles
  */
 function setStyles(element, styles) {
   for (const k in styles) {
@@ -1175,7 +1175,7 @@ const styleType = 'text/css';
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!Object<string, string|number|boolean|!Object<string, string|number|boolean>>} attributes
+ * @param {!{[key: string]: string|number|boolean|!{[key: string]: string|number|boolean}}} attributes
  * @return {!Element} updated element.
  */
 function addAttributesToElement(element, attributes) {
@@ -1183,13 +1183,13 @@ function addAttributesToElement(element, attributes) {
     if (attr == 'style') {
       setStyles(
         element,
-        /** @type {!Object<string, string|boolean|number>} */
+        /** @type {!{[key: string]: string|boolean|number}} */
         (attributes[attr])
       );
     } else {
       element.setAttribute(
         attr,
-        /** @type {string|boolean|number} */ (attributes[attr])
+        /** @type {string|boolean|number} */(attributes[attr])
       );
     }
   }
@@ -1200,7 +1200,7 @@ function addAttributesToElement(element, attributes) {
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!Object<string, string>} attributes
+ * @param {!{[key: string]: string}} attributes
  * @param {?(string|!Node|!ArrayLike<!Node>|!Array<!Node>)=} content
  * @return {!Element} created element.
  */
@@ -1211,7 +1211,7 @@ function createElement(doc, tagName, attributes, content) {
     if (typeof content == 'string') {
       element.textContent = content;
     } else if (content.nodeType) {
-      element.appendChild(/** @type {!Node} */ (content));
+      element.appendChild(/** @type {!Node} */(content));
     } else if ('length' in content) {
       for (let i = 0; i < content.length; i++) {
         element.appendChild(content[i]);
@@ -1401,11 +1401,11 @@ class GlobalDoc {
 function resolveDoc(input) {
   // Is it a `Document`
   if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
+    return new GlobalDoc(/** @type {!Document} */(input));
   }
   // Is it a `Window`?
   if (/** @type {!Window} */ (input).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
+    return new GlobalDoc(/** @type {!Window} */(input));
   }
   return /** @type {!Doc} */ (input);
 }
@@ -1426,7 +1426,7 @@ function resolveDoc(input) {
  * limitations under the License.
  */
 
-/** @const {!Object<string,?Array<AnalyticsEvent>>} */
+/** @const {!{[key: string]: ?Array<AnalyticsEvent}>} */
 const ShowcaseEvents = {
   // Events related to content being potentially unlockable
   [ShowcaseEvent.EVENT_SHOWCASE_METER_OFFERED]: [
@@ -1896,7 +1896,7 @@ class GaaMeteringRegwall {
    * @param {{ iframeUrl: string, caslUrl: string }} params
    * @return {!Promise<!GaaUserDef|!GoogleIdentityV1|!Object>}
    */
-  static show({iframeUrl, caslUrl}) {
+  static show({ iframeUrl, caslUrl }) {
     const queryString = GaaUtils.getQueryString();
     if (!queryStringHasFreshGaaParams(queryString)) {
       const errorMessage =
@@ -1910,8 +1910,8 @@ class GaaMeteringRegwall {
       isFromUserAction: false,
     });
 
-    GaaMeteringRegwall.render_({iframeUrl, caslUrl});
-    GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
+    GaaMeteringRegwall.render_({ iframeUrl, caslUrl });
+    GaaMeteringRegwall.sendIntroMessageToGsiIframe_({ iframeUrl });
     GaaMeteringRegwall.logButtonClickEvents_();
     return GaaMeteringRegwall.getGaaUser_()
       .then((gaaUser) => {
@@ -1981,7 +1981,7 @@ class GaaMeteringRegwall {
    * @param {{ caslUrl: string, authorizationUrl: string }} params
    * @return {boolean}
    */
-  static showWithNative3PRegistrationButton({caslUrl, authorizationUrl}) {
+  static showWithNative3PRegistrationButton({ caslUrl, authorizationUrl }) {
     logEvent({
       showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
       isFromUserAction: false,
@@ -2027,7 +2027,7 @@ class GaaMeteringRegwall {
    * @nocollapse
    * @param {{ iframeUrl: string, caslUrl: string, useNativeMode: (boolean|undefined)}} params
    */
-  static render_({iframeUrl, caslUrl, useNativeMode = false}) {
+  static render_({ iframeUrl, caslUrl, useNativeMode = false }) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const publisherName = GaaMeteringRegwall.getPublisherNameFromPageConfig_();
     const placeholderPatternForPublication = /<ph name="PUBLICATION".+?\/ph>/g;
@@ -2118,7 +2118,7 @@ class GaaMeteringRegwall {
     // Trigger a fade-in transition.
     /** @suppress {suspiciousCode} */
     containerEl.offsetHeight; // Trigger a repaint (to prepare the CSS transition).
-    setImportantStyles(containerEl, {'opacity': 1});
+    setImportantStyles(containerEl, { 'opacity': 1 });
 
     // Listen for clicks.
     GaaMeteringRegwall.addClickListenerOnPublisherSignInButton_();
@@ -2175,7 +2175,7 @@ class GaaMeteringRegwall {
 
     // Search for publisher name, breadth-first.
     for (let i = 0; i < jsonQueue.length; i++) {
-      const json = /** @type {!Object<?,?>} */ (jsonQueue[i]);
+      const json = /** @type {!{[key: ?]: ?}} */ (jsonQueue[i]);
 
       // Return publisher name, if possible.
       const publisherName = json?.publisher?.name;
@@ -2226,7 +2226,7 @@ class GaaMeteringRegwall {
           isFromUserAction: true,
         });
 
-        callSwg((swg) => swg.triggerLoginRequest({linkRequested: false}));
+        callSwg((swg) => swg.triggerLoginRequest({ linkRequested: false }));
       });
   }
 
@@ -2303,7 +2303,7 @@ class GaaMeteringRegwall {
    * @nocollapse
    * @param {{ iframeUrl: string }} params
    */
-  static sendIntroMessageToGsiIframe_({iframeUrl}) {
+  static sendIntroMessageToGsiIframe_({ iframeUrl }) {
     // Introduce this window to the publisher's Google Sign-In iframe.
     // This lets the iframe send post messages back to this window.
     // Without the introduction, the iframe wouldn't have a reference to this window.
@@ -2321,7 +2321,7 @@ class GaaMeteringRegwall {
     };
   }
 
-  static createNativeRegistrationButton({googleApiClientId}) {
+  static createNativeRegistrationButton({ googleApiClientId }) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const parentElement = self.document.getElementById(
       REGISTRATION_BUTTON_CONTAINER_ID
@@ -2367,7 +2367,7 @@ class GaaMeteringRegwall {
     });
   }
 
-  static createNative3PRegistrationButton({authorizationUrl}) {
+  static createNative3PRegistrationButton({ authorizationUrl }) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const parentElement = self.document.getElementById(
       REGISTRATION_BUTTON_CONTAINER_ID
@@ -2413,7 +2413,7 @@ class GaaGoogleSignInButton {
    * @nocollapse
    * @param {{ allowedOrigins: !Array<string> }} params
    */
-  static show({allowedOrigins}) {
+  static show({ allowedOrigins }) {
     // Optionally grab language code from URL.
     const queryString = GaaUtils.getQueryString();
     const queryParams = parseQueryString(queryString);
@@ -2638,7 +2638,7 @@ class GaaGoogle3pSignInButton {
    * the same window, set redirectMode to true. For webview applications
    * redirectMode is recommended.
    */
-  static show({allowedOrigins, authorizationUrl, redirectMode = false}) {
+  static show({ allowedOrigins, authorizationUrl, redirectMode = false }) {
     // Optionally grab language code from URL.
     const queryString = GaaUtils.getQueryString();
     const queryParams = parseQueryString(queryString);
@@ -2739,7 +2739,7 @@ class GaaGoogle3pSignInButton {
    * @nocollapse
    * @param {{ gaaUser: GaaUserDef}} params
    */
-  static gaaNotifySignIn({gaaUser}) {
+  static gaaNotifySignIn({ gaaUser }) {
     self.opener.postMessage({
       stamp: POST_MESSAGE_STAMP,
       command: POST_MESSAGE_COMMAND_USER,
@@ -2756,7 +2756,7 @@ class GaaGoogle3pSignInButton {
  *   isFromUserAction: boolean,
  * }} params
  */
-function logEvent({analyticsEvent, showcaseEvent, isFromUserAction} = {}) {
+function logEvent({ analyticsEvent, showcaseEvent, isFromUserAction } = {}) {
   callSwg((swg) => {
     // Get reference to event manager.
     swg.getEventManager().then((eventManager) => {

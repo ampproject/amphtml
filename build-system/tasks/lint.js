@@ -64,8 +64,8 @@ async function runLinter(filesToLint) {
 
 /**
  * Summarize the results of linting all files.
- * @param {Object} results
- * @param {Object} fixedFiles
+ * @param {object} results
+ * @param {object} fixedFiles
  */
 function summarizeResults(results, fixedFiles) {
   const {errorCount, warningCount} = results;

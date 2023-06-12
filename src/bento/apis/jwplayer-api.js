@@ -8,7 +8,7 @@ import {addParamsToUrl} from '../../url';
  * @param {string} contentSearch
  * @param {string} contentRecency
  * @param {boolean} contentBackfill
- * @param {Object} queryParams
+ * @param {object} queryParams
  * @param {{policyInfo, policyMetadata, policyState}} consentParams
  * @return {string} iframe src
  */

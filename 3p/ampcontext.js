@@ -51,7 +51,7 @@ export class AbstractAmpContext {
     /** @type {?Object} */
     this.consentSharedData = null;
 
-    /** @type {?Object<string, *>} */
+    /** @type {?{[key: string]: *}} */
     this.data = null;
 
     /** @type {?string} */
@@ -102,7 +102,7 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.tagName = null;
 
-    /** @type {!Object<number, Deferred>} */
+    /** @type {!{[key: number]: Deferred}} */
     this.resizeIdToDeferred_ = map();
 
     /** @type {number} */

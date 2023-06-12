@@ -25,7 +25,7 @@ const TAG = 'sanitizer';
  * Allowlist of supported self-closing tags for Caja. These are used for
  * correct parsing on Caja and are not necessary for DOMPurify which uses
  * the browser's HTML parser.
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const SELF_CLOSING_TAGS = {
   'br': true,

@@ -79,7 +79,7 @@ export const TCF_POST_MESSAGE_API_COMMANDS = {
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
  *  consentMetadata: (ConsentMetadataDef|undefined),
- *  purposeConsents: (Object<string, PURPOSE_CONSENT_STATE>|undefined),
+ *  purposeConsents: ({[key: string]: PURPOSE_CONSENT_STATE}|undefined),
  *  isDirty: (boolean|undefined),
  * }}
  */
@@ -275,7 +275,7 @@ function getLegacyStoredConsentInfo(value) {
  * @param {CONSENT_ITEM_STATE} consentState
  * @param {string=} opt_consentString
  * @param {ConsentMetadataDef=} opt_consentMetadata
- * @param {Object<string, PURPOSE_CONSENT_STATE>=} opt_purposeConsents
+ * @param {{[key: string]: PURPOSE_CONSENT_STATE}=} opt_purposeConsents
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
@@ -386,7 +386,7 @@ export function getConsentStateValue(enumState) {
  * {'ga': true, 'cst': 2}
  *
  * @param {ConsentMetadataDef=} consentInfoMetadata
- * @return {Object}
+ * @return {object}
  */
 export function composeMetadataStoreValue(consentInfoMetadata) {
   const storageMetadata = map();

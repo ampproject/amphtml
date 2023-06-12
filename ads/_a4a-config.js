@@ -11,13 +11,13 @@ import {map} from '#core/types/object';
  * Otherwise, it will attempt to render the ad via the existing "3p iframe"
  * pathway (delay load into a cross-domain iframe).
  *
- * @type {!Object<string, function(!Window, !Element): boolean>}
+ * @type {!{[key: string]: function(!Window, !Element): boolean}}
  */
 let a4aRegistry;
 
 /**
  * Returns the a4a registry map
- * @return {Object}
+ * @return {object}
  */
 export function getA4ARegistry() {
   if (!a4aRegistry) {
@@ -44,7 +44,7 @@ export function getA4ARegistry() {
 
 /**
  * An object mapping signing server names to their corresponding URLs.
- * @type {!Object<string, string>}
+ * @type {!{[key: string]: string}}
  */
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',

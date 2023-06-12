@@ -484,7 +484,7 @@ def PrintEnumFor(enum_desc, out):
       (LocalModuleName(enum_desc.full_name), ','.join([
           '%s.%s' % (LocalModuleName(enum_desc.full_name), n) for n in names
       ])))
-  out.Line('/** @type (!Object<%s, number>) */' %
+  out.Line('/** @type (!{[key: %s]: number}) */' %
            LocalModuleName(enum_desc.full_name))
   out.Line('%s_NumberByName = {' % LocalModuleName(enum_desc.full_name))
   out.PushIndent(2)
@@ -492,7 +492,7 @@ def PrintEnumFor(enum_desc, out):
     out.Line("'%s': %s," % (v.name, v.number))
   out.PopIndent()
   out.Line('};')
-  out.Line('/** @type (!Object<number, %s>) */' %
+  out.Line('/** @type (!{[key: number]: %s}) */' %
            LocalModuleName(enum_desc.full_name))
   out.Line('%s_NameByNumber = {' % LocalModuleName(enum_desc.full_name))
   out.PushIndent(2)

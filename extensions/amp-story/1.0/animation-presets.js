@@ -55,7 +55,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
 
 /**
  * A mapping of animation categories to corresponding CSS class names.
- * @private @const {!Object<string, string>}
+ * @private @const {!{[key: string]: string}}
  */
 const ANIMATION_CSS_CLASS_NAMES = {
   [FULL_BLEED_CATEGORY]:
@@ -78,7 +78,7 @@ export function setStyleForPreset(el, presetName) {
 /**
  * First keyframe will always be considered offset: 0 and will be applied to the
  * element as the first frame before animation starts.
- * @type {!Object<string, !StoryAnimationPresetDef>}
+ * @type {!{[key: string]: !StoryAnimationPresetDef}}
  */
 export const presets = {
   'pulse': {

@@ -433,7 +433,7 @@ export function adoptShadowMode(global) {
      * @param {!Element} hostElement
      * @param {!Document} doc
      * @param {string} url
-     * @param {!Object<string, string>=} opt_initParams
+     * @param {!{[key: string]: string}=} opt_initParams
      * @return {!Object}
      */
     global.AMP.attachShadowDoc = manager.attachShadowDoc.bind(manager);
@@ -442,7 +442,7 @@ export function adoptShadowMode(global) {
      * Registers a shadow root document via a stream.
      * @param {!Element} hostElement
      * @param {string} url
-     * @param {!Object<string, string>=} opt_initParams
+     * @param {!{[key: string]: string}=} opt_initParams
      * @return {!Object}
      */
     global.AMP.attachShadowDocAsStream =

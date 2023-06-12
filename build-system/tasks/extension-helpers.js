@@ -144,7 +144,7 @@ function declareExtension(name, version, options, extensionsObject) {
 /**
  * Initializes all extensions from build-system/compile/bundles.config.extensions.json
  * if not already done and populates the given extensions object.
- * @param {Object} extensionsObject
+ * @param {object} extensionsObject
  */
 function maybeInitializeExtensions(extensionsObject) {
   if (Object.keys(extensionsObject).length === 0) {

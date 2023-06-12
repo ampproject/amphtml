@@ -24,7 +24,7 @@ export function getSocialConfig(type) {
  *
  * @typedef {{
  *   shareEndpont: string,
- *   defaultParams: Object<string, string>,
+ *   defaultParams: {[key: string]: string},
  *   defaultColor: string,
  *   defaultBackgroundColor: string,
  *   bindings: (!Array<string>|undefined),
@@ -33,7 +33,7 @@ export function getSocialConfig(type) {
 let BentoSocialShareConfigDef;
 
 /**
- * @type {Object<string, BentoSocialShareConfigDef>}
+ * @type {{[key: string]: BentoSocialShareConfigDef}}
  */
 const BUILTINS = {
   'twitter': {

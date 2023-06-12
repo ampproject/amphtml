@@ -56,13 +56,13 @@ export class AmpAdExit extends AMP.BaseElement {
     super(element);
 
     /**
-     * @private @const {!Object<string, !NavigationTargetDef>}
+     * @private @const {!{[key: string]: !NavigationTargetDef}}
      */
     this.targets_ = {};
 
     /**
      * Maps variable target name to an actual target name.
-     * @private @const {!Object<string, string>}
+     * @private @const {!{[key: string]: string}}
      */
     this.variableTargets_ = {};
 
@@ -87,7 +87,7 @@ export class AmpAdExit extends AMP.BaseElement {
       ActionTrust_Enum.LOW
     );
 
-    /** @private @const {!Object<string, !Object<string, string>>} */
+    /** @private @const {!{[key: string]: !{[key: string]: string}}} */
     this.vendorResponses_ = {};
 
     /** @private {?function()} */
@@ -96,7 +96,7 @@ export class AmpAdExit extends AMP.BaseElement {
     /** @private {?string} */
     this.ampAdResourceId_ = null;
 
-    /** @private @const {!Object<string,string>} */
+    /** @private @const {!{[key: string]: string}} */
     this.expectedOriginToVendor_ = {};
 
     /** @private @const {boolean} */
@@ -190,7 +190,7 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object<string, string|number|boolean>} args
+   * @param {!{[key: string]: string|number|boolean}} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
    * @param {!NavigationTargetDef} target
    * @return {function(string): string}

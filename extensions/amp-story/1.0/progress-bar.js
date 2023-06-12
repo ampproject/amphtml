@@ -93,7 +93,7 @@ export class ProgressBar {
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
-    /** @private {!Object<string, number>} */
+    /** @private {!{[key: string]: number}} */
     this.segmentIdMap_ = map();
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */

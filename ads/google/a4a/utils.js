@@ -44,7 +44,7 @@ export const ValidAdContainerTypes = {
 
 /**
  * See `VisibilityState_Enum` enum.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
 const visibilityStateCodes = {
   'visible': '1',
@@ -98,7 +98,7 @@ export let NameframeExperimentConfig;
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
-/** @const {Object} */
+/** @const {object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
@@ -200,7 +200,7 @@ export function isReportingEnabled(ampElement) {
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
- * @return {!Object<string,null|number|string>} block level parameters
+ * @return {!{[key: string]: null|number|string}} block level parameters
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
   const {element: adElement, win} = a4a;
@@ -235,7 +235,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type matching typing attribute.
  * @param {function(!Element):string} groupFn
- * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
+ * @return {!Promise<!{[key: string]: !Array<!Promise<!../../../src/base-element.BaseElement}>>>}
  */
 export function groupAmpAdsByType(ampdoc, type, groupFn) {
   // Look for amp-ad elements of correct type or those contained within
@@ -288,7 +288,7 @@ export function groupAmpAdsByType(ampdoc, type, groupFn) {
 /**
  * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {number} startTime
- * @return {!Promise<!Object<string,null|number|string>>}
+ * @return {!Promise<!{[key: string]: null|number|string}>}
  */
 export function googlePageParameters(a4a, startTime) {
   const {win} = a4a;
@@ -378,7 +378,7 @@ export function googlePageParameters(a4a, startTime) {
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
- * @param {!Object<string,null|number|string>} parameters
+ * @param {!{[key: string]: null|number|string}} parameters
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
@@ -401,7 +401,7 @@ export function googleAdUrl(
 
 /**
  * @param {string} baseUrl
- * @param {!Object<string,null|number|string>} parameters
+ * @param {!{[key: string]: null|number|string}} parameters
  * @param {number} startTime
  * @return {string}
  */
@@ -588,7 +588,7 @@ export function additionalDimensions(win, viewportSize) {
 /**
  * Returns amp-analytics config for a new CSI trigger.
  * @param {string} on The name of the analytics trigger.
- * @param {!Object<string, string>} params Params to be included on the ping.
+ * @param {!{[key: string]: string}} params Params to be included on the ping.
  * @return {!JsonObject}
  */
 function csiTrigger(on, params) {

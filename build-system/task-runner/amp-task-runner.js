@@ -16,6 +16,7 @@ const {
 const {cyan, green, magenta, red} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
+const {isCircleciBuild} = require('../common/ci');
 
 /**
  * @typedef {Function & {
@@ -83,7 +84,7 @@ function ensureUpdatedPackages(taskSourceFileName) {
  * Runs an AMP task with logging and timing after installing its subpackages.
  * @param {string} taskName
  * @param {TaskFuncDef} taskFunc
- * @return {Promise<boolean>} true if task finished successfully.
+ * @return {Promise<void>}
  */
 async function runTask(taskName, taskFunc) {
   const taskFile = path.relative(os.homedir(), 'amp.js');
@@ -93,11 +94,17 @@ async function runTask(taskName, taskFunc) {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
-    return true;
+    // For some reason, e2e tests get stuck on CircleCI after finishing, despite
+    // reaching this point in the code. This is a temporary workaround until we
+    // understand exactly why and fix the root cause.
+    // TODO(@ampproject/wg-infra): fix this.
+    if (isCircleciBuild() && taskName === 'e2e') {
+      process.exit(); // process.exitCode is set in ../tasks/e2e/index.js:171
+    }
   } catch (err) {
     log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
     log(err);
-    return false;
+    process.exit(1);
   }
 }
 
@@ -229,15 +236,14 @@ function createTask(
     }
     task.action(async () => {
       validateUsage(task, taskName, taskFunc);
-      const success = await runTask(taskName, taskFunc);
-      process.exit(Number(!success));
+      await runTask(taskName, taskFunc);
     });
   }
 }
 
 /**
  * Validates usage by examining task and flag invocation.
- * @param {Object} task
+ * @param {object} task
  * @param {string} taskName
  * @param {TaskFuncDef} taskFunc
  */

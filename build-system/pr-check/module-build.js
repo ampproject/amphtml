@@ -36,6 +36,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp dist --esm --fortesting');
     storeModuleBuildToWorkspace();
   } else {
+    timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, or visual diff tests'

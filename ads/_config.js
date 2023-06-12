@@ -46,7 +46,7 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  * }
  *
- * @const {!Object<string, !JsonObject>}
+ * @const {!{[key: string]: !JsonObject}}
  */
 const adConfig = jsonConfiguration({
   '_ping_': {
@@ -1041,6 +1041,10 @@ const adConfig = jsonConfiguration({
   'pubmine': {
     prefetch: ['https://s.pubmine.com/head.js'],
     preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
+  },
+
+  'pubscale': {
     renderStartImplemented: true,
   },
 

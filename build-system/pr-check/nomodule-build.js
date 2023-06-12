@@ -51,7 +51,6 @@ async function prBuildWorkflow() {
     }
     storeNomoduleBuildToWorkspace();
   } else {
-    timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'

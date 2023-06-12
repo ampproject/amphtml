@@ -1,8 +1,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
-/** @type {Object} */
-const experimentDefines = require('../global-configs/experiments-const.json');
+/** @type {object} */
+const experimentDefinesJson = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const open = require('open');
 const path = require('path');
@@ -59,6 +59,17 @@ const watchDebounceDelay = 1000;
  * @private @const {!Map<string, {rebuild: function():!Promise<void>}>}
  */
 const watchedTargets = new Map();
+
+/**
+ * Converts defines to their JSON representation.
+ * See https://esbuild.github.io/api/#define.
+ */
+const experimentDefines = Object.fromEntries(
+  Object.entries(experimentDefinesJson).map(([key, value]) => [
+    key,
+    JSON.stringify(value),
+  ])
+);
 
 /**
  * @param {!Object} jsBundles
@@ -264,7 +275,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   /**
    * Splits up the wrapper to compute the banner and footer
-   * @return {Object}
+   * @return {object}
    */
   function splitWrapper() {
     const wrapper = options.wrapper ?? wrappers.none;
@@ -305,6 +316,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     );
   }
 
+  /** @type {?esbuild.BuildResult} */
   let result = null;
 
   /**
@@ -312,7 +324,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function build(startTime) {
-    if (!result) {
+    if (!result?.rebuild) {
       result = await esbuild.build({
         entryPoints: [entryPoint],
         bundle: true,
@@ -342,12 +354,23 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     }
 
     const {outputFiles} = result;
+    if (outputFiles === undefined) {
+      throw new Error(`No output files for ${destFilename}`);
+    }
 
-    let code = outputFiles.find(({path}) => !path.endsWith('.map')).text;
-    const map = JSON.parse(
-      result.outputFiles.find(({path}) => path.endsWith('.map')).text
-    );
-    const mapChain = [map];
+    const codeFile = outputFiles.find(({path}) => !path.endsWith('.map'));
+    const mapFile = outputFiles.find(({path}) => path.endsWith('.map'));
+
+    if (!codeFile || !mapFile) {
+      throw new Error(
+        `Expected code and map file for ${destFilename}; got ${outputFiles.map(
+          ({path}) => path
+        )}`
+      );
+    }
+
+    let {text: code} = codeFile;
+    const mapChain = [JSON.parse(mapFile.text)];
 
     if (options.outputFormat === 'nomodule-loader') {
       const result = await babel.transformAsync(code, {
@@ -356,7 +379,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         sourceRoot: path.dirname(destFile),
         sourceMaps: true,
       });
-      if (!result) {
+      if (!result?.code) {
         throw new Error('failed to babel');
       }
       code = result.code;
@@ -392,21 +415,25 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     await finishBundle(destDir, destFilename, options, startTime);
   }
 
-  await build(startTime).catch((err) =>
-    handleBundleError(err, !!options.watch, destFilename)
-  );
+  try {
+    await build(startTime);
+  } catch (err) {
+    handleBundleError(err, !!options.watch, destFilename);
+  }
 
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const startTime = Date.now();
-        const buildPromise = build(startTime).catch((err) =>
-          handleBundleError(err, !!options.watch, destFilename)
-        );
-        if (options.onWatchBuild) {
-          options.onWatchBuild(buildPromise);
+        try {
+          const buildPromise = build(startTime);
+          if (options.onWatchBuild) {
+            options.onWatchBuild(buildPromise);
+          }
+          await buildPromise;
+        } catch (err) {
+          handleBundleError(err, !!options.watch, destFilename);
         }
-        await buildPromise;
       },
     });
   }
@@ -517,7 +544,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
 
   /**
    * Actually performs the steps to compile the entry point.
-   * @param {Object} options
+   * @param {object} options
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {

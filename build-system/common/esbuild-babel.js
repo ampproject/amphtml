@@ -46,7 +46,7 @@ function getEsbuildBabelPlugin(
    * @param {string} filename
    * @param {string} contents
    * @param {string} hash
-   * @param {Object} babelOptions
+   * @param {object} babelOptions
    * @return {!Promise<!CacheMessageDef>}
    */
   async function transformContents(filename, contents, hash, babelOptions) {
@@ -151,9 +151,9 @@ function getEsbuildBabelPlugin(
             const file = path.join(root, f);
             const map = babelMaps.get(file);
             if (!map) {
-              if (file.includes(nodeMods)) {
-                // Excuse node_modules since they may have been marked external
-                // (and so not processed by babel).
+              if (file.includes(nodeMods) || file.endsWith('.json')) {
+                // Excuse node_modules and JSON files since they may have been
+                // marked external (and so not processed by babel).
                 return null;
               }
               throw new Error(`failed to find sourcemap for babel file "${f}"`);

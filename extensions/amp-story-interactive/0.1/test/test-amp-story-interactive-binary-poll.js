@@ -182,7 +182,7 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable:2'
+        '--post-select-scale-variable: 2.00'
       );
     });
 
@@ -192,7 +192,7 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable:1.14'
+        '--post-select-scale-variable: 1.14'
       );
     });
 
@@ -202,7 +202,7 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable:1'
+        '--post-select-scale-variable: 1.00'
       );
     });
 

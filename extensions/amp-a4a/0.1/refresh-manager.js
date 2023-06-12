@@ -118,7 +118,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver)>}
+ * @const {!{[key: string]: (!IntersectionObserver)}}
  */
 const observers = {};
 
@@ -127,7 +127,7 @@ const observers = {};
  * the IntersectionOberserver callback function to find the appropriate element
  * target.
  *
- * @const {!Object<string, !RefreshManager>}
+ * @const {!{[key: string]: !RefreshManager}}
  */
 const managers = {};
 

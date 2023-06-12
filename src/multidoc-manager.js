@@ -54,7 +54,7 @@ export class MultidocManager {
    * Attaches the shadow root and calls the supplied DOM builder.
    * @param {!Element} hostElement
    * @param {string} url
-   * @param {!Object<string, string>|undefined} params
+   * @param {!{[key: string]: string}|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
    * @return {!./runtime.ShadowDoc}
@@ -213,7 +213,7 @@ export class MultidocManager {
    * @param {!Element} hostElement
    * @param {!Document} doc
    * @param {string} url
-   * @param {!Object<string, string>=} opt_initParams
+   * @param {!{[key: string]: string}=} opt_initParams
    * @return {!./runtime.ShadowDoc}
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
@@ -255,7 +255,7 @@ export class MultidocManager {
    * doc and configures ampdoc for it.
    * @param {!Element} hostElement
    * @param {string} url
-   * @param {!Object<string, string>=} opt_initParams
+   * @param {!{[key: string]: string}=} opt_initParams
    * @return {!Object}
    */
   attachShadowDocAsStream(hostElement, url, opt_initParams) {

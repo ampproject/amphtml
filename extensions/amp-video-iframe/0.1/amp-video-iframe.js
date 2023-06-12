@@ -296,7 +296,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     //   event: (undefined|string),
     //   analytics: (undefined|{
     //     eventType: string,
-    //     vars: Object<string, string>,
+    //     vars: {[key: string]: string},
     //   }),
     // }}
 
@@ -356,7 +356,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>=} vars
+   * @param {!{[key: string]: string}=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
     user().assertString(eventType, '`eventType` missing in analytics event');

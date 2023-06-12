@@ -32,10 +32,10 @@ const SectionContext = Preact.createContext(
   /** @type {BentoAccordionDef.SectionContext} */ ({})
 );
 
-/** @type {!Object<string, boolean>} */
+/** @type {!{[key: string]: boolean}} */
 const EMPTY_EXPANDED_MAP = {};
 
-/** @type {!Object<string, function(boolean):undefined|undefined>} */
+/** @type {!{[key: string]: function(boolean):undefined|undefined}} */
 const EMPTY_EVENT_MAP = {};
 
 const generateSectionId = sequentialIdGenerator();
@@ -224,9 +224,9 @@ export {BentoAccordion};
 /**
  * @param {string} id
  * @param {boolean} value
- * @param {!Object<string, boolean>} expandedMap
+ * @param {!{[key: string]: boolean}} expandedMap
  * @param {boolean} expandSingleSection
- * @return {!Object<string, boolean>}
+ * @return {!{[key: string]: boolean}}
  */
 function setExpanded(id, value, expandedMap, expandSingleSection) {
   let newExpandedMap;

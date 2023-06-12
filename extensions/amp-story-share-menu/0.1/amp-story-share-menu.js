@@ -38,7 +38,7 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
 /**
  * Maps share provider type to localization asset.
- * @const {!Object<string, !LocalizedStringId_Enum>}
+ * @const {!{[key: string]: !LocalizedStringId_Enum}}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
   'email': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
@@ -248,7 +248,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
   }
 
   /**
-   * @param {Object<string, *>|string} provider
+   * @param {{[key: string]: *}|string} provider
    * @return {Element|null}
    * @private
    * TODO(alanorozco): Set story metadata in share config.

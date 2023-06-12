@@ -524,7 +524,7 @@ export class StoryAdPage {
   /**
    * Construct an analytics event and trigger it.
    * @param {string} eventType
-   * @param {!Object<string, number>} vars A map of vars and their values.
+   * @param {!{[key: string]: number}} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

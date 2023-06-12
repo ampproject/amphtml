@@ -499,7 +499,7 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * Returns URL params - in its own method so we can stub it for testing.
-   * @return {Object<string>}
+   * @return {{[key: string]: string}}
    * @private
    */
   getUrlParams_() {
