@@ -151,8 +151,8 @@ export class AmpStoryAudioSticker extends AMP.BaseElement {
       this.systemLayerEl_ ??
       (this.systemLayerEl_ = this.element
         .closest('amp-story')
-        .querySelector('.i-amphtml-system-layer-host')
-    ));
+        .querySelector('.i-amphtml-system-layer-host'))
+    );
   }
 
   /** @private */
