@@ -10,6 +10,6 @@
     "@puppeteer/browsers": "1.4.1",
     "@types/inquirer": "9.0.3",
     "inquirer": "9.2.7",
-    "puppeteer-core": "20.7.0"
+    "puppeteer-core": "20.7.1"
   }
 }
