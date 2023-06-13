@@ -289,7 +289,7 @@
   margin: auto !important;
   /* expand to full circle and then fade out */
   opacity: 0;
-  animation: expand-fade 10s ease-in-out forwards !important;
+  animation: expand-fade 10s ease-in-out !important;
 }
 
 @keyframes expand-fade {
