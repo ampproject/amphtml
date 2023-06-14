@@ -5622,7 +5622,7 @@ void ReferencePointMatcher::RecordMatch(const ParsedTagSpec& reference_point) {
 
 void ReferencePointMatcher::ExitParentTag(const Context& context,
                                           ValidationResult* result) const {
-  absl::node_hash_map<int32_t, int32_t> reference_point_by_count;
+  absl::flat_hash_map<int32_t, int32_t> reference_point_by_count;
   for (int32_t r : reference_points_matched_) ++reference_point_by_count[r];
   for (const ParsedReferencePoint& p : *parsed_reference_points_) {
     if (p.point->mandatory() && reference_point_by_count.find(p.tag_spec_id) ==
