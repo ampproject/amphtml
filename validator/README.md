@@ -54,6 +54,10 @@ This is only useful development - e.g. when making changes to
     .circleci/install_validator_dependencies.sh
     ```
 
+1. Currently our bazel configuration are only compatible with bazel 5.
+   If you have installed a newer version of bazel, please use [bazelisk](https://github.com/bazelbuild/bazelisk),
+   by replacing all `bazel run` and `bazel test` in this doc to `bazelisk run` and `bazelisk test`.
+
 ### Building Validator Engine
 
 In `amphtml/validator` folder, run
