@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "description": "packages specific to the react storybook env",
   "devDependencies": {
-    "@storybook/react": "7.0.20"
+    "@storybook/react": "7.0.21"
   }
 }
