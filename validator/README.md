@@ -82,3 +82,10 @@ You may now use the `--validator_js` command line flag to
     sed -i 's/--ui_event_filters=INFO//' build-system/tasks/validator.js
     ```
     Then re-run `amp validator-cpp && echo SUCCESS || echo FAIL`.
+
+### Update output files
+
+In `amphtml/validator` folder, run
+```bash
+bazel run cpp/engine:update-tests
+```
