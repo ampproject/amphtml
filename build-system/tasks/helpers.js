@@ -316,16 +316,16 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     );
   }
 
-  /** @type {?esbuild.BuildResult} */
-  let result = null;
+  /** @type {?esbuild.BuildContext} */
+  let esbuildContext = null;
 
   /**
    * @param {number} startTime
    * @return {Promise<void>}
    */
   async function build(startTime) {
-    if (!result?.rebuild) {
-      result = await esbuild.build({
+    if (!esbuildContext) {
+      esbuildContext = await esbuild.context({
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: 'external',
@@ -343,17 +343,14 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         footer,
         // For es5 builds, ensure esbuild-injected code is transpiled.
         target: argv.esm ? 'es6' : 'es5',
-        incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
         mainFields: ['module', 'browser', 'main'],
         write: false,
       });
-    } else {
-      result = await result.rebuild();
     }
 
-    const {outputFiles} = result;
+    const {outputFiles} = await esbuildContext.rebuild();
     if (outputFiles === undefined) {
       throw new Error(`No output files for ${destFilename}`);
     }
@@ -413,6 +410,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
+
+    if (!options.watch) {
+      await esbuildContext.dispose();
+      esbuildContext = null;
+    }
   }
 
   try {
