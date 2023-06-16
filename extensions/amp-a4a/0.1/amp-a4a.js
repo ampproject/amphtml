@@ -50,6 +50,7 @@ import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
+  getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
@@ -146,6 +147,7 @@ export let CreativeMetaDataDef;
       consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
+      consentSharedData: (?Object|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -752,14 +754,23 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           });
 
+          const consentSharedDataPromise = getConsentPolicySharedData(
+            this.element,
+            consentPolicyId
+          ).catch((err) => {
+            user().error(TAG, 'Error determining consent shared data', err);
+            return null;
+          });
+
           return Promise.all([
             consentStatePromise,
             consentStringPromise,
             consentMetadataPromise,
+            consentSharedDataPromise,
           ]);
         }
 
-        return Promise.resolve([null, null, null]);
+        return Promise.resolve([null, null, null, null]);
       })
       // This block returns the ad URL, if one is available.
       /** @return {!Promise<?string>} */
@@ -769,6 +780,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
         const consentMetadata = consentResponse[2];
+        const consentSharedData = consentResponse[3];
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
@@ -788,6 +800,7 @@ export class AmpA4A extends AMP.BaseElement {
                 consentStringType,
                 gdprApplies,
                 additionalConsent,
+                consentSharedData,
               },
               this.tryExecuteRealTimeConfig_(
                 consentState,
