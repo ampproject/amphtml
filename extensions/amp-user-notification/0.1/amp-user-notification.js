@@ -452,10 +452,10 @@ export class UserNotificationManager {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @private @const {!Object<string,!NotificationInterface>} */
+    /** @private @const {!{[key: string]: !NotificationInterface}} */
     this.registry_ = Object.create(null);
 
-    /** @private @const {!Object<string,!UserNotificationDeferDef>} */
+    /** @private @const {!{[key: string]: !UserNotificationDeferDef}} */
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Promise} */

@@ -817,6 +817,20 @@
       "viewport": {"width": 400, "height": 800},
       "loading_complete_selectors": ["amp-subscriptions-dialog:not([hidden])"],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-subscriptions.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-custom-desktop-aspect-ratio.html",
+      "name": "amp-story: custom desktop aspect ratio",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"]
+    },
+    {
+      "url": "examples/visual-tests/amp-story-player/player-local-story-custom-desktop-aspect-ratio.html",
+      "name": "amp-story-player: custom desktop aspect ratio",
+      "viewport": {"width": 1440, "height": 900},
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
     }
   ]
 }

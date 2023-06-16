@@ -150,6 +150,7 @@ export let ShoppingDataDef;
  *    pageSize: {width: number, height: number},
  *    subscriptionsDialogState: boolean,
  *    subscriptionsPageIndex: number,
+ *    desktopAspectRatio: number,
  * }}
  */
 export let State;
@@ -195,6 +196,7 @@ const StateProperty = mangleObjectValues({
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
+  DESKTOP_ASPECT_RATIO: 'desktopAspectRatio',
 
   // App data.
   ACTIONS_ALLOWLIST: 'actionsAllowlist',
@@ -231,6 +233,7 @@ const Action = mangleObjectValues({
   SET_PAGE_SIZE: 'updatePageSize',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
   SET_SUBSCRIPTIONS_PAGE_INDEX: 'setSubscriptionsPageIndex',
+  SET_DESKTOP_ASPECT_RATIO: 'setDesktopAspectRatio',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -258,7 +261,7 @@ export {Action};
 /**
  * Functions to compare a data structure from the previous to the new state and
  * detect a mutation, when a simple equality test would not work.
- * @private @const {!Object<string, !function(*, *):boolean>}
+ * @private @const {!{[key: string]: !function(*, *):boolean}}
  */
 const stateComparisonFunctions = {
   [StateProperty.ACTIONS_ALLOWLIST]: (old, curr) => old.length !== curr.length,
@@ -266,6 +269,7 @@ const stateComparisonFunctions = {
     /**
      * @param {InteractiveComponentDef} old
      * @param {InteractiveComponentDef} curr
+     * @return {boolean}
      */
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
@@ -496,6 +500,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.SUBSCRIPTIONS_STATE]: data,
       });
+    case Action.SET_DESKTOP_ASPECT_RATIO:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.DESKTOP_ASPECT_RATIO]: data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -513,7 +522,7 @@ export class AmpStoryStoreService {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {!Object<string, !Observable>} */
+    /** @private {!{[key: string]: !Observable}} */
     this.listeners_ = {};
 
     /** @private {!State} */
@@ -638,13 +647,14 @@ export class AmpStoryStoreService {
       [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.DISABLED,
       [StateProperty.SUBSCRIPTIONS_PAGE_INDEX]: -1,
+      [StateProperty.DESKTOP_ASPECT_RATIO]: 0,
     });
   }
 
   // @TODO(gmajoulet): These should get their own file if they start growing.
   /**
    * Retrieves the embed mode config, that will override the default state.
-   * @return {!Object<StateProperty, *>} Partial state
+   * @return {!{[key: StateProperty]: *}} Partial state
    * @protected
    */
   getEmbedOverrides_() {

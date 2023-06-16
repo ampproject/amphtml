@@ -12,7 +12,7 @@ import {Slot, createSlot} from './slot';
 
 /** @typedef {import('#core/dom/media-query-props').MediaQueryProps} MediaQueryProps */
 
-/** @typedef {Object<string, AmpElementProp>} AmpElementProps */
+/** @typedef {{[key: string]: AmpElementProp}} AmpElementProps */
 
 /**
  * The following combinations are allowed.
@@ -181,10 +181,10 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       const def = propDefs[match];
       const {
         as = false,
-        single,
-        name = match,
         clone,
+        name = match,
         props: slotProps = {},
+        single,
       } = def;
       devAssert(clone || Ctor['usesShadowDom']);
       const parsedSlotProps = {};
@@ -303,7 +303,7 @@ function createShallowVNodeCopy(element) {
 
 /**
  * @param {HTMLElement} element
- * @param {Object<string, AmpElementProp>} defs
+ * @param {{[key: string]: AmpElementProp}} defs
  * @return {string|null}
  */
 function matchChild(element, defs) {
@@ -354,7 +354,7 @@ export function createParseDateAttr(name) {
  * @param {string} prefix
  * @return {{
  *   attrMatches: function(?string=):boolean,
- *   parseAttrs: function(Element):(undefined|Object<string, string>)
+ *   parseAttrs: function(Element):(undefined|{[key: string]: string})
  * }}
  */
 export function createParseAttrsWithPrefix(prefix) {

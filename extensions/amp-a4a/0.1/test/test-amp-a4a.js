@@ -20,6 +20,7 @@ import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real
 
 import * as analytics from '#utils/analytics';
 import {dev, user} from '#utils/log';
+import * as privacySandboxUtils from '#utils/privacy-sandbox-utils';
 
 import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
@@ -50,7 +51,6 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import * as secureFrame from '../secure-frame';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
@@ -923,7 +923,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
@@ -936,7 +936,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
@@ -1035,7 +1035,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1048,7 +1048,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1169,7 +1169,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1186,7 +1186,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();

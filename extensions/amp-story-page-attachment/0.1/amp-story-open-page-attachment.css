@@ -63,7 +63,7 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   /* Prevents clipping of decenders. */
-  line-height: 18px !important;
+  line-height: 20px !important;
 }
 
  .i-amphtml-story-page-open-attachment-label {

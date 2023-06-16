@@ -19,7 +19,7 @@ const isMinified = argv._.includes('dist') || !!argv.minified;
  * TODO: move constant replacement to bundlers once either https://github.com/google/closure-compiler/issues/1601
  *       is resolved, or we switch to using a different bundler.
  *
- * @type {Object<string, boolean|string>}
+ * @type {{[key: string]: boolean|string}}
  */
 const BUILD_CONSTANTS = {
   IS_PROD: isProd,

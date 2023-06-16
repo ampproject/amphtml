@@ -92,7 +92,7 @@ export class LightboxManager {
 
     /**
      * Ordered lists of lightboxable elements according to group
-     * @private {!Object<string, !Array<!Element>>}
+     * @private {!{[key: string]: !Array<!Element>}}
      */
     this.lightboxGroups_ = map({
       default: [],

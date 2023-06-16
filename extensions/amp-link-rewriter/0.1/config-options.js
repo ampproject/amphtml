@@ -48,7 +48,7 @@ function getConfigJson(element) {
 
 /**
  * @param {!Object} attribute
- * @return {Object}
+ * @return {object}
  */
 function parseAttribute(attribute) {
   const newAttr = {};

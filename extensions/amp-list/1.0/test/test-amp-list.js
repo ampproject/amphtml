@@ -5,6 +5,7 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import {sleep} from '#testing/helpers';
 import {cleanHtml} from '#testing/helpers/cleanHtml';
 import {waitFor, whenCalled} from '#testing/helpers/service';
 
@@ -14,10 +15,6 @@ const CONTENTS = 'div > div'; // TODO: find a better way to find the component's
 function snapshot(element) {
   const keep = ['aria-label'];
   return cleanHtml(element.shadowRoot.querySelector(CONTENTS).innerHTML, keep);
-}
-
-function delay(ms = 50) {
-  return new Promise((r) => setTimeout(r, ms));
 }
 
 describes.realWin(
@@ -56,7 +53,7 @@ describes.realWin(
 
       fetchJson = env.sandbox.stub().resolves({items: ['one', 'two', 'three']});
       env.sandbox.stub(xhr, 'fetchJson').callsFake(async (...args) => {
-        await delay(); // Ensure enough time to catch the "Loading" state
+        await sleep(50); // Ensure enough time to catch the "Loading" state
         return {json: () => fetchJson(...args)};
       });
     });

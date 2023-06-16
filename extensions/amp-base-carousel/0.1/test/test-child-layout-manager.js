@@ -2,18 +2,21 @@ import {setInitialDisplay, setStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 
+import {macroTask} from '#testing/helpers';
+
 import {ChildLayoutManager} from '../child-layout-manager';
 
 /**
  * @return {!Promise<undefined>} A Promise that resolves after the browser has
  *    rendered.
  */
-function afterRenderPromise() {
-  return new Promise((resolve) => {
+async function afterRenderPromise() {
+  await new Promise((resolve) => {
     requestAnimationFrame(() => {
       setTimeout(resolve);
     });
   });
+  return macroTask();
 }
 
 /**

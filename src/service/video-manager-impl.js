@@ -23,9 +23,9 @@ import {
 } from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {VideoSessionManager} from './video-session-manager';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
+import {VideoSessionManager} from './video-session-manager';
 
 import {
   EMPTY_METADATA,
@@ -571,7 +571,7 @@ class VideoEntry {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars
+   * @param {!{[key: string]: string}} vars
    */
   logCustomAnalytics_(eventType, vars) {
     const prefixedVars = {[videoAnalyticsCustomEventTypeKey]: eventType};
@@ -1599,7 +1599,7 @@ export class AnalyticsPercentageTracker {
 /**
  * @param {!VideoEntry} entry
  * @param {!VideoAnalyticsEvents_Enum} eventType
- * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ * @param {!{[key: string]: string}=} opt_vars A map of vars and their values.
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {

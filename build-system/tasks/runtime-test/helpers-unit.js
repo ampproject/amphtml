@@ -33,20 +33,20 @@ function isLargeRefactor() {
  * Extracts extension info and creates a mapping from CSS files in different
  * source directories to their equivalent JS files in the 'build/' directory.
  *
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function extractCssJsFileMap() {
   execOrDie('amp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(EXTENSIONS);
-  /** @type {Object<string, string>} */
+  /** @type {{[key: string]: string}} */
   const cssJsFileMap = {};
 
   /**
    * Adds an entry that maps a CSS file to a JS file
    *
-   * @param {Object} cssData
+   * @param {object} cssData
    * @param {string} cssBinaryName
-   * @param {Object} cssJsFileMap
+   * @param {object} cssJsFileMap
    */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
@@ -115,7 +115,7 @@ function getImports(jsFile) {
  * Retrieves the set of JS source files that import the given CSS file.
  *
  * @param {string} cssFile
- * @param {!Object<string, string>} cssJsFileMap
+ * @param {!{[key: string]: string}} cssJsFileMap
  * @return {!Array<string>}
  */
 function getJsFilesFor(cssFile, cssJsFileMap) {
@@ -140,10 +140,9 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
 
 /**
  * Computes the list of unit tests to run under difference scenarios
- * @param {{bentoOnly?: boolean}} [options]
  * @return {Array<string>|void}
  */
-function getUnitTestsToRun({bentoOnly = false} = {}) {
+function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -154,7 +153,7 @@ function getUnitTestsToRun({bentoOnly = false} = {}) {
     return;
   }
 
-  const tests = unitTestsToRun({bentoOnly});
+  const tests = unitTestsToRun();
   if (tests.length == 0) {
     log(
       green('INFO:'),
@@ -182,17 +181,15 @@ function getUnitTestsToRun({bentoOnly = false} = {}) {
  * Extracts the list of unit tests to run based on the changes in the local
  * branch. Return value is cached to optimize for multiple calls.
  *
- * @param {{bentoOnly?: boolean}} [options]
  * @return {!Array<string>}
  */
-function unitTestsToRun({bentoOnly = false} = {}) {
+function unitTestsToRun() {
   if (testsToRun) {
     return testsToRun;
   }
   const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMain();
-  const {bentoUnitTestPaths, unitTestPaths: nonBentoUnitTestPaths} = testConfig;
-  const unitTestPaths = bentoOnly ? bentoUnitTestPaths : nonBentoUnitTestPaths;
+  const {unitTestPaths} = testConfig;
   testsToRun = [];
   let srcFiles = [];
 

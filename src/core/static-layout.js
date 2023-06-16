@@ -24,7 +24,7 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
  * `hasNaturalDimensions` checks for membership in this set.
  * `getNaturalDimensions` determines the dimensions for an element in the
  *    set and caches it.
- * @type {Object<string, ?import('./dom/layout').DimensionsDef>}
+ * @type {{[key: string]: ?import('./dom/layout').DimensionsDef}}
  * @private  Visible for testing only
  */
 export const naturalDimensions_ = {

@@ -1,5 +1,7 @@
 import {htmlFor} from '#core/dom/static-template';
 
+import {macroTask} from '#testing/helpers';
+
 import {
   ACTIVATION_TIMEOUT,
   UserActivationTracker,
@@ -23,12 +25,6 @@ describes.realWin('UserActivationTracker', {}, (env) => {
     clock = env.sandbox.useFakeTimers();
     clock.tick(1);
   });
-
-  function microTask() {
-    return new Promise((resolve) => {
-      win.setTimeout(resolve, 0);
-    });
-  }
 
   it('should start as inactive', () => {
     expect(tracker.hasBeenActive()).to.be.false;
@@ -84,7 +80,7 @@ describes.realWin('UserActivationTracker', {}, (env) => {
       return promise
         .then(() => {
           // Skip microtask.
-          return microTask();
+          return macroTask(win.setTimeout);
         })
         .then(() => {
           // The gesture window is expanded for an extra window.
@@ -118,7 +114,7 @@ describes.realWin('UserActivationTracker', {}, (env) => {
         .catch(() => {})
         .then(() => {
           // Skip microtask.
-          return microTask();
+          return macroTask(win.setTimeout);
         })
         .then(() => {
           // The gesture window is expanded for an extra window.

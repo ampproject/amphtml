@@ -12,7 +12,7 @@ import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise, macroTask} from '#testing/helpers';
 
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -26,6 +26,7 @@ const extensions = ['amp-story:1.0', 'amp-audio'];
 
 describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let win;
+  let ampDoc;
   let element;
   let html;
   let gridLayerEl;
@@ -33,8 +34,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let story;
   let storeService;
   let isPerformanceTrackingOn;
-
-  const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
   beforeEach(() => {
     win = env.win;
@@ -76,7 +75,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');
-    element.getAmpDoc = () => new AmpDocSingle(win);
+    ampDoc = new AmpDocSingle(win);
+    element.getAmpDoc = () => ampDoc;
     const signals = new Signals();
     element.signals = () => signals;
     element.appendChild(gridLayerEl);
@@ -301,7 +301,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask();
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -331,7 +331,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask();
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -350,7 +350,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask();
 
     const audioEl = scopedQuerySelectorAll(
       element,
@@ -380,7 +380,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     deferred.resolve();
-    await nextTick();
+    await macroTask();
 
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(videoEl);
   });
@@ -407,7 +407,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     // Not calling deferred.resolve();
 
-    await nextTick();
+    await macroTask();
 
     expect(mediaPoolRegister).to.not.have.been.called;
   });
@@ -620,7 +620,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.layoutCallback();
 
     page.setState(PageState.PLAYING);
-    await nextTick();
+    await macroTask();
 
     const playButtonEl = element.querySelector(
       '.i-amphtml-story-page-play-button'
@@ -668,7 +668,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    await nextTick();
+    await macroTask();
 
     const poolVideoEl = element.querySelector('video');
     // Not called with the original video.
@@ -693,7 +693,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
-    await nextTick();
+    await macroTask();
     page.setState(PageState.NOT_ACTIVE);
 
     const poolVideoEl = element.querySelector('video');
@@ -804,5 +804,89 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         expect(outlinkElAfterBuild.isEqualNode(expectedOutlinkEl)).is.true;
       });
     });
+  });
+
+  describe('auto-advance-after', async () => {
+    beforeEach(() => {
+      env.sandbox.stub(ampDoc, 'isPreview').returns(true);
+      expect(element.getAttribute('auto-advance-after')).to.be.equal(null);
+    });
+
+    it(
+      'should use the default advancement value when auto-advance-after is ' +
+        'unspecified',
+      () => {
+        page.buildCallback();
+
+        expect(element.getAttribute('auto-advance-after')).to.be.equal('5s');
+      }
+    );
+
+    it('should use the specified previewSecondsPerPage value', () => {
+      const viewer = Services.viewerForDoc(element);
+      stubWithArg(viewer, 'getParam', 'previewSecondsPerPage', '3');
+
+      page.buildCallback();
+
+      expect(element.getAttribute('auto-advance-after')).to.be.equal('3s');
+    });
+
+    it('should ignore max-video-preview when the page has no video', () => {
+      const viewer = Services.viewerForDoc(element);
+      stubWithArg(viewer, 'getParam', 'previewSecondsPerPage', '3');
+      stubWithArg(ampDoc, 'getMetaByName', 'robots', 'max-video-preview: 2');
+
+      page.buildCallback();
+
+      expect(element.getAttribute('auto-advance-after')).to.be.equal('3s');
+    });
+
+    it(
+      'should override the previewSecondsPerPage value with the ' +
+        'max-video-preview value',
+      () => {
+        const viewer = Services.viewerForDoc(element);
+        stubWithArg(viewer, 'getParam', 'previewSecondsPerPage', '3');
+        stubWithArg(ampDoc, 'getMetaByName', 'robots', 'max-video-preview: 2');
+        appendAmpVideo();
+
+        page.buildCallback();
+
+        expect(element.getAttribute('auto-advance-after')).to.be.equal('2s');
+      }
+    );
+
+    it('should be unaffected by a max-video-preview value of -1', () => {
+      const viewer = Services.viewerForDoc(element);
+      stubWithArg(viewer, 'getParam', 'previewSecondsPerPage', '3');
+      stubWithArg(ampDoc, 'getMetaByName', 'robots', 'max-video-preview: -1');
+      appendAmpVideo();
+
+      page.buildCallback();
+
+      expect(element.getAttribute('auto-advance-after')).to.be.equal('3s');
+    });
+
+    it('should be unaffected by a max-video-preview value of 0', () => {
+      const viewer = Services.viewerForDoc(element);
+      stubWithArg(viewer, 'getParam', 'previewSecondsPerPage', '3');
+      stubWithArg(ampDoc, 'getMetaByName', 'robots', 'max-video-preview: 0');
+      appendAmpVideo();
+
+      page.buildCallback();
+
+      expect(element.getAttribute('auto-advance-after')).to.be.equal('3s');
+    });
+
+    function stubWithArg(object, functionName, arg, returnValue) {
+      env.sandbox.stub(object, functionName).withArgs(arg).returns(returnValue);
+    }
+
+    /**
+     * Appends an AMP video to the document
+     */
+    function appendAmpVideo() {
+      gridLayerEl.appendChild(win.document.createElement('amp-video'));
+    }
   });
 });

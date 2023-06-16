@@ -36,7 +36,7 @@ export class LiveListManager {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
+    /** @private @const {!{[key: string]: !./amp-live-list.AmpLiveList}} */
     this.liveLists_ = Object.create(null);
 
     /** @private @const {!../../../src/service/extensions-impl.Extensions} */

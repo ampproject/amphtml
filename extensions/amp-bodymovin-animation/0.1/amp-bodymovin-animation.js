@@ -227,7 +227,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @param {Object} args
+   * @param {object} args
    * @private
    */
   seekTo_(args) {

@@ -10,8 +10,8 @@ export function AutocompleteItem({
   item,
   itemTemplate,
   onError = () => {},
-  selected = false,
   onMouseDown = () => {},
+  selected = false,
 }: AutocompleteItemProps) {
   const classes = useStyles();
 

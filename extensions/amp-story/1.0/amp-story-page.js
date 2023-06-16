@@ -367,31 +367,63 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   setupAutoAdvanceForPreview_() {
-    let previewSecondsPerPage = parseInt(
-      this.viewer_.getParam('previewSecondsPerPage'),
-      10
-    );
-    if (isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0) {
-      previewSecondsPerPage = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
-    }
-    this.element.setAttribute(
-      'auto-advance-after',
-      previewSecondsPerPage + 's'
-    );
+    let autoAdvanceAfter = this.getAutoAdvanceAfterSeconds_();
 
     const firstVideo = this.getFirstAmpVideo_();
-    if (firstVideo) {
-      whenUpgradedToCustomElement(firstVideo)
-        .then(() => firstVideo.getImpl())
-        .then((videoImpl) => {
-          this.loadPromise(firstVideo).then(() => {
-            const duration = videoImpl.getDuration();
-            const tooShort = duration < previewSecondsPerPage;
-            const videoEl = firstVideo.querySelector('video');
-            videoEl.loop ||= tooShort;
-          });
-        });
+    if (!firstVideo) {
+      this.element.setAttribute('auto-advance-after', autoAdvanceAfter + 's');
+      return;
     }
+
+    const maxPrev = this.getMaxVideoPreview_();
+    if (maxPrev > 0) {
+      // Comply with max-video-preview, but never to lengthen the page preview
+      autoAdvanceAfter = Math.min(maxPrev, autoAdvanceAfter);
+    } else if (maxPrev === 0) {
+      // TODO(masanto): Prevent video from playing when maxVideoPreview is 0
+    }
+    this.element.setAttribute('auto-advance-after', autoAdvanceAfter + 's');
+
+    whenUpgradedToCustomElement(firstVideo)
+      .then(() => firstVideo.getImpl())
+      .then((videoImpl) => {
+        this.loadPromise(firstVideo).then(() => {
+          const duration = videoImpl.getDuration();
+          const tooShort = duration < autoAdvanceAfter;
+          const videoEl = firstVideo.querySelector('video');
+          videoEl.loop ||= tooShort;
+        });
+      });
+  }
+
+  /**
+   * Calculates the duration of this page's preview based upon the
+   * 'previewSecondsPerPage' query parameter.
+   * @return {number} The number of seconds for which this page should be
+   *     previewed before advancing to the next page.
+   * @private
+   */
+  getAutoAdvanceAfterSeconds_() {
+    const previewSecondsStr = this.viewer_.getParam('previewSecondsPerPage');
+    const previewSecondsPerPage = parseInt(previewSecondsStr, 10);
+    return isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0
+      ? DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S
+      : previewSecondsPerPage;
+  }
+
+  /**
+   * @return {number} The max-video-preview value, if it exists on the doc. A
+   *     positive value means that a maximum of <value> seconds may be used as
+   *     a video snippet for videos on this page in search results. A value of
+   *     0 means that a static image may be used. And a value of -1 means that
+   *     there is no limit to the video's preview length.
+   * @private
+   */
+  getMaxVideoPreview_() {
+    const robotsContent = this.getAmpDoc().getMetaByName('robots');
+    const maxVideoPreviewRegex = /max-video-preview[^,]*/;
+    const maxVideoPreviewStr = robotsContent?.match(maxVideoPreviewRegex)[0];
+    return parseInt(maxVideoPreviewStr?.split(':')[1], 10);
   }
 
   /**

@@ -7,10 +7,7 @@ module.exports = {
   // Unlike the `amp` and `preact` environments, we search Storybook files only
   // under component paths. This is because only components have React build
   // output, but directories in src/ outside src/bento/components/ do not.
-  stories: [
-    `${rootDir}/extensions/**/*.*/storybook/!(*.amp).js`,
-    `${rootDir}/src/bento/components/**/*.*/storybook/*.js`,
-  ],
+  stories: [`${rootDir}/extensions/**/*.*/storybook/!(*.amp).js`],
   addons: [
     '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',

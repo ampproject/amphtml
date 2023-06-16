@@ -5,7 +5,7 @@ import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import {setImportantStyles} from '#core/dom/style';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
 
 import {toggleExperiment} from '#experiments';
 
@@ -13,6 +13,7 @@ import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 import {Performance} from '#service/performance-impl';
 
+import {macroTask} from '#testing/helpers';
 import {waitFor} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
 
@@ -58,8 +59,6 @@ describes.realWin(
     let localizationService;
     let fetchJson = {};
     let fetchStub;
-
-    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     /**
      * @param {number} count
@@ -1451,7 +1450,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await nextTick();
+          await macroTask();
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
@@ -1465,7 +1464,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.GRANTED
           );
-          await nextTick();
+          await macroTask();
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
@@ -1484,7 +1483,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await nextTick();
+          await macroTask(win.setTimeout);
           clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
@@ -1495,7 +1494,7 @@ describes.realWin(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          await nextTick();
+          await macroTask();
 
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
@@ -1534,7 +1533,7 @@ describes.realWin(
           storeService.get(StateProperty.CURRENT_PAGE_ID)
         );
         paywallPage.element.dispatchEvent(clickRightEvent);
-        await nextTick();
+        await macroTask();
 
         it('should not show paywall', () => {
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
@@ -2114,7 +2113,7 @@ describes.realWin(
         expect(pages[1].hasAttribute('distance')).to.be.false;
 
         signals.signal(CommonSignals_Enum.LOAD_END);
-        await nextTick();
+        await macroTask();
 
         // Check page 1 is loaded with distance 1.
         expect(pages[1].getAttribute('distance')).to.be.equal('1');
@@ -2221,6 +2220,45 @@ describes.realWin(
             await localizationService.getLocalizedStringAsync('35')
           ).to.be.equal('REMOTE-STRING');
         });
+      });
+    });
+
+    describe('custom desktop aspect ratio', () => {
+      beforeEach(async () => {
+        await createStoryWithPages(3, ['cover', 'page-1', 'page-2']);
+      });
+
+      it('should apply custom desktop aspect ratio is there is one', async () => {
+        story.element.setAttribute('desktop-aspect-ratio', '9:16');
+        await story.buildCallback();
+
+        expect(
+          computedStyle(win, document.querySelector(':root')).getPropertyValue(
+            '--i-amphtml-story-desktop-one-panel-ratio'
+          )
+        ).equal('0.5625');
+      });
+
+      it('should apply minimum desktop aspect ratio if the custom one is too small', async () => {
+        story.element.setAttribute('desktop-aspect-ratio', '1:10');
+        await story.buildCallback();
+
+        expect(
+          computedStyle(win, document.querySelector(':root')).getPropertyValue(
+            '--i-amphtml-story-desktop-one-panel-ratio'
+          )
+        ).equal('0.5');
+      });
+
+      it('should apply maximum desktop aspect ratio if the custom one is too big', async () => {
+        story.element.setAttribute('desktop-aspect-ratio', '1:1');
+        await story.buildCallback();
+
+        expect(
+          computedStyle(win, document.querySelector(':root')).getPropertyValue(
+            '--i-amphtml-story-desktop-one-panel-ratio'
+          )
+        ).equal('0.75');
       });
     });
   }

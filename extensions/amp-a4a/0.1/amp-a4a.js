@@ -28,15 +28,12 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {DomTransformStream} from '#utils/dom-tranform-stream';
 import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {processHead} from './head-validation';
-import {
-  createSecureDocSkeleton,
-  createSecureFrame,
-  isAttributionReportingSupported,
-} from './secure-frame';
+import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {whenWithinViewport} from './within-viewport';
 
@@ -168,7 +165,7 @@ export const AnalyticsTrigger = {
 
 /**
  * Maps the names of lifecycle events to analytics triggers.
- * @const {!Object<string, !AnalyticsTrigger>}
+ * @const {!{[key: string]: !AnalyticsTrigger}}
  */
 const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'adRequestStart': AnalyticsTrigger.AD_REQUEST_START,
@@ -334,7 +331,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Mapping of feature name to value extracted from ad response header
      * amp-ff-exps with comma separated pairs of '=' separated key/value.
-     * @type {!Object<string,string>}
+     * @type {!{[key: string]: string}}
      */
     this.postAdResponseExperimentFeatures = {};
 
@@ -805,7 +802,7 @@ export class AmpA4A extends AMP.BaseElement {
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
-                /** @type {?Object<string, string|number|boolean|undefined>} */ (
+                /** @type {?{[key: string]: string|number|boolean|undefined}} */ (
                   consentMetadata
                 )
               ),
@@ -2050,7 +2047,7 @@ export class AmpA4A extends AMP.BaseElement {
     // request completes.
     let featurePolicies = "sync-xhr 'none';";
 
-    if (isAttributionReportingSupported(this.win.document)) {
+    if (isAttributionReportingAllowed(this.win.document)) {
       featurePolicies += "attribution-reporting 'src';";
     }
 
@@ -2398,7 +2395,7 @@ export class AmpA4A extends AMP.BaseElement {
    * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {?{[key: string]: string|number|boolean|undefined}} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {

@@ -53,7 +53,7 @@ export class StoryAdPageManager {
     /** @private {!./story-ad-button-text-fitter.ButtonTextFitter} */
     this.buttonFitter_ = new ButtonTextFitter(this.ampdoc_);
 
-    /** @private {Object<string, StoryAdPage>} */
+    /** @private {{[key: string]: StoryAdPage}} */
     this.pages_ = {};
 
     /** @private {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} **/
@@ -237,7 +237,7 @@ export class StoryAdPageManager {
   /**
    * Construct an analytics event and trigger it.
    * @param {string} eventType
-   * @param {!Object<string, number>} vars A map of vars and their values.
+   * @param {!{[key: string]: number}} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

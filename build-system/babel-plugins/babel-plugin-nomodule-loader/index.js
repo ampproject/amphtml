@@ -26,7 +26,7 @@ module.exports = function (babel) {
     pathToModuleName(posix.join(posix.dirname(filename), source));
 
   /**
-   * @param {Object} replacements
+   * @param {object} replacements
    * @return {babel.Node}
    */
   function buildWrapper(replacements) {

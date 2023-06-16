@@ -182,7 +182,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
   /**
    * @param {string} eventType The eventType must be prefixed with video-custom- to prevent naming collisions with other analytics event types.
-   * @param {!Object<string, string>=} vars
+   * @param {!{[key: string]: string}=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
     dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {

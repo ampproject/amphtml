@@ -77,7 +77,7 @@ async function doBuild3pVendor(jsBundles, name, options) {
 
 /**
  * Generate bundles for all 3p vendors to be built.
- * @return {Object}
+ * @return {object}
  */
 function generateBundles() {
   const bundles = {};

@@ -1,5 +1,7 @@
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
+
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
@@ -26,7 +28,7 @@ const sandboxVals =
   'allow-top-navigation';
 
 const TOKEN_VALUE_1P =
-  'AlQOrFnZiFdI61JEjqDm5lg07gKrnYgXL9jDD/w7EHNFBE60/++yfetyABuyjCD917535XXwd9JHzjrKK36TDg0AAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2ODA2NTI3OTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
+  'Akf/tuirtbNmVRwhMztVypuINFmk7s/DbLzDDhE/yJp/PJdlTchTrby3C2btx+7B9+Iw6LKILMZA7OL2/dL2KgIAAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2OTUxNjc5OTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
 
 /**
  * Create the starting html for all FIE ads. If streaming is supported body will be
@@ -87,18 +89,9 @@ export function createSecureFrame(win, title, height, width) {
     })
   );
 
-  if (isAttributionReportingSupported(document)) {
+  if (isAttributionReportingAllowed(document)) {
     iframe.setAttribute('allow', `attribution-reporting 'src'`);
   }
 
   return iframe;
-}
-
-/**
- * Determine if `attribution-reporting` API is available in browser.
- * @param {!Document} doc
- * @return {boolean}
- */
-export function isAttributionReportingSupported(doc) {
-  return doc.featurePolicy?.features().includes('attribution-reporting');
 }

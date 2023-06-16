@@ -18,7 +18,7 @@ const generateLightboxItemKey = sequentialIdGenerator();
 /** @const {string} */
 const DEFAULT_ARIA_LABEL = 'Open content in a lightbox view.';
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_ACTIVATION_PROPS = {
   'aria-label': DEFAULT_ARIA_LABEL,
   role: 'button',

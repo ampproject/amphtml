@@ -216,7 +216,7 @@ export function getTrackerKeyName(eventType) {
 
 /**
  * @param {string} parentType
- * @return {!Object<string, typeof EventTracker>}
+ * @return {!{[key: string]: typeof EventTracker}}
  */
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
@@ -335,7 +335,7 @@ export class BrowserEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.observables_ = new Observable();
 
-    /** @private {!Object<BrowserEventType, boolean>} */
+    /** @private {!{[key: BrowserEventType]: boolean}} */
     this.listenerMap_ = {};
 
     /** @private {?function(!Event)} */
@@ -414,12 +414,12 @@ export class CustomEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
+    /** @const @private {!{[key: string]: !Observable<!AnalyticsEvent>}} */
     this.observables_ = {};
     /**
      * Early events have to be buffered because there's no way to predict
      * how fast all `amp-analytics` elements will be instrumented.
-     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
+     * @private {!{[key: string]: !Array<!AnalyticsEvent>>|undefined}}
      */
     this.buffer_ = {};
 
@@ -428,7 +428,7 @@ export class CustomEventTracker extends EventTracker {
      * be added after parent element's layout. (Time varies, can be later than
      * 10s) sandbox events buffer will never expire but will cleared when
      * handler is ready.
-     * @private {!Object<string, !Array<!AnalyticsEvent>|undefined>|undefined}
+     * @private {!{[key: string]: !Array<!AnalyticsEvent>|undefined>|undefined}}
      */
     this.sandboxBuffer_ = {};
 
@@ -746,8 +746,8 @@ export class ScrollEventTracker extends EventTracker {
 
   /**
    * Function to handle scroll events from the Scroll manager
-   * @param {!Object<number,boolean>} boundsH
-   * @param {!Object<number,boolean>} boundsV
+   * @param {!{[key: number]: boolean}} boundsH
+   * @param {!{[key: number]: boolean}} boundsV
    * @param {boolean} useInitialPageSize
    * @param {function(!AnalyticsEvent)} listener
    * @param {!Object} e
@@ -806,7 +806,7 @@ export class ScrollEventTracker extends EventTracker {
   }
 
   /**
-   * @param {!Object<number, boolean>} bounds
+   * @param {!{[key: number]: boolean}} bounds
    * @param {number} scrollPos Number representing the current scroll
    * @param {string} varName variable name to assign to the bound that
    * @param {function(!AnalyticsEvent)} listener
@@ -1171,7 +1171,7 @@ export class TimerEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private {!Object<number, TimerEventHandler>} */
+    /** @const @private {!{[key: number]: TimerEventHandler}} */
     this.trackers_ = {};
 
     /** @private {number} */
