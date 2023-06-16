@@ -163,6 +163,7 @@ export function createExtensionScript(win, extensionId, version) {
         createScriptURL: function (url) {
           // Only allow trusted URLs
           const urlObject = new URL(url);
+          // eslint-disable-next-line local/no-forbidden-terms
           if (urlObject.host === 'cdn.ampproject.org') {
             return url;
           } else {
