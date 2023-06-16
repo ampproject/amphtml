@@ -155,7 +155,26 @@ export function createExtensionScript(win, extensionId, version) {
     version,
     getMode(win).localDev
   );
-  scriptElement.src = scriptSrc;
+
+  if (self.trustedTypes && self.trustedTypes.createPolicy) {
+    const policy = self.trustedTypes.createPolicy(
+      'extension-script#createExtensionScript',
+      {
+        createScriptURL: function (url) {
+          // Only allow trusted URLs
+          const urlObject = new URL(url);
+          if (urlObject.host === 'cdn.ampproject.org') {
+            return url;
+          } else {
+            return '';
+          }
+        },
+      }
+    );
+    scriptElement.src = policy.createScriptURL(scriptSrc);
+  } else {
+    scriptElement.src = scriptSrc;
+  }
   return scriptElement;
 }
 
