@@ -65,32 +65,29 @@ executors:
     resource_class: 2xlarge
   macos-medium:
     macos:
-      xcode: 13.4.1
+      xcode: 14.3.1
     resource_class: macos.x86.medium.gen2
 
 commands:
   checkout_repo:
     parameters:
-      restore-git-cache:
-        type: boolean
-        default: true
       save-git-cache:
         type: boolean
         default: false
     steps:
-      - when:
-          condition: << parameters.restore-git-cache >>
-          steps:
-            - restore_cache:
-                name: 'Restore Git Cache'
-                keys:
-                  - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
-                  - git-cache-{{ arch }}-v2-{{ .Branch }}-
-                  - git-cache-{{ arch }}-v2-
+      - restore_cache:
+          name: 'Restore Git Cache'
+          keys:
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-
+            - git-cache-{{ arch }}-v2-
       - checkout
       - when:
           condition: << parameters.save-git-cache >>
           steps:
+            - run:
+                name: 'Garbage Collection for Git'
+                command: git gc --auto
             - save_cache:
                 name: 'Save Git Cache'
                 key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
@@ -104,9 +101,6 @@ commands:
           with-cache: false
   setup_vm:
     parameters:
-      restore-git-cache:
-        type: boolean
-        default: true
       save-git-cache:
         type: boolean
         default: false
@@ -122,7 +116,6 @@ commands:
           name: 'Maybe Gracefully Halt'
           command: /tmp/restored-workspace/maybe_gracefully_halt.sh
       - checkout_repo:
-          restore-git-cache: << parameters.restore-git-cache >>
           save-git-cache: << parameters.save-git-cache >>
       - run:
           name: 'Configure Development Environment'
@@ -201,6 +194,12 @@ jobs:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
+  initialize_mac_os:
+    executor:
+      name: macos-medium
+    steps:
+      - checkout_repo:
+          save-git-cache: true
   checks:
     executor:
       name: node-docker-medium
@@ -379,10 +378,7 @@ jobs:
     executor:
       name: macos-medium
     steps:
-      - setup_vm:
-          # Saving and restoring Git cache on MacOS takes much longer than simply cloning the repo from GitHub.
-          restore-git-cache: false
-          save-git-cache: false
+      - setup_vm
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
@@ -497,6 +493,9 @@ workflows:
       - initialize_repository:
           name: 'Initialize Repository'
           <<: *push_and_pr_builds
+      - initialize_mac_os:
+          name: 'Initialize for Mac OS'
+          <<: *push_and_pr_builds
       - checks:
           name: 'Checks'
           <<: *push_and_pr_builds
@@ -585,6 +584,7 @@ workflows:
           name: 'Browser Tests (Safari)'
           <<: *push_and_pr_builds
           requires:
+            - 'Initialize for Mac OS'
             - 'Nomodule Build (Test)'
       - browser_tests_firefox:
           name: 'Browser Tests (Firefox)'
