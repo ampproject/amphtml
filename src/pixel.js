@@ -1,6 +1,8 @@
 import {createElementWithAttributes} from '#core/dom';
 import {WindowInterface} from '#core/window/interface';
 
+import {Services} from '#service';
+
 import {user} from '#utils/log';
 
 import {
@@ -77,17 +79,23 @@ function createImagePixel(win, src, noReferrer = false, attributionSrc) {
     if (isAttributionReportingAllowed(win.document)) {
       attributionReportingStatus =
         AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
-      attributionSrc = attributionSrc.replace(
-        'ATTRIBUTION_REPORTING_STATUS',
-        attributionReportingStatus
-      );
+      const substituteVariables =
+        getAttributionReportingStatusUrlVariableRewriter(
+          win,
+          attributionReportingStatus
+        );
+      attributionSrc = substituteVariables(attributionSrc);
       image.attributionsrc = attributionSrc;
     } else {
       attributionReportingStatus =
         AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
     }
   }
-  src = src.replace('ATTRIBUTION_REPORTING_STATUS', attributionReportingStatus);
+  const substituteVariables = getAttributionReportingStatusUrlVariableRewriter(
+    win,
+    attributionReportingStatus
+  );
+  src = substituteVariables(src);
   image.src = src;
   return image;
 }
@@ -100,4 +108,22 @@ function createImagePixel(win, src, noReferrer = false, attributionSrc) {
  */
 function isReferrerPolicySupported() {
   return 'referrerPolicy' in Image.prototype;
+}
+
+/**
+ * @param {!Window} win
+ * @param {string=} status
+ * @return {function(string): string}
+ */
+function getAttributionReportingStatusUrlVariableRewriter(win, status) {
+  const substitutionFunctions = {
+    'ATTRIBUTION_REPORTING_STATUS': () => status,
+  };
+  const replacements = Services.urlReplacementsForDoc(win.document);
+  const allowlist = {
+    'ATTRIBUTION_REPORTING_STATUS': true,
+  };
+
+  return (url) =>
+    replacements.expandUrlSync(url, substitutionFunctions, allowlist);
 }
