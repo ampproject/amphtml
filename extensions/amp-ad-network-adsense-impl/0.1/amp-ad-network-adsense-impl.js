@@ -289,12 +289,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     let gdprApplies = undefined;
     let additionalConsent = undefined;
     let consentStringType = undefined;
+    let consentSharedData = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
       gdprApplies = consentTuple.gdprApplies;
       additionalConsent = consentTuple.additionalConsent;
       consentStringType = consentTuple.consentStringType;
+      consentSharedData = consentTuple.consentSharedData;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -412,6 +414,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${this.size_.width}x${this.size_.height}`
         : null,
+      'tfcd': consentSharedData?.['adsense-tfcd'] || null,
+      'tfua': consentSharedData?.['adsense-tfua'] || null,
     };
 
     const experimentIds = [];
