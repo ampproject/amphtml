@@ -7,7 +7,7 @@ import {loadScript, validateData} from '#3p/3p';
 export function rcmwidget(global, data) {
   validateData(
     data,
-    ['rcmId', 'blockId', 'templateName'],
+    ['rcmId', 'blockId', 'templateName', 'layoutType'],
     [
       'contextItemId',
       'customStyles',
