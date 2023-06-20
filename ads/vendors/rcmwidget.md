@@ -10,6 +10,7 @@
     data-rcm-id="rcmId"
     data-block-id="blockId"
     data-template-name="templateName"
+    data-layout-type="layoutType"
 >
 </amp-embed>
 ```
@@ -23,6 +24,7 @@ For details on the configuration semantics, please contact the ad network or ref
 -   `data-rcm-id`
 -   `data-block-id`
 -   `data-template-name`
+-   `data-layout-type`
 
 ### Optional parameters
 
