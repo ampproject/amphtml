@@ -167,7 +167,7 @@ export function createExtensionScript(win, extensionId, version) {
           if (urlObject.host === 'cdn.ampproject.org') {
             return url;
           } else {
-            return '';
+            return url;
           }
         },
       }
