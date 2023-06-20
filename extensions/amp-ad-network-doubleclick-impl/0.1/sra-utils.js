@@ -19,6 +19,12 @@ const TAG = 'amp-ad-network-doubleclick-impl';
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
+/**
+ * @const {string}
+ * @visibleForTesting
+ */
+export const TFUA = 'tagForUnderAgeTreatment';
+
 /** @private {!Array<function(!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>):?{[key: string]: string}>} */
 const SRA_JOINERS = [
   combineInventoryUnits,
