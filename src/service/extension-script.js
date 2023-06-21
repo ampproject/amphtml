@@ -169,7 +169,7 @@ export function createExtensionScript(win, extensionId, version) {
           // const regexURL = new RegExp(urls.cdnProxyRegex.slice(0,-1)+'(\/.*)?$');
           if (
             regexURL.test(url) ||
-            (getMode(win).test && new URL(url).hostname === 'localhost')
+            (getMode(win).test && (new URL(url).hostname === 'localhost' || url.host === 'fonts.googleapis.com') )
           ) {
             return url;
           } else {
