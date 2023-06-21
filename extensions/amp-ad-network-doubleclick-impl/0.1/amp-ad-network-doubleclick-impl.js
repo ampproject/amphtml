@@ -85,6 +85,7 @@ import {
 import {SafeframeHostApi} from './safeframe-host';
 import {
   TFCD,
+  TFUA,
   constructSRABlockParameters,
   serializeTargeting,
   sraBlockCallbackHandler,
@@ -628,8 +629,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {additionalConsent, consentString, consentStringType, gdprApplies} =
-      consentTuple;
+    const {
+      additionalConsent,
+      consentSharedData,
+      consentString,
+      consentStringType,
+      gdprApplies,
+    } = consentTuple;
+
+    const tfcdFromSharedData = consentSharedData?.['doubleclick-tfcd'];
+    const tfuaFromSharedData = consentSharedData?.['doubleclick-tfua'];
+    const tfcdFromJson = this.jsonTargeting && this.jsonTargeting[TFCD];
+    const tfuaFromJson = this.jsonTargeting && this.jsonTargeting[TFUA];
 
     return {
       'ptt': 13,
@@ -654,6 +665,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
           ? consentString
           : null,
+      'tfcd': tfcdFromSharedData || tfcdFromJson || null,
+      'tfua': tfuaFromSharedData || tfuaFromJson || null,
     };
   }
 
@@ -670,8 +683,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getBlockParameters_() {
     devAssert(this.initialSize_);
-    devAssert(this.jsonTargeting);
-    const tfcd = this.jsonTargeting && this.jsonTargeting[TFCD];
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ =
       (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
@@ -706,7 +717,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
       'output': 'html',
       'impl': 'ifr',
-      'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
