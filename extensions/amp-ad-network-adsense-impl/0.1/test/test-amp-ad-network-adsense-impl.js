@@ -958,6 +958,28 @@ describes.realWin(
         });
       });
 
+      it('should set tfcd parameter if set in shared data', () => {
+        impl.uiHandler = {isStickyAd: () => false};
+        const consentSharedData = {
+          'adsense-tfua': 0,
+          'adsense-tfcd': 1,
+        };
+        return impl.getAdUrl({consentSharedData}).then((url) => {
+          expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+        });
+      });
+
+      it('should set tfua parameter if set in shared data', () => {
+        impl.uiHandler = {isStickyAd: () => false};
+        const consentSharedData = {
+          'adsense-tfua': 1,
+          'adsense-tfcd': 0,
+        };
+        return impl.getAdUrl({consentSharedData}).then((url) => {
+          expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+        });
+      });
+
       describe('SSR experiments', () => {
         it('should include SSR experiments', () => {
           env.sandbox
