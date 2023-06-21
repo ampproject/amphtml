@@ -33,7 +33,6 @@ import {
   getCookieOptOut,
   getExperimentIds,
   getForceSafeframe,
-  getIdentity,
   getIsFluid,
   getPageOffsets,
   getSizes,
@@ -255,18 +254,6 @@ describes.realWin('Doubleclick SRA', config, (env) => {
         'eid': '7,123,456,901,902,903',
       });
     });
-    it('should determine identity', () => {
-      impls[0] = new AmpAdNetworkDoubleclickImpl(
-        env.win.document.createElement('span')
-      );
-      impls[0].identityToken = {token: 'foo', jar: 'bar', pucrd: 'oof'};
-      impls[1] = {};
-      expect(getIdentity(impls)).to.jsonEqual({
-        adsid: 'foo',
-        jar: 'bar',
-        pucrd: 'oof',
-      });
-    });
     it('should combine force safeframe', () => {
       expect(getForceSafeframe(impls)).to.be.null;
       impls[0] = {forceSafeframe: false};
@@ -373,12 +360,6 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           .withArgs('50x320')
           .returns('13579');
         impl1.populateAdUrlState();
-        impl1.identityToken =
-          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-            token: 'abcdef',
-            jar: 'some_jar',
-            pucrd: 'some_pucrd',
-          });
         const targeting2 = {
           cookieOptOut: 1,
           categoryExclusions: 'food',
