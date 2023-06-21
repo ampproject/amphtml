@@ -163,13 +163,16 @@ export function createExtensionScript(win, extensionId, version) {
         createScriptURL: function (url) {
           // Only allow trusted URLs
           // eslint-disable-next-line local/no-forbidden-terms
-          const regexURL = new RegExp("^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$");
+          const regexURL = new RegExp(
+            '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
+          );
           // const regexURL = new RegExp(urls.cdnProxyRegex.slice(0,-1)+'(\/.*)?$');
-          if (regexURL.test(url) || (getMode(win).test && (new URL(url)).hostname === 'localhost')) {
-            // console.log('1success: '+ url);
+          if (
+            regexURL.test(url) ||
+            (getMode(win).test && new URL(url).hostname === 'localhost')
+          ) {
             return url;
           } else {
-            // console.log('failed: '+ url);
             return '';
           }
         },
