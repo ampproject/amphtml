@@ -1,1 +1,325 @@
-PASS
+FAIL
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="ampconf.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <title>Key Highlights of AMP Conf 2018</title>
+|
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+>>   ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:11:2 The attribute 'custom-element' may not appear in tag 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+|    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+>>   ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:12:2 The attribute 'custom-element' may not appear in tag 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+|    <script async custom-element="amp-story-audio-sticker" src="https://cdn.ampproject.org/v0/amp-story-audio-sticker-0.1.js"></script>
+|
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-custom>
+|      * {
+|        box-sizing: border-box;
+|      }
+|      amp-story * {
+|        font-family: 'Helvetica Neue', sans-serif;
+|        color: white;
+|      }
+|      amp-story-page {
+|        background: white;
+|      }
+|      amp-story h1 {
+|        font-size: 2.875rem;
+|      }
+|      amp-story h2 {
+|        font-size: 2.25rem;
+|      }
+|      amp-story p {
+|        line-height: 1.5;
+|      }
+|      .bold {
+|        font-weight: bold;
+|      }
+|      .bottom {
+|        align-content: end;
+|      }
+|      .medium {
+|        font-weight: 600;
+|      }
+|      .first {
+|        padding-top: 8.83vh;
+|      }
+|      .last {
+|        padding-bottom: 8.83vh;
+|      }
+|      .blue {
+|        color: #4285F4;
+|      }
+|      .twenty-px {
+|        font-size: 1.25rem;
+|      }
+|      .center {
+|        text-align: center;
+|      }
+|      .icon {
+|        background-image: url('./img/AMP-Brand-White-Icon.svg');
+|        background-repeat: no-repeat;
+|        background-size: 4.25rem 4.25rem;
+|        height: 4.25rem;
+|        object-fit: contain;
+|        width: 4.25rem;
+|      }
+|      .byline {
+|        letter-spacing: 1.28px;
+|        padding-bottom: 7.88vh;
+|      }
+|      .introducing p {
+|        line-height: 2.625em;
+|      }
+|      .introducing h2 {
+|        line-height: 1.17em;
+|      }
+|      .subtitle-page {
+|        padding-top: 10.87vh;
+|      }
+|      .button {
+|        align-items: center;
+|        border: 4px solid #FFFFFF;
+|        color: #FFFFFF;
+|        display: flex;
+|        margin: 0 auto;
+|        max-width: 240px;
+|        text-decoration:none;
+|      }
+|      .button p {
+|        width: 100%;
+|      }
+|      amp-ad[template="image-template"] img {
+|        object-fit: cover;
+|      }
+|      ::cue {
+|        background-color: rgba(0, 0, 0, 0.75);
+|        font-size: 24px;
+|        line-height: 1.5;
+|      }
+|      amp-story-audio-sticker {
+|        height: 10rem;
+|        width: 10rem;
+|        --story-audio-sticker-outline-color: rgb(150, 51, 0);
+|        --story-audio-sticker-dropshadow-color: rgb(150, 51, 0);
+|      }
+|    </style>
+|  </head>
+|    <body>
+|      <amp-story standalone id="cats"
+>>     ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:110:4 The tag 'amp-story' is disallowed.
+|          title="Key Highlights of AMP Conf 2018" publisher="The AMP team"
+|          publisher-logo-src="./img/amplogo.png"
+|          poster-portrait-src="./img/overview.jpg">
+|
+|        <amp-story-page id="page-1" title="Lorem ipsum dolor sit amet">
+>>       ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:115:6 The tag 'amp-story-page' is disallowed.
+|          <amp-story-grid-layer template="fill">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:116:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-video autoplay loop
+>>           ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:117:10 The tag 'amp-video' is disallowed.
+|              width="400"
+|              height="750"
+|              poster="./img/poster0.png"
+|              layout="fill">
+|              <source src="./video/p1.mp4" type="video/mp4">
+|            </amp-video>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical" class="bottom">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:125:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <div class="icon"></div>
+|            <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+|            <p class="byline">By The AMP team</p>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:130:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-story-audio-sticker sticker="audio-cloud"></amp-story-audio-sticker>
+|          </amp-story-grid-layer>>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-2" title="Lorem ipsum dolor sit amet">
+>>       ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:135:6 The tag 'amp-story-page' is disallowed.
+|          <amp-story-grid-layer template="fill">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:136:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-video autoplay loop
+>>           ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:137:10 The tag 'amp-video' is disallowed.
+|              width="400"
+|              height="750"
+|              poster="./img/poster0.png"
+|              layout="fill">
+|              <source src="./video/p1.mp4" type="video/mp4">
+|            </amp-video>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical" class="bottom">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:145:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <div class="icon"></div>
+|            <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+|            <p class="byline">By The AMP team</p>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:150:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-story-audio-sticker size="large" sticker="cat-sticker"></amp-story-audio-sticker>
+|          </amp-story-grid-layer>>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-3" title="Lorem ipsum dolor sit amet">
+>>       ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:155:6 The tag 'amp-story-page' is disallowed.
+|          <amp-story-grid-layer template="fill">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:156:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-video autoplay loop
+>>           ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:157:10 The tag 'amp-video' is disallowed.
+|              width="400"
+|              height="750"
+|              poster="./img/poster0.png"
+|              layout="fill">
+|              <source src="./video/p1.mp4" type="video/mp4">
+|            </amp-video>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical" class="bottom">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:165:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <div class="icon"></div>
+|            <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+|            <p class="byline">By The AMP team</p>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:170:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-story-audio-sticker sticker="loud-speaker"></amp-story-audio-sticker>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-4" title="Lorem ipsum dolor sit amet">
+>>       ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:175:6 The tag 'amp-story-page' is disallowed.
+|          <amp-story-grid-layer template="fill">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:176:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-video autoplay loop
+>>           ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:177:10 The tag 'amp-video' is disallowed.
+|              width="400"
+|              height="750"
+|              poster="./img/poster0.png"
+|              layout="fill">
+|              <source src="./video/p1.mp4" type="video/mp4">
+|            </amp-video>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical" class="bottom">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:185:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <div class="icon"></div>
+|            <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+|            <p class="byline">By The AMP team</p>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:190:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-story-audio-sticker size="large" sticker="tape-player"></amp-story-audio-sticker>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-5" title="Lorem ipsum dolor sit amet">
+>>       ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:195:6 The tag 'amp-story-page' is disallowed.
+|          <amp-story-grid-layer template="fill">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:196:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-video autoplay loop
+>>           ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:197:10 The tag 'amp-video' is disallowed.
+|              width="400"
+|              height="750"
+|              poster="./img/poster0.png"
+|              layout="fill">
+|              <source src="./video/p1.mp4" type="video/mp4">
+|            </amp-video>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical" class="bottom">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:205:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <div class="icon"></div>
+|            <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+|            <p class="byline">By The AMP team</p>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:210:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-story-audio-sticker sticker-style="outline">
+|              <amp-story-audio-sticker-pretap>
+>>             ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:212:12 The tag 'amp-story-audio-sticker-pretap' is disallowed.
+|                <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
+|              </amp-story-audio-sticker-pretap>
+|              <amp-story-audio-sticker-posttap>
+>>             ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:215:12 The tag 'amp-story-audio-sticker-posttap' is disallowed.
+|                <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
+|              </amp-story-audio-sticker-posttap>
+|            </amp-story-audio-sticker>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-6" title="Lorem ipsum dolor sit amet">
+>>       ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:222:6 The tag 'amp-story-page' is disallowed.
+|          <amp-story-grid-layer template="fill">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:223:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-video autoplay loop
+>>           ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:224:10 The tag 'amp-video' is disallowed.
+|              width="400"
+|              height="750"
+|              poster="./img/poster0.png"
+|              layout="fill">
+|              <source src="./video/p1.mp4" type="video/mp4">
+|            </amp-video>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical" class="bottom">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:232:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <div class="icon"></div>
+|            <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+|            <p class="byline">By The AMP team</p>
+|          </amp-story-grid-layer>
+|          <amp-story-grid-layer template="vertical">
+>>         ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:237:8 The tag 'amp-story-grid-layer' is disallowed.
+|            <amp-story-audio-sticker size="large" sticker-style="dropshadow">
+|              <amp-story-audio-sticker-pretap>
+>>             ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:239:12 The tag 'amp-story-audio-sticker-pretap' is disallowed.
+|                <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
+|              </amp-story-audio-sticker-pretap>
+|              <amp-story-audio-sticker-posttap>
+>>             ^~~~~~~~~
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker.html:242:12 The tag 'amp-story-audio-sticker-posttap' is disallowed.
+|                <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
+|              </amp-story-audio-sticker-posttap>
+|            </amp-story-audio-sticker>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|      </amp-story>
+|    </body>
+|  </html>
