@@ -101,7 +101,8 @@
     amp-story-audio-sticker {
       height: 10rem;
       width: 10rem;
-      border: 1px solid white; /* Optional: Add a border to the container for visualization */
+      --story-audio-sticker-outline-color: rgb(150, 51, 0);
+      --story-audio-sticker-dropshadow-color: rgb(150, 51, 0);
     }
   </style>
 </head>
@@ -207,16 +208,43 @@
           <p class="byline">By The AMP team</p>
         </amp-story-grid-layer>
         <amp-story-grid-layer>
-          <amp-story-audio-sticker>
+          <amp-story-audio-sticker sticker-style="outline">
             <amp-story-audio-sticker-pretap>
-              <amp-img width="100" height="100" layout="responsive" src="https://media.tenor.com/oK5AJr1cvF4AAAAi/high-volume-speaker-symbols.gif"></amp-img>
+              <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
             </amp-story-audio-sticker-pretap>
             <amp-story-audio-sticker-posttap>
-              <amp-img width="100" height="100" layout="responsive" src="https://media.tenor.com/oK5AJr1cvF4AAAAi/high-volume-speaker-symbols.gif"></amp-img>
+              <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
             </amp-story-audio-sticker-posttap>
           </amp-story-audio-sticker>
         </amp-story-grid-layer>
       </amp-story-page>
-    </amp-story-page>
+
+      <amp-story-page id="page-6" title="Lorem ipsum dolor sit amet">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay loop
+            width="400"
+            height="750"
+            poster="./img/poster0.png"
+            layout="fill">
+            <source src="./video/p1.mp4" type="video/mp4">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <div class="icon"></div>
+          <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+          <p class="byline">By The AMP team</p>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer>
+          <amp-story-audio-sticker size="large" sticker-style="dropshadow">
+            <amp-story-audio-sticker-pretap>
+              <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
+            </amp-story-audio-sticker-pretap>
+            <amp-story-audio-sticker-posttap>
+              <amp-img width="100" height="100" layout="responsive" src="https://d1k5j68ob7clqb.cloudfront.net/thumb/480/processed/thumb/5zK5d91jK0gLkv1AMa.png"></amp-img>
+            </amp-story-audio-sticker-posttap>
+          </amp-story-audio-sticker>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
   </body>
 </html>

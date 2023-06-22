@@ -28,7 +28,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Checkout Repo
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           fetch-depth: 0
 
@@ -71,7 +71,7 @@ jobs:
 
       - name: Create Pull Request
         id: pull-request
-        uses: peter-evans/create-pull-request@284f54f989303d2699d373481a0cfa13ad5a6666 # v5.0.1
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # v5.0.2
         with:
           draft: true
           title: ${{ steps.sweep.outputs.title }}
@@ -80,7 +80,7 @@ jobs:
 
       - name: Comment on Pull Request
         if: ${{ steps.pull-request.outputs.pull-request-number }}
-        uses: peter-evans/create-or-update-comment@ca08ebd5dc95aa0cd97021e9708fcd6b87138c9b # v3.0.1
+        uses: peter-evans/create-or-update-comment@c6c9a1a66007646a28c153e2a8580a5bad27bcfa # v3.0.2
         with:
           issue-number: ${{ steps.pull-request.outputs.pull-request-number }}
           body: |
@@ -111,7 +111,7 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Create issue on error
         uses: JasonEtco/create-an-issue@e27dddc79c92bc6e4562f268fffa5ed752639abd # v2.9.1
