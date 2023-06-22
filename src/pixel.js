@@ -85,7 +85,7 @@ function createImagePixel(win, src, noReferrer = false, attributionSrc) {
           attributionReportingStatus
         );
       attributionSrc = substituteVariables(attributionSrc);
-      image.attributionsrc = attributionSrc;
+      image.attributionSrc = attributionSrc;
     } else {
       attributionReportingStatus =
         AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
