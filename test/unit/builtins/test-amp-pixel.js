@@ -142,12 +142,16 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
   it('should not allow attribution reporting', () => {
     const attributionSrc =
       '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
+    pixel.setAttribute(
+      'src',
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=ATTRIBUTION_REPORTING_STATUS'
+    );
     return trigger(null, attributionSrc).then((img) => {
       // Protocol is resolved to `http:` relative to test server.
       expect(img.src).to.equal(
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=5'
       );
-      expect(img.attributionsrc).to.be.undefined;
+      expect(img.attributionSrc).to.be.undefined;
     });
   });
 
@@ -156,12 +160,16 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
       .returns(true);
     const attributionSrc = '';
+    pixel.setAttribute(
+      'src',
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=ATTRIBUTION_REPORTING_STATUS'
+    );
     return trigger(null, attributionSrc).then((img) => {
       // Protocol is resolved to `http:` relative to test server.
       expect(img.src).to.equal(
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
       );
-      expect(img.attributionsrc).to.equal('');
+      expect(img.attributionSrc).to.equal('');
     });
   });
 
@@ -169,13 +177,18 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     env.sandbox
       .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
       .returns(true);
-    const attributionSrc = 'https://adtech.example';
+    pixel.setAttribute(
+      'src',
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=ATTRIBUTION_REPORTING_STATUS'
+    );
+    const attributionSrc =
+      'https://adtech.example?ars=ATTRIBUTION_REPORTING_STATUS';
     return trigger(null, attributionSrc).then((img) => {
       // Protocol is resolved to `http:` relative to test server.
       expect(img.src).to.equal(
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
       );
-      expect(img.attributionsrc).to.equal('https://adtech.example');
+      expect(img.attributionSrc).to.equal('https://adtech.example?ars=6');
     });
   });
 });
