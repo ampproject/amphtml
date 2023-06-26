@@ -151,7 +151,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       expect(img.src).to.equal(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=5'
       );
-      expect(img.attributionsrc).to.be.undefined;
+      expect(img.attributionSrc).to.be.undefined;
     });
   });
 
@@ -169,7 +169,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       expect(img.src).to.equal(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
       );
-      expect(img.attributionsrc).to.equal('');
+      expect(img.attributionSrc).to.equal('');
     });
   });
 
@@ -188,7 +188,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       expect(img.src).to.equal(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
       );
-      expect(img.attributionsrc).to.equal('https://adtech.example?ars=6');
+      expect(img.attributionSrc).to.equal('https://adtech.example?ars=6');
     });
   });
 });
