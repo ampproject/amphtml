@@ -77,7 +77,7 @@ You may now use the `--validator_js` command line flag to
 1. In `amphtml` folder, run
 
     ```bash
-    amp validator-cpp && echo SUCCESS || echo FAIL
+    bazel test cpp/engine:validator_test && echo SUCCESS || echo FAIL
     ```
 
 1. To see more information of the tests
@@ -85,11 +85,13 @@ You may now use the `--validator_js` command line flag to
     sed -i 's/--test_output=errors//' build-system/tasks/validator.js
     sed -i 's/--ui_event_filters=INFO//' build-system/tasks/validator.js
     ```
-    Then re-run `amp validator-cpp && echo SUCCESS || echo FAIL`.
+    Then re-run `bazel test cpp/engine:validator_test && echo SUCCESS || echo FAIL`.
 
-### Update output files
+1. Some tests run validator for given input `.html` files, and compare the actual output against the expected `.out` files.
+   When the actual output is not equal to the expected output, a message will be printed to test log.
+   ```
+   echo YW1waHRtbA== | base64 --decode > testdata/feature_tests/example.out
+   ```
+   You can use the command in test log to overwrite the `.out` file in the repository,
+   and use `git diff` to inspect the difference.
 
-In `amphtml/validator` folder, run
-```bash
-bazel run cpp/engine:update-tests
-```
