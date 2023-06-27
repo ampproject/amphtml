@@ -1377,8 +1377,8 @@ For more information, please refer to
 ### Google Analytics 4 and AMP
 
 For information on how to set up Google Analytics 4 with amp-analytics see
-[https://developers.google.com/analytics/devguides/collection/amp-analytics](https://developers.google.com/analytics/devguides/collection/amp-analytics)
-and [https://developers.devsite.corp.google.com/tag-platform/gtagjs/amp?technology=gtagjs](https://developers.devsite.corp.google.com/tag-platform/gtagjs/amp?technology=gtagjs)
+[amp-analytics dev guide](https://developers.google.com/analytics/devguides/collection/amp-analytics)
+and [gtagjs guide](https://developers.google.com/tag-platform/gtagjs/amp?technology=gtagjs)
 
 ## Validation
 
