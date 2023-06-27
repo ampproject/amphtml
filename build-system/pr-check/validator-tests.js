@@ -26,6 +26,8 @@ function pushBuildWorkflow() {
  * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
+  timedExecOrDie('amp validator-cpp');
+
   if (
     !buildTargetsInclude(
       Targets.HTML_FIXTURES,
