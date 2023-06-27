@@ -111,6 +111,8 @@ function checkLinksInFile(file) {
       {pattern: /https:\/\/codepen.*/},
       // developers.google.com links are assumed to exist
       {pattern: /https:\/\/developers.google.com\/.*/},
+      // anchor links should be ignored
+      {pattern: /^#/},
       // GitHub PRs and Issues can be assumed to exist
       {pattern: /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/.*/},
       // Templated links are merely used to generate other markdown files.
