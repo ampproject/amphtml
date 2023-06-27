@@ -266,7 +266,7 @@ jobs:
       - teardown_vm
   validator_tests:
     executor:
-      name: jdk-docker-2xlarge
+      name: jdk-docker-2xlarge+
     steps:
       - setup_vm
       - run:
