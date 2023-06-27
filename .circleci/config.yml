@@ -59,10 +59,10 @@ executors:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: xlarge
-  jdk-docker-2xlarge:
+  jdk-docker-2xlarge+:
     docker:
       - image: cimg/openjdk:20.0-node
-    resource_class: 2xlarge
+    resource_class: 2xlarge+
   macos-medium:
     macos:
       xcode: 14.3.1
