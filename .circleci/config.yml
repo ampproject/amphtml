@@ -59,7 +59,7 @@ executors:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: xlarge
-  jdk-docker-2xlarge+:
+  jdk-docker-2xlarge-plus:
     docker:
       - image: cimg/openjdk:20.0-node
     resource_class: 2xlarge+
@@ -266,7 +266,7 @@ jobs:
       - teardown_vm
   validator_tests:
     executor:
-      name: jdk-docker-2xlarge+
+      name: jdk-docker-2xlarge-plus
     steps:
       - setup_vm
       - run:
