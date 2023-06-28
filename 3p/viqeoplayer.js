@@ -3,7 +3,7 @@ import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {getData} from '#utils/event-helper';
 
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 /**
  * @param {Window} global
@@ -106,5 +106,5 @@ export function viqeoplayer(global) {
       : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1');
 
   global['onViqeoLoad'] = (VIQEO) => viqeoPlayerInitLoaded(global, VIQEO);
-  loadScript(global, scriptPlayerInit);
+  loadScript(global, scriptURLSafeByReview(scriptPlayerInit, 'legacy'));
 }

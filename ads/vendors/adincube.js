@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 import {hasOwn} from '#core/types/object';
 
@@ -24,7 +24,7 @@ export function adincube(global, data) {
     url += parseParams(data['params']);
   }
 
-  loadScript(global, url);
+  loadScript(global, scriptURLSafeByReview(url, 'legacy'));
 }
 
 /**

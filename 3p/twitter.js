@@ -2,7 +2,7 @@
 
 import {setStyles} from '#core/dom/style';
 
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -13,7 +13,7 @@ import {loadScript} from './3p';
  * @param {function(!Object)} cb
  */
 function getTwttr(global, cb) {
-  loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
+  loadScript(global, scriptURLSafeByReview('https://platform.twitter.com/widgets.js', 'legacy'), () => {
     cb(global.twttr);
   });
   // Temporarily disabled the code sharing between frames.

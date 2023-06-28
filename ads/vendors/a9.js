@@ -1,4 +1,4 @@
-import {loadScript, validateData, writeScript} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData, writeScript} from '#3p/3p';
 
 import {hasOwn} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
@@ -111,6 +111,7 @@ function getURL(data) {
 function loadRecTag(global, data, publisherUrl) {
   let url = getURL(data);
   url += '&adInstanceId=' + data['adinstanceid'];
+  url = scriptURLSafeByReview(url);
   global['amzn_assoc_URL'] = publisherUrl;
 
   if (data['recomtype'] === 'sync') {

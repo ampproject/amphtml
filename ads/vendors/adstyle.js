@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -17,7 +17,7 @@ export function adstyle(global, data) {
 
   global._adstyle.widgetIds.push(data.widget);
 
-  const url = 'https://widgets.ad.style/amp.js';
+  const url = scriptURLSafeByReview('https://widgets.ad.style/amp.js', 'legacy');
 
   window.context.observeIntersection(function (changes) {
     /** @type {!Array} */ (changes).forEach(function (c) {

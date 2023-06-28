@@ -1,4 +1,4 @@
-import {loadScript} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -30,7 +30,7 @@ export function _4wmarketplace(global, data) {
         amp: 1,
       });
     });
-    loadScript($4wm, 'https://static-adsr.4wnetwork.com/js/fwloader.js', () => {
+    loadScript($4wm, scriptURLSafeByReview('https://static-adsr.4wnetwork.com/js/fwloader.js', 'legacy'), () => {
       window.addEventListener('message', (e) => {
         if (
           e.data.message == 'RESIZE_AMP' &&
@@ -58,7 +58,7 @@ export function _4wmarketplace(global, data) {
 
     $4wm.objFw = [];
     $4wm.objFw.push(obj);
-    loadScript($4wm, 'https://static.4wnetwork.com/js/sdk.min.js', () => {
+    loadScript($4wm, scriptURLSafeByReview('https://static.4wnetwork.com/js/sdk.min.js', 'legacy'), () => {
       window.addEventListener('message', (e) => {
         if (
           e.data.message == 'RESIZE_AMP' &&

@@ -1,7 +1,7 @@
-import {loadScript, validateData, validateSrcPrefix} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData, validateSrcPrefix} from '#3p/3p';
 
 const jsnPrefix = 'https://jsn.24smi.net/';
-const smiJs = `${jsnPrefix}smi.js`;
+const smiJs = scriptURLSafeByReview(`${jsnPrefix}smi.js`,'legacy');
 
 /**
  * @param {!Window} global

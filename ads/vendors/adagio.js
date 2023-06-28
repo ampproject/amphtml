@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -12,5 +12,5 @@ export function adagio(global, data) {
   $neodata._adagio = {};
   $neodata._adagio.amp = data;
 
-  loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
+  loadScript($neodata, scriptURLSafeByReview('https://js-ssl.neodatagroup.com/adagio_amp.js', 'legacy'));
 }

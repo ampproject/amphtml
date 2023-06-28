@@ -12,7 +12,7 @@ import {
   user,
 } from '#utils/log';
 
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
@@ -101,7 +101,7 @@ export function initRecaptcha(recaptchaApiBaseUrl = RECAPTCHA_API_URL) {
 
   loadScript(
     win,
-    recaptchaApiUrl,
+    scriptURLSafeByReview(recaptchaApiUrl, 'legacy'),
     function () {
       const {grecaptcha} = win;
 

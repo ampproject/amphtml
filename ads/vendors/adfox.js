@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -6,7 +6,7 @@ import {loadScript, validateData} from '#3p/3p';
  */
 export function adfox(global, data) {
   validateData(data, ['adfoxParams', 'ownerId']);
-  loadScript(global, 'https://yandex.ru/ads/system/context.js', () =>
+  loadScript(global, scriptURLSafeByReview('https://yandex.ru/ads/system/context.js', 'legacy'), () =>
     renderAdFox(global, data)
   );
 }

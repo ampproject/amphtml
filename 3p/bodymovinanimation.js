@@ -4,15 +4,15 @@ import {parseJson} from '#core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 const libSourceUrl = {
   'canvas':
-    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_canvas.min.js',
+    scriptURLSafeByReview('https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_canvas.min.js', 'legacy'),
   'html':
-    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_html.min.js',
+    scriptURLSafeByReview('https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_html.min.js', 'legacy'),
   'svg':
-    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_svg.min.js',
+    scriptURLSafeByReview('https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_svg.min.js', 'legacy'),
 };
 
 /**

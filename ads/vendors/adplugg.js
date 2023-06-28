@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 import {hasOwn} from '#core/types/object';
 
@@ -9,7 +9,7 @@ import {hasOwn} from '#core/types/object';
  */
 export function adplugg(global, data) {
   // Load ad.js
-  loadScript(global, 'https://www.adplugg.com/serve/js/ad.js');
+  loadScript(global, scriptURLSafeByReview('https://www.adplugg.com/serve/js/ad.js', 'legacy'));
 
   // Validate the amp-ad attributes.
   validateData(

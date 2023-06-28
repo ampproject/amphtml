@@ -1,4 +1,4 @@
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 /**
  * Get the correct script for the container.
@@ -287,7 +287,7 @@ export function yotpo(global, data) {
   let cssLoaded = false;
   let batchLoaded = false;
   const scriptSource =
-    'https://staticw2.yotpo.com/' + data.appKey + '/widget.js';
+    scriptURLSafeByReview('https://staticw2.yotpo.com/' + data.appKey + '/widget.js', 'legacy');
   getContainerScript(
     global,
     scriptSource,

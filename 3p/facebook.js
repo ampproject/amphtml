@@ -4,7 +4,7 @@ import {dashToUnderline} from '#core/types/string';
 
 import {devAssert} from '#utils/log';
 
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 /** @const @enum {string} */
 export const FacebookEmbedType = {
@@ -31,7 +31,7 @@ export const FacebookEmbedType = {
 function getFacebookSdk(global, cb, locale) {
   loadScript(
     global,
-    'https://connect.facebook.net/' + locale + '/sdk.js',
+    scriptURLSafeByReview('https://connect.facebook.net/' + locale + '/sdk.js', 'legacy'),
     () => {
       cb(global.FB);
     }

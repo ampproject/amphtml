@@ -84,7 +84,13 @@ module.exports = {
     testServerPort: TEST_SERVER_PORT,
   },
 
-  singleRun: true,
+  customHeaders: [{
+    match: '.*',
+    name: 'Content-Security-Policy',
+    value: `require-trusted-types-for 'script'; report-uri /cspreport`,
+  }],
+
+  singleRun: false,
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
 

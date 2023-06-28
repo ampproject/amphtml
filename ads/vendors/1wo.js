@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -8,7 +8,7 @@ export function _1wo(global, data) {
   validateData(data, ['src', 'owoType', 'owoCode', 'owoMode']);
   const {src} = data;
   createContainer(global, data);
-  loadScript(global, src);
+  loadScript(global, scriptURLSafeByReview(src, 'legacy'));
 }
 
 /**

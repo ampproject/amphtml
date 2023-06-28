@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -41,5 +41,5 @@ export function adbutler(global, data) {
       click: 'CLICK_MACRO_PLACEHOLDER',
     },
   });
-  loadScript(global, 'https://servedbyadbutler.com/app.js');
+  loadScript(global, scriptURLSafeByReview('https://servedbyadbutler.com/app.js', 'legacy'));
 }

@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -10,7 +10,7 @@ export function admanmedia(global, data) {
   const encodedId = encodeURIComponent(data.id);
   loadScript(
     global,
-    `https://pub.admanmedia.com/go?id=${encodedId}`,
+    scriptURLSafeByReview(`https://pub.admanmedia.com/go?id=${encodedId}`, 'legacy'),
     () => {
       global.context.renderStart();
     },

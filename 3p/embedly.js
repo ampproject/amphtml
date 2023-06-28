@@ -1,13 +1,13 @@
 import {setStyle} from '#core/dom/style';
 import {hasOwn} from '#core/types/object';
 
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 /**
  * Embedly platform library url to create cards.
  * @const {string}
  */
-const EMBEDLY_SDK_URL = 'https://cdn.embedly.com/widgets/platform.js';
+const EMBEDLY_SDK_URL = scriptURLSafeByReview('https://cdn.embedly.com/widgets/platform.js', 'legacy');
 
 /**
  * Event name emitted by embedly's SDK.

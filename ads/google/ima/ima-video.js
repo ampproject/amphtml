@@ -1,4 +1,4 @@
-import {loadScript} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview} from '#3p/3p';
 
 import {
   CONSENT_POLICY_STATE,
@@ -449,7 +449,7 @@ export function imaVideo(global, data) {
     // Set-up code that can't run until the IMA lib loads.
     loadScript(
       /** @type {!Window} */ (global),
-      'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+      scriptURLSafeByReview('https://imasdk.googleapis.com/js/sdkloader/ima3.js', 'legacy'),
       () => onImaLoadSuccess(global, data),
       onImaLoadFail
     );

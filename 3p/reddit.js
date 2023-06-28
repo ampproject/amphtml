@@ -1,4 +1,4 @@
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 /**
  * Get the correct script for the container.
@@ -53,10 +53,10 @@ export function reddit(global, data) {
   // Post and comment embeds are handled totally differently.
   if (embedtype === 'post') {
     container = getPostContainer(global);
-    scriptSource = 'https://embed.redditmedia.com/widgets/platform.js';
+    scriptSource = scriptURLSafeByReview('https://embed.redditmedia.com/widgets/platform.js', 'legacy');
   } else if (embedtype === 'comment') {
     container = getCommentContainer(global, data);
-    scriptSource = 'https://www.redditstatic.com/comment-embed.js';
+    scriptSource = scriptURLSafeByReview('https://www.redditstatic.com/comment-embed.js','legacy');
   }
 
   const link = global.document.createElement('a');

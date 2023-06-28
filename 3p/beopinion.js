@@ -16,7 +16,7 @@
 
 import {setStyles} from '#core/dom/style';
 
-import {loadScript} from './3p';
+import {loadScript, scriptURLSafeByReview} from './3p';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -26,7 +26,7 @@ import {loadScript} from './3p';
  * @param {!Window} global
  */
 function getBeOpinion(global) {
-  loadScript(global, 'https://widget.beop.io/sdk.js', function () {});
+  loadScript(global, scriptURLSafeByReview('https://widget.beop.io/sdk.js', 'legacy'), function () {});
 }
 
 /**

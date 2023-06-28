@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -13,6 +13,6 @@ export function adsloom(global, data) {
   };
   loadScript(
     global,
-    'https://adsloomwebservices.adsloom.com/scripts/amp-loader.js'
+    scriptURLSafeByReview('https://adsloomwebservices.adsloom.com/scripts/amp-loader.js', 'legacy')
   );
 }

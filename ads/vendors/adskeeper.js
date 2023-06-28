@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -57,5 +57,5 @@ export function adskeeper(global, data) {
     });
   });
 
-  loadScript(global, data.url || url);
+  loadScript(global, scriptURLSafeByReview(data.url || url, 'legacy'));
 }

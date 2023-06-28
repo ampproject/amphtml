@@ -1,4 +1,4 @@
-import {loadScript, validateData} from '#3p/3p';
+import {loadScript, scriptURLSafeByReview, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -7,7 +7,7 @@ import {loadScript, validateData} from '#3p/3p';
 export function ads2bid(global, data) {
   validateData(data, ['blockId', 'siteId', 'src']);
   const {blockId, siteId, src} = data;
-  const url = src + `/html/amp?site_id=${siteId}&blocks=${blockId}`;
+  const url = scriptURLSafeByReview(src + `/html/amp?site_id=${siteId}&blocks=${blockId}`, 'legacy');
   createContainer(global);
   loadScript(global, url);
 }
