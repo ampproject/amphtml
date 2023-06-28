@@ -164,13 +164,15 @@ export function createExtensionScript(win, extensionId, version) {
           // Only allow trusted URLs
           // eslint-disable-next-line local/no-forbidden-terms
           const regexURL = new RegExp(
+            // eslint-disable-next-line local/no-forbidden-terms
             '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
           );
-          // const regexURL = new RegExp(urls.cdnProxyRegex.slice(0,-1)+'(\/.*)?$');
+          const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
           if (
             regexURL.test(url) ||
-            (getMode(win).test && new URL(url).hostname === 'localhost') ||
-            new URL(url).host === 'fonts.googleapis.com'
+            (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
+            (new URL(url).host === 'fonts.googleapis.com' &&
+              (url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js'))
           ) {
             return url;
           } else {
