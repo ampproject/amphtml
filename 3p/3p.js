@@ -56,6 +56,35 @@ export function run(id, win, data) {
   fn(win, data);
 }
 
+function assertValidJustification(justification) {
+  if (typeof justification !== 'string' || justification.trim() === '') {
+    let errMsg =
+      'Calls to uncheckedconversion functions must go through security review.';
+    errMsg += ' A justification must be provided to capture what security' +
+      ' assumptions are being made.';
+    throw new Error(errMsg);
+  }
+}
+
+export function scriptURLSafeByReview(html, justification) {
+  assertValidJustification(justification);
+
+  if (self.trustedTypes && self.trustedTypes.createPolicy) {
+    const policy = self.trustedTypes.createPolicy(
+      '3p#scriptSafeByReview',
+      {
+        createScriptURL: function (html) {
+          // This policy is only to be used for trusted inputs that do not involve unsanitized user inputs.
+          return html;
+        },
+      }
+    );
+    return policy.createScriptURL(html);
+  } else {
+    return html;
+  }
+};
+
 /**
  * Synchronously load the given script URL. Only use this if you need a sync
  * load. Otherwise use {@link loadScript}.
