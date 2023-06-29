@@ -156,7 +156,7 @@ export function createExtensionScript(win, extensionId, version) {
     getMode(win).localDev
   );
 
-  const policy = {
+  let policy = {
     createScriptURL: function (url) {
       // Only allow trusted URLs
       const regexURL = new RegExp(
@@ -177,15 +177,13 @@ export function createExtensionScript(win, extensionId, version) {
   };
 
   if (self.trustedTypes && self.trustedTypes.createPolicy) {
-    const policy = self.trustedTypes.createPolicy(
+    policy = self.trustedTypes.createPolicy(
       'extension-script#createExtensionScript',
       policy
     );
-    scriptElement.src = policy.createScriptURL(scriptSrc);
-  } else {
-    scriptElement.src = scriptSrc;
   }
 
+  scriptElement.src = policy.createScriptURL(scriptSrc);
   return scriptElement;
 }
 
