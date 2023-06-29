@@ -162,7 +162,6 @@ export function createExtensionScript(win, extensionId, version) {
       {
         createScriptURL: function (url) {
           // Only allow trusted URLs
-          // eslint-disable-next-line local/no-forbidden-terms
           const regexURL = new RegExp(
             // eslint-disable-next-line local/no-forbidden-terms
             '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
