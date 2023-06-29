@@ -170,8 +170,7 @@ export function createExtensionScript(win, extensionId, version) {
           if (
             regexURL.test(url) ||
             (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
-            (new URL(url).host === 'fonts.googleapis.com' &&
-              (url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js'))
+            (new URL(url).host === 'fonts.googleapis.com')
           ) {
             return url;
           } else {
