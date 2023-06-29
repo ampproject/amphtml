@@ -167,7 +167,7 @@ export function createExtensionScript(win, extensionId, version) {
       if (
         regexURL.test(url) ||
         (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
-        (new URL(url).host === 'fonts.googleapis.com')
+        new URL(url).host === 'fonts.googleapis.com'
       ) {
         return url;
       } else {
