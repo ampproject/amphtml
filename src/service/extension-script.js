@@ -166,7 +166,8 @@ export function createExtensionScript(win, extensionId, version) {
       const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
       if (
         regexURL.test(url) ||
-        (getMode(win).test && testRegexURL.test((new URL(url)).hostname))
+        (getMode(win).test && testRegexURL.test((new URL(url)).hostname)) ||
+        url.host === 'fonts.googleapis.com'
       ) {
         return url;
       } else {
