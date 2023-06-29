@@ -156,32 +156,33 @@ export function createExtensionScript(win, extensionId, version) {
     getMode(win).localDev
   );
 
-  const policy = self.trustedTypes.createPolicy(
-      'extension-script#createExtensionScript',
-      {
-        createScriptURL: function (url) {
-          // Only allow trusted URLs
-          const regexURL = new RegExp(
-            // eslint-disable-next-line local/no-forbidden-terms
-            '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
-          );
-          const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
-          if (
-            regexURL.test(url) ||
-            (true && testRegexURL.test(new URL(url).hostname)) ||
-            (new URL(url).host === 'fonts.googleapis.com')
-          ) {
-            return url;
-          } else {
-            return '';
-          }
-        },
+  const policy = {
+    createScriptURL: function (url) {
+      // Only allow the correct webworker url to pass through
+      const regexURL = new RegExp(
+        // eslint-disable-next-line local/no-forbidden-terms
+        '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
+      );
+      const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
+      if (
+        regexURL.test(url) ||
+        (true && testRegexURL.test(new URL(url).hostname))
+      ) {
+        return url;
+      } else {
+        return '';
       }
+    },
+  };
+
+  if (self.trustedTypes && self.trustedTypes.createPolicy) {
+    const policy = self.trustedTypes.createPolicy(
+      'extension-script#createExtensionScript',
+      policy
     );
-    scriptElement.src = policy.createScriptURL(scriptSrc);
-  } else {
-    scriptElement.src = scriptSrc;
   }
+
+  scriptElement.src = policy.createScriptURL(scriptSrc);
 
   return scriptElement;
 }
