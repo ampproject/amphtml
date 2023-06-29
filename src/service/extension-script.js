@@ -156,9 +156,9 @@ export function createExtensionScript(win, extensionId, version) {
     getMode(win).localDev
   );
 
-  const policy = {
+  let policy = {
     createScriptURL: function (url) {
-      // Only allow the correct webworker url to pass through
+      // Only allow safe cdn urls to pass through
       const regexURL = new RegExp(
         // eslint-disable-next-line local/no-forbidden-terms
         '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
@@ -166,7 +166,7 @@ export function createExtensionScript(win, extensionId, version) {
       const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
       if (
         regexURL.test(url) ||
-        (true && testRegexURL.test(new URL(url).hostname))
+        (getMode(win).test && testRegexURL.test(new URL(url).hostname))
       ) {
         return url;
       } else {
@@ -176,7 +176,7 @@ export function createExtensionScript(win, extensionId, version) {
   };
 
   if (self.trustedTypes && self.trustedTypes.createPolicy) {
-    const policy = self.trustedTypes.createPolicy(
+    policy = self.trustedTypes.createPolicy(
       'extension-script#createExtensionScript',
       policy
     );
