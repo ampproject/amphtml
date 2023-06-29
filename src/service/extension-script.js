@@ -166,7 +166,7 @@ export function createExtensionScript(win, extensionId, version) {
       const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
       if (
         regexURL.test(url) ||
-        (getMode().test && testRegexURL.test(new URL(url).hostname))
+        (getMode(win).test && testRegexURL.test(new URL(url).hostname))
       ) {
         return url;
       } else {
