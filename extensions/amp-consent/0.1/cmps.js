@@ -88,11 +88,11 @@ CMP_CONFIG['quantcast'] = {
     'https://apis.quantcast.mgr.consensu.org/amp/check-consent',
   'promptUISrc': 'https://quantcast.mgr.consensu.org/tcfv2/amp.html',
 };
-
+ 
 CMP_CONFIG['SourcePoint'] = {
   'consentInstanceId': 'SourcePoint',
-  'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
-  'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
+  'checkConsentHref': 'https://cdn.privacy-mgmt.com/wrapper/tcfv2/v1/amp-v2?authId=CLIENT_ID',
+  'promptUISrc': 'https://cdn.privacy-mgmt.com/amp/unified/index.html?authId=CLIENT_ID&source_url=SOURCE_URL',
 };
 
 CMP_CONFIG['UniConsent'] = {
