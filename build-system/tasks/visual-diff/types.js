@@ -1,4 +1,5 @@
-const {ConsoleMessage} = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
+/** @typedef {import('puppeteer-core')} puppeteer */
+/** @typedef {import('puppeteer-core').ConsoleMessage} puppeteer.ConsoleMessage */
 
 /**
  * @typedef {{
@@ -25,7 +26,7 @@ let WebpageDef;
  *   name: string;
  *   message: string;
  *   error: Error;
- *   consoleMessages: ConsoleMessage[];
+ *   consoleMessages: puppeteer.ConsoleMessage[];
  * }}
  */
 let TestErrorDef;

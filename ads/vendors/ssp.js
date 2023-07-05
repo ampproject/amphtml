@@ -28,7 +28,7 @@ import {parseJson} from '#core/types/object/json';
  * @param {!Array.<!Object>} array
  * @param {!Function} iteratee
  *
- * @return {Object}
+ * @return {object}
  */
 export function keyBy(array, iteratee) {
   return array.reduce(
@@ -53,7 +53,7 @@ export function runWhenFetchingSettled(fetchingSSPs, cb) {
 /**
  * @param {!Element} element
  * @param {boolean} center
- * @param {Object} dimensions
+ * @param {object} dimensions
  */
 export function handlePosition(element, center, dimensions) {
   const styles = {

@@ -118,7 +118,7 @@ async function overrideToc(content) {
 
 /**
  * @param {string} cwd
- * @return {Promise<Object<string, ?string>>}
+ * @return {Promise<{[key: string]: ?string}>}
  */
 async function overrideTocGlob(cwd) {
   const glob = [
@@ -134,7 +134,7 @@ async function overrideTocGlob(cwd) {
     .trim()
     .split('\n');
 
-  /** @type {Object<string, ?string>} */
+  /** @type {{[key: string]: ?string}} */
   const result = {};
 
   for (const filename of filesIncludingString) {

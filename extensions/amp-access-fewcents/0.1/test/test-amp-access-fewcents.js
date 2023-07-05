@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {sleep} from '#testing/helpers';
+
 import {AmpAccessFewcents} from '../fewcents-impl';
 
 const TAG = 'amp-access-fewcents';
@@ -336,7 +338,7 @@ describes.realWin(
         xhrMock.verify();
       });
 
-      it('should check clicking on unlock button', (done) => {
+      it('should check clicking on unlock button', async () => {
         accessSourceMock
           .expects('buildUrl')
           .returns(Promise.resolve('https://apllink'))
@@ -346,9 +348,7 @@ describes.realWin(
 
         const clickEv = new Event('click');
         container.querySelector('button').dispatchEvent(clickEv);
-        setTimeout(() => {
-          done();
-        }, 500);
+        await sleep(500);
       });
     });
 

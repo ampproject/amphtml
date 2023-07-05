@@ -20,7 +20,7 @@ export function isEnumValue(enumObj, val) {
 /**
  * Returns all enum values of `enumObj`.
  *
- * @param {Object} enumObj
+ * @param {object} enumObj
  * @return {readonly T[]}
  * @template T
  */

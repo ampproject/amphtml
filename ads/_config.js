@@ -46,7 +46,7 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  * }
  *
- * @const {!Object<string, !JsonObject>}
+ * @const {!{[key: string]: !JsonObject}}
  */
 const adConfig = jsonConfiguration({
   '_ping_': {
@@ -238,6 +238,11 @@ const adConfig = jsonConfiguration({
       'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
+  },
+
+  'adsviu': {
+    prefetch: 'https://widget.adsviu.com/adsviuAMP.js',
+    preconnect: ['https://api.adsviu.com'],
   },
 
   'adunity': {
@@ -534,6 +539,8 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://img.ak.impact-ad.jp',
     renderStartImplemented: true,
   },
+
+  'fairground': {},
 
   'fake': {},
 
@@ -1037,6 +1044,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pubscale': {
+    renderStartImplemented: true,
+  },
+
   'puffnetwork': {
     prefetch: 'https://static.puffnetwork.com/amp_ad.js',
     renderStartImplemented: true,
@@ -1157,7 +1168,7 @@ const adConfig = jsonConfiguration({
   'seedingalliance': {},
 
   'seedtag': {
-    prefetch: 'https://config.seedtag.com/omid/bridge/bridge.js',
+    prefetch: 'https://t.seedtag.com/c/loader.js',
     preconnect: ['https://s.seedtag.com'],
     consentHandlingOverride: true,
     renderStartImplemented: true,
@@ -1186,6 +1197,10 @@ const adConfig = jsonConfiguration({
 
   'sklik': {
     prefetch: 'https://c.imedia.cz/js/amp.js',
+  },
+
+  'skoiy': {
+    preconnect: ['https://svas.skoiy.xyz'],
   },
 
   'slimcutmedia': {

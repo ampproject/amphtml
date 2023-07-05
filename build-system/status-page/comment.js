@@ -3,7 +3,6 @@
  * Add progress comment for Stable and LTS cherry-picks
  */
 
-const fetch = require('node-fetch');
 const {getChannels, steps} = require('./common');
 const {log} = require('../common/logging');
 

@@ -5,7 +5,12 @@
   reviewerPool: ['ampproject/reviewers-amphtml', 'renovate-approve[bot]'],
   rules: [
     {
-      owners: [{name: 'erwinmombay', requestReviews: false}],
+      owners: [
+        {name: 'erwinmombay', requestReviews: true},
+        {name: 'powerivq', requestReviews: true},
+        {name: 'ychsieh', requestReviews: true},
+        {name: 'banaag', requestReviews: true},
+      ],
     },
     {
       pattern: '**/validator-*.{protoascii,html,out,out.cpponly}',

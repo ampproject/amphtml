@@ -3,6 +3,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
+import {sleep} from '#testing/helpers';
 import {cleanHtml} from '#testing/helpers/cleanHtml';
 import {waitFor} from '#testing/helpers/service';
 
@@ -32,6 +33,14 @@ describes.realWin(
       doc = win.document;
       html = htmlFor(doc);
       toggleExperiment(win, 'bento-pan-zoom', true, true);
+    });
+
+    afterEach(async () => {
+      // Avoids "ResizeObserver loop limit exceeded" errors.
+      while (doc.lastChild) {
+        doc.lastChild.remove();
+      }
+      await sleep(50);
     });
 
     async function mountElement(element) {

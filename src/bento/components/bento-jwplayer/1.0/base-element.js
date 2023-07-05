@@ -42,7 +42,7 @@ export class BaseElement extends BentoVideoBaseElement {
 
   /**
    * Merges query params from multiple sources into 1 string
-   * @param {Object} playerParams
+   * @param {object} playerParams
    * @param {string} playerQueryString
    * @return {string}
    */

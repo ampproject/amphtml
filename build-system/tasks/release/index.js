@@ -32,7 +32,6 @@ let DistFlavorDef;
 const argv = require('minimist')(process.argv.slice(2));
 /** @type {ExperimentsConfigDef} */
 const experimentsConfig = require('../../global-configs/experiments-config.json');
-const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
@@ -319,10 +318,19 @@ async function fetchAmpSw_(flavorType, tempDir) {
     filter: (path) => path.startsWith('package/dist'),
     strip: 2, // to strip "package/dist/".
   });
-  (await fetch(ampSwTarballUrl)).body.pipe(tarWritableStream);
-  await new Promise((resolve) => {
-    tarWritableStream.on('end', resolve);
-  });
+  const tarballResponse = await fetch(ampSwTarballUrl);
+  if (!tarballResponse.body) {
+    throw new Error(`Failed to fetch ${ampSwTarballUrl}`);
+  }
+  const reader = tarballResponse.body.getReader();
+  while (true) {
+    const {done, value} = await reader.read();
+    if (done) {
+      break;
+    }
+    tarWritableStream.write(value);
+  }
+  tarWritableStream.end();
 
   await fs.copy(ampSwTempDir, path.join(tempDir, flavorType, 'dist/sw'));
 

@@ -22,7 +22,7 @@ import {
 } from '../../3p-frame';
 import {parseUrlDeprecated} from '../../url';
 
-/** @type {Object<string,function():void>} 3p frames for that type. */
+/** @type {{[key: string]: function():void}} 3p frames for that type. */
 export const countGenerators = {};
 
 // Block synchronous XHR in ad. These are very rare, but super bad for UX

@@ -5,7 +5,6 @@ const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
   endBuildStep,
@@ -23,7 +22,6 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {buildBentoComponents} = require('./build-bento');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -117,8 +115,6 @@ async function dist() {
   // These steps use closure compiler. Small ones before large (parallel) ones.
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
-  } else if (argv.bento_runtime_only) {
-    await compileBentoRuntimeAndCore(options);
   } else {
     await Promise.all([
       writeVersionFiles(),
@@ -131,12 +127,11 @@ async function dist() {
   }
 
   // This step internally parses the various extension* flags.
-  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
+  await buildExtensions(options);
 
   // This step is to be run only during a full `amp dist`.
   if (
     !argv.core_runtime_only &&
-    !argv.bento_runtime_only &&
     !argv.extensions &&
     !argv.extensions_from &&
     !argv.noextensions
@@ -402,7 +397,6 @@ dist.flags = {
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
-  bento_runtime_only: 'Build only the standalone Bento runtime',
   full_sourcemaps: 'Include source code content in sourcemaps',
   sourcemap_url: 'Set a custom sourcemap URL with placeholder {version}',
   type: 'Point sourcemap to fetch files from the correct GitHub tag',

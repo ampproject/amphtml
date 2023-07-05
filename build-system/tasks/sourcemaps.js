@@ -26,7 +26,7 @@ function includeSourcesContent() {
  * @param {Array<Object|string>} mapChain
  * @param {string} destFile
  * @param {*} options
- * @return {Object}
+ * @return {object}
  */
 function massageSourcemaps(mapChain, destFile, options) {
   const map = remapping(mapChain, () => null, !includeSourcesContent());
@@ -46,7 +46,7 @@ function massageSourcemaps(mapChain, destFile, options) {
  * Computes the base url for sourcemaps. Custom sourcemap URLs have placeholder
  * {version} that should be replaced with the actual version. Also, ensures
  * that a trailing slash exists.
- * @param {Object} options
+ * @param {object} options
  * @return {string}
  */
 function getSourceRoot(options) {

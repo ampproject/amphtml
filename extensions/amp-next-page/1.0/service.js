@@ -125,7 +125,7 @@ export class NextPageService {
     /** @private {?Page} */
     this.currentTitlePage_ = null;
 
-    /** @private {!Object<string, !Element>} */
+    /** @private {!{[key: string]: !Element}} */
     this.replaceableElements_ = {};
 
     /** @private {boolean} */

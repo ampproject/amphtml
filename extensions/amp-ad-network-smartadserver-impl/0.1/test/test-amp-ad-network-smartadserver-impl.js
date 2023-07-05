@@ -37,7 +37,7 @@ const realWinConfig = {
 describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
   const rtcConfig = {
     vendors: {
-      prebidappnexus: {
+      prebidappnexuspsp: {
         PLACEMENT_ID: 13133382,
         ACCOUNT_ID: 101010,
       },
@@ -374,7 +374,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
               'hb_size': '300x250',
             },
           },
-          callout: 'prebidappnexus',
+          callout: 'prebidappnexuspsp',
           rtcTime: 184,
         },
         {
@@ -567,7 +567,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
             },
           },
           rtcTime: 134,
-          callout: 'prebidappnexus',
+          callout: 'prebidappnexuspsp',
         },
         {
           response: {},
@@ -600,7 +600,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         {
           'response': {},
           'rtcTime': 92,
-          'callout': 'prebidappnexus',
+          'callout': 'prebidappnexuspsp',
         },
         {
           'response': {},

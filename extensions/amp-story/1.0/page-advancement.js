@@ -516,6 +516,11 @@ export class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
+        if (tagName === 'amp-story-audio-sticker') {
+          shouldHandleEvent = false;
+          return true;
+        }
+
         if (tagName === 'amp-story-page') {
           shouldHandleEvent = true;
           return true;

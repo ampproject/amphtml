@@ -361,7 +361,7 @@ export class AmpRecaptchaService {
    * NOTE: Use bracket notation to access message properties,
    * As the externs were a little too generic.
    *
-   * @param {Object} data
+   * @param {object} data
    */
   tokenMessageHandler_(data) {
     const id = data['id'];
@@ -377,7 +377,7 @@ export class AmpRecaptchaService {
    * NOTE: Use bracket notation to access message properties,
    * As the externs were a little too generic.
    *
-   * @param {Object} data
+   * @param {object} data
    */
   errorMessageHandler_(data) {
     const id = data['id'];

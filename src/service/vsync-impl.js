@@ -20,7 +20,7 @@ import {getService, registerServiceBuilder} from '../service-helpers';
 const FRAME_TIME = 16;
 
 /**
- * @typedef {!Object<string, *>}
+ * @typedef {!{[key: string]: *}}
  */
 let VsyncStateDef;
 

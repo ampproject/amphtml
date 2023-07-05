@@ -12,6 +12,7 @@
  * An async module loader similar to define() in AMD.
  * Our implementation varies in that it can be compiled down to a minimal form
  * based on the module's needs, rather than bundling a full implementation.
+ * @param {object} defineCallback
  */
 (function defineish(defineCallback) {
   // self.BENTO maps module names to callbacks to execute with their contents.

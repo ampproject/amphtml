@@ -14,7 +14,7 @@ import {
 } from '../../../src/service-helpers';
 import {parseUrlDeprecated} from '../../../src/url';
 
-/** @private {!Object<string, string|boolean>} */
+/** @private {!{[key: string]: string|boolean}} */
 const TEMPLATE_CORS_CONFIG = {
   mode: 'cors',
   method: 'GET',

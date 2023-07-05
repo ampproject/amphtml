@@ -198,7 +198,7 @@ async function getConfig(
  * Returns an empty string if no AMP_CONFIG is necessary.
  *
  * @param {string} filename the file being operated on.
- * @param {Object} options
+ * @param {object} options
  * @return {!Promise<string>}
  */
 async function getAmpConfigForFile(filename, options) {

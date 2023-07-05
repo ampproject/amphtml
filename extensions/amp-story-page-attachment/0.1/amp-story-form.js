@@ -30,7 +30,7 @@ export function allowlistFormActions(win) {
 let FormElementChildrenDef;
 
 /**
- * @const {Object<string, (function(Element):!FormElementChildrenDef|function():!FormElementChildrenDef)>}
+ * @const {{[key: string]: (function(Element):!FormElementChildrenDef|function():!FormElementChildrenDef)}}
  */
 const createStatusChildrenByAttribute = {
   'submitting': () => toggleLoadingSpinner(renderLoadingSpinner(), true),

@@ -612,7 +612,7 @@ export class FakeHistory {
  */
 export class FakeStorage {
   constructor() {
-    /** @const {!Object<string, string>} */
+    /** @const {!{[key: string]: string}} */
     this.values = {};
 
     // Length.
@@ -675,7 +675,7 @@ export class FakeCustomElements {
     /** @type {number} */
     this.count = 0;
 
-    /** @const {!Object<string, !{prototype: !Prototype}>} */
+    /** @const {!{[key: string]: !{prototype: !Prototype}}} */
     this.elements = {};
 
     /**

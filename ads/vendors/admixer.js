@@ -9,7 +9,7 @@ import {tryParseJson} from '#core/types/object/json';
 export function admixer(global, data) {
   validateData(data, ['zone'], ['sizes']);
   /**
-   * @type {Object}
+   * @type {object}
    */
   const payload = {
     imps: [],

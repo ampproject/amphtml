@@ -17,11 +17,12 @@ To use RTC, you must meet the following requirements:
 -   Use an ad network that supports Fast Fetch and AMP RTC
 -   Set the `rtc-config` attribute on each amp-ad element for which RTC is to be used, as specified below.
 
+<!-- markdown-link-check-disable -->
+
 ### Supported Vendors
 
 -   Admax
 -   Adpushup
--   AppNexus
 -   AppNexus PSP
 -   APS
 -   Automatad
@@ -52,6 +53,8 @@ To use RTC, you must meet the following requirements:
 -   The Ozone Project
 -   Yieldbot
 -   Yieldlab
+
+<!-- markdown-link-check-enable -->
 
 ### Overview
 

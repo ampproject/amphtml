@@ -30,7 +30,7 @@ const PARAMS_SENTINEL = '__AMP__';
 
 /**
  * @typedef {{
- *   params: (!Object<string, string>|undefined),
+ *   params: (!{[key: string]: string}|undefined),
  *   signals: (?Signals|undefined),
  *   visibilityState: (?VisibilityState_Enum|undefined),
  * }}
@@ -66,7 +66,7 @@ export class AmpDocService {
   /**
    * @param {!Window} win
    * @param {boolean} isSingleDoc
-   * @param {!Object<string, string>=} opt_initParams
+   * @param {!{[key: string]: string}=} opt_initParams
    */
   constructor(win, isSingleDoc, opt_initParams) {
     /** @const {!Window} */
@@ -239,7 +239,7 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME_ENUM, boolean>} */
+    /** @private {!{[key: ../enums.AMPDOC_SINGLETON_NAME_ENUM]: boolean}} */
     this.registeredSingleton_ = map();
 
     /** @public @const {?AmpDoc} */
@@ -248,13 +248,13 @@ export class AmpDoc {
     /** @private @const */
     this.signals_ = (opt_options && opt_options.signals) || new Signals();
 
-    /** @private {!Object<string, string>} */
+    /** @private {!{[key: string]: string}} */
     this.params_ = (opt_options && opt_options.params) || map();
 
-    /** @protected {?Object<string, string>} */
+    /** @protected {?{[key: string]: string}} */
     this.meta_ = null;
 
-    /** @private @const {!Object<string, string>} */
+    /** @private @const {!{[key: string]: string}} */
     this.declaredExtensions_ = {};
 
     const paramsVisibilityState = this.params_['visibilityState'];
@@ -347,7 +347,7 @@ export class AmpDoc {
   /**
    * Initializes (if necessary) cached map of an ampdoc's meta name values to
    * their associated content values and returns the map.
-   * @return {!Object<string, string>}
+   * @return {!{[key: string]: string}}
    */
   getMeta() {
     if (this.meta_) {
@@ -962,7 +962,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getMeta() {
-    return /** @type {!Object<string,string>} */ (map(this.meta_));
+    return /** @type {!{[key: string]: string}} */ (map(this.meta_));
   }
 
   /** @override */
@@ -1066,8 +1066,8 @@ export class AmpDocFie extends AmpDoc {
 
 /**
  * @param {!Window} win
- * @param {!Object<string, string>|undefined} initParams
- * @return {!Object<string, string>}
+ * @param {!{[key: string]: string}|undefined} initParams
+ * @return {!{[key: string]: string}}
  */
 function extractSingleDocParams(win, initParams) {
   const params = map();
@@ -1095,7 +1095,7 @@ function extractSingleDocParams(win, initParams) {
  * initial configuration.
  * @param {!Window} win
  * @param {boolean} isSingleDoc
- * @param {!Object<string, string>=} opt_initParams
+ * @param {!{[key: string]: string}=} opt_initParams
  */
 export function installDocService(win, isSingleDoc, opt_initParams) {
   registerServiceBuilder(win, 'ampdoc', function () {

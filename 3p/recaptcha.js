@@ -142,7 +142,7 @@ function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
  *
  * @param {Window} win
  * @param {*} grecaptcha
- * @param {Object} data
+ * @param {object} data
  */
 function actionTypeHandler(win, grecaptcha, data) {
   doesOriginDomainMatchIframeSrc(win, data)
@@ -183,7 +183,7 @@ function actionTypeHandler(win, grecaptcha, data) {
  * Function to verify our origin domain from the
  * parent window.
  * @param {Window} win
- * @param {Object} data
+ * @param {object} data
  * @return {!Promise}
  */
 export function doesOriginDomainMatchIframeSrc(win, data) {

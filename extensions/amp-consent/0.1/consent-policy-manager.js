@@ -33,10 +33,10 @@ export class ConsentPolicyManager {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Object<string, ?Deferred>} */
+    /** @private {!{[key: string]: ?Deferred}} */
     this.policyInstancesDeferred_ = map();
 
-    /** @private {!Object<string, ConsentPolicyInstance>} */
+    /** @private {!{[key: string]: ConsentPolicyInstance}} */
     this.instances_ = map();
 
     /** @private {!Promise} */

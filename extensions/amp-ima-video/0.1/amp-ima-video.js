@@ -42,7 +42,7 @@ let SerializableChildDef;
 
 /**
  * @param {!Element} element
- * @return {!Object<string, *>}
+ * @return {!{[key: string]: *}}
  */
 function serializeAttributes(element) {
   const {attributes} = element;
@@ -91,7 +91,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /**
      * Maps events to their unlisteners.
-     * @private {!Object<string, function()>}
+     * @private {!{[key: string]: function()}}
      */
     this.unlisteners_ = {};
 

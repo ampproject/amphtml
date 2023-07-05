@@ -46,10 +46,10 @@ export const AdvancementMode = {
   VIEWER_SELECT_PAGE: 'viewerSelectPage',
 };
 
-/** @typedef {!Object<string, !PageEventCountDef>} */
+/** @typedef {!{[key: string]: !PageEventCountDef}} */
 let EventsPerPageDef;
 
-/** @typedef {!Object<string, number>} */
+/** @typedef {!{[key: string]: number}} */
 let PageEventCountDef;
 
 /**

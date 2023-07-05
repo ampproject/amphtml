@@ -24,7 +24,7 @@ class NamedObservable {
    * Creates an instance of NamedObservable.
    */
   constructor() {
-    /** @private {!Object<string, !Function>} */
+    /** @private {!{[key: string]: !Function}} */
     this.map_ = {};
   }
 
@@ -72,7 +72,7 @@ export class InaboxMessagingHost {
     /** @private {!Array<!HTMLIFrameElement>} */
     this.iframes_ = iframes;
 
-    /** @private {!Object<string,!AdFrameDef>} */
+    /** @private {!{[key: string]: !AdFrameDef}} */
     this.iframeMap_ = Object.create(null);
 
     /** @private {!./position-observer.PositionObserver} */

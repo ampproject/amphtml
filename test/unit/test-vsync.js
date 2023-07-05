@@ -429,10 +429,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = '';
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
+          result += 'mu1';
         },
       });
 
@@ -446,10 +446,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = '';
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
+          result += 'mu1';
         },
       });
       const res = task();
@@ -709,10 +709,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = '';
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
+          result += 'mu1';
         },
       });
 
@@ -726,10 +726,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = '';
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
+          result += 'mu1';
         },
       });
       const res = task();
