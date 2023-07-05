@@ -254,7 +254,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-orientation-observer-scroll.amp.html',
   '!examples/amp-orientation-observer.amp.html',
   '!examples/amp-position-observer.amp.html',
-  '!examples/amp-redbull-player.amp.html',
   '!examples/amp-script/example.amp.html',
   '!examples/amp-script/example.sandboxed.amp.html',
   '!examples/amp-script/todomvc.amp.html',
