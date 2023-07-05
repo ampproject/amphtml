@@ -11,7 +11,7 @@ const cdnRegexUrl = new RegExp(
   // eslint-disable-next-line local/no-forbidden-terms
   '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
 );
-const testCdnRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
+const testCdnRegexUrl = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
 
 /**
  * Calculate the base url for any scripts.
@@ -166,8 +166,8 @@ export function createExtensionScript(win, extensionId, version) {
     createScriptURL: function (url) {
       // Only allow trusted URLs
       if (
-        cdnRegexURL.test(url) ||
-        (getMode().test && testCdnRegexURL.test(new URL(url).hostname)) ||
+        cdnRegexUrl.test(url) ||
+        (getMode().test && testCdnRegexUrl.test(new URL(url).hostname)) ||
         new URL(url).host === 'fonts.googleapis.com'
       ) {
         return url;
