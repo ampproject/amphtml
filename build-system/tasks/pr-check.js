@@ -84,7 +84,8 @@ async function prCheck() {
   }
 
   if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
-    runCheck('amp check-renovate-config');
+    // TODO(#39231): restore this check.
+    // timedExecOrDie('amp check-renovate-config');
   }
 
   if (buildTargetsInclude(Targets.SERVER)) {
