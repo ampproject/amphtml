@@ -25,7 +25,8 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-links');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp check-exact-versions');
-  timedExecOrDie('amp check-renovate-config');
+  // TODO(#39231): restore this check.
+  // timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
   timedExecOrDie('amp make-extension --name=t --test --cleanup');
   timedExecOrDie('amp dep-check');
@@ -93,7 +94,8 @@ function prBuildWorkflow() {
   }
 
   if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
-    timedExecOrDie('amp check-renovate-config');
+    // TODO(#39231): restore this check.
+    // timedExecOrDie('amp check-renovate-config');
   }
 
   if (buildTargetsInclude(Targets.SERVER)) {

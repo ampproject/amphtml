@@ -1,5 +1,8 @@
 {
-  "extends": ["config:recommended"],
+  "extends": ["config:base"],
+  "node": {
+    "supportPolicy": ["lts_latest"]
+  },
   "ignoreDeps": ["ubuntu-2004"],
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
@@ -17,13 +20,13 @@
   "packageRules": [
     {
       "groupName": "subpackage devDependencies",
-      "matchFileNames": ["**/*"],
+      "matchPaths": ["**/*"],
       "rebaseWhen": "never",
       "automerge": true
     },
     {
       "groupName": "chrome and chromedriver",
-      "matchFileNames": ["build-system/tasks/e2e/package.json"],
+      "matchFiles": ["build-system/tasks/e2e/package.json"],
       "matchPackageNames": ["chromedriver"],
       "labels": ["WG: infra"],
       "rebaseWhen": "never",
@@ -31,33 +34,33 @@
     },
     {
       "groupName": "build-system devDependencies",
-      "matchFileNames": ["build-system/**"],
+      "matchPaths": ["build-system/**"],
       "labels": ["WG: infra"],
       "rebaseWhen": "never",
       "automerge": true
     },
     {
       "groupName": "validator devDependencies",
-      "matchFileNames": ["validator/**"],
+      "matchPaths": ["validator/**"],
       "labels": ["WG: caching"],
       "rebaseWhen": "never",
       "automerge": true
     },
     {
       "groupName": "validator webui",
-      "matchFileNames": ["validator/js/webui/**"],
+      "matchPaths": ["validator/js/webui/**"],
       "enabled": false
     },
     {
       "groupName": "core devDependencies",
-      "matchFileNames": ["package.json"],
+      "matchFiles": ["package.json"],
       "labels": ["WG: infra"],
       "rebaseWhen": "never",
       "automerge": true
     },
     {
       "groupName": "linting devDependencies",
-      "matchFileNames": ["package.json"],
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
       "labels": ["WG: infra"],
       "rebaseWhen": "never",
@@ -65,7 +68,7 @@
     },
     {
       "groupName": "babel devDependencies",
-      "matchFileNames": ["package.json"],
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\bbabel"],
       "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra", "WG: performance"],
@@ -74,7 +77,7 @@
     },
     {
       "groupName": "esbuild devDependencies",
-      "matchFileNames": ["package.json"],
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\besbuild\\b"],
       "labels": ["WG: infra", "WG: performance"],
       "rebaseWhen": "never",
@@ -82,7 +85,7 @@
     },
     {
       "groupName": "ampproject devDependencies",
-      "matchFileNames": ["package.json"],
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
       "labels": ["WG: components", "WG: performance"],
@@ -91,7 +94,7 @@
     },
     {
       "groupName": "ampproject dependencies",
-      "matchFileNames": ["package.json"],
+      "matchFiles": ["package.json"],
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: components", "WG: performance"],
@@ -101,7 +104,7 @@
     },
     {
       "groupName": "core dependencies",
-      "matchFileNames": ["package.json"],
+      "matchFiles": ["package.json"],
       "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: components", "WG: performance"],
