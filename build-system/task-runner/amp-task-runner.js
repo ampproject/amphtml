@@ -94,11 +94,11 @@ async function runTask(taskName, taskFunc) {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
-    // For some reason, e2e tests get stuck on CircleCI after finishing, despite
-    // reaching this point in the code. This is a temporary workaround until we
-    // understand exactly why and fix the root cause.
-    // TODO(@ampproject/wg-infra): fix this.
-    if (isCircleciBuild() && taskName === 'e2e') {
+    // For some reason, the `e2e` and `unit` tasks get stuck on CircleCI after
+    // testing is finishing, despite reaching this point in the code. This is a
+    // temporary workaround until we understand exactly why and fix the root
+    // cause. TODO(@ampproject/wg-infra): fix this.
+    if (isCircleciBuild() && ['e2e', 'unit'].includes(taskName)) {
       process.exit(); // process.exitCode is set in ../tasks/e2e/index.js:171
     }
   } catch (err) {
