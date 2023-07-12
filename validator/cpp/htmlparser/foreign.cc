@@ -1,9 +1,9 @@
-#include "foreign.h"
+#include "cpp/htmlparser/foreign.h"
 
 #include <algorithm>
 
-#include "comparators.h"
-#include "strings.h"
+#include "cpp/htmlparser/comparators.h"
+#include "cpp/htmlparser/strings.h"
 
 namespace htmlparser {
 

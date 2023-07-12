@@ -2,10 +2,12 @@ import {getDate} from '#core/types/date';
 
 import * as Preact from '#preact';
 import {useMemo} from '#preact';
-import {Wrapper, useRenderer} from '#preact/component';
+import {Wrapper} from '#preact/component';
+import {useRenderer} from '#preact/component/renderer';
 import {useResourcesNotify} from '#preact/utils';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
+
 import {getTimeZoneName} from '../format';
 
 /** @const {string} */
@@ -17,7 +19,7 @@ const DEFAULT_DISPLAY_IN = 'local';
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_DATETIME_OPTIONS = {
   'year': 'numeric',
   'month': 'short',
@@ -112,7 +114,7 @@ export function BentoDateDisplay({
  * @param {!Date} date
  * @param {string} displayIn
  * @param {string} locale
- * @param {Object<string, *>} localeOptions
+ * @param {{[key: string]: *}} localeOptions
  * @return {!EnhancedVariablesV2Def}
  */
 function getDataForTemplate(date, displayIn, locale, localeOptions) {
@@ -161,7 +163,7 @@ function enhanceBasicVariables(data) {
 /**
  * @param {!Date} date
  * @param {string} locale
- * @param {?Object<string, *>} localeOptions
+ * @param {?{[key: string]: *}} localeOptions
  * @return {string}
  * @private
  */
@@ -176,7 +178,7 @@ function getLocaleString_(date, locale, localeOptions) {
 /**
  * @param {!Date} date
  * @param {string} locale
- * @param {?Object<string, *>} localeOptions
+ * @param {?{[key: string]: *}} localeOptions
  * @return {!VariablesV2Def}
  */
 function getVariablesInLocal(
@@ -209,7 +211,7 @@ function getVariablesInLocal(
 /**
  * @param {!Date} date
  * @param {string} locale
- * @param {?Object<string, *>} localeOptions
+ * @param {?{[key: string]: *}} localeOptions
  * @return {!VariablesV2Def}
  */
 function getVariablesInUTC(

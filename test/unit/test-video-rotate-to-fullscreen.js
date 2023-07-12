@@ -1,7 +1,7 @@
 import {Services} from '#service';
 import {AutoFullscreenManager} from '#service/video-manager-impl';
 
-import {PlayingStates} from '../../src/video-interface';
+import {PlayingStates_Enum} from '../../src/video-interface';
 
 describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
   let ampdoc;
@@ -133,9 +133,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PAUSED);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_AUTO);
-    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PAUSED);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_AUTO);
+    getPlayingState.withArgs(video3).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
@@ -196,9 +196,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video3).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video3).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
@@ -247,8 +247,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
@@ -295,8 +295,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
       'getPlayingState_'
     );
 
-    getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
-    getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
+    getPlayingState.withArgs(video1).returns(PlayingStates_Enum.PLAYING_MANUAL);
+    getPlayingState.withArgs(video2).returns(PlayingStates_Enum.PLAYING_MANUAL);
 
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});

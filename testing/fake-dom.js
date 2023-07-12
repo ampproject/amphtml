@@ -210,6 +210,9 @@ export class FakeWindow {
     /** @const */
     this.Date = window.Date;
 
+    /** @const */
+    this.performance = new FakePerformance(this);
+
     /** polyfill setTimeout. */
     this.setTimeout = function () {
       return window.setTimeout.apply(window, arguments);
@@ -609,7 +612,7 @@ export class FakeHistory {
  */
 export class FakeStorage {
   constructor() {
-    /** @const {!Object<string, string>} */
+    /** @const {!{[key: string]: string}} */
     this.values = {};
 
     // Length.
@@ -672,7 +675,7 @@ export class FakeCustomElements {
     /** @type {number} */
     this.count = 0;
 
-    /** @const {!Object<string, !{prototype: !Prototype}>} */
+    /** @const {!{[key: string]: !{prototype: !Prototype}}} */
     this.elements = {};
 
     /**
@@ -748,6 +751,21 @@ export class FakeMutationObserver {
       this.scheduled_ = null;
       this.callback_(this.takeRecords_());
     }));
+  }
+}
+
+export class FakePerformance {
+  constructor(win) {
+    /** @const */
+    this.win_ = win;
+  }
+
+  get timeOrigin() {
+    return 1;
+  }
+
+  now() {
+    return this.win_.Date.now();
   }
 }
 

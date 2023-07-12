@@ -5,9 +5,9 @@ import {arrayOrSingleItemToArray} from '#core/types/array';
  * to an updateable element.
  * If `opt_removeMissingAttrs` is true, then also removes any specified
  * attributes that are missing on the source element from the updateable element.
- * @param {string|!Array<string>} attributes
- * @param {!Element} sourceElement
- * @param {!Element} updateElement
+ * @param {string|Array<string>} attributes
+ * @param {Element} sourceElement
+ * @param {Element} updateElement
  * @param {boolean=} opt_removeMissingAttrs
  */
 export function propagateAttributes(

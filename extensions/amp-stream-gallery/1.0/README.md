@@ -1,97 +1,90 @@
----
-$category@: layout
-formats:
-  - websites
-teaser:
-  text: Displays multiple similar pieces of content at a time, for features like related products or articles.
----
-
 # Bento Stream Gallery
 
-## Usage
+The Bento Stream Gallery is for displaying multiple similar pieces of content at a time along a horizontal axis.
 
-The Bento Stream Gallery is for displaying multiple similar pieces of content at a time along a horizontal axis. To implement a more customized UX, see
-[`bento-base-carousel`](../../amp-base-carousel/1.0/README.md).
+It is a specialization of Bento Base Carousel and uses [ResizeObservers](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver) to adjust dynamically adjust the size and number of displayed slides displayed based on the width of the container. To implement a more customized UX, see [`<bento-base-carousel>`](../../amp-base-carousel/1.0/README.md).
 
-Use Bento Stream Gallery as a web component ([`<bento-stream-gallery>`](#web-component)), or a Preact/React functional component ([`<BentoStreamGallery>`](#preact/react-component)).
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-stream-gallery>` web component.
-
-#### Example: Import via npm
-
-[example preview="top-frame" playground="false"]
-
-Install via npm:
+### Import via npm
 
 ```sh
-npm install @ampproject/bento-stream-gallery
+npm install @bentoproject/stream-gallery
 ```
 
 ```javascript
-import '@ampproject/bento-stream-gallery';
+import {defineElement as defineBentoStreamGallery} from '@bentoproject/stream-gallery';
+defineBentoStreamGallery();
 ```
 
-[/example]
-
-#### Example: Include via `<script>`
-
-The example below contains an `bento-stream-gallery` with three sections. The
-`expanded` attribute on the third section expands it on page load.
-
-[example preview="top-frame" playground="false"]
+### Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-streamGallery-1.0.css">
-
-</head>
-<body>
-  <bento-stream-gallery>
-    <img src="img1.png">
-    <img src="img2.png">
-    <img src="img3.png">
-    <img src="img4.png">
-    <img src="img5.png">
-    <img src="img6.png">
-    <img src="img7.png">
-  </bento-stream-gallery>
-  <script>
-    (async () => {
-      const streamGallery = document.querySelector('#my-stream-gallery');
-      await customElements.whenDefined('bento-stream-gallery');
-      const api = await streamGallery.getApi();
-
-      // programatically expand all sections
-      api.next();
-      // programatically collapse all sections
-      api.prev();
-      // programatically go to slide
-      api.goToSlide(4);
-    })();
-  </script>
-</body>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css" crossorigin="anonymous">
 ```
 
-[/example]
+### Example
 
-#### Interactivity and API usage
+<!--% example %-->
 
-Bento enabled components in standalone use are highly interactive through their API. The `bento-stream-gallery` component API is accessible by including the following script tag in your document:
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-stream-gallery id="my-stream-gallery" style="height: 150px;" min-item-width="75" max-item-width="100">
+      <div style="height: 100px; background: red;">A</div>
+      <div style="height: 100px; background: green;">B</div>
+      <div style="height: 100px; background: blue;">C</div>
+      <div style="height: 100px; background: yellow;">D</div>
+      <div style="height: 100px; background: purple;">E</div>
+      <div style="height: 100px; background: orange;">F</div>
+      <div style="height: 100px; background: fuchsia;">G</div>
+    </bento-stream-gallery>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+Bento components are highly interactive through their API. The `bento-stream-gallery` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-stream-gallery');
 const api = await streamGallery.getApi();
 ```
 
-##### Actions
+#### Actions
 
-**next()**
+##### next()
 
 Moves the carousel forwards by number of slides visible.
 
@@ -99,7 +92,7 @@ Moves the carousel forwards by number of slides visible.
 api.next();
 ```
 
-**prev()**
+##### prev()
 
 Moves the carousel backwards by number of slides visible.
 
@@ -107,9 +100,10 @@ Moves the carousel backwards by number of slides visible.
 api.prev();
 ```
 
-**goToSlide(index: number)**
+##### goToSlide(index: number)
 
 Moves the carousel to the slide specified by the `index` argument.
+
 Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
 ```js
@@ -117,31 +111,34 @@ api.goToSlide(0); // Advance to first slide.
 api.goToSlide(length - 1); // Advance to last slide.
 ```
 
-##### Events
+#### Events
 
 The Bento Stream Gallery component allows you to register and respond to the following events:
 
-**slideChange**
+##### slideChange
 
-This event is triggered when the index displayed by the carousel has changed.
-The new index is available via `event.data.index`.
+This event is triggered when the index displayed by the carousel has changed. The new index is available via `event.data.index`.
 
 ```js
-streamGallery.addEventListener('slideChange', (e) => console.log(e.data.index))
+streamGallery.addEventListener('slideChange', (e) => console.log(e.data.index));
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-streamGallery-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-stream-gallery {
     display: block;
     overflow: hidden;
@@ -150,11 +147,71 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-#### Attributes
+#### API Example
 
-##### Behavior
+This example demonstrates how to programmatically switch to the next/previous slide and jump to specific slides.
 
-###### `controls`
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-stream-gallery id="my-stream-gallery" style="height: 150px;" min-item-width="75" max-item-width="100">
+      <div style="height: 100px; background: red;">A</div>
+      <div style="height: 100px; background: green;">B</div>
+      <div style="height: 100px; background: blue;">C</div>
+      <div style="height: 100px; background: yellow;">D</div>
+      <div style="height: 100px; background: purple;">E</div>
+      <div style="height: 100px; background: orange;">F</div>
+      <div style="height: 100px; background: fuchsia;">G</div>
+    </bento-stream-gallery>
+    <script>
+      (async () => {
+        const streamGallery = document.querySelector('#my-stream-gallery');
+        await customElements.whenDefined('bento-stream-gallery');
+        const api = await streamGallery.getApi();
+
+        // programatically go to next slide
+        api.next();
+        // programatically go to prev slide
+        api.prev();
+        // programatically go to slide
+        api.goToSlide(4);
+      })();
+    </script>
+  </body>
+</html>
+```
+
+### Attributes
+
+#### Behavior
+
+##### `controls`
 
 Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines if and when prev/next navigational arrows are displayed. Note: When `outset-arrows` is `true`, the arrows are shown `"always"`.
 
@@ -162,99 +219,85 @@ Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines
 -   `auto`: Arrows are displayed when the carousel has most recently received interaction via mouse, and not displayed when the carousel has most recently received interaction via touch. On first load for touch devices, arrows are displayed until first interaction.
 -   `never`: Arrows are never displayed.
 
-###### `extra-space`
+##### `extra-space`
 
 Either `"around"` or undefined. This determines how extra space is allocated after displaying the calculated number of visible slides in the carousel. If `"around"`, white space is evenly distributed around the carousel with `justify-content: center`; otherwise, space is allocated to the right of the carousel for LTR documents and to the left for RTL documents.
 
-###### `loop`
+##### `loop`
 
-Either `true` or `false`, defaults to `true`. When true, the carousel will allow
-the user to move from the first item back to the last item and visa versa. There
-must be at least three slides present for looping to occur.
+Either `true` or `false`, defaults to `true`. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three slides present for looping to occur.
 
-###### `outset-arrows`
+##### `outset-arrows`
 
 Either `true` or `false`, defaults to `false`. When true, the carousel will display its arrows outset and on either side of the slides. Note that with outset arrows, the slide container will have an effective length of 100px less than the allotted space for its given container - 50px per arrow on either side. When false, the carousel will display its arrows inset and overlayed on top of the left and right edges of the slides.
 
-###### `peek`
+##### `peek`
 
 A number, defaults to `0`. This determines how much of an additional slide to show (on one or both sides of the current slide) as an affordance to the user indicating the carousel is swipeable.
 
-##### Gallery slide visibility
+#### Gallery slide visibility
 
-###### `min-visible-count`
+##### `min-visible-count`
 
-A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s)
-visible.
+A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s) visible.
 
-###### `max-visible-count`
+##### `max-visible-count`
 
 A number, defaults to [`Number.MAX_VALUE`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_VALUE). Determines the maximum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s) visible.
 
-###### `min-item-width`
+##### `min-item-width`
 
 A number, defaults to `1`. Determines the minimum width of each item, used to resolve how many whole items can be shown at once within the overall width of the gallery.
 
-###### `max-item-width`
+##### `max-item-width`
 
 A number, defaults to [`Number.MAX_VALUE`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_VALUE). Determines the maximum width of each item, used to resolve how many whole items can be shown at once within the overall width of the gallery.
 
-##### Slide snapping
+#### Slide snapping
 
-###### `slide-align`
+##### `slide-align`
 
-Either `start` or `center`. When start aligning, the start of a slide (e.g. the
-left edge, when horizontal aligning) is aligned with the start of a carousel.
-When center aligning, the center of a slide is aligned with the center of a
-carousel.
+Either `start` or `center`. When start aligning, the start of a slide (e.g. the left edge, when horizontal aligning) is aligned with the start of a carousel. When center aligning, the center of a slide is aligned with the center of a carousel.
 
-###### `snap`
+##### `snap`
 
-Either `true` or `false`, defaults to `true`. Determines whether or not the
-carousel should snap on slides when scrolling.
+Either `true` or `false`, defaults to `true`. Determines whether or not the carousel should snap on slides when scrolling.
 
-#### Styling
+### Styling
 
-You may use the `bento-stream-gallery` element selector to style the streamGallery
-freely.
+You may use the `bento-stream-gallery` element selector to style the streamGallery freely.
 
-### Preact/React Component
+---
 
-The examples below demonstrates use of the `<BentoStreamGallery>` as a functional component usable with the Preact or React libraries.
+## Preact/React Component
 
-#### Example: Import via npm
-
-[example preview="top-frame" playground="false"]
-
-Install via npm:
+### Import via npm
 
 ```sh
-npm install @ampproject/bento-stream-gallery
+npm install @bentoproject/stream-gallery
 ```
 
 ```javascript
 import React from 'react';
-import { BentoStreamGallery } from '@ampproject/bento-stream-gallery/react';
-import '@ampproject/bento-stream-gallery/styles.css';
+import {BentoStreamGallery} from '@bentoproject/stream-gallery/react';
+import '@bentoproject/stream-gallery/styles.css';
 
 function App() {
   return (
-    <BentoStreamGallery>
-      <img src="img1.png">
-      <img src="img2.png">
-      <img src="img3.png">
-      <img src="img4.png">
-      <img src="img5.png">
-      <img src="img6.png">
-      <img src="img7.png">
+    <BentoStreamGallery style={{height: 150}} minItemWidth="75" maxItemWidth="100">
+      <img src="img1.png" />
+      <img src="img2.png" />
+      <img src="img3.png" />
+      <img src="img4.png" />
+      <img src="img5.png" />
+      <img src="img6.png" />
+      <img src="img7.png" />
     </BentoStreamGallery>
   );
 }
 ```
 
-[/example]
-
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento components are highly interactive through their API. The `BentoStreamGallery` component API is accessible by passing a `ref`:
 
@@ -265,23 +308,23 @@ const ref = createRef();
 function App() {
   return (
     <BentoStreamGallery ref={ref}>
-      <img src="img1.png">
-      <img src="img2.png">
-      <img src="img3.png">
-      <img src="img4.png">
-      <img src="img5.png">
-      <img src="img6.png">
-      <img src="img7.png">
+      <img src="img1.png" />
+      <img src="img2.png" />
+      <img src="img3.png" />
+      <img src="img4.png" />
+      <img src="img5.png" />
+      <img src="img6.png" />
+      <img src="img7.png" />
     </BentoStreamGallery>
   );
 }
 ```
 
-##### Actions
+#### Actions
 
 The `BentoStreamGallery` API allows you to perform the following actions:
 
-**next()**
+##### next()
 
 Moves the carousel forwards by `advanceCount` slides.
 
@@ -289,7 +332,7 @@ Moves the carousel forwards by `advanceCount` slides.
 ref.current.next();
 ```
 
-**prev()**
+##### prev()
 
 Moves the carousel backwards by `advanceCount` slides.
 
@@ -297,48 +340,43 @@ Moves the carousel backwards by `advanceCount` slides.
 ref.current.prev();
 ```
 
-**goToSlide(index: number)**
+##### goToSlide(index: number)
 
-Moves the carousel to the slide specified by the `index` argument.
-Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
+Moves the carousel to the slide specified by the `index` argument. Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
 ```javascript
 ref.current.goToSlide(0); // Advance to first slide.
 ref.current.goToSlide(length - 1); // Advance to last slide.
 ```
 
-##### Events
+#### Events
 
-**onSlideChange**
+##### onSlideChange
 
 This event is triggered when the index displayed by the carousel has changed.
 
 ```jsx
-<BentoStreamGallery onSlideChange={(index) => console.log(index)}>
+<BentoStreamGallery style={{height: 150}} onSlideChange={(index) => console.log(index)}>
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
 </BentoStreamGallery>
 ```
 
-#### Layout and style
+### Layout and style
 
-**Container type**
+#### Container type
 
 The `BentoStreamGallery` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `width`). These can be applied inline:
 
 ```jsx
-<BentoStreamGallery style={{width: '300px'}}>
-  ...
-</BentoStreamGallery>
+<BentoStreamGallery style={{width: 300}}>...</BentoStreamGallery>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoStreamGallery className='custom-styles'>
-  ...
-</BentoStreamGallery>
+<BentoStreamGallery className="custom-styles">...</BentoStreamGallery>
 ```
 
 ```css
@@ -347,15 +385,15 @@ Or via `className`:
 }
 ```
 
-#### Props
+### Props
 
-##### Common props
+#### Common props
 
 This component supports the [common props](../../../docs/spec/bento-common-props.md) for React and Preact components.
 
-##### Behavior
+#### Behavior
 
-###### `controls`
+##### `controls`
 
 Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines if and when prev/next navigational arrows are displayed. Note: When `outset-arrows` is `true`, the arrows are shown `"always"`.
 
@@ -363,53 +401,46 @@ Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines
 -   `auto`: Arrows are displayed when the carousel has most recently received interaction via mouse, and not displayed when the carousel has most recently received interaction via touch. On first load for touch devices, arrows are displayed until first interaction.
 -   `never`: Arrows are never displayed.
 
-###### `extraSpace`
+##### `extraSpace`
 
 Either `"around"` or undefined. This determines how extra space is allocated after displaying the calculated number of visible slides in the carousel. If `"around"`, white space is evenly distributed around the carousel with `justify-content: center`; otherwise, space is allocated to the right of the carousel for LTR documents and to the left for RTL documents.
 
-###### `loop`
+##### `loop`
 
-Either `true` or `false`, defaults to `true`. When true, the carousel will allow
-the user to move from the first item back to the last item and visa versa. There
-must be at least three slides present for looping to occur.
+Either `true` or `false`, defaults to `true`. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three slides present for looping to occur.
 
-###### `outsetArrows`
+##### `outsetArrows`
 
 Either `true` or `false`, defaults to `false`. When true, the carousel will display its arrows outset and on either side of the slides. Note that with outset arrows, the slide container will have an effective length of 100px less than the allotted space for its given container - 50px per arrow on either side. When false, the carousel will display its arrows inset and overlayed on top of the left and right edges of the slides.
 
-###### `peek`
+##### `peek`
 
 A number, defaults to `0`. This determines how much of an additional slide to show (on one or both sides of the current slide) as an affordance to the user indicating the carousel is swipeable.
 
-##### Gallery slide visibility
+#### Gallery slide visibility
 
-###### `minVisibleCount`
+##### `minVisibleCount`
 
-A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s)
-visible.
+A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s) visible.
 
-###### `maxVisibleCount`
+##### `maxVisibleCount`
 
 A number, defaults to [`Number.MAX_VALUE`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_VALUE). Determines the maximum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s) visible.
 
-###### `minItemWidth`
+##### `minItemWidth`
 
 A number, defaults to `1`. Determines the minimum width of each item, used to resolve how many whole items can be shown at once within the overall width of the gallery.
 
-###### `maxItemWidth`
+##### `maxItemWidth`
 
 A number, defaults to [`Number.MAX_VALUE`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_VALUE). Determines the maximum width of each item, used to resolve how many whole items can be shown at once within the overall width of the gallery.
 
-##### Slide snapping
+#### Slide snapping
 
-###### `slideAlign`
+##### `slideAlign`
 
-Either `start` or `center`. When start aligning, the start of a slide (e.g. the
-left edge, when horizontal aligning) is aligned with the start of a carousel.
-When center aligning, the center of a slide is aligned with the center of a
-carousel.
+Either `start` or `center`. When start aligning, the start of a slide (e.g. the left edge, when horizontal aligning) is aligned with the start of a carousel. When center aligning, the center of a slide is aligned with the center of a carousel.
 
-###### `snap`
+##### `snap`
 
-Either `true` or `false`, defaults to `true`. Determines whether or not the
-carousel should snap on slides when scrolling.
+Either `true` or `false`, defaults to `true`. Determines whether or not the carousel should snap on slides when scrolling.

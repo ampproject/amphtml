@@ -20,14 +20,9 @@ teaser:
 
 ## Version notes
 
-| Version | Description                                                                             |
-| ------- | --------------------------------------------------------------------------------------- |
-| 1.0     | Current version, since 2018-07-16.                                                      |
-| 0.1     | Initial implementation. This is no longer valid AMP, and will be deleted on 2019-10-01. |
-
-### Migrating from 0.1 to 1.0
-
-As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2019-10-01. This may cause minor breaking changes, as your stories will automatically be upgraded to use version 1.0. We recommend manually migrating your pages to version 1.0 before this date to ensure functionality and proper design.
+| Version | Description                        |
+| ------- | ---------------------------------- |
+| 1.0     | Current version, since 2018-07-16. |
 
 ## AMP story format
 
@@ -388,7 +383,7 @@ Use 720p videos or higher to take advantage of all the video transcodes and adap
 Example:
 
 ```html
-<amp-video layout="fill" poster="img.png" cache="google">
+<amp-video layout="fill" poster="img.png" cache="google" autoplay>
   <source src="video.mp4" type="video/mp4">
 </amp-video>
 ```
@@ -431,20 +426,11 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### Interactive components
+#### Embedded components
 
-We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
-
-When clicked, the component will be shown in a lightbox-like mode. Here, a user can choose to further interact with the embed, or close the lightbox and go back to the story.
+We support embedding some components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will advance to the next page), but by using the `interactive` attribute, you can show a tooltip linking to original source (i.e. opening the tweet on a new tab).
 
 Example:
-
-<figure class="centered-fig">
-  <span class="special-char">Example:</span>
-  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
-  <noscript><img width="300"  alt="Embedded component example" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
-  </amp-anim>
-</figure>
 
 ```html
 <amp-twitter
@@ -561,6 +547,10 @@ Disables the [Live story](#Live-story) functionality.
 ### data-poll-interval (optional)
 
 Used with the `live-story` attribute. Time interval (in milliseconds) between checks for new content. If no `data-poll-interval` is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
+
+### desktop-aspect-ratio (optional)
+
+The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the story in desktop one panel mode is set to conform to the specified proportions. The accepted ratio is between 1:2 and 3:4, and any values outside of the range would be clamped.
 
 ## Animations
 
@@ -734,6 +724,27 @@ _Example_: An image panning 50px down over 15 seconds.
   animate-in="pan-down"
   translate-y="50px"
   animate-in-duration="15s"
+  layout="fixed"
+  src="https://picsum.photos/720/320?image=1026"
+  width="720"
+  height="320"
+  alt="..."
+>
+</amp-img>
+```
+
+#### pan-scaling-factor [optional, only works with `pan-left`, `pan-right`, `pan-up`, & `pan-down` animations]
+
+The target scales automatically in a pan-left/pan-right/pan-up/pan-down animation to ensure it does not go out of the target boundary when panning.
+
+Use this attribute to override the default scaling factor calculation, and specify a static scaling factor. The value must be greater than 0, and decimals are allowed.
+
+_Example_: An image scales 1.3x when panning.
+
+```html
+<amp-img
+  animate-in="pan-left"
+  pan-scaling-factor="1.3"
   layout="fixed"
   src="https://picsum.photos/720/320?image=1026"
   width="720"

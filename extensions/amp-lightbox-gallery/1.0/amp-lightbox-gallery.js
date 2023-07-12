@@ -1,16 +1,22 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {BaseElement} from '#bento/components/bento-lightbox-gallery/1.0/base-element';
+
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
-import {BaseElement} from './base-element';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {userAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox-gallery';
@@ -18,7 +24,10 @@ const TAG = 'amp-lightbox-gallery';
 /** @const {string} */
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
-class AmpLightboxGallery extends BaseElement {
+class AmpLightboxGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   constructor(element) {
     super(element);
@@ -37,12 +46,12 @@ class AmpLightboxGallery extends BaseElement {
     this.registerApiAction(
       DEFAULT_ACTION,
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     this.registerApiAction(
       'open',
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     return super.init();
   }

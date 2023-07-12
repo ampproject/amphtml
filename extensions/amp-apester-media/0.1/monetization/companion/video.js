@@ -1,8 +1,7 @@
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 
-const ALLOWED_AD_PROVIDER = 'sr';
+import {Services} from '#service';
 
 /**
  * @param {!JsonObject} media
@@ -21,29 +20,53 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
   const position = getCompanionPosition(
     /**@type {!JsonObject}*/ (videoSettings)
   );
-
   if (
-    !companionCampaignOptions ||
     !videoSettings ||
-    !videoSettings['enabled'] ||
-    videoSettings['provider'] !== ALLOWED_AD_PROVIDER ||
+    !videoSettings.enabled ||
     !position ||
     position === 'floating'
   ) {
     return;
   }
-  const macros = getSrMacros(
-    media,
-    companionCampaignOptions['companionCampaignId'],
-    apesterElement,
-    consentObj
-  );
-  addCompanionSrElement(
-    videoSettings['videoTag'],
-    position,
-    /** @type {!JsonObject} */ (macros),
-    apesterElement
-  );
+  const provider = videoSettings['provider'];
+  switch (provider) {
+    case 'sr': {
+      const companionCampaignId = companionCampaignOptions?.companionCampaignId;
+      const {videoTag} = videoSettings;
+
+      if (!companionCampaignId || !videoTag) {
+        return;
+      }
+      const macros = getSrMacros(
+        media,
+        companionCampaignId,
+        apesterElement,
+        consentObj
+      );
+      addCompanionSrElement(
+        videoTag,
+        position,
+        /** @type {!JsonObject} */ (macros),
+        apesterElement
+      );
+      break;
+    }
+    case 'aniview': {
+      const {playerOptions = {}} = videoSettings;
+      if (!playerOptions.aniviewChannelId) {
+        return;
+      }
+      addCompanionAvElement(
+        playerOptions,
+        position,
+        apesterElement,
+        consentObj
+      );
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 /**
@@ -67,6 +90,53 @@ function getCompanionPosition(video) {
 }
 
 /**
+ * @param {!JsonObject} playerOptions
+ * @param {string} position
+ * @param {!AmpElement} apesterElement
+ * @param {!JsonObject} consentObj
+ */
+function addCompanionAvElement(
+  playerOptions,
+  position,
+  apesterElement,
+  consentObj
+) {
+  const size = getCompanionVideoAdSize(apesterElement);
+  const ampAvAd = createElementWithAttributes(
+    /** @type {!Document} */ (apesterElement.ownerDocument),
+    'amp-iframe',
+    {
+      'scrolling': 'no',
+      'id': 'amp-iframe',
+      'title': 'Ads',
+      'layout': 'responsive',
+      'sandbox': 'allow-scripts allow-same-origin allow-popups',
+      'allowfullscreen': 'false',
+      'frameborder': '0',
+      'width': size.width,
+      'height': size.height,
+      'src': `https://player.avplayer.com/amp/ampiframe.html?AV_TAGID=${playerOptions.aniviewPlayerId}&AV_PUBLISHERID=5fabb425e5d4cb4bbc0ca7e4`,
+    }
+  );
+
+  if (consentObj['gdpr']) {
+    ampAvAd['data-av_gdpr'] = consentObj['gdpr'];
+    ampAvAd['data-av_consent'] = consentObj['user_consent'];
+  }
+
+  ampAvAd.classList.add('i-amphtml-amp-apester-companion');
+
+  const relativeElement =
+    position === 'below' ? apesterElement.nextSibling : apesterElement;
+  apesterElement.parentNode.insertBefore(ampAvAd, relativeElement);
+
+  Services.mutatorForDoc(apesterElement).requestChangeSize(
+    ampAvAd,
+    size.height
+  );
+}
+
+/**
  * @param {string} videoTag
  * @param {string} position
  * @param {!JsonObject} macros
@@ -78,7 +148,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
   const ampBladeAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': size.width,
       'height': size.height,
       'type': 'blade',
@@ -89,7 +159,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
       'data-blade_player_id': videoTag,
       'data-blade_api_key': '5857d2ee263dc90002000001',
       'data-enable-refresh': `${refreshInterval}`,
-    })
+    }
   );
 
   ampBladeAd.classList.add('i-amphtml-amp-apester-companion');
@@ -100,8 +170,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
 
   Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampBladeAd,
-    size.height,
-    /* newWidth */ undefined
+    size.height
   );
 }
 
@@ -130,12 +199,12 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
 
   const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
 
-  const macros = dict({
+  const macros = {
     'param1': interactionId,
     'param2': publisherId,
     'param6': campaignId,
     'page_url': pageUrl,
-  });
+  };
 
   if (consentObj['gdpr']) {
     macros['gdpr'] = consentObj['gdpr'];

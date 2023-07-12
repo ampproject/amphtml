@@ -6,8 +6,20 @@
  * This helper function casts it into just a simple Window return type.
  *
  * @param {?Window} winOrNull
- * @return {!Window}
+ * @return {Window}
  */
 export function toWin(winOrNull) {
-  return /** @type {!Window} */ (winOrNull);
+  return /** @type {Window} */ (winOrNull);
+}
+
+/**
+ * Returns the associated Window for a node.
+ *
+ * @param {Node} node
+ * @return {Window}
+ */
+export function getWin(node) {
+  return toWin(
+    (node.ownerDocument || /** @type {Document} */ (node)).defaultView
+  );
 }

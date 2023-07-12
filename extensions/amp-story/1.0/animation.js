@@ -1,10 +1,26 @@
 import {Deferred} from '#core/data-structures/promise';
+import {getChildJsonConfig} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+import {map, omit} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
   setStyleForPreset,
 } from './animation-presets';
-import {Services} from '#service';
 import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,
@@ -16,19 +32,8 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '#core/dom';
-import {map, omit} from '#core/types/object';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {
-  matches,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {timeStrToMillis, unscaledClientRect} from './utils';
-import {isExperimentOn} from '#experiments';
+import {isPreviewMode} from './embed-mode';
+import {isTransformed, timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';
 
@@ -54,7 +59,7 @@ const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
  * TODO(alanorozco): maybe memoize?
  */
 export function hasAnimations(element) {
-  const selector = `${ANIMATABLE_ELEMENTS_SELECTOR},>amp-story-animation`;
+  const selector = `${ANIMATABLE_ELEMENTS_SELECTOR},>amp-story-animation,amp-bodymovin-animation`;
   return !!scopedQuerySelector(element, selector);
 }
 
@@ -134,7 +139,7 @@ export class AnimationRunner {
 
     /**
      * Evaluated set of CSS properties for first animation frame.
-     * @private @const {!Promise<?Object<string, *>>}
+     * @private @const {!Promise<?{[key: string]: *}>}
      */
     this.firstFrameProps_ = this.resolvedSpecPromise_.then((spec) => {
       const {keyframes} = spec;
@@ -229,7 +234,7 @@ export class AnimationRunner {
   /**
    * Evaluates a preset's keyframes function using dimensions.
    * @param {!WebKeyframesDef|!WebKeyframesCreateFnDef} keyframesOrCreateFn
-   * @param {!Object<string, *>=} keyframeOptions
+   * @param {!{[key: string]: *}=} keyframeOptions
    * @return {!Promise<!WebKeyframesDef>}
    * @private
    */
@@ -545,10 +550,15 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    const firstPageAnimationDisabled =
+      isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
+      isPreviewMode(ampdoc.win) ||
+      isTransformed(ampdoc);
+
     /** @private @const {bool} */
     this.skipAnimations_ =
       prefersReducedMotion(ampdoc.win) ||
-      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+      (firstPageAnimationDisabled &&
         matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */
@@ -690,6 +700,12 @@ export class AnimationManager {
               })
           )
         )
+        .concat(
+          Array.prototype.map.call(
+            this.page_.querySelectorAll('amp-bodymovin-animation'),
+            (el) => new BodymovinAnimationRunner(el)
+          )
+        )
         .filter(Boolean);
     }
     return devAssert(this.runners_);
@@ -794,7 +810,7 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @return {!Object<string, *>}
+   * @return {!{[key: string]: *}}
    * @private
    */
   getKeyframeOptions_(el) {
@@ -829,10 +845,10 @@ export class AnimationSequence {
    * @public
    */
   constructor() {
-    /** @private @const {!Object<string, !Promise>} */
+    /** @private @const {!{[key: string]: !Promise}} */
     this.subscriptionPromises_ = map();
 
-    /** @private @const {!Object<string, !Function>} */
+    /** @private @const {!{[key: string]: !Function}} */
     this.subscriptionResolvers_ = map();
   }
 
@@ -869,5 +885,77 @@ export class AnimationSequence {
       this.subscriptionResolvers_[id] = deferred.resolve;
     }
     return this.subscriptionPromises_[id];
+  }
+}
+
+export class BodymovinAnimationRunner {
+  /**
+   * @param {!Element} bodymovinAnimationEl
+   */
+  constructor(bodymovinAnimationEl) {
+    this.bodymovinAnimationEl_ = bodymovinAnimationEl;
+    this.pause();
+  }
+
+  /**
+   * Pauses the bodymovin animation.
+   */
+  pause() {
+    this.executeAction_('pause');
+  }
+
+  /**
+   * Plays the bodymovin animation.
+   */
+  resume() {
+    this.executeAction_('play');
+  }
+
+  /**
+   * Starts the bodymovin animation.
+   */
+  start() {
+    this.applyFirstFrame();
+    this.resume();
+  }
+
+  /**
+   * Seeks the bodymovin animation to the first frame.
+   */
+  applyFirstFrame() {
+    this.executeAction_('seekTo', {
+      percent: 0,
+    });
+  }
+
+  /**
+   * Seeks the bodymovin animation to the last frame.
+   */
+  applyLastFrame() {
+    this.executeAction_('seekTo', {
+      percent: 1,
+    });
+  }
+
+  /**
+   * Cancels the bodymovin animation by pausing it.
+   */
+  cancel() {
+    this.pause();
+  }
+
+  /**
+   * @param {string} method
+   * @param {=any} args
+   * @private
+   */
+  executeAction_(method, args = null) {
+    this.bodymovinAnimationEl_.getImpl().then((impl) => {
+      impl.executeAction({
+        method,
+        args,
+        satisfiesTrust: () => true,
+      });
+    });
   }
 }

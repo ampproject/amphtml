@@ -1,9 +1,10 @@
+import {BentoFacebook} from '#bento/components/bento-facebook/1.0/component';
+
 import * as Preact from '#preact';
-import {Facebook} from '../component';
 
 export default {
   title: 'Facebook',
-  component: Facebook,
+  component: BentoFacebook,
 };
 
 const SAMPLE_HREFS = {
@@ -17,14 +18,14 @@ const SAMPLE_HREFS = {
 export const _default = ({frenchLocale, ...args}) => {
   const locale = frenchLocale ? 'fr_FR' : undefined;
   return (
-    <Facebook
+    <BentoFacebook
       href={SAMPLE_HREFS[args.embedAs]}
       locale={locale}
       style={{width: '400px', height: '400px'}}
       {...args}
     >
       This text is inside.
-    </Facebook>
+    </BentoFacebook>
   );
 };
 
@@ -53,13 +54,13 @@ export const Comments = ({frenchLocale, orderByTime, ...args}) => {
   const orderBy = orderByTime ? 'time' : undefined;
   const locale = frenchLocale ? 'fr_FR' : undefined;
   return (
-    <Facebook
+    <BentoFacebook
       embedAs="comments"
       locale={locale}
       orderBy={orderBy}
       style={{width: '400px', height: '400px'}}
       {...args}
-    ></Facebook>
+    ></BentoFacebook>
   );
 };
 
@@ -73,7 +74,7 @@ Comments.args = {
 export const Like = ({frenchLocale, ...args}) => {
   const locale = frenchLocale ? 'fr_FR' : undefined;
   return (
-    <Facebook
+    <BentoFacebook
       embedAs="like"
       locale={locale}
       style={{width: '800px', height: '400px'}}
@@ -117,12 +118,12 @@ Like.argTypes = {
 export const Page = ({frenchLocale, ...args}) => {
   const locale = frenchLocale ? 'fr_FR' : undefined;
   return (
-    <Facebook
+    <BentoFacebook
       embedAs="page"
       locale={locale}
       style={{width: '400px', height: '400px'}}
       {...args}
-    ></Facebook>
+    ></BentoFacebook>
   );
 };
 

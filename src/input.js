@@ -2,8 +2,9 @@ import {Observable} from '#core/data-structures/observable';
 
 import {Services} from '#service';
 
-import {listenOnce, listenOncePromise} from './event-helper';
-import {dev} from './log';
+import {listenOnce, listenOncePromise} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {registerServiceBuilder} from './service-helpers';
 
 const TAG_ = 'Input';

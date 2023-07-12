@@ -1,6 +1,6 @@
 import {parseQueryString} from '#core/types/string/url';
 
-import {BrowserController, RequestBank} from '#testing/test-helper';
+import {BrowserController, RequestBank} from '#testing/helpers/service';
 
 const config = describes.sandboxed.configure().skipEdge().skipSafari();
 

@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {Resource, ResourceState} from '#service/resource';
+import {Resource, ResourceState_Enum} from '#service/resource';
 
 describes.realWin(
   'owners-impl',
@@ -47,13 +47,13 @@ describes.realWin(
 
     function createElementWithResource(
       id,
-      state = ResourceState.LAYOUT_COMPLETE
+      state = ResourceState_Enum.LAYOUT_COMPLETE
     ) {
       const element = createElement();
       const resource = new Resource(id, element, resources);
       resource.state_ = state;
       env.sandbox.stub(resource, 'measure').callsFake(() => {
-        resource.state_ = ResourceState.READY_FOR_LAYOUT;
+        resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
       });
       resource.isDisplayedForTesting = true;
       env.sandbox
@@ -151,7 +151,7 @@ describes.realWin(
       it('should schedule when resource is READY_FOR_LAYOUT', () => {
         const resource1 = setElementResourceState(
           children[1],
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         const ensureLoadedStub = env.sandbox
           .stub(resource1.element, 'ensureLoaded')
@@ -163,7 +163,7 @@ describes.realWin(
       it('should schedule even when not build', async () => {
         const resource1 = setElementResourceState(
           children[1],
-          ResourceState.NOT_BUILT
+          ResourceState_Enum.NOT_BUILT
         );
         env.sandbox.stub(resource1, 'whenBuilt').returns(new Promise(() => {}));
         const ensureLoadedStub = env.sandbox
@@ -204,9 +204,9 @@ describes.realWin(
 
     describe('schedulePreload', () => {
       beforeEach(() => {
-        setAllResourceState(ResourceState.NOT_BUILT);
+        setAllResourceState(ResourceState_Enum.NOT_BUILT);
         [parent, children[1], children[2]].forEach((element) => {
-          setElementResourceState(element, ResourceState.READY_FOR_LAYOUT);
+          setElementResourceState(element, ResourceState_Enum.READY_FOR_LAYOUT);
         });
       });
 
@@ -247,13 +247,13 @@ describes.realWin(
       it('should schedule on nested custom element placeholder', () => {
         const placeholder1 = createElementWithResource(
           10,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         children[1].getPlaceholder = () => placeholder1;
 
         const placeholder2 = createElementWithResource(
           11,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         children[2].getPlaceholder = () => placeholder2;
 
@@ -272,7 +272,7 @@ describes.realWin(
       it('should schedule amp-* placeholder inside non-amp element', () => {
         const insidePlaceholder1 = createElementWithResource(
           10,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         const placeholder1 = doc.createElement('div');
         children[0].getElementsByClassName = () => [insidePlaceholder1];
@@ -299,31 +299,31 @@ describes.realWin(
       });
 
       it('should layout AMP element itself', async () => {
-        setAllResourceState(ResourceState.READY_FOR_LAYOUT);
+        setAllResourceState(ResourceState_Enum.READY_FOR_LAYOUT);
         const scheduledElements = await owners.requireLayout(parent);
         expect(scheduledElements).to.deep.equal([0]);
       });
 
       it("should layout non-AMP element's all AMP children", async () => {
-        setAllResourceState(ResourceState.READY_FOR_LAYOUT);
+        setAllResourceState(ResourceState_Enum.READY_FOR_LAYOUT);
         const scheduledElements = await owners.requireLayout(children[0]);
         expect(scheduledElements).to.deep.equal([3, 4]);
       });
 
       it('should layout element w/ state=LAYOUT_FAILED', async () => {
-        setElementResourceState(parent, ResourceState.LAYOUT_FAILED);
+        setElementResourceState(parent, ResourceState_Enum.LAYOUT_FAILED);
         const scheduledElements = await owners.requireLayout(parent);
         expect(scheduledElements).to.deep.equal([0]);
       });
 
       it('should layout element w/ state=LAYOUT_COMPLETE', async () => {
-        setElementResourceState(parent, ResourceState.LAYOUT_COMPLETE);
+        setElementResourceState(parent, ResourceState_Enum.LAYOUT_COMPLETE);
         const scheduledElements = await owners.requireLayout(parent);
         expect(scheduledElements).to.deep.equal([0]);
       });
 
       it('should not double schedule element w/ state=LAYOUT_SCHEDULED', async () => {
-        setElementResourceState(parent, ResourceState.LAYOUT_SCHEDULED);
+        setElementResourceState(parent, ResourceState_Enum.LAYOUT_SCHEDULED);
         const scheduledElements = await owners.requireLayout(parent);
         expect(scheduledElements).to.deep.equal([0]);
       });
@@ -331,7 +331,7 @@ describes.realWin(
       it('should not require layout for undisplayed element', async () => {
         const resource = setElementResourceState(
           parent,
-          ResourceState.READY_FOR_LAYOUT
+          ResourceState_Enum.READY_FOR_LAYOUT
         );
         resource.isDisplayedForTesting = false;
         const scheduledElements = await owners.requireLayout(parent);

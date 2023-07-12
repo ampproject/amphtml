@@ -1,13 +1,13 @@
-import {AmpEvents} from '#core/constants/amp-events';
-import {iterateCursor, removeElement} from '#core/dom';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {removeElement} from '#core/dom';
 import {computedStyle, px, setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {throttle} from '#core/types/function';
 
 import {Services} from '#service';
 
-import {listen, listenOncePromise} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {listen, listenOncePromise} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -50,7 +50,7 @@ export class AmpFormTextarea {
       }
     };
 
-    listen(root, AmpEvents.DOM_UPDATE, maybeInstall);
+    listen(root, AmpEvents_Enum.DOM_UPDATE, maybeInstall);
     maybeInstall();
   }
 
@@ -105,7 +105,7 @@ export class AmpFormTextarea {
 
     let cachedTextareaElements = root.querySelectorAll('textarea');
     this.unlisteners_.push(
-      listen(root, AmpEvents.DOM_UPDATE, () => {
+      listen(root, AmpEvents_Enum.DOM_UPDATE, () => {
         cachedTextareaElements = root.querySelectorAll('textarea');
       })
     );
@@ -170,10 +170,10 @@ export function getHasOverflow(element) {
 
 /**
  * Attempt to resize all textarea elements
- * @param {!IArrayLike<!Element>} elements
+ * @param {!NodeList} elements
  */
 function resizeTextareaElements(elements) {
-  iterateCursor(elements, (element) => {
+  elements.forEach((element) => {
     if (
       element.tagName != 'TEXTAREA' ||
       !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)

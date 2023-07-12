@@ -2,7 +2,7 @@ import {isElement} from '#core/types';
 
 import {Services} from '#service';
 
-import {dev} from './log';
+import {dev} from '#utils/log';
 
 /**
  * The interface that is implemented by all templates.

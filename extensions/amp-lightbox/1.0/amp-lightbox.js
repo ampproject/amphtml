@@ -1,17 +1,27 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-lightbox-1.0.css';
-import {Services} from '#service';
-import {createCustomEvent} from '../../../src/event-helper';
+import {BaseElement} from '#bento/components/bento-lightbox/1.0/base-element';
+
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
+import {getWin} from '#core/window';
+
 import {isExperimentOn} from '#experiments';
-import {toWin} from '#core/window';
-import {userAssert} from '../../../src/log';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-lightbox-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends BaseElement {
+class AmpLightbox extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   constructor(element) {
     super(element);
@@ -30,10 +40,10 @@ class AmpLightbox extends BaseElement {
     this.registerApiAction(
       DEFAULT_ACTION,
       (api) => api.open(),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
-    this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
-    this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
+    this.registerApiAction('open', (api) => api.open(), ActionTrust_Enum.LOW);
+    this.registerApiAction('close', (api) => api.close(), ActionTrust_Enum.LOW);
 
     return super.init();
   }
@@ -41,7 +51,7 @@ class AmpLightbox extends BaseElement {
   /** @override */
   triggerEvent(element, eventName, detail) {
     const event = createCustomEvent(
-      toWin(element.ownerDocument.defaultView),
+      getWin(element),
       `amp-lightbox.${eventName}`,
       detail
     );
@@ -49,7 +59,7 @@ class AmpLightbox extends BaseElement {
       element,
       eventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(element, eventName, detail);

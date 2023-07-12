@@ -128,14 +128,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'adsense-ad-size-optimization',
-    name:
-      'Per publisher server side settings for changing the ad size ' +
-      'to responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/23568',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -152,25 +144,9 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
   {
-    id: 'amp-cid-backup',
-    name: 'Backup AMP-generated CIDs to Storage.',
-    spec: 'https://github.com/ampproject/amphtml/issues/29484',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
-  },
-  {
-    id: 'layout-aspect-ratio-css',
-    name: 'Responsive layouts implemented via aspect-ratio CSS',
-    spec: 'https://github.com/ampproject/amphtml/issues/30291',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
-  },
-  {
-    id: 'amp-story-desktop-one-panel',
-    name: 'New desktop one-panel UI with background blur for stories.',
-    spec: 'https://github.com/ampproject/amphtml/projects/128',
   },
   {
     id: 'flexible-bitrate',
@@ -191,5 +167,35 @@ export const EXPERIMENTS = [
     id: 'story-ad-page-outlink',
     name: 'Story ad CTA page outlink',
     spec: 'https://github.com/ampproject/amphtml/pull/35867',
+  },
+  {
+    id: 'amp-story-first-page-max-bitrate',
+    name: 'Decrease max bitrate for videos on first page',
+    spec: 'https://github.com/ampproject/amphtml/pull/35389',
+  },
+  {
+    id: 'story-disable-animations-first-page',
+    name: 'Disable animations on the first page that can artificially delay LCP reports',
+    spec: 'https://github.com/ampproject/amphtml/pull/35356',
+  },
+  {
+    id: 'story-load-inactive-outside-viewport',
+    name: 'Load inactive pages outside the viewport to prevent them from counting towards LCP when invisible',
+    spec: 'https://github.com/ampproject/amphtml/pull/35323',
+  },
+  {
+    id: 'story-video-cache-apply-audio',
+    name: 'Apply the hasAudio flag from cached videos on stories',
+    spec: 'https://github.com/ampproject/amphtml/pull/38285',
+  },
+  {
+    id: 'amp-story-subscriptions',
+    name: 'Enable paywall experiences in web stories by turning on amp-story-subscriptions extension',
+    spec: 'https://github.com/ampproject/amphtml/pull/38179',
+  },
+  {
+    id: 'attribution-reporting',
+    name: 'Enable new privacy preserving attribution reporting APIs',
+    spec: 'https://github.com/ampproject/amphtml/pull/35347',
   },
 ];

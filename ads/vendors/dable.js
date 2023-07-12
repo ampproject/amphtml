@@ -30,16 +30,38 @@ export function dable(global, data) {
   }
 
   const itemId = data['itemId'] || '';
-  const opts = {};
+  const channel = data['channel'] || '';
+  const articleSection = data['articleSection'] || '';
+  const articleSection2 = data['articleSection2'] || '';
+  const articleSection3 = data['articleSection3'] || '';
+  const widgetOpts = {};
+  const logOpts = {};
+
+  if (channel) {
+    widgetOpts.channel = channel;
+  }
+  if (articleSection) {
+    widgetOpts.category1 = articleSection;
+    logOpts.category1 = articleSection;
+  }
+  if (articleSection2) {
+    widgetOpts.category2 = articleSection2;
+    logOpts.category2 = articleSection2;
+  }
+  if (articleSection3) {
+    widgetOpts.category3 = articleSection3;
+    logOpts.category3 = articleSection3;
+  }
 
   if (itemId) {
-    global.dable('sendLog', 'view', {id: itemId});
+    logOpts.id = itemId;
+    global.dable('sendLog', 'view', logOpts);
   } else {
-    opts.ignoreItems = true;
+    widgetOpts.ignoreItems = true;
   }
 
   // call render widget
-  global.dable('renderWidget', slot.id, itemId, opts, function (hasAd) {
+  global.dable('renderWidget', slot.id, itemId, widgetOpts, function (hasAd) {
     if (hasAd) {
       global.context.renderStart();
     } else {

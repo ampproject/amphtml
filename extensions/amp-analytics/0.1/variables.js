@@ -1,26 +1,29 @@
-import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
-import {Services} from '#service';
-import {TickLabel} from '#core/constants/enums';
+import {TickLabel_Enum} from '#core/constants/enums';
+import {isArray, isFiniteNumber} from '#core/types';
 import {asyncStringReplace} from '#core/types/string';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
-import {cookieReader} from './cookie-reader';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+
 import {getActiveExperimentBranches, getExperimentBranch} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {cookieReader} from './cookie-reader';
+import {linkerReaderServiceFor} from './linker-reader';
+import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
+
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {isInFie} from '../../../src/iframe-helper';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {isArray, isFiniteNumber} from '#core/types';
-
-import {isInFie} from '../../../src/iframe-helper';
-import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
@@ -46,12 +49,12 @@ let FunctionNameArgsDef;
  */
 export class ExpansionOptions {
   /**
-   * @param {!Object<string, *>} vars
+   * @param {!{[key: string]: *}} vars
    * @param {number=} opt_iterations
    * @param {boolean=} opt_noEncode
    */
   constructor(vars, opt_iterations, opt_noEncode) {
-    /** @const {!Object<string, string|Array<string>>} */
+    /** @const {!{[key: string]: string|Array<string>}} */
     this.vars = vars;
     /** @const {number} */
     this.iterations = opt_iterations === undefined ? 2 : opt_iterations;
@@ -230,7 +233,7 @@ export class VariableService {
     this.ampdoc_ = ampdoc;
 
     /** @private {!JsonObject} */
-    this.macros_ = dict({});
+    this.macros_ = {};
 
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
@@ -326,27 +329,27 @@ export class VariableService {
       : {
           'FIRST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.FIRST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_VIEWPORT_READY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_VIEWPORT_READY
+              TickLabel_Enum.FIRST_VIEWPORT_READY
             ),
           'MAKE_BODY_VISIBLE': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.MAKE_BODY_VISIBLE
+              TickLabel_Enum.MAKE_BODY_VISIBLE
             ),
           'LARGEST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_INPUT_DELAY
+              TickLabel_Enum.FIRST_INPUT_DELAY
             ),
           'CUMULATIVE_LAYOUT_SHIFT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+              TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT
             ),
         };
     const merged = {
@@ -392,7 +395,7 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string.
    */
   expandTemplate(template, options, element, opt_bindings, opt_allowlist) {
-    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
+    return asyncStringReplace(template, /\${([^{}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,

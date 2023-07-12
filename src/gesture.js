@@ -1,9 +1,9 @@
+import {devAssert} from '#core/assert/dev';
 import {Observable} from '#core/data-structures/observable';
 import {supportsPassiveEventListener} from '#core/dom/event-helper-listen';
 import {findIndex} from '#core/types/array';
-import {toWin} from '#core/window';
+import {getWin, toWin} from '#core/window';
 
-import {devAssert} from './log';
 import {Pass} from './pass';
 
 const PROP_ = '__AMP_Gestures';
@@ -74,7 +74,11 @@ export class Gestures {
    * @param {boolean} shouldNotPreventDefault
    * @param {boolean} shouldStopPropagation
    */
-  constructor(element, shouldNotPreventDefault, shouldStopPropagation) {
+  constructor(
+    element,
+    shouldNotPreventDefault = false,
+    shouldStopPropagation = false
+  ) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -93,8 +97,11 @@ export class Gestures {
     /** @private {?GestureRecognizer} */
     this.eventing_ = null;
 
+    const win = element.ownerDocument.defaultView;
+    const passiveSupported = supportsPassiveEventListener(toWin(win));
+
     /** @private {boolean} */
-    this.shouldNotPreventDefault_ = shouldNotPreventDefault;
+    this.shouldNotPreventDefault_ = shouldNotPreventDefault || passiveSupported;
 
     /** @private {boolean} */
     this.shouldStopPropagation_ = shouldStopPropagation;
@@ -107,17 +114,14 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(
-      toWin(element.ownerDocument.defaultView),
-      this.doPass_.bind(this)
-    );
+    this.pass_ = new Pass(getWin(element), this.doPass_.bind(this));
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();
 
     /**
      * Observers for each type of registered gesture types.
-     * @private {!Object<string, !Observable<!Gesture>>}
+     * @private {!{[key: string]: !Observable<!Gesture>}}
      */
     this.overservers_ = Object.create(null);
 
@@ -130,8 +134,6 @@ export class Gestures {
     /** @private @const {function(!Event)} */
     this.boundOnTouchCancel_ = this.onTouchCancel_.bind(this);
 
-    const win = element.ownerDocument.defaultView;
-    const passiveSupported = supportsPassiveEventListener(toWin(win));
     this.element_.addEventListener(
       'touchstart',
       this.boundOnTouchStart_,

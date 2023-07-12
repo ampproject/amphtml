@@ -1,4 +1,4 @@
-import {devAssert} from '../log';
+import {devAssert} from '#utils/log';
 
 /**
  * The internal structure for the task.
@@ -28,7 +28,7 @@ export class TaskQueue {
     /** @private @const {!Array<!TaskDef>} */
     this.tasks_ = [];
 
-    /** @private @const {!Object<string, !TaskDef>} */
+    /** @private @const {!{[key: string]: !TaskDef}} */
     this.taskIdMap_ = {};
 
     /** @private {!time} */

@@ -4,7 +4,7 @@ import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:config';
@@ -23,6 +23,7 @@ const AllowedAdTypes = {
   'doubleclick': true,
   'fake': true,
   'nws': true,
+  'mgid': true,
 };
 
 export class StoryAdConfig {

@@ -5,7 +5,7 @@
  */
 
 const {
-  TEST_FILES_LIST_FILE_NAME,
+  FILELIST_PATH,
   generateCircleCiShardTestFileList,
   skipDependentJobs,
   timedExecOrDie,
@@ -31,7 +31,7 @@ function runExperimentTests(config) {
     const reportFlag = isPushBuild() ? '--report' : '';
     generateCircleCiShardTestFileList(e2eTestPaths);
     timedExecOrThrow(
-      `amp e2e --nobuild --minified --headless ${experimentFlag} ${defineFlag} ${reportFlag} --filelist ${TEST_FILES_LIST_FILE_NAME}`
+      `amp e2e --nobuild --minified --headless ${experimentFlag} ${defineFlag} ${reportFlag} --filelist ${FILELIST_PATH}`
     );
   } catch (e) {
     if (e.status) {

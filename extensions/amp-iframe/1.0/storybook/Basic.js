@@ -1,19 +1,27 @@
 import * as Preact from '#preact';
-import {Iframe} from '../component';
+
+import {BentoIframe} from '../component';
 
 export default {
   title: 'Iframe',
-  component: Iframe,
+  component: BentoIframe,
+  argTypes: {
+    src: {
+      name: 'iframe src',
+      defaultValue: 'https://www.wikipedia.org/',
+      control: {type: 'text'},
+    },
+  },
 };
 
-export const _default = () => {
+export const _default = ({src}) => {
   return (
-    <Iframe
+    <BentoIframe
       style={{width: 800, height: 600}}
       iframeStyle={{border: '1px solid black'}}
-      src="https://www.wikipedia.org/"
+      src={src}
       title="Wikipedia"
-    ></Iframe>
+    ></BentoIframe>
   );
 };
 
@@ -27,7 +35,7 @@ export const WithIntersectingIframe = () => {
           backgroundColor: 'blue',
         }}
       ></div>
-      <Iframe
+      <BentoIframe
         style={{width: 100, height: 100}}
         iframeStyle={{border: '1px solid black'}}
         sandbox="allow-scripts allow-same-origin"
@@ -35,17 +43,16 @@ export const WithIntersectingIframe = () => {
         src="/examples/bento/amp-iframe-resizing-example.html"
       >
         <div placeholder>Placeholder</div>
-      </Iframe>
+      </BentoIframe>
       <p>The above iframe will not resize and should remain 100x100px</p>
     </div>
   );
 };
 
-WithIntersectingIframe.storyName = 'Resizable iframe in viewport';
-
 export const WithResizableIframe = () => {
   return (
     <div>
+      <h1>Scroll down</h1>
       <div
         style={{
           width: '100%',
@@ -53,7 +60,7 @@ export const WithResizableIframe = () => {
           backgroundColor: 'blue',
         }}
       ></div>
-      <Iframe
+      <BentoIframe
         style={{width: 100, height: 100}}
         iframeStyle={{border: '1px solid black'}}
         sandbox="allow-scripts allow-same-origin"
@@ -61,10 +68,31 @@ export const WithResizableIframe = () => {
         src="/examples/bento/amp-iframe-resizing-example.html"
       >
         <div placeholder>Placeholder</div>
-      </Iframe>
+      </BentoIframe>
       <p>The above iframe should be 300x300px when visible</p>
     </div>
   );
 };
 
-WithResizableIframe.storyName = 'Resizable iframe outside viewport';
+export const WithSendIntersectionsPostMessage = () => {
+  return (
+    <div>
+      <h1>Scroll down</h1>
+      <div
+        style={{
+          width: '100%',
+          height: '110vh', // so that iframe is outside viewport
+          backgroundColor: 'blue',
+        }}
+      ></div>
+      <BentoIframe
+        style={{width: 500, height: 500}}
+        iframeStyle={{border: '1px solid black'}}
+        sandbox="allow-scripts allow-same-origin"
+        src="/examples/bento/amp-iframe-send-intersections-example.html"
+      >
+        <div placeholder>Placeholder</div>
+      </BentoIframe>
+    </div>
+  );
+};

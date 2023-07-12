@@ -39,12 +39,13 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
+import {user, userAssert} from '#utils/log';
+
 import {FollowButton} from './follow-button';
 import {PinWidget} from './pin-widget';
 import {SaveButton} from './save-button';
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
-import {user, userAssert} from '../../../src/log';
 
 /**
  * AMP Pinterest
@@ -53,7 +54,7 @@ import {user, userAssert} from '../../../src/log';
  *    - buttonFollow: User follow button
  */
 class AmpPinterest extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const type = element.getAttribute('data-do');
     if (type != 'embedPin') {

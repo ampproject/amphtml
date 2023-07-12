@@ -1,10 +1,12 @@
-import {WindowInterface} from '#core/window/interface';
 import {
   base64UrlDecodeFromString,
   base64UrlEncodeFromString,
 } from '#core/types/string/base64';
+import {WindowInterface} from '#core/window/interface';
+
+import {user} from '#utils/log';
+
 import {crc32} from './crc32';
-import {user} from '../../../src/log';
 
 /** @const {string} */
 const DELIMITER = '*';
@@ -39,7 +41,7 @@ export function createLinker(version, ids) {
 /**
  * Return the key value pairs
  * @param {string} value
- * @return {?Object<string, string>}
+ * @return {?{[key: string]: string}}
  */
 export function parseLinker(value) {
   const linkerObj = parseLinkerParamValue(value);
@@ -154,7 +156,7 @@ function serialize(pairs) {
 /**
  * Deserialize the serializedIds and return keyValue pairs.
  * @param {string} serializedIds
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function deserialize(serializedIds) {
   const keyValuePairs = {};

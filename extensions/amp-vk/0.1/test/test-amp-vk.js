@@ -1,5 +1,5 @@
 import '../amp-vk';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 
 import {Resource} from '#service/resource';
 
@@ -114,14 +114,20 @@ describes.realWin(
     });
 
     it('post::renders responsively', async () => {
-      const vkPost = await createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE);
+      const vkPost = await createAmpVkElement(
+        POST_PARAMS,
+        Layout_Enum.RESPONSIVE
+      );
       const iframe = vkPost.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
     it('post::sets correct src url to the vk iFrame', async () => {
-      const vkPost = await createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE);
+      const vkPost = await createAmpVkElement(
+        POST_PARAMS,
+        Layout_Enum.RESPONSIVE
+      );
       const impl = await vkPost.getImpl(false);
       const iframe = vkPost.querySelector('iframe');
       const referrer = encodeURIComponent(vkPost.ownerDocument.referrer);
@@ -166,14 +172,20 @@ describes.realWin(
     });
 
     it('poll::renders responsively', async () => {
-      const vkPoll = await createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE);
+      const vkPoll = await createAmpVkElement(
+        POLL_PARAMS,
+        Layout_Enum.RESPONSIVE
+      );
       const iframe = vkPoll.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
     it('poll::sets correct src url to the vk iFrame', async () => {
-      const vkPoll = await createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE);
+      const vkPoll = await createAmpVkElement(
+        POLL_PARAMS,
+        Layout_Enum.RESPONSIVE
+      );
       const iframe = vkPoll.querySelector('iframe');
       const referrer = encodeURIComponent(vkPoll.ownerDocument.referrer);
       const url = encodeURIComponent(

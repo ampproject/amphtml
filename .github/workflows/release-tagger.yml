@@ -12,24 +12,63 @@ on:
         description: 'base AMP version'
         required: true
       channel:
-        description: 'release channel (beta | stable | lts)'
+        description: 'release channel (beta-opt-in | beta-percent | stable | lts)'
         required: true
+      sha:
+        description: 'commit sha'
+        required: true
+permissions:
+  contents: read
+
 jobs:
   tagger:
     environment: release_tagger
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@55d479fb1c5bcad5a4f9099a5d9f37c8857b2845 # v2.4.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: lts/*
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - run: bash ./.github/workflows/install_dependencies.sh
       - name: Run tagger
         run: |
-          npm ci
           node ./build-system/release-tagger/index.js \
-            ${{ github.event.inputs.action }} \
-            ${{ github.event.inputs.head }} \
-            ${{ github.event.inputs.base }} \
-            ${{ github.event.inputs.channel }}
+            --action ${{ github.event.inputs.action }} \
+            --head ${{ github.event.inputs.head }} \
+            --base ${{ github.event.inputs.base }} \
+            --channel ${{ github.event.inputs.channel }} \
+            --sha ${{ github.event.inputs.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: tagger
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@55d479fb1c5bcad5a4f9099a5d9f37c8857b2845 # v2.4.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@e27dddc79c92bc6e4562f268fffa5ed752639abd # v2.9.1
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

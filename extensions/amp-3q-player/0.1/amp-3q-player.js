@@ -11,15 +11,16 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {addParamToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-3q-player';
 
@@ -190,12 +191,12 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     redispatch(this.element, eventType, {
-      'ready': VideoEvents.LOAD,
-      'playing': VideoEvents.PLAYING,
-      'paused': VideoEvents.PAUSE,
-      'complete': VideoEvents.ENDED,
-      'muted': VideoEvents.MUTED,
-      'unmuted': VideoEvents.UNMUTED,
+      'ready': VideoEvents_Enum.LOAD,
+      'playing': VideoEvents_Enum.PLAYING,
+      'paused': VideoEvents_Enum.PAUSE,
+      'complete': VideoEvents_Enum.ENDED,
+      'muted': VideoEvents_Enum.MUTED,
+      'unmuted': VideoEvents_Enum.UNMUTED,
     });
   }
 

@@ -6,7 +6,8 @@ import {
 
 import {Services} from '#service';
 
-import {dev, devAssert, userAssert} from '../../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {FxType} from '../fx-type';
 
 /**
@@ -119,7 +120,7 @@ function isInViewportConsideringMargins(entry, fxElement, opt_vh) {
   return !!top && top <= (1 - fxElement.marginStart) * vh;
 }
 
-/** @const {!Object<!FxType, !FxPresetDef>} */
+/** @const {!{[key: !FxType]: !FxPresetDef}} */
 export const Presets = {
   [FxType.PARALLAX]: {
     userAsserts(element) {

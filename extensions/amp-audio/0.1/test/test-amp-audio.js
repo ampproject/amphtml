@@ -1,6 +1,6 @@
 import {htmlFor} from '#core/dom/static-template';
+import {naturalDimensions_} from '#core/static-layout';
 
-import {naturalDimensions_} from '../../../../src/static-layout';
 import {AmpAudio} from '../amp-audio';
 
 describes.realWin(
@@ -46,6 +46,21 @@ describes.realWin(
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(element.style.width).to.be.equal('300px');
       expect(element.style.height).to.be.equal('30px');
+    });
+
+    it('should load audio with container layout', async () => {
+      const element = await attachAndRun(
+        html`<amp-audio src="audio.mp3" loop muted layout="container"><audio controls></amp-audio>`
+      );
+      const audio = element.querySelector('audio');
+      expect(audio.tagName).to.equal('AUDIO');
+      expect(audio.getAttribute('src')).to.equal('audio.mp3');
+      expect(audio.hasAttribute('controls')).to.be.true;
+      expect(audio).to.have.attribute('controls');
+      expect(audio).to.have.attribute('muted');
+      expect(audio).to.have.attribute('loop');
+      expect(element.style.width).to.be.equal('');
+      expect(element.style.height).to.be.equal('');
     });
 
     it('should not preload audio', async () => {

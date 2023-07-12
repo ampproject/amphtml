@@ -1,18 +1,13 @@
-#ifndef HTMLPARSER__DOCTYPE_H_
-#define HTMLPARSER__DOCTYPE_H_
+#ifndef CPP_HTMLPARSER_DOCTYPE_H_
+#define CPP_HTMLPARSER_DOCTYPE_H_
 
 #include <memory>
 #include <string_view>
 #include <tuple>
 
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 namespace htmlparser {
-
-// Controls if lang=.* parameter or any combinations of it are allowed in the
-// doctype declarations. We have seen several web pages with lang attribute in
-// doctype.
-#define ALLOW_LANG_ATTRIBUTE_IN_DOCTYPE 1
 
 // Parses the data from a DoctypeToken into a name,
 // public identifier, and system identifier. It returns a Node whose Type
@@ -83,4 +78,4 @@ inline constexpr std::array<std::string_view, 55> kQuirkyIDs {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__DOCTYPE_H_
+#endif  // CPP_HTMLPARSER_DOCTYPE_H_

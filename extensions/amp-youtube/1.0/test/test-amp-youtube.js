@@ -3,8 +3,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
 
+import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
-import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-youtube-v1.0',
@@ -47,6 +47,38 @@ describes.realWin(
       expect(element.shadowRoot.querySelector('iframe').src).to.equal(
         'https://www.youtube.com/embed/IAvf-rkzNck?enablejsapi=1&amp=1&playsinline=1'
       );
+    });
+
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
+      element = createElementWithAttributes(win.document, 'amp-youtube', {
+        'data-videoid': 'IAvf-rkzNck',
+        'data-loading': 'lazy',
+        'amp': true,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('lazy');
+    });
+
+    it('should set loading="auto" if no value is specified', async () => {
+      element = createElementWithAttributes(win.document, 'amp-youtube', {
+        'data-videoid': 'IAvf-rkzNck',
+        'amp': true,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      expect(
+        element.shadowRoot.querySelector('iframe').getAttribute('loading')
+      ).to.equal('auto');
     });
   }
 );

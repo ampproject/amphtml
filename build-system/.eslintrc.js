@@ -22,6 +22,7 @@ module.exports = {
   },
   'rules': {
     'import/no-unresolved': 0,
+    'local/enums': 0,
     'local/no-bigint': 0,
     'local/no-dynamic-import': 0,
     'local/no-export-side-effect': 0,

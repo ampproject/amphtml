@@ -68,6 +68,9 @@ A unique identifier for the page. Can be used for styling the page and its desce
 
 Specifies when to auto-advance to the next page. If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either a specified amount of time, or the `id` of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface.
 
+**exceptions**
+`auto-advance-after` enables a lean-back user experience. In absence of `auto-advance-after`, the serving platform may decide to auto advance after a specific duration.
+
 #### Time
 
 Auto-advance to the next story page after a specified amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time). The time must be positive.

@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '#preact';
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../../../amp-accordion/1.0/component';
-import {VideoIframe} from '../video-iframe';
-import {createCustomEvent} from '../../../../src/event-helper';
+} from '#bento/components/bento-accordion/1.0/component';
+import {VideoIframe} from '#bento/components/bento-video/1.0/video-iframe';
+
+import * as Preact from '#preact';
 import {useCallback} from '#preact';
+
+import {createCustomEvent} from '#utils/event-helper';
 
 export default {
   title: 'VideoIframe',
@@ -77,7 +79,7 @@ UsingVideoIframe.args = {
   controls: true,
   noaudio: false,
   loop: false,
-  ariaLabel: 'Video Player',
+  'aria-label': 'Video Player',
   poster:
     'https://amp.dev/static/samples/img/amp-video-iframe-sample-placeholder.jpg',
   src: 'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html',

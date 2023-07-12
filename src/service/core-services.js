@@ -4,6 +4,8 @@ import {installPixel} from '#builtins/amp-pixel/amp-pixel';
 
 import {installInaboxResourcesServiceForDoc} from '#inabox/inabox-resources';
 
+import {devAssert} from '#utils/log';
+
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -30,7 +32,6 @@ import {installXhrService} from './xhr-impl';
 
 import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installInputService} from '../input';
-import {devAssert} from '../log';
 import {installPreconnectService} from '../preconnect';
 import {
   adoptServiceFactoryForEmbedDoc,

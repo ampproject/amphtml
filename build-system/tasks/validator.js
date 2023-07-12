@@ -28,16 +28,20 @@ async function validatorCpp() {
     'bazel test',
     '--repo_env=CC=clang',
     "--cxxopt='-std=c++17'",
+    '--discard_analysis_cache',
+    '--notrack_incremental_state',
+    '--nokeep_state_after_build',
     '--test_output=errors',
     '--ui_event_filters=INFO',
     '--noshow_progress',
     '--noshow_loading_progress',
     '--test_summary=detailed',
     '--verbose_failures',
-    'validator_test',
+    'cpp/engine:validator_test',
+    'cpp/engine/wasm:validator_js_test',
   ].join(' ');
   execOrDie(bazelCmd, {
-    cwd: 'validator/cpp/engine',
+    cwd: 'validator',
     stdio: 'inherit',
   });
 }

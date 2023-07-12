@@ -516,3 +516,5 @@ Returns an object containing metadata about the host document:
 -   `title` is the source URL's document title at the time the `<amp-video-iframe>` is initialized. `null` when the component is loaded in a shadow root.
 
 -   `lang` is the source URL's language specified in `<html ⚡️ lang="en">`. `null` when the component is loaded in a shadow root.
+
+-   `jsonLd` includes the parsed content of a [JSON-LD](https://json-ld.org/) tag, if present.

@@ -73,10 +73,10 @@ export function aduptech(global, data) {
     context.consentSharedData.consentString &&
     context.consentSharedData.consentString !== ''
   ) {
-    // eslint-disable-next-line google-camelcase/google-camelcase
+    // eslint-disable-next-line local/camelcase
     options.gdpr_consent = context.consentSharedData.consentString;
   } else if ('gdpr_consent' in data) {
-    // eslint-disable-next-line google-camelcase/google-camelcase
+    // eslint-disable-next-line local/camelcase
     options.gdpr_consent = data.gdpr_consent;
   }
 

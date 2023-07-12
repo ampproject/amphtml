@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
     <title>Attachments</title>
@@ -51,6 +51,12 @@
         margin-bottom: 30px;
         width: 100%;
       }
+
+      form input[type="submit"] {
+        background-color: black;
+        color: white;
+        margin-bottom: 0px;
+      }
     </style>
   </head>
 
@@ -60,8 +66,7 @@
         publisher="The AMP team"
         publisher-logo-src="/examples/visual-tests/amp-story/img/AMP-Brand-White-Icon.svg"
         poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
-        title="Landscape story"
-        supports-landscape>
+        title="Attachment Story">
       <amp-story-page id="inline-default">
         <amp-story-grid-layer template="fill">
           <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
@@ -174,8 +179,14 @@
           cta-text="Subscribe">
           <div class="attachment-content">
             <p>Form within a small attachment:</p>
-            <form>
+            <form
+              method="POST"
+              action-xhr="https://www.example.com"
+              target="_top"
+              >
+              <input type="tel" name="phone" placeholder="Phone" required>
               <input type="email" name="email" placeholder="Email" required>
+              <input type="text" name="name" placeholder="Your name" required>
               <input type="submit" value="Subscribe">
             </form>
           </div>
@@ -196,15 +207,23 @@
           layout="nodisplay"
           cta-text="Subscribe">
           <div class="attachment-content">
-          <p>Forms within a large attachment:</p>
-            <form>
+            <p>Forms within a large attachment:</p>
+            <form
+              method="POST"
+              action-xhr="https://www.example.com"
+              target="_top"
+              >
               <input type="email" name="email" placeholder="Email" required>
               <input type="submit" value="Subscribe">
             </form>
             <p>In nisl nisi scelerisque eu ultrices vitae auctor eu. Tristique magna sit amet purus gravida. Tincidunt id aliquet risus feugiat in ante metus dictum. Mattis nunc sed blandit libero volutpat sed. Imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Proin sagittis nisl rhoncus mattis rhoncus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Nibh tellus molestie nunc non blandit massa enim nec dui. Sagittis eu volutpat odio facilisis. Tristique senectus et netus et malesuada fames ac. Molestie a iaculis at erat. Sit amet cursus sit amet. Suscipit tellus mauris a diam maecenas sed enim ut. Gravida quis blandit turpis cursus in. Tincidunt vitae semper quis lectus nulla at volutpat diam ut. Morbi tempus iaculis urna id. Faucibus et molestie ac feugiat sed lectus vestibulum. Mauris augue neque gravida in. Ac turpis egestas sed tempus.</p>
             <p>In nisl nisi scelerisque eu ultrices vitae auctor eu. Tristique magna sit amet purus gravida. Tincidunt id aliquet risus feugiat in ante metus dictum. Mattis nunc sed blandit libero volutpat sed. Imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Proin sagittis nisl rhoncus mattis rhoncus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Nibh tellus molestie nunc non blandit massa enim nec dui. Sagittis eu volutpat odio facilisis. Tristique senectus et netus et malesuada fames ac. Molestie a iaculis at erat. Sit amet cursus sit amet. Suscipit tellus mauris a diam maecenas sed enim ut. Gravida quis blandit turpis cursus in. Tincidunt vitae semper quis lectus nulla at volutpat diam ut. Morbi tempus iaculis urna id. Faucibus et molestie ac feugiat sed lectus vestibulum. Mauris augue neque gravida in. Ac turpis egestas sed tempus.</p>
             <p>Ut tristique et egestas quis ipsum. Aliquam malesuada bibendum arcu vitae elementum curabitur vitae nunc sed. Elementum curabitur vitae nunc sed velit dignissim. Tristique et egestas quis ipsum suspendisse ultrices gravida dictum fusce. At elementum eu facilisis sed odio morbi. Imperdiet proin fermentum leo vel orci porta non. Quam lacus suspendisse faucibus interdum. Eu non diam phasellus vestibulum lorem sed risus. Commodo viverra maecenas accumsan lacus vel facilisis volutpat est velit. Sagittis aliquam malesuada bibendum arcu vitae elementum. Ut sem viverra aliquet eget sit amet. Nulla facilisi morbi tempus iaculis. Sed odio morbi quis commodo odio aenean sed adipiscing diam. Donec ultrices tincidunt arcu non sodales. Amet venenatis urna cursus eget. Sapien et ligula ullamcorper malesuada proin. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Venenatis tellus in metus vulputate eu scelerisque felis.</p>
-            <form>
+            <form
+              method="POST"
+              action-xhr="https://www.example.com"
+              target="_top"
+              >
               <input type="text" name="feedback" placeholder="Feedback">
               <input type="submit" value="Submit">
             </form>

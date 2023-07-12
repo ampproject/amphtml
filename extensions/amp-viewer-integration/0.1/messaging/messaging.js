@@ -6,7 +6,7 @@ const APP = '__AMPHTML__';
 /**
  * @enum {string}
  */
-const MessageType = {
+const MessageType_Enum = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -14,7 +14,7 @@ const MessageType = {
 /**
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
-let RequestHandler; // eslint-disable-line no-unused-vars
+let RequestHandler; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /**
  * @param {*} message
@@ -239,11 +239,11 @@ export class Messaging {
 
     /** @private {number} */
     this.requestIdCounter_ = 0;
-    /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
+    /** @private {!{[key: number]: {resolve: function(*), reject: function(!Error)}}} */
     this.waitingForResponse_ = {};
     /**
      * A map from message names to request handlers.
-     * @private {!Object<string, !RequestHandler>}
+     * @private {!{[key: string]: !RequestHandler}}
      */
     this.messageHandlers_ = {};
 
@@ -299,9 +299,9 @@ export class Messaging {
       this.logError_(TAG + ': handleMessage_ error: ', 'invalid token');
       return;
     }
-    if (message.type === MessageType.REQUEST) {
+    if (message.type === MessageType_Enum.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.type === MessageType.RESPONSE) {
+    } else if (message.type === MessageType_Enum.RESPONSE) {
       this.handleResponse_(message);
     }
   }
@@ -325,7 +325,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.REQUEST,
+        type: MessageType_Enum.REQUEST,
         name: messageName,
         data: messageData,
         rsvp: awaitResponse,
@@ -346,7 +346,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MessageType_Enum.RESPONSE,
         name: messageName,
         data: messageData,
       })
@@ -369,7 +369,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MessageType_Enum.RESPONSE,
         name: messageName,
         data: null,
         error: errString,
@@ -382,7 +382,7 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    const /** Object<string, *> */ finalMessage = Object.assign(message, {});
+    const /** {[key: string]: *} */ finalMessage = Object.assign(message, {});
     if (this.token_ && !this.verifyToken_) {
       finalMessage.messagingToken = this.token_;
     }

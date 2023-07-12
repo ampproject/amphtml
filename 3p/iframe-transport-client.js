@@ -1,9 +1,11 @@
-import {IframeTransportEventDef, MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 
-import {dev, devAssert, user, userAssert} from '../src/log';
+/** @typedef {import('#core/3p-frame-messaging').IframeTransportEventDef} IframeTransportDef */
 
 /** @private @const {string} */
 const TAG_ = 'iframe-transport-client';
@@ -18,7 +20,7 @@ export class IframeTransportClient {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {!Object<string, IframeTransportContext>} */
+    /** @private {!{[key: string]: IframeTransportContext}} */
     this.creativeIdToContext_ = {};
 
     const parsedFrameName = tryParseJson(this.win_.name);
@@ -46,8 +48,8 @@ export class IframeTransportClient {
       )
     );
     this.iframeMessagingClient_.makeRequest(
-      MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
-      MessageType.IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.SEND_IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
       (eventData) => {
         const events = /** @type {!Array<IframeTransportEventDef>} */ (
           eventData['events']
@@ -159,11 +161,11 @@ export class IframeTransportContext {
 
   /**
    * Sends a response message back to the creative.
-   * @param {!Object<string, string>} data
+   * @param {!{[key: string]: string}} data
    */
   sendResponseToCreative(data) {
     this.iframeMessagingClient_./*OK*/ sendMessage(
-      MessageType.IFRAME_TRANSPORT_RESPONSE,
+      MessageType_Enum.IFRAME_TRANSPORT_RESPONSE,
       /** @type {!JsonObject} */
       ({message: data, ...this.baseMessage_})
     );

@@ -1,7 +1,7 @@
 'use strict';
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -16,15 +16,17 @@ exports.jsBundles = {
     destDir: './build/',
     minifiedDestDir: './build/',
   },
-  'custom-elements-polyfill.js': {
-    srcDir: 'src/polyfills/',
-    srcFilename: 'custom-elements-entrypoint.js',
+  'bento.js': {
+    srcDir: './src/bento',
+    srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      toName: 'custom-elements-polyfill.max.js',
       includePolyfills: false,
-      minifiedName: 'custom-elements-polyfill.js',
+      toName: 'bento.max.js',
+      minifiedName: 'bento.js',
+      // For backwards-compat:
+      aliasName: 'custom-elements-polyfill.js',
     },
   },
   'alp.max.js': {
@@ -117,7 +119,6 @@ exports.jsBundles = {
       toName: 'amp-viewer-host.max.js',
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
-      extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
       skipUnknownDepsCheck: true,
     },
   },
@@ -192,7 +193,6 @@ exports.jsBundles = {
       toName: 'amp-inabox.js',
       minifiedName: 'amp4ads-v0.js',
       includePolyfills: true,
-      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
     },
   },
 };
@@ -253,25 +253,6 @@ exports.verifyExtensionBundles = function () {
       'is missing from',
       bundle.name,
       bundleString
-    );
-    verifyBundle_(
-      'latestVersion' in bundle,
-      'latestVersion',
-      'is missing from',
-      bundle.name,
-      bundleString
-    );
-    const duplicates = exports.extensionBundles.filter(
-      (duplicate) => duplicate.name === bundle.name
-    );
-    verifyBundle_(
-      duplicates.every(
-        (duplicate) => duplicate.latestVersion === bundle.latestVersion
-      ),
-      'latestVersion',
-      'is not the same for all versions of',
-      bundle.name,
-      JSON.stringify(duplicates, null, 2)
     );
   });
 };

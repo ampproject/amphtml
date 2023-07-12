@@ -1,8 +1,8 @@
-#include "utf8-util.h"
+#include "cpp/engine/utf8-util.h"
 
-#include "glog/logging.h"
 #include "absl/strings/string_view.h"
-#include "strings.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/strings.h"
 
 using absl::string_view;
 using std::vector;

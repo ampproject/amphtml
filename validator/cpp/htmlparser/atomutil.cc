@@ -1,6 +1,6 @@
-#include "atomutil.h"
+#include "cpp/htmlparser/atomutil.h"
 
-#include "hash.h"
+#include "cpp/htmlparser/hash.h"
 
 namespace htmlparser {
 

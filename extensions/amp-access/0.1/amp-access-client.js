@@ -1,8 +1,7 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
 
@@ -139,9 +138,9 @@ export class AccessClientAdapter {
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: dict({
+        headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-        }),
+        },
         body: '',
       });
     });

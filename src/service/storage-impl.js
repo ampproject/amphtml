@@ -1,9 +1,10 @@
-import {dict, recreateNonProtoObject} from '#core/types/object';
+import {recreateNonProtoObject} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
+
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {getSourceOrigin} from '../url';
 
@@ -201,7 +202,7 @@ export class Store {
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
 
-    /** @private @const {!Object<string, !JsonObject>} */
+    /** @private @const {!{[key: string]: !JsonObject}} */
     this.values_ = this.obj['vv'] || Object.create(null);
     if (!this.obj['vv']) {
       this.obj['vv'] = this.values_;
@@ -250,10 +251,10 @@ export class Store {
       item['v'] = value;
       item['t'] = timestamp;
     } else {
-      this.values_[name] = dict({
+      this.values_[name] = {
         'v': value,
         't': Date.now(),
-      });
+      };
     }
 
     // Purge old values.
@@ -399,26 +400,17 @@ export class ViewerStorageBinding {
   /** @override */
   loadBlob(origin) {
     return this.viewer_
-      .sendMessageAwaitResponse('loadStore', dict({'origin': origin}))
+      .sendMessageAwaitResponse('loadStore', {'origin': origin})
       .then((response) => response['blob']);
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return /** @type {!Promise} */ (
-      this.viewer_
-        .sendMessageAwaitResponse(
-          'saveStore',
-          dict({'origin': origin, 'blob': blob})
-        )
-        .catch((reason) => {
-          throw dev().createExpectedError(
-            TAG,
-            'Failed to save store: ',
-            reason
-          );
-        })
-    );
+    return /** @type {!Promise} */ this.viewer_
+      .sendMessageAwaitResponse('saveStore', {'origin': origin, 'blob': blob})
+      .catch((reason) => {
+        throw dev().createExpectedError(TAG, 'Failed to save store: ', reason);
+      });
   }
 }
 

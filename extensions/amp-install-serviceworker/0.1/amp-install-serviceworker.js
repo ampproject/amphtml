@@ -1,13 +1,13 @@
 import {removeElement} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {urls} from '../../../src/config';
-import {listen} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {listen} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 import {removeFragment} from '../../../src/url';
 
@@ -391,12 +391,10 @@ function sendAmpScriptToSwOnFirstVisit(win, registration) {
     // using convention from https://github.com/redux-utilities/flux-standard-action.
     if (activeSW.postMessage) {
       activeSW.postMessage(
-        JSON.stringify(
-          dict({
-            'type': 'AMP__FIRST-VISIT-CACHING',
-            'payload': ampScriptsUsed,
-          })
-        )
+        JSON.stringify({
+          'type': 'AMP__FIRST-VISIT-CACHING',
+          'payload': ampScriptsUsed,
+        })
       );
     }
   }
@@ -425,12 +423,10 @@ function prefetchOutgoingLinks(registration, win) {
     const activeSW = registration.active;
     if (activeSW.postMessage) {
       activeSW.postMessage(
-        JSON.stringify(
-          dict({
-            'type': 'AMP__LINK-PREFETCH',
-            'payload': links,
-          })
-        )
+        JSON.stringify({
+          'type': 'AMP__LINK-PREFETCH',
+          'payload': links,
+        })
       );
     }
   }

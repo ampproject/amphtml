@@ -23,12 +23,12 @@
 // Another example is that the programmatic equivalent of "a<head>b</head>c"
 // becomes "<html><head><head/><body>abc</body></html>".
 
-#ifndef HTMLPARSER__RENDERER_H_
-#define HTMLPARSER__RENDERER_H_
+#ifndef CPP_HTMLPARSER_RENDERER_H_
+#define CPP_HTMLPARSER_RENDERER_H_
 
 #include <sstream>
 
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 namespace htmlparser {
 
@@ -43,16 +43,10 @@ enum class RenderError {
 class Renderer {
  public:
   // This renderer though fully functional, is primarily used to render webkit
-  // test cases. This Render uses recursion which may not be very efficient for
-  // production rendering. Some things you may need to consider:
-  // A) Increase the stack size.
-  // B) Control document complexity by --htmlparser_max_nodes_depth_count flag.
-  // C) Write your own renderer.
-  //
-  // TODO(amaltas): Replace recursion with iteration based dom tree traversal.
-  static RenderError Render(Node* node, std::stringbuf* output_buffer);
+  // test cases.
+  static RenderError Render(Node* node, std::stringbuf* buf);
 };
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__RENDERER_H_
+#endif  // CPP_HTMLPARSER_RENDERER_H_

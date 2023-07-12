@@ -1,6 +1,7 @@
+import {user, userAssert} from '#utils/log';
+
 import {FilterType} from './filters/filter';
 
-import {user, userAssert} from '../../../src/log';
 import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors';
 
 /**
@@ -12,9 +13,9 @@ export let AmpAdExitConfigOptions;
 
 /**
  * @typedef {{
- *   targets: !Object<string, !NavigationTargetConfig>,
- *   filters: (!Object<string, !FilterConfig>|undefined),
- *   transport: (!Object<TransportMode, boolean>|undefined),
+ *   targets: !{[key: string]: !NavigationTargetConfig},
+ *   filters: (!{[key: string]: !FilterConfig}|undefined),
+ *   transport: (!{[key: TransportMode]: boolean}|undefined),
  *   options: (!AmpAdExitConfigOptions|undefined)
  * }}
  */
@@ -40,7 +41,7 @@ export let NavigationTargetConfig;
 export let VariableDef;
 
 /**
- * @typedef {!Object<string, !VariableDef>}
+ * @typedef {!{[key: string]: !VariableDef}}
  */
 export let VariablesDef;
 

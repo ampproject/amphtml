@@ -3,11 +3,11 @@ import {addAttributesToElement} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 import {remove} from '#core/types/array';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {getData} from './event-helper';
-import {dev, devAssert} from './log';
+import {getData} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {parseUrlDeprecated} from './url';
 
 /**
@@ -19,7 +19,7 @@ const UNLISTEN_SENTINEL = 'unlisten';
 /**
  * @typedef {{
  *   frame: !Element,
- *   events: !Object<string, !Array<function(!JsonObject)>>
+ *   events: !{[key: string]: !Array<function(!JsonObject)}>
  * }}
  */
 let WindowEventsDef;
@@ -29,7 +29,7 @@ let WindowEventsDef;
  * listenFor listeners.
  * @param {?Window} parentWin the window that created the iframe
  * @param {boolean=} opt_create create the mapping if it does not exist
- * @return {?Object<string, !Array<!WindowEventsDef>>}
+ * @return {?{[key: string]: !Array<!WindowEventsDef>}}
  */
 function getListenFors(parentWin, opt_create) {
   let {listeningFors} = parentWin;
@@ -67,7 +67,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
+ * @return {?{[key: string]: !Array<function(!JsonObject, !Window, string, !MessageEvent)>}}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   const sentinel = getSentinel_(iframe, opt_is3P);
@@ -99,7 +99,7 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
  * @param {string} sentinel the sentinel of the message
  * @param {string} origin the source window's origin
  * @param {?Window} triggerWin the window that triggered the event
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
+ * @return {?{[key: string]: !Array<function(!JsonObject, !Window, string, !MessageEvent)>}}
  */
 function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   const listenSentinel = getListenForSentinel(parentWin, sentinel);
@@ -152,7 +152,7 @@ function isDescendantWindow(ancestor, descendant) {
  * @param {!Array<!WindowEventsDef>} listenSentinel
  */
 function dropListenSentinel(listenSentinel) {
-  const noopData = dict({'sentinel': UNLISTEN_SENTINEL});
+  const noopData = {'sentinel': UNLISTEN_SENTINEL};
 
   for (let i = listenSentinel.length - 1; i >= 0; i--) {
     const windowEvents = listenSentinel[i];
@@ -545,7 +545,7 @@ export function isAdLike(element) {
  * @return {!Element}
  */
 export function disableScrollingOnIframe(iframe) {
-  addAttributesToElement(iframe, dict({'scrolling': 'no'}));
+  addAttributesToElement(iframe, {'scrolling': 'no'});
 
   // This shouldn't work, but it does on Firefox.
   // https://stackoverflow.com/a/15494969

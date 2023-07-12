@@ -1,6 +1,8 @@
-import {parseUrlDeprecated} from '../../src/url';
-import {setStyles} from '#core/dom/style';
 import {validateData} from '#3p/3p';
+
+import {setStyles} from '#core/dom/style';
+
+import {parseUrlDeprecated} from '../../src/url';
 
 /**
  * @param {!Window} global

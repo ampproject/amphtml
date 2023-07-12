@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
+import {removeElement} from '#core/dom';
 import {
   applyFillContent,
   getLengthNumeral,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {px, setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
+import {dev, user, userAssert} from '#utils/log';
+
+import {handleAds} from './monetization';
 import {
   extractTags,
   getPlatform,
@@ -31,19 +35,16 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {handleCompanionAds} from './monetization';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {px, setStyles} from '#core/dom/style';
-import {removeElement} from '#core/dom';
+
+import {CSS} from '../../../build/amp-apester-media-0.1.css';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-apester-media';
 const AD_TAG = 'amp-ad';
+const AD_IFRAME_TAG = 'amp-iframe';
 /** @const {!JsonObject} */
-const BOTTOM_AD_MESSAGE = dict({'type': 'has_bottom_ad', 'adHeight': 50});
+const BOTTOM_AD_MESSAGE = {'type': 'has_bottom_ad', 'adHeight': 50};
 /**
  * @enum {string}
  */
@@ -106,6 +107,9 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.unlisteners_ = [];
     /** @private {?IntersectionObserver3pHost} */
     this.intersectionObserverHostApi_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -181,7 +185,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       dev().assertString(this.mediaAttribute_)
     );
     let suffix = '';
-    const queryParams = dict();
+    const queryParams = {};
     queryParams['renderer'] = false;
     queryParams['platform'] = getPlatform();
     if (inative) {
@@ -223,7 +227,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    *  @return {string}
    * */
   constructUrlFromMedia_(id, usePlayer) {
-    const queryParams = dict();
+    const queryParams = {};
     queryParams['channelId'] = this.embedOptions_.distributionChannelId;
     queryParams['type'] = this.embedOptions_.playlist
       ? 'playlist'
@@ -269,19 +273,6 @@ class AmpApesterMedia extends AMP.BaseElement {
     return img;
   }
 
-  /**
-   * @return {!Element}
-   */
-  constructOverflow_() {
-    const overflow = this.element.ownerDocument.createElement('div');
-    overflow.setAttribute('overflow', '');
-    overflow.className = 'amp-apester-overflow';
-    const overflowButton = this.element.ownerDocument.createElement('button');
-    overflowButton.textContent = 'Full Size';
-    overflow.appendChild(overflowButton);
-    return overflow;
-  }
-
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -315,10 +306,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
         return vsync
           .mutatePromise(() => {
-            const overflow = this.constructOverflow_();
-            this.element.appendChild(overflow);
             this.element.appendChild(iframe);
-            handleCompanionAds(media, this.element);
+            handleAds(media, this.element);
           })
           .then(() => this.loadPromise(iframe))
           .then(() =>
@@ -328,10 +317,13 @@ class AmpApesterMedia extends AMP.BaseElement {
 
                 const campaignData = media['campaignData'];
                 if (campaignData) {
+                  const ampdoc = this.getAmpDoc();
+                  Services.extensionsFor(
+                    this.win
+                  )./*OK*/ installExtensionForDoc(ampdoc, AD_IFRAME_TAG);
                   const bottomAdOptions = campaignData['bottomAdOptions'];
                   if (bottomAdOptions?.enabled) {
                     this.hasBottomAd_ = true;
-                    const ampdoc = this.getAmpDoc();
                     Services.extensionsFor(
                       this.win
                     )./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
@@ -363,8 +355,9 @@ class AmpApesterMedia extends AMP.BaseElement {
             })
           )
           .then(() => {
-            observeWithSharedInOb(this.element, (inViewport) =>
-              this.viewportCallback_(inViewport)
+            this.unobserveIntersections_ = observeIntersections(
+              this.element,
+              ({isIntersecting}) => this.viewportCallback_(isIntersecting)
             );
           });
       })
@@ -405,7 +398,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;

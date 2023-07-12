@@ -2,13 +2,13 @@ import {PriorityQueue} from '#core/data-structures/priority-queue';
 import {isIframed} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dict} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
-import {dev, user, userAssert} from '../log';
 import {getMode} from '../mode';
 import {openWindowDialog} from '../open-window-dialog';
 import {registerServiceBuilderForDoc} from '../service-helpers';
@@ -37,7 +37,7 @@ const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
  * @enum {number} Priority reserved for extensions in anchor mutations.
  * The higher the priority, the sooner it's invoked.
  */
-export const Priority = {
+export const Priority_Enum = {
   LINK_REWRITER_MANAGER: 0,
   ANALYTICS_LINKER: 2,
 };
@@ -286,13 +286,10 @@ export class Navigation {
    */
   navigateToAmpUrl(url, requestedBy) {
     if (this.viewer_.hasCapability('a2a')) {
-      this.viewer_.sendMessage(
-        'a2aNavigate',
-        dict({
-          'url': url,
-          'requestedBy': requestedBy,
-        })
-      );
+      this.viewer_.sendMessage('a2aNavigate', {
+        'url': url,
+        'requestedBy': requestedBy,
+      });
       return true;
     }
     return false;
@@ -444,7 +441,7 @@ export class Navigation {
     }
 
     /** @const {!Window} */
-    const win = toWin(element.ownerDocument.defaultView);
+    const win = getWin(element);
     const url = element.href;
     const {protocol} = location;
 
@@ -733,13 +730,10 @@ export class Navigation {
       return false;
     }
 
-    this.viewer_.sendMessage(
-      'navigateTo',
-      dict({
-        'url': url,
-        'requestedBy': requestedBy,
-      })
-    );
+    this.viewer_.sendMessage('navigateTo', {
+      'url': url,
+      'requestedBy': requestedBy,
+    });
     return true;
   }
 }

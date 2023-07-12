@@ -1,10 +1,10 @@
 import {createElementWithAttributes} from '#core/dom';
 
 import {
-  AmpAdUIHandler, // eslint-disable-line no-unused-vars
+  AmpAdUIHandler, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-ui';
 import {
-  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
+  AmpAdXOriginIframeHandler, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AmpAdNetworkOblivkiImpl} from '../amp-ad-network-oblivki-impl';
 import {oblivkiIsA4AEnabled} from '../oblivki-a4a-config';

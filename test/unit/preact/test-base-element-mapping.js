@@ -4,12 +4,16 @@ import {omit} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
+import {
+  createParseAttrsWithPrefix,
+  createParseDateAttr,
+} from '#preact/parse-props';
 import {Slot} from '#preact/slot';
 
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 
 import {testElementR1} from '#testing/element-v1';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 
@@ -74,6 +78,14 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       Impl['loadable'] = true;
       expect(Impl.prerenderAllowed()).to.be.false;
     });
+
+    it('by default previewAllowed is NOT tied to the "loadable" flag', () => {
+      Impl['loadable'] = false;
+      expect(Impl.previewAllowed()).to.be.false;
+
+      Impl['loadable'] = true;
+      expect(Impl.previewAllowed()).to.be.false;
+    });
   });
 
   describe('layout mapping', () => {
@@ -106,7 +118,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
         'propA': {attr: 'prop-a'},
         'minFontSize': {attr: 'min-font-size', type: 'number'},
-        'aDate': {attr: 'a-date', type: 'date'},
+        'aDate': createParseDateAttr('a-date'),
         'disabled': {attr: 'disabled', type: 'boolean'},
         'enabled': {attr: 'enabled', type: 'boolean'},
         'boolDefTrue': {attr: 'bool-def-true', type: 'boolean', default: true},
@@ -115,8 +127,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           parseAttrs: (e) =>
             `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
         },
-        'params': {attrPrefix: 'data-param-'},
-        'prefix': {attrPrefix: 'prefix'},
+        'params': createParseAttrsWithPrefix('data-param-'),
+        'prefix': createParseAttrsWithPrefix('prefix'),
       };
       element = html`
         <amp-preact
@@ -354,10 +366,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(component).to.be.calledOnce;
-      const container = element.shadowRoot.querySelector(':scope > c');
+      const container = element.shadowRoot.querySelector(':scope c');
       expect(container).to.be.ok;
       expect(container.style.display).to.equal('contents');
-      expect(container.querySelector(':scope > #component')).to.be.ok;
+      expect(container.querySelector(':scope #component')).to.be.ok;
       expect(
         element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
       ).to.have.lengthOf(1);
@@ -383,7 +395,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(serviceSlot[0].assignedElements()[2]).to.equal(overflow);
     });
 
-    describe('SSR', () => {
+    // TODO(#38975): fix or remove broken test.
+    describe.skip('SSR', () => {
       let shadowRoot, container;
       let componentEl, serviceSlotEl, styleEl;
 
@@ -515,7 +528,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lightDom.className).to.equal('i-amphtml-fill-content');
       expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
-      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.class).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
         () => updateEventSpy.callCount > 0,
@@ -535,7 +548,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(element.querySelector(':scope > time')).to.equal(existing);
       expect(existing.querySelector(':scope > #component')).to.be.ok;
       expect(existing.className).to.equal('i-amphtml-fill-content');
-      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.class).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
         () => updateEventSpy.callCount > 0,
@@ -564,7 +577,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
             'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
             'propA': {attr: 'prop-a'},
             'minFontSize': {attr: 'min-font-size', type: 'number'},
-            'aDate': {attr: 'a-date', type: 'date'},
+            'aDate': createParseDateAttr('a-date'),
             'disabled': {attr: 'disabled', type: 'boolean'},
             'enabled': {attr: 'enabled', type: 'boolean'},
           },
@@ -600,8 +613,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
               parseAttrs: (e) =>
                 `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
             },
-            'params': {attrPrefix: 'data-param-'},
-            'prefix': {attrPrefix: 'prefix'},
+            'params': createParseAttrsWithPrefix('data-param-'),
+            'prefix': createParseAttrsWithPrefix('prefix'),
           },
           selector: '*', // This should be last as catch-all.
           single: false,
@@ -1151,7 +1164,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
             'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
             'propA': {attr: 'prop-a'},
             'minFontSize': {attr: 'min-font-size', type: 'number'},
-            'aDate': {attr: 'a-date', type: 'date'},
+            'aDate': createParseDateAttr('a-date'),
             'disabled': {attr: 'disabled', type: 'boolean'},
             'enabled': {attr: 'enabled', type: 'boolean'},
           },

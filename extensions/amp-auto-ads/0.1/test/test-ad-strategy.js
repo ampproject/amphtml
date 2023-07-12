@@ -1,3 +1,5 @@
+import {AmpAd} from 'extensions/amp-ad/0.1/amp-ad';
+
 import {AdStrategy} from '../ad-strategy';
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
@@ -33,6 +35,10 @@ describes.realWin(
       env.sandbox
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
+
+      // Stub actual amp-ad creation since we don't care about its behavior
+      // here, only that they are created.
+      env.sandbox.stub(AmpAd.prototype, 'buildCallback').resolves();
     });
 
     it('should call placeAd with correct parameters', () => {

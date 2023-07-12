@@ -1,18 +1,18 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {clamp} from '#core/math';
 import {isFiniteNumber, isObject} from '#core/types';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {getData, listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
 import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-bodymovin-animation';
@@ -89,21 +89,21 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       () => {
         this.play_();
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'pause',
       () => {
         this.pause_();
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'stop',
       () => {
         this.stop_();
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'seekTo',
@@ -113,7 +113,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
           this.seekTo_(args);
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -201,13 +201,11 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   sendCommand_(action, opt_valueType, opt_value) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'action': action,
-            'valueType': opt_valueType || '',
-            'value': opt_value || '',
-          })
-        );
+        const message = JSON.stringify({
+          'action': action,
+          'valueType': opt_valueType || '',
+          'value': opt_value || '',
+        });
         this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
@@ -229,7 +227,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @param {Object} args
+   * @param {object} args
    * @private
    */
   seekTo_(args) {

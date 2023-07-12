@@ -1,0 +1,16 @@
+# Defaults to compile as fast as possible.
+build --compilation_mode fastbuild
+
+# Tested and compiles in llvm.
+build --repo_env=CC=clang
+
+# Contains c++17 features.
+build --cxxopt='-std=c++17'
+
+# Enabled operator new and operator delete for custom allocators.
+build --cxxopt='-fsized-deallocation'
+
+build --cxxopt='-Wno-error=return-type'
+build --cxxopt='-Wno-error=unused-but-set-variable'
+build --cxxopt='-Wno-error=unused-variable'
+build --cxxopt='-Wno-unknown-warning-option'

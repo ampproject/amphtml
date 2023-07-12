@@ -1,9 +1,8 @@
 import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';
@@ -43,12 +42,22 @@ export class AnchorAdStrategy {
       return Promise.resolve(false);
     }
 
-    Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
-      this.ampdoc,
-      STICKY_AD_TAG,
-      '1.0'
-    );
-    this.placeStickyAd_();
+    if (this.baseAttributes_.sticky === 'top') {
+      Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
+        this.ampdoc,
+        'amp-ad',
+        '0.1'
+      );
+      this.placeAmpAdStickyAd_();
+    } else {
+      // TODO(powerivq@) once <amp-ad sticky=bottom> is stabilized, move this to use amp-ad sticky.
+      Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
+        this.ampdoc,
+        STICKY_AD_TAG,
+        '1.0'
+      );
+      this.placeStickyAd_();
+    }
     return Promise.resolve(true);
   }
 
@@ -57,7 +66,9 @@ export class AnchorAdStrategy {
    * @private
    */
   hasExistingStickyAd_() {
-    return !!this.ampdoc.getRootNode().querySelector('AMP-STICKY-AD');
+    return !!this.ampdoc
+      .getRootNode()
+      .querySelector('amp-sticky-ad, amp-ad[sticky]');
   }
 
   /**
@@ -73,28 +84,36 @@ export class AnchorAdStrategy {
   /**
    * @private
    */
+  placeAmpAdStickyAd_() {
+    const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
+    const attributes = /** @type {!JsonObject} */ ({
+      ...this.baseAttributes_,
+      'width': String(viewportWidth),
+      'height': this.baseAttributes_.height || '100',
+    });
+    const doc = this.ampdoc.win.document;
+    const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
+    const body = this.ampdoc.getBody();
+    body.insertBefore(ampAd, body.firstChild);
+  }
+
+  /**
+   * @private
+   */
   placeStickyAd_() {
     const baseAttributes = this.baseAttributes_;
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict(),
-        baseAttributes,
-        dict({
-          'width': String(viewportWidth),
-          'height': baseAttributes.height || '100',
-        })
-      )
-    );
+    const attributes = /** @type {!JsonObject} */ ({
+      ...baseAttributes,
+      'width': String(viewportWidth),
+      'height': baseAttributes.height || '100',
+    });
+    delete attributes.sticky; // To ensure that no sticky attribute will be wrapped inside an amp-sticky-ad element.
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
-    const stickyAd = createElementWithAttributes(
-      doc,
-      'amp-sticky-ad',
-      dict({
-        'layout': 'nodisplay',
-      })
-    );
+    const stickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+      'layout': 'nodisplay',
+    });
     stickyAd.appendChild(ampAd);
     const body = this.ampdoc.getBody();
     body.insertBefore(stickyAd, body.firstChild);

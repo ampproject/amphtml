@@ -1,10 +1,11 @@
 import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {getHistoryState} from '#core/window/history';
 
 import {Services} from '#service';
 
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
+
 import {getMode} from '../mode';
 import {
   getService,
@@ -412,22 +413,30 @@ export class HistoryBindingNatural_ {
         history.originalReplaceState || history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(
-          state,
-          opt_title,
-          // A bug in edge causes paths to become undefined if URL is
-          // undefined, filed here: https://goo.gl/KlImZu
-          opt_url || null
-        );
+        try {
+          this.origPushState_(
+            state,
+            opt_title,
+            // A bug in edge causes paths to become undefined if URL is
+            // undefined, filed here: https://goo.gl/KlImZu
+            opt_url || null
+          );
+        } catch (e) {
+          dev().error(TAG_, 'pushState failed: ' + e.message);
+        }
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
         // NOTE: check for `undefined` since IE11 and Edge
         // unexpectedly coerces it into a `string`.
-        if (opt_url !== undefined) {
-          this.origReplaceState_(state, opt_title, opt_url);
-        } else {
-          this.origReplaceState_(state, opt_title);
+        try {
+          if (opt_url !== undefined) {
+            this.origReplaceState_(state, opt_title, opt_url);
+          } else {
+            this.origReplaceState_(state, opt_title);
+          }
+        } catch (e) {
+          dev().error(TAG_, 'replaceState failed: ' + e.message);
         }
       };
       if (!history.originalPushState) {
@@ -946,16 +955,14 @@ export class HistoryBindingVirtual_ {
     if (stackIndex > this.stackIndex_) {
       return this.get();
     }
-    const message = dict({'stackIndex': this.stackIndex_});
+    const message = {'stackIndex': this.stackIndex_};
     const pop = 'popHistory';
     return this.viewer_
       .sendMessageAwaitResponse(pop, message)
       .then((response) => {
-        const fallbackState = /** @type {!HistoryStateDef} */ (
-          dict({
-            'stackIndex': this.stackIndex_ - 1,
-          })
-        );
+        const fallbackState = /** @type {!HistoryStateDef} */ ({
+          'stackIndex': this.stackIndex_ - 1,
+        });
         const newState = this.toHistoryState_(response, fallbackState, pop);
         this.updateHistoryState_(newState);
         return newState;
@@ -975,11 +982,9 @@ export class HistoryBindingVirtual_ {
       if (!this.viewer_.hasCapability('fullReplaceHistory')) {
         // Full URL replacement requested, but not supported by the viewer.
         // Don't update, and return the current state.
-        const curState = /** @type {!HistoryStateDef} */ (
-          dict({
-            'stackIndex': this.stackIndex_,
-          })
-        );
+        const curState = /** @type {!HistoryStateDef} */ ({
+          'stackIndex': this.stackIndex_,
+        });
         return Promise.resolve(curState);
       }
 
@@ -1097,12 +1102,10 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (
-      this.viewer_.sendMessageAwaitResponse(
-        'replaceHistory',
-        dict({'fragment': fragment}),
-        /* cancelUnsent */ true
-      )
+    return /** @type {!Promise} */ this.viewer_.sendMessageAwaitResponse(
+      'replaceHistory',
+      {'fragment': fragment},
+      /* cancelUnsent */ true
     );
   }
 }

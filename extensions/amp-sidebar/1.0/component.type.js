@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var SidebarDef = {};
+var BentoSidebarDef = {};
 
 /**
  * @typedef {{
@@ -15,7 +15,7 @@ var SidebarDef = {};
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SidebarDef.SidebarProps;
+BentoSidebarDef.Props;
 
 /**
  * @typedef {{
@@ -24,7 +24,7 @@ SidebarDef.SidebarProps;
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SidebarDef.SidebarToolbarProps;
+BentoSidebarDef.BentoSidebarToolbarProps;
 
 /**
  * @typedef {{
@@ -33,10 +33,10 @@ SidebarDef.SidebarToolbarProps;
  *   toolbarTarget: (string|undefined),
  * }}
  */
-SidebarDef.ToolbarShimProps;
+BentoSidebarDef.ToolbarShimProps;
 
 /** @interface */
-SidebarDef.SidebarApi = class {
+BentoSidebarDef.Api = class {
   /** Open the sidebar */
   open() {}
 

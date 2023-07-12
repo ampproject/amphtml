@@ -8,7 +8,7 @@
  * }} LogMethodMetadataDef
  */
 
-const definitionFile = 'src/log.js';
+const definitionFile = 'src/utils/log.js';
 
 /** Functions exposed as singleton getters for `Log`. */
 const singletonFunctions = ['dev', 'user'];
@@ -17,7 +17,7 @@ const assertAliases = singletonFunctions.map((prefix) => `${prefix}Assert`);
 
 /**
  * Known transformable logging methods.
- * @type {!Object<string, LogMethodMetadataDef>}
+ * @type {!{[key: string]: LogMethodMetadataDef}}
  */
 const transformableMethods = {
   assert: {variadic: true, extractMessages: true, messageArgPos: 1},

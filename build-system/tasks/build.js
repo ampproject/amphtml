@@ -13,6 +13,7 @@ const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
 const {parseExtensionFlags} = require('./extension-helpers');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -24,7 +25,11 @@ const argv = require('minimist')(process.argv.slice(2));
  * @return {Promise}
  */
 async function runPreBuildSteps(options) {
-  return Promise.all([compileCss(options), bootstrapThirdPartyFrames(options)]);
+  return Promise.all([
+    buildStoryLocalization(options),
+    compileCss(options),
+    bootstrapThirdPartyFrames(options),
+  ]);
 }
 
 /**
@@ -36,6 +41,7 @@ async function build() {
   process.env.NODE_ENV = 'development';
   const options = {
     fortesting: argv.fortesting,
+    localDev: true,
     minify: false,
     watch: argv.watch,
   };
@@ -50,6 +56,7 @@ async function build() {
   }
   await buildExtensions(options);
 
+  // This step is to be run only during a full `amp build`.
   if (!argv.core_runtime_only) {
     await buildVendorConfigs(options);
   }
@@ -63,7 +70,7 @@ module.exports = {
   runPreBuildSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 build.description = 'Build the AMP library';
 build.flags = {

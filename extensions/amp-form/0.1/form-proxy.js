@@ -1,8 +1,8 @@
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 
 /**
  * denylisted properties. Used mainly fot testing.
@@ -32,7 +32,7 @@ export function setDenylistedPropertiesForTesting(properties) {
  * @return {!Object}
  */
 export function installFormProxy(form) {
-  const constr = getFormProxyConstr(toWin(form.ownerDocument.defaultView));
+  const constr = getFormProxyConstr(getWin(form));
   const proxy = new constr(form);
   if (!('action' in proxy)) {
     setupLegacyProxy(form, proxy);
@@ -260,12 +260,12 @@ const LegacyPropDataType = {
 };
 
 /**
- * @const {!Object<string, {
+ * @const {!{[key: string]: {
  *   access: !LegacyPropAccessType,
  *   attr: (string|undefined),
  *   type: (LegacyPropDataType|undefined),
  *   def: *,
- * }>}
+ * }}}
  */
 const LEGACY_PROPS = {
   'acceptCharset': {

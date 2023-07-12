@@ -16,10 +16,11 @@
 
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {CONFIG_TAG, TAG} from './vars';
 import {webPushServiceForDoc} from './web-push-service';
 
-import {dev, user, userAssert} from '../../../src/log';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /** @enum {string} */

@@ -1,12 +1,12 @@
 import {removeElement} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 import {isEnumValue} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {getData, listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 
 /**
@@ -93,7 +93,7 @@ export class AmpVk extends AMP.BaseElement {
         const startWidth = this.element./*OK*/ offsetWidth;
         const pageUrl = this.getAmpDoc().getUrl();
         const iframeUrl = 'https://vk.com/widget_post.php';
-        const queryParams = dict({
+        const queryParams = {
           'app': '0',
           'width': '100%',
           '_ver': '1',
@@ -105,7 +105,7 @@ export class AmpVk extends AMP.BaseElement {
           'url': pageUrl,
           'referrer': ref,
           'title': 'AMP Post',
-        });
+        };
 
         return addParamsToUrl(iframeUrl, queryParams);
       });
@@ -121,7 +121,7 @@ export class AmpVk extends AMP.BaseElement {
       .then((ref) => {
         const pageUrl = this.getAmpDoc().getUrl();
         const iframeUrl = 'https://vk.com/al_widget_poll.php';
-        const queryParams = dict({
+        const queryParams = {
           'app': this.apiId_,
           'width': '100%',
           '_ver': '1',
@@ -131,7 +131,7 @@ export class AmpVk extends AMP.BaseElement {
           'title': 'AMP Poll',
           'description': '',
           'referrer': ref,
-        });
+        };
 
         return addParamsToUrl(iframeUrl, queryParams);
       });
@@ -246,9 +246,9 @@ export class AmpVk extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return (
-      layout === Layout.RESPONSIVE ||
-      layout === Layout.FLEX_ITEM ||
-      layout === Layout.FIXED
+      layout === Layout_Enum.RESPONSIVE ||
+      layout === Layout_Enum.FLEX_ITEM ||
+      layout === Layout_Enum.FIXED
     );
   }
 

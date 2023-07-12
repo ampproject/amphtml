@@ -1,6 +1,8 @@
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 
+import {FakePerformance} from '#testing/fake-dom';
+
 import {allocateVariant} from '../variant';
 
 describes.sandboxed('allocateVariant', {}, (env) => {
@@ -23,6 +25,7 @@ describes.sandboxed('allocateVariant', {}, (env) => {
         nodeType: /* DOCUMENT */ 9,
         body: {},
       },
+      performance: new FakePerformance(window),
     };
     fakeWin.document.defaultView = fakeWin;
     ampdoc = new AmpDocSingle(fakeWin);

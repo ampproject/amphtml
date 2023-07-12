@@ -1,12 +1,14 @@
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 #include <algorithm>
 #include <functional>
 #include <sstream>
 
-#include "atomutil.h"
-#include "elements.h"
-#include "logging.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/elements.h"
+#include "cpp/htmlparser/logging.h"
 
 namespace htmlparser {
 
@@ -22,7 +24,7 @@ void Node::AddAttribute(const Attribute& attr) {
 }
 
 void Node::SortAttributes(bool remove_duplicates) {
-  std::sort(attributes_.begin(), attributes_.end(),
+  std::stable_sort(attributes_.begin(), attributes_.end(),
             [](const Attribute& left, const Attribute& right) -> bool {
               return left.KeyPart() < right.KeyPart();
             });
@@ -103,8 +105,8 @@ bool Node::InsertBefore(Node* new_child, Node* old_child) {
 
 bool Node::AppendChild(Node* new_child) {
   CHECK(!(new_child->Parent() || new_child->PrevSibling() ||
-          new_child->NextSibling()),
-        "html: AppendChild called for an attached child Node.");
+          new_child->NextSibling()))
+      << "html: AppendChild called for an attached child Node.";
 
   Node* last = LastChild();
   if (last) {
@@ -121,7 +123,7 @@ bool Node::AppendChild(Node* new_child) {
 
 Node* Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
+  CHECK(c->parent_ == this) << "html: RemoveChild called for a non-child Node";
 
   if (first_child_ == c) {
     first_child_ = c->next_sibling_;
@@ -375,35 +377,33 @@ bool Node::IsBlockElementNode() {
 }
 
 std::string Node::InnerText() const {
-  static std::function<void(const Node*, std::string*)> output;
-  output = [](const Node* node, std::string* buf) {
-    switch (node->Type()) {
-      case NodeType::TEXT_NODE: {
-        buf->append(node->Data());
-        buf->append(" ");
-        return;
-      }
-      case NodeType::COMMENT_NODE: {
-        // Ignore comments.
-        return;
-      }
-      default:
-        break;
-    }
+  static std::function<void(const Node*, std::vector<absl::string_view>&)>
+      output =
+          [](const Node* node, std::vector<absl::string_view>& output_content) {
+            switch (node->Type()) {
+              case NodeType::TEXT_NODE: {
+                output_content.push_back(absl::string_view(
+                    node->Data().data(), node->Data().size()));
+                return;
+              }
+              case NodeType::COMMENT_NODE: {
+                // Ignore comments.
+                return;
+              }
+              default:
+                break;
+            }
 
-    for (Node* child = node->FirstChild(); child;
-         child = child->NextSibling()) {
-      output(child, buf);
-    }
-  };
+            for (Node* child = node->FirstChild(); child;
+                 child = child->NextSibling()) {
+              output(child, output_content);
+            }
+          };
 
-  std::string buffer;
-  output(this, &buffer);
+  std::vector<absl::string_view> buffer;
+  output(this, buffer);
 
-  if (!buffer.empty() && buffer.at(buffer.size() - 1) == ' ') {
-    buffer.erase(buffer.size() - 1);
-  }
-  return buffer;
+  return absl::StrJoin(buffer, " ");
 }
 
 void Node::UpdateChildNodesPositions(Node* relative_node) {

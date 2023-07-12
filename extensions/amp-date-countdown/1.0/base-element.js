@@ -4,6 +4,8 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoDateCountdown} from './component';
 
+export const TAG = 'bento-date-countdown';
+
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
@@ -30,9 +32,9 @@ BaseElement['props'] = {
     ],
     parseAttrs: parseDateAttrs,
   },
-  'whenEnded': {attr: 'when-ended', type: 'string'},
-  'locale': {attr: 'locale', type: 'string'},
-  'biggestUnit': {attr: 'biggest-unit', type: 'string'},
+  'whenEnded': {attr: 'when-ended'},
+  'locale': {attr: 'locale'},
+  'biggestUnit': {attr: 'biggest-unit'},
   'countUp': {attr: 'count-up', type: 'boolean'},
 };
 

@@ -11,10 +11,6 @@ const privateServiceFactory =
 const shouldNeverBeUsed =
   'Usage of this API is not allowed - only for internal purposes.';
 
-const backwardCompat =
-  'This method must not be called. It is only retained ' +
-  'for backward compatibility during rollout.';
-
 const realiasGetMode =
   'Do not re-alias getMode or its return so it can be ' +
   'DCE\'d. Use explicitly like "getMode().localDev" instead.';
@@ -43,7 +39,7 @@ let ForbiddenTermDef;
 
 /**
  * Terms that must not appear in our source files.
- * @const {Object<string, string|!ForbiddenTermDef>}
+ * @const {{[key: string]: string|!ForbiddenTermDef}}
  */
 const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
@@ -71,7 +67,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
-      'validator/js/engine/validator_test.js',
+      //'validator/js/engine/validator_test.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -100,6 +96,9 @@ const forbiddenTermsGlobal = {
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
     checkInTestFolder: true,
+    allowlist: [
+      'build-system/tasks/remap-dependencies-plugin/test-remap-dependencies.js',
+    ],
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
@@ -131,8 +130,8 @@ const forbiddenTermsGlobal = {
       'build-system/common/logging.js',
       'build-system/task-runner/amp-cli-runner.js',
       'src/purifier/noop.js',
-      'validator/js/engine/validator-in-browser.js',
-      'validator/js/engine/validator.js',
+      //'validator/js/engine/validator-in-browser.js',
+      //'validator/js/engine/validator.js',
     ],
     checkInTestFolder: true,
   },
@@ -148,6 +147,7 @@ const forbiddenTermsGlobal = {
       'build-system/compile/build-compiler.js',
       'build-system/compile/build-constants.js',
       'src/core/mode/esm.js',
+      'src/core/mode/globals.d.ts',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
       'src/core/mode/version.js',
@@ -221,7 +221,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -316,7 +316,7 @@ const forbiddenTermsGlobal = {
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
       'src/utils/display-observer.js',
-      'testing/test-helper.js',
+      'testing/helpers/service.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -332,7 +332,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
-      'src/log.js',
+      'src/utils/log.js',
       'src/error-reporting.js',
       'src/web-worker/web-worker.js',
       'testing/async-errors.js',
@@ -430,6 +430,7 @@ const forbiddenTermsGlobal = {
       'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
       'extensions/amp-video/0.1/video-cache.js',
+      'extensions/amp-story/1.0/amp-story.js',
       'src/utils/xhr-utils.js',
     ],
   },
@@ -465,9 +466,11 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments/index.js',
+      'src/preact/hooks/useLocalStorage.ts',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/fake-dom.js',
     ],
   },
@@ -538,7 +541,7 @@ const forbiddenTermsGlobal = {
       ', depending on your use case.',
     allowlist: [
       'src/core/3p-frame-messaging.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/core/dom/event-helper-listen.js',
     ],
   },
@@ -588,14 +591,9 @@ const forbiddenTermsGlobal = {
     message: 'Use src/open-window-dialog',
     allowlist: ['src/open-window-dialog.js'],
   },
-  '\\.getWin\\(': {
-    message: backwardCompat,
-  },
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/core/assert/base.js', // Has actual implementation of assertElement.
-      'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
       'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
@@ -615,10 +613,7 @@ const forbiddenTermsGlobal = {
   '\\b(__)?AMP_EXP\\b': {
     message:
       'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: [
-      'src/experiments/index.js',
-      'src/experiments/experiments.extern.js',
-    ],
+    allowlist: ['src/experiments/index.js', 'src/experiments/amp-globals.d.ts'],
   },
   'AMP_CONFIG': {
     message:
@@ -638,16 +633,13 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/build.js',
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/helpers.js',
-      'src/config.js',
-      'src/core/window/window.extern.js',
+      'src/config/urls.js',
       'src/experiments/index.js',
-      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/core/mode/test.js',
       'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -682,7 +674,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['testing/init-tests.js'],
+    allowlist: ['testing/init-tests-helpers.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -716,66 +708,19 @@ const forbiddenTermsGlobal = {
       // Non test files. These can remain.
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
-      'validator/js/engine/amp4ads-parse-css_test.js',
-      'validator/js/engine/htmlparser_test.js',
-      'validator/js/engine/keyframes-parse-css_test.js',
-      'validator/js/engine/parse-css_test.js',
-      'validator/js/engine/parse-srcset_test.js',
-      'validator/js/engine/parse-url_test.js',
-      'validator/js/engine/validator_test.js',
+      //'validator/js/engine/amp4ads-parse-css_test.js',
+      //'validator/js/engine/htmlparser_test.js',
+      //'validator/js/engine/keyframes-parse-css_test.js',
+      //'validator/js/engine/parse-css_test.js',
+      //'validator/js/engine/parse-srcset_test.js',
+      //'validator/js/engine/parse-url_test.js',
+      //'validator/js/engine/validator_test.js',
       'validator/js/gulpjs/test/validate.js',
     ],
     checkInTestFolder: true,
   },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
-  '@storybook/addon-knobs': {
-    message:
-      'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
-    allowlist: [
-      // TODO(#35923): Update existing files to use Controls instead.
-      'build-system/tasks/storybook/amp-env/main.js',
-      'build-system/tasks/storybook/preact-env/main.js',
-      'extensions/amp-animation/0.1/storybook/template.js',
-      'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
-      'extensions/amp-date-display/1.0/storybook/Basic.js',
-      'extensions/amp-iframe/0.1/storybook/Basic.amp.js',
-      'extensions/amp-iframe/1.0/storybook/Basic.amp.js',
-      'extensions/amp-image-slider/0.1/storybook/Basic.amp.js',
-      'extensions/amp-inline-gallery/1.0/storybook/Basic.js',
-      'extensions/amp-lightbox/1.0/storybook/Basic.amp.js',
-      'extensions/amp-lightbox/1.0/storybook/Basic.js',
-      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.amp.js',
-      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.js',
-      'extensions/amp-render/1.0/storybook/Basic.js',
-      'extensions/amp-selector/1.0/storybook/Basic.amp.js',
-      'extensions/amp-selector/1.0/storybook/Basic.js',
-      'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
-      'extensions/amp-sidebar/1.0/storybook/Basic.amp.js',
-      'extensions/amp-sidebar/1.0/storybook/Basic.js',
-      'extensions/amp-soundcloud/1.0/storybook/Basic.amp.js',
-      'extensions/amp-soundcloud/1.0/storybook/Basic.js',
-      'extensions/amp-stream-gallery/1.0/storybook/Basic.amp.js',
-      'extensions/amp-stream-gallery/1.0/storybook/Basic.js',
-      'extensions/amp-timeago/1.0/storybook/Basic.js',
-      'extensions/amp-twitter/0.1/storybook/Basic.amp.js',
-      'extensions/amp-twitter/1.0/storybook/Basic.amp.js',
-      'extensions/amp-twitter/1.0/storybook/Basic.js',
-      'extensions/amp-video/1.0/storybook/Basic.amp.js',
-      'extensions/amp-video/1.0/storybook/Basic.js',
-      'extensions/amp-video-iframe/1.0/storybook/Basic.amp.js',
-      'extensions/amp-vimeo/1.0/storybook/Basic.amp.js',
-      'extensions/amp-vimeo/1.0/storybook/Basic.js',
-      'extensions/amp-wordpress-embed/1.0/storybook/Basic.amp.js',
-      'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
-      'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
-      'extensions/amp-youtube/1.0/storybook/Basic.js',
-      'src/builtins/storybook/amp-layout-with-aspect-ratio-css.amp.js',
-      'src/builtins/storybook/amp-layout.amp.js',
-      'src/preact/storybook/Context.js',
-      'src/preact/storybook/Wrappers.js',
-    ],
-  },
 };
 
 const bannedTermsHelpString =
@@ -798,7 +743,7 @@ const measurementApiDeprecated =
   ' @ampproject/wg-performance for questions.';
 
 /**
- * @const {Object<string, string|!ForbiddenTermDef>}
+ * @const {{[key: string]: string|!ForbiddenTermDef}}
  */
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
@@ -824,6 +769,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.pageXOffset(?!_)': bannedTermsHelpString,
   '\\.pageYOffset(?!_)': bannedTermsHelpString,
   '\\.innerWidth(?!_)': bannedTermsHelpString,
+  '\\.toggleAttribute(?!_)': 'please use `toggleAttribute()` from core/dom',
   '\\.innerHeight(?!_)': bannedTermsHelpString,
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
@@ -863,9 +809,9 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       '3p/integration-lib.js',
       'examples/pwa/pwa.js',
-      'validator/js/engine/parse-url.js',
-      'validator/js/engine/validator.js',
-      'validator/js/webui/webui.js',
+      //'validator/js/engine/parse-url.js',
+      //'validator/js/engine/validator.js',
+      //'validator/js/webui/webui.js',
       'src/url.js',
       'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
@@ -920,7 +866,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Most users should use BaseElement…loadPromise.',
     allowlist: [
       'src/base-element.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/friendly-iframe-embed.js',
       'src/service/resources-impl.js',
       'src/service/variable-source.js',
@@ -976,7 +922,7 @@ const forbiddenTermsSrcInclusive = {
   '(cdn|3p)\\.ampproject\\.': {
     message:
       'The CDN domain should typically not be hardcoded in source ' +
-      'code. Use a property of urls from src/config.js instead.',
+      'code. Use urls from src/config/urls.js instead.',
     allowlist: [
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
@@ -987,15 +933,14 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
-      'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
       'src/amp-story-player/amp-story-player-impl.js',
-      'src/config.js',
+      'src/config/urls.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/experiments/experiments.js',
       'validator/js/engine/htmlparser-interface.js',
-      'validator/js/engine/validator-in-browser.js',
-      'validator/js/engine/validator.js',
+      //'validator/js/engine/validator-in-browser.js',
+      //'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
       'validator/js/webui/serve-standalone.go',
     ],
@@ -1014,7 +959,7 @@ const forbiddenTermsSrcInclusive = {
     'use endsWith helper in src/core/types/string',
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
-    allowlist: ['validator/js/engine/validator.js'],
+    //allowlist: ['validator/js/engine/validator.js'],
   },
   "process\\.env(\\.|\\[\\')(GITHUB_ACTIONS|CIRCLECI)": {
     message:
@@ -1089,14 +1034,6 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
-  "require\\('kleur\\/colors'\\)": {
-    message:
-      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
-    allowlist: [
-      'build-system/common/colors.js',
-      'third_party/react-dates/scope-require.js',
-    ],
-  },
   'detectIsAutoplaySupported': {
     message:
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
@@ -1155,7 +1092,7 @@ function stripComments(contents) {
  *
  * @param {string} srcFile
  * @param {string} contents
- * @param {!Object<string, string|!ForbiddenTermDef>} terms
+ * @param {!{[key: string]: string|!ForbiddenTermDef}} terms
  * @return {Array<!ForbiddenTermMatchDef>}
  */
 function matchForbiddenTerms(srcFile, contents, terms) {

@@ -1,5 +1,5 @@
 import {Observable} from '#core/data-structures/observable';
-import {whenDocumentReady} from '#core/document-ready';
+import {whenDocumentReady} from '#core/document/ready';
 import {waitForBodyOpen} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle, px, setImportantStyles} from '#core/dom/style';
@@ -8,12 +8,12 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-
-import {dev} from '../../log';
 
 const TAG_ = 'Viewport';
 

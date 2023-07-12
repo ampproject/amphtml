@@ -5,7 +5,7 @@ const fs = require('fs-extra');
 const minimist = require('minimist');
 const objstr = require('obj-str');
 const path = require('path');
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {format} = require('./format');
 const {getOutput, getStdout} = require('../../common/process');
 const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
@@ -27,7 +27,6 @@ let MakeExtensionResultDef;
 /**
  * @typedef {{
  *   version?: (string|undefined),
- *   bento?: (boolean|undefined),
  *   name?: (string|undefined),
  *   nocss?: (string|undefined),
  *   nojss?: (string|undefined),
@@ -39,7 +38,6 @@ let ArgsDef;
  * @typedef {{
  *   name: string,
  *   version: string,
- *   latestVersion?: (string|undefined)
  *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
  * }}
  */
@@ -57,7 +55,7 @@ function dashToPascalCase(name) {
 /**
  * Replaces from a map of keys/values.
  * @param {string} inputText
- * @param {Object<string, string>} replacements
+ * @param {{[key: string]: string}} replacements
  * @return {string}
  */
 const replace = (inputText, replacements) =>
@@ -89,7 +87,7 @@ const getTemplateDir = (template) =>
 
 /**
  * @param {string} templateDir
- * @param {Object<string, string>} replacements
+ * @param {{[key: string]: string}} replacements
  * @param {string=} destinationDir
  * @return {Promise<Array<string>>}
  */
@@ -111,31 +109,20 @@ async function writeFromTemplateDir(
     await fs.mkdirp(path.dirname(destination));
 
     // Skip if the destination file already exists
-    let fileHandle;
-    try {
-      fileHandle = await fs.open(destination, 'wx');
-    } catch (e) {
-      if (e.code !== 'EEXIST') {
-        throw e;
-      }
-      if (!argv.overwrite) {
-        logLocalDev(
-          yellow('WARNING:'),
-          'Skipping existing file',
-          cyan(destination)
-        );
-        continue;
-      }
+    if (await fs.pathExists(destination)) {
       logLocalDev(
         yellow('WARNING:'),
-        'Overwriting existing file',
+        argv.overwrite ? 'Overwriting' : 'Skipping',
+        'existing file',
         cyan(destination)
       );
+      if (!argv.overwrite) {
+        continue;
+      }
     }
 
     const template = await fs.readFile(templatePath, 'utf8');
-    await fs.write(fileHandle, replace(template, replacements));
-    await fs.close(fileHandle);
+    await fs.writeFile(destination, replace(template, replacements));
 
     logLocalDev(green('SUCCESS:'), 'Created', cyan(destination));
 
@@ -155,23 +142,12 @@ async function insertExtensionBundlesConfig(
   bundle,
   destination = extensionBundlesJson
 ) {
-  let extensionBundles = [];
-  try {
-    extensionBundles = await fs.readJson(destination, {throws: false});
-  } catch (_) {}
+  const extensionBundles = fs.readJsonSync(destination, {throws: false}) ?? [];
 
-  const existingOrNull = extensionBundles.find(
-    ({name}) => name === bundle.name
-  );
-
-  const {latestVersion, name, version, ...rest} = bundle;
+  const {name, version, ...rest} = bundle;
   extensionBundles.push({
     name,
     version,
-    latestVersion:
-      (existingOrNull && existingOrNull.latestVersion) ||
-      latestVersion ||
-      version,
     ...rest,
   });
 
@@ -209,9 +185,7 @@ async function makeExtensionFromTemplates(
   destinationDir = '.',
   options = argv
 ) {
-  const version = (
-    options.version || (options.bento ? '1.0' : '0.1')
-  ).toString();
+  const version = (options.version || '0.1').toString();
   const name = (options.name || '').replace(/^amp-/, '');
   if (!name) {
     log(red('ERROR:'), 'Must specify component name with', cyan('--name'));
@@ -226,13 +200,6 @@ async function makeExtensionFromTemplates(
     '__component_name_hyphenated__': name,
     '__component_name_hyphenated_capitalized__': name.toUpperCase(),
     '__component_name_pascalcase__': namePascalCase,
-    // TODO(alanorozco): Remove __storybook_experiments...__ once we stop
-    // requiring the bento experiment.
-    '__storybook_experiments_do_not_add_trailing_comma__':
-      // Don't add a trailing comma in the template, instead we add it here.
-      // This is because the property added is optional, and a double comma would
-      // cause a syntax error.
-      options.bento ? "experiments: ['bento']," : '',
     ...(!options.nocss
       ? {
           '__css_import__': `import {CSS} from '../../../build/amp-${name}-${version}.css'`,
@@ -252,6 +219,7 @@ async function makeExtensionFromTemplates(
           '__jss_styles_use_styles__': 'const styles = useStyles()',
           '__jss_styles_example_or_placeholder__':
             '`${styles.exampleContentHidden}`',
+          '__jss_import_storybook__': `import '../component.jss'`,
         }
       : {
           '__jss_import_component_css_': '',
@@ -259,6 +227,7 @@ async function makeExtensionFromTemplates(
           '__jss_import_use_styles__': '',
           '__jss_styles_use_styles__': '',
           '__jss_styles_example_or_placeholder__': `'my-classname'`,
+          '__jss_import_storybook__': '',
         }),
     // eslint-disable-next-line local/no-forbidden-terms
     // This allows generated code to contain "DO NOT SUBMIT", which will cause
@@ -292,9 +261,6 @@ async function makeExtensionFromTemplates(
 
   if (!options.nocss) {
     bundleConfig.options = {...bundleConfig.options, hasCss: true};
-  }
-  if (options.bento) {
-    bundleConfig.options = {...bundleConfig.options, wrapper: 'bento'};
   }
 
   await insertExtensionBundlesConfig(
@@ -387,15 +353,14 @@ async function runExtensionTests(name) {
 async function makeExtension() {
   let testError;
 
-  const {bento, nocss, nojss} = argv;
+  const {nocss, nojss} = argv;
 
   // @ts-ignore
   const templateDirs = objstr({
     shared: true,
-    bento,
-    classic: !bento,
+    classic: true,
     css: !nocss,
-    jss: bento && !nojss,
+    jss: !nojss,
   })
     .split(/\s+/)
     .map((name) => getTemplateDir(name));
@@ -443,12 +408,10 @@ makeExtension.description = 'Create the skeleton for a new extension';
 makeExtension.flags = {
   name: 'Name of the extension (the amp-* prefix is added if necessary)',
   cleanup: 'Undo file changes before exiting (useful with --test)',
-  bento: 'Generate a Bento component',
-  nocss:
-    'Exclude extension-specific CSS (JSS is generated for --bento unless combined with --nojss)',
-  nojss: 'Exclude extension-specific JSS (used with --bento)',
+  nocss: 'Exclude extension-specific CSS',
+  nojss: 'Exclude extension-specific JSS',
   test: 'Build and test the generated extension',
-  version: 'Set the version number (default: 0.1; or 1.0 with --bento)',
+  version: 'Set the version number (default: 0.1)',
   overwrite:
     'Overwrite existing files at the destination if present, otherwise skip',
 };

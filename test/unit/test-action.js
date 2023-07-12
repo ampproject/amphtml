@@ -1,9 +1,9 @@
 import {
-  ActionTrust,
+  ActionTrust_Enum,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
 } from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {htmlFor} from '#core/dom/static-template';
 
 import {
@@ -15,9 +15,11 @@ import {
 } from '#service/action-impl';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 
-import {whenCalled} from '#testing/test-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
-import {createCustomEvent} from '../../src/event-helper';
+import {FakePerformance} from '#testing/fake-dom';
+import {macroTask} from '#testing/helpers';
+import {whenCalled} from '#testing/helpers/service';
 
 /**
  * @return {!ActionService}
@@ -35,6 +37,7 @@ function actionService() {
     __AMP_SERVICES: {
       vsync: {obj: {}, ctor: Object},
     },
+    performance: new FakePerformance(window),
   };
   return new ActionService(new AmpDocSingle(win), document);
 }
@@ -821,7 +824,7 @@ describes.sandboxed('Action method', {}, (env) => {
         ampActionMacro,
         'tap',
         null,
-        ActionTrust.HIGH,
+        ActionTrust_Enum.HIGH,
         /* opt_args */ {arg1: 'realArgValue'}
       );
 
@@ -845,7 +848,7 @@ describes.sandboxed('Action method', {}, (env) => {
         expect(method).to.equal('method');
         expect(actionEventType).to.equal('tap');
         expect(args).to.deep.equal({realArgName: 'realArgValue'});
-        expect(trust).to.equal(ActionTrust.HIGH);
+        expect(trust).to.equal(ActionTrust_Enum.HIGH);
         expect(tagOrTarget).to.equal('AMP-ACTION-MACRO');
         expect(actionEventType).to.equal('tap');
         expect(source).to.equal(ampActionMacro);
@@ -873,7 +876,7 @@ describes.sandboxed('installActionHandler', {}, (env) => {
         'button',
         'button',
         'tap',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       )
     );
     expect(handlerSpy).to.be.calledOnce;
@@ -884,7 +887,7 @@ describes.sandboxed('installActionHandler', {}, (env) => {
     expect(callArgs.source).to.be.equal('button');
     expect(callArgs.caller).to.be.equal('button');
     expect(callArgs.event).to.be.equal('tap');
-    expect(callArgs.trust).to.be.equal(ActionTrust.HIGH);
+    expect(callArgs.trust).to.be.equal(ActionTrust_Enum.HIGH);
   });
 
   it('should not check trust level (handler should check)', () => {
@@ -899,12 +902,12 @@ describes.sandboxed('installActionHandler', {}, (env) => {
       'button',
       'button',
       'tapEvent',
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     action.invoke_(invocation);
     expect(handlerSpy).to.be.calledOnce;
 
-    invocation.trust = ActionTrust.LOW;
+    invocation.trust = ActionTrust_Enum.LOW;
     action.invoke_(invocation);
     expect(handlerSpy).to.be.calledTwice;
   });
@@ -987,10 +990,6 @@ describes.sandboxed('Multiple handlers action method', {}, (env) => {
     expect(onEnqueue1).to.not.have.been.called;
     expect(xyz).to.not.have.been.called;
     expect(onEnqueue2).to.not.have.been.called;
-
-    // Invocation of chained actions are branched on promiseAbc/promiseXyz,
-    // so wait for macro-task to ensure all queued promises are resolved.
-    const macroTask = () => new Promise((resolve) => setTimeout(resolve, 0));
 
     resolveAbc();
     return macroTask()
@@ -1086,7 +1085,7 @@ describes.sandboxed('Action interceptor', {}, (env) => {
         'source1',
         'caller1',
         'event1',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       )
     );
     action.invoke_(
@@ -1097,7 +1096,7 @@ describes.sandboxed('Action interceptor', {}, (env) => {
         'source2',
         'caller2',
         'event2',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       )
     );
 
@@ -1135,7 +1134,7 @@ describes.sandboxed('Action interceptor', {}, (env) => {
         'source3',
         'caller3',
         'event3',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       )
     );
     expect(handler).to.have.callCount(3);
@@ -1174,7 +1173,7 @@ describes.sandboxed('Action common handler', {}, (env) => {
         'source1',
         'caller1',
         'event1',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       )
     );
     expect(action1).to.be.calledOnce;
@@ -1188,7 +1187,7 @@ describes.sandboxed('Action common handler', {}, (env) => {
         'source2',
         'caller2',
         'event2',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       )
     );
     expect(action2).to.be.calledOnce;
@@ -1199,7 +1198,7 @@ describes.sandboxed('Action common handler', {}, (env) => {
 
   it('should check trust before invoking action', () => {
     const handler = env.sandbox.spy();
-    action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
+    action.addGlobalMethodHandler('foo', handler, ActionTrust_Enum.HIGH);
 
     action.invoke_(
       new ActionInvocation(
@@ -1209,7 +1208,7 @@ describes.sandboxed('Action common handler', {}, (env) => {
         'source1',
         'caller1',
         'event1',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       )
     );
     expect(handler).to.be.calledOnce;
@@ -1223,7 +1222,7 @@ describes.sandboxed('Action common handler', {}, (env) => {
           'source1',
           'caller1',
           'event1',
-          ActionTrust.LOW
+          ActionTrust_Enum.LOW
         )
       );
       expect(handler).to.be.calledOnce;
@@ -1338,7 +1337,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       element.setAttribute('role', 'button');
       const event = {
         target: element,
-        key: Keys.ENTER,
+        key: Keys_Enum.ENTER,
         preventDefault: env.sandbox.stub(),
       };
       handler(event);
@@ -1359,7 +1358,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       element.setAttribute('role', 'button');
       const event = {
         target: element,
-        key: Keys.ENTER,
+        key: Keys_Enum.ENTER,
         preventDefault: env.sandbox.stub(),
       };
       handler(event);
@@ -1382,7 +1381,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       element.setAttribute('role', 'option');
       const event = {
         target: element,
-        key: Keys.ENTER,
+        key: Keys_Enum.ENTER,
         preventDefault: env.sandbox.stub(),
       };
       handler(event);
@@ -1401,7 +1400,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       const handler = window.document.addEventListener.getCall(1).args[1];
       const element = document.createElement('div');
       element.setAttribute('role', 'not-a-button');
-      const event = {target: element, key: Keys.ENTER};
+      const event = {target: element, key: Keys_Enum.ENTER};
       handler(event);
       expect(action.trigger).to.not.have.been.called;
     }
@@ -1416,7 +1415,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       );
       const handler = window.document.addEventListener.getCall(1).args[1];
       const element = document.createElement('input');
-      const event = {target: element, key: Keys.ENTER};
+      const event = {target: element, key: Keys_Enum.ENTER};
       handler(event);
       expect(action.trigger).to.not.have.been.called;
     }
@@ -1670,7 +1669,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH,
+        ActionTrust_Enum.HIGH,
         'tap',
         opt_tagOrTarget || element.tagName
       );

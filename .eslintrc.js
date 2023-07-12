@@ -1,12 +1,12 @@
 const fs = require('fs');
 
 const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
+const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
-const {
-  getImportResolver,
-} = require('./build-system/babel-config/import-resolver');
 
 const importAliases = getImportResolver().alias;
 
@@ -28,10 +28,9 @@ function getExperimentGlobals() {
 
 module.exports = {
   'root': true,
-  'parser': '@babel/eslint-parser',
+  'parser': '@typescript-eslint/parser',
   'plugins': [
     'chai-expect',
-    'google-camelcase',
     'import',
     'jsdoc',
     'local',
@@ -40,24 +39,25 @@ module.exports = {
     'react',
     'react-hooks',
     'sort-destructure-keys',
-    'sort-requires',
+    '@typescript-eslint',
   ],
   'env': {
     'es6': true,
     'browser': true,
   },
   'parserOptions': {
-    'ecmaVersion': 6,
     'jsx': true,
     'sourceType': 'module',
   },
   'globals': {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
+    'IS_SSR_CSS': 'readonly',
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
     'IS_PROD': 'readonly',
     'INTERNAL_RUNTIME_VERSION': 'readonly',
+    'AMP_STORY_SUPPORTED_LANGUAGES': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
@@ -97,7 +97,6 @@ module.exports = {
     'chai-expect/no-inner-compare': 2,
     'chai-expect/terminating-properties': 2,
     'curly': 2,
-    'google-camelcase/google-camelcase': 2,
 
     // Rules restricting/standardizing import statements
     'import/no-unresolved': [
@@ -165,8 +164,10 @@ module.exports = {
 
     // Custom repo rules defined in build-system/eslint-rules
     'local/await-expect': 2,
+    'local/camelcase': 2,
     'local/closure-type-primitives': 2,
-    'local/dict-string-keys': 2,
+    'local/core-dom-jsx': 2,
+    'local/enums': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,
@@ -176,7 +177,6 @@ module.exports = {
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
     'local/no-duplicate-import': 2,
-    'local/no-duplicate-name-typedef': 2,
     'local/no-dynamic-import': 2,
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
@@ -197,7 +197,6 @@ module.exports = {
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
     'local/no-module-exports': 2,
-    'local/no-static-this': 2,
     'local/no-style-display': 2,
     'local/no-style-property-setting': 2,
     'local/no-swallow-return-from-allow-console-error': 2,
@@ -255,12 +254,39 @@ module.exports = {
     'no-native-reassign': 2,
     'no-redeclare': 2,
     'no-restricted-globals': [2, 'error', 'event', 'Animation'],
+    'no-restricted-syntax': [
+      2,
+      // Ban all TS features that don't have a direct ECMAScript equivalent.
+      {
+        'selector': 'TSEnumDeclaration',
+        'message': 'Enums are banned.',
+      },
+      {
+        'selector': 'TSModuleDeclaration',
+        'message': 'Namespaces are banned.',
+      },
+      {
+        'selector': 'TSParameterProperty',
+        'message': 'Parameter properties are banned.',
+      },
+      {
+        'selector': 'Decorator',
+        'message': 'Decorators are banned.',
+      },
+      {
+        'selector': 'PropertyDefinition[declare="false"]:not([value])',
+        'message':
+          'Class properties should be declared or initialized. ' +
+          'See https://github.com/ampproject/amphtml/pull/37387#discussion_r791232943',
+      },
+    ],
     'no-script-url': 2,
     'no-self-compare': 2,
     'no-sequences': 2,
     'no-throw-literal': 2,
     'no-unused-expressions': 0,
-    'no-unused-vars': [
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
       2,
       {
         'argsIgnorePattern': '^(var_args$|opt_|unused)',
@@ -299,9 +325,7 @@ module.exports = {
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
     'import/order': [
-      // Disabled for now, so individual folders can opt-in one PR at a time and
-      // minimize disruption/merge conflicts
-      0,
+      2,
       {
         // Split up imports groups with exactly one newline
         'newlines-between': 'always',
@@ -341,9 +365,19 @@ module.exports = {
         'ignoreDeclarationSort': true,
       },
     ],
-    'sort-requires/sort-requires': 2,
   },
   'overrides': [
+    {
+      'files': ['**/*.ts', '**/*.tsx'],
+      'rules': {
+        'require-jsdoc': 0,
+        'jsdoc/require-param': 0,
+        'jsdoc/require-param-type': 0,
+        'jsdoc/require-returns': 0,
+        'no-undef': 0,
+        'import/no-unresolved': 0,
+      },
+    },
     {
       'files': [
         'test/**/*.js',
@@ -356,6 +390,7 @@ module.exports = {
       'rules': {
         'require-jsdoc': 0,
         'local/always-call-chai-methods': 2,
+        'local/enums': 0,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
         'local/no-function-async': 0,
@@ -431,13 +466,13 @@ module.exports = {
       'rules': {
         'no-var': 0,
         'no-undef': 0,
-        'no-unused-vars': 0,
+        '@typescript-eslint/no-unused-vars': 0,
         'prefer-const': 0,
         'require-jsdoc': 0,
         'jsdoc/check-tag-names': 0,
         'local/closure-type-primitives': 0,
         'local/no-duplicate-name-typedef': 0,
-        'google-camelcase/google-camelcase': 0,
+        'local/camelcase': 0,
       },
     },
     {
@@ -451,12 +486,32 @@ module.exports = {
       },
     },
     {
-      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
-      'rules': {'import/order': 2},
+      'files': ['build-system/**/*.js'],
+      'rules': {'import/order': 0},
     },
     {
-      'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],
+      'files': ['extensions/**/1.0/**', 'src/preact/**', '**/storybook/**'],
       'rules': {'local/preact-preferred-props': 2},
+    },
+    {
+      // src/preact can directly import from 'preact' without issue.
+      'files': ['src/preact/**'],
+      'rules': {'local/no-import': 0},
+    },
+    {
+      // Files that use JSX for plain DOM nodes instead of Preact
+      'files': [
+        'extensions/amp-story/**',
+        'extensions/amp-story-*/**',
+        // Extensions whose version is lower than 1.0 do not use Preact
+        'extensions/*/0.*/**',
+      ],
+      'rules': {'local/preact': [2, '#core/dom/jsx']},
+    },
+    {
+      // Allow sinon stub for release tagger tests
+      'files': ['build-system/release-tagger/test/**'],
+      'rules': {'local/no-forbidden-terms': 0},
     },
   ],
 };

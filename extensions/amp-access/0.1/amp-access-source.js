@@ -1,11 +1,14 @@
 import {Deferred} from '#core/data-structures/promise';
 import {isEnumValue, isObject} from '#core/types';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, user, userAssert} from '#utils/log';
 
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessIframeAdapter} from './amp-access-iframe';
@@ -15,8 +18,6 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {dev, user, userAssert} from '../../../src/log';
 import {assertHttpsUrl} from '../../../src/url';
 
 /** @const */
@@ -114,7 +115,7 @@ export class AccessSource {
     /** @private {?Function} */
     this.firstAuthorizationResolver_ = deferred.resolve;
 
-    /** @private {!Object<string, string>} */
+    /** @private {!{[key: string]: string}} */
     this.loginUrlMap_ = {};
 
     /** @private {?Promise} */
@@ -227,7 +228,7 @@ export class AccessSource {
    */
   buildConfigLoginMap_(configJson) {
     const loginConfig = configJson['login'];
-    const loginMap = dict();
+    const loginMap = {};
     if (!loginConfig) {
       // Ignore: in some cases login config is not necessary.
     } else if (typeof loginConfig == 'string') {
@@ -299,7 +300,7 @@ export class AccessSource {
   /**
    * @param {string} url
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
+   * @return {!Promise<!{[key: string]: *}>}
    */
   collectUrlVars(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then((vars) => {
@@ -309,7 +310,7 @@ export class AccessSource {
 
   /**
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
+   * @return {!Promise<!{[key: string]: *}>}
    * @private
    */
   prepareUrlVars_(useAuthData) {
@@ -545,7 +546,7 @@ export class AccessSource {
  * @typedef {{
  *   buildUrl: function(string, boolean):!Promise<string>,
  *   collectUrlVars: function(string, boolean):
- *       !Promise<!Object<string, *>>
+ *       !Promise<!{[key: string]: *}>
  * }}
  */
 export let AccessTypeAdapterContextDef;

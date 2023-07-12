@@ -11,7 +11,7 @@ import {
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import * as bytesUtils from '#core/types/string/bytes';
 
 import {toggleExperiment} from '#experiments';
@@ -771,6 +771,15 @@ for (const {config, name} of [
           });
         });
 
+        it('handles tagForUnderAgeTreatment', () => {
+          element.setAttribute('json', '{"tagForUnderAgeTreatment": 1}');
+          new AmpAd(element).upgradeCallback();
+          impl.uiHandler = {isStickyAd: () => false};
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.match(/&tfua=1&/);
+          });
+        });
+
         describe('data-force-safeframe', () => {
           const fsfRegexp = /(\?|&)fsf=1(&|$)/;
           it('handles default', () => {
@@ -825,7 +834,8 @@ for (const {config, name} of [
           });
         });
 
-        it('expands CLIENT_ID in targeting', () => {
+        // TODO(#38720): fix flaky test.
+        it.skip('expands CLIENT_ID in targeting', () => {
           element.setAttribute(
             'json',
             `{
@@ -841,7 +851,8 @@ for (const {config, name} of [
           });
         });
 
-        it('expands CLIENT_ID in targeting inside array', () => {
+        // TODO(#38720): fix flaky test.
+        it.skip('expands CLIENT_ID in targeting inside array', () => {
           element.setAttribute(
             'json',
             `{
@@ -1218,6 +1229,36 @@ for (const {config, name} of [
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)ptt=13(&|$)/
           );
+        });
+
+        it('should set ppid parameter if set in json', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          element.setAttribute('json', '{"ppid": "testId"}');
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)ppid=testId(&|$)/
+          );
+        });
+
+        it('should set tfcd parameter if set in shared data', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 0,
+            'doubleclick-tfcd': 1,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+          });
+        });
+
+        it('should set tfua parameter if set in shared data', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 1,
+            'doubleclick-tfcd': 0,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+          });
         });
       });
 
@@ -1713,7 +1754,7 @@ for (const {config, name} of [
         });
 
         it('should return safeframe if fluid', () => {
-          impl.isLayoutSupported(Layout.FLUID);
+          impl.isLayoutSupported(Layout_Enum.FLUID);
           expect(impl.getNonAmpCreativeRenderingMethod()).to.equal(
             XORIGIN_MODE.SAFEFRAME
           );

@@ -64,8 +64,8 @@ describes.realWin(
           'type': 'wunderkind',
           'data-ad': 'wunderkind',
           'layout': 'responsive',
-          'height': '250',
-          'width': '250',
+          'height': '75vw',
+          'width': '100vw',
         });
       });
 
@@ -81,11 +81,8 @@ describes.realWin(
         const adNetwork = getAdNetworkConfig('wunderkind', ampAutoAdsElem);
         expect(adNetwork.getDefaultAdConstraints()).to.deep.equal({
           initialMinSpacing: 500,
-          subsequentMinSpacing: [
-            {adCount: 3, spacing: 1000},
-            {adCount: 6, spacing: 1500},
-          ],
-          maxAdCount: 8,
+          subsequentMinSpacing: [],
+          maxAdCount: 10,
         });
       });
 

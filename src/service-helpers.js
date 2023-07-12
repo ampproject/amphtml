@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /**
  * @fileoverview Registration and getter functions for AMP services.
  *
@@ -5,9 +7,9 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
-import {dev, devAssert} from './log';
+import {dev, devAssert} from '#utils/log';
 
 /**
  * Holds info about a service.
@@ -301,10 +303,7 @@ export function getParentWindowFrameElement(node, opt_topWin) {
  */
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    const win = toWin(
-      /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc)
-        .defaultView
-    );
+    const win = getWin(nodeOrDoc);
     return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
@@ -336,7 +335,7 @@ function getAmpdocService(win) {
  * has already been registered.
  * @param {!Object} holder Object holding the service instance.
  * @param {string} id of the service.
- * @return {Object}
+ * @return {object}
  */
 function getServiceInternal(holder, id) {
   devAssert(
@@ -471,7 +470,7 @@ function getServicePromiseOrNullInternal(holder, id) {
 /**
  * Returns the object that holds the services registered in a holder.
  * @param {!Object} holder
- * @return {!Object<string,!ServiceHolderDef>}
+ * @return {!{[key: string]: !ServiceHolderDef}}
  */
 function getServices(holder) {
   let services = holder.__AMP_SERVICES;

@@ -1,16 +1,18 @@
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {isFiniteNumber, isObject} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
+
+import {user, userAssert} from '#utils/log';
+
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
   PURPOSE_CONSENT_STATE,
 } from './consent-info';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {Deferred} from '#core/data-structures/promise';
-import {Observable} from '#core/data-structures/observable';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {hasOwn, map} from '#core/types/object';
-import {isFiniteNumber, isObject} from '#core/types';
 
-import {user, userAssert} from '../../../src/log';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
@@ -31,10 +33,10 @@ export class ConsentPolicyManager {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Object<string, ?Deferred>} */
+    /** @private {!{[key: string]: ?Deferred}} */
     this.policyInstancesDeferred_ = map();
 
-    /** @private {!Object<string, ConsentPolicyInstance>} */
+    /** @private {!{[key: string]: ConsentPolicyInstance}} */
     this.instances_ = map();
 
     /** @private {!Promise} */

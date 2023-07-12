@@ -21,7 +21,7 @@ const {
   buildNewServer,
 } = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
@@ -234,7 +234,7 @@ module.exports = {
   PORT,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 serve.description = 'Start a webserver at the project root directory';
 serve.flags = {

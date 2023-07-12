@@ -3,78 +3,67 @@
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('../../common/colors');
+const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
-const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {isCiBuild} = require('../../common/ci');
-const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {writeFileSync} = require('fs-extra');
+const {updateSubpackages} = require('../../common/update-packages');
+const {bootstrapThirdPartyFrames} = require('../helpers');
+
+/** @typedef {'amp'|'preact'|'react'} StorybookEnv */
 
 const ENV_PORTS = {
   amp: 9001,
   preact: 9002,
+  react: 9003,
 };
 
 const repoDir = path.join(__dirname, '../../..');
 
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  * @return {string}
  */
-const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
+const envDir = (env) => path.join(__dirname, 'env', env);
 
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  */
-function launchEnv(env) {
-  log(`Launching storybook for the ${cyan(env)} environment...`);
+function startStorybook(env) {
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
+  log(`Launching storybook for the ${cyan(env)} environment...`);
   execScriptAsync(
     [
-      './node_modules/.bin/start-storybook',
-      `--config-dir ${envConfigDir(env)}`,
-      `--static-dir ${repoDir}/`,
+      'npx',
+      'start-storybook',
+      `--config-dir .`,
       `--port ${port}`,
       '--quiet',
       isCiBuild() ? '--ci' : '',
     ].join(' '),
-    {cwd: __dirname, stdio: 'inherit'}
+    {cwd: envDir(env), stdio: 'inherit'}
   ).on('error', () => {
     throw new Error('Launch failed');
   });
 }
 
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  */
-function buildEnv(env) {
-  const configDir = envConfigDir(env);
-
-  if (env === 'amp' && isPullRequestBuild()) {
-    // Allows PR deploys to reference built binaries.
-    writeFileSync(
-      `${configDir}/preview.js`,
-      // If you change this JS template, make sure to JSON.stringify every
-      // dynamic value. This prevents XSS and other types of garbling.
-      `// DO NOT${' '}SUBMIT.
-       // This preview.js file was generated for a specific PR build.
-       export const parameters = (${JSON.stringify({
-         ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
-       })});`
-    );
-  }
+function buildStorybook(env) {
   log(`Building storybook for the ${cyan(env)} environment...`);
+
   const result = exec(
     [
-      './node_modules/.bin/build-storybook',
-      `--config-dir ${configDir}`,
+      'npx',
+      'build-storybook',
+      `--config-dir .`,
       `--output-dir ${repoDir}/examples/storybook/${env}`,
       '--quiet',
       `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
     ].join(' '),
-    {cwd: __dirname, stdio: 'inherit'}
+    {cwd: envDir(env), stdio: 'inherit'}
   );
   if (result.status != 0) {
     throw new Error('Build failed');
@@ -82,18 +71,42 @@ function buildEnv(env) {
 }
 
 /**
+ * @param {string} env
+ * @return {StorybookEnv[]}
+ */
+function parseEnvs(env) {
+  return /** @type {StorybookEnv[]} */ (
+    env.split(',').filter((env) => {
+      return env === 'amp' || env === 'preact' || env === 'react';
+    })
+  );
+}
+
+/**
  * @return {Promise<void>}
  */
 async function storybook() {
-  const {build = false, 'storybook_env': env = 'amp,preact'} = argv;
-  const envs = env.split(',');
-  if (!build && envs.includes('amp')) {
-    await runAmpDevBuildServer();
-  }
+  const {build = false, 'storybook_env': storybookEnv = 'preact'} = argv;
+  const envs = parseEnvs(storybookEnv);
   if (!build) {
     createCtrlcHandler('storybook');
+    if (envs.includes('amp')) {
+      await runAmpDevBuildServer();
+    } else {
+      // Proxy frames require an .html file output from the function below.
+      // runAmpDevBuildServer() does this implicitly, so it's not required to
+      // call directly in that case.
+      await bootstrapThirdPartyFrames({});
+    }
   }
-  envs.map(build ? buildEnv : launchEnv);
+  for (const env of envs) {
+    updateSubpackages(envDir(env));
+    if (build) {
+      buildStorybook(env);
+    } else {
+      startStorybook(env);
+    }
+  }
 }
 
 module.exports = {
@@ -106,6 +119,6 @@ storybook.description =
 storybook.flags = {
   'build': 'Build a static web application (see https://storybook.js.org/docs)',
   'storybook_env':
-    "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
+    "Environment(s) to run Storybook. Either 'amp', 'preact' or 'react', or a list as 'amp,preact'. Defaults to 'preact'",
   'storybook_port': 'Port from which to run the Storybook dashboard',
 };

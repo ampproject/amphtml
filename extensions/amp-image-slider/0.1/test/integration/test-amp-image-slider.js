@@ -1,4 +1,4 @@
-import {createPointerEvent} from '#testing/test-helper';
+import {createPointerEvent} from '#testing/helpers/service';
 
 const t = describes.sandboxed.configure().ifChrome();
 

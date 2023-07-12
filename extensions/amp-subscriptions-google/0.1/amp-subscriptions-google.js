@@ -6,6 +6,9 @@ import {experimentToggles, isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {getData} from '#utils/event-helper';
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {
   AnalyticsEvent,
   ConfiguredRuntime,
@@ -17,8 +20,6 @@ import {
 import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
-import {getData} from '../../../src/event-helper';
-import {devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
@@ -144,7 +145,13 @@ export class GoogleSubscriptionsPlatform {
       )
       .map((exp) => exp.substring(4));
 
-    const swgConfig = {'experiments': ampExperimentsForSwg};
+    // Force skipping the account creation screen in the buyflow
+    const swgConfig = {
+      'experiments': ampExperimentsForSwg,
+    };
+    const clientOptions = {
+      'skipAccountCreationScreen': true,
+    };
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
@@ -154,7 +161,8 @@ export class GoogleSubscriptionsPlatform {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise((resolve) => (resolver = resolve)),
       },
-      swgConfig
+      swgConfig,
+      clientOptions
     );
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
@@ -491,10 +499,17 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * Returns URL params - in its own method so we can stub it for testing.
-   * @return {Object<string>}
+   * @return {{[key: string]: string}}
    * @private
    */
   getUrlParams_() {
+    // GAA params should be in the hash for AMP
+    // to avoid being seen as discrete documents
+    // by the AMP cache. However we check for
+    // both just in case.
+    if (/gaa_n=/.test(this.ampdoc_.win.location.hash)) {
+      return parseQueryString(this.ampdoc_.win.location.hash);
+    }
     return parseQueryString(this.ampdoc_.win.location.search);
   }
 

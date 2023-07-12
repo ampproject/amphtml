@@ -11,9 +11,9 @@ import {
   getAutofocusElementForShowAction,
 } from '#service/standard-actions-impl';
 
-import {macroTask} from '#testing/helpers';
+import {user} from '#utils/log';
 
-import {user} from '../../src/log';
+import {macroTask} from '#testing/helpers';
 
 describes.sandboxed('StandardActions', {}, (env) => {
   let standardActions;
@@ -561,6 +561,32 @@ describes.sandboxed('StandardActions', {}, (env) => {
       expectCheckboxToHaveCheckedStateTrue(element);
     });
 
+    it('should set checked property to false when checked property is true and args is null', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = true;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: null,
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
+    });
+
+    it('should set checked property to true when checked property is false and args is null', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = false;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: null,
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
     it('should set checked property to true when force=true', () => {
       const element = createElement();
       element.type = 'checkbox';
@@ -949,5 +975,191 @@ describes.sandboxed('StandardActions', {}, (env) => {
       expect(scrollStub).to.be.calledWith(invocation);
       expect(result).to.eql('scrollToResponsePromise');
     });
+  });
+});
+
+describes.realWin('toggleTheme action', {amp: true}, (env) => {
+  let invocation, win, body, standardActions;
+  let matchMediaStub, getItemStub, setItemStub;
+
+  beforeEach(() => {
+    win = env.win;
+    body = win.document.body;
+    standardActions = new StandardActions(env.ampdoc);
+
+    getItemStub = env.sandbox.stub(win.localStorage, 'getItem');
+    setItemStub = env.sandbox.stub(win.localStorage, 'setItem');
+
+    matchMediaStub = env.sandbox.stub(win, 'matchMedia');
+
+    invocation = {
+      node: {
+        ownerDocument: {
+          defaultView: env.win,
+        },
+      },
+      satisfiesTrust: () => true,
+    };
+
+    invocation.method = 'toggleTheme';
+  });
+
+  it('should set amp-dark-mode property in localStorage with yes', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns('no');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned('no');
+
+    expect(body).to.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+
+  it('should set amp-dark-mode property in localStorage with no', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns('yes');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned('yes');
+
+    expect(body).to.not.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'no');
+  });
+
+  it('should set amp-dark-mode property in localStorage with yes if it is null and user prefers light mode', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns(null);
+
+    matchMediaStub
+      .withArgs('(prefers-color-scheme: dark)')
+      .returns({matches: false});
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned(null);
+
+    expect(body).to.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+
+  it('should set amp-dark-mode property in localStorage with no if it is null and user prefers dark mode', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns(null);
+
+    matchMediaStub
+      .withArgs('(prefers-color-scheme: dark)')
+      .returns({matches: true});
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned(null);
+
+    expect(body).to.not.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'no');
+  });
+
+  it('should add custom dark mode class to the body', async () => {
+    body.setAttribute('data-prefers-dark-mode-class', 'is-dark-mode');
+    getItemStub.withArgs('amp-dark-mode').returns('no');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(body).to.have.class('is-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+});
+
+describes.realWin('copy action', {amp: true}, (env) => {
+  let ampdoc, standardActions, win;
+  beforeEach(() => {
+    ampdoc = new AmpDocSingle(window);
+    env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
+    standardActions = new StandardActions(ampdoc);
+    win = env.win;
+  });
+
+  function trustedInvocation(obj) {
+    return {satisfiesTrust: () => true, ...obj};
+  }
+
+  it('should copy `static text` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const doc = win.document;
+
+    const invocation = trustedInvocation({
+      args: {'text': 'Hello World!'},
+      tagOrTarget: 'AMP',
+      node: doc,
+      caller: doc,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should copy `DIV Content` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const divElement = win.document.createElement('div');
+    divElement.textContent = 'Hello World!';
+
+    const invocation = trustedInvocation({
+      node: divElement,
+      caller: divElement,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should copy `INPUT Value` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const inputElement = win.document.createElement('input');
+    inputElement.value = 'Hello World!';
+
+    const invocation = trustedInvocation({
+      node: inputElement,
+      caller: inputElement,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should fall back to legacy "doc.execCommand" if clipboard is not on the window.navigator', async () => {
+    Object.defineProperties(env.win.navigator, {
+      clipboard: {
+        value: undefined,
+        writable: true,
+      },
+    });
+
+    env.sandbox.spy(env.win.document, 'execCommand');
+    const divElement = win.document.createElement('div');
+    divElement.textContent = 'Live long and prosper!';
+
+    const invocation = trustedInvocation({
+      node: divElement,
+      caller: divElement,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.document.execCommand).to.be.calledWith('copy');
   });
 });

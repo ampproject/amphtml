@@ -9,13 +9,13 @@ import {rethrowAsync} from '#core/error';
 import {isArray} from '#core/types';
 import {hasOwn, map} from '#core/types/object';
 
-import {devAssert, userAssert} from '../src/log';
+import {devAssert, userAssert} from '#utils/log';
 
 /** @typedef {function(!Window, !Object)}  */
 let ThirdPartyFunctionDef;
 
 /**
- * @const {!Object<ThirdPartyFunctionDef>}
+ * @const {!{[key: string]: ThirdPartyFunctionDef}}
  * @visibleForTesting
  */
 let registrations;
@@ -285,7 +285,7 @@ function validateAllowedFields(data, allowedFields) {
   }
 }
 
-/** @private {!Object<string, boolean>} */
+/** @private {!{[key: string]: boolean}} */
 let experimentToggles = {};
 
 /**
@@ -299,7 +299,7 @@ export function isExperimentOn(experimentId) {
 
 /**
  * Set experiment toggles.
- * @param {!Object<string, boolean>} toggles
+ * @param {!{[key: string]: boolean}} toggles
  */
 export function setExperimentToggles(toggles) {
   experimentToggles = toggles;

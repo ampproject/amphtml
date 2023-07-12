@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
   realChildNodes,
@@ -10,12 +9,13 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {createShadowRoot} from './shadow-utils';
 import {truncateText} from './truncate-text';
 
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
-import {dev} from '../../../src/log';
 
 /**
  * TODO(sparhami) List of stuff to do / consider:
@@ -125,18 +125,15 @@ export class AmpTruncateText extends AMP.BaseElement {
       '.i-amphtml-truncate-persistent-slot'
     );
 
-    iterateCursor(this.element.querySelectorAll('[slot="collapsed"]'), (el) => {
+    this.element.querySelectorAll('[slot="collapsed"]').forEach((el) => {
       this.collapsedSlot_.appendChild(el);
     });
-    iterateCursor(this.element.querySelectorAll('[slot="expanded"]'), (el) => {
+    this.element.querySelectorAll('[slot="expanded"]').forEach((el) => {
       this.expandedSlot_.appendChild(el);
     });
-    iterateCursor(
-      this.element.querySelectorAll('[slot="persistent"]'),
-      (el) => {
-        this.persistentSlot_.appendChild(el);
-      }
-    );
+    this.element.querySelectorAll('[slot="persistent"]').forEach((el) => {
+      this.persistentSlot_.appendChild(el);
+    });
     realChildNodes(this.element).forEach((node) => {
       defaultSlot.appendChild(node);
     });

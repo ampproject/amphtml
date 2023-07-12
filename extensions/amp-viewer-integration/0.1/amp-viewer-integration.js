@@ -1,8 +1,10 @@
 import {isIframed} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {FixedLayer} from '#service/fixed-layer';
+
+import {getData, listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
 
 import {FocusHandler} from './focus-handler';
 import {
@@ -18,8 +20,6 @@ import {
 } from './messaging/messaging';
 import {TouchHandler} from './touch-handler';
 
-import {getData, listen, listenOnce} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {getSourceUrl} from '../../../src/url';
 
@@ -174,10 +174,10 @@ export class AmpViewerIntegration {
     return messaging
       .sendRequest(
         RequestNames.CHANNEL_OPEN,
-        dict({
+        {
           'url': ampdocUrl,
           'sourceUrl': srcUrl,
-        }),
+        },
         true /* awaitResponse */
       )
       .then(() => {
@@ -235,7 +235,7 @@ export class AmpViewerIntegration {
    * @private
    */
   handleUnload_(messaging) {
-    return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
+    return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
   }
 
   /**

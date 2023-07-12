@@ -1,10 +1,11 @@
 import {devAssertElement} from '#core/assert';
 import {getDate} from '#core/types/date';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import * as Preact from '#preact';
 import {useCallback, useRef, useState} from '#preact';
-import {Wrapper, useIntersectionObserver} from '#preact/component';
+import {Wrapper} from '#preact/component';
+import {useIntersectionObserver} from '#preact/component/intersection-observer';
 import {useMergeRefs, useResourcesNotify} from '#preact/utils';
 
 import {format, getLocale} from './locales';
@@ -12,7 +13,7 @@ import {format, getLocale} from './locales';
 /** @const {string} */
 const DEFAULT_LOCALE = 'en_US';
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_DATETIME_OPTIONS = {
   'year': 'numeric',
   'month': 'short',
@@ -21,7 +22,7 @@ const DEFAULT_DATETIME_OPTIONS = {
   'minute': 'numeric',
 };
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
 
 /**
@@ -47,7 +48,7 @@ export function BentoTimeago({
       }
       const node = devAssertElement(ref.current);
       let {lang} = node.ownerDocument.documentElement;
-      const win = toWin(node.ownerDocument?.defaultView);
+      const win = getWin(node);
       if (lang === 'unknown') {
         lang = win.navigator?.language || DEFAULT_LOCALE;
       }

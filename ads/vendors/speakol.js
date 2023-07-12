@@ -11,7 +11,7 @@ export function speakol(global, data) {
   validateData(data, ['widgetid']);
 
   (global.spksdk = global.spksdk || []).push({
-    // eslint-disable-next-line google-camelcase/google-camelcase
+    // eslint-disable-next-line local/camelcase
     widget_id: `wi-${data['widgetid']}`,
     element: `wi-${data['widgetid']}`,
   });

@@ -25,7 +25,50 @@ PASS
 |          poster-portrait-src="example.com/poster.jpg">
 |        <amp-story-page id="cover">
 |          <amp-story-grid-layer template="fill">
-|            <amp-story-panning-media layout="fill"></amp-story-panning-media>
+|            <amp-story-panning-media layout="fill">
+|            <amp-img
+|              layout="fill"
+|              width="4000"
+|              height="3059"
+|              src="img/conservatory-coords.jpg">
+|            </amp-img>
+|          </amp-story-panning-media>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|        <amp-story-page id="page-1">
+|          <amp-story-grid-layer template="fill">
+|            <amp-story-panning-media
+|              layout="fill"
+|              data-x="10%"
+|              data-y="-10%"
+|              data-zoom="2"
+|              lock-bounds
+|            >
+|            <amp-img
+|              layout="fill"
+|              width="4000"
+|              height="3059"
+|              src="img/conservatory-coords.jpg">
+|            </amp-img>
+|          </amp-story-panning-media>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|        <amp-story-page id="page-2">
+|          <amp-story-grid-layer template="fill">
+|            <amp-story-panning-media
+|              layout="fill"
+|              data-x="20.5%"
+|              data-y="-20.5%"
+|              data-zoom="2.5"
+|              lock-bounds
+|            >
+|            <amp-img
+|              layout="fill"
+|              width="4000"
+|              height="3059"
+|              src="img/conservatory-coords.jpg">
+|            </amp-img>
+|          </amp-story-panning-media>
 |          </amp-story-grid-layer>
 |        </amp-story-page>
 |      </amp-story>

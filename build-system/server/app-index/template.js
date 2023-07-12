@@ -68,8 +68,8 @@ function renderTemplate(opt_params = {}) {
     basepath = '/',
     css,
     fileSet = [],
-    serveMode = 'default',
     htmlEnvelopePrefix = '/',
+    serveMode = 'default',
   } = opt_params;
 
   const body = joinFragments([

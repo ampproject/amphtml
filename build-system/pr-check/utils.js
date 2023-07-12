@@ -1,8 +1,6 @@
 'use strict';
 
-const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const path = require('path');
 const {
   ciPullRequestSha,
   circleciBuildNumber,
@@ -18,27 +16,18 @@ const {
   gitDiffStatMain,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('../common/colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {getStdout} = require('../common/process');
-const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
 const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
-const ARTIFACT_DIRECTORY = '/tmp/artifacts/';
-const ARTIFACT_FILE_NAME = `${ARTIFACT_DIRECTORY}/amp_nomodule_build.tar.gz`;
-const TEST_FILES_LIST_FILE_NAME = '/tmp/testfiles.txt';
+const FILELIST_PATH = '/tmp/filelist.txt';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p', 'dist.tools'];
-const APP_SERVING_DIRS = [
-  ...BUILD_OUTPUT_DIRS,
-  'examples',
-  'test/manual',
-  'test/fixtures/e2e',
-];
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#create-a-git-branch';
@@ -244,18 +233,6 @@ function storeBuildToWorkspace_(containerDirectory) {
         );
       }
     }
-    // Bento components are compiled inside the extension source file.
-    for (const componentFile of fastGlob.sync('extensions/*/?.?/dist/*.js')) {
-      fs.ensureDirSync(
-        `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
-          componentFile
-        )}`
-      );
-      fs.moveSync(
-        componentFile,
-        `/tmp/workspace/builds/${containerDirectory}/${componentFile}`
-      );
-    }
   }
 }
 
@@ -289,32 +266,6 @@ function storeExperimentBuildToWorkspace(exp) {
 }
 
 /**
- * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
- * @return {Promise<void>}
- */
-async function processAndStoreBuildToArtifacts() {
-  if (!isCircleciBuild()) {
-    return;
-  }
-
-  await replaceUrls('test/manual');
-  await replaceUrls('examples');
-
-  const loggingPrefix = getLoggingPrefix();
-
-  logWithoutTimestamp(
-    `\n${loggingPrefix} Compressing ` +
-      cyan(APP_SERVING_DIRS.join(', ')) +
-      ' into ' +
-      cyan(ARTIFACT_FILE_NAME) +
-      '...'
-  );
-  await fs.ensureDir(ARTIFACT_DIRECTORY);
-  execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
-  execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
-}
-
-/**
  * Generates a file with a comma-separated list of test file paths that CircleCI
  * should execute in a parallelized job shard.
  *
@@ -327,17 +278,17 @@ function generateCircleCiShardTestFileList(globs) {
   )
     .trim()
     .replace(/\s+/g, ',');
-  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, {encoding: 'utf8'});
+  fs.writeFileSync(FILELIST_PATH, fileList, 'utf8');
   logWithoutTimestamp(
     'Stored list of',
     cyan(fileList.split(',').length),
     'test files in',
-    cyan(TEST_FILES_LIST_FILE_NAME)
+    cyan(FILELIST_PATH)
   );
 }
 
 module.exports = {
-  TEST_FILES_LIST_FILE_NAME,
+  FILELIST_PATH,
   abortTimedJob,
   printChangeSummary,
   skipDependentJobs,
@@ -351,6 +302,5 @@ module.exports = {
   storeNomoduleBuildToWorkspace,
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
-  processAndStoreBuildToArtifacts,
   generateCircleCiShardTestFileList,
 };

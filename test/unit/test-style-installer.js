@@ -6,7 +6,8 @@ import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
 
-import {isAnimationNone} from '#testing/test-helper';
+import {macroTask} from '#testing/helpers';
+import {isAnimationNone} from '#testing/helpers/service';
 
 import * as rds from '../../src/render-delaying-services';
 import {createShadowRoot} from '../../src/shadow-embed';
@@ -48,7 +49,7 @@ describes.sandboxed('Styles', {}, () => {
       expect(isAnimationNone(doc.body)).to.be.true;
     });
 
-    it('should wait for render delaying services', () => {
+    it('should wait for render delaying services', async () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
@@ -58,31 +59,25 @@ describes.sandboxed('Styles', {}, () => {
         .withArgs(win)
         .returns(Promise.resolve(['service1', 'service2']));
       styles.makeBodyVisible(doc);
-      return new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      }).then(() => {
-        expect(getStyle(doc.body, 'opacity')).to.equal('1');
-        expect(getStyle(doc.body, 'visibility')).to.equal('visible');
-        expect(isAnimationNone(doc.body)).to.be.true;
-        expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
-        expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
-        expect(ampdoc.signals().get('render-start')).to.be.ok;
-      });
+      await macroTask();
+      expect(getStyle(doc.body, 'opacity')).to.equal('1');
+      expect(getStyle(doc.body, 'visibility')).to.equal('visible');
+      expect(isAnimationNone(doc.body)).to.be.true;
+      expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
+      expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
+      expect(ampdoc.signals().get('render-start')).to.be.ok;
     });
 
-    it('should skip schedulePass if no render delaying services', () => {
+    it('should skip schedulePass if no render delaying services', async () => {
       waitForServicesStub.withArgs(win).returns(Promise.resolve([]));
       styles.makeBodyVisible(doc);
-      return new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      }).then(() => {
-        expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
-        expect(schedulePassSpy).to.not.be.calledWith(
-          env.sandbox.match.number,
-          true
-        );
-        expect(ampdoc.signals().get('render-start')).to.be.ok;
-      });
+      await macroTask();
+      expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
+      expect(schedulePassSpy).to.not.be.calledWith(
+        env.sandbox.match.number,
+        true
+      );
+      expect(ampdoc.signals().get('render-start')).to.be.ok;
     });
   });
 
@@ -246,6 +241,28 @@ describes.sandboxed('Styles', {}, () => {
             expect(styleEl.textContent).to.equal('other{}');
             expect(
               head.querySelectorAll('style[amp-extension=amp-ext1]')
+            ).to.have.length(1);
+          });
+        });
+
+        it('should discover existing extension link[rel=stylesheet] and not overwrite it', () => {
+          const serverEl = doc.createElement('link');
+          serverEl.setAttribute('amp-extension', 'amp-story');
+          serverEl.setAttribute(
+            'href',
+            '/examples/amp-story/amp-story-1.0.css'
+          );
+          serverEl.setAttribute('rel', 'stylesheet');
+          head.appendChild(serverEl);
+          const promise = installStylesAsPromise('other{}', false, 'amp-story');
+          return promise.then((styleEl) => {
+            expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
+            expect(head.__AMP_CSS_SM['amp-extension=amp-story']).to.equal(
+              serverEl
+            );
+            expect(styleEl).to.equal(serverEl);
+            expect(
+              head.querySelectorAll('link[amp-extension=amp-story]')
             ).to.have.length(1);
           });
         });

@@ -1,5 +1,3 @@
-
-
 /*
  * Pre-upgrade:
  * - display:block element
@@ -18,7 +16,7 @@ amp-date-countdown:not(.i-amphtml-built) {
 
 /* Pre-upgrade: size-defining element - hide children. */
 amp-date-countdown:not(.i-amphtml-built)
-  > :not([placeholder]):not(.i-amphtml-svc) {
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }

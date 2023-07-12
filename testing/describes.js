@@ -93,9 +93,9 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {stubService} from './helpers/service';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {TestConfig} from './test-config';
-import {stubService} from './test-helper';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -116,7 +116,7 @@ const SUB = ' ';
 let iframeCount = 0;
 
 /**
- * @const {!Object<string, function(!Object)>}
+ * @const {!{[key: string]: function(!Object)}}
  */
 const extensionsBuffer = {};
 
@@ -146,7 +146,7 @@ export let TestSpec;
  *   extensions: (!Array<string>|undefined),
  *   canonicalUrl: (string|undefined),
  *   ampdoc: (string|undefined),
- *   params: (!Object<string, string>|undefined),
+ *   params: (!{[key: string]: string}|undefined),
  * }}
  */
 export let AmpTestSpec;
@@ -229,7 +229,7 @@ export const integration = createConfigurableRunner((spec) => [
 /**
  * A repeated test within a sandboxed wrapper.
  * @param {string} name
- * @param {!Object<string, *>} variants
+ * @param {!{[key: string]: *}} variants
  * @param {function()} fn
  */
 export const repeated = createRepeatedRunner();
@@ -240,7 +240,7 @@ export const repeated = createRepeatedRunner();
 function repeatedEnv() {
   /**
    * @param {string} name
-   * @param {!Object<string, *>} variants
+   * @param {!{[key: string]: *}} variants
    * @param {function(string, *)} fn
    * @param {function(string, function())} describeFunc
    */

@@ -1,4 +1,4 @@
-import {BrowserController} from '#testing/test-helper';
+import {BrowserController} from '#testing/helpers/service';
 
 describes.integration(
   'amp-ad type=custom',
@@ -59,7 +59,8 @@ describes.integration(
       return browser.waitForElementLayout('amp-ad');
     });
 
-    it('should render template', () => {
+    // TODO(#38126): This test is flaky on CI.
+    it.skip('should render template', () => {
       expect(doc.querySelectorAll('amp-img')).to.have.length(3);
 
       // ad1

@@ -7,7 +7,7 @@
 -var parseHTML = require('./parse-html')
  var KEY_PREFIX = '_set-dom-'
  var NODE_MOUNTED = KEY_PREFIX + 'mounted'
- var ELEMENT_TYPE = 1
+ var ELEMENT_TYPE_ENUM = 1
  var DOCUMENT_TYPE = 9
  var DOCUMENT_FRAGMENT_TYPE = 11
  

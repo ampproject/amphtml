@@ -1,24 +1,25 @@
 import * as Preact from '#preact';
-import {Sidebar, SidebarToolbar} from '../component';
-import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
+
+import {BentoSidebar} from '../component';
+
+import '../component.jss';
 
 export default {
   title: 'Sidebar',
-  component: Sidebar,
-  decorators: [withKnobs],
+  component: BentoSidebar,
 };
 
 /**
  * @param {!Object} props
  * @return {*}
  */
-function SidebarWithActions(props) {
+function BentoSidebarWithActions(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
   return (
     <>
-      <Sidebar ref={ref} {...props}>
+      <BentoSidebar ref={ref} {...props}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
@@ -34,7 +35,7 @@ function SidebarWithActions(props) {
           <button onClick={() => ref.current.close()}>close</button>
           {props.children}
         </div>
-      </Sidebar>
+      </BentoSidebar>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.toggle()}>toggle</button>
         <button onClick={() => ref.current.open()}>open</button>
@@ -45,66 +46,58 @@ function SidebarWithActions(props) {
   );
 }
 
-export const _default = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-
+export const Default = ({
+  backdropColor,
+  backgroundColor,
+  foregroundColor,
+  ...args
+}) => {
   return (
     <main>
-      <SidebarWithActions
-        side={side}
+      <BentoSidebarWithActions
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
+        {...args}
       />
     </main>
   );
 };
 
-export const toolbar = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const toolbarMedia = text('toolbar media', '(max-width: 500px)');
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-
-  return (
-    <main>
-      <SidebarWithActions
-        side={side}
-        style={{color: foregroundColor, backgroundColor}}
-        backdropStyle={{backgroundColor: backdropColor}}
-      >
-        <SidebarToolbar toolbar={toolbarMedia} toolbarTarget="toolbar-target">
-          <ul>
-            <li>Toolbar Item 1</li>
-            <li>Toolbar Item 2</li>
-          </ul>
-        </SidebarToolbar>
-      </SidebarWithActions>
-      <div id="toolbar-target"></div>
-    </main>
-  );
+Default.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
 };
 
-export const scroll = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-  const moreBackgroundContent = boolean('more background content', false);
-  const moreSidebarContent = boolean('more sidebar content', false);
-
+export const scroll = ({
+  backdropColor,
+  backgroundColor,
+  foregroundColor,
+  moreBackgroundContent,
+  moreBentoSidebarContent,
+  ...args
+}) => {
   return (
     <main>
-      <SidebarWithActions
-        side={side}
+      <BentoSidebarWithActions
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
+        {...args}
         moreBackgroundContent={
           moreBackgroundContent && (
             <>
@@ -239,7 +232,7 @@ export const scroll = () => {
           )
         }
       >
-        {moreSidebarContent && (
+        {moreBentoSidebarContent && (
           <>
             <p>
               Dessert tootsie roll marzipan pastry. Powder powder jelly beans
@@ -368,7 +361,38 @@ export const scroll = () => {
             </p>
           </>
         )}
-      </SidebarWithActions>
+      </BentoSidebarWithActions>
     </main>
   );
+};
+
+scroll.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
+  moreBackgroundContent: {
+    name: 'moreBackgroundContent',
+    defaultValue: 'false',
+    control: {type: 'boolean'},
+  },
+  moreBentoSidebarContent: {
+    name: 'moreBentoSidebarContent',
+    defaultValue: 'false',
+    control: {type: 'boolean'},
+  },
 };

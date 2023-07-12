@@ -1,15 +1,15 @@
 import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
 import {setStyle} from '#core/dom/style';
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {urls} from './config';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import * as urls from './config/urls';
 import {getContextMetadata} from './iframe-attributes';
-import {dev, devAssert, user, userAssert} from './log';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
-/** @type {!Object<string,number>} Number of 3p frames on the for that type. */
+/** @type {!{[key: string]: number}} Number of 3p frames on the for that type. */
 let count = {};
 
 /** @type {string} */
@@ -34,7 +34,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const type = opt_type || element.getAttribute('type');
   userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
-  let attributes = dict();
+  let attributes = {};
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
   attributes = getContextMetadata(parentWindow, element, sentinel, attributes);
@@ -97,16 +97,14 @@ export function getIframe(
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
   // @see https://github.com/ampproject/amphtml/blob/main/3p/integration.js
-  const name = JSON.stringify(
-    dict({
-      'host': host,
-      'bootstrap': getBootstrapUrl(attributes['type']),
-      'type': attributes['type'],
-      // https://github.com/ampproject/amphtml/pull/2955
-      'count': count[attributes['type']],
-      'attributes': attributes,
-    })
-  );
+  const name = JSON.stringify({
+    'host': host,
+    'bootstrap': getBootstrapUrl(attributes['type']),
+    'type': attributes['type'],
+    // https://github.com/ampproject/amphtml/pull/2955
+    'count': count[attributes['type']],
+    'attributes': attributes,
+  });
 
   iframe.src = baseUrl;
   iframe.ampLocation = parseUrlDeprecated(baseUrl);
@@ -294,7 +292,13 @@ function getAdsLocalhost(win) {
   if (adsUrl == 'https://3p.ampproject.net') {
     adsUrl = 'http://ads.localhost'; // local dev with a localhost server
   }
-  return adsUrl + ':' + (win.location.port || win.parent.location.port);
+  return (
+    adsUrl +
+    ':' +
+    (new URL(win.document.baseURI)?.port ||
+      win.location.port ||
+      win.parent.location.port)
+  );
 }
 
 /**

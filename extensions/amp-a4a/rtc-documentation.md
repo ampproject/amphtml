@@ -125,7 +125,6 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 
 -   Admax
 -   Adpushup
--   AppNexus
 -   AppNexus PSP
 -   APS
 -   Automatad
@@ -137,17 +136,22 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Future Plc
 -   Galaxie Media
 -   Highfivve
+-   [Improve Digital](https://www.improvedigital.com)
 -   IndexExchange
 -   Kargo
 -   NewsPassID
 -   Lotame
 -   Media.net
+-   Mediasquare
 -   Nexx360.io
 -   OpenX
 -   PubMatic OpenWrap
+-   [PubWise](https://www.pubwise.io)
 -   Purch
+-   RichAudience
 -   Rubicon
 -   Salesforce
+-   [Snigel](https://www.snigel.com)
 -   T13
 -   Tail
 -   The Ozone Project

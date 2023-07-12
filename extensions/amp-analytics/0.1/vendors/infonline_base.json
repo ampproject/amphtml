@@ -1,0 +1,18 @@
+{
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "requests": {
+    "pageview": "${url}?dn=${dn}&cn=${cn}&st=${st}&co=${co}&cp=${cp}&au=${canonicalUrl}&tp=pageview",
+    "event": "${url}?dn=${dn}&cn=${cn}&ev=${ev}&st=${st}&co=${co}&cp=${cp}&au=${canonicalUrl}&tp=event"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "pageview",
+      "iframePing": true
+    }
+  }
+}

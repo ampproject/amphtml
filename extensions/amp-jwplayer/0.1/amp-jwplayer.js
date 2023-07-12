@@ -13,18 +13,19 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
 
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   addUnsafeAllowAutoplay,
@@ -34,19 +35,18 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const JWPLAYER_EVENTS = {
-  'ready': VideoEvents.LOAD,
-  'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'complete': VideoEvents.ENDED,
-  'visible': VideoEvents.VISIBILITY,
-  'adImpression': VideoEvents.AD_START,
-  'adComplete': VideoEvents.AD_END,
+  'ready': VideoEvents_Enum.LOAD,
+  'play': VideoEvents_Enum.PLAYING,
+  'pause': VideoEvents_Enum.PAUSE,
+  'complete': VideoEvents_Enum.ENDED,
+  'visible': VideoEvents_Enum.VISIBILITY,
+  'adImpression': VideoEvents_Enum.AD_START,
+  'adComplete': VideoEvents_Enum.AD_END,
 };
 
 /**
@@ -306,7 +306,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return this.getConsentData_().then(() => {
-      const queryParams = dict({
+      const queryParams = {
         'search': this.getContextualVal_() || undefined,
         'recency': this.contentRecency_ || undefined,
         'backfill': this.contentBackfill_ || undefined,
@@ -314,7 +314,7 @@ class AmpJWPlayer extends AMP.BaseElement {
         'consentState': this.consentState_ || undefined,
         'consentValue': this.consentString_ || undefined,
         'consentGdpr': this.consentMetadata_?.gdprApplies || undefined,
-      });
+      };
 
       const url = this.getSingleLineEmbed_();
       let src = addParamsToUrl(url, queryParams);
@@ -439,10 +439,10 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     // Inform Video Manager that the video is pre-muted from persisted options.
     if (detail.muted) {
-      dispatchCustomEvent(element, VideoEvents.MUTED);
+      dispatchCustomEvent(element, VideoEvents_Enum.MUTED);
     }
 
-    dispatchCustomEvent(element, VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
   }
 
   /**
@@ -564,12 +564,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     dev().info('JWPLAYER', 'COMMAND:', method, optParams);
 
     this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(
-        dict({
-          'method': method,
-          'optParams': optParams,
-        })
-      ),
+      JSON.stringify({
+        'method': method,
+        'optParams': optParams,
+      }),
       '*'
     );
   }

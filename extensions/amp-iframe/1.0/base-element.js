@@ -1,10 +1,11 @@
-import {Iframe} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoIframe} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Iframe;
+BaseElement['Component'] = BentoIframe;
 
 /** @override */
 BaseElement['props'] = {
@@ -13,7 +14,6 @@ BaseElement['props'] = {
   'sandbox': {attr: 'sandbox'},
   'allowFullScreen': {attr: 'allowfullscreen'},
   'allowPaymentRequest': {attr: 'allowpaymentrequest'},
-  'allowTransparency': {attr: 'allowtransparency'},
   'referrerPolicy': {attr: 'referrerpolicy'},
 };
 

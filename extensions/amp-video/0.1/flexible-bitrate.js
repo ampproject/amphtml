@@ -1,15 +1,18 @@
-import {tryPlay} from '#core/dom/video';
 import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
-import {Services} from '#service';
 import {childElement, childElementsByTag} from '#core/dom/query';
-import {dev, devAssert} from '../../../src/log';
-import {isExperimentOn} from '#experiments';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {tryPlay} from '#core/dom/video';
 import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {listen, listenOnce} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
 
 const TAG = 'amp-video';
 
-/** @const {!Object<string, number>} */
+/** @const {!{[key: string]: number}} */
 const BITRATE_BY_EFFECTIVE_TYPE = {
   // We assign low values to 2G in general. None of these will likely be able
   // to stream any bitrates we see in the wild.

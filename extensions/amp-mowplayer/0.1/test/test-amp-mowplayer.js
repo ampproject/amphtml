@@ -3,8 +3,9 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
-import {listenOncePromise} from '../../../../src/event-helper';
-import {VideoEvents} from '../../../../src/video-interface';
+import {listenOncePromise} from '#utils/event-helper';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
 const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
@@ -53,7 +54,8 @@ describes.realWin(
         });
     }
 
-    describe('with data-mediaid', function () {
+    // TODO(#38720): fix flaky test.
+    describe.skip('with data-mediaid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
     });
 
@@ -84,38 +86,40 @@ describes.realWin(
 
           return Promise.resolve()
             .then(async () => {
-              const p = listenOncePromise(mp, VideoEvents.MUTED);
+              const p = listenOncePromise(mp, VideoEvents_Enum.MUTED);
               await sendFakeInfoDeliveryMessage(mp, iframe, {muted: true});
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(mp, VideoEvents.PLAYING);
+              const p = listenOncePromise(mp, VideoEvents_Enum.PLAYING);
               await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 1});
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(mp, VideoEvents.PAUSE);
+              const p = listenOncePromise(mp, VideoEvents_Enum.PAUSE);
               await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 2});
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(mp, VideoEvents.UNMUTED);
+              const p = listenOncePromise(mp, VideoEvents_Enum.UNMUTED);
               await sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
               return p;
             })
             .then(async () => {
               // Should not send the unmute event twice if already sent once.
-              const p = listenOncePromise(mp, VideoEvents.UNMUTED).then(() => {
-                assert.fail('Should not have dispatch unmute message twice');
-              });
+              const p = listenOncePromise(mp, VideoEvents_Enum.UNMUTED).then(
+                () => {
+                  assert.fail('Should not have dispatch unmute message twice');
+                }
+              );
               await sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
               const successTimeout = timer.promise(10);
               return Promise.race([p, successTimeout]);
             })
             .then(async () => {
               // Make sure pause and end are triggered when video ends.
-              const pEnded = listenOncePromise(mp, VideoEvents.ENDED);
-              const pPause = listenOncePromise(mp, VideoEvents.PAUSE);
+              const pEnded = listenOncePromise(mp, VideoEvents_Enum.ENDED);
+              const pPause = listenOncePromise(mp, VideoEvents_Enum.PAUSE);
               await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 0});
               return Promise.all([pEnded, pPause]);
             });

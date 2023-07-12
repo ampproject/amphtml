@@ -5,13 +5,14 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   isJsonOrObj,
@@ -20,9 +21,8 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-minute-media-player';
@@ -102,7 +102,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == Layout.FLEX_ITEM;
+    return isLayoutSizeDefined(layout) || layout == Layout_Enum.FLEX_ITEM;
   }
 
   /**
@@ -163,12 +163,12 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     }
 
     redispatch(this.element, data['event'], {
-      'ready': VideoEvents.LOAD,
-      'playing': VideoEvents.PLAYING,
-      'pause': VideoEvents.PAUSE,
-      'ended': [VideoEvents.ENDED, VideoEvents.PAUSE],
-      'ads-ad-started': VideoEvents.AD_START,
-      'ads-ad-ended': VideoEvents.AD_END,
+      'ready': VideoEvents_Enum.LOAD,
+      'playing': VideoEvents_Enum.PLAYING,
+      'pause': VideoEvents_Enum.PAUSE,
+      'ended': [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
+      'ads-ad-started': VideoEvents_Enum.AD_START,
+      'ads-ad-ended': VideoEvents_Enum.AD_END,
     });
 
     if (data['event'] === 'mute') {
@@ -191,7 +191,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     const baseUrl =
       'https://www.oo-syringe.com/prod/AMP/minute-media-player.html';
 
-    const moreQueryParams = dict({
+    const moreQueryParams = {
       'content_type': this.contentType_ || undefined,
       'content_id': this.contentId_ || undefined,
       'scanned_element_type': this.scannedElementType_ || undefined,
@@ -200,7 +200,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       'minimum_date_factor': this.minimumDateFactor_ || undefined,
       'scoped_keywords': this.scopedKeywords_ || undefined,
       'player_id': this.playerId_ || undefined,
-    });
+    };
 
     return addParamsToUrl(baseUrl, moreQueryParams);
   }
@@ -219,7 +219,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      dispatchCustomEvent(element, VideoEvents.LOAD);
+      dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;

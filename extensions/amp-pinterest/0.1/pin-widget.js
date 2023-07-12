@@ -1,12 +1,13 @@
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {user, userAssert} from '#utils/log';
+
 import {Util} from './util';
 
-import {user, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 
@@ -31,7 +32,7 @@ export class PinWidget {
       'The data-url attribute is required for Pin widgets'
     );
     this.element = rootElement;
-    this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
+    this.xhr = Services.xhrFor(getWin(rootElement));
     this.pinId = '';
     this.alt = '';
     this.pinUrl = '';
@@ -47,7 +48,7 @@ export class PinWidget {
    * @param {Event} event
    */
   handleKeyDown(event) {
-    if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
+    if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
       this.handleClick(event);
     }
   }

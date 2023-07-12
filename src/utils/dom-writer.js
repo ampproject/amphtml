@@ -1,10 +1,10 @@
 import {devAssert} from '#core/assert';
-import {iterateCursor, removeElement} from '#core/dom';
+import {removeElement} from '#core/dom';
 import {childElementsByTag} from '#core/dom/query';
 
 import {Services} from '#service';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs
@@ -330,8 +330,5 @@ export class DomWriterBulk {
  * @param {!Element} parent
  */
 export function removeNoScriptElements(parent) {
-  const noscriptElements = childElementsByTag(parent, 'noscript');
-  iterateCursor(noscriptElements, (element) => {
-    removeElement(element);
-  });
+  childElementsByTag(parent, 'noscript').forEach(removeElement);
 }

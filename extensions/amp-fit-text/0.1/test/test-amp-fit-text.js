@@ -1,4 +1,13 @@
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
+
 import {createElementWithAttributes} from '#core/dom';
+
+import {
+  getDeterministicOuterHTML,
+  hypenCaseToCamelCase,
+  sleep,
+} from '#testing/helpers';
+
 import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
 import {buildDom} from '../build-dom';
 
@@ -52,6 +61,64 @@ describes.realWin(
       expect(fitText1.outerHTML).to.equal(fitText2.outerHTML);
     });
 
+    it('buildDom should behave same in browser and in WorkerDOM', async () => {
+      const browserFitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      const workerFitText = createElementWithAttributes(
+        createWorkerDomDoc(),
+        'amp-fit-text',
+        {
+          width: '111px',
+          height: '222px',
+        }
+      );
+
+      buildDom(browserFitText);
+      buildDom(workerFitText);
+
+      const browserHtml = getDeterministicOuterHTML(browserFitText);
+      const workerHtml = getDeterministicOuterHTML(workerFitText);
+      expect(workerHtml).to.equal(browserHtml);
+    });
+
+    it('buildCallback should assign ivars even when server rendered', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      buildDom(fitText);
+      fitText.setAttribute('i-amphtml-ssr', '');
+      const baseElement = new AmpFitText(fitText);
+      await baseElement.buildCallback();
+
+      expect(baseElement.content_).ok;
+      expect(baseElement.contentWrapper_).ok;
+      expect(baseElement.measurer_).ok;
+    });
+
+    it('buildDom should throw if invalid server rendered dom', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        'i-amphtml-ssr': '',
+      });
+      allowConsoleError(() => {
+        expect(() => buildDom(fitText)).throws(/Invalid server render/);
+      });
+    });
+
+    it('buildDom should not modify dom for server rendered element', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text');
+      buildDom(fitText);
+      fitText.setAttribute('i-amphtml-ssr', '');
+
+      const before = fitText.outerHTML;
+      buildDom(fitText);
+      const after = fitText.outerHTML;
+
+      expect(before).equal(after);
+    });
+
     it('renders', () => {
       const text = 'Lorem ipsum';
       return getFitText(text).then((ft) => {
@@ -82,11 +149,7 @@ describes.realWin(
 
       // Wait for the resizeObserver recognize the changes
       // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 90);
-      });
+      await sleep(90);
       // Verify that layoutCallback calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
       updateFontSizeSpy.resetHistory();
@@ -98,11 +161,7 @@ describes.realWin(
 
       // Wait for the resizeObserver recognize the changes
       // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 90);
-      });
+      await sleep(90);
       // Verify that the ResizeObserver calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
     });
@@ -181,7 +240,11 @@ describes.realWin('amp-fit-text updateOverflow', {}, (env) => {
     doc = win.document;
     classToggles = {};
     content = {
-      style: {},
+      style: {
+        setProperty(name, value) {
+          content.style[hypenCaseToCamelCase(name)] = value;
+        },
+      },
       classList: {
         toggle: (className, on) => {
           classToggles[className] = on;

@@ -1,3 +1,5 @@
+import {Deferred} from '#core/data-structures/promise';
+
 import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
 
 describes.sandboxed
@@ -16,12 +18,12 @@ describes.sandboxed
 
     let iframe;
 
-    beforeEach((done) => {
+    beforeEach(async () => {
       iframe = createIframeWithMessageStub(window);
       document.body.appendChild(iframe);
-      iframe.onload = () => {
-        done();
-      };
+      const {promise, resolve} = new Deferred();
+      iframe.onload = resolve;
+      await promise;
     });
 
     it('should get message from fragment and post back to parent window', () => {

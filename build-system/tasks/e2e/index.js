@@ -18,7 +18,7 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
-const {cyan} = require('../../common/colors');
+const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
@@ -26,8 +26,8 @@ const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {watch} = require('chokidar');
 
-const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = isCiBuild() ? 2 : 0;
+const SLOW_TEST_THRESHOLD_MS = isCiBuild() ? 5000 : 2500;
+const TEST_RETRIES = isCiBuild() ? 3 : 0;
 
 const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
@@ -110,7 +110,7 @@ async function fetchCoverage_(outDir) {
   // it can be accessed separately.
 
   // Clear out previous coverage data.
-  fs.rmdirSync(outDir, {recursive: true});
+  fs.rmSync(outDir, {recursive: true});
   fs.mkdirSync(outDir);
 
   const zipFilename = path.join(outDir, 'coverage.zip');
@@ -184,7 +184,7 @@ async function runWatch_() {
       ? getFilesFromArgv().concat(getFilesFromFileList())
       : config.e2eTestPaths;
 
-  log('Watching', cyan(filesToWatch), 'for changes...');
+  log('Watching', cyan(`[${filesToWatch.join(', ')}]`), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
     const mocha = createMocha_();

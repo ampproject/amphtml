@@ -1,77 +1,84 @@
----
-$category@: presentation
-formats:
-  - websites
-teaser:
-  text: The Bento Date Display component displays time data that you can render in your page.
----
-
 # Bento Date Display
 
-## Usage
+Displays time data that you can render in your page. By providing specific [attributes](#attributes) in the Bento Date Display tag, the Bento Date Display extension returns a list of time parameters, which you can pass to [an amp-mustache template](../../amp-mustache/amp-mustache.md) for rendering. Refer to the [list below for each returned time parameter](#returned-time-parameters).
 
-The Bento Date Display component displays time data that you can render in your page. By providing specific [attributes](#attributes) in the
-Bento Date Display tag, the Bento Date Display extension returns a list of time
-parameters, which you can pass to
-[an amp-mustache template](../../amp-mustache/amp-mustache.md)
-for rendering. Refer to the
-[list below for each returned time parameter](#returned-time-parameters).
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-date-display>` web component.
-
-#### Example: Import via npm
-
-[example preview="top-frame" playground="false"]
+### Example: Import via npm
 
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-display
+npm install @bentoproject/bento-date-display
 ```
 
 ```javascript
-import '@ampproject/bento-date-display';
+import {defineElement as defineBentoDateDisplay} from '@bentoproject/bento-date-display';
+defineBentoDateDisplay();
 ```
 
-[/example]
-
-#### Example: Include via `<script>`
-
-The example below contains an `bento-date-display` with three sections. The
-`expanded` attribute on the third section expands it on page load.
-
-[example preview="top-frame" playground="false"]
+### Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css">
-</head>
-<body>
-  <bento-date-display
-    datetime="2021-09-09T16:02:08.494Z"
-    displayIn="utc"
-    locale="en-GB"
-  >
-    <template type="amp-mustache">
-      <div>ISO: {{iso}}; locale: {{localeString}}`}</div>
-    </template>
-  </bento-date-display>
-</body>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<!-- Include bento-mustache.js to use mustache templates with this component -->
+<script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-date-display-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css" crossorigin="anonymous">
 ```
 
-[/example]
+### Example
 
-#### Interactivity and API usage
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-display-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-date-display
+      datetime="2021-09-09T16:02:08.494Z"
+      displayIn="utc"
+      locale="en-GB"
+    >
+      <template>
+        <div>ISO: {{iso}}; locale: {{localeString}}</div>
+      </template>
+    </bento-date-display>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
 
 The Bento Date Display component does not have an imperative API. However, the Bento Date Display Web Component will render a mustache-template, provided by the consumer in a `<template>` tag with `type="amp-mustache"`. This template may interpolate date-related parameters. See the [Returned Time Parameters section](#returned-time-parameters) for a full list of all the available parameters.
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -91,41 +98,41 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-#### Attributes
+### Attributes
 
-##### `datetime`
+#### `datetime`
 
 The `datetime` attribute specifies the date and time in a standard ISO 8601 date
 string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`,
 `bento-date-display` will use the time the page loaded to render its template.
 
-##### `timestamp-ms`
+#### `timestamp-ms`
 
 The `timestamp-ms` attribute specifies the date and time using the number of
 milliseconds since 1970-01-01T0:00:00.000Z
 
-##### `timestamp-seconds`
+#### `timestamp-seconds`
 
 The `timestamp-seconds` attribute specifies the date and time using the number
 of seconds since 1970-01-01T0:00:00.000Z
 
-##### `locale` (optional)
+#### `locale` (optional)
 
 An internationalization language string for each timer unit. The default value
 is `en` (for English). This attribute supports all values that are supported by
 the user's browser.
 
-##### `display-in` (optional)
+#### `display-in` (optional)
 
 If set to the value `utc`, the `display-in` attribute will convert the given
 date to UTC.
 
-##### `offset-seconds` (optional)
+#### `offset-seconds` (optional)
 
 The `offset-seconds` attribute specifies an integer number of seconds to shift
 the given date.
 
-##### `data-options-\*` (optional)
+#### `data-options-\*` (optional)
 
 The `data-options-*` supports all the options under [Intl.DateTimeFormat.options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters)
 parameter that specifies the formatting style to use for `localeString` format.
@@ -134,28 +141,24 @@ Valid attributes include: `data-options-date-style`, `data-options-time-style`, 
 Note that if `display-in` attrubute is set to `utc`, the value of
 `data-options-time-zone` will automatically be converted to `UTC`.
 
-#### Styling
+### Styling
 
 You may use the `bento-date-display` element selector to style the Bento Date Display component freely.
 
-### Preact/React Component
+---
 
-The examples below demonstrates use of the `<BentoDateDisplay>` as a functional component usable with the Preact or React libraries.
+## Preact/React Component
 
-#### Example: Import via npm
-
-[example preview="top-frame" playground="false"]
-
-Install via npm:
+### Import via npm
 
 ```sh
-npm install @ampproject/bento-date-display
+npm install @bentoproject/date-display
 ```
 
 ```javascript
 import React from 'react';
-import { BentoDateDisplay } from '@ampproject/bento-date-display/react';
-import '@ampproject/bento-date-display/styles.css';
+import {BentoDateDisplay} from '@bentoproject/date-display/react';
+import '@bentoproject/date-display/styles.css';
 
 function App() {
   return (
@@ -171,42 +174,39 @@ function App() {
 }
 ```
 
-[/example]
-
-#### Interactivity and API usage
+### Interactivity and API usage
 
 The Bento Date Display component does not have an imperative API. However, the Bento Date Display Preact/React component does accept a `render` prop that renders the consumer's template. This `render` prop should be a function which the Bento Date Display Preact/React component can use to render its template. The `render` callback will be provided a variety of date-related parameters for consumers to interpolate in the rendered template. See the [`render` prop section](#render) for more information.
 
-#### Layout and style
+### Layout and style
 
 The Bento Date Display Preact/React component allows consumers to render their own templates. These templates may use inline styles, `<style>` tags, Preact/React components that import their own stylesheets.
 
-#### Props
+### Props
 
-##### `datetime`
+#### `datetime`
 
-Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a
-standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
+Required prop. Denotes the date and time as a Date, String, or Number. If String, must be a standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
 
-##### `displayIn`
+#### `displayIn`
 
 Optional prop that can be either `"utc"` or `"local"` and defaults to `"local"`. This prop indicates what timezone to display the date in. If set to the value `"utc"`, the component will convert the given date to UTC.
 
-##### `locale`
+#### `locale`
 
 An internationalization language string for each timer unit. The default value is `en` (for English). This prop supports all values that are supported by the user's browser.
 
-##### `localeOptions`
+#### `localeOptions`
 
 The `localeOptions` object supports all the options under [Intl.DateTimeFormat.options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters) parameter that specifies the formatting style to use for `localeString` format.
 
 Note that if the `displayIn` prop is set to `utc`, the value of `localeOptions.timeZone` will automatically be converted to `UTC`.
 
-##### `render`
+#### `render`
 
 Optional callback that should render a template. The callback will be provided an object with properties/values related to the date expressed in `datetime`.
-By default, the Bento Date Display component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption.
-See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
+
+By default, the Bento Date Display component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption. See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
 
 ```typescript
 (dateParams: DateParams) => JSXInternal.Element

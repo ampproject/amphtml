@@ -1,8 +1,11 @@
 import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
 
 import {PreactBaseElement} from '#preact/base-element';
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoDateDisplay} from './component';
+
+export const TAG = 'bento-date-display';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -17,7 +20,7 @@ BaseElement['props'] = {
   },
   'displayIn': {attr: 'display-in'},
   'locale': {attr: 'locale'},
-  'localeOptions': {attrPrefix: 'data-options-'},
+  'localeOptions': createParseAttrsWithPrefix('data-options-'),
 };
 
 /** @override */

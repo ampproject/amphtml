@@ -1,6 +1,6 @@
 import '../amp-accordion';
-import {ActionTrust} from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {createElementWithAttributes, tryFocus} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {htmlFor} from '#core/dom/static-template';
@@ -71,7 +71,12 @@ describes.realWin(
     }
 
     /** Helper for invoking expand/collapse actions on amp-accordion. */
-    function execute(impl, method, trust = ActionTrust.HIGH, opt_sectionId) {
+    function execute(
+      impl,
+      method,
+      trust = ActionTrust_Enum.HIGH,
+      opt_sectionId
+    ) {
       const invocation = {
         method,
         trust,
@@ -89,7 +94,7 @@ describes.realWin(
       const headerElements = doc.querySelectorAll('section > *:first-child');
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-      impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH);
+      impl.toggle_(headerElements[0].parentNode, ActionTrust_Enum.HIGH);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
     });
@@ -111,7 +116,7 @@ describes.realWin(
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
 
-      impl.toggle_(headerElements[1].parentNode, ActionTrust.HIGH);
+      impl.toggle_(headerElements[1].parentNode, ActionTrust_Enum.HIGH);
 
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
@@ -123,7 +128,7 @@ describes.realWin(
       const headerElements = doc.querySelectorAll('section > *:first-child');
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-      impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH, true);
+      impl.toggle_(headerElements[0].parentNode, ActionTrust_Enum.HIGH, true);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
     });
@@ -144,7 +149,7 @@ describes.realWin(
           'true'
         );
         // expand the first section
-        impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH, true);
+        impl.toggle_(headerElements[0].parentNode, ActionTrust_Enum.HIGH, true);
         // we expect the first section to be expanded
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
           .true;
@@ -166,7 +171,7 @@ describes.realWin(
       const headerElements = doc.querySelectorAll('section > *:first-child');
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-      impl.toggle_(headerElements[0].parentNode, ActionTrust.LOW);
+      impl.toggle_(headerElements[0].parentNode, ActionTrust_Enum.LOW);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
     });
@@ -178,7 +183,7 @@ describes.realWin(
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
 
-      impl.toggle_(headerElements[1].parentNode, ActionTrust.LOW);
+      impl.toggle_(headerElements[1].parentNode, ActionTrust_Enum.LOW);
 
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
@@ -196,7 +201,7 @@ describes.realWin(
           `expand:acc${counter}.expand(section='acc${counter}sec${2}')`
         );
         expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-        impl.toggle_(impl.sections_[0], ActionTrust.HIGH, true);
+        impl.toggle_(impl.sections_[0], ActionTrust_Enum.HIGH, true);
 
         await poll('wait for first section to expand', () =>
           impl.sections_[0].hasAttribute('expanded')
@@ -217,7 +222,7 @@ describes.realWin(
           `collapse:acc${counter}.expand(section='acc${counter}sec${2}')`
         );
         expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-        impl.toggle_(impl.sections_[1], ActionTrust.HIGH, false);
+        impl.toggle_(impl.sections_[1], ActionTrust_Enum.HIGH, false);
 
         await poll(
           'wait for first section to expand',
@@ -240,7 +245,7 @@ describes.realWin(
           `expand:acc${counter}.expand(section='acc${counter}sec${2}')`
         );
         expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-        impl.toggle_(impl.sections_[0], ActionTrust.HIGH, true);
+        impl.toggle_(impl.sections_[0], ActionTrust_Enum.HIGH, true);
 
         await poll('wait for first section to expand', () =>
           impl.sections_[0].hasAttribute('expanded')
@@ -264,7 +269,7 @@ describes.realWin(
           `collapse:acc${counter}.expand(section='acc${counter}sec${2}')`
         );
         expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-        impl.toggle_(impl.sections_[1], ActionTrust.HIGH, false);
+        impl.toggle_(impl.sections_[1], ActionTrust_Enum.HIGH, false);
 
         await poll(
           'wait for first section to expand',
@@ -290,7 +295,7 @@ describes.realWin(
 
       ampAccordion.setAttribute('animate', '');
       ampAccordion.style.width = '300px';
-      impl.toggle_(firstSection, ActionTrust.HIGH, true);
+      impl.toggle_(firstSection, ActionTrust_Enum.HIGH, true);
       await poll('wait for first section to finish animating', () => {
         return (
           firstSection.hasAttribute('expanded') &&
@@ -318,7 +323,7 @@ describes.realWin(
 
       ampAccordion.setAttribute('animate', '');
       ampAccordion.style.width = '400px';
-      impl.toggle_(firstSection, ActionTrust.HIGH, true);
+      impl.toggle_(firstSection, ActionTrust_Enum.HIGH, true);
       await poll('wait for first section to finish animating', () => {
         return (
           firstSection.hasAttribute('expanded') &&
@@ -338,7 +343,7 @@ describes.realWin(
       const headerElements = doc.querySelectorAll('section > *:first-child');
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
-      impl.toggle_(headerElements[1].parentNode, ActionTrust.HIGH, true);
+      impl.toggle_(headerElements[1].parentNode, ActionTrust_Enum.HIGH, true);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
     });
@@ -349,7 +354,7 @@ describes.realWin(
       const headerElements = doc.querySelectorAll('section > *:first-child');
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
-      impl.toggle_(headerElements[1].parentNode, ActionTrust.HIGH, false);
+      impl.toggle_(headerElements[1].parentNode, ActionTrust_Enum.HIGH, false);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
     });
@@ -360,7 +365,7 @@ describes.realWin(
       const headerElements = doc.querySelectorAll('section > *:first-child');
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-      impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH, false);
+      impl.toggle_(headerElements[0].parentNode, ActionTrust_Enum.HIGH, false);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
     });
@@ -442,7 +447,7 @@ describes.realWin(
         const impl = await ampAccordion.getImpl();
         const headerElements = doc.querySelectorAll('section > *:first-child');
         const keyDownEvent = {
-          key: Keys.SPACE,
+          key: Keys_Enum.SPACE,
           target: headerElements[0],
           currentTarget: headerElements[0],
           preventDefault: env.sandbox.spy(),
@@ -472,7 +477,7 @@ describes.realWin(
         const child = doc.createElement('div');
         headerElements[0].appendChild(child);
         const keyDownEvent = {
-          key: Keys.ENTER,
+          key: Keys_Enum.ENTER,
           target: child,
           currentTarget: headerElements[0],
           preventDefault: env.sandbox.spy(),
@@ -500,7 +505,7 @@ describes.realWin(
         const impl = await ampAccordion.getImpl();
         const headerElements = doc.querySelectorAll('section > *:first-child');
         const keyDownEvent = {
-          key: Keys.ENTER,
+          key: Keys_Enum.ENTER,
           target: headerElements[1],
           currentTarget: headerElements[1],
           preventDefault: env.sandbox.spy(),
@@ -531,7 +536,7 @@ describes.realWin(
         tryFocus(headerElements[0]);
         expect(doc.activeElement).to.equal(headerElements[0]);
         const upArrowEvent = {
-          key: Keys.UP_ARROW,
+          key: Keys_Enum.UP_ARROW,
           target: headerElements[0],
           currentTarget: headerElements[0],
           preventDefault: env.sandbox.spy(),
@@ -541,7 +546,7 @@ describes.realWin(
           headerElements[headerElements.length - 1]
         );
         const downArrowEvent = {
-          key: Keys.DOWN_ARROW,
+          key: Keys_Enum.DOWN_ARROW,
           target: headerElements[headerElements.length - 1],
           currentTarget: headerElements[headerElements.length - 1],
           preventDefault: env.sandbox.spy(),
@@ -896,7 +901,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
@@ -907,7 +912,7 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ActionTrust.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });

@@ -7,7 +7,7 @@ export {isObject} from './object';
 /**
  * Determines if value is an ELement
  * @param {*} value
- * @return {boolean}
+ * @return {value is Element}
  */
 export function isElement(value) {
   return value?.nodeType == /* Node.ELEMENT_NODE */ 1;
@@ -22,4 +22,14 @@ export function isElement(value) {
  */
 export function isFiniteNumber(value) {
   return typeof value === 'number' && isFinite(value);
+}
+
+/**
+ * Returns true if obj is a PromiseLike.
+ *
+ * @param {*} obj
+ * @return {obj is Promise<*>}
+ */
+export function isPromise(obj) {
+  return typeof obj?.then === 'function';
 }

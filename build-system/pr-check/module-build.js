@@ -26,16 +26,20 @@ function pushBuildWorkflow() {
  * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
-  // TODO(#31102): This list must eventually match the same buildTargets check
-  // found in pr-check/nomodule-build.js as we turn on the systems that
-  // run against the module build. (ex. visual diffs, e2e, etc.)
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+  if (
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.INTEGRATION_TEST,
+      Targets.VISUAL_DIFF
+    )
+  ) {
     timedExecOrDie('amp dist --esm --fortesting');
     storeModuleBuildToWorkspace();
   } else {
+    timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(
       jobName,
-      'this PR does not affect the runtime or integration tests'
+      'this PR does not affect the runtime, integration tests, or visual diff tests'
     );
   }
 }

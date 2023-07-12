@@ -9,23 +9,23 @@
 #include <utility>
 #include <vector>
 
-#include "defer.h"
-#include "fileutil.h"
-#include "strings.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/strings.h"
 
 const char kFileHeader[] =
     R"HEADER(// AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file, see comments in bin/entitytablegen.cc
 
-#ifndef HTMLPARSER__ENTITY_H_
-#define HTMLPARSER__ENTITY_H_
+#ifndef CPP_HTMLPARSER_ENTITY_H_
+#define CPP_HTMLPARSER_ENTITY_H_
 
 #include <algorithm>
 #include <array>
 #include <string>
 #include <string_view>
 
-#include "comparators.h"
+#include "cpp/htmlparser/comparators.h"
 
 namespace htmlparser {
 
@@ -53,7 +53,7 @@ inline std::string_view EntityLookup(std::string_view entity_name) {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__ENTITY_H_
+#endif  // CPP_HTMLPARSER_ENTITY_H_
 )FOOTER";
 
 // Extracts the entity name from it's line in entities.json.
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
   options.white_space_transform =
       htmlparser::FileReadOptions::LineTransforms::StripWhitespace();
   if (!htmlparser::FileUtil::ReadFileLines(
-          options, "data/entities.json", &lines)) {
+          options, "cpp/htmlparser/data/entities.json", &lines)) {
     std::cerr << "Error reading input file." << std::endl;
     return EXIT_FAILURE;
   }
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::ofstream fd("entity.h");
+  std::ofstream fd("cpp/htmlparser/entity.h");
   htmlparser::Defer __([&]() {fd.close();});
 
   fd << kFileHeader;

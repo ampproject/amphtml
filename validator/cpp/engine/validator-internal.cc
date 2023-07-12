@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "glog/logging.h"
 #include "google/protobuf/repeated_field.h"
 #include "absl/algorithm/container.h"
 #include "absl/base/thread_annotations.h"
@@ -26,25 +25,26 @@
 #include "absl/strings/strip.h"
 #include "absl/strings/substitute.h"
 #include "absl/synchronization/mutex.h"
-#include "keyframes-parse-css.h"
-#include "parse-layout.h"
-#include "parse-srcset.h"
-#include "parse-viewport.h"
-#include "type-identifier.h"
-#include "utf8-util.h"
-#include "validator_pb.h"
-#include "atom.h"
-#include "atomutil.h"
-#include "css/amp4ads-parse-css.h"
-#include "css/parse-css.h"
-#include "css/parse-css.pb.h"
-#include "defer.h"
-#include "elements.h"
-#include "json/parser.h"
-#include "node.h"
-#include "parser.h"
-#include "strings.h"
-#include "url.h"
+#include "cpp/engine/keyframes-parse-css.h"
+#include "cpp/engine/parse-layout.h"
+#include "cpp/engine/parse-srcset.h"
+#include "cpp/engine/parse-viewport.h"
+#include "cpp/engine/type-identifier.h"
+#include "cpp/engine/utf8-util.h"
+#include "cpp/engine/validator_pb.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/css/amp4ads-parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/elements.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/node.h"
+#include "cpp/htmlparser/parser.h"
+#include "cpp/htmlparser/strings.h"
+#include "cpp/htmlparser/url.h"
+#include "cpp/htmlparser/validators/json.h"
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
@@ -127,12 +127,30 @@ static const LazyRE2 kRuntimeScriptPathRe = {
 static const LazyRE2 kExtensionPathRe = {
     R"re((?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?)re"};
 
+// Generates a htmlparser::css::CssParsingConfig.
+CssParsingConfig GenCssParsingConfig() {
+  CssParsingConfig config;
+  // If other @ rule types are added to the rules, their block parsing types
+  // will need to be added here as well.
+  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
+  // Note that ignoring still generates an error.
+  config.default_spec = BlockType::PARSE_AS_IGNORE;
+  return config;
+}
+
 namespace {
+
+#define CHECK_NOTNULL(x) (x)
 
 // Sorts and eliminates duplicates in |v|.
 template <typename T>
 void SortAndUniquify(vector<T>* v) {
-  std::sort(v->begin(), v->end());
+  std::stable_sort(v->begin(), v->end());
   v->erase(std::unique(v->begin(), v->end()), v->end());
 }
 
@@ -843,22 +861,6 @@ class ParsedAttrSpecs {
   unordered_map<std::string, vector<const ParsedAttrSpec*>> attr_lists_by_name_;
 };
 
-// Generates a htmlparser::css::CssParsingConfig.
-CssParsingConfig GenCssParsingConfig() {
-  CssParsingConfig config;
-  // If other @ rule types are added to the rules, their block parsing types
-  // will need to be added here as well.
-  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
-  // Note that ignoring still generates an error.
-  config.default_spec = BlockType::PARSE_AS_IGNORE;
-  return config;
-}
-
 // Instances of this class precompute the regular expressions for a particular
 // Cdata specification.
 class ParsedCdataSpec {
@@ -1010,7 +1012,7 @@ RecordValidated ShouldRecordTagspecValidated(
   // Unique and similar can introduce requirements, ie: there cannot be
   // another such tag. We don't want to introduce requirements for failing
   // tags.
-  if (tag.unique() || tag.unique_warning() || !tag.requires().empty())
+  if (tag.unique() || tag.unique_warning() || !tag.requires_condition().empty())
     return IF_PASSING;
   return NEVER;
 }
@@ -1083,8 +1085,8 @@ class ParsedTagSpec {
     SortAndUniquify(&mandatory_anyofs_);
     SortAndUniquify(&mandatory_attr_ids_);
     c_copy(spec->requires_extension(), std::back_inserter(requires_extension_));
-    c_copy(spec->requires(), std::back_inserter(requires_));
-    c_copy(spec->excludes(), std::back_inserter(excludes_));
+    c_copy(spec->requires_condition(), std::back_inserter(requires_condition_));
+    c_copy(spec->excludes_condition(), std::back_inserter(excludes_condition_));
     for (const std::string& tag_spec_name : spec->also_requires_tag_warning()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(tag_spec_name);
       CHECK(iter != tag_spec_ids_by_tag_spec_name.end());
@@ -1165,8 +1167,8 @@ class ParsedTagSpec {
   const vector<int32_t>& AlsoRequiresTagWarnings() const {
     return also_requires_tag_warnings_;
   }
-  const vector<std::string>& Requires() const { return requires_; }
-  const vector<std::string>& Excludes() const { return excludes_; }
+  const vector<std::string>& Requires() const { return requires_condition_; }
+  const vector<std::string>& Excludes() const { return excludes_condition_; }
 
   // Whether or not the tag should be recorded via
   // Context->RecordTagspecValidated if it was validated
@@ -1227,8 +1229,8 @@ class ParsedTagSpec {
   ParsedCdataSpec parsed_cdata_spec_;
   RecordValidated should_record_tagspec_validated_;
   bool attrs_can_satisfy_extension_ = false;
-  vector<std::string> requires_;
-  vector<std::string> excludes_;
+  vector<std::string> requires_condition_;
+  vector<std::string> excludes_condition_;
   vector<std::string> requires_extension_;
   vector<int32_t> also_requires_tag_warnings_;
   set<int32_t> implicit_attrspecs_;
@@ -2471,7 +2473,7 @@ class Context {
 
   // Record document-level conditions which have been satisfied by the tag spec.
   void SatisfyConditionsFromTagSpec(const ParsedTagSpec& parsed_tag_spec) {
-    c_copy(parsed_tag_spec.spec().satisfies(),
+    c_copy(parsed_tag_spec.spec().satisfies_condition(),
            std::inserter(conditions_satisfied_, conditions_satisfied_.end()));
   }
 
@@ -3292,7 +3294,7 @@ void ValidateAttrValueProperties(const ParsedAttrSpec& parsed_attr_spec,
            mandatory_value_properties_seen);
 
   // To reduce churn emit errors sorted by names instead of memory addresses.
-  std::sort(not_seen.begin(), not_seen.end(),
+  std::stable_sort(not_seen.begin(), not_seen.end(),
             [](const PropertySpec* lhs, const PropertySpec* rhs) {
               return lhs->name() < rhs->name();
             });
@@ -4629,7 +4631,7 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
     missing_attrs.push_back(attr_name);
   }
   // Sort this list for stability across implementations.
-  std::sort(missing_attrs.begin(), missing_attrs.end());
+  std::stable_sort(missing_attrs.begin(), missing_attrs.end());
   for (const std::string& missing_attr : missing_attrs) {
     context.AddError(ValidationError::MANDATORY_ATTR_MISSING,
                      context.line_col(),
@@ -4734,7 +4736,7 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
     }
     if (parsed_tag_spec.spec().mandatory()) mandatory_tagspecs_.push_back(ii);
   }
-  std::sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
+  std::stable_sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
 
   error_codes_.resize(ValidationError::Code_MAX + 1);
   for (const ErrorSpecificity& error_specificity : rules_.error_specificity()) {
@@ -4804,8 +4806,9 @@ void ParsedValidatorRules::ExpandModuleExtensionSpec(
     TagSpec* tagspec, const string_view spec_name) const {
   tagspec->set_spec_name(StrCat(spec_name, " module extension script"));
   tagspec->set_descriptive_name(tagspec->spec_name());
-  tagspec->add_satisfies(tagspec->spec_name());
-  tagspec->add_requires(StrCat(spec_name, " nomodule extension script"));
+  tagspec->add_satisfies_condition(tagspec->spec_name());
+  tagspec->add_requires_condition(
+      StrCat(spec_name, " nomodule extension script"));
   AttrSpec* attr = tagspec->add_attrs();
   attr->set_name("crossorigin");
   attr->add_value("anonymous");
@@ -4822,8 +4825,9 @@ void ParsedValidatorRules::ExpandNomoduleExtensionSpec(
     TagSpec* tagspec, const string_view spec_name) const {
   tagspec->set_spec_name(StrCat(spec_name, " nomodule extension script"));
   tagspec->set_descriptive_name(tagspec->spec_name());
-  tagspec->add_satisfies(tagspec->spec_name());
-  tagspec->add_requires(StrCat(spec_name, " module extension script"));
+  tagspec->add_satisfies_condition(tagspec->spec_name());
+  tagspec->add_requires_condition(
+      StrCat(spec_name, " module extension script"));
   AttrSpec* attr = tagspec->add_attrs();
   attr->set_name("nomodule");
   attr->add_value("");
@@ -4848,7 +4852,7 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
     // This is satisfied by any of the `v0.js` variants:
-    tagspec->add_requires("amphtml javascript runtime (v0.js)");
+    tagspec->add_requires_condition("amphtml javascript runtime (v0.js)");
 
     if (extension_spec.deprecated_allow_duplicates()) {
       tagspec->set_unique_warning(true);
@@ -5690,7 +5694,7 @@ class Validator {
     // Currently parser returns nullptr only if document is too complex.
     // NOTE: If htmlparser starts returning null document for other reasons, we
     // must add new error types here.
-    if (doc == nullptr) {
+    if (!doc || !doc->status().ok()) {
       context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX, LineCol(1, 0),
                         {}, "", &result_);
       return result_;
@@ -5784,7 +5788,7 @@ class Validator {
               (htmlparser::Strings::EqualFold(attr.value, "application/json") ||
                htmlparser::Strings::EqualFold(attr.value,
                                               "application/ld+json"))) {
-            if (auto v = htmlparser::json::JSONParser::Validate(
+            if (auto v = htmlparser::json::Validate(
                     node->FirstChild()->Data());
                 !v.first) {
               std::pair<int, int> json_linecol{0, 0};
@@ -5849,14 +5853,16 @@ class Validator {
         auto dummy_node = std::make_unique<htmlparser::Node>(
             htmlparser::NodeType::ELEMENT_NODE, htmlparser::Atom::BODY);
         auto doc = htmlparser::ParseFragment(c->Data(), dummy_node.get());
-        // Append all the nodes to the original <noscript> parent.
-        for (htmlparser::Node* cn : doc->FragmentNodes()) {
-          cn->UpdateChildNodesPositions(node);
-          UpdateLineColumnIndex(cn);
-          ValidateNode(cn, ++stack_size);
-          --stack_size;
+        if (doc && doc->status().ok()) {
+          // Append all the nodes to the original <noscript> parent.
+          for (htmlparser::Node* cn : doc->FragmentNodes()) {
+            cn->UpdateChildNodesPositions(node);
+            UpdateLineColumnIndex(cn);
+            ValidateNode(cn, ++stack_size);
+            --stack_size;
+          }
+          node->RemoveChild(c);
         }
-        node->RemoveChild(c);
       }
       c = next;
     }

@@ -21,6 +21,11 @@
 export const buildGtagConfig = (gtagId) => ({
   'vars': {
     'gtag_id': gtagId,
+    'config': {
+      [gtagId]: {
+        'groups': 'default',
+      },
+    },
   },
   'triggers': {
     'storyPageCount': {
@@ -65,25 +70,45 @@ export const buildGtagConfig = (gtagId) => ({
         'repeat': false,
       },
     },
-  },
-  // Linkers stitch sessions between cache and origin together using cid.
-  'linkers': {
-    'ampStoryAutoAnalyticsLinker': {
-      'ids': {
-        'cid': '${clientId}',
+    'storyShoppingTagClick': {
+      'on': 'story-shopping-tag-click',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_tag_click',
+        'event_category': '${title}',
+        'event_label': '${storyShoppingProductId}',
+        'send_to': [gtagId],
       },
-      'enabled': true,
-      // Makes sure URL is decorated from origin to cache. (Default is cache to
-      // origin only).
-      'proxyOnly': false,
     },
-  },
-  // CookieWriter config is used to extract the url params and store them into
-  // cookies.
-  'cookies': {
-    'ampStoryAutoAnalyticsCookies': {
-      // Reads URL linker params and stores them as cookies.
-      'value': 'LINKER_PARAM(ampStoryAutoAnalyticsLinker, cid)',
+    'storyShoppingPLPView': {
+      'on': 'story-shopping-plp-view',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_plp_view',
+        'event_category': '${title}',
+        'event_label': '${storyPageId}',
+        'send_to': [gtagId],
+      },
+    },
+    'storyShoppingPDPView': {
+      'on': 'story-shopping-pdp-view',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_pdp_view',
+        'event_category': '${title}',
+        'event_label': '${storyShoppingProductId}',
+        'send_to': [gtagId],
+      },
+    },
+    'storyShoppingBuyNowClick': {
+      'on': 'story-shopping-buy-now-click',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_buy_now_click',
+        'event_category': '${title}',
+        'event_label': '${storyShoppingProductId}',
+        'send_to': [gtagId],
+      },
     },
   },
 });

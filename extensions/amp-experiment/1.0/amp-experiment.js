@@ -1,5 +1,4 @@
-import {Layout} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {Layout_Enum} from '#core/dom/layout';
 import {parseJson} from '#core/types/object/json';
 
 import {isExperimentOn} from '#experiments';
@@ -10,16 +9,17 @@ import {
   originExperimentsForDoc,
 } from '#service/origin-experiments-impl';
 
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {applyExperimentToVariant} from './apply-experiment';
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 
-import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-experiment';
 
 export class AmpExperiment extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     /*
      * Prerender is allowed because the client_id is only used to calculate
@@ -32,7 +32,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+    return layout == Layout_Enum.NODISPLAY || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -52,7 +52,7 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
-      let config = dict({});
+      let config = {};
 
       try {
         config = this.getConfig_();
@@ -94,7 +94,7 @@ export class AmpExperiment extends AMP.BaseElement {
           });
         });
 
-        /** @private @const {!Promise<!Object<string, ?string>>} */
+        /** @private @const {!Promise<!{[key: string]: ?string}>} */
         const experimentVariants = Promise.all(variants)
           .then(() => {
             const ampdoc = this.getAmpDoc();
@@ -169,7 +169,7 @@ export class AmpExperiment extends AMP.BaseElement {
    * Object. This is useful for type checking in analytics
    * and disabling all experiments manually.
    * @param {!JsonObject} config
-   * @return {!Object<string, ?string>}
+   * @return {!{[key: string]: ?string}}
    */
   getEmptyExperimentToVariant_(config) {
     const experimentToVariant = Object.create(null);

@@ -48,15 +48,15 @@ The AMP framework can be built from source or downloaded pre-built. Building the
 
 ### Option 1: Build the framework yourself
 
-Refer to the [Developing in AMP](https://github.com/ampproject/amphtml/blob/main/docs/developing.md) guide to familiarize yourself with building and testing the AMP framework. Once you are comfortable with the build system, a few small changes will customize the framework to run from your host.
+Refer to the [Developing in AMP](../developing.md) guide to familiarize yourself with building and testing the AMP framework. Once you are comfortable with the build system, a few small changes will customize the framework to run from your host.
 
 #### Update URLs config
 
-When AMP is built, several scripts are prepended with an `AMP_CONFIG` environment variable (object) containing basic information like: runtime version, config type, experiment enable/disable status, etc. This object can be customized at build time to inform the runtime where the framework is hosted. See [build-system/global-configs/README.md](https://github.com/ampproject/amphtml/tree/main/build-system/global-configs#custom-configjson) for information about the `custom-config.json` overlay.
+When AMP is built, several scripts are prepended with an `AMP_CONFIG` environment variable (object) containing basic information like: runtime version, config type, experiment enable/disable status, etc. This object can be customized at build time to inform the runtime where the framework is hosted. See [build-system/global-configs/README.md](../../build-system/global-configs/README.md#custom-configjson) for information about the `custom-config.json` overlay.
 
 Create JSON file `build-system/global-configs/custom-config.json` with the following contents:
 
-```
+```json
 {
   "cdnUrl": "https://example.com/amp-framework",
   "geoApiUrl": "https://example.com/geo-api"
@@ -68,23 +68,46 @@ where
 -   `cdnUrl` is the base URL to your AMP framework. Defaults to `https://cdn.ampproject.org`.
 -   `geoApiUrl` (optional) is your amp-geo fallback API URL. This API is described in section [amp-geo hotpatching](#amp-geo-hotpatching). Defaults to `null`.
 
-Important: `build-system/global-configs/custom-config.json` is not part of checked-in source. If it exists, it _always_ applies at build time, overlaying the active config. Don't forget about it! You can verify the overlay applies by looking for log line `Overlaid config with custom-config.json` during the build process.
+Important: `build-system/global-configs/custom-config.json` is not part of checked-in source. If it exists, it _always_ applies at build time, overlaying the active config. Don't forget about it! The build system emits warnings like `Notice: prod config overlaid with custom-config.json` to remind you that your build will differ from the default.
+
+#### Define a custom release flavor
+
+Release flavors define the runtime version prefix(es) that should be built and the command line that should be used to build each runtime version. When the build system prepares a release, it supplements the built runtime with static files and pre-compiled resources. See [build-system/global-configs/README.md](../../build-system/global-configs/README.md#custom-flavors-configjson) for information about adding a custom release flavor.
+
+Create JSON file `build-system/global-configs/custom-flavors-config.json` with the following contents:
+
+```json
+[
+  {
+    "flavorType": "self-host-prod",
+    "name": "Self-hosted production release",
+    "environment": "AMP",
+    "rtvPrefixes": [ "01" ],
+    "command": "amp dist --noconfig"
+  }
+]
+
+```
+
+If your AMP runtime will be built with code customizations, consider using flag `--sourcemap_url` with `amp dist`:
+
+-   `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `https://raw.githubusercontent.com/ampproject/amphtml/{version}/`.
+
+**Tips:**
+
+-   Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.).
+-   Flag `--version_override` is not supported.
+-   `build-system/global-configs/custom-flavors-config.json` is not part of checked-in source. If it exists, the custom flavors are automatically made available to `amp release`.
 
 #### Build the framework
 
 Build an AMP release with
 
+```sh
+amp release --flavor="self-host-prod"
 ```
-amp dist
-```
 
-The built framework can be found in directory `dist`. The version assigned to the build is in `dist/version.txt` and a listing of all files included in build is in `dist/files.txt`. The framework is ready to be moved to and served from your host.
-
-If you have advanced hosting capabilities or would like to manually assign a version, `amp dist` accepts these flags (among others):
-
--   `--config`: Indicate the release type, production (`prod`) or canary (`canary`). Defaults to `prod`.
--   `--version_override`: Assign a version to the distribution. The version must consist of 13-digits. Defaults to the latest git commit time of the active branch.
--   `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `https://raw.githubusercontent.com/ampproject/amphtml/{version}/`.
+The built framework can be found in directory `release/org-cdn/rtv/<rtv>/`. The version assigned to the build is in `version.txt` and a listing of all files included in build is in `files.txt`. The framework is ready to be moved to and served from your host.
 
 ### Option 2: Download the framework with an AMP Toolbox tool
 
@@ -95,7 +118,7 @@ If you have advanced hosting capabilities or would like to manually assign a ver
 
 ### Option 3: Manually copy the framework from cdn.ampproject.org
 
-The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly release is always served from the root of `cdn.ampproject.org`. All [non-deprecated releases](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-versioning-policy.md#version-deprecations) can be found in versioned URLs: `cdn.ampproject.org/rtv/<rtv>`, where `<rtv>` is the runtime version.
+The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly release is always served from the root of `cdn.ampproject.org`. All [non-deprecated releases](./amp-versioning-policy.md#version-deprecations) can be found in versioned URLs: `cdn.ampproject.org/rtv/<rtv>`, where `<rtv>` is the runtime version.
 
 Note: The AMP Project is looking into options for packaging releases ([#27726](https://github.com/ampproject/amphtml/issues/27726)).
 
@@ -227,7 +250,7 @@ The properties are defined as follows:
 -   `ampCssUrl` (optional) is a URL to the boilerplate CSS for the current stable runtime version.
 -   `canaryPercentage` (optional) indicates the fraction of users who receive the experimental runtime version of the AMP framework instead of the current stable runtime version.
 -   `diversions` (optional) lists active non-stable runtime versions.
--   `ltsRuntimeVersion` (optional) is the current [long-term stable](https://github.com/ampproject/amphtml/blob/main/docs/lts-release.md) runtime version.
+-   `ltsRuntimeVersion` (optional) is the current [long-term stable](../lts-release.md) runtime version.
 -   `ltsCssUrl` (optional) is a URL to the boilerplate CSS for the current long-term stable runtime version.
 
 ### amp-geo hotpatching
@@ -257,7 +280,7 @@ If location detection and file modification at time of delivery are not possible
 
 The API must meet the following requirements:
 
--   Satisfy [CORS security in AMP](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md)
+-   Satisfy [CORS security in AMP](./amp-cors-requests.md)
 -   Be secure (HTTPS)
 -   Return `application/json` content conforming to the following schema:
     ```
@@ -310,7 +333,7 @@ There are trade-offs in accuracy and performance when you set the client cache t
 In addition to following [TLS best practices](https://infosec.mozilla.org/guidelines/web_security), consider the following headers when hosting the AMP framework:
 
 -   `content-security-policy`: If your pages implement [AMP's CSP](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/secure-pages/), apply a matching content security policy to your hosted framework responses. Inspect the headers on `https://cdn.ampproject.org/v0.js` for a base policy that should be expanded to include resources served from your host.
--   `access-control-allow-origin`: Some runtime components are fetched via XHR. If your AMP pages will be served from a different host than your framework, be sure to include CORS headers (see also [CORS Requests in AMP](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md)).
+-   `access-control-allow-origin`: Some runtime components are fetched via XHR. If your AMP pages will be served from a different host than your framework, be sure to include CORS headers (see also [CORS Requests in AMP](./amp-cors-requests.md)).
 -   `content-type`: There are a few resources served without file extensions, or with extensions that may not be recognized by all web servers. In addition to [common types](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types), you may want to include special handling for the following:
 
     -   `/rtv/metadata` - `application/json`

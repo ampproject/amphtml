@@ -2,9 +2,10 @@
 $category@: layout
 formats:
   - websites
-  - ads
 teaser:
   text: Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.
+experimental: true
+bento: true
 ---
 
 # amp-lightbox-gallery
@@ -240,6 +241,15 @@ You can track this event using the following code snippet:
   </script>
 </amp-analytics>
 ```
+
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-lightbox-gallery`, see [**`bento-lightbox-gallery`**](./1.0/README.md).
 
 ## Validation
 

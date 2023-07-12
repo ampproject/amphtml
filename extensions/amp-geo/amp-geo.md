@@ -167,6 +167,37 @@ example below.
 </amp-geo>
 ```
 
+#### U.S. Virginia, Colorado, Connecticut Detection
+
+The `amp-geo` component provides the
+[ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when it
+determines a request is from Virginia, Colorado, or Connecticut.
+The values are in a `${country}-${subdivision}` format and the following codes
+are supported.
+
+-   `us-co` - Colorado
+-   `us-ct` - Connecticut
+-   `us-va` - Virginia
+
+Additional countries/subdivision may be included with the preset list as in the `usWithSubdivisions`
+example below.
+
+```html
+<amp-geo layout="nodisplay">
+  <script type="application/json">
+    {
+      "ISOCountryGroups": {
+        "usca": ["preset-us-ca"],
+        "usco":["us-co"],
+        "usct":["us-ct"],
+        "usva":["us-va"],
+        "usWithSubdivisions": ["us-ca", "us-co", "us-ct", "us-va"]
+      }
+    }
+  </script>
+</amp-geo>
+```
+
 ### Render Blocking
 
 By default, the `amp-geo` component is not render blocking. That is, the page
@@ -244,6 +275,12 @@ The country code is also available via AMP variable substitution:
 `AMP_GEO` or `${ampGeo}` returns the list of matched groups (comma delimited).
 `AMP_GEO(ISOCountry)` or `${ampGeo(ISOCountry)}` returns the country code (or
 `unknown`).
+
+The subdivision code is also available via AMP variable substitution:
+
+`AMP_GEO` or `${ampGeo}` returns the list of matched groups (comma delimited).
+`AMP_GEO(ISOSubdivision)` or `${ampGeo(ISOSubdivision)}` returns the country
+subdivision (or `unknown`).
 
 ### Caching
 

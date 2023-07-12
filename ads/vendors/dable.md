@@ -11,6 +11,8 @@
   type="dable"
   data-widget-id="jobgqR7W"
   data-item-id="testitem"
+  data-article-section="politics"
+  data-article-section2="global"
 >
 </amp-embed>
 ```
@@ -27,3 +29,7 @@ For configuration details and to generate your tags, please contact https://admi
 
 -   `data-item-id`
 -   `data-service-name`
+-   `data-channel`
+-   `data-article-section`
+-   `data-article-section2`
+-   `data-article-section3`

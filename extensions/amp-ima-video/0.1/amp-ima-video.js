@@ -11,17 +11,21 @@ import {childElementsByTag} from '#core/dom/query';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {isEnumValue, isObject} from '#core/types';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen} from '#utils/event-helper';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -38,7 +42,7 @@ let SerializableChildDef;
 
 /**
  * @param {!Element} element
- * @return {!Object<string, *>}
+ * @return {!{[key: string]: *}}
  */
 function serializeAttributes(element) {
   const {attributes} = element;
@@ -87,7 +91,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /**
      * Maps events to their unlisteners.
-     * @private {!Object<string, function()>}
+     * @private {!{[key: string]: function()}}
      */
     this.unlisteners_ = {};
 
@@ -177,30 +181,37 @@ class AmpImaVideo extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  getConsentPolicy() {
-    return null;
+  /**
+   * @return {Promise<Object|undefined>}
+   * @private
+   */
+  getIframeContext_() {
+    const consentPolicyId = this.getConsentPolicy();
+    if (!consentPolicyId) {
+      return Promise.resolve();
+    }
+    return Promise.all([
+      getConsentPolicyState(this.element, consentPolicyId),
+      getConsentMetadata(this.element, consentPolicyId),
+      getConsentPolicyInfo(this.element, consentPolicyId),
+    ]).then((result) => ({
+      initialConsentState: result[0],
+      initialConsentMetadata: result[1],
+      initialConsentValue: result[2],
+    }));
   }
 
   /** @override */
   layoutCallback() {
-    const {element, win} = this;
-    const consentPolicyId = super.getConsentPolicy();
-    const consentPromise = consentPolicyId
-      ? getConsentPolicyState(element, consentPolicyId)
-      : Promise.resolve(null);
+    const {element} = this;
     element.setAttribute(
       'data-source-children',
       JSON.stringify(this.sourceChildren_)
     );
-    return consentPromise.then((initialConsentState) => {
-      const iframe = getIframe(
-        win,
-        element,
-        TYPE,
-        {initialConsentState},
-        {allowFullscreen: true}
-      );
+    return this.getIframeContext_().then((context) => {
+      const iframe = getIframe(this.win, element, TYPE, context, {
+        allowFullscreen: true,
+      });
       iframe.title = this.element.title || 'IMA video';
 
       applyFillContent(iframe);
@@ -262,7 +273,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /**
    * Sends a command to the player through postMessage. NOTE: All commands sent
-   * before imaVideo fires VideoEvents.LOAD will be queued until that event
+   * before imaVideo fires VideoEvents_Enum.LOAD will be queued until that event
    * fires.
    * @param {string} command
    * @param {Object=} opt_args
@@ -273,13 +284,11 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyPromise_.then(() => {
         if (this.iframe_ && this.iframe_.contentWindow) {
           this.iframe_.contentWindow./*OK*/ postMessage(
-            JSON.stringify(
-              dict({
-                'event': 'command',
-                'func': command,
-                'args': opt_args || '',
-              })
-            ),
+            JSON.stringify({
+              'event': 'command',
+              'func': command,
+              'args': opt_args || '',
+            }),
             '*'
           );
         }
@@ -306,18 +315,18 @@ class AmpImaVideo extends AMP.BaseElement {
     }
 
     const videoEvent = eventData['event'];
-    if (isEnumValue(VideoEvents, videoEvent)) {
+    if (isEnumValue(VideoEvents_Enum, videoEvent)) {
       switch (videoEvent) {
-        case VideoEvents.LOAD:
+        case VideoEvents_Enum.LOAD:
           this.playerReadyResolver_(this.iframe_);
           break;
-        case VideoEvents.AD_START:
-        case VideoEvents.PLAY:
-        case VideoEvents.PLAYING:
+        case VideoEvents_Enum.AD_START:
+        case VideoEvents_Enum.PLAY:
+        case VideoEvents_Enum.PLAYING:
           this.pauseHelper_.updatePlaying(true);
           break;
-        case VideoEvents.PAUSE:
-        case VideoEvents.ENDED:
+        case VideoEvents_Enum.PAUSE:
+        case VideoEvents_Enum.ENDED:
           this.pauseHelper_.updatePlaying(false);
           break;
       }
@@ -326,7 +335,7 @@ class AmpImaVideo extends AMP.BaseElement {
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
-      dispatchCustomEvent(this.element, VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {

@@ -1,8 +1,9 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 
-import {dev, user, userAssert} from './log';
+import {dev, user, userAssert} from '#utils/log';
+
 import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
@@ -151,7 +152,7 @@ export function onDocumentFormSubmit_(e) {
       /*source*/ form,
       /*caller*/ form,
       e,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
   }
 }

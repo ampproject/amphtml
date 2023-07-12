@@ -4,7 +4,6 @@ require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
-const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const selenium = require('selenium-webdriver');
 const {
@@ -279,7 +278,7 @@ envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
 class ItConfig {
   /**
    * @param {function} it
-   * @param {Object} env
+   * @param {object} env
    */
   constructor(it, env) {
     this.it = /** @type {Mocha.it} */ (it);
@@ -450,7 +449,7 @@ function describeEnv(factory) {
     /**
      *
      * @param {string} _name
-     * @param {Object} variant
+     * @param {object} variant
      * @param {string} browserName
      */
     function doTemplate(_name, variant, browserName) {
@@ -652,7 +651,7 @@ function getDriver({headless = false}, browserName, deviceName) {
  */
 async function setUpTest(
   {ampDriver, controller, environment},
-  {testUrl = '', version, experiments = [], initialRect}
+  {experiments = [], initialRect, testUrl = '', version}
 ) {
   const url = new URL(testUrl);
 

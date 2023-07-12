@@ -1,4 +1,4 @@
-const colors = require('../common/colors');
+const colors = require('kleur/colors');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const path = require('path');
@@ -13,16 +13,15 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {
-  cleanupBuildDir,
-  printClosureConcurrency,
-} = require('../compile/compile');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -31,6 +30,7 @@ const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {VERSION} = require('../compile/internal-version');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const {cyan, green} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -86,13 +86,13 @@ function printDistHelp(options) {
  * @return {Promise<void>}
  */
 async function runPreDistSteps(options) {
-  cleanupBuildDir();
   await prebuild();
   await compileCss(options);
   await copyCss();
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
+  await buildStoryLocalization(options);
   displayLifecycleDebugging();
 }
 
@@ -108,25 +108,26 @@ async function dist() {
     minify: true,
     watch: argv.watch,
   };
-  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);
 
   // These steps use closure compiler. Small ones before large (parallel) ones.
-  const steps = [];
   if (argv.core_runtime_only) {
-    steps.push(compileCoreRuntime(options));
+    await compileCoreRuntime(options);
   } else {
-    steps.push(buildExperiments());
-    steps.push(buildLoginDone('0.1'));
-    steps.push(buildWebPushPublisherFiles());
-    steps.push(buildCompiler());
-    steps.push(compileAllJs(options));
+    await Promise.all([
+      writeVersionFiles(),
+      buildExperiments(),
+      buildLoginDone('0.1'),
+      buildWebPushPublisherFiles(),
+      buildCompiler(),
+      compileAllJs(options),
+    ]);
   }
 
   // This step internally parses the various extension* flags.
-  steps.push(buildExtensions(options));
+  await buildExtensions(options);
 
   // This step is to be run only during a full `amp dist`.
   if (
@@ -135,10 +136,8 @@ async function dist() {
     !argv.extensions_from &&
     !argv.noextensions
   ) {
-    steps.push(buildVendorConfigs(options));
+    await buildVendorConfigs(options);
   }
-
-  await Promise.all(steps);
 
   // This step is required no matter which binaries are built.
   await formatExtractedMessages();
@@ -146,6 +145,26 @@ async function dist() {
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
+}
+
+/**
+ * Writes the verion.txt file.
+ * @return {!Promise}
+ */
+async function writeVersionFiles() {
+  // TODO: determine which of these are necessary and trim the rest via an I2D.
+  const paths = [
+    'dist',
+    'dist/v0',
+    'dist/v0/examples',
+    'dist.tools/experiments',
+    `dist.3p/${internalRuntimeVersion}`,
+    `dist.3p/${internalRuntimeVersion}/vendor`,
+  ].map((p) => path.join(...p.split('/'), 'version.txt'));
+
+  return Promise.all(
+    paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
+  );
 }
 
 /**
@@ -176,17 +195,13 @@ function buildLoginDone(version) {
   const buildDir = `build/all/amp-access-${version}`;
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
-  const latestName = 'amp-login-done-latest.js';
+  const aliasName = 'amp-login-done-latest.js';
   return compileJs(`./${buildDir}`, builtName, './dist/v0/', {
     watch: argv.watch,
     includePolyfills: true,
     minify: true,
     minifiedName,
-    latestName,
-    extraGlobs: [
-      `${buildDir}/amp-login-done-0.1.max.js`,
-      `${buildDir}/amp-login-done-dialog.js`,
-    ],
+    aliasName,
   });
 }
 
@@ -206,7 +221,6 @@ async function buildWebPushPublisherFiles() {
         includePolyfills: true,
         minify: true,
         minifiedName,
-        extraGlobs: [`${tempBuildDir}/*.js`],
       });
     }
   }
@@ -364,7 +378,7 @@ module.exports = {
   runPreDistSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 dist.description =
   'Compile AMP production binaries and apply AMP_CONFIG to runtime files';
@@ -375,6 +389,8 @@ dist.flags = {
     'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
+  nomanglecache:
+    'Do not share the mangle cache between binaries, useful only in estimating size impacts of code changes.',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   coverage: 'Instrument code for collecting coverage information',
   extensions: 'Build only the listed extensions',
@@ -387,13 +403,10 @@ dist.flags = {
   esm: 'Do not transpile down to ES5',
   version_override: 'Override the version written to AMP_CONFIG',
   watch: 'Watch for changes in files, re-compiles when detected',
-  closure_concurrency: 'Set the number of concurrent invocations of closure',
   debug: 'Output the file contents during compilation lifecycles',
   define_experiment_constant:
     'Build runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     'Sanitize the output to diff build results (requires --pseudo_names)',
   sxg: 'Output the minified code for the SxG build',
-  warning_level:
-    "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };

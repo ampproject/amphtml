@@ -1,4 +1,4 @@
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '#utils/log';
 
 const TAG = 'amp-fx-collection';
 
@@ -81,7 +81,7 @@ let FxBindingDef;
 
 /**
  * Include respective `FxType`s here.
- * @package @const {!Object<!FxType, !FxBindingDef>}
+ * @package @const {!{[key: !FxType]: !FxBindingDef}}
  */
 export const FxBindings = {
   [FxType.FADE_IN]: {

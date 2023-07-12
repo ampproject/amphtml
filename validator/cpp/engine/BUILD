@@ -8,7 +8,11 @@ load("embed_data.bzl", "embed_data")
 # Usage:
 # To build the library, use the following bazel command:
 #
-# bazel build --repo_env=CC=clang --cxxopt='-std=c++17' <build_target>
+# bazel build --repo_env=CC=clang --cxxopt='-std=c++17' validator
+#
+# To run the tests, use the following bazel command:
+#
+# bazel test --cxxopt='-std=c++17' validator_test
 
 package(default_visibility = ["//visibility:public"])
 
@@ -36,13 +40,13 @@ cc_library(
     name = "parse-layout",
     srcs = ["parse-layout.cc"],
     hdrs = ["parse-layout.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_googlesource_code_re2//:re2",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -60,12 +64,12 @@ cc_library(
     name = "parse-layout-sizes",
     srcs = ["parse-layout-sizes.cc"],
     hdrs = ["parse-layout-sizes.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -82,13 +86,13 @@ cc_library(
     name = "parse-srcset",
     srcs = ["parse-srcset.cc"],
     hdrs = ["parse-srcset.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -105,13 +109,14 @@ cc_library(
     name = "parse-viewport",
     srcs = ["parse-viewport.cc"],
     hdrs = ["parse-viewport.h"],
+    copts = ["-std=c++17"],
     deps = [
         ":utf8-util",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:logging",
+        "//cpp/htmlparser:strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -128,13 +133,14 @@ cc_library(
     name = "utf8-util",
     srcs = ["utf8-util.cc"],
     hdrs = ["utf8-util.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:logging",
+        "//cpp/htmlparser:strings",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -144,7 +150,7 @@ cc_test(
     deps = [
         ":utf8-util",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
 
@@ -152,13 +158,13 @@ cc_library(
     name = "keyframes-parse-css",
     srcs = ["keyframes-parse-css.cc"],
     hdrs = ["keyframes-parse-css.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-        "@htmlparser//css:parse-css",
+        "//cpp/htmlparser/css:parse-css",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -168,8 +174,8 @@ cc_test(
         ":keyframes-parse-css",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
-        "@htmlparser//css:parse-css",
+        "//cpp/htmlparser:strings",
+        "//cpp/htmlparser/css:parse-css",
     ],
 )
 
@@ -177,11 +183,11 @@ cc_library(
     name = "type-identifier",
     srcs = ["type-identifier.cc"],
     hdrs = ["type-identifier.h"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/strings",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -190,7 +196,7 @@ cc_test(
     deps = [
         ":type-identifier",
         "@com_google_googletest//:gtest_main",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -198,14 +204,14 @@ cc_library(
     name = "error-formatter",
     srcs = ["error-formatter.cc"],
     hdrs = ["error-formatter.h"],
+    copts = ["-std=c++17"],
     deps = [
         ":validator_pb",
         "@com_googlesource_code_re2//:re2",
-        "@com_github_glog//:glog",
-        "@htmlparser//:strings",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:logging",
+        "//cpp/htmlparser:strings",
+        "//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -221,18 +227,19 @@ cc_test(
 cc_binary(
     name = "validator-convert",
     srcs = ["validator-convert.cc"],
+    copts = ["-std=c++17"],
     deps = [
         "@com_google_protobuf//:protobuf",
-        "@htmlparser//:defer",
-        "@htmlparser//:fileutil",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:fileutil",
+        "//cpp/htmlparser:logging",
+        "//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 genrule(
     name = "validator-pb",
-    srcs = ["@validator//:validator.protoascii"],
+    srcs = ["//:validator.protoascii"],
     outs = ["validator.pb"],
     cmd = "$(location :validator-convert) " +
           "$(SRCS) $@",
@@ -244,6 +251,7 @@ cc_library(
     srcs = [
         "validator-internal.cc",
     ],
+    copts = ["-std=c++17"],
     visibility = ["//visibility:private"],
     deps = [
         ":keyframes-parse-css",
@@ -266,20 +274,19 @@ cc_library(
         "@com_google_absl//absl/strings:cord",
         "@com_google_absl//absl/synchronization",
         "@com_googlesource_code_re2//:re2",
-        "@htmlparser//:atom",
-        "@htmlparser//:atomutil",
-        "@htmlparser//:defer",
-        "@htmlparser//:node",
-        "@htmlparser//:parser",
-        "@htmlparser//:strings",
-        "@htmlparser//:url",
-        "@htmlparser//css:amp4ads-parse-css",
-        "@htmlparser//css:parse-css",
-        "@htmlparser//css:parse_css_cc_proto",
-        "@htmlparser//json:parser",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:atom",
+        "//cpp/htmlparser:atomutil",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:node",
+        "//cpp/htmlparser:parser",
+        "//cpp/htmlparser:strings",
+        "//cpp/htmlparser:url",
+        "//cpp/htmlparser/css:amp4ads-parse-css",
+        "//cpp/htmlparser/css:parse-css",
+        "//cpp/htmlparser/css:parse_css_cc_proto",
+        "//cpp/htmlparser/validators:json",
+        "//:validator_cc_proto",
     ],
-    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -287,12 +294,13 @@ cc_library(
     hdrs = [
         "validator.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":validator-internal",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser/css:parse-css",
+        "//:validator_cc_proto",
     ],
     alwayslink = 1,
-    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -303,18 +311,28 @@ cc_library(
     hdrs = [
         "testing-utils.h",
     ],
+    copts = ["-std=c++17"],
     data = [
-        "@validator//:testdata_files",
         "@amphtml-extensions//:testdata_files",
+        "//:testdata_files",
     ],
     deps = [
         ":error-formatter",
         "@com_google_absl//absl/strings",
-        "@htmlparser//:fileutil",
-        "@htmlparser//:strings",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:fileutil",
+        "//cpp/htmlparser:strings",
+        "//:validator_cc_proto",
     ],
+)
+
+cc_binary(
+    name = "update-tests",
+    srcs = ["update-tests.cc"],
     copts = ["-std=c++17"],
+    deps = [
+        ":testing-utils",
+        ":validator",
+    ],
 )
 
 cc_test(
@@ -325,10 +343,12 @@ cc_test(
         ":testing-utils",
         ":validator",
         ":validator_pb",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//css:parse_css_cc_proto",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser/css:parse_css_cc_proto",
+        "//:validator_cc_proto",
     ],
 )
 

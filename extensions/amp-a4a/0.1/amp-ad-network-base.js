@@ -1,10 +1,10 @@
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {map} from '#core/types/object';
 
+import {dev, devAssert} from '#utils/log';
+
 import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
 import {sendXhrRequest} from './amp-ad-utils';
-
-import {dev, devAssert} from '../../../src/log';
 
 const TAG = 'amp-ad-network-base';
 
@@ -22,13 +22,13 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {?Promise<!Response>} */
     this.adResponsePromise_ = null;
 
-    /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
+    /** @private {{[key: string]: !./amp-ad-type-defs.Validator}} */
     this.validators_ = map();
 
-    /** @private {Object<string, !./amp-ad-type-defs.Renderer>} */
+    /** @private {{[key: string]: !./amp-ad-type-defs.Renderer}} */
     this.renderers_ = map();
 
-    /** @private {Object<string, string>} */
+    /** @private {{[key: string]: string}} */
     this.recoveryModes_ = map();
 
     /** @const @private {!Object} */

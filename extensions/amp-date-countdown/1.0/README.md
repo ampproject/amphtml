@@ -1,76 +1,86 @@
----
-$category@: presentation
-formats:
-  - websites
-teaser:
-  text: Displays a countdown sequence to a specified date.
----
-
 # Bento Date Countdown
 
-## Usage
+Displays a countdown sequence to a specified date. Refer to the [returned time parameters section](#returned-time-parameters) for information on the available time parameters.
 
-The Bento Date Countdown component displays a countdown sequence to a specified date. The Bento Date Countdown extension provides a list of time parameters. Refer to the [returned time parameters section](#returned-time-parameters) below for more information on the available time parameters.
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-date-countdown>` web component.
-
-#### Example: Import via npm
-
-[example preview="top-frame" playground="false"]
-
-Install via npm:
+### Import via npm
 
 ```sh
-npm install @ampproject/bento-date-countdown
+npm install @bentoproject/bento-date-countdown
 ```
 
 ```javascript
-import '@ampproject/bento-date-countdown';
+import {defineElement as defineBentoDateCountdown} from '@bentoproject/bento-date-countdown';
+defineBentoDateCountdown();
 ```
 
-[/example]
-
-#### Example: Include via `<script>`
-
-The example below contains an `bento-date-countdown` with three sections. The
-`expanded` attribute on the third section expands it on page load.
-
-[example preview="top-frame" playground="false"]
+### Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.css">
-</head>
-<body>
-  <bento-date-countdown timeleft-ms="200000000" biggest-unit="HOURS">
-    <template type="amp-mustache">
-      <div>
-        <span>{{days}} {{dd}} {{d}}</span>
-        <br />
-        <span>{{hours}} {{hh}} {{h}}</span>
-        <br />
-        <span>{{minutes}} {{mm}} {{m}}</span>
-        <br />
-        <span>{{seconds}} {{ss}} {{s}}</span>
-      </div>
-    </template>
-  </bento-date-countdown>
-</body>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<!-- Include bento-mustache.js to use mustache templates with this component -->
+<script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.css" crossorigin="anonymous">
 ```
 
-[/example]
+### Example
 
-#### Interactivity and API usage
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-date-countdown timeleft-ms="200000000" biggest-unit="HOURS">
+      <template>
+        <div>
+          <span>{{days}} {{dd}} {{d}}</span>
+          <br>
+          <span>{{hours}} {{hh}} {{h}}</span>
+          <br>
+          <span>{{minutes}} {{mm}} {{m}}</span>
+          <br>
+          <span>{{seconds}} {{ss}} {{s}}</span>
+        </div>
+      </template>
+    </bento-date-countdown>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
 
 The Bento Date Countdown component does not have an imperative API. However, the Bento Date Countdown Web Component will render a mustache-template, provided by the consumer in a `<template>` tag with `type="amp-mustache"`. This template may interpolate date-related parameters. See the [Returned Time Parameters section](#returned-time-parameters) for a full list of all the available parameters.
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -90,44 +100,44 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-#### Attributes
+### Attributes
 
 To provide the datetime to countdown to, you must specify at least one of these required attributes: `end-date`,
 `timeleft-ms`, `timestamp-ms`, `timestamp-seconds`.
 
-##### `end-date`
+#### `end-date`
 
 An ISO formatted date to count down to. For example, `2020-06-01T00:00:00+08:00`.
 
 Used to determine the datetime to countdown to.
 
-##### `timestamp-ms`
+#### `timestamp-ms`
 
 A POSIX epoch value in milliseconds; assumed to be UTC timezone. For example, `timestamp-ms="1521880470000"`.
 
 Used to determine the datetime to countdown to.
 
-##### `timestamp-seconds`
+#### `timestamp-seconds`
 
 A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timestamp-seconds="1521880470"`.
 
 Used to determine the datetime to countdown to.
 
-##### `timeleft-ms`
+#### `timeleft-ms`
 
 A value in milliseconds left to be counting down. For example, 48 hours left `timeleft-ms="172800000"`.
 
 Used to determine the datetime to countdown to.
 
-##### `offset-seconds` (optional)
+#### `offset-seconds` (optional)
 
 A positive or negative number that represents the number of seconds to add or subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds to the end-date.
 
-##### `when-ended` (optional)
+#### `when-ended` (optional)
 
 Specifies whether to stop the timer when it reaches 0 seconds. The value can be set to `stop` (default) to indicate the timer to stop at 0 seconds and will not pass the final date or `continue` to indicate the timer should continue after reaching 0 seconds.
 
-##### `locale` (optional)
+#### `locale` (optional)
 
 An internationalization language string for each timer unit. The default value is `en` (for English).
 
@@ -152,7 +162,7 @@ Supported values:
 | zh-cn | Chinese Simplified  |
 | zh-tw | Chinese Traditional |
 
-##### `biggest-unit` (optional)
+#### `biggest-unit` (optional)
 
 Allows the `bento-date-countdown` component to calculate the time difference based
 on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays
@@ -161,32 +171,28 @@ on the specified `biggest-unit` value. For example, assume there are `50 days 10
 -   Supported values: `days`, `hours`, `minutes`, `seconds`
 -   Default: `days`
 
-##### `count-up` (optional)
+#### `count-up` (optional)
 
 Include this attribute to reverse the direction of the countdown to count up instead. This is useful to display the time elapsed since a target date in the past. To continue the countdown when the target date is in the past, be sure to include the `when-ended` attribute with the `continue` value. If the target date is in the future, `bento-date-countdown` will display a decrementing (toward 0) negative value.
 
-#### Styling
+### Styling
 
 You may use the `bento-date-countdown` element selector to style the Bento Date Countdown component freely.
 
-### Preact/React Component
+---
 
-The examples below demonstrates use of the `<BentoDateCountdown>` as a functional component usable with the Preact or React libraries.
+## Preact/React Component
 
-#### Example: Import via npm
-
-[example preview="top-frame" playground="false"]
-
-Install via npm:
+### Import via npm
 
 ```sh
-npm install @ampproject/bento-date-countdown
+npm install @bentoproject/date-countdown
 ```
 
 ```javascript
 import React from 'react';
-import { BentoDateCountdown } from '@ampproject/bento-date-countdown/react';
-import '@ampproject/bento-date-countdown/styles.css';
+import {BentoDateCountdown} from '@bentoproject/date-countdown/react';
+import '@bentoproject/date-countdown/styles.css';
 
 function App() {
   return (
@@ -196,11 +202,11 @@ function App() {
       render={(data) => (
         <div>
           <span>{`${data.days} ${data.dd} ${data.d}`}</span>
-          <br />
+          <br>
           <span>{`${data.hours} ${data.hh} ${data.h}`}</span>
-          <br />
+          <br>
           <span>{`${data.minutes} ${data.mm} ${data.m}`}</span>
-          <br />
+          <br>
           <span>{`${data.seconds} ${data.ss} ${data.s}`}</span>
         </div>
       )}
@@ -209,52 +215,48 @@ function App() {
 }
 ```
 
-[/example]
-
-#### Interactivity and API usage
+### Interactivity and API usage
 
 The Bento Date Countdown component does not have an imperative API. However, the Bento Date Countdown Preact/React component does accept a `render` prop that renders the consumer's template. This `render` prop should be a function which the Bento Date Countdown Preact/React component can use to render its template. The `render` callback will be provided a variety of date-related parameters for consumers to interpolate in the rendered template. See the [`render` prop section](#render) for more information.
 
-#### Layout and style
+### Layout and style
 
 The Bento Date Countdown Preact/React component allows consumers to render their own templates. These templates may use inline styles, `<style>` tags, Preact/React components that import their own stylesheets.
 
-#### Props
+### Props
 
-##### `datetime`
+#### `datetime`
 
-Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a
-standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
+Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
 
-##### `locale`
+#### `locale`
 
 An internationalization language string for each timer unit. The default value is `en` (for English). This prop supports all values that are supported by the user's browser.
 
-##### `whenEnded`
+#### `whenEnded`
 
 Specifies whether to stop the timer when it reaches 0 seconds. The value can be set to `stop` (default) to indicate the timer to stop at 0 seconds and will not pass the final date or `continue` to indicate the timer should continue after reaching 0 seconds.
 
-##### `biggestUnit`
+#### `biggestUnit`
 
-Allows the `bento-date-countdown` component to calculate the time difference based
-on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays
-`1210 hours` left.
+Allows the `bento-date-countdown` component to calculate the time difference based on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays `1210 hours` left.
 
 -   Supported values: `days`, `hours`, `minutes`, `seconds`
 -   Default: `days`
 
-##### `countUp`
+#### `countUp`
 
 Include this prop to reverse the direction of the countdown to count up instead. This is useful to display the time elapsed since a target date in the past. To continue the countdown when the target date is in the past, be sure to include the `when-ended` prop with the `continue` value. If the target date is in the future, `bento-date-countdown` will display a decrementing (toward 0) negative value.
 
-##### `render`
+#### `render`
 
 Optional callback that should render a template. The callback will be provided an object with properties/values related to the date expressed in `datetime`.
-By default, the Bento Date Countdown component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption.
-See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
+
+By default, the Bento Date Countdown component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption. See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
 
 ```typescript
-(dateParams: DateParams) => JSXInternal.Element
+function render(dateParams: DateParams): JSXInternal.Element;
+
 interface DateParams {
   day: number;
   dayName: string;
@@ -282,7 +284,7 @@ interface DateParams {
 }
 ```
 
-### Returned Time Parameters
+## Returned Time Parameters
 
 This table lists the format you can specify in your Mustache template:
 
@@ -301,7 +303,7 @@ This table lists the format you can specify in your Mustache template:
 | minutes | internationalization string for minute or minutes |
 | seconds | internationalization string for second or seconds |
 
-#### Samples of formatted values
+### Samples of formatted values
 
 This table provides examples of formatted values specified in a Mustache template, and a sample of what the output:
 

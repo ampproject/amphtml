@@ -6,6 +6,8 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, user} from '#utils/log';
+
 import {macroTask} from '#testing/helpers';
 
 import {
@@ -16,7 +18,6 @@ import {
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
 } from '../../src/impression';
-import {dev, user} from '../../src/log';
 
 describes.realWin('impression', {amp: true}, (env) => {
   let window, document;

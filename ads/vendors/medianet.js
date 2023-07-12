@@ -1,6 +1,8 @@
 import {computeInMasterFrame, validateData, writeScript} from '#3p/3p';
-import {getSourceUrl, parseUrlDeprecated} from '../../src/url';
+
 import {hasOwn} from '#core/types/object';
+
+import {getSourceUrl, parseUrlDeprecated} from '../../src/url';
 
 const mandatoryParams = ['tagtype', 'cid'],
   optionalParams = [
@@ -186,7 +188,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     global,
     'medianet-hb-load',
     (done) => {
-      /*eslint "google-camelcase/google-camelcase": 0*/
+      /*eslint "local/camelcase": 0*/
       global.advBidxc_requrl = publisherUrl;
       global.advBidxc_refurl = referrerUrl;
       global.advBidxc = {

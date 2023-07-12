@@ -12,7 +12,7 @@ The `amp-story-auto-analytics` component configures [`amp-analytics`](https://am
 
 ```html
 <amp-story>
-  <amp-story-auto-analytics gtag-id="UA-123456789-0"></amp-story-auto-analytics>
+  <amp-story-auto-analytics gtag-id="G-12345678"></amp-story-auto-analytics>
 </amp-story>
 ```
 

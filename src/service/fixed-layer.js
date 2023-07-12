@@ -16,8 +16,9 @@ import {endsWith} from '#core/types/string';
 
 import {Services} from '#service';
 
-import {Animation} from '../animation';
-import {dev, user} from '../log';
+import {Animation} from '#utils/animation';
+import {dev, user} from '#utils/log';
+
 import {getMode} from '../mode';
 import {Pass} from '../pass';
 

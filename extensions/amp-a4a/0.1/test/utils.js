@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {AmpA4A} from '../amp-a4a';
 
 /** @type {string} @private */
@@ -36,6 +34,6 @@ export class MockA4AImpl extends AmpA4A {
 
   /** @override */
   getA4aAnalyticsConfig() {
-    return dict();
+    return {};
   }
 }

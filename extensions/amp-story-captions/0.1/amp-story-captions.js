@@ -1,10 +1,20 @@
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import * as Preact from '#core/dom/jsx';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {toArray} from '#core/types/array';
+
+import {listen} from '#utils/event-helper';
 
 import {TrackRenderer} from './track-renderer';
 
 import {CSS} from '../../../build/amp-story-captions-0.1.css';
-import {listen} from '../../../src/event-helper';
+import {CSS as PRESETS_CSS} from '../../../build/amp-story-captions-presets-0.1.css';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+
+/**
+ * List of valid preset values.
+ * @const {Array<string>}
+ */
+const presetValues = ['default', 'appear'];
 
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -26,14 +36,24 @@ export class AmpStoryCaptions extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
+    this.container_ = <div />;
+    // Check if style-preset is defined and valid.
+    // If valid it renders in shadow dom with preset syles.
+    const preset = this.element.getAttribute('style-preset');
+    if (presetValues.includes(preset)) {
+      this.container_.classList.add(`amp-story-captions-${preset}`);
+      createShadowRootWithStyle(this.element, this.container_, PRESETS_CSS);
+    } else {
+      this.element.appendChild(this.container_);
+    }
+    if (this.element.hasAttribute('auto-append')) {
+      this.container_.classList.add(`i-amphtml-amp-story-captions-auto-append`);
+    }
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return isLayoutSizeDefined(layout) || layout === Layout_Enum.CONTAINER;
   }
 
   /**
@@ -57,7 +77,10 @@ export class AmpStoryCaptions extends AMP.BaseElement {
     );
   }
 
-  /** Creates new track renderers for current textTracks. */
+  /**
+   * Creates new track renderers for current textTracks.
+   * @private
+   */
   updateTracks_() {
     while (this.trackRenderers_.length) {
       this.trackRenderers_.pop().dispose();

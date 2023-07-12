@@ -1,12 +1,14 @@
+import {isAmphtml} from '#core/document/format';
+
 import {Services} from '#service';
 
-import {ChunkPriority, chunk} from './chunk';
-import {isAmphtml} from './format';
-import {dev} from './log';
+import {dev} from '#utils/log';
+
+import {ChunkPriority_Enum, chunk} from './chunk';
 import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */
-export const AutoLightboxEvents = {
+export const AutoLightboxEvents_Enum = {
   // Triggered when the lightbox attribute is newly set on an item in order to
   // process by the renderer extension (e.g. amp-lightbox-gallery).
   NEWLY_SET: 'amp-auto-lightbox:newly-set',
@@ -25,7 +27,13 @@ export const AutoLightboxEvents = {
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
   // Only enabled on single documents tagged as <html amp> or <html ⚡>.
-  if (!isAmphtml(win.document) || !ampdoc.isSingleDoc()) {
+  if (
+    !isAmphtml(win.document) ||
+    !ampdoc.isSingleDoc() ||
+    // Prevent loading auto lightbox when disabled using 'data-amp-auto-lightbox-disable' attribute (#37854)
+    // Check if HTML Tag has 'data-amp-auto-lightbox-disable' attribute
+    win.document.documentElement.hasAttribute('data-amp-auto-lightbox-disable')
+  ) {
     return;
   }
   chunk(
@@ -42,7 +50,7 @@ export function installAutoLightboxExtension(ampdoc) {
         );
       });
     },
-    ChunkPriority.LOW
+    ChunkPriority_Enum.LOW
   );
 }
 

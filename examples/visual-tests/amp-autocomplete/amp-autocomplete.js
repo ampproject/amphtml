@@ -3,7 +3,7 @@
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
+} = require('../../../build-system/tasks/visual-diff/verifiers');
 
 module.exports = {
   'tap input1 to focus and display results': async (page, name) => {

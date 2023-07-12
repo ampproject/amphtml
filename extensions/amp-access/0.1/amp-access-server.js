@@ -1,15 +1,15 @@
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {AccessClientAdapter} from './amp-access-client';
 
 import {fetchDocument} from '../../../src/document-fetcher';
-import {dev, devAssert} from '../../../src/log';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 
 /** @const {string} */
@@ -128,11 +128,11 @@ export class AccessServerAdapter {
             requestVars[k] = String(vars[k]);
           }
         }
-        const request = dict({
+        const request = {
           'url': removeFragment(this.ampdoc.win.location.href),
           'state': this.serverState_,
           'vars': requestVars,
-        });
+        };
         dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
         // Note that `application/x-www-form-urlencoded` is used to avoid
         // CORS preflight request.
@@ -141,9 +141,9 @@ export class AccessServerAdapter {
           fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-            headers: dict({
+            headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
-            }),
+            },
           })
         );
       })

@@ -1,7 +1,7 @@
 // Comparators for calling standard algorithms on various containers.
 
-#ifndef HTMLPARSER__COMPARATORS_H_
-#define HTMLPARSER__COMPARATORS_H_
+#ifndef CPP_HTMLPARSER_COMPARATORS_H_
+#define CPP_HTMLPARSER_COMPARATORS_H_
 
 #include <utility>
 
@@ -23,4 +23,4 @@ struct PairComparator {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__COMPARATORS_H_
+#endif  // CPP_HTMLPARSER_COMPARATORS_H_

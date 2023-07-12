@@ -4,23 +4,179 @@
  * @fileoverview Script that cuts a nightly branch.
  */
 
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
+const {getVersion} = require('../compile/internal-version');
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
-
-// TODO(danielrozenberg): remove this once the Google-backed job is turned off.
-const DRY_RUN = true;
+const {RequestError} = require('@octokit/request-error');
 
 const params = {owner: 'ampproject', repo: 'amphtml'};
 
-const colorizeState = (state) =>
-  state == 'error' || state == 'failure'
-    ? red(state)
-    : state == 'pending'
-    ? yellow(state)
-    : state == 'success'
-    ? green(state)
-    : state;
+// Permanent external ID as assigned by the GitHub Actions runner.
+const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
+
+const CHECKS_TO_SKIP = [
+  'Cut Nightly Branch',
+  'create-issue-on-error',
+  'status-page',
+];
+
+/**
+ * Get the current nightly branch's commit SHA.
+ *
+ * @param {Octokit} octokit
+ * @return {Promise<string>}
+ */
+async function getCurrentNightly(octokit) {
+  const {data} = await octokit.rest.git.getRef({
+    ...params,
+    ref: 'heads/nightly',
+  });
+  return data.object.sha;
+}
+
+/**
+ * Get the SHA of the last green commit from the main branch.
+ *
+ * @param {Octokit} octokit
+ * @return {Promise<string>}
+ * @throws {Error} if a green commit was not found in the last 100 main commits.
+ */
+async function getCommit(octokit) {
+  const commits = await octokit.rest.repos.listCommits({
+    ...params,
+    ref: 'main',
+    'per_page': 100,
+  });
+  log(
+    'Iterating the latest',
+    cyan(commits.data.length),
+    'commits on',
+    cyan('main')
+  );
+
+  for (const {sha} of commits.data) {
+    const checkRuns = (
+      await octokit.paginate(octokit.rest.checks.listForRef, {
+        ...params,
+        ref: sha,
+        'per_page': 100,
+      })
+    ).filter(
+      ({'external_id': id, name}) =>
+        id !== GITHUB_EXTERNAL_ID && !CHECKS_TO_SKIP.includes(name)
+    );
+
+    if (checkRuns.some(({status}) => status != 'completed')) {
+      log(
+        'Not all check runs for commit',
+        cyan(sha),
+        'are completed. Checking next commit...'
+      );
+      continue;
+    }
+
+    if (
+      !checkRuns.every(({conclusion}) =>
+        ['success', 'neutral', 'skipped'].includes(conclusion ?? '')
+      )
+    ) {
+      log(
+        'Not all check runs for commit',
+        cyan(sha),
+        'are successful. Checking next commit...'
+      );
+      continue;
+    }
+
+    log(
+      'All check runs for commit',
+      cyan(sha),
+      'have completed successfully. Cutting a new nightly at this commit...'
+    );
+
+    return sha;
+  }
+
+  throw new Error(
+    'Failed to cut nightly. Could not find a green commit in the last 100 commits'
+  );
+}
+
+/**
+ * Fast forward nightly branch to given SHA.
+ *
+ * @param {Octokit} octokit
+ * @param {string} sha
+ * @return {Promise<void>}
+ */
+async function updateBranch(octokit, sha) {
+  try {
+    await octokit.rest.git.updateRef({
+      ...params,
+      ref: 'heads/nightly',
+      sha,
+    });
+    log(
+      'A new',
+      cyan('nightly'),
+      'branch was successfully cut at commit',
+      cyan(sha)
+    );
+  } catch (e) {
+    log(
+      red(
+        'An uncaught status was returned while attempting to fast-forward the'
+      ),
+      cyan('nightly'),
+      red('branch to commit'),
+      cyan(sha)
+    );
+    log('See full error:', e);
+  }
+}
+
+/**
+ * Create GitHub tag.
+ *
+ * @param {Octokit} octokit
+ * @param {string} sha
+ * @param {string} ampVersion
+ * @return {Promise<void>}
+ */
+async function createTag(octokit, sha, ampVersion) {
+  try {
+    await octokit.rest.git.createTag({
+      ...params,
+      tag: ampVersion,
+      message: ampVersion,
+      object: sha,
+      type: 'commit',
+    });
+
+    // once a tag object is created, create a reference.
+    await octokit.rest.git.createRef({
+      ...params,
+      ref: `refs/tags/${ampVersion}`,
+      sha,
+    });
+
+    log(
+      'A new tag',
+      cyan(ampVersion),
+      'was successfully created at commit',
+      cyan(sha)
+    );
+  } catch (e) {
+    if (e instanceof RequestError && e.status === 422) {
+      log('The tag', cyan(ampVersion), 'already exists at', cyan(sha));
+    } else {
+      throw new Error(
+        `An unaught status returned while attempting to create a tag\n${e}`
+      );
+    }
+  }
+}
 
 /**
  * Perform nightly branch cut.
@@ -35,70 +191,30 @@ async function cutNightlyBranch() {
       cyan(options.method),
       cyan(options.url)
     );
-    throw new Error(error.message);
+    throw error;
   });
 
-  const commits = await octokit.rest.repos.listCommits({
-    ...params,
-    ref: 'main',
-    'per_page': 100,
-  });
-  log(
-    'Iterating the latest',
-    cyan(commits.data.length),
-    'commits on',
-    cyan('main')
-  );
-
-  for (const {sha} of commits.data) {
-    const commitStatus = await octokit.rest.repos.getCombinedStatusForRef({
-      ...params,
-      ref: sha,
-    });
-    const {state} = commitStatus.data;
-
-    log('Status of commit', cyan(sha), 'is', colorizeState(state));
-
-    if (state === 'success') {
-      if (DRY_RUN) {
-        log(yellow('NOTE:'), 'this job is running in DRY_RUN mode.');
-        break;
-      }
-
-      const response = await octokit.rest.git.updateRef({
-        ...params,
-        ref: 'heads/nightly',
-        sha,
-      });
-
-      // Casting to Number because the return type in Octokit is incorrectly
-      // annotated to only ever return 200.
-      switch (Number(response.status)) {
-        case 201:
-          log('Cut a new', cyan('nightly'), 'with', cyan(sha));
-          break;
-        case 200:
-          log(
-            'The',
-            cyan('nightly'),
-            'branch is already at the latest',
-            green('green'),
-            'sha',
-            cyan(sha)
-          );
-          break;
-        default:
-          log(
-            red('An error occurred while attempting to fast-forward the'),
-            cyan('nightly'),
-            red('branch to sha'),
-            cyan(sha)
-          );
-      }
-
-      break;
-    }
+  const currentSha = await getCurrentNightly(octokit);
+  const newSha = await getCommit(octokit);
+  if (newSha === currentSha) {
+    log(
+      yellow('There are no new'),
+      green('green'),
+      yellow('commits in the'),
+      cyan('main'),
+      yellow('branch to be cut into'),
+      cyan('nightly')
+    );
+    return;
   }
+
+  const ampVersion = getVersion(newSha);
+
+  await updateBranch(octokit, newSha);
+  await createTag(octokit, newSha, ampVersion);
+
+  log(green('Successfully cut the'), cyan('nightly'), green('branch'));
+  log('It was fast-forwarded from', cyan(currentSha), 'to', cyan(newSha));
 }
 
 cutNightlyBranch();

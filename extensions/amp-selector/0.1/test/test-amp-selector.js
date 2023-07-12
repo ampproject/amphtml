@@ -1,6 +1,6 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
-import {Keys} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
@@ -580,14 +580,14 @@ describes.realWin(
         let clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
         let setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
-        await keyPress(ampSelector, Keys.ENTER, options[3]);
+        await keyPress(ampSelector, Keys_Enum.ENTER, options[3]);
         expect(options[3].hasAttribute('selected')).to.be.true;
         expect(setSelectionSpy).to.have.been.calledWith(options[3]);
         expect(clearSelectionSpy).to.have.been.calledWith(options[1]);
         expect(setSelectionSpy).to.have.been.calledOnce;
         expect(clearSelectionSpy).to.have.been.calledOnce;
 
-        await keyPress(ampSelector, Keys.ENTER, options[3]);
+        await keyPress(ampSelector, Keys_Enum.ENTER, options[3]);
         expect(setSelectionSpy).to.have.been.calledOnce;
         expect(clearSelectionSpy).to.have.been.calledOnce;
 
@@ -610,19 +610,19 @@ describes.realWin(
         clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
         setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
-        await keyPress(ampSelector, Keys.SPACE, options[4]);
+        await keyPress(ampSelector, Keys_Enum.SPACE, options[4]);
         expect(options[4].hasAttribute('selected')).to.be.true;
         expect(setSelectionSpy).to.have.been.calledWith(options[4]);
         expect(setSelectionSpy).to.have.been.calledOnce;
         expect(clearSelectionSpy).to.not.have.been.called;
 
-        await keyPress(ampSelector, Keys.SPACE, options[4]);
+        await keyPress(ampSelector, Keys_Enum.SPACE, options[4]);
         expect(options[4].hasAttribute('selected')).to.be.false;
         expect(clearSelectionSpy).to.have.been.calledWith(options[4]);
         expect(setSelectionSpy).to.have.been.calledOnce;
         expect(clearSelectionSpy).to.have.been.calledOnce;
 
-        await keyPress(ampSelector, Keys.ENTER, options[2]);
+        await keyPress(ampSelector, Keys_Enum.ENTER, options[2]);
         expect(options[2].hasAttribute('selected')).to.be.true;
         expect(setSelectionSpy).to.have.been.calledWith(options[2]);
         expect(setSelectionSpy).to.have.been.calledTwice;
@@ -645,7 +645,7 @@ describes.realWin(
         clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
         setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
-        await keyPress(ampSelector, Keys.SPACE, impl.element.children[0]);
+        await keyPress(ampSelector, Keys_Enum.SPACE, impl.element.children[0]);
         expect(setSelectionSpy).to.not.have.been.called;
         expect(clearSelectionSpy).to.not.have.been.called;
       });
@@ -845,7 +845,7 @@ describes.realWin(
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
 
         const trust = triggerSpy.firstCall.args[3];
-        expect(trust).to.equal(ActionTrust.HIGH);
+        expect(trust).to.equal(ActionTrust_Enum.HIGH);
       });
 
       it('should trigger "select" event when an item is toggled', async () => {
@@ -913,7 +913,7 @@ describes.realWin(
         ]);
 
         const trust = triggerSpy.firstCall.args[3];
-        expect(trust).to.equal(ActionTrust.HIGH);
+        expect(trust).to.equal(ActionTrust_Enum.HIGH);
       });
 
       it(
@@ -1147,7 +1147,7 @@ describes.realWin(
           const impl = await ampSelector.getImpl(false);
           const spy = env.sandbox.spy(impl, 'navigationKeyDownHandler_');
           await ampSelector.buildInternal();
-          await keyPress(ampSelector, Keys.RIGHT_ARROW);
+          await keyPress(ampSelector, Keys_Enum.RIGHT_ARROW);
           expect(spy).to.not.have.been.called;
         });
 
@@ -1167,12 +1167,12 @@ describes.realWin(
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
-            return keyPress(ampSelector, Keys.LEFT_ARROW)
+            return keyPress(ampSelector, Keys_Enum.LEFT_ARROW)
               .then(() => {
                 expect(ampSelector.children[0].tabIndex).to.equal(-1);
                 expect(ampSelector.children[1].tabIndex).to.equal(-1);
                 expect(ampSelector.children[2].tabIndex).to.equal(0);
-                return keyPress(ampSelector, Keys.RIGHT_ARROW);
+                return keyPress(ampSelector, Keys_Enum.RIGHT_ARROW);
               })
               .then(() => {
                 expect(ampSelector.children[0].tabIndex).to.equal(0);
@@ -1200,7 +1200,7 @@ describes.realWin(
             expect(ampSelector.children[0].tabIndex).to.equal(-1);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(0);
-            return keyPress(ampSelector, Keys.HOME).then(() => {
+            return keyPress(ampSelector, Keys_Enum.HOME).then(() => {
               expect(ampSelector.children[0].tabIndex).to.equal(-1);
               expect(ampSelector.children[1].tabIndex).to.equal(0);
               expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1225,7 +1225,7 @@ describes.realWin(
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
-            return keyPress(ampSelector, Keys.END).then(() => {
+            return keyPress(ampSelector, Keys_Enum.END).then(() => {
               expect(ampSelector.children[0].tabIndex).to.equal(-1);
               expect(ampSelector.children[1].tabIndex).to.equal(0);
               expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1293,7 +1293,7 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          return keyPress(ampSelector, Keys.DOWN_ARROW)
+          return keyPress(ampSelector, Keys_Enum.DOWN_ARROW)
             .then(() => {
               expect(ampSelector.children[0].hasAttribute('selected')).to.be
                 .false;
@@ -1301,7 +1301,7 @@ describes.realWin(
                 .true;
               expect(ampSelector.children[2].hasAttribute('selected')).to.be
                 .false;
-              return keyPress(ampSelector, Keys.UP_ARROW);
+              return keyPress(ampSelector, Keys_Enum.UP_ARROW);
             })
             .then(() => {
               expect(ampSelector.children[0].hasAttribute('selected')).to.be
@@ -1398,13 +1398,15 @@ describes.realWin(
           expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
           // Note that the newly added third child is ignored.
-          keyPress(ampSelector, Keys.LEFT_ARROW)
+          keyPress(ampSelector, Keys_Enum.LEFT_ARROW)
             .then(() => {
               expect(ampSelector.children[0].tabIndex).to.equal(-1);
               expect(ampSelector.children[1].tabIndex).to.equal(0);
               expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-              const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
+              const e = new CustomEvent(AmpEvents_Enum.DOM_UPDATE, {
+                bubbles: true,
+              });
               newChild.dispatchEvent(e);
 
               // `newChild` should be focused since it has the 'selected' attribute.
@@ -1413,14 +1415,14 @@ describes.realWin(
               expect(ampSelector.children[2].tabIndex).to.equal(0);
 
               // Tabbing between children now works for `newChild`.
-              return keyPress(ampSelector, Keys.LEFT_ARROW);
+              return keyPress(ampSelector, Keys_Enum.LEFT_ARROW);
             })
             .then(() => {
               expect(ampSelector.children[0].tabIndex).to.equal(-1);
               expect(ampSelector.children[1].tabIndex).to.equal(0);
               expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-              return keyPress(ampSelector, Keys.RIGHT_ARROW);
+              return keyPress(ampSelector, Keys_Enum.RIGHT_ARROW);
             })
             .then(() => {
               expect(ampSelector.children[0].tabIndex).to.equal(-1);
@@ -1459,7 +1461,7 @@ describes.realWin(
       const impl = await element.getImpl();
       env.sandbox.stub(impl, 'setSelection_');
 
-      [('clear', 'selectDown', 'selectUp', 'toggle')].forEach((method) => {
+      ['clear', 'selectDown', 'selectUp', 'toggle'].forEach((method) => {
         action.execute(
           element,
           method,
@@ -1467,7 +1469,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
@@ -1478,7 +1480,7 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ActionTrust.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });

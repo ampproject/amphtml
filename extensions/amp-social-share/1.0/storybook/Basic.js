@@ -1,6 +1,8 @@
+import {BentoSocialShare} from '#bento/components/bento-social-share/1.0/component';
+
 import * as Preact from '#preact';
 
-import {SocialShare} from '../component';
+import '#bento/components/bento-social-share/1.0/component.jss';
 
 const types = [
   'email',
@@ -19,7 +21,7 @@ const types = [
 
 export default {
   title: 'SocialShare',
-  component: SocialShare,
+  component: BentoSocialShare,
   argTypes: {
     type: {control: {type: 'select'}, options: types},
     color: {control: {type: 'color'}},
@@ -39,5 +41,5 @@ export default {
 };
 
 export const _default = (args) => {
-  return <SocialShare {...args} />;
+  return <BentoSocialShare {...args} />;
 };

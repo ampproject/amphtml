@@ -1,8 +1,7 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
+
 import {getSourceOrigin} from '../url';
 
 /**
@@ -83,9 +82,9 @@ export class CacheCidApi {
    * @return {!Promise<?string>}
    */
   fetchCid_(url, useAlternate = true) {
-    const payload = dict({
+    const payload = {
       'publisherOrigin': getSourceOrigin(this.ampdoc_.win.location),
-    });
+    };
 
     // Make the XHR request to the cache endpoint.
     const timeoutMessage = 'fetchCidTimeout';

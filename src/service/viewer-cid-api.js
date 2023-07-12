@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {parseUrlDeprecated} from '../url';
@@ -45,11 +43,11 @@ export class ViewerCidApi {
    * @return {!Promise<?JsonObject|string|undefined>}
    */
   getScopedCid(apiKey, scope) {
-    const payload = dict({
+    const payload = {
       'scope': scope,
       'clientIdApi': !!apiKey,
       'canonicalOrigin': this.canonicalOrigin_,
-    });
+    };
     if (apiKey) {
       payload['apiKey'] = apiKey;
     }

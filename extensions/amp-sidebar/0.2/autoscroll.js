@@ -1,7 +1,9 @@
-import {Services} from '#service';
-import {computedStyle} from '#core/dom/style';
 import {scopedQuerySelector} from '#core/dom/query';
-import {user} from '../../../src/log';
+import {computedStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {user} from '#utils/log';
 
 /**
  * Given a container, find the first descendant element with the `autoscroll`

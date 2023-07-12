@@ -1,7 +1,8 @@
 import {Services} from '#service';
 
+import * as eventHelper from '#utils/event-helper';
+
 import {CSS} from '../../../../build/amp-form-0.1.css';
-import * as eventHelper from '../../../../src/event-helper';
 import {installStylesForDoc} from '../../../../src/style-installer';
 import {
   AmpFormTextarea,

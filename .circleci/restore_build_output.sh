@@ -25,13 +25,6 @@ if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
         rsync -a "${RESTORED_DIR}/" "./${OUTPUT_DIR}"
       fi
     done
-    # Bento components are compiled inside the extension source file.
-    for RESTORED_COMPONENT_DIR in ${RESTORED_BUILD_DIR}/extensions/*/?.?/dist; do
-      OUTPUT_DIR=${RESTORED_COMPONENT_DIR##$RESTORED_BUILD_DIR/}
-      echo "*" $(GREEN "Merging") $(CYAN "${RESTORED_COMPONENT_DIR}") $(GREEN "into") $(CYAN "./${OUTPUT_DIR}")
-      mkdir -p $RESTORED_DIR
-      rsync -a "${RESTORED_COMPONENT_DIR}/" "./${OUTPUT_DIR}"
-    done
   done
 else
   echo $(YELLOW "Workspace does not contain any build outputs to restore")

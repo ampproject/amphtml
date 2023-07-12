@@ -77,7 +77,7 @@ async function copyCss() {
   for (const {outCss} of cssEntryPoints) {
     await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
   }
-  const cssFiles = await fastGlob('build/css/amp-*.css');
+  const cssFiles = await fastGlob('build/css/*.css');
   await Promise.all(
     cssFiles.map((cssFile) => {
       return fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);
@@ -137,7 +137,8 @@ async function compileCss(options = {}) {
   for (const {append, outCss, outJs, path} of cssEntryPoints) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }
-  await buildExtensions({compileOnlyCss: true});
+  const buildOptions = {compileOnlyCss: true};
+  await buildExtensions(buildOptions);
   endBuildStep('Recompiled all CSS files into', 'build/', startTime);
 }
 

@@ -1,9 +1,10 @@
-import * as Preact from '#preact';
-import {Sidebar, SidebarToolbar} from '../component';
-import {htmlFor} from '#core/dom/static-template';
 import {mount} from 'enzyme';
 
-describes.sandboxed('Sidebar preact component', {}, (env) => {
+import * as Preact from '#preact';
+
+import {BentoSidebar} from '../component';
+
+describes.sandboxed('BentoSidebar preact component', {}, (env) => {
   const isOpened = (sidebarElement) => {
     return !sidebarElement.className.includes('unmounted');
   };
@@ -23,16 +24,16 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       ref = Preact.createRef();
       wrapper = mount(
         <>
-          <Sidebar ref={ref} side="left">
+          <BentoSidebar ref={ref} side="left">
             <div>Content</div>
-          </Sidebar>
+          </BentoSidebar>
           <button id="toggle" onClick={() => ref.current.toggle()}></button>
           <button id="open" onClick={() => ref.current.open()}></button>
           <button id="close" onClick={() => ref.current.close()}></button>
         </>
       );
 
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       openButton = wrapper.find('#open');
       closeButton = wrapper.find('#close');
       toggleButton = wrapper.find('#toggle');
@@ -48,16 +49,18 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
 
       // verify sidebar is opened
-      let sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      let sidebarElement = wrapper.find(BentoSidebar).getDOMNode();
       expect(isOpened(sidebarElement)).to.be.true;
 
       // click on the backdrop
-      const backdropElement = wrapper.find(Sidebar).getDOMNode().nextSibling;
+      const backdropElement = wrapper
+        .find(BentoSidebar)
+        .getDOMNode().nextSibling;
       backdropElement.click();
       wrapper.update();
 
       // verify sidebar closes
-      sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      sidebarElement = wrapper.find(BentoSidebar).getDOMNode();
       expect(isOpened(sidebarElement)).to.be.false;
     });
 
@@ -66,7 +69,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
 
       // verify sidebar is opened
-      let sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      let sidebarElement = wrapper.find(BentoSidebar).getDOMNode();
       expect(isOpened(sidebarElement)).to.be.true;
 
       // forces flush of effect queue (attaches esc key event listener)
@@ -80,8 +83,8 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       // force rerender
       wrapper.update();
 
-      // Sidebar closes
-      sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      // BentoSidebar closes
+      sidebarElement = wrapper.find(BentoSidebar).getDOMNode();
       expect(isOpened(sidebarElement)).to.be.false;
     });
 
@@ -89,7 +92,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       openButton.getDOMNode().click();
       wrapper.update();
 
-      const contentElement = wrapper.find(Sidebar).getDOMNode()
+      const contentElement = wrapper.find(BentoSidebar).getDOMNode()
         .firstElementChild.firstElementChild;
       expect(contentElement.textContent).to.equal('Content');
     });
@@ -99,7 +102,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
 
       const sidebarElement = wrapper
-        .find(Sidebar)
+        .find(BentoSidebar)
         .getDOMNode().firstElementChild;
       const backdropElement = sidebarElement.nextSibling;
 
@@ -113,7 +116,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
     it('should allow custom CSS', () => {
       wrapper = mount(
         <>
-          <Sidebar
+          <BentoSidebar
             ref={ref}
             side="left"
             style={{
@@ -130,7 +133,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
             backdropStyle={{backgroundColor: 'rgb(3, 3, 3)'}}
           >
             <div>Content</div>
-          </Sidebar>
+          </BentoSidebar>
           <button id="toggle" onClick={() => ref.current.toggle()}></button>
           <button id="open" onClick={() => ref.current.open()}></button>
           <button id="close" onClick={() => ref.current.close()}></button>
@@ -141,7 +144,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       wrapper.update();
 
       const sidebarElement = wrapper
-        .find(Sidebar)
+        .find(BentoSidebar)
         .getDOMNode().firstElementChild;
       const backdropElement = sidebarElement.nextSibling;
 
@@ -161,23 +164,23 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       ref = Preact.createRef();
       wrapper = mount(
         <>
-          <Sidebar ref={ref} side="right">
+          <BentoSidebar ref={ref} side="right">
             <div>Content</div>
-          </Sidebar>
+          </BentoSidebar>
           <button id="toggle" onClick={() => ref.current.toggle()}></button>
           <button id="open" onClick={() => ref.current.open()}></button>
           <button id="close" onClick={() => ref.current.close()}></button>
         </>
       );
 
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       openButton = wrapper.find('#open');
       closeButton = wrapper.find('#close');
       toggleButton = wrapper.find('#toggle');
 
       openButton.getDOMNode().click();
       wrapper.update();
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
 
       const sidebarNode = sidebar.getDOMNode().firstElementChild;
       expect(sidebarNode.className.includes('right')).to.be.true;
@@ -191,20 +194,20 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       ref = Preact.createRef();
       wrapper = mount(
         <>
-          <Sidebar ref={ref}>
+          <BentoSidebar ref={ref}>
             <div>Content</div>
-          </Sidebar>
+          </BentoSidebar>
           <button id="toggle" onClick={() => ref.current.toggle()}></button>
           <button id="open" onClick={() => ref.current.open()}></button>
           <button id="close" onClick={() => ref.current.close()}></button>
         </>
       );
 
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       openButton = wrapper.find('#open');
       openButton.getDOMNode().click();
       wrapper.update();
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
 
       let sidebarNode = sidebar.getDOMNode().firstElementChild;
       expect(sidebarNode.className.includes('right')).to.be.true;
@@ -214,20 +217,20 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       ref = Preact.createRef();
       wrapper = mount(
         <>
-          <Sidebar ref={ref}>
+          <BentoSidebar ref={ref}>
             <div>Content</div>
-          </Sidebar>
+          </BentoSidebar>
           <button id="toggle" onClick={() => ref.current.toggle()}></button>
           <button id="open" onClick={() => ref.current.open()}></button>
           <button id="close" onClick={() => ref.current.close()}></button>
         </>
       );
 
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       openButton = wrapper.find('#open');
       openButton.getDOMNode().click();
       wrapper.update();
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
 
       sidebarNode = sidebar.getDOMNode().firstElementChild;
       expect(sidebarNode.className.includes('left')).to.be.true;
@@ -237,132 +240,132 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
     describe('programatic access to imperative API', () => {
       it('open', () => {
-        // Sidebar is initially closed (no rendered nodes)
+        // BentoSidebar is initially closed (no rendered nodes)
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.open();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar opens
+        // BentoSidebar opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         ref.current.open();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar remains opens
+        // BentoSidebar remains opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
       });
 
       it('close', () => {
-        // Sidebar is initially closed (no rendered nodes)
+        // BentoSidebar is initially closed (no rendered nodes)
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.open();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar opens
+        // BentoSidebar opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         ref.current.close();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar closes
+        // BentoSidebar closes
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.close();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar remains closed
+        // BentoSidebar remains closed
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
 
       it('toggle', () => {
-        // Sidebar is initially closed (no rendered nodes)
+        // BentoSidebar is initially closed (no rendered nodes)
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         ref.current.toggle();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar opens
+        // BentoSidebar opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         ref.current.toggle();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar closes
+        // BentoSidebar closes
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
     });
 
     describe('click button to access imperative API', () => {
       it('open', () => {
-        // Sidebar is initially closed (no rendered nodes)
+        // BentoSidebar is initially closed (no rendered nodes)
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         openButton.getDOMNode().click();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar opens
+        // BentoSidebar opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         openButton.getDOMNode().click();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar remains opens
+        // BentoSidebar remains opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
       });
 
       it('close', () => {
-        // Sidebar is initially closed (no rendered nodes)
+        // BentoSidebar is initially closed (no rendered nodes)
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         openButton.getDOMNode().click();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar opens
+        // BentoSidebar opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         closeButton.getDOMNode().click();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar closes
+        // BentoSidebar closes
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         closeButton.getDOMNode().click();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar remains closed
+        // BentoSidebar remains closed
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
 
       it('toggle', () => {
-        // Sidebar is initially closed (no rendered nodes)
+        // BentoSidebar is initially closed (no rendered nodes)
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
         toggleButton.getDOMNode().click();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar opens
+        // BentoSidebar opens
         expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
         toggleButton.getDOMNode().click();
         wrapper.update();
-        sidebar = wrapper.find(Sidebar);
+        sidebar = wrapper.find(BentoSidebar);
 
-        // Sidebar closes
+        // BentoSidebar closes
         expect(isOpened(sidebar.getDOMNode())).to.be.false;
       });
     });
@@ -381,16 +384,16 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       ref = Preact.createRef();
       wrapper = mount(
         <>
-          <Sidebar ref={ref} side="left">
+          <BentoSidebar ref={ref} side="left">
             <div>Content</div>
-          </Sidebar>
+          </BentoSidebar>
           <button id="toggle" onClick={() => ref.current.toggle()}></button>
           <button id="open" onClick={() => ref.current.open()}></button>
           <button id="close" onClick={() => ref.current.close()}></button>
         </>
       );
 
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       openButton = wrapper.find('#open');
       closeButton = wrapper.find('#close');
     });
@@ -405,14 +408,14 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       const animation = {};
       animateStub.returns(animation);
 
-      // Sidebar is closed
+      // BentoSidebar is closed
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
-      // Sidebar immediately begins to open
-      sidebar = wrapper.find(Sidebar);
+      // BentoSidebar immediately begins to open
+      sidebar = wrapper.find(BentoSidebar);
       expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
       // Animation has been started
@@ -442,17 +445,17 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animateFunction = Element.prototype.animate;
       Element.prototype.animate = null;
 
-      // Sidebar is closed
+      // BentoSidebar is closed
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
       // Synchronously open the sidebar
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
-      // Turn on animations after Sidebar is opened
+      // Turn on animations after BentoSidebar is opened
       Element.prototype.animate = animateFunction;
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       const animation = {};
@@ -461,8 +464,8 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       // Close the sidebar
       closeButton.simulate('click');
 
-      // Sidebar begins to close but is not immediately closed
-      sidebar = wrapper.find(Sidebar);
+      // BentoSidebar begins to close but is not immediately closed
+      sidebar = wrapper.find(BentoSidebar);
       expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
       // Animation has been started
@@ -492,7 +495,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       // Cleanup the animation.
       animation.onfinish();
       wrapper.update();
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
     });
 
@@ -503,7 +506,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       };
       animateStub.returns(animation);
 
-      // Sidebar is closed
+      // BentoSidebar is closed
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
@@ -527,7 +530,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       };
       animateStub.returns(animation);
 
-      // Sidebar is closed
+      // BentoSidebar is closed
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
@@ -548,17 +551,17 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animateFunction = Element.prototype.animate;
       Element.prototype.animate = null;
 
-      // Sidebar is closed
+      // BentoSidebar is closed
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
       // Synchronously open the sidebar
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       expect(sidebar.getDOMNode()).to.not.be.null;
 
-      // Turn on animations after Sidebar is opened
+      // Turn on animations after BentoSidebar is opened
       Element.prototype.animate = animateFunction;
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       const animation = {
@@ -584,17 +587,17 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animateFunction = Element.prototype.animate;
       Element.prototype.animate = null;
 
-      // Sidebar is closed
+      // BentoSidebar is closed
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
       // Synchronously open the sidebar
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       expect(sidebar.getDOMNode()).to.not.be.null;
 
-      // Turn on animations after Sidebar is opened
+      // Turn on animations after BentoSidebar is opened
       Element.prototype.animate = animateFunction;
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       const animation = {
@@ -620,173 +623,25 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       animateFunction = Element.prototype.animate;
       Element.prototype.animate = null;
 
-      // Sidebar is closed
+      // BentoSidebar is closed
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Click to open the sidebar
       openButton.simulate('click');
 
       // Immediately opens the sidebar
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       expect(isOpened(sidebar.getDOMNode())).to.be.true;
 
       // Click to close the sidebar
       closeButton.simulate('click');
 
       // Immediately closes the sidebar
-      sidebar = wrapper.find(Sidebar);
+      sidebar = wrapper.find(BentoSidebar);
       expect(isOpened(sidebar.getDOMNode())).to.be.false;
 
       // Restore animations to the system
       Element.prototype.animate = animateFunction;
-    });
-  });
-
-  describe('toolbar', () => {
-    let wrapper;
-    let ref;
-    let matchMediaFunction;
-    let html;
-    let mediaQuery;
-    let target;
-
-    beforeEach(() => {
-      ref = Preact.createRef();
-      matchMediaFunction = window.matchMedia;
-
-      // append the toolbar target to document body separately
-      // test cannot find it otherwise
-      html = htmlFor(document);
-      target = html`<div id="toolbar-target"></div>`;
-      document.body.appendChild(target);
-    });
-
-    afterEach(() => {
-      window.matchMedia = matchMediaFunction;
-      wrapper.unmount();
-      document.body.removeChild(target);
-    });
-
-    it('toolbar target should receive expected content from toolbar', () => {
-      // this media query is always true
-      mediaQuery = '';
-      wrapper = mount(
-        <>
-          <Sidebar ref={ref} side="left">
-            <div>Content</div>
-            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
-              <ul>
-                <li>Toolbar Item 1</li>
-                <li>Toolbar Item 2</li>
-              </ul>
-            </SidebarToolbar>
-          </Sidebar>
-        </>
-      );
-
-      // Toolbar nodes were appended to the target
-      expect(target.hasChildNodes()).to.be.true;
-      expect(target.childElementCount).to.equal(2);
-      expect(target.firstElementChild.nodeName).to.equal('NAV');
-      expect(target.lastElementChild.nodeName).to.equal('STYLE');
-    });
-
-    it('existing children in toolbar target should not be overwritten', () => {
-      // this media query is always true
-      mediaQuery = '';
-      target.innerHTML = '<span>hello world<span>';
-      wrapper = mount(
-        <>
-          <Sidebar ref={ref} side="left">
-            <div>Content</div>
-            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
-              <ul>
-                <li>Toolbar Item 1</li>
-                <li>Toolbar Item 2</li>
-              </ul>
-            </SidebarToolbar>
-          </Sidebar>
-        </>
-      );
-
-      // Toolbar target now has 3 nodes, 1 existing, 2 appended from toolbar
-      expect(target.hasChildNodes()).to.be.true;
-      expect(target.childElementCount).to.equal(3);
-      expect(target.firstElementChild.nodeName).to.equal('SPAN');
-      expect(target.children[1].nodeName).to.equal('NAV');
-      expect(target.lastElementChild.nodeName).to.equal('STYLE');
-    });
-
-    it('toolbar target content should be removed on unmount', () => {
-      // this media query is always false
-      mediaQuery = '(max-height: 0px)';
-      wrapper = mount(
-        <>
-          <Sidebar ref={ref} side="left">
-            <div>Content</div>
-            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
-              <ul>
-                <li>Toolbar Item 1</li>
-                <li>Toolbar Item 2</li>
-              </ul>
-            </SidebarToolbar>
-          </Sidebar>
-        </>
-      );
-
-      expect(target.hasChildNodes()).to.be.true;
-      expect(target.childElementCount).to.equal(2);
-
-      wrapper.unmount();
-      expect(target.hasChildNodes()).to.be.false;
-    });
-
-    it('toolbar should sanitize an invalid media query', () => {
-      // this is an invalid media query
-      mediaQuery = 'foo {}';
-      wrapper = mount(
-        <>
-          <Sidebar ref={ref} side="left">
-            <div>Content</div>
-            <SidebarToolbar toolbar={mediaQuery} toolbarTarget="toolbar-target">
-              <ul>
-                <li>Toolbar Item 1</li>
-                <li>Toolbar Item 2</li>
-              </ul>
-            </SidebarToolbar>
-          </Sidebar>
-        </>
-      );
-
-      expect(target.hasChildNodes()).to.be.true;
-      expect(target.childElementCount).to.equal(2);
-      const styleElementText = target.lastElementChild.textContent;
-      expect(styleElementText).to.include('not all'); //sanitized media query
-      expect(styleElementText).not.to.include('foo'); //unsanitized media query
-    });
-
-    it('toolbar should sanitize the toolbar target attribute', () => {
-      // this media query is always true
-      mediaQuery = '';
-      const toolbarTarget = 'toolbar-target:.';
-      const getElementByIdSpy = env.sandbox.spy(document, 'getElementById');
-      wrapper = mount(
-        <>
-          <Sidebar ref={ref} side="left">
-            <div>Content</div>
-            <SidebarToolbar toolbar={mediaQuery} toolbarTarget={toolbarTarget}>
-              <ul>
-                <li>Toolbar Item 1</li>
-                <li>Toolbar Item 2</li>
-              </ul>
-            </SidebarToolbar>
-          </Sidebar>
-        </>
-      );
-
-      expect(getElementByIdSpy).to.be.calledOnce;
-      expect(getElementByIdSpy).to.be.calledWith('toolbar-target\\:\\.');
-      expect(target.hasChildNodes()).to.be.false;
     });
   });
 });

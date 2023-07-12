@@ -13,12 +13,13 @@ const {
   updatePackages,
   updateSubpackages,
 } = require('../common/update-packages');
-const {cyan, green, magenta, red} = require('../common/colors');
+const {cyan, green, magenta, red} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
+const {isCircleciBuild} = require('../common/ci');
 
 /**
- * @function {{
+ * @typedef {Function & {
  *  description: string,
  *  flags?: Object,
  * }}
@@ -93,6 +94,13 @@ async function runTask(taskName, taskFunc) {
     log(`Starting '${cyan(taskName)}'...`);
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
+    // For some reason, the `e2e` and `unit` tasks get stuck on CircleCI after
+    // testing is finishing, despite reaching this point in the code. This is a
+    // temporary workaround until we understand exactly why and fix the root
+    // cause. TODO(@ampproject/wg-infra): fix this.
+    if (isCircleciBuild() && ['e2e', 'unit'].includes(taskName)) {
+      process.exit(); // process.exitCode is set in ../tasks/e2e/index.js:171
+    }
   } catch (err) {
     log(`'${cyan(taskName)}'`, red('errored after'), magenta(getTime(start)));
     log(err);
@@ -235,7 +243,7 @@ function createTask(
 
 /**
  * Validates usage by examining task and flag invocation.
- * @param {Object} task
+ * @param {object} task
  * @param {string} taskName
  * @param {TaskFuncDef} taskFunc
  */

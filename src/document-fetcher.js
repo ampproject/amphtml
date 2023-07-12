@@ -1,8 +1,7 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
-import {user} from './log';
+import {user} from '#utils/log';
+
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -113,7 +112,7 @@ function xhrRequest(input, init) {
  * @return {!JsonObject}
  */
 function parseHeaders(rawHeaders) {
-  const headers = dict({});
+  const headers = {};
   // Replace instances of \r\n and \n followed by at least one space or
   // horizontal tab with a space.
   const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');

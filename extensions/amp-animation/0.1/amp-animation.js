@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getChildJsonConfig} from '#core/dom';
 import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
 import {clamp} from '#core/math';
@@ -6,13 +6,14 @@ import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
+import {getDetail, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {WebAnimationService} from './web-animation-service';
 import {WebAnimationPlayState} from './web-animation-types';
 import {Builder} from './web-animations';
 
-import {getDetail, listen} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
 import {Pass} from '../../../src/pass';
 
 const TAG = 'amp-animation';
@@ -121,43 +122,47 @@ export class AmpAnimation extends AMP.BaseElement {
     this.registerDefaultAction(
       this.startAction_.bind(this),
       'start',
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'restart',
       this.restartAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
-    this.registerAction('pause', this.pauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction(
+      'pause',
+      this.pauseAction_.bind(this),
+      ActionTrust_Enum.LOW
+    );
     this.registerAction(
       'resume',
       this.resumeAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'togglePause',
       this.togglePauseAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'seekTo',
       this.seekToAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'reverse',
       this.reverseAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'finish',
       this.finishAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'cancel',
       this.cancelAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 

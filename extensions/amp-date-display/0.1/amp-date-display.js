@@ -1,12 +1,13 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {dashToCamelCase} from '#core/types/string';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {getTimeZoneName} from '../format';
 
 /** @const {string} */
@@ -18,7 +19,7 @@ const DEFAULT_LOCALE = 'en';
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_DATETIME_OPTIONS = {
   'year': 'numeric',
   'month': 'short',
@@ -95,7 +96,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = '';
 
-    /** @private {Object<string, *>} */
+    /** @private {{[key: string]: *}} */
     this.localeOptions_ = null;
 
     /** @private {?../../../src/service/template-impl.Templates} */
@@ -211,7 +212,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Element} element
    * @param {string} attrPrefix
-   * @return {Object<string, *>|undefined}
+   * @return {{[key: string]: *}|undefined}
    * @private
    */
   parseLocaleOptionsAttrs_(element, attrPrefix) {
@@ -234,7 +235,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
-   * @param {?Object<string, *>} localeOptions
+   * @param {?{[key: string]: *}} localeOptions
    * @return {string}
    * @private
    */
@@ -249,7 +250,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
-   * @param {?Object<string, *>} localeOptions
+   * @param {?{[key: string]: *}} localeOptions
    * @return {!VariablesDef}
    * @private
    */
@@ -279,7 +280,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
-   * @param {?Object<string, *>} localeOptions
+   * @param {?{[key: string]: *}} localeOptions
    * @return {!VariablesDef}
    * @private
    */
@@ -370,7 +371,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
       const event = createCustomEvent(
         this.win,
-        AmpEvents.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );

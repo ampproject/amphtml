@@ -1,13 +1,14 @@
 import {DEFAULT_ACTION} from '#core/constants/action-constants';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {Services} from '#service';
 import {Resource} from '#service/resource';
 
+import {listenOncePromise} from '#utils/event-helper';
+
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;
@@ -32,7 +33,7 @@ describes.realWin('BaseElement', {amp: true}, (env) => {
       resources,
       'updateLayoutPriority'
     );
-    element.updateLayoutPriority(LayoutPriority.METADATA);
+    element.updateLayoutPriority(LayoutPriority_Enum.METADATA);
     expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
 

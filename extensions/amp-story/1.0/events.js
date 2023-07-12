@@ -1,6 +1,6 @@
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
-/** @const {!Object<string, string>} */
+/** @const {!{[key: string]: string}} */
 export const EventType = {
   // Triggered when the user mutes the story
   MUTE: 'ampstory:mute',
@@ -22,10 +22,6 @@ export const EventType = {
 
   // Triggered when the story should be replayed
   REPLAY: 'ampstory:replay',
-
-  // DEVELOPMENT MODE ONLY: Triggered when a story page has log entries (e.g.
-  // warnings or errors).
-  DEV_LOG_ENTRIES_AVAILABLE: 'ampstory:devlogentriesavailable',
 
   // Triggered when user clicks on end 75% of the last page
   NO_NEXT_PAGE: 'ampstory:nonextpage',

@@ -1,5 +1,5 @@
-#ifndef AMPVALIDATOR__PARSE_VIEWPORT_H_
-#define AMPVALIDATOR__PARSE_VIEWPORT_H_
+#ifndef CPP_ENGINE_PARSE_VIEWPORT_H_
+#define CPP_ENGINE_PARSE_VIEWPORT_H_
 
 #include <map>
 #include <string>
@@ -18,4 +18,4 @@ namespace amp::validator::parse_viewport {
 std::map<std::string, std::string> ParseContent(const std::string& content);
 }  // namespace amp::validator::parse_viewport
 
-#endif  // AMPVALIDATOR__PARSE_VIEWPORT_H_
+#endif  // CPP_ENGINE_PARSE_VIEWPORT_H_

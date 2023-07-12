@@ -7,13 +7,16 @@ export class PriorityQueue {
    * Creates an instance of PriorityQueue.
    */
   constructor() {
-    /** @private @const {Array<{item: T, priority: number}>} */
+    /**
+     * @type {Array<{item: T, priority: number}>}
+     * @private
+     */
     this.queue_ = [];
   }
 
   /**
    * Returns the max priority item without dequeueing it.
-   * @return {T}
+   * @return {?T}
    */
   peek() {
     const l = this.length;
@@ -67,7 +70,7 @@ export class PriorityQueue {
   }
 
   /**
-   * @param {function(T)} callback
+   * @param {function(T):*} callback
    */
   forEach(callback) {
     let index = this.length;
@@ -79,13 +82,14 @@ export class PriorityQueue {
   /**
    * Dequeues the max priority item.
    * Items with the same priority are dequeued in FIFO order.
-   * @return {T}
+   * @return {?T}
    */
   dequeue() {
-    if (!this.length) {
+    const lastItem = this.queue_.pop();
+    if (!lastItem) {
       return null;
     }
-    return this.queue_.pop().item;
+    return lastItem.item;
   }
 
   /**

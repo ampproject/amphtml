@@ -1,9 +1,10 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {dict} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
+
+import {Attributes} from './attributes';
 
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -34,7 +35,7 @@ export class AdSenseNetworkConfig {
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
-    const win = toWin(this.autoAmpAdsElement_.ownerDocument.defaultView);
+    const win = getWin(this.autoAmpAdsElement_);
     return buildUrl(
       '//pagead2.googlesyndication.com/getconfig/ama',
       {
@@ -50,11 +51,24 @@ export class AdSenseNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    // Force no fill on anchor ads if adsbygoogle tag (non-AMP Adsense) is already loaded.
+    // We do this to prevent multiple anchor ads from being loaded.
+    if (
+      getWin(this.autoAmpAdsElement_).adsbygoogle &&
+      config[Attributes.STICKY_AD_ATTRIBUTES]
+    ) {
+      config[Attributes.STICKY_AD_ATTRIBUTES]['data-no-fill'] = 'true';
+    }
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
-    const attributesObj = dict({
+    const attributesObj = {
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-    });
+    };
     const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
     const dataAdHostChannel = this.autoAmpAdsElement_.getAttribute(
       'data-ad-host-channel'

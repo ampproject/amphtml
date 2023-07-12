@@ -1,10 +1,10 @@
-import {addExperimentIdToElement} from './traffic-experiments';
 import {
   forceExperimentBranch,
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {ExperimentInfoDef} from '#experiments/experiments.type';
+
+import {addExperimentIdToElement} from './traffic-experiments';
 
 /**
  * Attempts to select into experiment and forces branch if selected.

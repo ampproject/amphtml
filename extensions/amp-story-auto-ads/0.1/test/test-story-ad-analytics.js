@@ -1,4 +1,5 @@
-import * as analyticsApi from '../../../../src/analytics';
+import * as analyticsApi from '#utils/analytics';
+
 import {
   AnalyticsEvents,
   AnalyticsVars,

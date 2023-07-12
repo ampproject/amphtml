@@ -1,10 +1,10 @@
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 #include "gtest/gtest.h"
-#include "atom.h"
-#include "document.h"
-#include "parser.h"
-#include "renderer.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/document.h"
+#include "cpp/htmlparser/parser.h"
+#include "cpp/htmlparser/renderer.h"
 
 using htmlparser::Atom;
 using htmlparser::Attribute;

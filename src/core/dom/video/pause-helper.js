@@ -5,13 +5,13 @@ import {
 
 export class PauseHelper {
   /**
-   * @param {!AmpElement} element
+   * @param {HTMLElement & IPausable} element
    */
   constructor(element) {
     /**
      * @private
      * @const
-     * @type {!AmpElement}
+     * @type {HTMLElement & IPausable}
      */
     this.element_ = element;
 
@@ -44,7 +44,7 @@ export class PauseHelper {
   }
 
   /**
-   * @param {!ResizeObserverSize} size
+   * @param {ResizeObserverSize} size
    * @private
    */
   pauseWhenNoSize_({blockSize, inlineSize}) {
@@ -54,7 +54,6 @@ export class PauseHelper {
     }
     this.hasSize_ = hasSize;
 
-    /** @type {!PausableInterface} */
     const element = this.element_;
     if (!hasSize) {
       element.pause();

@@ -1,21 +1,24 @@
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
-import {expandConsentEndpointUrl} from './consent-config';
-import {getConsentStateValue} from './consent-info';
-import {getData} from '../../../src/event-helper';
-import {getConsentStateManager} from './consent-state-manager';
-import {htmlFor} from '#core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '#core/dom';
 import {
   isAmpElement,
   whenUpgradedToCustomElement,
 } from '#core/dom/amp-element-helpers';
+import {elementByTag} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 import {isEsm} from '#core/mode';
+
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
+
+import {expandConsentEndpointUrl} from './consent-config';
+import {getConsentStateValue} from './consent-info';
+import {getConsentStateManager} from './consent-state-manager';
+
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-consent-ui';
 const MINIMUM_INITIAL_HEIGHT = 10;
@@ -32,6 +35,10 @@ const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
 const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 const CANCEL_OVERLAY = 'cancelFullOverlay';
 const REQUEST_OVERLAY = 'requestFullOverlay';
+const ALLOWED_SANDBOX_ATTRIBUTES = [
+  'allow-popups-to-escape-sandbox',
+  'allow-top-navigation-by-user-activation',
+];
 
 const IFRAME_RUNNING_TIMEOUT = 1000;
 
@@ -234,8 +241,11 @@ export class ConsentUI {
     const {classList} = this.parent_;
     classList.add('amp-active');
     classList.remove('amp-hidden');
-    // Add to fixed layer
-    this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
+
+    this.baseInstance_
+      .getViewport()
+      .addToFixedLayer(this.parent_, /* forceTransfer */ true);
+
     if (this.isCreatedIframe_) {
       // show() can be called multiple times, but notificationsUiManager
       // ensures that only 1 is shown at a time, so no race condition here
@@ -449,7 +459,7 @@ export class ConsentUI {
    * @param {string} event
    */
   sendViewerEvent_(event) {
-    this.viewer_.sendMessage(event, dict(), /* cancelUnsent */ true);
+    this.viewer_.sendMessage(event, {}, /* cancelUnsent */ true);
   }
 
   /**
@@ -459,16 +469,30 @@ export class ConsentUI {
    */
   createPromptIframe_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
-    const sandbox = ['allow-scripts', 'allow-popups'];
-    const allowSameOrigin = this.allowSameOrigin_(promptUISrc);
-    if (allowSameOrigin) {
-      sandbox.push('allow-same-origin');
-    }
-    iframe.setAttribute('sandbox', sandbox.join(' '));
+    const sandbox = this.getSandboxAttribute_(promptUISrc);
+    iframe.setAttribute('sandbox', sandbox);
     const {classList} = iframe;
     classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.
     return iframe;
+  }
+
+  /**
+   * Determines the sandbox attribute for the prompt iframe
+   * @param {string} src
+   * @return {string}
+   */
+  getSandboxAttribute_(src) {
+    const sandbox = ['allow-scripts', 'allow-popups'];
+    const allowSameOrigin = this.allowSameOrigin_(src);
+    if (allowSameOrigin) {
+      sandbox.push('allow-same-origin');
+    }
+
+    const additional = this.getAdditionalSandboxAttributes_();
+    Array.prototype.push.apply(sandbox, additional);
+
+    return sandbox.join(' ');
   }
 
   /**
@@ -481,6 +505,26 @@ export class ConsentUI {
     const srcUrl = urlService.parse(src);
     const containerUrl = urlService.parse(this.ampdoc_.getUrl());
     return srcUrl.origin != containerUrl.origin;
+  }
+
+  /**
+   * Retrieve additional sandbox restrictions to be removed from the iframe.
+   * @return {Array<string>}
+   */
+  getAdditionalSandboxAttributes_() {
+    return (this.config_['sandbox'] || '')
+      .split(' ')
+      .filter(Boolean)
+      .filter((attribute) => {
+        const isAllowed = ALLOWED_SANDBOX_ATTRIBUTES.indexOf(attribute) !== -1;
+        if (!isAllowed) {
+          user().error(
+            TAG,
+            `The sandbox attribute "${attribute}" is not allowed`
+          );
+        }
+        return isAllowed;
+      });
   }
 
   /**
@@ -519,7 +563,7 @@ export class ConsentUI {
       return consentStateManager
         .getLastConsentInstanceInfo()
         .then((consentInfo) => {
-          return dict({
+          return {
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
             'consentState': getConsentStateValue(consentInfo['consentState']),
@@ -531,7 +575,7 @@ export class ConsentUI {
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
             'purposeConsents': consentInfo['purposeConsents'],
-          });
+          };
         });
     });
   }

@@ -4,7 +4,7 @@ const {hasOwnProperty: hasOwn_, toString: toString_} = Object.prototype;
 /**
  * Determines if value is actually an Object.
  * @param {*} value
- * @return {boolean}
+ * @return {value is Object}
  */
 export function isObject(value) {
   return toString_.call(value) === '[object Object]';
@@ -27,23 +27,6 @@ export function map(opt_initial) {
 }
 
 /**
- * Return an empty JsonObject or makes the passed in object literal
- * an JsonObject.
- * The JsonObject type is just a simple object that is at-dict.
- * See
- * https://github.com/google/closure-compiler/wiki/@struct-and-@dict-Annotations
- * for what a dict is type-wise.
- * The linter enforces that the argument is, in fact, at-dict like.
- * @param {!Object=} opt_initial
- * @return {!JsonObject}
- */
-export function dict(opt_initial) {
-  // We do not copy. The linter enforces that the passed in object is a literal
-  // and thus the caller cannot have a reference to it.
-  return /** @type {!JsonObject} */ (opt_initial || {});
-}
-
-/**
  * Checks if the given key is a property in the map.
  *
  * @param {T}  obj a map like property.
@@ -59,7 +42,7 @@ export function hasOwn(obj, key) {
  * Returns obj[key] iff key is obj's own property (is not inherited).
  * Otherwise, returns undefined.
  *
- * @param {Object} obj
+ * @param {{[key: string]: *}} obj
  * @param {string} key
  * @return {*}
  */
@@ -71,28 +54,31 @@ export function ownProperty(obj, key) {
   }
 }
 
+/** @typedef {{t: Object, s: Object, d: number}} DeepMergeTuple */
+
 /**
  * Deep merges source into target.
  *
- * @param {!Object} target
- * @param {!Object} source
+ * @param {object} target
+ * @param {object} source
  * @param {number} depth The maximum merge depth. If exceeded, Object.assign
  *                       will be used instead.
- * @return {!Object}
+ * @return {object}
  * @throws {Error} If source contains a circular reference.
  * Note: Only nested objects are deep-merged, primitives and arrays are not.
  */
 export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.
+  /** @type {Object[]} */
   const seen = [];
 
-  /** @type {!Array<{t: !Object, s: !Object, d: number}>} */
+  /** @type {DeepMergeTuple[]} */
   const queue = [];
   queue.push({t: target, s: source, d: 0});
 
   // BFS to ensure objects don't have recursive references at shallower depths.
   while (queue.length > 0) {
-    const {d, s, t} = queue.shift();
+    const {d, s, t} = /** @type {DeepMergeTuple} */ (queue.shift());
     if (seen.includes(s)) {
       throw new Error('Source object has a circular reference.');
     }
@@ -105,39 +91,39 @@ export function deepMerge(target, source, depth = 10) {
       continue;
     }
     for (const key of Object.keys(s)) {
-      const newValue = s[key];
+      const newValue = /** @type {*} */ (s)[key];
       // Perform a deep merge IFF both target and source have the same key
       // whose corresponding values are objects.
       if (hasOwn(t, key)) {
-        const oldValue = t[key];
+        const oldValue = /** @type {*} */ (t)[key];
         if (isObject(newValue) && isObject(oldValue)) {
           queue.push({t: oldValue, s: newValue, d: d + 1});
           continue;
         }
       }
-      t[key] = newValue;
+      /** @type {*} */ (t)[key] = newValue;
     }
   }
   return target;
 }
 
 /**
- * @param {!Object} o An object to remove properties from
- * @param {!Array<string>} props A list of properties to remove from the Object
- * @return {!Object} An object with the given properties removed
+ * @param {{[key: string]: *}} o An object to remove properties from
+ * @param {Array<string>} props A list of properties to remove from the Object
+ * @return {{[key: string]: *}} An object with the given properties removed
  */
 export function omit(o, props) {
   return Object.keys(o).reduce((acc, key) => {
     if (!props.includes(key)) {
-      acc[key] = o[key];
+      /** @type {*} */ (acc)[key] = o[key];
     }
     return acc;
   }, {});
 }
 
 /**
- * @param {!Object|null|undefined} o1
- * @param {!Object|null|undefined} o2
+ * @param {*} o1
+ * @param {*} o2
  * @return {boolean}
  */
 export function objectsEqualShallow(o1, o2) {
@@ -161,14 +147,47 @@ export function objectsEqualShallow(o1, o2) {
 }
 
 /**
- * @param {T} obj
+ * Deeply compares 2 objects, and returns `true` if they match.
+ * @param {*} o1
+ * @param {*} o2
+ * @return {boolean}
+ */
+export function objectsEqualDeep(o1, o2) {
+  if (o1 === o2) {
+    return true;
+  }
+  if (o1 && o2 && typeof o1 === 'object' && typeof o2 === 'object') {
+    // Deep array compare:
+    if (Array.isArray(o1)) {
+      return (
+        Array.isArray(o2) &&
+        o1.length === o2.length &&
+        o1.every((value, i) => objectsEqualDeep(value, o2[i]))
+      );
+    }
+
+    // Deep object compare:
+    const o1Keys = Object.keys(o1);
+    const o2Keys = Object.keys(o2);
+    return (
+      o1Keys.length === o2Keys.length &&
+      o1Keys.every((key) => o2Keys.includes(key)) &&
+      o1Keys.every((key) => objectsEqualDeep(o1[key], o2[key]))
+    );
+  }
+  return false;
+}
+
+/**
+ * @param {{[key: string]: R|undefined}} obj
  * @param {string} prop
- * @param {function(T, string):R} factory
+ * @param {function({[key: string]: R|undefined}, string): R} factory
  * @return {R}
- * @template T,R
+ *
+ * @template R
  */
 export function memo(obj, prop, factory) {
-  let result = /** @type {?R} */ (obj[prop]);
+  let result = obj[prop];
   if (result === undefined) {
     result = factory(obj, prop);
     obj[prop] = result;
@@ -178,8 +197,8 @@ export function memo(obj, prop, factory) {
 
 /**
  * Recreates objects with prototype-less copies.
- * @param {!JsonObject} obj
- * @return {!JsonObject}
+ * @param {JsonObject} obj
+ * @return {JsonObject}
  */
 export function recreateNonProtoObject(obj) {
   const copy = map();
@@ -190,7 +209,7 @@ export function recreateNonProtoObject(obj) {
     const v = obj[k];
     copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
   }
-  return /** @type {!JsonObject} */ (copy);
+  return /** @type {JsonObject} */ (copy);
 }
 
 /**
@@ -199,7 +218,7 @@ export function recreateNonProtoObject(obj) {
  * field in a chain does not exist or is not an object or array, the returned
  * value will be `undefined`.
  *
- * @param {!JsonObject} obj
+ * @param {JsonObject} obj
  * @param {string} expr
  * @return {*}
  */
@@ -210,6 +229,7 @@ export function getValueForExpr(obj, expr) {
   }
   // Otherwise, navigate via properties.
   const parts = expr.split('.');
+  /** @type {*} */
   let value = obj;
   for (const part of parts) {
     if (

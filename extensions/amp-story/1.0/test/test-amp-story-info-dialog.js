@@ -1,16 +1,18 @@
-import {
-  Action,
-  AmpStoryStoreService,
-  StateProperty,
-} from '../amp-story-store-service';
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   DIALOG_VISIBLE_CLASS,
   InfoDialog,
   MOREINFO_VISIBLE_CLASS,
 } from '../amp-story-info-dialog';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 
 describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   let moreInfoLinkUrl;
@@ -28,6 +30,9 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     embedded = true;
@@ -61,7 +66,6 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
 
   it('should build the info dialog', async () => {
     await infoDialog.build();
-    expect(infoDialog.isBuilt()).to.be.true;
     expect(infoDialog.element_).to.exist;
   });
 
@@ -115,7 +119,9 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   it('should not hide the info dialog on click on the inner container', async () => {
     await infoDialog.build();
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-    infoDialog.innerContainerEl_.dispatchEvent(new Event('click'));
+    parentEl
+      .querySelector('.i-amphtml-story-info-dialog-container')
+      .dispatchEvent(new Event('click'));
 
     expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
     expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;

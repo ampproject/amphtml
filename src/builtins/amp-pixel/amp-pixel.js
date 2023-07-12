@@ -1,8 +1,9 @@
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
+import {dev, userAssert} from '#utils/log';
+
 import {BaseElement} from '../../base-element';
-import {dev, userAssert} from '../../log';
 import {createPixel} from '../../pixel';
 
 const TAG = 'amp-pixel';
@@ -79,7 +80,13 @@ export class AmpPixel extends BaseElement {
             if (!this.win) {
               return;
             }
-            const pixel = createPixel(this.win, src, this.referrerPolicy_);
+
+            const pixel = createPixel(
+              this.win,
+              src,
+              this.referrerPolicy_,
+              this.element.getAttribute('attributionsrc')
+            );
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });

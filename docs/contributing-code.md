@@ -20,7 +20,7 @@ We want to make it as easy as possible to get in small fixes. A fix for a small 
         -   choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml); it's possible that the Owners that were automatically added by the bot are also Reviewers
     -   If the Owner that was automatically added is not a Reviewer, or you want to have someone else review and approve your code add them as reviewers on your PR if you are able to do so, otherwise cc them by adding the line "/cc @username" in your PR description/comment.
 
-If your run into any issues finding a Reviewer/Owner or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup). You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
+If your run into any issues finding a Reviewer/Owner or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
 
 ### Process for significant changes
 

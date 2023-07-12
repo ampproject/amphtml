@@ -1,11 +1,12 @@
 import {bindParser as parser} from '#build/parsers/bind-expr-impl';
 
 import {isArray, isObject} from '#core/types';
-import {dict, hasOwn, map} from '#core/types/object';
+import {hasOwn, map} from '#core/types/object';
+
+import {devAssert, user} from '#utils/log';
 
 import {AstNodeType} from './bind-expr-defines';
 
-import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-bind';
@@ -14,19 +15,19 @@ const TAG = 'amp-bind';
  * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */
-const MAX_AST_SIZE = 100;
+const MAX_AST_SIZE = 250;
 
 /** @const @private {string} */
 const CUSTOM_FUNCTIONS = 'custom-functions';
 
 /**
  * Map of object type to function name to allowlisted function.
- * @private {!Object<string, !Object<string, Function>>}
+ * @private {!{[key: string]: !{[key: string]: Function}}}
  */
 let FUNCTION_ALLOWLIST;
 
 /**
- * @return {!Object<string, !Object<string, Function>>}
+ * @return {!{[key: string]: !{[key: string]: Function}}}
  * @private
  */
 function generateFunctionAllowlist() {
@@ -103,7 +104,7 @@ function generateFunctionAllowlist() {
   }
 
   // Prototype functions.
-  const allowlist = dict({
+  const allowlist = {
     '[object Array]': {
       // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
@@ -139,7 +140,7 @@ function generateFunctionAllowlist() {
       'toLowerCase': String.prototype.toLowerCase,
       'toUpperCase': String.prototype.toUpperCase,
     },
-  });
+  };
 
   // Un-namespaced static functions.
   allowlist[CUSTOM_FUNCTIONS] = {
@@ -199,7 +200,7 @@ function generateFunctionAllowlist() {
 export class BindExpression {
   /**
    * @param {string} expressionString
-   * @param {!Object<string, !./bind-macro.BindMacro>} macros
+   * @param {!{[key: string]: !./bind-macro.BindMacro}} macros
    * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
@@ -211,7 +212,7 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @private @const {!Object<string, !./bind-macro.BindMacro>} */
+    /** @private @const {!{[key: string]: !./bind-macro.BindMacro}} */
     this.macros_ = macros;
 
     /** @const @private {!./bind-expr-defines.AstNode} */

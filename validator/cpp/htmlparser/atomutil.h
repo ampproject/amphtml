@@ -1,12 +1,12 @@
 // Helper class to do a lookup of a tag/entity/event to its Atom and convert
 // atom to string.
 
-#ifndef HTMLPARSER__ATOMUTIL_H_
-#define HTMLPARSER__ATOMUTIL_H_
+#ifndef CPP_HTMLPARSER_ATOMUTIL_H_
+#define CPP_HTMLPARSER_ATOMUTIL_H_
 
 #include <string>
 
-#include "atom.h"
+#include "cpp/htmlparser/atom.h"
 
 namespace htmlparser {
 
@@ -33,4 +33,4 @@ class AtomUtil {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__ATOMUTIL_H_
+#endif  // CPP_HTMLPARSER_ATOMUTIL_H_

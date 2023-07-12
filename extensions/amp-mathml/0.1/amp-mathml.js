@@ -1,5 +1,5 @@
 import {removeElement} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 import {setStyles} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -92,7 +92,7 @@ export class AmpMathml extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 }
 

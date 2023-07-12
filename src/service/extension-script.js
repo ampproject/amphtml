@@ -1,6 +1,7 @@
+import {propagateNonce} from '#core/dom';
 import * as mode from '#core/mode';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
@@ -49,6 +50,25 @@ export function calculateExtensionScriptUrl(
 }
 
 /**
+ * Calculate url for a file in the v0/ extension directory.
+ * @param {!Window} win The window
+ * @param {!Location} location The window's location
+ * @param {string} filename
+ * @param {boolean=} opt_isLocalDev
+ * @return {string}
+ */
+export function calculateExtensionFileUrl(
+  win,
+  location,
+  filename,
+  opt_isLocalDev
+) {
+  const base = calculateScriptBaseUrl(location, opt_isLocalDev);
+  const rtv = getMode(win).rtvVersion;
+  return `${base}/rtv/${rtv}/v0/${filename}`;
+}
+
+/**
  * Calculate script url for an entry point.
  * If `opt_rtv` is true, returns the URL matching the current RTV.
  * @param {!Location} location The window's location
@@ -85,7 +105,7 @@ export function parseExtensionUrl(scriptUrl) {
   }
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
-    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)(?:\?ssr-css=[0|1])?$/i
   );
   const extensionId = matches ? matches[2] : undefined;
   const extensionVersion = matches ? matches[3] : undefined;
@@ -120,12 +140,7 @@ export function createExtensionScript(win, extensionId, version) {
   if (mode.isEsm()) {
     scriptElement.setAttribute('type', 'module');
   }
-
-  // Propagate nonce to all generated script tags.
-  const currentScript = win.document.head.querySelector('script[nonce]');
-  if (currentScript) {
-    scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
-  }
+  propagateNonce(win.document, scriptElement);
 
   // Allow error information to be collected
   // https://github.com/ampproject/amphtml/issues/7353
@@ -197,7 +212,7 @@ export function getExtensionScripts(
 /**
  * Get list of all the extension JS files.
  * @param {HTMLHeadElement|Element|ShadowRoot|Document} head
- * @return {!Array<{extensionId: string, extensionVersion: string}>}
+ * @return {!Array<{script: HTMLScriptElement, extensionId: string, extensionVersion: string}>}
  */
 export function extensionScriptsInNode(head) {
   // ampdoc.getHeadNode() can return null.
@@ -216,9 +231,12 @@ export function extensionScriptsInNode(head) {
       script.getAttribute('custom-element') ||
       script.getAttribute('custom-template');
     const urlParts = parseExtensionUrl(script.src);
-    // TODO: register error handler
     if (extensionId && urlParts) {
-      scripts.push({extensionId, extensionVersion: urlParts.extensionVersion});
+      scripts.push({
+        script,
+        extensionId,
+        extensionVersion: urlParts.extensionVersion,
+      });
     }
   }
   return scripts;

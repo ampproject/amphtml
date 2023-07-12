@@ -1,5 +1,3 @@
-
-
 /*
  * Pre-upgrade:
  * - display:block element
@@ -23,13 +21,14 @@ amp-facebook-page:not(.i-amphtml-built) {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-facebook:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc),
+amp-facebook:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
 amp-facebook-comments:not(.i-amphtml-built)
-  > :not([placeholder]):not(.i-amphtml-svc),
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
 amp-facebook-like:not(.i-amphtml-built)
-  > :not([placeholder]):not(.i-amphtml-svc),
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
 amp-facebook-pagee:not(.i-amphtml-built)
-  > :not([placeholder]):not(.i-amphtml-svc) {
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }

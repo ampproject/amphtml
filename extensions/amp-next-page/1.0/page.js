@@ -1,8 +1,8 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+
+import {devAssert} from '#utils/log';
 
 import {ViewportRelativePos} from './visibility-observer';
-
-import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {
@@ -51,8 +51,8 @@ export class Page {
     this.content_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
-    /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.PRERENDER;
+    /** @private {!VisibilityState_Enum} */
+    this.visibilityState_ = VisibilityState_Enum.PRERENDER;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
   }
@@ -135,11 +135,13 @@ export class Page {
    * @return {boolean}
    */
   isVisible() {
-    return this.isLoaded() && this.visibilityState_ === VisibilityState.VISIBLE;
+    return (
+      this.isLoaded() && this.visibilityState_ === VisibilityState_Enum.VISIBLE
+    );
   }
 
   /**
-   * @param {VisibilityState} visibilityState
+   * @param {VisibilityState_Enum} visibilityState
    */
   setVisibility(visibilityState) {
     if (!this.isLoaded() || visibilityState == this.visibilityState_) {
@@ -149,7 +151,7 @@ export class Page {
     //Reload the page if necessary
     if (
       this.is(PageState.PAUSED) &&
-      visibilityState === VisibilityState.VISIBLE
+      visibilityState === VisibilityState_Enum.VISIBLE
     ) {
       this.resume();
     }
@@ -179,7 +181,7 @@ export class Page {
     return this.shadowDoc_.close().then(() => {
       return this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
-        this.visibilityState_ = VisibilityState.HIDDEN;
+        this.visibilityState_ = VisibilityState_Enum.HIDDEN;
         this.state_ = PageState.PAUSED;
       });
     });
@@ -260,7 +262,7 @@ export class HostPage extends Page {
    * @param {!./service.NextPageService} manager
    * @param {{ url: string, title: string, image: string }} meta
    * @param {!PageState} initState
-   * @param {!VisibilityState} initVisibility
+   * @param {!VisibilityState_Enum} initVisibility
    * @param {!Document} doc
    */
   constructor(manager, meta, initState, initVisibility, doc) {

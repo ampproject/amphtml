@@ -1,6 +1,6 @@
 import {parseQueryString} from '#core/types/string/url';
 
-import {BrowserController, RequestBank} from '#testing/test-helper';
+import {BrowserController, RequestBank} from '#testing/helpers/service';
 
 import {PLATFORM_NAME} from '../../extensions/amp-skimlinks/0.1/constants';
 

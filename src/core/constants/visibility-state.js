@@ -2,11 +2,17 @@
  * Visibility state of the AMP document.
  * @enum {string}
  */
-export const VisibilityState = {
+export const VisibilityState_Enum = {
   /**
    * The AMP document is being pre-rendered before being shown.
    */
   PRERENDER: 'prerender',
+
+  /**
+   * The AMP document is being displayed in a preview mode before being shown.
+   * External resources should not be loaded, to preserve privacy.
+   */
+  PREVIEW: 'preview',
 
   /**
    * The AMP document is currently active and visible.

@@ -17,10 +17,9 @@ let passiveSupported;
  * @property {undefined|boolean} [capture]
  * @property {undefined|boolean} [once]
  * @property {undefined|boolean} [passive]
- * @property {undefined|!AbortSignal} [signal]
- * }}
+ * @property {undefined|AbortSignal} [signal]
+ * }} AddEventListenerOptsDef;
  */
-let AddEventListenerOptsDef;
 
 /**
  * Listens for the specified event on the element.
@@ -29,11 +28,11 @@ let AddEventListenerOptsDef;
  * dependency. Use `listen()` in either `event-helper` or
  * `#core/3p-frame-messaging`, depending on your use case.
  *
- * @param {!EventTarget} element
+ * @param {EventTarget} element
  * @param {string} eventType
- * @param {function(!Event)} listener
- * @param {!AddEventListenerOptsDef=} opt_evtListenerOpts
- * @return {!UnlistenDef}
+ * @param {function(Event):void} listener
+ * @param {AddEventListenerOptsDef=} opt_evtListenerOpts
+ * @return {import('#core/types/function/types').UnlistenCallback}
  */
 export function internalListenImplementation(
   element,
@@ -43,7 +42,7 @@ export function internalListenImplementation(
 ) {
   let localElement = element;
   let localListener = listener;
-  /** @type {?function(!Event)} */
+  /** @type {?function(Event):void} */
   let wrapped = (event) => {
     try {
       return localListener(event);
@@ -68,8 +67,8 @@ export function internalListenImplementation(
       optsSupported ? opt_evtListenerOpts : capture
     );
     // Ensure these are GC'd
-    localListener = null;
-    localElement = null;
+    /** @type {?} */ (localListener) = null;
+    /** @type {?} */ (localElement) = null;
     wrapped = null;
   };
 }
@@ -92,10 +91,23 @@ export function detectEvtListenerOptsSupport() {
     const options = {
       get capture() {
         optsSupported = true;
+        return false;
       },
     };
-    self.addEventListener('test-options', null, options);
-    self.removeEventListener('test-options', null, options);
+    self.addEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
+    self.removeEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
   } catch (err) {
     // EventListenerOptions are not supported
   }
@@ -112,7 +124,7 @@ export function resetEvtListenerOptsSupportForTesting() {
 /**
  * Return boolean. if listener option is supported, return `true`.
  * if not supported, return `false`
- * @param {!Window} win
+ * @param {Window} win
  * @return {boolean}
  */
 export function supportsPassiveEventListener(win) {
@@ -122,17 +134,29 @@ export function supportsPassiveEventListener(win) {
 
   passiveSupported = false;
   try {
-    const options = {
+    const options = /** @type {EventListenerOptions} */ ({
       get passive() {
         // This function will be called when the browser
         // attempts to access the passive property.
         passiveSupported = true;
         return false;
       },
-    };
+    });
 
-    win.addEventListener('test-options', null, options);
-    win.removeEventListener('test-options', null, options);
+    win.addEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
+    win.removeEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
   } catch (err) {
     // EventListenerOptions are not supported
   }

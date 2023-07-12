@@ -3,7 +3,8 @@ import {Messaging} from './messaging/messaging';
 import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
 
 const APP = '__AMPHTML__';
-const MessageType = {
+/** @enum {string} */
+const MessageType_Enum = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -141,7 +142,7 @@ export class WebviewViewerForTesting {
     const message = {
       app: APP,
       requestid: requestId,
-      type: MessageType.RESPONSE,
+      type: MessageType_Enum.RESPONSE,
     };
     this.log('############## viewer posting1 Message', message);
     channel.port1./*OK*/ postMessage(JSON.stringify(message));

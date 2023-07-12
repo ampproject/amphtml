@@ -3,7 +3,8 @@ import {devAssert} from '#core/assert';
 import {Services} from '#service';
 import {calculateEntryPointScriptUrl} from '#service/extension-script';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
+
 import {ModeDef, getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
 
@@ -108,7 +109,7 @@ class AmpWorker {
 
     /**
      * Array of in-flight messages pending response from worker.
-     * @const @private {!Object<number, PendingMessageDef>}
+     * @const @private {!{[key: number]: PendingMessageDef}}
      */
     this.messages_ = {};
 

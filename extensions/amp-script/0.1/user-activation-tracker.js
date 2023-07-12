@@ -1,4 +1,4 @@
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 export const ACTIVATION_TIMEOUT = 5000; // 5 seconds.
 

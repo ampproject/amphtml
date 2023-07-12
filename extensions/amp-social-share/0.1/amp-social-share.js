@@ -1,22 +1,22 @@
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {getSocialConfig} from './amp-social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {addParamsToUrl} from '../../../src/url';
 
 const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -28,7 +28,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.shareEndpoint_ = null;
 
     /** @private @const {!JsonObject} */
-    this.params_ = dict();
+    this.params_ = {};
 
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
@@ -83,7 +83,7 @@ class AmpSocialShare extends AMP.BaseElement {
         return;
       }
     }
-    const typeConfig = getSocialConfig(typeAttr) || dict();
+    const typeConfig = getSocialConfig(typeAttr) || {};
     if (typeConfig['obsolete']) {
       toggle(element, false);
       user().warn(TAG, `Skipping obsolete share button ${typeAttr}`);
@@ -165,7 +165,7 @@ class AmpSocialShare extends AMP.BaseElement {
    */
   handleKeyPress_(event) {
     const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
+    if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }

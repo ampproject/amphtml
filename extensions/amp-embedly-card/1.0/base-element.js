@@ -4,6 +4,8 @@ import {PreactBaseElement} from '#preact/base-element';
 import {BentoEmbedlyCard} from './component';
 import {BentoEmbedlyContext} from './embedly-context';
 
+export const BENTO_TAG = 'bento-embedly-card';
+
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */

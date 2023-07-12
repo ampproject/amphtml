@@ -15,13 +15,13 @@ import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {isObject} from '#core/types';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {getData, listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {addParamsToUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
@@ -138,14 +138,14 @@ class AmpMegaphone extends AMP.BaseElement {
     const start = this.element.getAttribute('data-start');
     const hasTile = this.element.hasAttribute('data-tile');
 
-    const queryParams = dict({
+    const queryParams = {
       'p': this.isPlaylist_ ? mediaid : undefined,
       'light': hasLightTheme || undefined,
       'sharing': hasSharing || undefined,
       'episodes': (this.isPlaylist_ && episodes) || undefined,
       'start': (!this.isPlaylist_ && start) || undefined,
       'tile': (!this.isPlaylist_ && hasTile) || undefined,
-    });
+    };
 
     return addParamsToUrl(
       this.baseUrl_ + '/' + (this.isPlaylist_ ? '' : mediaid + '/'),
@@ -194,7 +194,7 @@ class AmpMegaphone extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(dict({'method': 'pause'})),
+        JSON.stringify({'method': 'pause'}),
         this.baseUrl_
       );
 

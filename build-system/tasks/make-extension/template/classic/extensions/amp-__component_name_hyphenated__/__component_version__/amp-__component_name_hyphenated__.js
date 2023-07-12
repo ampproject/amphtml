@@ -1,5 +1,5 @@
 __css_import__;
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 
 const TAG = 'amp-__component_name_hyphenated__';
 
@@ -26,7 +26,7 @@ export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return layout == Layout_Enum.RESPONSIVE;
   }
 }
 

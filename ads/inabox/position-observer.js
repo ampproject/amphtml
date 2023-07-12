@@ -1,10 +1,9 @@
+import {Observable} from '#core/data-structures/observable';
 import {
-  LayoutRectDef,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '#core/dom/layout/rect';
-import {Observable} from '#core/data-structures/observable';
 import {throttle} from '#core/types/function';
 
 /**
@@ -14,6 +13,8 @@ import {throttle} from '#core/types/function';
  * }}
  */
 let PositionEntryDef;
+
+/** @typedef {import('#core/dom/layout/rect').LayoutRectDef} LayoutRectDef */
 
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;

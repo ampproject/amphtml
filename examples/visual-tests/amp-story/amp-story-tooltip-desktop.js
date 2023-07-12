@@ -3,7 +3,7 @@
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
+} = require('../../../build-system/tasks/visual-diff/verifiers');
 
 module.exports = {
   'tapping on a clickable anchor should show the tooltip': async (
@@ -52,21 +52,6 @@ module.exports = {
     await page.waitForTimeout(800); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page#page-3[active]']);
   },
-  'tapping on embed tooltip should expand the component': async (
-    page,
-    name
-  ) => {
-    await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#page-2[active]');
-    await page.waitForTimeout(300); // For animations to finish.
-    await page.tap('amp-twitter.interactive-embed');
-    await page.waitForTimeout(300); // For animations to finish.
-    await page.tap('a.i-amphtml-story-tooltip');
-    await page.waitForTimeout(800); // For animations to finish.
-    await verifySelectorsVisible(page, name, [
-      'amp-story-page.i-amphtml-expanded-mode',
-    ]);
-  },
   'tapping on non-interactive embed should not show tooltip or block navigation':
     async (page, name) => {
       await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -82,18 +67,4 @@ module.exports = {
         'amp-story-page#page-4[active]',
       ]);
     },
-  'tapping on closing button should exit expanded view': async (page, name) => {
-    await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#page-2[active]');
-    await page.waitForTimeout(300); // For animations to finish.
-    await page.tap('amp-twitter.interactive-embed');
-    await page.waitForTimeout(300); // For animations to finish.
-    await page.tap('a.i-amphtml-story-tooltip');
-    await page.waitForSelector('amp-story-page.i-amphtml-expanded-mode');
-    await page.waitForTimeout(800); // For animations to finish.
-    await page.tap('span.i-amphtml-expanded-view-close-button');
-    await verifySelectorsInvisible(page, name, [
-      'amp-story-page.i-amphtml-expanded-mode',
-    ]);
-  },
 };

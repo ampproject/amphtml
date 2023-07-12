@@ -18,7 +18,7 @@ FAIL
 |    <!-- Invalid: the script src path is not valid for AMP -->
 |    <script async custom-element=amp-ad src=https://cdn.ampproject.org/v0/0xff-amp-ad-0.1-foo.js-bar></script>
 >>   ^~~~~~~~~
-feature_tests/script_invalid_path.html:18:2 The extension 'amp-ad' has a path 'v0/0xff-amp-ad-0.1-foo.js-bar' which is invalid. Please use a valid path for this extension. (see https://amp.dev/documentation/components/amp-ad)
+feature_tests/script_invalid_path.html:18:2 The extension 'amp-ad' has a path 'https://cdn.ampproject.org/v0/0xff-amp-ad-0.1-foo.js-bar' which is invalid. Please use a valid path for this extension. (see https://amp.dev/documentation/components/amp-ad)
 |  </head>
 |  <body>
 |  Hello, world.

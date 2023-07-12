@@ -1,21 +1,24 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {toWin} from '#core/window';
+import {BaseElement} from '#bento/components/bento-accordion/1.0/base-element';
+
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
-import {BaseElement} from './base-element';
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-accordion-1.0.css';
-import {createCustomEvent} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
 
 /** @extends {PreactBaseElement<BentoAccordionDef.AccordionApi>} */
-class AmpAccordion extends BaseElement {
+class AmpAccordion extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api, invocation) =>
@@ -34,7 +37,7 @@ class AmpAccordion extends BaseElement {
   /** @override */
   triggerEvent(section, eventName, detail) {
     const event = createCustomEvent(
-      toWin(section.ownerDocument.defaultView),
+      getWin(section),
       `accordionSection.${eventName}`,
       detail
     );
@@ -42,7 +45,7 @@ class AmpAccordion extends BaseElement {
       section,
       eventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(section, eventName, detail);

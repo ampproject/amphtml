@@ -6,7 +6,7 @@
 /**
  * @param {!Date} date
  * @param {string} locale
- * @param {?Object<string, *>} options
+ * @param {?{[key: string]: *}} options
  * @param {string=} format ('long' by default)
  * @return {string}
  * @private

@@ -1,16 +1,18 @@
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {PreactBaseElement} from '#preact/base-element';
-import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
-import {BentoInlineGalleryThumbnails} from './thumbnails';
+import {ThumbnailsBaseElement} from '#bento/components/bento-inline-gallery/1.0/thumbnails-base-element';
+
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';
 
-/** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
-export class AmpInlineGalleryThumbnails extends PreactBaseElement {
+export class AmpInlineGalleryThumbnails extends setSuperClass(
+  ThumbnailsBaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -23,25 +25,3 @@ export class AmpInlineGalleryThumbnails extends PreactBaseElement {
     return super.isLayoutSupported(layout);
   }
 }
-
-/** @override */
-AmpInlineGalleryThumbnails['Component'] = BentoInlineGalleryThumbnails;
-
-/** @override */
-AmpInlineGalleryThumbnails['props'] = {
-  'aspectRatio': {attr: 'aspect-ratio', type: 'number', media: true},
-  'children': {passthroughNonEmpty: true},
-  'loop': {attr: 'loop', type: 'boolean', media: true},
-};
-
-/** @override */
-AmpInlineGalleryThumbnails['layoutSizeDefined'] = true;
-
-/** @override */
-AmpInlineGalleryThumbnails['usesShadowDom'] = true;
-
-/** @override */
-AmpInlineGalleryThumbnails['shadowCss'] = CAROUSEL_CSS + THUMBNAIL_CSS;
-
-/** @override */
-AmpInlineGalleryThumbnails['useContexts'] = [CarouselContextProp];

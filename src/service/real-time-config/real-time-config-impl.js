@@ -4,10 +4,11 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {RTC_VENDORS} from './callout-vendors';
 
 import {isCancellation} from '../../error-reporting';
-import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
 import {isAmpScriptUri} from '../../url';
@@ -61,7 +62,7 @@ export const RTC_ERROR_ENUM = {
   MACRO_EXPAND_TIMEOUT: '11',
 };
 
-/** @const {!Object<string, boolean>} */
+/** @const {!{[key: string]: boolean}} */
 const GLOBAL_MACRO_ALLOWLIST = {CLIENT_ID: true};
 
 export class RealTimeConfigService {
@@ -77,11 +78,11 @@ export class RealTimeConfigService {
    * For a given A4A Element, sends out Real Time Config requests to
    * any urls or vendors specified by the publisher.
    * @param {!Element} element
-   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   * @param {!{[key: string]: !../../../src/service/variable-source.AsyncResolverDef}} customMacros The ad-network specified macro
    *   substitutions available to use.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {?{[key: string]: string|number|boolean|undefined}} consentMetadata
    * @param {!Function} checkStillCurrent
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting
@@ -116,7 +117,7 @@ export class RealTimeConfigManager {
     /** @private {!Window} */
     this.win_ = ampDoc.win;
 
-    /** @private {!Object<string, boolean>} */
+    /** @private {!{[key: string]: boolean}} */
     this.seenUrls_ = {};
 
     /** @private {?number} */
@@ -134,7 +135,7 @@ export class RealTimeConfigManager {
     /** @private {?string} */
     this.consentString_ = null;
 
-    /** @private {?Object<string, string|number|boolean|undefined>} */
+    /** @private {?{[key: string]: string|number|boolean|undefined}} */
     this.consentMetadata_ = null;
   }
 
@@ -279,8 +280,8 @@ export class RealTimeConfigManager {
   /**
    * Assigns constant macros that should exist for all RTC to object of custom
    * per-network macros.
-   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
-   * @return {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>}
+   * @param {!{[key: string]: !../../../src/service/variable-source.AsyncResolverDef}} macros
+   * @return {!{[key: string]: !../../../src/service/variable-source.AsyncResolverDef}}
    */
   assignMacros(macros) {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
@@ -298,7 +299,7 @@ export class RealTimeConfigManager {
 
   /**
    * Manages sending the RTC callouts for the Custom URLs.
-   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   * @param {!{[key: string]: !../../../src/service/variable-source.AsyncResolverDef}} customMacros The ad-network specified macro
    * @param {!Function} checkStillCurrent
    * @param {!Element} element
    */
@@ -328,7 +329,7 @@ export class RealTimeConfigManager {
 
   /**
    * Manages sending the RTC callouts for all specified vendors.
-   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   * @param {!{[key: string]: !../../../src/service/variable-source.AsyncResolverDef}} customMacros The ad-network specified macro
    * @param {!Function} checkStillCurrent
    */
   handleRtcForVendorUrls(customMacros, checkStillCurrent) {
@@ -381,7 +382,7 @@ export class RealTimeConfigManager {
 
   /**
    * @param {string} url
-   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
+   * @param {!{[key: string]: !../../../src/service/variable-source.AsyncResolverDef}} macros
    * @param {string} errorReportingUrl
    * @param {!Function} checkStillCurrent
    * @param {string=} opt_vendor
@@ -583,11 +584,11 @@ export class RealTimeConfigManager {
    * For a given A4A Element, sends out Real Time Config requests to
    * any urls or vendors specified by the publisher.
    * @param {!Element} element
-   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   * @param {!{[key: string]: !../../../src/service/variable-source.AsyncResolverDef}} customMacros The ad-network specified macro
    *   substitutions available to use.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {?{[key: string]: string|number|boolean|undefined}} consentMetadata
    * @param {!Function} checkStillCurrent
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting

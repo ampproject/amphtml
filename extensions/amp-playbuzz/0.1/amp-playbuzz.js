@@ -24,20 +24,17 @@
 import {CSS} from '#build/amp-playbuzz-0.1.css';
 
 import {removeElement} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {dict} from '#core/types/object';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 
 import {Services} from '#service';
+
+import * as events from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
 
 import {logo, showMoreArrow} from './images';
 import * as utils from './utils';
 
-import * as events from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseUrlDeprecated,
@@ -78,6 +75,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     /** @private {string}  */
     this.iframeSrcUrl_ = '';
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
   /**
    * @override
@@ -118,7 +118,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.RESPONSIVE || layout === Layout.FIXED_HEIGHT;
+    return (
+      layout === Layout_Enum.RESPONSIVE || layout === Layout_Enum.FIXED_HEIGHT
+    );
   }
 
   /** @override */
@@ -168,9 +170,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(
+    this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (inViewport) => (this.inViewport_ = inViewport)
+      ({isIntersecting}) => (this.inViewport_ = isIntersecting)
     );
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
@@ -291,12 +293,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
       return;
     }
 
-    const scrollingData = dict({
+    const scrollingData = {
       'event': 'scroll',
       'windowHeight': changeEvent.height,
       'scroll': changeEvent.top,
       'offsetTop': this.getLayoutBox().top,
-    });
+    };
 
     this.notifyIframe_(scrollingData);
   }
@@ -310,7 +312,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 

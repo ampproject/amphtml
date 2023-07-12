@@ -1,13 +1,13 @@
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 #include <algorithm>
 #include <array>
 #include <functional>
 #include <sstream>
 #include <tuple>
-#include "casetable.h"
-#include "entity.h"
-#include "whitespacetable.h"
+#include "cpp/htmlparser/casetable.h"
+#include "cpp/htmlparser/entity.h"
+#include "cpp/htmlparser/whitespacetable.h"
 
 namespace htmlparser {
 
@@ -226,7 +226,7 @@ void Strings::ConvertNewLines(std::string* s) {
   }
 }
 
-std::string Strings::ToHexString(char32_t c) {
+std::string Strings::ToHexString(uint32_t c) {
   std::stringstream ss;
   ss << "0x" << std::hex << c;
   return ss.str();
@@ -254,7 +254,7 @@ int8_t Strings::CodePointNumBytes(char32_t c) {
 }
 
 std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
-  if (s->empty()) {
+  if (!s || s->empty()) {
     return std::nullopt;
   }
 

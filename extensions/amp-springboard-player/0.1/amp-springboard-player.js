@@ -4,7 +4,8 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 
 import {Services} from '#service';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
+
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {

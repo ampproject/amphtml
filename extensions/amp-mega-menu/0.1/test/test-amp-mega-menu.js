@@ -1,5 +1,5 @@
 import '../amp-mega-menu';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
@@ -157,7 +157,7 @@ describes.realWin(
       impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
-      const escKey = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
+      const escKey = new KeyboardEvent('keydown', {key: Keys_Enum.ESCAPE});
       doc.documentElement.dispatchEvent(escKey);
       expect(heading.parentNode.hasAttribute('open')).to.be.false;
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
@@ -169,8 +169,10 @@ describes.realWin(
       const heading1 = doc.getElementById('heading1');
       const heading2 = doc.getElementById('heading2');
       const heading3 = doc.getElementById('heading3');
-      const leftKey = new KeyboardEvent('keydown', {key: Keys.LEFT_ARROW});
-      const rightKey = new KeyboardEvent('keydown', {key: Keys.RIGHT_ARROW});
+      const leftKey = new KeyboardEvent('keydown', {key: Keys_Enum.LEFT_ARROW});
+      const rightKey = new KeyboardEvent('keydown', {
+        key: Keys_Enum.RIGHT_ARROW,
+      });
       tryFocus(heading1);
       expect(doc.activeElement).to.equal(heading1);
       heading1.dispatchEvent(leftKey);

@@ -71,10 +71,6 @@ async function prCheck() {
     runCheck('amp babel-plugin-tests');
   }
 
-  if (buildTargetsInclude(Targets.CACHES_JSON)) {
-    runCheck('amp caches-json');
-  }
-
   if (buildTargetsInclude(Targets.DOCS)) {
     runCheck('amp check-links --local_changes');
   }

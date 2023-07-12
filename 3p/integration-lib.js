@@ -1,33 +1,35 @@
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
+
+import {
+  initLogConstructor,
+  isUserErrorMessage,
+  setReportError,
+  userAssert,
+} from '#utils/log';
 
 import {run, setExperimentToggles} from './3p';
 import {IntegrationAmpContext} from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 
-import {urls} from '../src/config';
-import {
-  initLogConstructor,
-  isUserErrorMessage,
-  setReportError,
-  userAssert,
-} from '../src/log';
+import * as urls from '../src/config/urls';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
   '1wo': true,
   '24smi': true,
+  adskeeper: true,
   adsloom: true,
   adstyle: true,
   bringhub: true,
+  colombiafeed: true,
   dable: true,
   engageya: true,
   epeex: true,
@@ -43,6 +45,7 @@ const AMP_EMBED_ALLOWED = {
   mediaad: true,
   mgid: true,
   miximedia: true,
+  myua: true,
   mywidget: true,
   nativery: true,
   lentainform: true,
@@ -310,7 +313,7 @@ export function parseFragment(fragment) {
     if (json.startsWith('{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());
+    return /** @type {!JsonObject} */ (json ? parseJson(json) : {});
   } catch (err) {
     return null;
   }

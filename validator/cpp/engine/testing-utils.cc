@@ -3,13 +3,13 @@
 
 #include <filesystem>
 
-#include "glog/logging.h"
-#include "testing-utils.h"
-#include "error-formatter.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/engine/testing-utils.h"
+#include "cpp/engine/error-formatter.h"
 #include "absl/strings/substitute.h"
 #include "absl/strings/str_cat.h"
-#include "fileutil.h"
-#include "strings.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/strings.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/strip.h"
 
@@ -91,7 +91,7 @@ const std::map<std::string, TestCase>& TestCases() {
     std::vector<TestCase> cases;
     std::vector<std::string> html_files;
     CHECK(htmlparser::FileUtil::Glob(
-           "external/validator/testdata/*/*.html",
+           "testdata/*/*.html",
            &html_files)) << "Test cases file pattern not found.";
     CHECK(htmlparser::FileUtil::Glob(
            "external/amphtml-extensions/*/*/test/*.html",

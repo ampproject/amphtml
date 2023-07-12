@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.d.ts",
+    "../core/**/globals.d.ts",
+    "../**/base-element.d.ts"
+  ]
+}

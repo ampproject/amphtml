@@ -83,9 +83,9 @@ describes.realWin(
     it('sets transform of amp-img on page change', async () => {
       const attributes = {
         'group-id': 'group-1',
-        'x': '50%',
-        'y': '50%',
-        'zoom': '2',
+        'data-x': '50%',
+        'data-y': '50%',
+        'data-zoom': 2,
       };
       await createAmpStoryPanningMedia(
         '/examples/amp-story/img/conservatory-coords.jpg',
@@ -95,17 +95,16 @@ describes.realWin(
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await afterRenderPromise(win);
       expect(panningMedia.element.firstChild.style.transform).to.equal(
-        `translate3d(${attributes.x}, ${attributes.y}, ${
-          (attributes.zoom - 1) / attributes.zoom
+        `translate3d(${attributes['data-x']}, ${attributes['data-y']}, ${
+          (attributes['data-zoom'] - 1) / attributes['data-zoom']
         }px)`
       );
     });
 
-    it('calculates transform with lock-bounds', async () => {
+    it('calculates zoom with lock-bounds', async () => {
       const attributes = {
         'group-id': 'group-1',
-        'y': '50%',
-        'zoom': 0.2,
+        'data-zoom': 0.2,
         'lock-bounds': '',
       };
       await createAmpStoryPanningMedia(

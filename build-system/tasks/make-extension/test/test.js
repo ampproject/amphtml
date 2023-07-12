@@ -114,21 +114,6 @@ test('makeExtensionFromTemplates does not print unit test blurb if a test file i
     );
   }));
 
-test('makeExtensionFromTemplates prints unit test blurb if a test file is created', (t) =>
-  tempy.directory.task(async (dir) => {
-    const {makeExtensionFromTemplates} = require('..');
-    await makeExtensionFromTemplates(
-      [path.join(__dirname, '../template/bento')],
-      dir,
-      {name: 'my-extension-name'}
-    );
-    t.true(
-      !!stubbedCalls.logLocalDev.find((args) =>
-        args.find((arg) => arg.includes('amp unit --files'))
-      )
-    );
-  }));
-
 test('makeExtensionFromTemplates does not print Storybook blurb if a Storybook file is not created', (t) =>
   tempy.directory.task(async (dir) => {
     const {makeExtensionFromTemplates} = require('..');
@@ -138,21 +123,6 @@ test('makeExtensionFromTemplates does not print Storybook blurb if a Storybook f
       {name: 'my-extension-name'}
     );
     t.false(
-      !!stubbedCalls.logLocalDev.find((args) =>
-        args.find((arg) => arg.includes('amp storybook'))
-      )
-    );
-  }));
-
-test('makeExtensionFromTemplates prints Storybook blurb if a Storybook file is created', (t) =>
-  tempy.directory.task(async (dir) => {
-    const {makeExtensionFromTemplates} = require('..');
-    await makeExtensionFromTemplates(
-      [path.join(__dirname, '../template/bento')],
-      dir,
-      {name: 'my-extension-name'}
-    );
-    t.true(
       !!stubbedCalls.logLocalDev.find((args) =>
         args.find((arg) => arg.includes('amp storybook'))
       )
@@ -220,7 +190,6 @@ test('insertExtensionBundlesConfig inserts new entry', (t) =>
         {
           name: 'a',
           version: 'x',
-          latestVersion: 'x',
           options: {hasCss: true},
         },
         {
@@ -229,117 +198,7 @@ test('insertExtensionBundlesConfig inserts new entry', (t) =>
       ]);
 
       // expected order of keys
-      t.deepEqual(Object.keys(items[1]), [
-        'name',
-        'version',
-        'latestVersion',
-        'options',
-      ]);
-    },
-    {extension: 'json'}
-  ));
-
-test('insertExtensionBundlesConfig uses existing latestVersion', (t) =>
-  tempy.file.task(
-    async (destination) => {
-      const {insertExtensionBundlesConfig} = require('..');
-      await writeJson(destination, [
-        {
-          name: 'foo',
-          version: 'existing version',
-          latestVersion: 'existing version',
-        },
-      ]);
-
-      await insertExtensionBundlesConfig(
-        {
-          name: 'foo',
-          version: 'new version',
-        },
-        destination
-      );
-
-      t.deepEqual(await readJson(destination), [
-        {
-          name: 'foo',
-          version: 'existing version',
-          latestVersion: 'existing version',
-        },
-        {
-          name: 'foo',
-          version: 'new version',
-          latestVersion: 'existing version',
-        },
-      ]);
-    },
-    {extension: 'json'}
-  ));
-
-test('insertExtensionBundlesConfig uses passed latestVersion', (t) =>
-  tempy.file.task(
-    async (destination) => {
-      const {insertExtensionBundlesConfig} = require('..');
-      await writeJson(destination, [
-        {
-          name: 'foo',
-          version: '_',
-        },
-      ]);
-
-      await insertExtensionBundlesConfig(
-        {
-          name: 'foo',
-          version: 'new version',
-          latestVersion: 'new version',
-        },
-        destination
-      );
-
-      t.deepEqual(await readJson(destination), [
-        {
-          name: 'foo',
-          version: '_',
-        },
-        {
-          name: 'foo',
-          version: 'new version',
-          latestVersion: 'new version',
-        },
-      ]);
-    },
-    {extension: 'json'}
-  ));
-
-test('insertExtensionBundlesConfig uses version as latestVersion', (t) =>
-  tempy.file.task(
-    async (destination) => {
-      const {insertExtensionBundlesConfig} = require('..');
-      await writeJson(destination, [
-        {
-          name: 'foo',
-          version: '_',
-        },
-      ]);
-
-      await insertExtensionBundlesConfig(
-        {
-          name: 'foo',
-          version: 'new version',
-        },
-        destination
-      );
-
-      t.deepEqual(await readJson(destination), [
-        {
-          name: 'foo',
-          version: '_',
-        },
-        {
-          name: 'foo',
-          version: 'new version',
-          latestVersion: 'new version',
-        },
-      ]);
+      t.deepEqual(Object.keys(items[1]), ['name', 'version', 'options']);
     },
     {extension: 'json'}
   ));

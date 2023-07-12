@@ -1,12 +1,16 @@
-import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '#service';
+import {getChildJsonConfig} from '#core/dom';
 import {childElementByTag} from '#core/dom/query';
 import {deepMerge, hasOwn, map} from '#core/types/object';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '#core/dom';
+
+import {Services} from '#service';
+
+import {devAssert, user, userAssert} from '#utils/log';
+
+import {CMP_CONFIG} from './cmps';
 import {getConsentStateManager} from './consent-state-manager';
+
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
@@ -19,8 +23,9 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'onUpdateHref': true,
 };
 
-/** @const @type {!Object<string, boolean>} */
+/** @const @type {!{[key: string]: boolean}} */
 const CONSENT_VARS_ALLOWED_LIST = {
+  'CANONICAL_URL': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
   'SOURCE_URL': true,
@@ -304,7 +309,7 @@ export class ConsentConfig {
  * Expand consent endpoint url
  * @param {!Element|!ShadowRoot} element
  * @param {string} url
- * @param {Object<string, *>=} opt_vars
+ * @param {{[key: string]: *}=} opt_vars
  * @return {!Promise<string>}
  */
 export function expandConsentEndpointUrl(element, url, opt_vars) {

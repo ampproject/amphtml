@@ -4,7 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const karmaConfig = require('../../test-configs/karma.conf');
 const {
   commonIntegrationTestPaths,
-  commonUnitTestPaths,
+  getCommonUnitTestPaths,
   integrationTestPaths,
   karmaHtmlFixturesPath,
   karmaJsPaths,
@@ -18,7 +18,7 @@ const {
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {customLaunchers} = require('./custom-launchers');
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
@@ -155,6 +155,7 @@ class RuntimeTestConfig {
   updateFiles() {
     switch (this.testType) {
       case 'unit':
+        const commonUnitTestPaths = getCommonUnitTestPaths();
         if (argv.files || argv.filelist) {
           this.files = commonUnitTestPaths
             .concat(getFilesFromArgv())
@@ -226,16 +227,19 @@ class RuntimeTestConfig {
     const babelPlugin = getEsbuildBabelPlugin(
       /* callerName */ 'test',
       /* enableCache */ true,
-      /* preSetup */ this.logBabelStart,
-      /* postLoad */ this.printBabelDot
+      {
+        preSetup: this.logBabelStart,
+        postLoad: this.printBabelDot,
+      }
     );
     this.esbuild = {
-      target: 'es5',
+      target: 'esnext', // We use babel for transpilation.
       define: {
         'process.env.NODE_DEBUG': 'false',
         'process.env.NODE_ENV': '"test"',
       },
       plugins: [importPathPlugin, babelPlugin],
+      mainFields: ['module', 'browser', 'main'],
       sourcemap: 'inline',
     };
   }

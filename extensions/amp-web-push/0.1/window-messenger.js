@@ -14,10 +14,11 @@
  * the License.
  */
 
+import {getData} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {TAG} from './vars';
 
-import {getData} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{
@@ -71,7 +72,7 @@ export class WindowMessenger {
      * A map of string topic names to callbacks listeners interested in replies
      * to the topic.
      *
-     * @type {(Object<string,Array>|null)}
+     * @type {({[key: string]: Array}|null)}
      */
     this.listeners_ = {};
     this.debug_ = options.debug;

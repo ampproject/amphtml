@@ -94,6 +94,7 @@
       <option>moengage</option>
       <option>mparticle</option>
       <option>mpulse</option>
+      <option>neodata</option>
       <option>newrelic</option>
       <option>nielsen</option>
       <option>nielsen-marketing-cloud</option>
@@ -102,6 +103,7 @@
       <option>oracleInfinityAnalytics</option>
       <option>parsely</option>
       <option>permutive</option>
+      <option>permutive-ampscript</option>
       <option>piano</option>
       <option>pinpoll</option>
       <option>piStats</option>
@@ -1160,7 +1162,7 @@ For complete documentation and additional examples please see: https://marketing
             "a": {
               "title": "${title}"
             },
-            "e": "amp example button click"
+            "e": "AMP example button click"
           }
         }
       }
@@ -1216,6 +1218,20 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End mParticle example -->
+
+<!-- Neodata example -->
+<amp-analytics type="neodata" id="neodata">
+  <script type="application/json">
+    {
+      "vars": {
+        "sysId": "999",
+        "tagId": "12321",
+        "advId": "56785"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Neodata example -->
 
 <!-- New Relic example -->
 <amp-analytics type="newrelic" id="newrelic">
@@ -1372,6 +1388,16 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Permutive example -->
+
+<!-- Permutive-amp-script example -->
+<amp-analytics type="permutive-ampscript" id="permutive-ampscript">
+  {
+    "extraUrlParams": {
+      "customProperty1": "customValue1"
+    }
+  }
+</amp-analytics>
+<!-- End Permutive-amp-script example -->
 
 <!-- Start Piano example -->
 <amp-analytics type="piano" id="piano">
@@ -1656,7 +1682,7 @@ For complete documentation and additional examples please see: https://marketing
   {
     "vars": {
       "collectorHost": "collector.snplow.net",
-      "appId": "amp-examples-v2.0.3",
+      "appId": "amp-examples-v2.1.0",
       "userId": "someUserId",
       "nameTracker": "testName",
       "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
@@ -2021,7 +2047,8 @@ For complete documentation and additional examples please see: https://marketing
     "id":"123456",
     "sec":"news",
     "tgs":"modi,parliament",
-    "pc":"loggedin"
+    "pc":"loggedin",
+    "vct":"1"
   }
 }
 </script>
@@ -2035,12 +2062,18 @@ For complete documentation and additional examples please see: https://marketing
       "object_id": "foo",
       "object_type":"bar",
       "section":"sport",
+      "taxonomy": "tennis",
       "author":"john suran",
       "creator":"john suran",
       "domain":"clientDomain",
       "pubdate":"2015-01-01 00:00:00",
-      "customKeys": ["source","user_status"],
-      "customValues": ["digital team","0"]
+      "custom_keys": ["source","sponsored"],
+      "custom_values": ["digital team", "0"],
+      "content_type": 1,
+      "content_blocked": 1,
+      "user_status": 0,
+      "lead_selector": "#leadButton",
+      "subscription_selector": "#subscribeButton"
     },
     "triggers": {
       "videoPlays": {

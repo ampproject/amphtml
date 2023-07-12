@@ -5,7 +5,7 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function teads(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._teads_amp = {
     allowed_data: ['pid', 'tag'],
     mandatory_data: ['pid'],
@@ -26,7 +26,7 @@ export function teads(global, data) {
 
     loadScript(
       global,
-      'https://s8t.teads.tv/media/format/' +
+      'https://a.teads.tv/media/format/' +
         encodeURI(data.tag.js || 'v3/teads-format.min.js')
     );
   } else {

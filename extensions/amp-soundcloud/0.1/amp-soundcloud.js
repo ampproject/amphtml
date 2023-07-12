@@ -13,11 +13,11 @@
 
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
+
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -129,7 +129,7 @@ class AmpSoundcloud extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(dict({'method': 'pause'})),
+        JSON.stringify({'method': 'pause'}),
         'https://w.soundcloud.com'
       );
     }

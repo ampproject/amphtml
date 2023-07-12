@@ -15,6 +15,7 @@
  */
 
 import {loadScript, validateData} from '#3p/3p';
+
 import {setStyle} from '#core/dom/style';
 
 /**
@@ -25,7 +26,7 @@ import {setStyle} from '#core/dom/style';
  */
 
 /**
- * @typedef {Object} FeedAdAsync
+ * @typedef {object} FeedAdAsync
  * @private
  *
  * @property {FeedAd} [sdk]
@@ -33,7 +34,7 @@ import {setStyle} from '#core/dom/style';
  */
 
 /**
- * @typedef {Object} FeedAd
+ * @typedef {object} FeedAd
  * @private
  *
  * @property {function(string)} init
@@ -41,14 +42,14 @@ import {setStyle} from '#core/dom/style';
  */
 
 /**
- * @typedef {Object} FeedAdResponse
+ * @typedef {object} FeedAdResponse
  * @private
  *
  * @property {function():HTMLElement} createAdContainer()
  */
 
 /**
- * @typedef {Object} FeedAdData
+ * @typedef {object} FeedAdData
  * @private
  *
  * @property {string} clientToken

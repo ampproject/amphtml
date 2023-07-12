@@ -1,4 +1,3 @@
-
 amp-lightbox {
   display: none;
   position: fixed !important;
@@ -16,7 +15,7 @@ amp-lightbox[scrollable] {
 
 /* Ad lightbox styles */
 
-i-amphtml-ad-close-header {
+amp-lightbox i-amphtml-ad-close-header {
   height: 60px !important;
   display: block !important;
   visibility: visible !important;
@@ -34,13 +33,13 @@ i-amphtml-ad-close-header {
   transition: 0.1s opacity ease-in;
 }
 
-[animate-in="fly-in-bottom"] > i-amphtml-ad-close-header,
-[animate-in="fly-in-top"] > i-amphtml-ad-close-header {
+[animate-in='fly-in-bottom'] > i-amphtml-ad-close-header,
+[animate-in='fly-in-top'] > i-amphtml-ad-close-header {
   /* show after transition has finished */
   transition-delay: 0.2s;
 }
 
-.amp-ad-close-header {
+amp-lightbox .amp-ad-close-header {
   opacity: 1 !important;
   box-sizing: border-box;
   padding: 5px;
@@ -52,14 +51,15 @@ i-amphtml-ad-close-header {
   cursor: pointer;
 }
 
-.amp-ad-close-header > *:first-child {
+amp-lightbox .amp-ad-close-header > *:first-child {
   margin-left: auto !important; /* aligns right */
   pointer-events: none !important; /* pass-thru */
 }
 
-.amp-ad-close-button {
+amp-lightbox .amp-ad-close-button {
   display: block !important;
-  background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E") no-repeat;
+  background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E")
+    no-repeat;
   background-position: center center;
   width: 40px;
   height: 40px;
@@ -68,6 +68,6 @@ i-amphtml-ad-close-header {
   margin-left: 5px;
 }
 
-.amp-ad-close-header:active>.amp-ad-close-button {
+amp-lightbox .amp-ad-close-header:active > .amp-ad-close-button {
   background-color: rgba(255, 255, 255, 0.3);
 }

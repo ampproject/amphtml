@@ -1,12 +1,18 @@
-import {createElementWithAttributes, iterateCursor} from '#core/dom';
-import {dict, map} from '#core/types/object';
+import {createElementWithAttributes} from '#core/dom';
+import {map} from '#core/types/object';
+import {getWin} from '#core/window';
 
 import {getExperimentBranch} from '#experiments';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
+
+import {getAmpdoc} from 'src/service-helpers';
 
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
-import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertHttpsUrl} from '../../../src/url';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -56,25 +62,23 @@ const DataAttrs = {
 };
 
 /**
- * Finds all meta tags starting with `amp4ads-vars-` or `amp-cta`.
+ * Finds all meta tags like `amp4ads-vars-` or `amp-cta`.
  * @param {Document} doc
- * @return {!IArrayLike}
+ * @return {!NodeList}
  */
 export function getStoryAdMetaTags(doc) {
-  const selector = 'meta[name^=amp4ads-vars-],meta[name^=amp-cta-]';
-  return doc.querySelectorAll(selector);
+  return doc.querySelectorAll('meta[name]');
 }
 
 /**
  * Creates object containing information extracted from the creative
  * that is needed to render story ad ui e.g. cta, attribution, etc.
- * @param {!Document} doc
+ * @param {!NodeList} metaTags
  * @return {StoryAdUIMetadata}
  */
-export function getStoryAdMetadataFromDoc(doc) {
-  const storyMetaTags = getStoryAdMetaTags(doc);
+export function getStoryAdMetadataFromDoc(metaTags) {
   const vars = map();
-  iterateCursor(storyMetaTags, (tag) => {
+  metaTags.forEach((tag) => {
     const {content, name} = tag;
     if (name.startsWith(CTA_META_PREFIX)) {
       const key = name.split('amp-')[1];
@@ -85,6 +89,24 @@ export function getStoryAdMetadataFromDoc(doc) {
     }
   });
   return vars;
+}
+
+/**
+ * Returns an object conntaining all meta tags that
+ * qualifies as a macro (name=>value)
+ * @param {!NodeList} metaTags
+ * @return {!Object}
+ */
+export function getStoryAdMacroTags(metaTags) {
+  const result = map();
+  metaTags.forEach((tag) => {
+    const {content, name} = tag;
+    // If the meta tag name is not alphanumerical, we would ignore it.
+    if (/^[a-zA-Z0-9\-_]+$/.test(name)) {
+      result[name] = content;
+    }
+  });
+  return result;
 }
 
 /**
@@ -151,23 +173,15 @@ export function maybeCreateAttribution(win, metadata, container) {
       'amp-story-auto-ads attribution icon'
     );
 
-    const root = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'role': 'button',
-        'class': 'i-amphtml-attribution-host',
-      })
-    );
+    const root = createElementWithAttributes(doc, 'div', {
+      'role': 'button',
+      'class': 'i-amphtml-attribution-host',
+    });
 
-    const adChoicesIcon = createElementWithAttributes(
-      doc,
-      'img',
-      dict({
-        'class': 'i-amphtml-story-ad-attribution',
-        'src': src,
-      })
-    );
+    const adChoicesIcon = createElementWithAttributes(doc, 'img', {
+      'class': 'i-amphtml-story-ad-attribution',
+      'src': src,
+    });
 
     adChoicesIcon.addEventListener('click', (unusedEvent) =>
       handleAttributionClick(win, href)
@@ -204,8 +218,11 @@ function createPageOutlink_(doc, uiMetadata, container) {
   const pageOutlink = doc.createElement('amp-story-page-outlink');
   pageOutlink.setAttribute('layout', 'nodisplay');
 
-  const pageAnchorTag = doc.createElement('a');
-  pageAnchorTag.href = uiMetadata[A4AVarNames.CTA_URL];
+  const pageAnchorTag = createElementWithAttributes(doc, 'a', {
+    'class': 'i-amphtml-story-ad-link',
+    'target': '_top',
+    'href': uiMetadata[A4AVarNames.CTA_URL],
+  });
   pageAnchorTag.textContent = uiMetadata[A4AVarNames.CTA_TYPE];
 
   pageOutlink.appendChild(pageAnchorTag);
@@ -219,10 +236,16 @@ function createPageOutlink_(doc, uiMetadata, container) {
     }
   }
 
+  Services.extensionsFor(getWin(doc)).installExtensionForDoc(
+    getAmpdoc(doc),
+    'amp-story-page-attachment',
+    '0.1'
+  );
+
   pageOutlink.className = 'i-amphtml-story-page-outlink-container';
 
   container.appendChild(pageOutlink);
-  return container;
+  return pageAnchorTag;
 }
 
 /**
@@ -236,14 +259,10 @@ function createCtaLayer_(a, doc, container) {
   const ctaLayer = doc.createElement('amp-story-cta-layer');
   ctaLayer.className = 'i-amphtml-cta-container';
 
-  const linkRoot = createElementWithAttributes(
-    doc,
-    'div',
-    dict({
-      'class': 'i-amphtml-story-ad-link-root',
-      'role': 'button',
-    })
-  );
+  const linkRoot = createElementWithAttributes(doc, 'div', {
+    'class': 'i-amphtml-story-ad-link-root',
+    'role': 'button',
+  });
 
   createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
 
@@ -263,15 +282,13 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
   const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
   const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
 
-  const a = createElementWithAttributes(
-    doc,
-    'a',
-    dict({
-      'class': 'i-amphtml-story-ad-link',
-      'target': '_blank',
-      'href': ctaUrl,
-    })
-  );
+  // TODO(#36035): we should be using this element in createPageOutlink_
+  // instead of creating it and dropping.
+  const a = createElementWithAttributes(doc, 'a', {
+    'class': 'i-amphtml-story-ad-link',
+    'target': '_blank',
+    'href': ctaUrl,
+  });
 
   const fitPromise = buttonFitter.fit(
     dev().assertElement(container),
@@ -293,12 +310,15 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    const autoAdvanceExpBranch = getExperimentBranch(
+    const storyAdSegmentBranch = getExperimentBranch(
       doc.defaultView,
-      StoryAdPageOutlink.ID
+      StoryAdSegmentExp.ID
     );
-
-    if (autoAdvanceExpBranch === StoryAdPageOutlink.EXPERIMENT) {
+    if (
+      storyAdSegmentBranch == StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA ||
+      storyAdSegmentBranch ==
+        StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA_NOT_ANIMATED
+    ) {
       return createPageOutlink_(doc, uiMetadata, container);
     } else {
       return createCtaLayer_(a, doc, container);

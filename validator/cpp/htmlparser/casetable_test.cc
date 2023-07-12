@@ -1,7 +1,7 @@
-#include "casetable.h"
+#include "cpp/htmlparser/casetable.h"
 
 #include "gtest/gtest.h"
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 // Just one test to ensure table mapping is correct.
 TEST(CasetableTest, TestTableMappingIsCorrect) {

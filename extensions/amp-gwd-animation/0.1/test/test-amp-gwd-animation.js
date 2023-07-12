@@ -1,6 +1,7 @@
 import {Services} from '#service';
 
-import {createCustomEvent} from '../../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
+
 import {getServiceForDocOrNull} from '../../../../src/service-helpers';
 import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {

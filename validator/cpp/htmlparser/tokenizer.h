@@ -1,12 +1,12 @@
-#ifndef HTMLPARSER__TOKENIZER_H_
-#define HTMLPARSER__TOKENIZER_H_
+#ifndef CPP_HTMLPARSER_TOKENIZER_H_
+#define CPP_HTMLPARSER_TOKENIZER_H_
 
 #include <memory>
 #include <optional>
 #include <tuple>
 #include <vector>
 
-#include "token.h"
+#include "cpp/htmlparser/token.h"
 
 namespace htmlparser {
 
@@ -261,4 +261,4 @@ class Tokenizer {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__TOKENIZER_H_
+#endif  // CPP_HTMLPARSER_TOKENIZER_H_

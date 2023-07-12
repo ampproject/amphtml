@@ -1,4 +1,4 @@
-import {KeyCodes, Keys} from '#core/constants/key-codes';
+import {KeyCodes_Enum, Keys_Enum} from '#core/constants/key-codes';
 
 import {KeyboardHandler} from '../keyboard-handler';
 import {Messaging} from '../messaging/messaging';
@@ -44,8 +44,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.ESCAPE,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys_Enum.ESCAPE,
+              keyCode: KeyCodes_Enum.ESCAPE,
             })
           );
 
@@ -53,8 +53,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.ESCAPE,
-                KeyCodes.ESCAPE
+                Keys_Enum.ESCAPE,
+                KeyCodes_Enum.ESCAPE
               ),
             },
           ]);
@@ -64,8 +64,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.LEFT_ARROW,
-              keyCode: KeyCodes.LEFT_ARROW,
+              key: Keys_Enum.LEFT_ARROW,
+              keyCode: KeyCodes_Enum.LEFT_ARROW,
             })
           );
 
@@ -73,8 +73,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.LEFT_ARROW,
-                KeyCodes.LEFT_ARROW
+                Keys_Enum.LEFT_ARROW,
+                KeyCodes_Enum.LEFT_ARROW
               ),
             },
           ]);
@@ -84,8 +84,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            key: Keys.ESCAPE,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys_Enum.ESCAPE,
+            keyCode: KeyCodes_Enum.ESCAPE,
           });
           e.preventDefault();
 
@@ -100,8 +100,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.document.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.ESCAPE,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys_Enum.ESCAPE,
+              keyCode: KeyCodes_Enum.ESCAPE,
             })
           );
 
@@ -109,8 +109,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.ESCAPE,
-                KeyCodes.ESCAPE
+                Keys_Enum.ESCAPE,
+                KeyCodes_Enum.ESCAPE
               ),
             },
           ]);
@@ -120,8 +120,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.document.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.LEFT_ARROW,
-              keyCode: KeyCodes.LEFT_ARROW,
+              key: Keys_Enum.LEFT_ARROW,
+              keyCode: KeyCodes_Enum.LEFT_ARROW,
             })
           );
 
@@ -129,8 +129,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.LEFT_ARROW,
-                KeyCodes.LEFT_ARROW
+                Keys_Enum.LEFT_ARROW,
+                KeyCodes_Enum.LEFT_ARROW
               ),
             },
           ]);
@@ -140,8 +140,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            key: Keys.ESCAPE,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys_Enum.ESCAPE,
+            keyCode: KeyCodes_Enum.ESCAPE,
           });
           e.preventDefault();
 
@@ -156,8 +156,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.document.documentElement.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.ESCAPE,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys_Enum.ESCAPE,
+              keyCode: KeyCodes_Enum.ESCAPE,
             })
           );
 
@@ -165,8 +165,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.ESCAPE,
-                KeyCodes.ESCAPE
+                Keys_Enum.ESCAPE,
+                KeyCodes_Enum.ESCAPE
               ),
             },
           ]);
@@ -176,8 +176,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.document.documentElement.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.LEFT_ARROW,
-              keyCode: KeyCodes.LEFT_ARROW,
+              key: Keys_Enum.LEFT_ARROW,
+              keyCode: KeyCodes_Enum.LEFT_ARROW,
             })
           );
 
@@ -185,8 +185,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.LEFT_ARROW,
-                KeyCodes.LEFT_ARROW
+                Keys_Enum.LEFT_ARROW,
+                KeyCodes_Enum.LEFT_ARROW
               ),
             },
           ]);
@@ -196,8 +196,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            key: Keys.ESCAPE,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys_Enum.ESCAPE,
+            keyCode: KeyCodes_Enum.ESCAPE,
           });
           e.preventDefault();
 
@@ -212,8 +212,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.document.body.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.ESCAPE,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys_Enum.ESCAPE,
+              keyCode: KeyCodes_Enum.ESCAPE,
             })
           );
 
@@ -221,8 +221,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.ESCAPE,
-                KeyCodes.ESCAPE
+                Keys_Enum.ESCAPE,
+                KeyCodes_Enum.ESCAPE
               ),
             },
           ]);
@@ -232,8 +232,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           env.win.document.body.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.LEFT_ARROW,
-              keyCode: KeyCodes.LEFT_ARROW,
+              key: Keys_Enum.LEFT_ARROW,
+              keyCode: KeyCodes_Enum.LEFT_ARROW,
             })
           );
 
@@ -241,8 +241,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.LEFT_ARROW,
-                KeyCodes.LEFT_ARROW
+                Keys_Enum.LEFT_ARROW,
+                KeyCodes_Enum.LEFT_ARROW
               ),
             },
           ]);
@@ -252,8 +252,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            key: Keys.ESCAPE,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys_Enum.ESCAPE,
+            keyCode: KeyCodes_Enum.ESCAPE,
           });
           e.preventDefault();
 
@@ -276,8 +276,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           checkbox.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.ESCAPE,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys_Enum.ESCAPE,
+              keyCode: KeyCodes_Enum.ESCAPE,
             })
           );
 
@@ -285,8 +285,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.ESCAPE,
-                KeyCodes.ESCAPE
+                Keys_Enum.ESCAPE,
+                KeyCodes_Enum.ESCAPE
               ),
             },
           ]);
@@ -296,8 +296,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           checkbox.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.LEFT_ARROW,
-              keyCode: KeyCodes.LEFT_ARROW,
+              key: Keys_Enum.LEFT_ARROW,
+              keyCode: KeyCodes_Enum.LEFT_ARROW,
             })
           );
 
@@ -305,8 +305,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.LEFT_ARROW,
-                KeyCodes.LEFT_ARROW
+                Keys_Enum.LEFT_ARROW,
+                KeyCodes_Enum.LEFT_ARROW
               ),
             },
           ]);
@@ -316,8 +316,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            key: Keys.ESCAPE,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys_Enum.ESCAPE,
+            keyCode: KeyCodes_Enum.ESCAPE,
           });
           e.preventDefault();
 
@@ -330,8 +330,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           checkbox.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.SPACE,
-              keyCode: KeyCodes.SPACE,
+              key: Keys_Enum.SPACE,
+              keyCode: KeyCodes_Enum.SPACE,
             })
           );
 
@@ -352,8 +352,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             node.dispatchEvent(
               new KeyboardEvent(eventType, {
                 bubbles: true,
-                key: Keys.ESCAPE,
-                keyCode: KeyCodes.ESCAPE,
+                key: Keys_Enum.ESCAPE,
+                keyCode: KeyCodes_Enum.ESCAPE,
               })
             );
 
@@ -361,8 +361,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
               {
                 name: eventType,
                 data: createKeyboardEventInitWithKeyCode(
-                  Keys.ESCAPE,
-                  KeyCodes.ESCAPE
+                  Keys_Enum.ESCAPE,
+                  KeyCodes_Enum.ESCAPE
                 ),
               },
             ]);
@@ -372,8 +372,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             const e = new KeyboardEvent(eventType, {
               bubbles: true,
               cancelable: true,
-              key: Keys.ESCAPE,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys_Enum.ESCAPE,
+              keyCode: KeyCodes_Enum.ESCAPE,
             });
             e.preventDefault();
 
@@ -386,8 +386,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             node.dispatchEvent(
               new KeyboardEvent(eventType, {
                 bubbles: true,
-                key: Keys.SPACE,
-                keyCode: KeyCodes.SPACE,
+                key: Keys_Enum.SPACE,
+                keyCode: KeyCodes_Enum.SPACE,
               })
             );
 
@@ -409,8 +409,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           element.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.ESCAPE,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys_Enum.ESCAPE,
+              keyCode: KeyCodes_Enum.ESCAPE,
             })
           );
 
@@ -418,8 +418,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
             {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(
-                Keys.ESCAPE,
-                KeyCodes.ESCAPE
+                Keys_Enum.ESCAPE,
+                KeyCodes_Enum.ESCAPE
               ),
             },
           ]);
@@ -429,8 +429,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            key: Keys.ESCAPE,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys_Enum.ESCAPE,
+            keyCode: KeyCodes_Enum.ESCAPE,
           });
           e.preventDefault();
 
@@ -443,8 +443,8 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           element.dispatchEvent(
             new KeyboardEvent(eventType, {
               bubbles: true,
-              key: Keys.SPACE,
-              keyCode: KeyCodes.SPACE,
+              key: Keys_Enum.SPACE,
+              keyCode: KeyCodes_Enum.SPACE,
             })
           );
 
@@ -456,15 +456,15 @@ describes.realWin('KeyboardHandler', {}, (env) => {
         env.win.document.documentElement.dispatchEvent(
           new KeyboardEvent(eventType, {
             bubbles: true,
-            key: Keys.LEFT_ARROW,
-            keyCode: KeyCodes.LEFT_ARROW,
+            key: Keys_Enum.LEFT_ARROW,
+            keyCode: KeyCodes_Enum.LEFT_ARROW,
           })
         );
         env.win.document.body.dispatchEvent(
           new KeyboardEvent(eventType, {
             bubbles: true,
-            key: Keys.RIGHT_ARROW,
-            keyCode: KeyCodes.RIGHT_ARROW,
+            key: Keys_Enum.RIGHT_ARROW,
+            keyCode: KeyCodes_Enum.RIGHT_ARROW,
           })
         );
 
@@ -472,15 +472,15 @@ describes.realWin('KeyboardHandler', {}, (env) => {
           {
             name: eventType,
             data: createKeyboardEventInitWithKeyCode(
-              Keys.LEFT_ARROW,
-              KeyCodes.LEFT_ARROW
+              Keys_Enum.LEFT_ARROW,
+              KeyCodes_Enum.LEFT_ARROW
             ),
           },
           {
             name: eventType,
             data: createKeyboardEventInitWithKeyCode(
-              Keys.RIGHT_ARROW,
-              KeyCodes.RIGHT_ARROW
+              Keys_Enum.RIGHT_ARROW,
+              KeyCodes_Enum.RIGHT_ARROW
             ),
           },
         ]);

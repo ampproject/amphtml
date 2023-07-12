@@ -183,9 +183,20 @@ cc_library(
 )
 
 cc_library(
+    name = "glog_polyfill",
+    hdrs = [
+        "glog_polyfill.h",
+    ],
+    copts = ["-std=c++17"],
+)
+
+cc_library(
     name = "logging",
     hdrs = [
         "logging.h",
+    ],
+    deps = [
+        ":glog_polyfill",
     ],
     copts = ["-std=c++17"],
 )
@@ -224,7 +235,7 @@ cc_library(
         ":error",
         ":logging",
         ":token",
-        "@com_github_glog//:glog",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -240,6 +251,35 @@ cc_test(
         ":parser",
         ":renderer",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "iterators",
+    hdrs = [
+        "iterators.h",
+    ],
+    deps = [
+        ":node",
+    ],
+)
+
+cc_library(
+    name = "document",
+    srcs = [
+        "document.cc",
+    ],
+    hdrs = [
+        "document.h",
+    ],
+    copts = ["-std=c++17"],
+    deps = [
+        ":allocator",
+        ":iterators",
+        ":node",
+        ":token",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -262,23 +302,6 @@ cc_test(
     deps = [
         ":htmlentities",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "document",
-    srcs = [
-        "document.cc",
-    ],
-    hdrs = [
-        "document.h",
-    ],
-    copts = ["-std=c++17"],
-    deps = [
-        ":allocator",
-        ":node",
-        ":token",
-        "@com_google_absl//absl/flags:flag",
     ],
 )
 
@@ -327,9 +350,8 @@ cc_library(
         ":node",
         ":strings",
         ":tokenizer",
-        "@com_github_glog//:glog",
-        "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -400,10 +422,7 @@ cc_library(
     deps = [
         ":casetable",
         ":htmlentities",
-        ":logging",
         ":whitespacetable",
-        "@com_github_glog//:glog",
-        "@com_google_absl//absl/base",
     ],
 )
 
@@ -444,7 +463,6 @@ cc_test(
         "tokenizer_test.cc",
     ],
     deps = [
-        ":parser",
         ":token",
         ":tokenizer",
         "@com_google_googletest//:gtest_main",
@@ -472,6 +490,23 @@ cc_test(
     ],
     deps = [
         ":url",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "utf8",
+    hdrs = ["utf8.h"],
+    copts = ["-std=c++17"],
+)
+
+cc_test(
+    name = "utf8_test",
+    srcs = [
+        "utf8_test.cc",
+    ],
+    deps = [
+        ":utf8",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -507,7 +542,6 @@ cc_test(
         ":html5lib_test_files",
     ],
     deps = [
-        ":atom",
         ":atomutil",
         ":defer",
         ":fileutil",
@@ -518,5 +552,6 @@ cc_test(
         ":testconstants",
         ":tokenizer",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/flags:flag",
     ],
 )

@@ -1,5 +1,5 @@
-#ifndef AMPVALIDATOR__PARSE_LAYOUT_SIZES_H_
-#define AMPVALIDATOR__PARSE_LAYOUT_SIZES_H_
+#ifndef CPP_ENGINE_PARSE_LAYOUT_SIZES_H_
+#define CPP_ENGINE_PARSE_LAYOUT_SIZES_H_
 
 #include <vector>
 
@@ -43,4 +43,4 @@ struct CssSizes {
 
 }  // namespace amp::validator::parse_layout_sizes
 
-#endif  // AMPVALIDATOR__PARSE_LAYOUT_SIZES_H_
+#endif  // CPP_ENGINE_PARSE_LAYOUT_SIZES_H_

@@ -20,13 +20,13 @@ import {createElementWithAttributes, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {setStyles} from '#core/dom/style';
 import {debounce} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {listenFor} from '../../../src/iframe-helper';
-import {user, userAssert} from '../../../src/log';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
@@ -98,7 +98,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.boundUpdateSize_ = debounce(
       this.win,
       (data) => {
-        this.updateSize_(/** @type {Object} */ (data));
+        this.updateSize_(/** @type {object} */ (data));
       },
       100
     );
@@ -225,7 +225,7 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   composeSrcUrl_() {
     const src = this.baseUrl_ + 'placeholder.php';
-    const params = dict({
+    const params = {
       'label': this.label_,
       'webcare_id': this.webcareId_,
       'bwch': this.channel_ || '',
@@ -247,7 +247,7 @@ export class AmpBysideContent extends AMP.BaseElement {
       'ua': 'USER_AGENT',
       'r': 'RANDOM',
       '_resize': '1',
-    });
+    };
     const url = addParamsToUrl(src, params);
 
     return Services.urlReplacementsForDoc(this.element).expandUrlAsync(url);
@@ -272,28 +272,16 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   getOverflowElement_() {
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
-    const overflow = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-overflow',
-        'overflow': '',
-      })
-    );
-    const overflowContent = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-overflow-content',
-      })
-    );
-    const arrow = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-arrow-down',
-      })
-    );
+    const overflow = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-overflow',
+      'overflow': '',
+    });
+    const overflowContent = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-overflow-content',
+    });
+    const arrow = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-arrow-down',
+    });
     overflowContent.appendChild(arrow);
     overflow.appendChild(overflowContent);
 
@@ -303,20 +291,12 @@ export class AmpBysideContent extends AMP.BaseElement {
   /** @return {!Element} @private */
   createBySideLoader_() {
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
-    const loadingContainer = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-loading-container',
-      })
-    );
-    const loadingAnimation = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-loading-animation',
-      })
-    );
+    const loadingContainer = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-loading-container',
+    });
+    const loadingAnimation = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-loading-animation',
+    });
     loadingContainer.appendChild(loadingAnimation);
 
     return loadingContainer;
@@ -325,7 +305,7 @@ export class AmpBysideContent extends AMP.BaseElement {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
-   * @param {Object} data
+   * @param {object} data
    * @private
    */
   updateSize_(data) {

@@ -3,12 +3,13 @@
  * connection before the real request can be made.
  */
 
-import {whenDocumentComplete} from '#core/document-ready';
+import {whenDocumentComplete} from '#core/document/ready';
 import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {dev} from './log';
+import {dev} from '#utils/log';
+
 import {registerServiceBuilder} from './service-helpers';
 import {parseUrlDeprecated} from './url';
 
@@ -69,12 +70,12 @@ export class PreconnectService {
     /**
      * Origin we've preconnected to and when that connection
      * expires as a timestamp in MS.
-     * @private @const {!Object<string, number>}
+     * @private @const {!{[key: string]: number}}
      */
     this.origins_ = {};
     /**
      * Urls we've prefetched.
-     * @private @const {!Object<string, boolean>}
+     * @private @const {!{[key: string]: boolean}}
      */
     this.urls_ = {};
     /** @private @const {!./service/platform-impl.Platform}  */

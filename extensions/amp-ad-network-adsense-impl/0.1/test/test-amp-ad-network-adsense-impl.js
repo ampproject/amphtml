@@ -8,6 +8,7 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {camelCaseToHyphenCase} from '#core/dom/style';
 import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 import {toWin} from '#core/window';
 
@@ -19,7 +20,7 @@ import {Services} from '#service';
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
-  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
+  AmpAdXOriginIframeHandler, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {
   AmpAdNetworkAdsenseImpl,
@@ -458,7 +459,7 @@ describes.realWin(
         impl.iframe = {
           contentWindow: window,
           nodeType: 1,
-          style: {},
+          style: {setProperty: () => {}},
         };
         impl.element.setAttribute('data-ad-client', 'ca-adsense');
 
@@ -954,6 +955,28 @@ describes.realWin(
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {
           expect(url).to.match(/spsa=320x50/);
+        });
+      });
+
+      it('should set tfcd parameter if set in shared data', () => {
+        impl.uiHandler = {isStickyAd: () => false};
+        const consentSharedData = {
+          'adsense-tfua': 0,
+          'adsense-tfcd': 1,
+        };
+        return impl.getAdUrl({consentSharedData}).then((url) => {
+          expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+        });
+      });
+
+      it('should set tfua parameter if set in shared data', () => {
+        impl.uiHandler = {isStickyAd: () => false};
+        const consentSharedData = {
+          'adsense-tfua': 1,
+          'adsense-tfcd': 0,
+        };
+        return impl.getAdUrl({consentSharedData}).then((url) => {
+          expect(url).to.match(/(\?|&)tfua=1(&|$)/);
         });
       });
 
@@ -1536,7 +1559,12 @@ describes.realWin(
         };
         impl.iframe = {
           contentWindow: window,
-          style: {'visibility': 'hidden'},
+          style: {
+            'visibility': 'hidden',
+            setProperty: (name, value) => {
+              impl.iframe.style[camelCaseToHyphenCase(name)] = value;
+            },
+          },
         };
         win.postMessage('fill_sticky', '*');
         return renderPromise.then(() => {

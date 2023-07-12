@@ -411,6 +411,18 @@ class SeleniumWebDriverController {
       this.getWaitFn_(() => webElement.isEnabled())
     );
   }
+
+  /**
+   * @param {!ElementHandle} handle
+   * @return {!Promise<boolean>}
+   */
+  isElementDisplayed(handle) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+      webElement.isDisplayed(),
+      this.getWaitFn_(() => webElement.isDisplayed())
+    );
+  }
   /**
    * @return {!Promise<Array<string>>}
    */
@@ -428,6 +440,18 @@ class SeleniumWebDriverController {
       webElement.isSelected(),
       this.getWaitFn_(() => webElement.isSelected())
     );
+  }
+
+  /**
+   * Get width/height of the browser area.
+   * @return {!Promise<[number, number]>}
+   */
+  async getWindowRect() {
+    const htmlElement = this.driver.findElement(By.tagName('html'));
+    return await Promise.all([
+      htmlElement.getAttribute('clientWidth'),
+      htmlElement.getAttribute('clientHeight'),
+    ]);
   }
 
   /**

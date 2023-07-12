@@ -1,9 +1,9 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {IframeTransportClient} from './iframe-transport-client';
+import {initLogConstructor, setReportError} from '#utils/log';
 
-import {initLogConstructor, setReportError} from '../src/log';
+import {IframeTransportClient} from './iframe-transport-client';
 
 initLogConstructor();
 // TODO(alanorozco): Refactor src/error.reportError so it does not contain big

@@ -1,6 +1,4 @@
-import {dict} from '#core/types/object';
-
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 
 /**
  * Forward focus events' related data from the AMP doc to the
@@ -40,7 +38,7 @@ export class FocusHandler {
     }
     this.messaging_.sendRequest(
       e.type,
-      dict({'focusTargetRect': e.target./*OK*/ getBoundingClientRect()}),
+      {'focusTargetRect': e.target./*OK*/ getBoundingClientRect()},
       /* awaitResponse */ false
     );
   }

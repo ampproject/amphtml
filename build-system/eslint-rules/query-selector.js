@@ -169,7 +169,7 @@ module.exports = function (context) {
           node: expression,
           message:
             'Each selector value must be escaped by ' +
-            'escapeCssSelectorIdent in src/css.js',
+            'escapeCssSelectorIdent in core/dom/css-selectors.js',
         });
       }
 
