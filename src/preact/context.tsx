@@ -70,7 +70,7 @@ export function WithAmpContext({
         playable,
         loading,
         notify,
-      } as AmpContext),
+      }) as AmpContext,
     [renderable, playable, loading, notify]
   );
   const AmpContext = getAmpContext();

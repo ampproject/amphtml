@@ -34,7 +34,7 @@ export function adskeeper(global, data) {
    * @return {string} Path to provided filename.
    */
   function getResourceFilePath(publisher) {
-    const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
+    const publisherStr = publisher.replace(/[^a-zA-Z0-9]/g, '');
     return `${publisherStr[0]}/${publisherStr[1]}`;
   }
 
