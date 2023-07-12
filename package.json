@@ -30,7 +30,7 @@
     "jss-preset-default": "10.8.2",
     "moment": "2.29.4",
     "obj-str": "1.1.0",
-    "preact": "10.5.15",
+    "preact": "10.16.0",
     "react-day-picker": "8.0.0-beta.37",
     "react-jss": "10.8.2",
     "resize-observer-polyfill": "1.5.1",
