@@ -101,4 +101,25 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     expect(clickCallbackSpy).to.have.been.calledOnce;
   });
+
+  it('should send message to viewer to execute copy url if embedded', async () => {
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+    await shareMenu.buildCallback();
+
+    const onMessageSpy = env.sandbox.spy(
+      shareMenu.viewerMessagingHandler_,
+      'onMessage'
+    );
+    const sendSpy = env.sandbox.spy(shareMenu.viewerMessagingHandler_, 'send');
+
+    const shareLinkEl = win.document.querySelector(
+      '.i-amphtml-story-share-icon-link'
+    );
+    shareLinkEl.click();
+    expect(onMessageSpy).to.have.been.calledOnce;
+    expect(sendSpy).to.have.been.calledOnce;
+  });
 });
