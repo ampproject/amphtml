@@ -32,22 +32,21 @@ const panelStateKey = 'panel';
 const htmlEnvelopePrefixKey = ampStateKey(stateId, htmlEnvelopePrefixStateKey);
 const panelKey = ampStateKey(stateId, panelStateKey);
 
-const PanelSelectorButton = ({expression, type, value}) =>
-  html`
-    <button
-      class="settings-panel-button"
-      [class]="'settings-panel-button' + (${panelKey} != '${type}' ? '' : ' open')"
-      data-type="${type}"
-      tabindex="0"
-      on="tap: AMP.setState({
+const PanelSelectorButton = ({expression, type, value}) => html`
+  <button
+    class="settings-panel-button"
+    [class]="'settings-panel-button' + (${panelKey} != '${type}' ? '' : ' open')"
+    data-type="${type}"
+    tabindex="0"
+    on="tap: AMP.setState({
         ${stateId}: {
           ${panelStateKey}: (${panelKey} != '${type}' ? '${type}' : null),
         }
       })"
-    >
-      <span>${type}</span> <strong [text]="${expression}">${value}</strong>
-    </button>
-  `;
+  >
+    <span>${type}</span> <strong [text]="${expression}">${value}</strong>
+  </button>
+`;
 
 /**
  * @param {{

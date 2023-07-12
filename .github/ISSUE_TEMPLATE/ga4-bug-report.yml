@@ -1,0 +1,74 @@
+---
+name: Google Analytics 4 and AMP Bug Report
+description: Report a bug in GA4 and AMP integration.
+labels: ['Type: Bug', 'Component: amp-analytics', 'Component: GA4']
+title: "\U0001F41B Google Analytics 4 Related Bug: "
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for filling out this bug report. Bugs related to Google Analytics 4 and amp-analytics can be reported using the form below.
+        - Bugs related to the [AMP](https://amp.dev) format and cache can be reported using the form below.
+        - Bugs related to the [AMP WordPress Plugin](https://wordpress.org/plugins/amp/) can be reported at the [support forum](https://wordpress.org/support/plugin/amp/) or at the [`amp-wp`](https://github.com/ampproject/amp-wp/issues) repository.
+        - Questions about AMP uage can be asked at the [`#using-amp`](https://amphtml.slack.com/archives/C9HPA6HGB) Slack channel or at the [`amp-html`](http://stackoverflow.com/questions/tagged/amp-html) tag at Stack Overflow.
+        - Questions about Google Search can be asked at Google's [Help Community](https://goo.gl/utQ1KZ).
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A brief description of the bug.
+      placeholder: Describe the expected vs. the current behavior, so this issue can be directed to the correct working group for investigation.
+    validations:
+      required: true
+  - type: input
+    id: example
+    attributes:
+      label: URL where we can debug and reproduce the problem
+      description: If applicable, give an example web page where we can reproduce the problem.
+      placeholder: e.g. https://amp-dev.cdn.ampproject.org/c/s/amp.dev/
+  - type: textarea
+    id: repro_steps
+    attributes:
+      label: Reproduction Steps
+      description: Step-by-step instructions for reproducing the issue.
+      placeholder: Provide a publicly accessible URL and a reduced set of steps that clearly demonstrate the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Relevant logging output.
+      placeholder: Paste any plain-text logs here (e.g. console warnings or errors from Chrome DevTools). They will automatically be formatted as code.
+      render: shell
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Browser(s) Affected
+      description: If applicable, specify which browser(s) are affected. Select one or more options below.
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - UC Browser
+  - type: input
+    id: operating_systems
+    attributes:
+      label: OS(s) Affected
+      description: If applicable, specify which operating system(s) are affected.
+      placeholder: e.g. Android 11
+  - type: input
+    id: devices
+    attributes:
+      label: Device(s) Affected
+      description: If applicable, specify which device(s) are affected.
+      placeholder: e.g. Pixel 3
+  - type: input
+    id: version
+    attributes:
+      label: AMP Version Affected
+      description: If applicable, specify which version is affected, in the format YYMMDDHHMMXXX.
+      placeholder: e.g. 2101280515000

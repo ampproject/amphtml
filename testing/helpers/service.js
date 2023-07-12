@@ -369,7 +369,7 @@ export class ImagePixelVerifier {
     const pixel = this.imagePixels_.shift();
     expect(pixel.src).to.equal(url);
     expect(pixel.referrerPolicy).to.equal(referrerPolicy);
-    expect(pixel.attributionsrc).to.equal(attributionSrc);
+    expect(pixel.attributionSrc).to.equal(attributionSrc);
   }
 
   verifyRequestMatch(regex) {

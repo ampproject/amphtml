@@ -132,7 +132,8 @@ describes.realWin(
             'productPriceCurrency': 'JPY',
             'productImages': [
               {
-                'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
+                'url':
+                  '/examples/visual-tests/unsplash.photos/BdVQU-NDtA8_500x500.jpg',
                 'alt': 'art',
               },
             ],

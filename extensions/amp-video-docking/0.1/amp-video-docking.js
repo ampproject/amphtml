@@ -203,24 +203,24 @@ export function getPosterImageSrc(element) {
  * @return {!Element}
  * @private
  */
-const ShadowLayer = (html) =>
-  html` <div class="amp-video-docked-shadow" hidden></div> `;
+const ShadowLayer = (html) => html`
+  <div class="amp-video-docked-shadow" hidden></div>
+`;
 
 /**
  * @param {!HtmlLiteralTagDef} html
  * @return {!Element}
  * @private
  */
-const PlaceholderBackground = (html) =>
-  html`
-    <div class="amp-video-docked-placeholder-background">
-      <div
-        class="amp-video-docked-placeholder-background-poster"
-        ref="poster"
-      ></div>
-      <div class="amp-video-docked-placeholder-icon" ref="icon"></div>
-    </div>
-  `;
+const PlaceholderBackground = (html) => html`
+  <div class="amp-video-docked-placeholder-background">
+    <div
+      class="amp-video-docked-placeholder-background-poster"
+      ref="poster"
+    ></div>
+    <div class="amp-video-docked-placeholder-icon" ref="icon"></div>
+  </div>
+`;
 
 /**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
