@@ -15,8 +15,6 @@ import {copyTextToClipboard} from '#core/window/clipboard';
 
 import {createCustomEvent, listenOnce} from '#utils/event-helper';
 
-import {applyBreakpointClassname} from 'extensions/amp-video-docking/0.1/breakpoints';
-
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {AMP_STORY_COPY_URL, AMP_STORY_PLAYER_EVENT} from './event';
 import {PageScroller} from './page-scroller';

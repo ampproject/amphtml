@@ -369,7 +369,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
   }
 
   /**
-   * @param url
+   * @param {string} url
    * @private
    */
   showCopySuccessfulToast_(url) {
@@ -386,7 +386,6 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
   }
 
   /**
-   * @param url
    * @private
    */
   showCopyFailedToast_() {
