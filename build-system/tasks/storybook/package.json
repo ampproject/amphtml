@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "amp storybook task",
   "devDependencies": {
-    "@babel/core": "7.22.8",
+    "@babel/core": "7.22.9",
     "@babel/preset-react": "7.22.5",
     "@storybook/addon-a11y": "7.0.27",
     "@storybook/addon-controls": "7.0.27",
