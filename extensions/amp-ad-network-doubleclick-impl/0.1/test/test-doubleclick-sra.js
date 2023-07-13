@@ -399,9 +399,6 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           eid: MANUAL_EXPERIMENT_ID,
           output: 'ldjh',
           impl: 'fifs',
-          adsid: 'abcdef',
-          jar: 'some_jar',
-          pucrd: 'some_pucrd',
         };
         if (forceSafeFrame) {
           exp['fsfs'] = '1,0';
