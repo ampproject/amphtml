@@ -24,7 +24,6 @@ import {
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
 
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
@@ -32,7 +31,6 @@ import {toggleExperiment} from '#experiments';
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {installExtensionsService} from '#service/extensions-impl';
-import {installXhrService} from '#service/xhr-impl';
 
 import {user} from '#utils/log';
 
