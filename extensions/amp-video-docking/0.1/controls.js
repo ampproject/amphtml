@@ -73,75 +73,67 @@ function swap(a, b) {
  * @return {!Element}
  * @private
  */
-const renderDockedOverlay = (html) =>
-  html` <div class="i-amphtml-video-docked-overlay" hidden></div> `;
+const renderDockedOverlay = (html) => html`
+  <div class="i-amphtml-video-docked-overlay" hidden></div>
+`;
 
 /**
  * @param {!HtmlLiteralTagDef} html
  * @return {!Element}
  * @private
  */
-const renderControls = (html) =>
-  html`
-    <div class="amp-video-docked-controls" hidden>
-      <div
-        class="amp-video-docked-main-button-group
+const renderControls = (html) => html`
+  <div class="amp-video-docked-controls" hidden>
+    <div
+      class="amp-video-docked-main-button-group
                amp-video-docked-control-set-playback"
-      >
-        <div class="amp-video-docked-button-group">
-          <div
-            role="button"
-            ref="playButton"
-            class="amp-video-docked-play"
-          ></div>
-          <div
-            role="button"
-            ref="pauseButton"
-            class="amp-video-docked-pause"
-          ></div>
-        </div>
-        <div class="amp-video-docked-button-group">
-          <div
-            role="button"
-            ref="muteButton"
-            class="amp-video-docked-mute"
-          ></div>
-          <div
-            role="button"
-            ref="unmuteButton"
-            class="amp-video-docked-unmute"
-          ></div>
-        </div>
-        <div class="amp-video-docked-button-group">
-          <div
-            role="button"
-            ref="fullscreenButton"
-            class="amp-video-docked-fullscreen"
-          ></div>
-        </div>
-      </div>
-      <div
-        class="amp-video-docked-main-button-group
-               amp-video-docked-control-set-scroll-back"
-        hidden
-      >
-        <div class="amp-video-docked-button-group">
-          <div
-            role="button"
-            ref="scrollBackButton"
-            class="amp-video-docked-scroll-back"
-          ></div>
-        </div>
-      </div>
-      <div class="amp-video-docked-button-dismiss-group" ref="dismissContainer">
+    >
+      <div class="amp-video-docked-button-group">
+        <div role="button" ref="playButton" class="amp-video-docked-play"></div>
         <div
           role="button"
-          ref="dismissButton"
-          class="amp-video-docked-dismiss"
+          ref="pauseButton"
+          class="amp-video-docked-pause"
+        ></div>
+      </div>
+      <div class="amp-video-docked-button-group">
+        <div role="button" ref="muteButton" class="amp-video-docked-mute"></div>
+        <div
+          role="button"
+          ref="unmuteButton"
+          class="amp-video-docked-unmute"
+        ></div>
+      </div>
+      <div class="amp-video-docked-button-group">
+        <div
+          role="button"
+          ref="fullscreenButton"
+          class="amp-video-docked-fullscreen"
         ></div>
       </div>
     </div>
-  `;
+    <div
+      class="amp-video-docked-main-button-group
+               amp-video-docked-control-set-scroll-back"
+      hidden
+    >
+      <div class="amp-video-docked-button-group">
+        <div
+          role="button"
+          ref="scrollBackButton"
+          class="amp-video-docked-scroll-back"
+        ></div>
+      </div>
+    </div>
+    <div class="amp-video-docked-button-dismiss-group" ref="dismissContainer">
+      <div
+        role="button"
+        ref="dismissButton"
+        class="amp-video-docked-dismiss"
+      ></div>
+    </div>
+  </div>
+`;
 
 export class Controls {
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
