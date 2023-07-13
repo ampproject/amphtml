@@ -80,9 +80,9 @@ class AmpWorker {
         // Only allow the correct webworker url to pass through
         const regexURL = new RegExp(
           // eslint-disable-next-line local/no-forbidden-terms
-          '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
+          '^https://([a-zA-Z0-9_-]+\.)?cdn.ampproject.org(/.*)?$'
         );
-        const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
+        const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+\.)?localhost$');
         if (
           regexURL.test(url) ||
           (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
