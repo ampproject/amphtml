@@ -5,7 +5,8 @@ formats:
 teaser:
   text: A sticker for users to click and unmute the story. 
 tags:
-  - audio-sticker
+  - audio
+  - sticker
 author: ychsieh
 $title: amp-story-audio-sticker
 version: '0.1'
@@ -49,21 +50,25 @@ Default value: “small”, which would be used if the input value is invalid or
 
 ### `sticker` {string} optional
 
-Which of the 4 premade stickers to use. Accepted values:
+Which of the 4 premade stickers to use:
 
--   “cat-sticker”
--   “tape-player”
--   “loud-speaker”
--   “audio-cloud”
+| Accepted Value | Pre-tap Image                                                                                   | Post-tap Image                                                                                    |
+| -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| “cat-sticker”  | ![Cat Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/cat-sticker-pretap.png)      | ![Cat Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/cat-sticker-posttap.gif)      |
+| “tape-player”  | ![Player Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/tape-player-pretap.png)   | ![Player Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/tape-player-posttap.gif)   |
+| “loud-speaker” | ![Speaker Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-pretap.png) | ![Speaker Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-posttap.png) |
+| “audio-cloud”  | ![Cloud Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-pretap.png)    | ![Cloud Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-posttap.png)    |
 
 Default value: “cat-sticker”, which would be used if the input value is invalid or is not provided.
 
 ### `sticker-style` {string} optional
 
-Extra premade style of the sticker. Accepted values:
+Extra premade style of the sticker:
 
--   “outline”
--   “dropshadow”
+| Accepted Value | Description                                                             | Header 3                                                                                              |
+| -------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| “outline”      | Adds a border around the provided sticker image.                        | ![Image 2](https://github.com/ampproject/amphtml/assets/1697814/c7996424-c810-40d3-a28f-09e7c76742d1) |
+| “dropshadow”   | Adds a dropshadow around the opaque part of the provided sticker image. | ![Image 4](https://github.com/ampproject/amphtml/assets/1697814/2f5b6c5d-ea86-4345-80b8-3b2c20c92e58) |
 
 Default value: none
 
