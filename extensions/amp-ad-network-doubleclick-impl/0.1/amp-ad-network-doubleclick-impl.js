@@ -805,24 +805,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
       });
 
-    Promise.all([
-      rtcParamsPromise,
-      targetingExpansionPromise,
-    ]).then((results) => {
-      checkStillCurrent();
-      const rtcParams = results[0];
-      googleAdUrl(
-        this,
-        DOUBLECLICK_BASE_URL,
-        startTime,
-        Object.assign(
-          this.getBlockParameters_(),
-          this.getPageParameters(consentTuple, /* instances= */ undefined),
-          rtcParams
-        ),
-        this.experimentIds
-      ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
-    });
+    Promise.all([rtcParamsPromise, targetingExpansionPromise]).then(
+      (results) => {
+        checkStillCurrent();
+        const rtcParams = results[0];
+        googleAdUrl(
+          this,
+          DOUBLECLICK_BASE_URL,
+          startTime,
+          Object.assign(
+            this.getBlockParameters_(),
+            this.getPageParameters(consentTuple, /* instances= */ undefined),
+            rtcParams
+          ),
+          this.experimentIds
+        ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
+      }
+    );
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
   }

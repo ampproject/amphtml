@@ -1,4 +1,3 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {DomFingerprint} from '#core/dom/fingerprint';
@@ -17,7 +16,6 @@ import {buildUrl} from './shared/url-builder';
 
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 
