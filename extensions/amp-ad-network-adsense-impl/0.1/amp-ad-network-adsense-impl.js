@@ -19,7 +19,6 @@ import {
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
-  getIdentityToken,
   getServeNpaPromise,
   googleAdUrl,
   isCdnProxy,
@@ -123,9 +122,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {?ResponsiveState}.  */
     this.responsiveState_ = ResponsiveState.createIfResponsive(element);
 
-    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
-    this.identityTokenPromise_ = null;
-
     /**
      * @private {?boolean} whether preferential rendered AMP creative, null
      * indicates no creative render.
@@ -175,11 +171,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     maybeInsertOriginTrialToken(this.win);
-    this.identityTokenPromise_ = this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() =>
-        getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
-      );
 
     // Convert the full-width tag to container width for desktop users.
     if (
@@ -419,26 +410,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     };
 
     const experimentIds = [];
-    const identityPromise = Services.timerFor(this.win)
-      .timeoutPromise(1000, this.identityTokenPromise_)
-      .catch((unusedErr) => {
-        // On error/timeout, proceed.
-        return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
-      });
-    return identityPromise.then((identity) => {
-      return googleAdUrl(
-        this,
-        ADSENSE_BASE_URL,
-        startTime,
-        {
-          'adsid': identity.token || null,
-          'jar': identity.jar || null,
-          'pucrd': identity.pucrd || null,
-          ...parameters,
-        },
-        experimentIds
-      );
-    });
+    return googleAdUrl(
+      this,
+      ADSENSE_BASE_URL,
+      startTime,
+      {
+        ...parameters,
+      },
+      experimentIds
+    );
   }
 
   /** @override */

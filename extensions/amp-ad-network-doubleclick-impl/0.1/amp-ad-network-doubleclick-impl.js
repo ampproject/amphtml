@@ -25,7 +25,6 @@ import {
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
-  getIdentityToken,
   getServeNpaPromise,
   googleAdUrl,
   googleBlockParameters,
@@ -277,12 +276,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
-
-    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
-    this.identityTokenPromise_ = null;
-
-    /** @type {?../../../ads/google/a4a/utils.IdentityToken} */
-    this.identityToken = null;
 
     /** @private {!TroubleshootDataDef} */
     this.troubleshootData_ = /** @type {!TroubleshootDataDef} */ ({});
@@ -598,11 +591,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
           DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
         ].some((eid) => this.experimentIds.indexOf(eid) >= 0));
-    this.identityTokenPromise_ = this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() =>
-        getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
-      );
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex = this.element.getAttribute(
       'data-amp-slot-index'
@@ -804,13 +792,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const startTime = Date.now();
     const timerService = Services.timerFor(this.win);
 
-    const identityPromise = timerService
-      .timeoutPromise(1000, this.identityTokenPromise_)
-      .catch(() => {
-        // On error/timeout, proceed.
-        return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
-      });
-
     const checkStillCurrent = this.verifyStillCurrent();
 
     const rtcParamsPromise = opt_rtcResponsesPromise.then((results) => {
@@ -824,27 +805,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
       });
 
-    Promise.all([
-      rtcParamsPromise,
-      identityPromise,
-      targetingExpansionPromise,
-    ]).then((results) => {
-      checkStillCurrent();
-      const rtcParams = results[0];
-      this.identityToken = results[1];
-      googleAdUrl(
-        this,
-        DOUBLECLICK_BASE_URL,
-        startTime,
-        Object.assign(
-          this.getBlockParameters_(),
-          this.buildIdentityParams(),
-          this.getPageParameters(consentTuple, /* instances= */ undefined),
-          rtcParams
-        ),
-        this.experimentIds
-      ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
-    });
+    Promise.all([rtcParamsPromise, targetingExpansionPromise]).then(
+      (results) => {
+        checkStillCurrent();
+        const rtcParams = results[0];
+        googleAdUrl(
+          this,
+          DOUBLECLICK_BASE_URL,
+          startTime,
+          Object.assign(
+            this.getBlockParameters_(),
+            this.getPageParameters(consentTuple, /* instances= */ undefined),
+            rtcParams
+          ),
+          this.experimentIds
+        ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
+      }
+    );
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
   }
@@ -905,20 +882,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       undefined /*opt_bindings*/,
       TARGETING_MACRO_ALLOWLIST
     );
-  }
-
-  /**
-   * Converts identity token response to ad request parameters.
-   * @return {!{[key: string]: string}}
-   */
-  buildIdentityParams() {
-    return this.identityToken
-      ? {
-          adsid: this.identityToken.token || null,
-          jar: this.identityToken.jar || null,
-          pucrd: this.identityToken.pucrd || null,
-        }
-      : {};
   }
 
   /**
