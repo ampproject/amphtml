@@ -4,12 +4,12 @@
   "version": "0.1.0",
   "description": "amp visual diff",
   "devDependencies": {
-    "@percy/core": "1.26.0",
+    "@percy/core": "1.26.2",
     "@percy/puppeteer": "2.0.2",
-    "@percy/sdk-utils": "1.26.0",
-    "@puppeteer/browsers": "1.4.1",
+    "@percy/sdk-utils": "1.26.2",
+    "@puppeteer/browsers": "1.4.5",
     "@types/inquirer": "9.0.3",
-    "inquirer": "9.2.7",
-    "puppeteer-core": "20.7.2"
+    "inquirer": "9.2.8",
+    "puppeteer-core": "20.8.2"
   }
 }

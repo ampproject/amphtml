@@ -864,11 +864,6 @@
     }
   },
   {
-    "name": "amp-redbull-player",
-    "version": "0.1",
-    "latestVersion": "0.1"
-  },
-  {
     "name": "amp-reddit",
     "version": "0.1",
     "latestVersion": "0.1"

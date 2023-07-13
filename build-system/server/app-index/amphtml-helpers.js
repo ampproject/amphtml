@@ -16,14 +16,13 @@ const containsByRegex = (str, re) => str.search(re) > -1;
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
 
-const ExtensionScript = ({isTemplate, name, version}) =>
-  html`
-    <script
-      async
-      ${isTemplate ? 'custom-template' : 'custom-element'}="${name}"
-      src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js"
-    ></script>
-  `;
+const ExtensionScript = ({isTemplate, name, version}) => html`
+  <script
+    async
+    ${isTemplate ? 'custom-template' : 'custom-element'}="${name}"
+    src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js"
+  ></script>
+`;
 
 const AmpState = (id, state) => html`
   <amp-state id="${id}">
@@ -48,7 +47,7 @@ const ampStateKey = (...keys) => keys.join('.');
 const AmpDoc = ({body, canonical, css, head}) => {
   assert(canonical);
   return html`
-    <!DOCTYPE html>
+    <!doctype html>
     <html ⚡ lang="en">
       <head>
         <title>AMP Dev Server</title>
