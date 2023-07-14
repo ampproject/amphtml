@@ -1,4 +1,4 @@
-import {devAssert} from '#core/assert';
+Fimport {devAssert} from '#core/assert';
 
 import {Services} from '#service';
 import {calculateEntryPointScriptUrl} from '#service/extension-script';
@@ -78,11 +78,9 @@ class AmpWorker {
     const policy = {
       createScriptURL: function (url) {
         // Only allow the correct webworker url to pass through
-        const regexURL = new RegExp(
-          // eslint-disable-next-line local/no-forbidden-terms
-          '^https://([a-zA-Z0-9_-]+\.)?cdn.ampproject.org(/.*)?$'
-        );
-        const testRegexURL = new RegExp('^([a-zA-Z0-9_-]+\.)?localhost$');
+        // eslint-disable-next-line local/no-forbidden-terms
+        const regexURL = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
+        const testRegexURL = /^https:\/\/([a-zA-Z0-9_-]+\.)?localhost$/;
         if (
           regexURL.test(url) ||
           (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
