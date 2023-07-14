@@ -44,7 +44,10 @@ describes.realWin(
       const iframe = slikeplayer.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js&baseurl=' + window.location.origin);
+      expect(iframe.src).to.equal(
+        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js&baseurl=' +
+          window.location.origin
+      );
     });
 
     it('renders responsively', async () => {
@@ -58,7 +61,10 @@ describes.realWin(
       const iframe = slikeplayer.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&baseurl=' + window.location.origin);
+      expect(iframe.src).to.equal(
+        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&baseurl=' +
+          window.location.origin
+      );
     });
 
     it('requires data-videoid', () => {
