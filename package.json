@@ -30,7 +30,7 @@
     "jss-preset-default": "10.8.2",
     "moment": "2.29.4",
     "obj-str": "1.1.0",
-    "preact": "10.5.15",
+    "preact": "10.16.0",
     "react-day-picker": "8.0.0-beta.37",
     "react-jss": "10.8.2",
     "resize-observer-polyfill": "1.5.1",
@@ -180,7 +180,7 @@
     "tempy": "1.0.1",
     "terser": "5.14.2",
     "traverse": "0.6.6",
-    "typescript": "4.5.4",
+    "typescript": "4.9.5",
     "util": "0.12.4"
   }
 }

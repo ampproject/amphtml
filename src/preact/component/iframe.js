@@ -71,6 +71,7 @@ export function IframeEmbedWithRef(
     [onReadyStateRef]
   );
 
+  /** @type {import('preact/hooks').MutableRef<HTMLIFrameElement?>} */
   const iframeRef = useRef(null);
 
   // Component API: IframeEmbedDef.Api.
@@ -112,7 +113,7 @@ export function IframeEmbedWithRef(
         iframe.src = iframe.src;
       } else {
         const parent = iframe.parentNode;
-        parent.insertBefore(iframe, iframe.nextSibling);
+        parent?.insertBefore(iframe, iframe.nextSibling);
       }
     }
   }, [playable]);
@@ -137,8 +138,8 @@ export function IframeEmbedWithRef(
     };
 
     const {defaultView} = iframe.ownerDocument;
-    defaultView.addEventListener('message', handler);
-    return () => defaultView.removeEventListener('message', handler);
+    defaultView?.addEventListener('message', handler);
+    return () => defaultView?.removeEventListener('message', handler);
   }, [matchesMessagingOrigin, messageHandler, mount, ready]);
 
   return (
