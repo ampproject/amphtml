@@ -6,7 +6,6 @@ teaser:
   text: Displays a cloud-hosted Slike Player.
 ---
 
-
 # amp-slikeplayer
 
 ## Example
@@ -50,7 +49,6 @@ Example:
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 
