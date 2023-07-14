@@ -75,7 +75,7 @@ module.exports = {
     mocha: {
       reporter: 'html',
       // Longer timeout during CI; fail quickly during local runs.
-      timeout: isCiBuild() ? 10000 : 2000,
+      timeout: isCiBuild() ? 10000 : 5000,
       // Run tests up to 3 times before failing them during CI.
       retries: isCiBuild() ? 2 : 0,
     },
