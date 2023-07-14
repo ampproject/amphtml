@@ -355,63 +355,6 @@ function IframeTransportContext() {}
 IframeTransportContext.onAnalyticsEvent;
 IframeTransportContext.sendResponseToCreative;
 
-// amp-date-picker externs
-/**
- * @type {function(*)}
- */
-let ReactRender = function () {};
-
-/** @constructor */
-let RRule;
-/**
- * @param {Date} unusedDt
- * @param {boolean=} unusedInc
- * @return {?Date}
- */
-RRule.prototype.before = function (unusedDt, unusedInc) {};
-/**
- * @param {Date} unusedDt
- * @param {boolean=} unusedInc
- * @return {?Date}
- */
-RRule.prototype.after = function (unusedDt, unusedInc) {};
-
-/**
- * @dict
- */
-let PropTypes = {};
-
-/**
- * @dict
- */
-let ReactDates;
-
-/** @constructor */
-ReactDates.DayPickerSingleDateController;
-
-/** @dict */
-ReactDates.DayPickerRangeController;
-
-/** @type {function(*):boolean} */
-ReactDates.isInclusivelyAfterDay;
-
-/** @type {function(*):boolean} */
-ReactDates.isInclusivelyBeforeDay;
-
-/** @type {function(*,*):boolean} */
-ReactDates.isSameDay;
-
-/**
- * @dict
- */
-let ReactDatesConstants = {};
-
-/** @const {string} */
-ReactDatesConstants.ANCHOR_LEFT;
-
-/** @const {string} */
-ReactDatesConstants.HORIZONTAL_ORIENTATION;
-
 // amp-inputmask externs
 /**
  * @constructor

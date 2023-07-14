@@ -357,14 +357,6 @@
     }
   },
   {
-    "name": "amp-date-picker",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-delight-player",
     "version": "0.1",
     "latestVersion": "0.1",
