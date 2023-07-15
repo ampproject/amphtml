@@ -7,7 +7,7 @@
     "@babel/register": "7.22.5",
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "113.0.0",
-    "geckodriver": "4.0.4",
+    "geckodriver": "4.0.5",
     "selenium-webdriver": "4.10.0"
   }
 }
