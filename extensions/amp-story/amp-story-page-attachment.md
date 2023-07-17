@@ -209,6 +209,7 @@ List of allowed AMP components in a page attachment:
   <li><code>&lt;amp-reach-player></code></li>
   <li><code>&lt;amp-reddit></code></li>
   <li><code>&lt;amp-riddle-quiz></code></li>
+  <li><code>&lt;amp-slikeplayer></code></li>
   <li><code>&lt;amp-soundcloud></code></li>
   <li><code>&lt;amp-springboard-player></code></li>
   <li><code>&lt;amp-timeago></code></li>

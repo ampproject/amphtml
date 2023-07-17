@@ -37,7 +37,7 @@ describes.realWin(
           'data-apikey': 'slike373googleamp5accuzkglo',
           'data-videoid': '1xp5a1wkul',
           'data-config':
-            'playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js',
+            'skipad=true',
         },
         true
       );
@@ -45,7 +45,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js&baseurl=' +
+        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&skipad=true&baseurl=' +
           window.location.origin
       );
     });

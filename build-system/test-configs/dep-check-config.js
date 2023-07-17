@@ -372,6 +372,8 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-delight-player/0.1/amp-delight-player.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-slikeplayer/0.1/amp-slikeplayer.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
@@ -441,8 +443,6 @@ exports.rules = [
 
       // For amp-image-slider_1.0: Required for `Gestures.get`
       'extensions/amp-image-slider/1.0/component.js->src/service/timer-impl.js',
-      'extensions/amp-slikeplayer/0.1/amp-slikelayer.js->' +
-        'src/service/video-manager-impl.js',
     ],
   },
   {
