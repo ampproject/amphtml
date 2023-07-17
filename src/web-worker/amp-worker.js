@@ -1,4 +1,4 @@
-Fimport {devAssert} from '#core/assert';
+import {devAssert} from '#core/assert';
 
 import {Services} from '#service';
 import {calculateEntryPointScriptUrl} from '#service/extension-script';
