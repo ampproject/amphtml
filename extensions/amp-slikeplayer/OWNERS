@@ -4,7 +4,11 @@
 {
   rules: [
     {
-      owners: [{name: 'SlikeTech'}, {name: 'ampproject/wg-components'}],
+      owners: [
+        {name: 'powerivq'},
+        {name: 'erwinmombay'},
+        {name: 'ampproject/wg-components'},
+      ],
     },
   ],
 }
