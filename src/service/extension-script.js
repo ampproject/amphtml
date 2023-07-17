@@ -7,8 +7,7 @@ import {getMode} from '../mode';
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LATEST_VERSION = 'latest';
 
-const regexURL =
-          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
+const regexURL = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
 const testRegexURL = /^([a-zA-Z0-9_-]+\.)?localhost$/;
 
 /**
