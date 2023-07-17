@@ -36,8 +36,7 @@ describes.realWin(
         {
           'data-apikey': 'slike373googleamp5accuzkglo',
           'data-videoid': '1xp5a1wkul',
-          'data-config':
-            'skipad=true',
+          'data-config': 'skipad=true',
         },
         true
       );

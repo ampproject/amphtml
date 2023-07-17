@@ -104,8 +104,8 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
     this.baseUrl_ = element.getAttribute('data-iframe-src') || this.baseUrl_;
     this.config_ = element.getAttribute('data-config') || '';
-    installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
+    installVideoManagerForDoc(element);
+    Services.videoManagerForDoc(element).register(this);
   }
 
   /** @override */
