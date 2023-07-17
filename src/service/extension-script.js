@@ -7,11 +7,9 @@ import {getMode} from '../mode';
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LATEST_VERSION = 'latest';
 
-const cdnRegexUrl = new RegExp(
-  // eslint-disable-next-line local/no-forbidden-terms
-  '^https://([a-zA-Z0-9_-]+.)?cdn.ampproject.org(/.*)?$'
-);
-const testCdnRegexUrl = new RegExp('^([a-zA-Z0-9_-]+.)?localhost$');
+const regexURL =
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
+const testRegexURL = /^([a-zA-Z0-9_-]+\.)?localhost$/;
 
 /**
  * Calculate the base url for any scripts.
@@ -166,8 +164,8 @@ export function createExtensionScript(win, extensionId, version) {
     createScriptURL: function (url) {
       // Only allow trusted URLs
       if (
-        cdnRegexUrl.test(url) ||
-        (getMode().test && testCdnRegexUrl.test(new URL(url).hostname)) ||
+        regexURL.test(url) ||
+        (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
         new URL(url).host === 'fonts.googleapis.com'
       ) {
         return url;
