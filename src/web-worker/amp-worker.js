@@ -78,9 +78,9 @@ class AmpWorker {
     const policy = {
       createScriptURL: function (url) {
         // Only allow the correct webworker url to pass through
-        // eslint-disable-next-line local/no-forbidden-terms
         const regexURL = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
         const testRegexURL = /^([a-zA-Z0-9_-]+\.)?localhost$/;
+
         if (
           regexURL.test(url) ||
           (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
