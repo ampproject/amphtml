@@ -78,7 +78,8 @@ class AmpWorker {
     const policy = {
       createScriptURL: function (url) {
         // Only allow the correct webworker url to pass through
-        const regexURL = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
+        const regexURL =
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
         const testRegexURL = /^([a-zA-Z0-9_-]+\.)?localhost$/;
 
         if (
