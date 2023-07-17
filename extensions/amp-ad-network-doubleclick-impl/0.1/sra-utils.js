@@ -35,7 +35,6 @@ const SRA_JOINERS = [
   isAdTest,
   getTargetingAndExclusions,
   getExperimentIds,
-  getIdentity,
   getForceSafeframe,
   getPageOffsets,
   getContainers,
@@ -260,17 +259,6 @@ export function getExperimentIds(impls) {
   impls.forEach((impl) => impl.experimentIds.forEach((eid) => (eids[eid] = 1)));
   const eidKeys = Object.keys(eids).join();
   return eidKeys ? {'eid': eidKeys} : null;
-}
-
-/**
- * Identity token is page level therefore SRA uses the value of the first
- * block.
- * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?{[key: string]: string}}
- * @visibleForTesting
- */
-export function getIdentity(impls) {
-  return getFirstInstanceValue_(impls, (impl) => impl.buildIdentityParams());
 }
 
 /**

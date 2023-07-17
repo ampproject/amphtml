@@ -87,7 +87,6 @@ function createImplTag(config, element, impl, env) {
   env.win.document.body.appendChild(element);
   impl = new AmpAdNetworkDoubleclickImpl(element);
   impl.iframe = iframe;
-  impl.win['goog_identity_prom'] = Promise.resolve({});
   return [element, impl, env];
 }
 
@@ -1012,24 +1011,6 @@ for (const {config, name} of [
                   expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
                 });
               });
-          });
-        });
-        it('should include identity', () => {
-          // Force get identity result by overloading window variable.
-          const token =
-            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-              token: 'abcdef',
-              jar: 'some_jar',
-              pucrd: 'some_pucrd',
-            });
-          impl.win['goog_identity_prom'] = Promise.resolve(token);
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            [
-              /(\?|&)adsid=abcdef(&|$)/,
-              /(\?|&)jar=some_jar(&|$)/,
-              /(\?|&)pucrd=some_pucrd(&|$)/,
-            ].forEach((regexp) => expect(url).to.match(regexp));
           });
         });
 
