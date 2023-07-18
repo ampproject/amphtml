@@ -7,8 +7,5 @@ import {validateData, writeScript} from '#3p/3p';
 export function incrementx(global, data) {
   validateData(data, ['vzid']);
   global.ixParam = data;
-  writeScript(
-    global,
-    'https://cdn.incrementxserv.com/ixamp.js'
-  );
+  writeScript(global, 'https://cdn.incrementxserv.com/ixamp.js');
 }
