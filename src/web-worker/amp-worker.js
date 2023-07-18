@@ -104,7 +104,7 @@ class AmpWorker {
 
     url = policy.createScriptURL(
       calculateEntryPointScriptUrl(loc, 'ww', useLocal, useRtvVersion)
-    );
+    ).toString();
 
     dev().fine(TAG, 'Fetching web worker from', url);
 
