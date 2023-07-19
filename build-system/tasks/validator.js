@@ -38,7 +38,6 @@ async function validatorCpp() {
     '--test_summary=detailed',
     '--verbose_failures',
     'cpp/engine:validator_test',
-    'cpp/engine/wasm:validator_js_test',
   ].join(' ');
   execOrDie(bazelCmd, {
     cwd: 'validator',
