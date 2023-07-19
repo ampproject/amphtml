@@ -18,7 +18,7 @@ function pushBuildWorkflow() {
   // tests are no longer needed since we now create a WASM build off of the
   // the C++ code.
   // TODO(#38610): fix for bazel 6.0 or use older version
-  // timedExecOrDie('amp validator-cpp');
+  timedExecOrDie('amp validator-cpp');
   timedExecOrDie('amp validate-html-fixtures');
 }
 
