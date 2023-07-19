@@ -35,6 +35,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-video-interface-list');
   timedExecOrDie('amp get-zindex');
   timedExecOrDie('amp markdown-toc');
+  timedExecOrDie('amp validator');
 }
 
 /**
