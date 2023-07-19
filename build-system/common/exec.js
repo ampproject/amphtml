@@ -102,6 +102,7 @@ function execOrThrow(cmd, msg) {
 module.exports = {
   exec,
   execOrDie,
+  execOrDieAndPrintError,
   execScriptAsync,
   execWithError,
   execOrThrow,
