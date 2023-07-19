@@ -37,7 +37,7 @@ async function validatorCpp() {
     '--verbose_failures',
     'cpp/engine:validator_test',
   ].join(' ');
-  execOrThrow(bazelCmd, {
+  execOrDieAndPrintError(bazelCmd, {
     cwd: 'validator',
     stdio: 'inherit',
   });
