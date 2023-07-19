@@ -97,6 +97,8 @@ const std::map<std::string, TestCase>& TestCases() {
            "external/amphtml-extensions/*/*/test/*.html",
             &html_files)) << "Test cases file pattern not found.";
 
+    CHECK(!html_files.empty()) << "Validator test cases are empty. Will not proceed.";
+    
     std::sort(html_files.begin(), html_files.end());
     for (const std::string& html_file : html_files) {
       if (html_file.find("/js_only/") != std::string::npos) continue;
