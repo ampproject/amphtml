@@ -51,20 +51,6 @@ function execOrDie(cmd, options) {
 }
 
 /**
- * Same as ExecOrDie except this also prints the process error message to stderr.
- *
- * @param {string} cmd
- * @param {?Object=} options
- */
-function execOrDieAndPrintError(cmd, options) {
-  const p = exec(cmd, options);
-  if (p.stderr.length > 0) {
-    log(red('ERROR:'), p.stderr.toString());
-    process.exit(1);
-  }
-}
-
-/**
  * Executes the provided command, piping the parent process' stderr, updating
  * the error to process if stderr is not empty, and returns process object.
  * @param {string} cmd
@@ -72,14 +58,6 @@ function execOrDieAndPrintError(cmd, options) {
  */
 function execWithError(cmd) {
   const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-  if (p.stderr.length > 0) {
-    p.error = new Error(p.stderr.toString());
-  }
-  return p;
-}
-
-function execWithErrorInValidatorDir(cmd) {
-  const p = exec(cmd, {'cwd': 'validator', 'stdio': ['inherit', 'inherit', 'pipe']});
   if (p.stderr.length > 0) {
     p.error = new Error(p.stderr.toString());
   }
@@ -108,8 +86,6 @@ function execOrThrow(cmd, msg) {
 module.exports = {
   exec,
   execOrDie,
-  execOrDieAndPrintError,
-  execWithErrorInValidatorDir,
   execScriptAsync,
   execWithError,
   execOrThrow,
