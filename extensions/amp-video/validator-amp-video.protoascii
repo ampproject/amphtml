@@ -161,11 +161,6 @@ tags: {  # <amp-video> in amp-story
     mandatory: true
   }
   attrs: {
-    name: "foo"
-    value: "bar"
-    mandatory: true
-  }
-  attrs: {
     name: "controls"
     value: ""
     deprecation: "- no replacement"
