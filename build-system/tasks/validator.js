@@ -1,7 +1,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrDie, execWithErrorInValidatorDir} = require('../common/exec');
+const {execOrDie} = require('../common/exec');
 
 let validatorArgs = '';
 if (argv.update_tests) {
@@ -37,7 +37,10 @@ async function validatorCpp() {
     '--verbose_failures',
     'cpp/engine:validator_test',
   ].join(' ');
-  execWithErrorInValidatorDir(bazelCmd);
+  execOrDie(bazelCmd, {
+    cwd: 'validator',
+    stdio: ['pipe', 'pipe', 'ignore']
+  });
 }
 
 /**
