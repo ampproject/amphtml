@@ -33,8 +33,6 @@ async function validatorCpp() {
     '--nokeep_state_after_build',
     '--test_output=errors',
     '--ui_event_filters=INFO',
-    '--noshow_progress',
-    '--noshow_loading_progress',
     '--test_summary=detailed',
     '--verbose_failures',
     'cpp/engine:validator_test',
