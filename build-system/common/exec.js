@@ -78,6 +78,14 @@ function execWithError(cmd) {
   return p;
 }
 
+function execWithErrorInValidatorDir(cmd) {
+  const p = exec(cmd, {'cwd': 'validator', 'stdio': ['inherit', 'inherit', 'pipe']});
+  if (p.stderr.length > 0) {
+    p.error = new Error(p.stderr.toString());
+  }
+  return p;
+}
+
 /**
  * Executes the provided command, piping the parent process' stderr, throwing
  * an error with the provided message the command fails, and returns the
@@ -101,6 +109,7 @@ module.exports = {
   exec,
   execOrDie,
   execOrDieAndPrintError,
+  execWithErrorInValidatorDir,
   execScriptAsync,
   execWithError,
   execOrThrow,
