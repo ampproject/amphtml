@@ -85,7 +85,7 @@ class AmpWorker {
 
         if (
           (regexURL.test(url) ||
-            (getMode().test && testRegexURL.test(new URL(url)))) &&
+            (getMode().test && testRegexURL.test(new URL(url).hostname))) &&
           (url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js')
         ) {
           return url;
