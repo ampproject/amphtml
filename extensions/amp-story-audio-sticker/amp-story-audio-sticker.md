@@ -50,7 +50,9 @@ Default value: “small”, which would be used if the input value is invalid or
 
 ### `sticker` {string} optional
 
-Which of the 4 premade stickers to use:
+Default value: “cat-sticker”, which would be used if the input value is invalid or is not provided.
+
+A list of premade stickers to use:
 
 | Accepted Value | Pre-tap Image                                                                                   | Post-tap Image                                                                                    |
 | -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -59,18 +61,16 @@ Which of the 4 premade stickers to use:
 | “loud-speaker” | ![Speaker Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-pretap.png) | ![Speaker Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-posttap.png) |
 | “audio-cloud”  | ![Cloud Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-pretap.png)    | ![Cloud Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-posttap.png)    |
 
-Default value: “cat-sticker”, which would be used if the input value is invalid or is not provided.
-
 ### `sticker-style` {string} optional
 
-Extra premade style of the sticker:
+Default value: none
+
+Extra premade styles of the sticker to use:
 
 | Accepted Value | Description                                                             | Header 3                                                                                              |
 | -------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | “outline”      | Adds a border around the provided sticker image.                        | ![Image 2](https://github.com/ampproject/amphtml/assets/1697814/c7996424-c810-40d3-a28f-09e7c76742d1) |
 | “dropshadow”   | Adds a dropshadow around the opaque part of the provided sticker image. | ![Image 4](https://github.com/ampproject/amphtml/assets/1697814/2f5b6c5d-ea86-4345-80b8-3b2c20c92e58) |
-
-Default value: none
 
 #### Customize Sticker Style via CSS Variables
 
