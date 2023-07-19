@@ -96,7 +96,7 @@ const std::map<std::string, TestCase>& TestCases() {
     CHECK(htmlparser::FileUtil::Glob(
            "external/amphtml-extensions/*/*/test/*.html",
             &html_files)) << "Test cases file pattern not found.";
-    
+
     std::sort(html_files.begin(), html_files.end());
     for (const std::string& html_file : html_files) {
       if (html_file.find("/js_only/") != std::string::npos) continue;
