@@ -45,7 +45,7 @@ function prBuildWorkflow() {
     timedExecOrDie('amp validate-html-fixtures');
   }
 
-  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
     // Trigger c++ validator early.
     timedExecOrDie('amp validator-cpp');
   }
