@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <memory>
 
 #include "cpp/engine/validator_pb.h"
@@ -62,7 +63,10 @@ TestCase FindOrDie(std::map<std::string, TestCase> cases,
 void MaybeGenerateFailuresFor(const std::string& actual,
                               const std::string& expected,
                               const std::string& test_case_output_file) {
-  if (actual == expected) return;
+  if (actual == expected) {
+    std::cout << "Expectd output same for " << test_case_output_file << std::endl;
+    return;
+  }
   std::string out_file =
       StrReplaceAll(test_case_output_file,
                     {{"external/validator/testdata/", "validator/testdata/"},
