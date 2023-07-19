@@ -25,7 +25,7 @@ async function validator() {
  */
 async function validatorCpp() {
   const bazelCmd = [
-    'bazel test',
+    'bazel-5.4.0 test',
     '--repo_env=CC=clang',
     "--cxxopt='-std=c++17'",
     '--discard_analysis_cache',
