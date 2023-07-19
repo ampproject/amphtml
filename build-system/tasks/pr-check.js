@@ -115,7 +115,6 @@ async function prCheck() {
   }
 
   if (buildTargetsInclude(Targets.VALIDATOR)) {
-    runCheck('amp validator');
     runCheck('amp validator-cpp');
   }
 
