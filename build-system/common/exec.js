@@ -58,11 +58,9 @@ function execOrDie(cmd, options) {
  */
 function execOrDieAndPrintError(cmd, options) {
   const p = exec(cmd, options);
-  if (p.status && p.status != 0) {
-    if (p.stderr.length > 0) {
-      log(red('ERROR:'), p.stderr.toString());
-      process.exit(p.status);
-    }
+  if (p.stderr.length > 0) {
+    log(red('ERROR:'), p.stderr.toString());
+    process.exit(1);
   }
 }
 
