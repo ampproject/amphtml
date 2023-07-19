@@ -51,6 +51,22 @@ function execOrDie(cmd, options) {
 }
 
 /**
+ * Same as ExecOrDie except this also prints the process error message to stderr.
+ *
+ * @param {string} cmd
+ * @param {?Object=} options
+ */
+function execOrDieAndPrintError(cmd, options) {
+  const p = exec(cmd, options);
+  if (p.status && p.status != 0) {
+    if (p.stderr.length > 0) {
+      log(red('ERROR:'), p.stderr.toString());
+      process.exit(p.status);
+    }
+  }
+}
+
+/**
  * Executes the provided command, piping the parent process' stderr, updating
  * the error to process if stderr is not empty, and returns process object.
  * @param {string} cmd
