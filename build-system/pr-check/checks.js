@@ -114,6 +114,10 @@ function prBuildWorkflow() {
     timedExecOrDie('amp check-video-interface-list');
     timedExecOrDie('amp get-zindex');
   }
+
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator-cpp');
+  }
 }
 
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
