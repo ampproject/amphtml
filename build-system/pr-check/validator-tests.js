@@ -44,6 +44,10 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
     timedExecOrDie('amp validate-html-fixtures');
   }
+
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator-cpp');
+  }
 }
 
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
