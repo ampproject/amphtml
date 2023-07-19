@@ -39,7 +39,7 @@ async function validatorCpp() {
   ].join(' ');
   execOrDie(bazelCmd, {
     cwd: 'validator',
-    stdio: ['pipe', 'pipe', 'ignore']
+    stdio: 'inherit',
   });
 }
 
