@@ -62,6 +62,7 @@ TestCase FindOrDie(std::map<std::string, TestCase> cases,
 void MaybeGenerateFailuresFor(const std::string& actual,
                               const std::string& expected,
                               const std::string& test_case_output_file) {
+  if (actual == expected) return;
   std::string out_file =
       StrReplaceAll(test_case_output_file,
                     {{"external/validator/testdata/", "validator/testdata/"},
