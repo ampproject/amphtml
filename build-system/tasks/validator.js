@@ -1,7 +1,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrDie, execOrThrow} = require('../common/exec');
+const {execOrDie, execOrDieAndPrintError} = require('../common/exec');
 
 let validatorArgs = '';
 if (argv.update_tests) {
