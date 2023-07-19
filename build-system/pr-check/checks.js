@@ -35,8 +35,6 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-video-interface-list');
   timedExecOrDie('amp get-zindex');
   timedExecOrDie('amp markdown-toc');
-  timedExecOrDie('amp validator');
-  timedExecOrDie('amp validator-cpp');
 }
 
 /**
@@ -113,10 +111,6 @@ function prBuildWorkflow() {
     timedExecOrDie('amp check-analytics-vendors-list');
     timedExecOrDie('amp check-video-interface-list');
     timedExecOrDie('amp get-zindex');
-  }
-
-  if (buildTargetsInclude(Targets.VALIDATOR)) {
-    timedExecOrDie('amp validator-cpp');
   }
 }
 
