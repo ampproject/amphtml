@@ -18,8 +18,6 @@ feature_tests/no_custom_js.html:13:3 The attribute 'src' in tag 'amphtml engine 
 >>    ^~~~~~~~~
 feature_tests/no_custom_js.html:14:3 The attribute 'custom-element' may not appear in tag 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 >>    ^~~~~~~~~
-feature_tests/no_custom_js.html:14:3 The script tag includes an invalid AMP domain in the src attribute.
->>    ^~~~~~~~~
 feature_tests/no_custom_js.html:14:3 The script version for 'amphtml engine script' is a unknown version which mismatches with the first script on the page using the standard version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |   </head>
 |   <body>
