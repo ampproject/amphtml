@@ -113,10 +113,6 @@ async function prCheck() {
     runCheck('amp validator');
     runCheck('amp validator-cpp');
   }
-
-  if (buildTargetsInclude(Targets.VALIDATOR)) {
-    runCheck('amp validator-cpp');
-  }
   
   if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
     runCheck('amp validator-webui');
