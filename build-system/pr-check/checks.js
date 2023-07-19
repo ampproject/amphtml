@@ -36,6 +36,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp get-zindex');
   timedExecOrDie('amp markdown-toc');
   timedExecOrDie('amp validator');
+  timedExecOrDie('amp validator-cpp');
 }
 
 /**
