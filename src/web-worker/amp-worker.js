@@ -83,9 +83,7 @@ class AmpWorker {
         const testRegexURL = /^([a-zA-Z0-9_-]+\.)?localhost$/;
 
         if (
-          (regexURL.test(url) ||
-            (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
-            new URL(url).host === 'fonts.googleapis.com') &&
+          (regexURL.test(url) || getMode().test) &&
           (url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js')
         ) {
           return url;
@@ -102,9 +100,11 @@ class AmpWorker {
       );
     }
 
-    url = policy.createScriptURL(
-      calculateEntryPointScriptUrl(loc, 'ww', useLocal, useRtvVersion)
-    ).toString();
+    url = policy
+      .createScriptURL(
+        calculateEntryPointScriptUrl(loc, 'ww', useLocal, useRtvVersion)
+      )
+      .toString();
 
     dev().fine(TAG, 'Fetching web worker from', url);
 
