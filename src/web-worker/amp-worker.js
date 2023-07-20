@@ -80,12 +80,9 @@ class AmpWorker {
         // Only allow the correct webworker url to pass through
         const regexURL =
           /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
-        const testRegexURL =
-          /^((([a-zA-Z0-9_-]+\.)?localhost)|0.0.0.0|127.0.0.1|192.168.192.3|172.28.0.3)$/;
 
         if (
-          (regexURL.test(url) ||
-            (getMode().test && testRegexURL.test(new URL(url).hostname))) &&
+          (regexURL.test(url) || getMode().test) &&
           (url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js')
         ) {
           return url;
