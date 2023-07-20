@@ -54,15 +54,16 @@ cc_binary(
 )
 
 cc_binary(
-    name = "statetablegen",
+    name = "validatorgen",
     srcs = [
-        "statetablegen.cc",
+        "validatorgen.cc",
     ],
     data = [
         "//cpp/htmlparser/data:jsongrammar.txt",
-        "//cpp/htmlparser/json:states.h",
+        "//cpp/htmlparser/validators:json.h",
     ],
     deps = [
+        "//base",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "//cpp/htmlparser/grammar:tablebuilder",

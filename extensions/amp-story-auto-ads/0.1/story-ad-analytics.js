@@ -53,7 +53,7 @@ export class StoryAdAnalytics {
   constructor(ampdoc) {
     /** @const @private {!Window} */
     this.win_ = ampdoc.win;
-    /** @const @private {!Object<number, JsonObject>} */
+    /** @const @private {!{[key: number]: JsonObject}} */
     this.data_ = {};
   }
 
@@ -62,7 +62,7 @@ export class StoryAdAnalytics {
    * @param {!Element} element amp-story-page element containing ad.
    * @param {number} adIndex
    * @param {string} eventType
-   * @param {!Object<string, number>} vars A map of vars and their values.
+   * @param {!{[key: string]: number}} vars A map of vars and their values.
    */
   fireEvent(element, adIndex, eventType, vars) {
     this.ensurePageTrackingInitialized_(adIndex);

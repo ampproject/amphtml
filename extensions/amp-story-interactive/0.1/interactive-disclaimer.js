@@ -116,8 +116,8 @@ export function buildInteractiveDisclaimerIcon(interactive) {
 /**
  * Returns the corresponding backend specs (as an array of url and specs), or undefined.
  * @param {string} backendUrl
- * @param {!Object<string, !Object<string, string>>} backendsList
- * @return {?Array<string|Object<string, string>>} array that contains: base url of backend, {learnMoreUrl, entity}.
+ * @param {!{[key: string]: !{[key: string]: string}}} backendsList
+ * @return {?Array<string|{[key: string]: string}>} array that contains: base url of backend, {learnMoreUrl, entity}.
  */
 export function getBackendSpecs(backendUrl, backendsList) {
   return Object.entries(backendsList).find((element) => {

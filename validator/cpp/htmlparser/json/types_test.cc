@@ -74,44 +74,8 @@ TEST(TypesTest, BasicAllTypesTest) {
   json.Insert("employed", false);
   json.Insert("married", true);
 
-  EXPECT_EQ(
-      R"({
-  "name": "John",
-  "age": 18,
-  "friends":  [
-    "Alice",
-    "Bob"
-  ],
-  "address":  [
-    123,
-    "foo street",
-    "3rd floor",
-    "New york",
-    91234,
-    true,
-    null,
-    false
-  ],
-  "devices":  {
-    "phone": "android",
-    "laptop": "macbook",
-    "camera": null,
-    "music":    [
-      "spotify",
-      "youtube",
-      "apple"
-    ],
-    "sdcards":    [
-      64,
-      128,
-      256.250000,
-      255
-    ]
-  },
-  "gender": "male",
-  "employed": false,
-  "married": true
-})", json.ToString());
+  EXPECT_EQ(R"({"name":"John","age":18,"friends":["Alice","Bob"],"address":[123,"foo street","3rd floor","New york",91234,true,null,false],"devices":{"phone":"android","laptop":"macbook","camera":null,"music":["spotify","youtube","apple"],"sdcards":[64,128,256.250000,255]},"gender":"male","employed":false,"married":true})",
+            json.ToString());
 }
 
 TEST(TypesTest, SingleValue) {
@@ -137,25 +101,13 @@ TEST(TypesTest, SingleValue) {
   EXPECT_EQ(jarr.ToString(), "[]");
   // Bulk append.
   jarr.Append(1, 2, 3, 1.200000, 2.200000, 3.300000, "hello", "world");
-  EXPECT_EQ(jarr.ToString(),
-            R"([
-  1,
-  2,
-  3,
-  1.200000,
-  2.200000,
-  3.300000,
-  "hello",
-  "world"
-])");
+  EXPECT_EQ("[1,2,3,1.200000,2.200000,3.300000,\"hello\",\"world\"]",
+            jarr.ToString());
 
   JsonDict keyval;
-  EXPECT_EQ(keyval.ToString(), "{\n\n}");
+  EXPECT_EQ(keyval.ToString(), "{}");
   keyval.Insert("foo", "bar");
-  EXPECT_EQ(keyval.ToString(),
-            R"({
-  "foo": "bar"
-})");
+  EXPECT_EQ("{\"foo\":\"bar\"}", keyval.ToString());
 }
 
 TEST(TypesTest, GetAndAssignmentOperatorTest) {
@@ -167,6 +119,10 @@ TEST(TypesTest, GetAndAssignmentOperatorTest) {
   // int_value is now string.
   int_value = "Hello World!";
   EXPECT_EQ("Hello World!", *int_value.Get<std::string>());
+  std::string_view str = "Foo Bar";
+  str.remove_prefix(1);
+  int_value = str;
+  EXPECT_EQ("oo Bar", *int_value.Get<std::string_view>());
 }
 
 TEST(TypesTest, OverflowIntegerTest) {
@@ -234,9 +190,7 @@ TEST(TypesTest, AnyObjectTest) {
     return dict;
   };
   Any<JsonDict> any(&greet, serializer1);
-  EXPECT_EQ(any.ToString(), R"({
-  "greeting": "Hello World!"
-})");
+  EXPECT_EQ("{\"greeting\":\"Hello World!\"}", any.ToString());
 
   // Output as JsonObject.
   std::function<JsonObject(const Greeting&)> serializer2 = [](
@@ -246,9 +200,7 @@ TEST(TypesTest, AnyObjectTest) {
     return JsonObject(dict);
   };
   Any<JsonObject> any2(&greet, serializer2);
-  EXPECT_EQ(any2.ToString(), R"({
-  "greeting": "Hello World!"
-})");
+  EXPECT_EQ("{\"greeting\":\"Hello World!\"}", any2.ToString());
 
   // Output as json array.
   LottoDrawing drawing{.n1 = 18, .n2 = 33, .n3 = 36, .n4 = 45, .n5 = 50,
@@ -261,14 +213,7 @@ TEST(TypesTest, AnyObjectTest) {
     return jarray;
   };
   Any<JsonArray> any3(&drawing, serializer3);
-  EXPECT_EQ(any3.ToString(), R"([
-  18,
-  33,
-  36,
-  45,
-  50,
-  10
-])");
+  EXPECT_EQ("[18,33,36,45,50,10]", any3.ToString());
 
   // Output as int.
   Age age{.age = 18};
@@ -308,20 +253,8 @@ TEST(TypesTest, AnyObjectTest) {
     return JsonObject(dict);
   };
   Any<JsonObject> any6(&nested, serializer6);
-  EXPECT_EQ(any6.ToString(),
-            R"({
-  "name": "John Doe",
-  "age": 18,
-  "greeting": "Hello World!",
-  "drawing":  [
-    18,
-    33,
-    36,
-    45,
-    50,
-    10
-  ]
-})");
+  EXPECT_EQ(R"({"name":"John Doe","age":18,"greeting":"Hello World!","drawing":[18,33,36,45,50,10]})",
+            any6.ToString());
 }
 
 TEST(TypesTest, JsonDictTypedGetter) {
@@ -345,23 +278,10 @@ TEST(TypesTest, ImmutablityTest) {
   array.Append(1, 2, 3);
   json.Insert("array", array);
   EXPECT_EQ(json.Get<JsonArray>("array")->size(), 3);
-  EXPECT_EQ(json.Get<JsonArray>("array")->ToString(),
-            R"([
-  1,
-  2,
-  3
-])");
+  EXPECT_EQ("[1,2,3]", json.Get<JsonArray>("array")->ToString());
   json.Get<JsonArray>("array")->Append(4, 5, 6);
   EXPECT_EQ(json.Get<JsonArray>("array")->size(), 6);
-  EXPECT_EQ(json.Get<JsonArray>("array")->ToString(),
-            R"([
-  1,
-  2,
-  3,
-  4,
-  5,
-  6
-])");
+  EXPECT_EQ("[1,2,3,4,5,6]", json.Get<JsonArray>("array")->ToString());
 }
 
 TEST(TypesTest, ArrayAppendTest) {

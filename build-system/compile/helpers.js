@@ -7,7 +7,7 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
  * Computes the base url for sourcemaps. Custom sourcemap URLs have placeholder
  * {version} that should be replaced with the actual version. Also, ensures
  * that a trailing slash exists.
- * @param {Object} options
+ * @param {object} options
  * @return {string}
  */
 function getSourceRoot(options) {

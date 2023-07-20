@@ -11,7 +11,7 @@
  * @typedef {{
  *   target: !Element,
  *   keyframes: !WebKeyframesDef,
- *   vars: ?Object<string, *>,
+ *   vars: ?{[key: string]: *},
  *   timing: !WebAnimationTimingDef,
  * }}
  */
@@ -72,7 +72,7 @@ export let WebCompAnimationDef;
 export let WebKeyframeAnimationDef;
 
 /**
- * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
+ * @typedef {!{[key: string]: *}|!Array<!{[key: string]: *}>}
  */
 export let WebKeyframesDef;
 
@@ -98,7 +98,7 @@ export let WebAnimationTimingDef;
  * specified as properties with the name in the format of `--varName`.
  *
  * @mixin
- * @typedef {Object}
+ * @typedef {object}
  */
 export let WebAnimationVarsDef;
 
@@ -186,7 +186,7 @@ export const WebAnimationTimingFill = {
   AUTO: 'auto',
 };
 
-/** @const {!Object<string, boolean>} */
+/** @const {!{[key: string]: boolean}} */
 const ALLOWLISTED_PROPS = {
   'opacity': true,
   'transform': true,

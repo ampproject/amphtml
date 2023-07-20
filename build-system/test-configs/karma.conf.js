@@ -103,7 +103,7 @@ module.exports = {
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
     'karma-chrome-launcher',
-    'karma-esbuild',
+    'karma-esbuild-up',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',

@@ -80,7 +80,13 @@ export class AmpPixel extends BaseElement {
             if (!this.win) {
               return;
             }
-            const pixel = createPixel(this.win, src, this.referrerPolicy_);
+
+            const pixel = createPixel(
+              this.win,
+              src,
+              this.referrerPolicy_,
+              this.element.getAttribute('attributionsrc')
+            );
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });

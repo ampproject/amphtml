@@ -16,8 +16,6 @@ import {
   getCorrelator,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
-  getIdentityToken,
-  getIdentityTokenRequestUrl,
   getServeNpaPromise,
   googleAdUrl,
   groupAmpAdsByType,
@@ -26,7 +24,6 @@ import {
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
 
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
@@ -34,7 +31,6 @@ import {toggleExperiment} from '#experiments';
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {installExtensionsService} from '#service/extensions-impl';
-import {installXhrService} from '#service/xhr-impl';
 
 import {user} from '#utils/log';
 
@@ -782,228 +778,6 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
       );
     });
   });
-
-  describes.fakeWin('#getIdentityTokenRequestUrl', {}, (env) => {
-    let doc;
-    let fakeWin;
-    beforeEach(() => {
-      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
-      doc = {};
-      fakeWin = {location: {}};
-      documentInfoStub
-        .withArgs(doc)
-        .returns({canonicalUrl: 'http://f.blah.com?some_site'});
-    });
-
-    it('should use google.com if at top', () => {
-      fakeWin.top = fakeWin;
-      fakeWin.location.ancestorOrigins = ['foo.google.com.eu'];
-      expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-        'https://adservice.google.com/adsid/integrator.json?' +
-          'domain=f.blah.com'
-      );
-    });
-
-    it('should use google.com if no ancestorOrigins', () => {
-      expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-        'https://adservice.google.com/adsid/integrator.json?' +
-          'domain=f.blah.com'
-      );
-    });
-
-    it('should use google.com if non-google top', () => {
-      fakeWin.location.ancestorOrigins = ['foo.google2.com'];
-      expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-        'https://adservice.google.com/adsid/integrator.json?' +
-          'domain=f.blah.com'
-      );
-    });
-
-    it('should use google ancestor origin based top domain', () => {
-      fakeWin.location.ancestorOrigins = ['foo.google.eu', 'blah.google.fr'];
-      expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-        'https://adservice.google.fr/adsid/integrator.json?' +
-          'domain=f.blah.com'
-      );
-    });
-
-    it('should use supplied domain', () => {
-      fakeWin.location.ancestorOrigins = ['foo.google.fr'];
-      expect(getIdentityTokenRequestUrl(fakeWin, doc, '.google.eu')).to.equal(
-        'https://adservice.google.eu/adsid/integrator.json?' +
-          'domain=f.blah.com'
-      );
-    });
-  });
-
-  describes.fakeWin(
-    '#getIdentityToken',
-    {amp: true, mockFetch: true},
-    (env) => {
-      beforeEach(() => {
-        installXhrService(env.win);
-        const documentInfoStub = env.sandbox.stub(
-          Services,
-          'documentInfoForDoc'
-        );
-        documentInfoStub
-          .withArgs(env.ampdoc)
-          .returns({canonicalUrl: 'http://f.blah.com?some_site'});
-      });
-
-      afterEach(() => {
-        // Verify fetch mocks are all consumed.
-        expect(env.fetchMock.done()).to.be.true;
-      });
-
-      const getUrl = (domain) => {
-        domain = domain || 'google.com';
-        return (
-          `https:\/\/adservice\.${domain}\/adsid\/integrator\.json\?` +
-          'domain=f.blah.com'
-        );
-      };
-
-      it('should ignore response if required fields are missing', () => {
-        env.expectFetch(getUrl(), JSON.stringify({newToken: 'abc'}));
-        return getIdentityToken(env.win, env.ampdoc).then((result) => {
-          expect(result.token).to.not.be.ok;
-          expect(result.jar).to.not.be.ok;
-          expect(result.pucrd).to.not.be.ok;
-          expect(result.freshLifetimeSecs).to.not.be.ok;
-          expect(result.validLifetimeSecs).to.not.be.ok;
-          expect(result.fetchTimeMs).to.be.at.least(0);
-        });
-      });
-
-      it('should fetch full token as expected', () => {
-        env.expectFetch(
-          getUrl(),
-          JSON.stringify({
-            newToken: 'abc',
-            '1p_jar': 'some_jar',
-            pucrd: 'some_pucrd',
-            freshLifetimeSecs: '1234',
-            validLifetimeSecs: '5678',
-          })
-        );
-        return getIdentityToken(env.win, env.ampdoc).then((result) => {
-          expect(result.token).to.equal('abc');
-          expect(result.jar).to.equal('some_jar');
-          expect(result.pucrd).to.equal('some_pucrd');
-          expect(result.freshLifetimeSecs).to.equal(1234);
-          expect(result.validLifetimeSecs).to.equal(5678);
-          expect(result.fetchTimeMs).to.be.at.least(0);
-        });
-      });
-
-      it('should redirect as expected', () => {
-        env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
-        env.expectFetch(
-          getUrl('google.fr'),
-          JSON.stringify({
-            newToken: 'abc',
-            freshLifetimeSecs: '1234',
-            validLifetimeSecs: '5678',
-          })
-        );
-        return getIdentityToken(env.win, env.ampdoc, '').then((result) => {
-          expect(result.token).to.equal('abc');
-          expect(result.jar).to.equal('');
-          expect(result.pucrd).to.equal('');
-          expect(result.freshLifetimeSecs).to.equal(1234);
-          expect(result.validLifetimeSecs).to.equal(5678);
-          expect(result.fetchTimeMs).to.be.at.least(0);
-        });
-      });
-
-      it('should stop after 1 redirect', () => {
-        env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
-        env.expectFetch(
-          getUrl('google.fr'),
-          JSON.stringify({altDomain: '.google.com'})
-        );
-        return getIdentityToken(env.win, env.ampdoc).then((result) => {
-          expect(result.token).to.not.be.ok;
-          expect(result.jar).to.not.be.ok;
-          expect(result.pucrd).to.not.be.ok;
-          expect(result.fetchTimeMs).to.be.at.least(0);
-        });
-      });
-
-      it('should use previous execution', () => {
-        const ident = {
-          newToken: 'foo',
-          freshLifetimeSecs: '1234',
-          validLifetimeSecs: '5678',
-        };
-        env.win['goog_identity_prom'] = Promise.resolve(ident);
-        return getIdentityToken(env.win, env.ampdoc).then((result) =>
-          expect(result).to.jsonEqual(ident)
-        );
-      });
-
-      it('should handle fetch error', () => {
-        env.sandbox
-          .stub(Services, 'xhrFor')
-          .returns({fetchJson: () => Promise.reject('some network failure')});
-        return getIdentityToken(env.win, env.ampdoc).then((result) =>
-          expect(result).to.jsonEqual({})
-        );
-      });
-
-      it('should fetch if SUFFICIENT consent', () => {
-        env.expectFetch(
-          getUrl(),
-          JSON.stringify({
-            newToken: 'abc',
-            '1p_jar': 'some_jar',
-            pucrd: 'some_pucrd',
-            freshLifetimeSecs: '1234',
-            validLifetimeSecs: '5678',
-          })
-        );
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
-            whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
-          })
-        );
-        return getIdentityToken(env.win, env.ampdoc, 'default').then((result) =>
-          expect(result.token).to.equal('abc')
-        );
-      });
-
-      it.configure()
-        .skipFirefox()
-        .run('should not fetch if INSUFFICIENT consent', () => {
-          env.sandbox
-            .stub(Services, 'consentPolicyServiceForDocOrNull')
-            .returns(
-              Promise.resolve({
-                whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
-              })
-            );
-          return expect(
-            getIdentityToken(env.win, env.ampdoc, 'default')
-          ).to.eventually.jsonEqual({});
-        });
-
-      it.configure()
-        .skipFirefox()
-        .run('should not fetch if UNKNOWN consent', () => {
-          env.sandbox
-            .stub(Services, 'consentPolicyServiceForDocOrNull')
-            .returns(
-              Promise.resolve({
-                whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
-              })
-            );
-          return expect(
-            getIdentityToken(env.win, env.ampdoc, 'default')
-          ).to.eventually.jsonEqual({});
-        });
-    }
-  );
 
   describe('variables for amp-analytics', () => {
     let a4a;

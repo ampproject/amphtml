@@ -65,7 +65,7 @@ async function printErrorWithSuggestedFixes(file) {
   log(`Suggested fixes for ${cyan(file)}:`);
   const options = await getOptions(file);
   const original = fs.readFileSync(file).toString();
-  const fixed = prettier.format(original, options);
+  const fixed = await prettier.format(original, options);
   const fixedFile = `${tempDir}/${file}`;
   fs.ensureDirSync(path.dirname(fixedFile));
   fs.writeFileSync(fixedFile, fixed);
@@ -114,7 +114,7 @@ async function runPrettify(filesToCheck) {
     const options = await getOptions(file);
     const original = fs.readFileSync(file).toString();
     if (argv.fix) {
-      const fixed = prettier.format(original, options);
+      const fixed = await prettier.format(original, options);
       if (fixed != original) {
         fs.writeFileSync(file, fixed);
       }

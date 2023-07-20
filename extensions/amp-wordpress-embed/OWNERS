@@ -5,7 +5,6 @@
   rules: [
     {
       owners: [
-        {name: 'ampproject/wg-bento'},
         {name: 'westonruter', notify: true},
         {name: 'ediamin', notify: true},
       ],

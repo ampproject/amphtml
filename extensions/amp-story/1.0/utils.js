@@ -103,7 +103,7 @@ export function createShadowRootWithStyle(container, element, css) {
  * `getComputedStyle`.
  * Returns an object containing the R, G, and B 8bit numbers.
  * @param  {string} cssValue
- * @return {!Object<string, number>}
+ * @return {!{[key: string]: number}}
  */
 export function getRGBFromCssColorValue(cssValue) {
   const regexPattern = /rgba?\((\d{1,3}), (\d{1,3}), (\d{1,3})/;
@@ -131,7 +131,7 @@ export function getRGBFromCssColorValue(cssValue) {
 /**
  * Returns the color, either black or white, that has the best contrast ratio
  * against the provided RGB 8bit values.
- * @param  {!Object<string, number>} rgb  ie: {r: 0, g: 0, b: 0}
+ * @param  {!{[key: string]: number}} rgb  ie: {r: 0, g: 0, b: 0}
  * @return {string} '#fff' or '#000'
  */
 export function getTextColorForRGB(rgb) {
@@ -357,4 +357,19 @@ export function dependsOnStoryServices(klass) {
         .then(() => new klass(this.element));
     }
   };
+}
+
+/**
+ * Handles hiding or showing content from screen readers.
+ * @param {!Element} el
+ * @param {boolean} isVisible
+ */
+export function toggleA11yReadable(el, isVisible) {
+  if (isVisible) {
+    el.removeAttribute('tab-index');
+    el.removeAttribute('aria-hidden');
+  } else {
+    el.setAttribute('tab-index', '-1');
+    el.setAttribute('aria-hidden', 'true');
+  }
 }

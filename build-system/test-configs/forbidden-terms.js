@@ -39,7 +39,7 @@ let ForbiddenTermDef;
 
 /**
  * Terms that must not appear in our source files.
- * @const {Object<string, string|!ForbiddenTermDef>}
+ * @const {{[key: string]: string|!ForbiddenTermDef}}
  */
 const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
@@ -67,7 +67,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
-      'validator/js/engine/validator_test.js',
+      //'validator/js/engine/validator_test.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -130,8 +130,8 @@ const forbiddenTermsGlobal = {
       'build-system/common/logging.js',
       'build-system/task-runner/amp-cli-runner.js',
       'src/purifier/noop.js',
-      'validator/js/engine/validator-in-browser.js',
-      'validator/js/engine/validator.js',
+      //'validator/js/engine/validator-in-browser.js',
+      //'validator/js/engine/validator.js',
     ],
     checkInTestFolder: true,
   },
@@ -708,13 +708,13 @@ const forbiddenTermsGlobal = {
       // Non test files. These can remain.
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
-      'validator/js/engine/amp4ads-parse-css_test.js',
-      'validator/js/engine/htmlparser_test.js',
-      'validator/js/engine/keyframes-parse-css_test.js',
-      'validator/js/engine/parse-css_test.js',
-      'validator/js/engine/parse-srcset_test.js',
-      'validator/js/engine/parse-url_test.js',
-      'validator/js/engine/validator_test.js',
+      //'validator/js/engine/amp4ads-parse-css_test.js',
+      //'validator/js/engine/htmlparser_test.js',
+      //'validator/js/engine/keyframes-parse-css_test.js',
+      //'validator/js/engine/parse-css_test.js',
+      //'validator/js/engine/parse-srcset_test.js',
+      //'validator/js/engine/parse-url_test.js',
+      //'validator/js/engine/validator_test.js',
       'validator/js/gulpjs/test/validate.js',
     ],
     checkInTestFolder: true,
@@ -743,7 +743,7 @@ const measurementApiDeprecated =
   ' @ampproject/wg-performance for questions.';
 
 /**
- * @const {Object<string, string|!ForbiddenTermDef>}
+ * @const {{[key: string]: string|!ForbiddenTermDef}}
  */
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
@@ -809,9 +809,9 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       '3p/integration-lib.js',
       'examples/pwa/pwa.js',
-      'validator/js/engine/parse-url.js',
-      'validator/js/engine/validator.js',
-      'validator/js/webui/webui.js',
+      //'validator/js/engine/parse-url.js',
+      //'validator/js/engine/validator.js',
+      //'validator/js/webui/webui.js',
       'src/url.js',
       'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
@@ -933,15 +933,14 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/variable-substitution.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
-      'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
       'src/amp-story-player/amp-story-player-impl.js',
       'src/config/urls.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/experiments/experiments.js',
       'validator/js/engine/htmlparser-interface.js',
-      'validator/js/engine/validator-in-browser.js',
-      'validator/js/engine/validator.js',
+      //'validator/js/engine/validator-in-browser.js',
+      //'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
       'validator/js/webui/serve-standalone.go',
     ],
@@ -960,7 +959,7 @@ const forbiddenTermsSrcInclusive = {
     'use endsWith helper in src/core/types/string',
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
-    allowlist: ['validator/js/engine/validator.js'],
+    //allowlist: ['validator/js/engine/validator.js'],
   },
   "process\\.env(\\.|\\[\\')(GITHUB_ACTIONS|CIRCLECI)": {
     message:
@@ -1093,7 +1092,7 @@ function stripComments(contents) {
  *
  * @param {string} srcFile
  * @param {string} contents
- * @param {!Object<string, string|!ForbiddenTermDef>} terms
+ * @param {!{[key: string]: string|!ForbiddenTermDef}} terms
  * @return {Array<!ForbiddenTermMatchDef>}
  */
 function matchForbiddenTerms(srcFile, contents, terms) {

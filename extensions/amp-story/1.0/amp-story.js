@@ -43,7 +43,7 @@ import {
 } from '#core/dom/style';
 import {devError} from '#core/error';
 import {clamp} from '#core/math';
-import {isEsm} from '#core/mode';
+import {isEsm, isSsrCss} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
@@ -127,6 +127,18 @@ const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '31 / 40';
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
+/**
+ * Minimum custom aspect ratio for desktop one panel, i.e. 1:2.
+ * @private @const {number}
+ * */
+const MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = 0.5;
+
+/**
+ * Maximum custom aspect ratio for desktop one panel, i.e. 3:4.
+ * @private @const {number}
+ * */
+const MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO = 0.75;
+
 /** @enum {string} */
 const Attributes = {
   AD_SHOWING: 'ad-showing',
@@ -165,7 +177,7 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
-/** @const {!Object<string, number>} */
+/** @const {!{[key: string]: number}} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType_Enum.AUDIO]: 4,
   [MediaType_Enum.VIDEO]: 8,
@@ -199,6 +211,10 @@ const DEFAULT_MIN_PAGES_TO_PREVIEW = 1;
  * @const {number}
  */
 const DEFAULT_PCT_PAGES_TO_PREVIEW = 30;
+
+/** The targets that should not navigate when pressing keys.
+ * @const {string} */
+const IGNORE_KEYDOWN_EVENT_TARGET = 'amp-story-interactive-slider';
 
 /*
  * @implements {./media-pool.MediaPoolRoot}
@@ -448,9 +464,45 @@ export class AmpStory extends AMP.BaseElement {
       );
     }
 
+    this.maybeApplyDesktopAspectRatioAttribute_();
+
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
+  }
+
+  /**
+   * Grab the desktop-aspect-ratio attribute, clamp the value
+   * between 1/2 and 3/4 aspect ratios, and apply it to the root element.
+   * @private
+   */
+  maybeApplyDesktopAspectRatioAttribute_() {
+    if (
+      this.isLandscapeSupported_() ||
+      !this.element.hasAttribute('desktop-aspect-ratio')
+    ) {
+      return;
+    }
+
+    const splittedRatio = this.element
+      .getAttribute('desktop-aspect-ratio')
+      .split(':');
+    if (splittedRatio[1] == 0) {
+      return;
+    }
+
+    const desktopAspectRatio = clamp(
+      splittedRatio[0] / splittedRatio[1],
+      MIN_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO,
+      MAX_CUSTOM_DESKTOP_ONE_PANEL_ASPECT_RATIO
+    );
+    setImportantStyles(document.querySelector(':root'), {
+      '--i-amphtml-story-desktop-one-panel-ratio': desktopAspectRatio,
+    });
+    this.storeService_.dispatch(
+      Action.SET_DESKTOP_ASPECT_RATIO,
+      desktopAspectRatio
+    );
   }
 
   /**
@@ -1681,6 +1733,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
+    if (matches(e.target, IGNORE_KEYDOWN_EVENT_TARGET)) {
+      return;
+    }
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
@@ -2063,10 +2118,10 @@ export class AmpStory extends AMP.BaseElement {
    *
    * @param {number} distance The distance that the page with the specified
    *     pageId is from the active page.
-   * @param {!Object<string, number>} map A mapping from pageId to its distance
+   * @param {!{[key: string]: number}} map A mapping from pageId to its distance
    *     from the active page.
    * @param {string} pageId The page to be added to the map.
-   * @return {!Object<string, number>} A mapping from page ID to the priority of
+   * @return {!{[key: string]: number}} A mapping from page ID to the priority of
    *     that page.
    * @private
    */
@@ -2787,7 +2842,11 @@ export class AmpStory extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
-  AMP.registerElement('amp-story', AmpStory, CSS);
+  if (isSsrCss()) {
+    AMP.registerElement('amp-story', AmpStory);
+  } else {
+    AMP.registerElement('amp-story', AmpStory, CSS);
+  }
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);

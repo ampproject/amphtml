@@ -72,9 +72,10 @@ const generateCarouselKey = sequentialIdGenerator();
  */
 function BentoBaseCarouselWithRef(
   {
+    _thumbnails = false,
     advanceCount = 1,
-    arrowPrevAs,
     arrowNextAs,
+    arrowPrevAs,
     autoAdvance: shouldAutoAdvance = false,
     autoAdvanceCount = 1,
     autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
@@ -97,7 +98,6 @@ function BentoBaseCarouselWithRef(
     snapAlign = Alignment.START,
     snapBy = 1,
     visibleCount = 1,
-    _thumbnails = false,
     ...rest
   },
   ref

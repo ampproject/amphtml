@@ -1,15 +1,9 @@
+import {sleep} from '#testing/helpers';
+
 const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,
 };
-
-/**
- * @param {number} ms
- * @return {!Promise}
- */
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 describes.endtoend(
   'player prerendering',
@@ -91,7 +85,7 @@ describes.endtoend(
       await controller.switchToShadowRoot(shadowHost);
 
       // Wait for first story iframe to load.
-      await timeout(5000);
+      await sleep(5000);
 
       const iframes = await controller.findElements(
         'iframe.story-player-iframe'

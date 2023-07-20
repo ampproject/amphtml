@@ -61,7 +61,7 @@ const Position = {
 const DENYLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
 
 /**
- * @const {!Object<!Position, function(!Element, !Element)>}
+ * @const {!{[key: !Position]: function(!Element, !Element)}}
  */
 const INJECTORS = {};
 INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {

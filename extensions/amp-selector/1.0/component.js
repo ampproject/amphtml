@@ -43,16 +43,16 @@ export const KEYBOARD_SELECT_MODE = {
 function SelectorWithRef(
   {
     as: Comp = 'div',
-    disabled,
+    children,
     defaultValue = [],
+    disabled,
     form,
     keyboardSelectMode = KEYBOARD_SELECT_MODE.NONE,
-    value,
     multiple,
     name,
     onChange,
     role = 'listbox',
-    children,
+    value,
     ...rest
   },
   ref

@@ -1,8 +1,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
-/** @type {Object} */
-const experimentDefines = require('../global-configs/experiments-const.json');
+/** @type {object} */
+const experimentDefinesJson = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const open = require('open');
 const path = require('path');
@@ -59,6 +59,17 @@ const watchDebounceDelay = 1000;
  * @private @const {!Map<string, {rebuild: function():!Promise<void>}>}
  */
 const watchedTargets = new Map();
+
+/**
+ * Converts defines to their JSON representation.
+ * See https://esbuild.github.io/api/#define.
+ */
+const experimentDefines = Object.fromEntries(
+  Object.entries(experimentDefinesJson).map(([key, value]) => [
+    key,
+    JSON.stringify(value),
+  ])
+);
 
 /**
  * @param {!Object} jsBundles
@@ -124,58 +135,6 @@ async function compileCoreRuntime(options) {
 }
 
 /**
- * Compiles the "core" utilies used by all bento extensions
- *
- * Outputs 2 scripts:
- * 1) for direct consumption in the browser
- * 2) for consumption by npm package users
- * @param {!Object} options
- * @return {Promise<void>}
- */
-async function compileBentoRuntimeAndCore(options) {
-  const bundleName = 'bento.js';
-  const {srcDir, srcFilename} = jsBundles[bundleName];
-  await Promise.all([
-    // cdn
-    doBuildJs(jsBundles, bundleName, {
-      ...options,
-      outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
-    }),
-    // npm - standalone
-    compileJs(srcDir, srcFilename, 'src/bento/core/dist', {
-      ...options,
-      toName: maybeToNpmEsmName('bento.core.max.js'),
-      minifiedName: maybeToNpmEsmName('bento.core.js'),
-      outputFormat: argv.esm ? 'esm' : 'cjs',
-    }),
-    // npm - preact
-    compileJs(srcDir, srcFilename, 'src/bento/core/preact/dist', {
-      ...options,
-      toName: maybeToNpmEsmName('bento-preact.core.max.js'),
-      minifiedName: maybeToNpmEsmName('bento-preact.core.js'),
-      outputFormat: argv.esm ? 'esm' : 'cjs',
-      remapDependencies: {'preact/dom': 'preact'},
-      externalDependencies: ['preact'],
-    }),
-    // npm - react
-    compileJs(srcDir, srcFilename, 'src/bento/core/react/dist', {
-      ...options,
-      toName: maybeToNpmEsmName('bento-react.core.max.js'),
-      minifiedName: maybeToNpmEsmName('bento-react.core.js'),
-      outputFormat: argv.esm ? 'esm' : 'cjs',
-      remapDependencies: {
-        'preact': 'react',
-        'preact/compat': 'react',
-        './src/preact/compat/internal.js': './src/preact/compat/external.js',
-        'preact/hooks': 'react',
-        'preact/dom': 'react-dom',
-      },
-      externalDependencies: ['react', 'react-dom'],
-    }),
-  ]);
-}
-
-/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  *
@@ -189,7 +148,6 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    compileBentoRuntimeAndCore(options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -241,19 +199,7 @@ function toEsmName(name) {
  * @return {string}
  */
 function maybeToEsmName(name) {
-  // Npm esm names occur at an earlier stage.
-  if (name.includes('.module')) {
-    return name;
-  }
   return argv.esm ? toEsmName(name) : name;
-}
-
-/**
- * @param {string} name
- * @return {string}
- */
-function maybeToNpmEsmName(name) {
-  return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
 }
 
 /**
@@ -296,11 +242,7 @@ async function finishBundle(destDir, destFilename, options, startTime) {
     );
     endBuildStep(logPrefix, `${destFilename} → ${aliasName}`, startTime);
   } else {
-    const loggingName =
-      options.npm && !destFilename.startsWith('amp-')
-        ? `${options.name} → ${destFilename}`
-        : destFilename;
-    endBuildStep(logPrefix, loggingName, startTime);
+    endBuildStep(logPrefix, destFilename, startTime);
   }
 }
 
@@ -333,7 +275,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   /**
    * Splits up the wrapper to compute the banner and footer
-   * @return {Object}
+   * @return {object}
    */
   function splitWrapper() {
     const wrapper = options.wrapper ?? wrappers.none;
@@ -353,9 +295,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
   // We read from the current binary configuration options if it is an
-  // SSR ready binary output. (ex. removes CSS installation, etc)
-  if (options.ssrReady) {
-    babelCaller += '-ssr-ready';
+  // no css binary output. (removes CSS installation)
+  if (options.ssrCss) {
+    babelCaller += '-ssr-css';
   }
 
   const babelPlugin = getEsbuildBabelPlugin(
@@ -374,15 +316,16 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     );
   }
 
-  let result = null;
+  /** @type {?esbuild.BuildContext} */
+  let esbuildContext = null;
 
   /**
    * @param {number} startTime
    * @return {Promise<void>}
    */
   async function build(startTime) {
-    if (!result) {
-      result = await esbuild.build({
+    if (!esbuildContext) {
+      esbuildContext = await esbuild.context({
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: 'external',
@@ -400,23 +343,31 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         footer,
         // For es5 builds, ensure esbuild-injected code is transpiled.
         target: argv.esm ? 'es6' : 'es5',
-        incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
         mainFields: ['module', 'browser', 'main'],
         write: false,
       });
-    } else {
-      result = await result.rebuild();
     }
 
-    const {outputFiles} = result;
+    const {outputFiles} = await esbuildContext.rebuild();
+    if (outputFiles === undefined) {
+      throw new Error(`No output files for ${destFilename}`);
+    }
 
-    let code = outputFiles.find(({path}) => !path.endsWith('.map')).text;
-    const map = JSON.parse(
-      result.outputFiles.find(({path}) => path.endsWith('.map')).text
-    );
-    const mapChain = [map];
+    const codeFile = outputFiles.find(({path}) => !path.endsWith('.map'));
+    const mapFile = outputFiles.find(({path}) => path.endsWith('.map'));
+
+    if (!codeFile || !mapFile) {
+      throw new Error(
+        `Expected code and map file for ${destFilename}; got ${outputFiles.map(
+          ({path}) => path
+        )}`
+      );
+    }
+
+    let {text: code} = codeFile;
+    const mapChain = [JSON.parse(mapFile.text)];
 
     if (options.outputFormat === 'nomodule-loader') {
       const result = await babel.transformAsync(code, {
@@ -425,7 +376,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         sourceRoot: path.dirname(destFile),
         sourceMaps: true,
       });
-      if (!result) {
+      if (!result?.code) {
         throw new Error('failed to babel');
       }
       code = result.code;
@@ -459,23 +410,32 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
+
+    if (!options.watch) {
+      await esbuildContext.dispose();
+      esbuildContext = null;
+    }
   }
 
-  await build(startTime).catch((err) =>
-    handleBundleError(err, !!options.watch, destFilename)
-  );
+  try {
+    await build(startTime);
+  } catch (err) {
+    handleBundleError(err, !!options.watch, destFilename);
+  }
 
   if (options.watch) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const startTime = Date.now();
-        const buildPromise = build(startTime).catch((err) =>
-          handleBundleError(err, !!options.watch, destFilename)
-        );
-        if (options.onWatchBuild) {
-          options.onWatchBuild(buildPromise);
+        try {
+          const buildPromise = build(startTime);
+          if (options.onWatchBuild) {
+            options.onWatchBuild(buildPromise);
+          }
+          await buildPromise;
+        } catch (err) {
+          handleBundleError(err, !!options.watch, destFilename);
         }
-        await buildPromise;
       },
     });
   }
@@ -586,7 +546,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
 
   /**
    * Actually performs the steps to compile the entry point.
-   * @param {Object} options
+   * @param {object} options
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {
@@ -728,9 +688,9 @@ async function thirdPartyBootstrap(input, outputName, options) {
 async function getDependencies(entryPoint, options) {
   let caller = options.minify ? 'minified' : 'unminified';
   // We read from the current binary configuration options if it is an
-  // SSR ready binary output. (ex. removes CSS installation, etc)
-  if (options.ssrReady) {
-    caller += '-ssr-ready';
+  // no css binary output. (removes CSS installation)
+  if (options.ssrCss) {
+    caller += '-ssr-css';
   }
   const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
   const result = await esbuild.build({
@@ -746,7 +706,6 @@ async function getDependencies(entryPoint, options) {
 module.exports = {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
   esbuildCompile,
@@ -754,7 +713,6 @@ module.exports = {
   endBuildStep,
   maybePrintCoverageMessage,
   maybeToEsmName,
-  maybeToNpmEsmName,
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,

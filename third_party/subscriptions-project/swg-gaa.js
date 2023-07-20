@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.224 */
+/** Version: 216488bf */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -332,9 +332,9 @@ function toString(val) {
 
 /**
  * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
-const base64UrlDecodeSubs = {'-': '+', '_': '/'};
+const base64UrlDecodeSubs = { '-': '+', '_': '/' };
 
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
@@ -421,7 +421,7 @@ function base64UrlDecodeToBytes(str) {
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */(json)));
 }
 
 /**
@@ -464,7 +464,7 @@ function tryParseJson(json, onFailed) {
  * Provides helper methods to decode and verify JWT tokens.
  */
 class JwtHelper {
-  constructor() {}
+  constructor() { }
 
   /**
    * Decodes JWT token and returns its payload.
@@ -560,6 +560,17 @@ const AnalyticsEvent = {
   IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
   IMPRESSION_REGWALL_OPT_IN: 34,
   IMPRESSION_NEWSLETTER_OPT_IN: 35,
+  IMPRESSION_SUBSCRIPTION_OFFERS_ERROR: 36,
+  IMPRESSION_CONTRIBUTION_OFFERS_ERROR: 37,
+  IMPRESSION_TWG_SHORTENED_STICKER_FLOW: 38,
+  IMPRESSION_SUBSCRIPTION_LINKING_LOADING: 39,
+  IMPRESSION_SUBSCRIPTION_LINKING_COMPLETE: 40,
+  IMPRESSION_SUBSCRIPTION_LINKING_ERROR: 41,
+  IMPRESSION_SURVEY: 42,
+  IMPRESSION_REGWALL_ERROR: 43,
+  IMPRESSION_NEWSLETTER_ERROR: 44,
+  IMPRESSION_SURVEY_ERROR: 45,
+  IMPRESSION_METER_TOAST_ERROR: 46,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -620,10 +631,30 @@ const AnalyticsEvent = {
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   ACTION_REGWALL_OPT_IN_CLOSE: 1058,
   ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
-  ACTION_SHOWCASE_REGWALL_SWIG_CLICK: 1060,
+  ACTION_SHOWCASE_REGWALL_SIWG_CLICK: 1060,
+  ACTION_TWG_CHROME_APP_MENU_ENTRY_POINT_CLICK: 1061,
+  ACTION_TWG_DISCOVER_FEED_MENU_ENTRY_POINT_CLICK: 1062,
+  ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK: 1063,
+  ACTION_SUBSCRIPTION_OFFERS_RETRY: 1064,
+  ACTION_CONTRIBUTION_OFFERS_RETRY: 1065,
+  ACTION_TWG_SHORTENED_STICKER_FLOW_STICKER_SELECTION_CLICK: 1066,
+  ACTION_INITIATE_UPDATED_SUBSCRIPTION_LINKING: 1067,
+  ACTION_SURVEY_SUBMIT_CLICK: 1068,
+  ACTION_SURVEY_CLOSED: 1069,
+  ACTION_SURVEY_DATA_TRANSFER: 1070,
+  ACTION_REGWALL_PAGE_REFRESH: 1071,
+  ACTION_NEWSLETTER_PAGE_REFRESH: 1072,
+  ACTION_SURVEY_PAGE_REFRESH: 1073,
+  ACTION_METER_TOAST_PAGE_REFRESH: 1074,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
+  EVENT_REGWALL_ALREADY_OPT_IN: 2003,
+  EVENT_NEWSLETTER_ALREADY_OPT_IN: 2004,
+  EVENT_SUBSCRIPTION_LINKING_FAILED: 2005,
+  EVENT_SURVEY_ALREADY_SUBMITTED: 2006,
+  EVENT_SURVEY_SUBMIT_FAILED: 2007,
+  EVENT_SURVEY_DATA_TRANSFER_FAILED: 2008,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -649,6 +680,12 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
   EVENT_REGWALL_OPTED_IN: 3023,
   EVENT_NEWSLETTER_OPTED_IN: 3024,
+  EVENT_SHOWCASE_METERING_INIT: 3025,
+  EVENT_DISABLE_MINIPROMPT_DESKTOP: 3026,
+  EVENT_SUBSCRIPTION_LINKING_SUCCESS: 3027,
+  EVENT_SURVEY_SUBMITTED: 3028,
+  EVENT_LINK_ACCOUNT_SUCCESS: 3029,
+  EVENT_SAVE_SUBSCRIPTION_SUCCESS: 3030,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -758,7 +795,7 @@ let a;
  * We cached all parsed URLs. As of now there are no use cases
  * of AMP docs that would ever parse an actual large number of URLs,
  * but we often parse the same one over and over again.
- * @type {Object<string, !LocationDef>}
+ * @type {{[key: string]: !LocationDef}}
  */
 let cache;
 
@@ -806,17 +843,15 @@ function parseUrlWithA(a, url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
-    origin: '', // Set below.
+    origin: a.protocol + '//' + a.host,
   };
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin != 'null') {
+  if (a.origin && a.origin !== 'null') {
     info.origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
+  } else if (info.protocol === 'data:' || !info.host) {
     info.origin = info.href;
-  } else {
-    info.origin = info.protocol + '//' + info.host;
   }
   return info;
 }
@@ -824,7 +859,7 @@ function parseUrlWithA(a, url) {
 /**
  * Parses and builds Object of URL query string.
  * @param {string} query The URL query string.
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function parseQueryString(query) {
   if (!query) {
@@ -896,7 +931,7 @@ const DEFAULT_LANGUAGE_CODE = 'en';
 
 /**
  * Gets a message for a given language code, from a map of messages.
- * @param {!Object<string, string>} map
+ * @param {!{[key: string]: string}} map
  * @param {?string|?Element} languageCodeOrElement
  * @return {?string}
  */
@@ -1001,7 +1036,7 @@ function startsWith(string, prefix) {
  * limitations under the License.
  */
 
-/** @type {Object<string, string>} */
+/** @type {{[key: string]: string}} */
 let propertyNameCache;
 
 /** @const {!Array<string>} */
@@ -1073,7 +1108,7 @@ function getVendorJsPropertyName(style, camelCase, bypassCache) {
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
  * @param {!Element} element
- * @param {!Object<string, string|number>} styles
+ * @param {!{[key: string]: string|number}} styles
  */
 function setImportantStyles(element, styles) {
   for (const k in styles) {
@@ -1110,7 +1145,7 @@ function setStyle(element, property, value, units, bypassCache) {
  * Sets the CSS styles of the specified element. The styles
  * a specified as a map from CSS property names to their values.
  * @param {!Element} element
- * @param {!Object<string, ?string|number|boolean>} styles
+ * @param {!{[key: string]: ?string|number|boolean}} styles
  */
 function setStyles(element, styles) {
   for (const k in styles) {
@@ -1140,7 +1175,7 @@ const styleType = 'text/css';
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!Object<string, string|number|boolean|!Object<string, string|number|boolean>>} attributes
+ * @param {!{[key: string]: string|number|boolean|!{[key: string]: string|number|boolean}}} attributes
  * @return {!Element} updated element.
  */
 function addAttributesToElement(element, attributes) {
@@ -1148,13 +1183,13 @@ function addAttributesToElement(element, attributes) {
     if (attr == 'style') {
       setStyles(
         element,
-        /** @type {!Object<string, string|boolean|number>} */
+        /** @type {!{[key: string]: string|boolean|number}} */
         (attributes[attr])
       );
     } else {
       element.setAttribute(
         attr,
-        /** @type {string|boolean|number} */ (attributes[attr])
+        /** @type {string|boolean|number} */(attributes[attr])
       );
     }
   }
@@ -1165,7 +1200,7 @@ function addAttributesToElement(element, attributes) {
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!Object<string, string>} attributes
+ * @param {!{[key: string]: string}} attributes
  * @param {?(string|!Node|!ArrayLike<!Node>|!Array<!Node>)=} content
  * @return {!Element} created element.
  */
@@ -1176,7 +1211,7 @@ function createElement(doc, tagName, attributes, content) {
     if (typeof content == 'string') {
       element.textContent = content;
     } else if (content.nodeType) {
-      element.appendChild(/** @type {!Node} */ (content));
+      element.appendChild(/** @type {!Node} */(content));
     } else if ('length' in content) {
       for (let i = 0; i < content.length; i++) {
         element.appendChild(content[i]);
@@ -1366,11 +1401,11 @@ class GlobalDoc {
 function resolveDoc(input) {
   // Is it a `Document`
   if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
+    return new GlobalDoc(/** @type {!Document} */(input));
   }
   // Is it a `Window`?
   if (/** @type {!Window} */ (input).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
+    return new GlobalDoc(/** @type {!Window} */(input));
   }
   return /** @type {!Doc} */ (input);
 }
@@ -1391,7 +1426,7 @@ function resolveDoc(input) {
  * limitations under the License.
  */
 
-/** @const {!Object<string,?Array<AnalyticsEvent>>} */
+/** @const {!{[key: string]: ?Array<AnalyticsEvent}>} */
 const ShowcaseEvents = {
   // Events related to content being potentially unlockable
   [ShowcaseEvent.EVENT_SHOWCASE_METER_OFFERED]: [
@@ -1466,8 +1501,14 @@ const POST_MESSAGE_COMMAND_USER = 'user';
 /** Error command for post messages. */
 const POST_MESSAGE_COMMAND_ERROR = 'error';
 
-/** Button click command for post messages. */
-const POST_MESSAGE_COMMAND_BUTTON_CLICK = 'button-click';
+/** GSI Button click command for post messages. */
+const POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK = 'gsi-button-click';
+
+/** SIWG Button click command for post messages. */
+const POST_MESSAGE_COMMAND_SIWG_BUTTON_CLICK = 'siwg-button-click';
+
+/** 3P button click command for post messages. */
+const POST_MESSAGE_COMMAND_3P_BUTTON_CLICK = '3p-button-click';
 
 /** ID for the Google Sign-In iframe element. */
 const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
@@ -1496,6 +1537,9 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
+
+/** Delay used to log 3P button click before redirect */
+const REDIRECT_DELAY = 10;
 
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
@@ -1852,7 +1896,7 @@ class GaaMeteringRegwall {
    * @param {{ iframeUrl: string, caslUrl: string }} params
    * @return {!Promise<!GaaUserDef|!GoogleIdentityV1|!Object>}
    */
-  static show({iframeUrl, caslUrl}) {
+  static show({ iframeUrl, caslUrl }) {
     const queryString = GaaUtils.getQueryString();
     if (!queryStringHasFreshGaaParams(queryString)) {
       const errorMessage =
@@ -1866,8 +1910,8 @@ class GaaMeteringRegwall {
       isFromUserAction: false,
     });
 
-    GaaMeteringRegwall.render_({iframeUrl, caslUrl});
-    GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
+    GaaMeteringRegwall.render_({ iframeUrl, caslUrl });
+    GaaMeteringRegwall.sendIntroMessageToGsiIframe_({ iframeUrl });
     GaaMeteringRegwall.logButtonClickEvents_();
     return GaaMeteringRegwall.getGaaUser_()
       .then((gaaUser) => {
@@ -1937,7 +1981,7 @@ class GaaMeteringRegwall {
    * @param {{ caslUrl: string, authorizationUrl: string }} params
    * @return {boolean}
    */
-  static showWithNative3PRegistrationButton({caslUrl, authorizationUrl}) {
+  static showWithNative3PRegistrationButton({ caslUrl, authorizationUrl }) {
     logEvent({
       showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
       isFromUserAction: false,
@@ -1983,7 +2027,7 @@ class GaaMeteringRegwall {
    * @nocollapse
    * @param {{ iframeUrl: string, caslUrl: string, useNativeMode: (boolean|undefined)}} params
    */
-  static render_({iframeUrl, caslUrl, useNativeMode = false}) {
+  static render_({ iframeUrl, caslUrl, useNativeMode = false }) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const publisherName = GaaMeteringRegwall.getPublisherNameFromPageConfig_();
     const placeholderPatternForPublication = /<ph name="PUBLICATION".+?\/ph>/g;
@@ -2074,7 +2118,7 @@ class GaaMeteringRegwall {
     // Trigger a fade-in transition.
     /** @suppress {suspiciousCode} */
     containerEl.offsetHeight; // Trigger a repaint (to prepare the CSS transition).
-    setImportantStyles(containerEl, {'opacity': 1});
+    setImportantStyles(containerEl, { 'opacity': 1 });
 
     // Listen for clicks.
     GaaMeteringRegwall.addClickListenerOnPublisherSignInButton_();
@@ -2131,7 +2175,7 @@ class GaaMeteringRegwall {
 
     // Search for publisher name, breadth-first.
     for (let i = 0; i < jsonQueue.length; i++) {
-      const json = /** @type {!Object<?,?>} */ (jsonQueue[i]);
+      const json = /** @type {!{[key: ?]: ?}} */ (jsonQueue[i]);
 
       // Return publisher name, if possible.
       const publisherName = json?.publisher?.name;
@@ -2182,7 +2226,7 @@ class GaaMeteringRegwall {
           isFromUserAction: true,
         });
 
-        callSwg((swg) => swg.triggerLoginRequest({linkRequested: false}));
+        callSwg((swg) => swg.triggerLoginRequest({ linkRequested: false }));
       });
   }
 
@@ -2221,11 +2265,32 @@ class GaaMeteringRegwall {
     self.addEventListener('message', (e) => {
       if (
         e.data.stamp === POST_MESSAGE_STAMP &&
-        e.data.command === POST_MESSAGE_COMMAND_BUTTON_CLICK
+        e.data.command === POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK
       ) {
         // Log button click event.
         logEvent({
           analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+          isFromUserAction: true,
+        });
+      }
+      if (
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_SIWG_BUTTON_CLICK
+      ) {
+        // Log button click event.
+        logEvent({
+          analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SIWG_CLICK,
+          isFromUserAction: true,
+        });
+      }
+      if (
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_3P_BUTTON_CLICK
+      ) {
+        // Log button click event.
+        logEvent({
+          analyticsEvent:
+            AnalyticsEvent.ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK,
           isFromUserAction: true,
         });
       }
@@ -2238,7 +2303,7 @@ class GaaMeteringRegwall {
    * @nocollapse
    * @param {{ iframeUrl: string }} params
    */
-  static sendIntroMessageToGsiIframe_({iframeUrl}) {
+  static sendIntroMessageToGsiIframe_({ iframeUrl }) {
     // Introduce this window to the publisher's Google Sign-In iframe.
     // This lets the iframe send post messages back to this window.
     // Without the introduction, the iframe wouldn't have a reference to this window.
@@ -2256,7 +2321,7 @@ class GaaMeteringRegwall {
     };
   }
 
-  static createNativeRegistrationButton({googleApiClientId}) {
+  static createNativeRegistrationButton({ googleApiClientId }) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const parentElement = self.document.getElementById(
       REGISTRATION_BUTTON_CONTAINER_ID
@@ -2278,13 +2343,12 @@ class GaaMeteringRegwall {
     });
     parentElement.appendChild(buttonEl);
 
-    // Track button clicks.
-    buttonEl.addEventListener('click', () => {
+    function logButtonClicks() {
       logEvent({
-        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SWIG_CLICK,
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_SIWG_CLICK,
         isFromUserAction: true,
       });
-    });
+    }
 
     return new Promise((resolve) => {
       self.google.accounts.id.initialize({
@@ -2298,11 +2362,12 @@ class GaaMeteringRegwall {
         'theme': 'outline',
         'text': 'continue_with',
         'logo_alignment': 'center',
+        'click_listener': logButtonClicks,
       });
     });
   }
 
-  static createNative3PRegistrationButton({authorizationUrl}) {
+  static createNative3PRegistrationButton({ authorizationUrl }) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const parentElement = self.document.getElementById(
       REGISTRATION_BUTTON_CONTAINER_ID
@@ -2328,11 +2393,14 @@ class GaaMeteringRegwall {
     buttonEl.addEventListener('click', () => {
       // Track button clicks.
       logEvent({
-        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_3P_BUTTON_CLICK,
         isFromUserAction: true,
       });
       // Redirect user using the parent window.
-      self.open(authorizationUrl, '_parent');
+      // TODO(b/242998655): Fix the downstream calls for logEvent to be chained to remove the need of delaying redirect.
+      self.setTimeout(() => {
+        self.open(authorizationUrl, '_parent');
+      }, REDIRECT_DELAY);
     });
 
     return buttonEl;
@@ -2345,7 +2413,7 @@ class GaaGoogleSignInButton {
    * @nocollapse
    * @param {{ allowedOrigins: !Array<string> }} params
    */
-  static show({allowedOrigins}) {
+  static show({ allowedOrigins }) {
     // Optionally grab language code from URL.
     const queryString = GaaUtils.getQueryString();
     const queryParams = parseQueryString(queryString);
@@ -2430,7 +2498,7 @@ class GaaGoogleSignInButton {
               sendMessageToParentFnPromise.then((sendMessageToParent) => {
                 sendMessageToParent({
                   stamp: POST_MESSAGE_STAMP,
-                  command: POST_MESSAGE_COMMAND_BUTTON_CLICK,
+                  command: POST_MESSAGE_COMMAND_GSI_BUTTON_CLICK,
                 });
               });
             });
@@ -2570,7 +2638,7 @@ class GaaGoogle3pSignInButton {
    * the same window, set redirectMode to true. For webview applications
    * redirectMode is recommended.
    */
-  static show({allowedOrigins, authorizationUrl, redirectMode = false}) {
+  static show({ allowedOrigins, authorizationUrl, redirectMode = false }) {
     // Optionally grab language code from URL.
     const queryString = GaaUtils.getQueryString();
     const queryParams = parseQueryString(queryString);
@@ -2590,7 +2658,17 @@ class GaaGoogle3pSignInButton {
     });
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
+      sendMessageToParentFnPromise.then((sendMessageToParent) => {
+        sendMessageToParent({
+          stamp: POST_MESSAGE_STAMP,
+          command: POST_MESSAGE_COMMAND_3P_BUTTON_CLICK,
+        });
+      });
       if (redirectMode) {
+        // TODO(b/242998655): Fix the downstream calls for logEvent to be chained to remove the need of delaying redirect.
+        self.setTimeout(() => {
+          self.open(authorizationUrl, '_parent');
+        }, REDIRECT_DELAY);
         self.open(authorizationUrl, '_parent');
       } else {
         self.open(authorizationUrl);
@@ -2661,7 +2739,7 @@ class GaaGoogle3pSignInButton {
    * @nocollapse
    * @param {{ gaaUser: GaaUserDef}} params
    */
-  static gaaNotifySignIn({gaaUser}) {
+  static gaaNotifySignIn({ gaaUser }) {
     self.opener.postMessage({
       stamp: POST_MESSAGE_STAMP,
       command: POST_MESSAGE_COMMAND_USER,
@@ -2678,7 +2756,7 @@ class GaaGoogle3pSignInButton {
  *   isFromUserAction: boolean,
  * }} params
  */
-function logEvent({analyticsEvent, showcaseEvent, isFromUserAction} = {}) {
+function logEvent({ analyticsEvent, showcaseEvent, isFromUserAction } = {}) {
   callSwg((swg) => {
     // Get reference to event manager.
     swg.getEventManager().then((eventManager) => {

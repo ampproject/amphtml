@@ -19,7 +19,7 @@ import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,

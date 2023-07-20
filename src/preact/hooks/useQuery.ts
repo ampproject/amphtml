@@ -69,9 +69,9 @@ export function useQuery<TData>(
   {
     enabled,
     initialData,
+    onError = noop,
     onSettled = noop,
     onSuccess = noop,
-    onError = noop,
   }: QueryConfig<TData>
 ) {
   const [state, setState] = useStateSafe<QueryState<TData>>({

@@ -28,7 +28,7 @@ export class TaskQueue {
     /** @private @const {!Array<!TaskDef>} */
     this.tasks_ = [];
 
-    /** @private @const {!Object<string, !TaskDef>} */
+    /** @private @const {!{[key: string]: !TaskDef}} */
     this.taskIdMap_ = {};
 
     /** @private {!time} */

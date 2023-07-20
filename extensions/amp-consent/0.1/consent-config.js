@@ -23,8 +23,9 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'onUpdateHref': true,
 };
 
-/** @const @type {!Object<string, boolean>} */
+/** @const @type {!{[key: string]: boolean}} */
 const CONSENT_VARS_ALLOWED_LIST = {
+  'CANONICAL_URL': true,
   'PAGE_VIEW_ID': true,
   'PAGE_VIEW_ID_64': true,
   'SOURCE_URL': true,
@@ -308,7 +309,7 @@ export class ConsentConfig {
  * Expand consent endpoint url
  * @param {!Element|!ShadowRoot} element
  * @param {string} url
- * @param {Object<string, *>=} opt_vars
+ * @param {{[key: string]: *}=} opt_vars
  * @return {!Promise<string>}
  */
 export function expandConsentEndpointUrl(element, url, opt_vars) {

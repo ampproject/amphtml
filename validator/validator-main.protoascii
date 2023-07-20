@@ -330,6 +330,8 @@ tags: {
     mandatory: true
     value: "https://cdn.ampproject.org/v0/amp-story-1.0.css"
     value: "https://cdn.ampproject.org/lts/v0/amp-story-1.0.css"
+    value: "https://ampjs.org/v0/amp-story-1.0.css"
+    value: "https://ampjs.org/lts/v0/amp-story-1.0.css"
   }
   attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
   attrs: { name: "media" }
@@ -1347,6 +1349,13 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "A"
+  attrs: {
+    name: "attributionsrc"
+    value_url: {
+      protocol: "https"
+      allow_empty: true
+    }
+  }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "download" }
   attrs: {
@@ -3338,7 +3347,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
-    dispatch_key: NAME_VALUE_DISPATCH
+    value: "https://ampjs.org/v0.js"
   }
   cdata: {
     disallowed_cdata_regex: {
@@ -3365,6 +3374,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
+    value: "https://ampjs.org/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3392,6 +3402,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.js"
+    value: "https://ampjs.org/lts/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3419,6 +3430,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.js"
+    value: "https://ampjs.org/lts/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3496,6 +3508,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.mjs"
+    value: "https://ampjs.org/lts/v0.mjs"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3521,6 +3534,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.js"
+    value: "https://ampjs.org/lts/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -4063,6 +4077,13 @@ tags: {  # <amp-pixel>
       allow_empty: true
     }
     disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "attributionsrc"
+    value_url: {
+      protocol: "https"
+      allow_empty: true
+    }
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-pixel/"

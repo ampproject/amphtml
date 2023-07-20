@@ -12,7 +12,7 @@ const TAG = 'amp-orientation-observer';
  */
 const AXES = ['alpha', 'beta', 'gamma'];
 /**
- * @const {Object<string, number>}
+ * @const {{[key: string]: number}}
  */
 const DEFAULT_REST_VALUES = {
   'alpha': 180,
@@ -20,7 +20,7 @@ const DEFAULT_REST_VALUES = {
   'gamma': 0,
 };
 /**
- * @const {Object<string, !Array<number>>}
+ * @const {{[key: string]: !Array<number>}}
  */
 const DEFAULT_RANGES = {
   'alpha': [0, 360],
@@ -47,16 +47,16 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {Object<string, !Array<number>>} */
+    /** @private {{[key: string]: !Array<number>}} */
     this.range_ = {...DEFAULT_RANGES};
 
-    /** @private {Object<string, number>} */
+    /** @private {{[key: string]: number}} */
     this.computedValue_ = {...DEFAULT_REST_VALUES};
 
-    /** @private {Object<string, number>} */
+    /** @private {{[key: string]: number}} */
     this.restValues_ = {...DEFAULT_REST_VALUES};
 
-    /** @private {Object<string, !Array<number>>} */
+    /** @private {{[key: string]: !Array<number>}} */
     this.smoothingPoints_ = {beta: [], alpha: [], gamma: []};
 
     /** @private {?number} */

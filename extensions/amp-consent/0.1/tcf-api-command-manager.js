@@ -45,7 +45,7 @@ export class TcfApiCommandManager {
     /** @private {!./consent-policy-manager.ConsentPolicyManager} */
     this.policyManager_ = policyManager;
 
-    /** @private {!Object<number, Object>} */
+    /** @private {!{[key: number]: Object}} */
     this.changeListeners_ = map();
 
     /** @private {?string} */

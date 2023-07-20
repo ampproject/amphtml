@@ -98,7 +98,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.boundUpdateSize_ = debounce(
       this.win,
       (data) => {
-        this.updateSize_(/** @type {Object} */ (data));
+        this.updateSize_(/** @type {object} */ (data));
       },
       100
     );
@@ -305,7 +305,7 @@ export class AmpBysideContent extends AMP.BaseElement {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
-   * @param {Object} data
+   * @param {object} data
    * @private
    */
   updateSize_(data) {

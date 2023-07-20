@@ -357,12 +357,10 @@ describes.realWin(
       const config = {
         targets: {
           landingPage: {
-            finalUrl: 'https://example.com',
+            finalUrl: 'https://advertiser.example',
             behaviors: {
               browserAdConversion: {
-                attributiondestination: 'https://example.com',
-                attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
-                attributionreportto: 'https://google.com',
+                attributionsrc: 'https://adtech.example',
               },
             },
           },
@@ -379,9 +377,185 @@ describes.realWin(
       });
 
       expect(openStub).calledWithExactly(
-        'https://example.com',
+        'https://advertiser.example',
         '_blank',
-        'noopener,attributiondestination=https://example.com,attributionsourceeventid=EFnZ8GunL1xrwNTIHbXrvQ==,attributionreportto=https://google.com'
+        'noopener,attributionsrc=https%3A%2F%2Fadtech.example'
+      );
+    });
+
+    it('should handle empty attributionsrc when given `browserAdConversion`', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const openStub = env.sandbox.stub(win, 'open').returns(win);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://adtech.example',
+            behaviors: {
+              browserAdConversion: {
+                attributionsrc: '',
+              },
+            },
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(openStub).calledWithExactly(
+        'https://adtech.example',
+        '_blank',
+        'noopener,attributionsrc='
+      );
+    });
+
+    it('should ignore trackingUrls when attribution tracking enabled', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const openStub = env.sandbox.stub(win, 'open').returns(win);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://advertiser.example',
+            behaviors: {
+              browserAdConversion: {
+                attributionsrc: 'https://adtech.example',
+              },
+            },
+            'trackingUrls': [
+              'http://localhost:8000/tracking?1',
+              'http://localhost:8000/tracking?2',
+              'http://localhost:8000/tracking?3',
+            ],
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(openStub).calledWithExactly(
+        'https://advertiser.example',
+        '_blank',
+        'noopener,attributionsrc=https%3A%2F%2Fadtech.example'
+      );
+    });
+
+    it('should fallback to tracking URLS when reporting API disabled', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(false);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://adtech.example',
+            behaviors: {
+              browserAdConversion: {
+                attributionsrc: 'https://adtech.example',
+              },
+            },
+            'trackingUrls': [
+              'http://localhost:8000/tracking?1',
+              'http://localhost:8000/tracking?2',
+              'http://localhost:8000/tracking?3',
+            ],
+          },
+        },
+      };
+
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.calledOnce;
+      expect(sendBeacon).to.have.been.calledThrice;
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?1',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?2',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?3',
+        ''
+      );
+    });
+
+    it('should fallback to tracking URLS when no `browserAdConversion` data', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://adtech.example',
+            'trackingUrls': [
+              'http://localhost:8000/tracking?1',
+              'http://localhost:8000/tracking?2',
+              'http://localhost:8000/tracking?3',
+            ],
+          },
+        },
+      };
+
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.calledOnce;
+      expect(sendBeacon).to.have.been.calledThrice;
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?1',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?2',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?3',
+        ''
       );
     });
 
@@ -979,9 +1153,7 @@ describes.realWin(
         const target = {
           behaviors: {
             browserAdConversion: {
-              attributiondestination: 'https://example.com',
-              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
-              attributionreportto: 'https://google.com',
+              attributionsrc: 'https://adtech.example',
             },
           },
         };
@@ -990,16 +1162,14 @@ describes.realWin(
             true /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(3);
+        ).to.equal(6);
       });
 
       it('should return ATTRIBUTION_DATA_PRESENT if browserAdConfig is present and no browser support', () => {
         const target = {
           behaviors: {
             browserAdConversion: {
-              attributiondestination: 'https://example.com',
-              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
-              attributionreportto: 'https://google.com',
+              attributionsrc: 'https://adtech.example',
             },
           },
         };
@@ -1008,7 +1178,7 @@ describes.realWin(
             false /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(2);
+        ).to.equal(5);
       });
 
       it('should return ATTRIBUTION_MACRO_PRESENT if browserAdConfig not present', () => {
@@ -1020,7 +1190,7 @@ describes.realWin(
             false /* isAttributionReportingSupported*/,
             target
           )
-        ).to.equal(1);
+        ).to.equal(4);
       });
     });
   }

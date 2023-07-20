@@ -149,6 +149,53 @@ describes.realWin(
           'allow-scripts allow-popups allow-same-origin'
         );
       });
+
+      it('should allow additional sandbox restriction to be removed from iframe', function* () {
+        const config = {
+          'promptUISrc': 'https://promptUISrc',
+          'sandbox': 'allow-top-navigation-by-user-activation',
+        };
+        consentUI = new ConsentUI(mockInstance, config);
+        expect(consentUI.ui_.tagName).to.equal('IFRAME');
+        expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-popups allow-same-origin allow-top-navigation-by-user-activation'
+        );
+      });
+
+      it('should allow multiple additional sandbox restrictions to be removed from iframe', function* () {
+        const config = {
+          'promptUISrc': 'https://promptUISrc',
+          'sandbox':
+            'allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation',
+        };
+        consentUI = new ConsentUI(mockInstance, config);
+        expect(consentUI.ui_.tagName).to.equal('IFRAME');
+        expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-popups allow-same-origin allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'
+        );
+      });
+
+      it('should show an error when invalid sandbox attributes are specified', function* () {
+        const errorSpy = env.sandbox.spy(user(), 'error');
+
+        const config = {
+          'promptUISrc': 'https://promptUISrc',
+          'sandbox': 'allow-top-navigation',
+        };
+        consentUI = new ConsentUI(mockInstance, config);
+
+        expect(consentUI.ui_.tagName).to.equal('IFRAME');
+        expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-popups allow-same-origin'
+        );
+
+        expect(errorSpy).to.be.calledOnce;
+        expect(errorSpy.args[0][1]).to.match(
+          /The sandbox attribute "allow-top-navigation" is not allowed/
+        );
+
+        errorSpy.resetHistory();
+      });
     });
 
     describe('show/hide', () => {

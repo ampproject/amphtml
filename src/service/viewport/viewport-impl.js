@@ -1099,7 +1099,7 @@ export class ViewportImpl {
  * width=device-width,initial-scale=1,minimum-scale=1
  * ```
  * @param {string} content
- * @return {!Object<string, (string|undefined)>}
+ * @return {!{[key: string]: (string|undefined)}}
  * @private Visible for testing only.
  */
 export function parseViewportMeta(content) {
@@ -1128,7 +1128,7 @@ export function parseViewportMeta(content) {
  * ```
  * width=device-width,initial-scale=1,minimum-scale=1
  * ```
- * @param {!Object<string, string>} params
+ * @param {!{[key: string]: string}} params
  * @return {string}
  * @private Visible for testing only.
  */
@@ -1154,7 +1154,7 @@ export function stringifyViewportMeta(params) {
  * updated string or the `currentValue` if no changes were necessary.
  *
  * @param {string} currentValue
- * @param {!Object<string, string|undefined>} updateParams
+ * @param {!{[key: string]: string|undefined}} updateParams
  * @return {string}
  * @private Visible for testing only.
  */

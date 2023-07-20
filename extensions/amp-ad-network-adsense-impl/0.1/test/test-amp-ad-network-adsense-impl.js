@@ -73,7 +73,6 @@ describes.realWin(
       env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
-      impl.win['goog_identity_prom'] = Promise.resolve({});
       env.sandbox.stub(Services, 'timerFor').returns({
         timeoutPromise: (unused, promise) => {
           if (promise) {
@@ -799,25 +798,6 @@ describes.realWin(
         });
       });
 
-      it('should include identity', () => {
-        // Force get identity result by overloading window variable.
-        const token =
-          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-            token: 'abcdef',
-            jar: 'some_jar',
-            pucrd: 'some_pucrd',
-          });
-        impl.win['goog_identity_prom'] = Promise.resolve(token);
-        impl.buildCallback();
-        return impl.getAdUrl().then((url) => {
-          [
-            /(\?|&)adsid=abcdef(&|$)/,
-            /(\?|&)jar=some_jar(&|$)/,
-            /(\?|&)pucrd=some_pucrd(&|$)/,
-          ].forEach((regexp) => expect(url).to.match(regexp));
-        });
-      });
-
       it('includes adsense package code when present', () => {
         element.setAttribute('data-package', 'package_code');
         return expect(impl.getAdUrl()).to.eventually.match(
@@ -955,6 +935,28 @@ describes.realWin(
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {
           expect(url).to.match(/spsa=320x50/);
+        });
+      });
+
+      it('should set tfcd parameter if set in shared data', () => {
+        impl.uiHandler = {isStickyAd: () => false};
+        const consentSharedData = {
+          'adsense-tfua': 0,
+          'adsense-tfcd': 1,
+        };
+        return impl.getAdUrl({consentSharedData}).then((url) => {
+          expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+        });
+      });
+
+      it('should set tfua parameter if set in shared data', () => {
+        impl.uiHandler = {isStickyAd: () => false};
+        const consentSharedData = {
+          'adsense-tfua': 1,
+          'adsense-tfcd': 0,
+        };
+        return impl.getAdUrl({consentSharedData}).then((url) => {
+          expect(url).to.match(/(\?|&)tfua=1(&|$)/);
         });
       });
 

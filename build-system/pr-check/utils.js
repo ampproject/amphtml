@@ -1,8 +1,6 @@
 'use strict';
 
-const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const path = require('path');
 const {
   ciPullRequestSha,
   circleciBuildNumber,
@@ -234,23 +232,6 @@ function storeBuildToWorkspace_(containerDirectory) {
           `/tmp/workspace/builds/${containerDirectory}/${outputDir}`
         );
       }
-    }
-
-    for (const componentFile of [
-      // Store Bento components compiled code from extensions
-      ...fastGlob.sync('extensions/*/?.?/dist/*.(js|css)'),
-      // Store Bento components compiled code from src/bento
-      ...fastGlob.sync('src/bento/components/*/1.0/dist/*.(js|css)'),
-    ]) {
-      fs.ensureDirSync(
-        `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
-          componentFile
-        )}`
-      );
-      fs.moveSync(
-        componentFile,
-        `/tmp/workspace/builds/${containerDirectory}/${componentFile}`
-      );
     }
   }
 }

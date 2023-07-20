@@ -165,7 +165,7 @@ export class Activity {
 
     /**
      * Contains the incrementalEngagedTime timestamps for named triggers.
-     * @private {Object<string, number>}
+     * @private {{[key: string]: number}}
      */
     this.totalEngagedTimeByTrigger_ = {
       /*

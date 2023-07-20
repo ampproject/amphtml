@@ -41,7 +41,7 @@ export function createLinker(version, ids) {
 /**
  * Return the key value pairs
  * @param {string} value
- * @return {?Object<string, string>}
+ * @return {?{[key: string]: string}}
  */
 export function parseLinker(value) {
   const linkerObj = parseLinkerParamValue(value);
@@ -156,7 +156,7 @@ function serialize(pairs) {
 /**
  * Deserialize the serializedIds and return keyValue pairs.
  * @param {string} serializedIds
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function deserialize(serializedIds) {
   const keyValuePairs = {};

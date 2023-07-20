@@ -1,117 +1,141 @@
 #amp-access-fewcents-dialog {
-  padding: 20px;
-}
-
-.aaf-container {
-  height: auto;
-  width: 70%;
-  max-width: 540px;
-  align-items: center;
-  margin: auto;
-  margin-top: 20px;
+  margin: 0px;
+  padding: 16px;
   display: flex;
-  flex-direction: column;
-  padding: 5px 15px;
-  background-color: whitesmoke;
-  border: 0px;
-  border-radius: 5px;
-  opacity: 1;
-  transition: opacity 0.5s ease 0s;
-  font-family: Arial;
-  font-weight: normal;
-  box-shadow: 1px 2px 2px 2px grey;
-  overflow: hidden;
+  -webkit-box-pack: center;
+  justify-content: center;
+  line-height: 1.2;
+  transition: opacity 300ms ease 0s;
 }
-
+.aaf-container {
+  -ms-flex-align: center;
+  align-items: center;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  position: relative;
+  height: auto;
+  border: 0px;
+  background: rgb(255, 255, 255);
+  font-family: Georgia, Times, 'Times New Roman', serif;
+  font-weight: normal;
+  margin: 0px;
+  border-radius: 5px;
+  box-shadow: rgb(0 0 0 / 20%) 0px 4px 10px 0px, rgb(0 0 0 / 19%) 0px 4px 20px 0px;
+  transition: all 0.5s ease 0s;
+  width: 300px;
+  padding: 8px;
+}
 .aaf-headerText {
-  text-align: center;
   font-size: 17px;
   text-align: center;
-  word-wrap: normal;
+  overflow-wrap: normal;
   overflow: hidden;
-  margin-top: 10px;
+  margin-top: 8px;
+  color: rgba(0, 0, 0, 0.87);
 }
-
 .aaf-purchase-button {
-  line-height: 1.2;
+  -ms-flex-align: center;
+  -ms-flex-pack: center;
+  -webkit-box-align: center;
+  align-items: center;
+  font-family: Georgia, Times, 'Times New Roman', serif;
+  width: 100%;
+  outline: none;
   cursor: pointer;
   color: white;
-  border: 0;
-  background: rgb(8, 40, 154);
-  width: 100%;
+  background: #08289a;
+  margin: 8px auto 0px;
+  max-width: 200px;
   border-radius: 5px;
+  border: 0px;
   height: 40px;
-  align-items: center;
+  display: flex;
+  -webkit-box-pack: center;
   justify-content: center;
+  line-height: 40px;
   font-size: 16px;
-  outline: none;
-  margin: auto;
-  padding: 0px 25px;
-  max-width: 160px;
+  padding: 0px 5px;
 }
-
 .aaf-imageTag {
-  max-height: 30px;
+  max-height: 25px;
+  margin-top: 6px;
 }
-
 .aaf-already-bought {
   font-size: 13px;
   font-weight: 500;
   text-align: center;
-  margin-top: 4px;
-  color: rgb(8, 40, 154);
+  margin-top: 8px;
+  margin-bottom: 0px;
+  color: #08289a;
 }
-
 .aaf-price-btn-div {
+  display: -ms-flexbox;
+  -ms-flex-align: center;
+  text-align: center;
   display: flex;
-  place-content: center space-evenly;
-  align-items: center;
-  margin: 12px auto 0px;
-  max-width: 250px;
+  -webkit-box-pack: center;
+  justify-content: center;
+  width: 100%;
+  flex-direction: column;
 }
-
 .aaf-article-price {
   font-size: 24px;
   font-weight: 400;
   text-align: center;
-  margin-right: 10px;
-  color: rgb(0, 0, 0);
+  -webkit-box-pack: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.87);
+  width: 100%;
+  margin-top: 8px;
 }
-
 .aaf-btn-div {
   line-height: 1.2;
-  margin-top: 0.5 rem;
   text-align: center;
-}
-
-.aaf-bottom-div {
   display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  width: 100%;
+  flex-direction: column;
+}
+.aaf-bottom-div {
+  display: -ms-flexbox;
+  -ms-flex-align: center;
+  margin-top: 12px;
+  font-size: 9px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.87);
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
   align-items: center;
+  opacity: 0.6;
 }
-
 .aaf-fewcents-image-tag {
-  max-height: 45px;
+  max-height: 25px;
 }
-
+.aaf-refRow {
+  word-break: break-word;
+}
+.aaf-refElements,
 .aaf-refRow {
   text-align: center;
-  word-break: break-word;
-  color: rgb(168, 163, 163);
+  color: #a8a3a3;
 }
-
 .aaf-refElements {
-  padding: 4px;
-  font-size: 11px;
-  text-align: center;
-  color: rgb(168, 163, 163);
-  white-space: nowrap;
+   padding:2px;
+   font-size: 9px;
+   text-decoration: none;
 }
-
+.aaf-refElements:hover{
+  text-decoration: underline;
+}
 .aaf-partition-bar {
   font-size: 11px;
   margin: 0px 4px;
 }
-
 @media (max-width: 786px) {
   #amp-access-fewcents-dialog {
     width: 350px;

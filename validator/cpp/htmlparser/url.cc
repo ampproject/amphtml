@@ -145,6 +145,9 @@ void URL::ParseAuthority() {
     }
     idx++;
   }
+  // Save off whatever is left as the path + params + fragment.
+  // We don't further parse this.
+  path_params_fragment_ = url_.substr(idx);
 
   // Extract the login string if one was found.
   if (at_idx != -1) {

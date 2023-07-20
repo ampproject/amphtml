@@ -28,15 +28,12 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {DomTransformStream} from '#utils/dom-tranform-stream';
 import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {processHead} from './head-validation';
-import {
-  createSecureDocSkeleton,
-  createSecureFrame,
-  isAttributionReportingSupported,
-} from './secure-frame';
+import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {whenWithinViewport} from './within-viewport';
 
@@ -50,6 +47,7 @@ import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
+  getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
@@ -146,6 +144,7 @@ export let CreativeMetaDataDef;
       consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
+      consentSharedData: (?Object|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -166,7 +165,7 @@ export const AnalyticsTrigger = {
 
 /**
  * Maps the names of lifecycle events to analytics triggers.
- * @const {!Object<string, !AnalyticsTrigger>}
+ * @const {!{[key: string]: !AnalyticsTrigger}}
  */
 const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'adRequestStart': AnalyticsTrigger.AD_REQUEST_START,
@@ -332,7 +331,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Mapping of feature name to value extracted from ad response header
      * amp-ff-exps with comma separated pairs of '=' separated key/value.
-     * @type {!Object<string,string>}
+     * @type {!{[key: string]: string}}
      */
     this.postAdResponseExperimentFeatures = {};
 
@@ -752,14 +751,23 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           });
 
+          const consentSharedDataPromise = getConsentPolicySharedData(
+            this.element,
+            consentPolicyId
+          ).catch((err) => {
+            user().error(TAG, 'Error determining consent shared data', err);
+            return null;
+          });
+
           return Promise.all([
             consentStatePromise,
             consentStringPromise,
             consentMetadataPromise,
+            consentSharedDataPromise,
           ]);
         }
 
-        return Promise.resolve([null, null, null]);
+        return Promise.resolve([null, null, null, null]);
       })
       // This block returns the ad URL, if one is available.
       /** @return {!Promise<?string>} */
@@ -769,6 +777,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
         const consentMetadata = consentResponse[2];
+        const consentSharedData = consentResponse[3];
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
@@ -788,11 +797,12 @@ export class AmpA4A extends AMP.BaseElement {
                 consentStringType,
                 gdprApplies,
                 additionalConsent,
+                consentSharedData,
               },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
-                /** @type {?Object<string, string|number|boolean|undefined>} */ (
+                /** @type {?{[key: string]: string|number|boolean|undefined}} */ (
                   consentMetadata
                 )
               ),
@@ -1472,6 +1482,16 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Remove the iframe and clean it up.
+   */
+  maybeDestroyIframe_() {
+    if (this.iframe && this.iframe.parentElement) {
+      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe = null;
+    }
+  }
+
+  /**
    * Attempts to remove the current frame and free any associated resources.
    * This function will no-op if this ad slot is currently in the process of
    * being refreshed.
@@ -1489,10 +1509,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.friendlyIframeEmbed_.destroy();
       this.friendlyIframeEmbed_ = null;
     }
-    if (this.iframe && this.iframe.parentElement) {
-      this.iframe.parentElement.removeChild(this.iframe);
-      this.iframe = null;
-    }
+    this.maybeDestroyIframe_();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
@@ -1795,6 +1812,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     const {height, width} = this.creativeSize_;
     const {extensions, fonts, head} = headData;
+    this.maybeDestroyIframe_();
     this.iframe = createSecureFrame(
       this.win,
       this.getIframeTitle(),
@@ -1875,6 +1893,7 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(!!this.element.ownerDocument, 'missing owner document?!');
     this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
+    this.maybeDestroyIframe_();
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
@@ -2028,12 +2047,13 @@ export class AmpA4A extends AMP.BaseElement {
     // request completes.
     let featurePolicies = "sync-xhr 'none';";
 
-    if (isAttributionReportingSupported(this.win.document)) {
+    if (isAttributionReportingAllowed(this.win.document)) {
       featurePolicies += "attribution-reporting 'src';";
     }
 
     mergedAttributes['allow'] = featurePolicies;
 
+    this.maybeDestroyIframe_();
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
@@ -2375,7 +2395,7 @@ export class AmpA4A extends AMP.BaseElement {
    * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {?{[key: string]: string|number|boolean|undefined}} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {

@@ -29,8 +29,8 @@ CMP_CONFIG['appconsent'] = {
 CMP_CONFIG['ConsentManager'] = {
   'consentInstanceId': 'ConsentManager',
   'checkConsentHref':
-    'https://consentmanager.mgr.consensu.org/delivery/ampcheck.php',
-  'promptUISrc': 'https://consentmanager.mgr.consensu.org/delivery/ampui.php',
+    'https://delivery.consentmanager.net/delivery/ampcheck.php',
+  'promptUISrc': 'https://delivery.consentmanager.net/delivery/ampui.php',
 };
 
 CMP_CONFIG['didomi'] = {
@@ -47,8 +47,9 @@ CMP_CONFIG['iubenda'] = {
 
 CMP_CONFIG['sirdata'] = {
   'consentInstanceId': 'sirdata',
-  'checkConsentHref': 'https://sddan.mgr.consensu.org/api/v1/public/amp/check',
-  'promptUISrc': 'https://ui.sddan.mgr.consensu.org/amp.html',
+  'checkConsentHref':
+    'https://choices.consentframework.com/api/v1/public/amp/check',
+  'promptUISrc': 'https://ui.consentframework.com/amp/loader.html',
 };
 
 CMP_CONFIG['Marfeel'] = {

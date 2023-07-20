@@ -46,7 +46,7 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  * }
  *
- * @const {!Object<string, !JsonObject>}
+ * @const {!{[key: string]: !JsonObject}}
  */
 const adConfig = jsonConfiguration({
   '_ping_': {
@@ -240,6 +240,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'adsviu': {
+    prefetch: 'https://widget.adsviu.com/adsviuAMP.js',
+    preconnect: ['https://api.adsviu.com'],
+  },
+
   'adunity': {
     preconnect: ['https://content.adunity.com'],
     renderStartImplemented: true,
@@ -284,6 +289,11 @@ const adConfig = jsonConfiguration({
   'affiliateb': {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
     renderStartImplemented: true,
+  },
+
+  'affinity': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn4-hbs.affinitymatrix.com',
   },
 
   'aja': {
@@ -414,6 +424,8 @@ const adConfig = jsonConfiguration({
 
   'chargeads': {}, // Deprecated, to be removed on 2019-05-23
 
+  'cognativex': {},
+
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
@@ -440,6 +452,10 @@ const adConfig = jsonConfiguration({
 
   'csa': {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
+  },
+
+  'clever': {
+    renderStartImplemented: true,
   },
 
   'dable': {
@@ -524,6 +540,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'fairground': {},
+
   'fake': {},
 
   'fake-delayed': {
@@ -580,6 +598,10 @@ const adConfig = jsonConfiguration({
 
   'genieessp': {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
+  },
+
+  'geozo': {
+    renderStartImplemented: true,
   },
 
   'giraff': {
@@ -659,7 +681,6 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
     preconnect: [
       'https://tpc.googlesyndication.com',
-      'https://adservice.google.com',
       'https://cdn.insurads.com',
       'https://services.insurads.com',
       'https://messaging.insurads.com',
@@ -699,7 +720,7 @@ const adConfig = jsonConfiguration({
   'jixie': {
     prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',
-    clientIdCookieName: '_jx',
+    clientIdCookieName: '_jxx',
     renderStartImplemented: true,
   },
 
@@ -777,7 +798,6 @@ const adConfig = jsonConfiguration({
       'https://marfeel-d.openx.net',
       'https://ice.360yield.com',
       'https://mbid.marfeelrev.com',
-      'https://adservice.google.com',
     ],
     consentHandlingOverride: true,
   },
@@ -1004,6 +1024,10 @@ const adConfig = jsonConfiguration({
 
   'pubexchange': {},
 
+  'pubfuture': {
+    renderStartImplemented: true,
+  },
+
   'pubguru': {
     renderStartImplemented: true,
   },
@@ -1015,6 +1039,10 @@ const adConfig = jsonConfiguration({
   'pubmine': {
     prefetch: ['https://s.pubmine.com/head.js'],
     preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
+  },
+
+  'pubscale': {
     renderStartImplemented: true,
   },
 
@@ -1042,6 +1070,11 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://a.quora.com/amp_ad.js',
     preconnect: 'https://ampad.quora.com',
     renderStartImplemented: true,
+  },
+
+  'r9x': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.r9x.in',
   },
 
   'rakutenunifiedads': {
@@ -1133,7 +1166,7 @@ const adConfig = jsonConfiguration({
   'seedingalliance': {},
 
   'seedtag': {
-    prefetch: 'https://config.seedtag.com/omid/bridge/bridge.js',
+    prefetch: 'https://t.seedtag.com/c/loader.js',
     preconnect: ['https://s.seedtag.com'],
     consentHandlingOverride: true,
     renderStartImplemented: true,
@@ -1162,6 +1195,10 @@ const adConfig = jsonConfiguration({
 
   'sklik': {
     prefetch: 'https://c.imedia.cz/js/amp.js',
+  },
+
+  'skoiy': {
+    preconnect: ['https://svas.skoiy.xyz'],
   },
 
   'slimcutmedia': {

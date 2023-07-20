@@ -18,7 +18,7 @@ export class FiniteStateMachine {
     /**
      * Callbacks that are invoked when transitioning from an old state
      * to the new.
-     * @private {Object<string, function():void>}
+     * @private {{[key: string]: function():void}}
      */
     this.transitions_ = map();
   }

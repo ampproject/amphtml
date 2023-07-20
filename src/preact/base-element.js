@@ -228,7 +228,7 @@ export class PreactBaseElement extends BaseElement {
   /**
    * Provides a mapping of Preact prop to AmpElement DOM attributes.
    *
-   * @type {Object<string, AmpElementProp>}
+   * @type {{[key: string]: AmpElementProp}}
    */
   static props = {};
 
@@ -498,7 +498,7 @@ export class PreactBaseElement extends BaseElement {
    * @param {JsonObject} props
    */
   mutateProps(props) {
-    Object.assign(/** @type {Object} */ (this.defaultProps_), props);
+    Object.assign(/** @type {object} */ (this.defaultProps_), props);
     this.scheduleRender_();
   }
 
@@ -914,7 +914,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {Object} api
+   * @param {object} api
    * @param {keyof API_TYPE} key
    * @private
    */

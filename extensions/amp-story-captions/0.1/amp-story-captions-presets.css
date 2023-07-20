@@ -39,7 +39,7 @@
   color: #fff !important;
 }
 
-/* fade in */
+/* appear */
 
 .amp-story-captions-appear .amp-story-captions-cue-wrapper  {
   font-size: var(--story-captions-font-size, calc(2.5 * var(--story-page-vh, 8px))) !important;

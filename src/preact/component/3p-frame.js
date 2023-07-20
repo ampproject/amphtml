@@ -22,7 +22,7 @@ import {
 } from '../../3p-frame';
 import {parseUrlDeprecated} from '../../url';
 
-/** @type {Object<string,function():void>} 3p frames for that type. */
+/** @type {{[key: string]: function():void}} 3p frames for that type. */
 export const countGenerators = {};
 
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
@@ -64,7 +64,10 @@ function ProxyIframeEmbedWithRef(
     );
   }
 
+  /** @type {import('preact/hooks').MutableRef<any>} */
   const contentRef = useRef(null);
+  // TODO: this should be IFrameEmbedApi, but it causes some minor type issues.
+  /** @type {import('preact/hooks').MutableRef<any>} */
   const iframeRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
@@ -75,6 +78,7 @@ function ProxyIframeEmbedWithRef(
 
   const [nameAndSrc, setNameAndSrc] = useState({name: nameProp, src: srcProp});
   const {name, src} = nameAndSrc;
+  /** @type {import('preact/hooks').MutableRef<string?>} */
   const sentinelRef = useRef(null);
 
   useLayoutEffect(() => {

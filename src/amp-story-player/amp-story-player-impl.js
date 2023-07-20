@@ -101,6 +101,7 @@ const STORY_MESSAGE_STATE_TYPE_ENUM = {
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
+  DESKTOP_ASPECT_RATIO: 'DESKTOP_ASPECT_RATIO',
 };
 
 /** @const {string} */
@@ -120,7 +121,8 @@ let DocumentStateTypeDef;
  *   title: (?string),
  *   posterImage: (?string),
  *   storyContentLoaded: ?boolean,
- *   connectedDeferred: !Deferred
+ *   connectedDeferred: !Deferred,
+ *   desktopAspectRatio: ?number,
  * }}
  */
 let StoryDef;
@@ -619,6 +621,9 @@ export class AmpStoryPlayer {
 
           messaging.registerHandler('storyContentLoaded', () => {
             story.storyContentLoaded = true;
+
+            // Store aspect ratio so that it can be updated when the story becomes active.
+            this.storeAndMaybeUpdateAspectRatio_(story);
           });
 
           messaging.sendRequest(
@@ -1147,6 +1152,39 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Store aspect ratio of the loaded story and and maybe update the active aspect ratio.
+   * @param {!StoryDef} story
+   * @private
+   */
+  storeAndMaybeUpdateAspectRatio_(story) {
+    story.messagingPromise.then((messaging) => {
+      messaging
+        .sendRequest(
+          'getDocumentState',
+          {state: STORY_MESSAGE_STATE_TYPE_ENUM.DESKTOP_ASPECT_RATIO},
+          true
+        )
+        .then((event) => {
+          story.desktopAspectRatio = event.value;
+          this.maybeUpdateAspectRatio_();
+        });
+    });
+  }
+
+  /**
+   * Update player aspect ratio based on the active story aspect ratio.
+   * @private
+   */
+  maybeUpdateAspectRatio_() {
+    if (this.stories_[this.currentIdx_].desktopAspectRatio) {
+      setStyles(this.rootEl_, {
+        '--i-amphtml-story-player-panel-ratio':
+          this.stories_[this.currentIdx_].desktopAspectRatio,
+      });
+    }
+  }
+
+  /**
    * Returns a promise that makes sure that the current story gets loaded first
    * before any others. When the given story is not the current story, it will
    * block until the current story has finished loading. When the given story
@@ -1157,6 +1195,8 @@ export class AmpStoryPlayer {
    */
   currentStoryPromise_(story) {
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
+      this.maybeUpdateAspectRatio_();
+
       return Promise.resolve();
     }
 
@@ -1176,6 +1216,9 @@ export class AmpStoryPlayer {
         // event anymore, which is why we need this sync property.
         story.storyContentLoaded = true;
         this.currentStoryLoadDeferred_.resolve();
+
+        // Store and update the player aspect ratio based on the active story aspect ratio.
+        this.storeAndMaybeUpdateAspectRatio_(story);
       })
     );
 

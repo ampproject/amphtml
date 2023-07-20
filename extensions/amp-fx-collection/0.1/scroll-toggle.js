@@ -146,7 +146,7 @@ export function getScrollToggleFloatInOffset(element, isShown, position) {
 
 /**
  * @param {!Element} element
- * @param {!Object<string, string>} computedStyle
+ * @param {!{[key: string]: string}} computedStyle
  * @return {boolean}
  */
 export function assertValidScrollToggleElement(element, computedStyle) {
@@ -159,7 +159,7 @@ export function assertValidScrollToggleElement(element, computedStyle) {
 /**
  * @param {!Element} element
  * @param {string} type
- * @param {!Object<string, string>} computedStyle
+ * @param {!{[key: string]: string}} computedStyle
  * @return {?ScrollTogglePosition}
  */
 export function getScrollTogglePosition(element, type, computedStyle) {
@@ -193,7 +193,7 @@ export function installScrollToggleStyles(element) {
 }
 
 /**
- * @param {!Object<string, string>} computed
+ * @param {!{[key: string]: string}} computed
  * @param {string} prop
  * @param {string} expected
  * @param {!Element} element

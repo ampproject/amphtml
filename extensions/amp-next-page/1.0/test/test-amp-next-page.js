@@ -6,6 +6,8 @@ import {setStyle} from '#core/dom/style';
 import {Services} from '#service';
 import {installCidService} from '#service/cid-impl';
 
+import {macroTask} from '#testing/helpers';
+
 import {getAmpdoc} from 'src/service-helpers';
 import * as url from 'src/url';
 
@@ -467,12 +469,12 @@ describes.realWin(
 
       it('awaits first scroll', async () => {
         element.buildInternal();
-        await new Promise(setTimeout);
+        await macroTask();
         expect(service.pages_.length).to.equal(1);
         expect(service.hostPage_).to.equal(hostPage);
         expect(service.currentTitlePage_).to.equal(service.hostPage_);
         win.dispatchEvent(new Event('scroll'));
-        await new Promise(setTimeout);
+        await macroTask();
         expect(service.pages_.length).to.equal(3);
       });
     });

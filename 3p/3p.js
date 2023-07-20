@@ -15,7 +15,7 @@ import {devAssert, userAssert} from '#utils/log';
 let ThirdPartyFunctionDef;
 
 /**
- * @const {!Object<ThirdPartyFunctionDef>}
+ * @const {!{[key: string]: ThirdPartyFunctionDef}}
  * @visibleForTesting
  */
 let registrations;
@@ -285,7 +285,7 @@ function validateAllowedFields(data, allowedFields) {
   }
 }
 
-/** @private {!Object<string, boolean>} */
+/** @private {!{[key: string]: boolean}} */
 let experimentToggles = {};
 
 /**
@@ -299,7 +299,7 @@ export function isExperimentOn(experimentId) {
 
 /**
  * Set experiment toggles.
- * @param {!Object<string, boolean>} toggles
+ * @param {!{[key: string]: boolean}} toggles
  */
 export function setExperimentToggles(toggles) {
   experimentToggles = toggles;

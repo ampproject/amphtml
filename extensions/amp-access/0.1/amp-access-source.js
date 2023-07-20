@@ -115,7 +115,7 @@ export class AccessSource {
     /** @private {?Function} */
     this.firstAuthorizationResolver_ = deferred.resolve;
 
-    /** @private {!Object<string, string>} */
+    /** @private {!{[key: string]: string}} */
     this.loginUrlMap_ = {};
 
     /** @private {?Promise} */
@@ -300,7 +300,7 @@ export class AccessSource {
   /**
    * @param {string} url
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
+   * @return {!Promise<!{[key: string]: *}>}
    */
   collectUrlVars(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then((vars) => {
@@ -310,7 +310,7 @@ export class AccessSource {
 
   /**
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
+   * @return {!Promise<!{[key: string]: *}>}
    * @private
    */
   prepareUrlVars_(useAuthData) {
@@ -546,7 +546,7 @@ export class AccessSource {
  * @typedef {{
  *   buildUrl: function(string, boolean):!Promise<string>,
  *   collectUrlVars: function(string, boolean):
- *       !Promise<!Object<string, *>>
+ *       !Promise<!{[key: string]: *}>
  * }}
  */
 export let AccessTypeAdapterContextDef;
