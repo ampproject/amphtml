@@ -33,11 +33,31 @@ tags: {  # <amp-story-audio-sticker>
     value: "outline"
     value: "dropshadow"
   }
-  child_tags: {
-    child_tag_name_oneof: "AMP-STORY-AUDIO-STICKER-PRETAP"
-    child_tag_name_oneof: "AMP-STORY-AUDIO-STICKER-POSTTAP"
+}
+
+tags: {  # <amp-story-audio-sticker-pretap>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUDIO-STICKER-PRETAP"
+  requires_extension: "amp-story-audio-sticker"
+  mandatory_parent: "AMP-STORY-AUDIO-STICKER"
+  descendant_tag_list: "amp-story-audio-sticker-allowed-descendants"
+  amp_layout: {
+    supported_layouts: CONTAINER
   }
-  descendant_tag_list: {
+}
+
+tags: {  # <amp-story-audio-sticker-posttap>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUDIO-STICKER-POSTTAP"
+  requires_extension: "amp-story-audio-sticker"
+  mandatory_parent: "AMP-STORY-AUDIO-STICKER"
+  descendant_tag_list: "amp-story-audio-sticker-allowed-descendants"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+
+descendant_tag_list: {
     # Allowlisting as many components as possible, unless they could result in a
     # bad UX.
     name: "amp-story-audio-sticker-allowed-descendants"
@@ -84,8 +104,8 @@ tags: {  # <amp-story-audio-sticker>
     tag: "AMP-REDDIT"
     tag: "AMP-RENDER"
     tag: "AMP-RIDDLE-QUIZ"
-    tag: "AMP-SOUNDCLOUD"
     tag: "AMP-SELECTOR"
+    tag: "AMP-SOUNDCLOUD"
     tag: "AMP-TIMEAGO"
     tag: "AMP-TWITTER"
     tag: "AMP-VIDEO"
@@ -225,4 +245,3 @@ tags: {  # <amp-story-audio-sticker>
     tag: "VKERN"
     tag: "WBR"
   }
-}
