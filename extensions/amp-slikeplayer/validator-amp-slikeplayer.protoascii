@@ -5,13 +5,14 @@ tags: {  # amp-slikeplayer
     name: "amp-slikeplayer"
     version: "0.1"
     version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-slikeplayer>
   html_format: AMP
-  tag_name: "SLIKEPLAYER"
+  tag_name: "AMP-SLIKEPLAYER"
   requires_extension: "amp-slikeplayer"
    attrs: {
     name: "data-apikey"
