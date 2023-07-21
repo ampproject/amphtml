@@ -42,8 +42,8 @@ const DEFAULT_STICKERS = {
   'headphone-cat': {
     width: '282',
     height: '226',
-    pretapUrl: ASSET_URL_PREFIX + 'headphone-cat-pretap.png',
-    posttapUrl: ASSET_URL_PREFIX + 'headphone-cat-posttap.gif',
+    pretapUrl: ASSET_URL_PREFIX + 'cat-sticker-pretap.png',
+    posttapUrl: ASSET_URL_PREFIX + 'cat-sticker-posttap.gif',
   },
   'loud-speaker': {
     width: '380',
