@@ -94,7 +94,6 @@ amp-selector
 amp-sidebar
 amp-skimlinks
 amp-smartlinks
-amp-slikeplayer
 amp-social-share
 amp-soundcloud
 amp-springboard-player
