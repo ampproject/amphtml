@@ -28,7 +28,7 @@ PASS
 |
 |        <amp-story-page id="page-2" title="Lorem ipsum dolor sit amet">
 |          <amp-story-grid-layer template="vertical">
-|            <amp-story-audio-sticker size="large" sticker="cat-sticker"></amp-story-audio-sticker>
+|            <amp-story-audio-sticker size="large" sticker="headphone-cat"></amp-story-audio-sticker>
 |          </amp-story-grid-layer>>
 |        </amp-story-page>
 |

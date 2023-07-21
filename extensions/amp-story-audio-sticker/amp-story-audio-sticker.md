@@ -50,16 +50,16 @@ Default value: “small”, which would be used if the input value is invalid or
 
 ### `sticker` {string} optional
 
-Default value: “cat-sticker”, which would be used if the input value is invalid or is not provided.
+Default value: “headphone-cat”, which would be used if the input value is invalid or is not provided.
 
 A list of premade stickers to use:
 
-| Accepted Value | Pre-tap Image                                                                                   | Post-tap Image                                                                                    |
-| -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| “cat-sticker”  | ![Cat Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/cat-sticker-pretap.png)      | ![Cat Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/cat-sticker-posttap.gif)      |
-| “tape-player”  | ![Player Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/tape-player-pretap.png)   | ![Player Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/tape-player-posttap.gif)   |
-| “loud-speaker” | ![Speaker Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-pretap.png) | ![Speaker Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-posttap.png) |
-| “audio-cloud”  | ![Cloud Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-pretap.png)    | ![Cloud Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-posttap.png)    |
+| Accepted Value  | Pre-tap Image                                                                                   | Post-tap Image                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| “headphone-cat” | ![Cat Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/cat-sticker-pretap.png)      | ![Cat Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/cat-sticker-posttap.gif)      |
+| “tape-player”   | ![Player Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/tape-player-pretap.png)   | ![Player Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/tape-player-posttap.gif)   |
+| “loud-speaker”  | ![Speaker Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-pretap.png) | ![Speaker Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/loud-speaker-posttap.png) |
+| “audio-cloud”   | ![Cloud Pre-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-pretap.png)    | ![Cloud Post-tap](https://www.gstatic.com/amphtml/stamp/audio-sticker/audio-cloud-posttap.png)    |
 
 ### `sticker-style` {string} optional
 

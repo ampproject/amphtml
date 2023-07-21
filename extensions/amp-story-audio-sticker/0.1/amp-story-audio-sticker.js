@@ -39,11 +39,11 @@ const DEFAULT_STICKERS = {
     pretapUrl: ASSET_URL_PREFIX + 'audio-cloud-pretap.png',
     posttapUrl: ASSET_URL_PREFIX + 'audio-cloud-posttap.png',
   },
-  'cat-sticker': {
+  'headphone-cat': {
     width: '282',
     height: '226',
-    pretapUrl: ASSET_URL_PREFIX + 'cat-sticker-pretap.png',
-    posttapUrl: ASSET_URL_PREFIX + 'cat-sticker-posttap.gif',
+    pretapUrl: ASSET_URL_PREFIX + 'headphone-cat-pretap.png',
+    posttapUrl: ASSET_URL_PREFIX + 'headphone-cat-posttap.gif',
   },
   'loud-speaker': {
     width: '380',
@@ -64,7 +64,7 @@ const DEFAULT_STICKERS = {
  * 2) the custom sticker data is not provided completely.
  * @const {string}
  */
-const FALLBACK_DEFAULT_STICKER = 'cat-sticker';
+const FALLBACK_DEFAULT_STICKER = 'headphone-cat';
 
 export class AmpStoryAudioSticker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
