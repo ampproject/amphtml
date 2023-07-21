@@ -16,7 +16,7 @@ export function affinity(global, data) {
       'affJson',
       'affRtcConfig',
       'jsontargeting',
-      'extras'
+      'extras',
     ]
   );
 
