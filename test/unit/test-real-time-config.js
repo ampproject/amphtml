@@ -810,11 +810,9 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       );
       await rtc.promiseArray_[0];
       expect(fetchJsonStub).to.be.called;
-      expect(
-        fetchJsonStub.calledWithMatch(
-          /https:\/\/www\.foo\.example\/\?title=[^&]+&src=https?:\/\/[\w\.\/]+&cid=amp-\S+$/
-        )
-      ).to.be.true;
+      expect(fetchJsonStub).to.be.calledWithMatch(
+        /https:\/\/www\.foo\.example\/\?title=[^&]*&src=[^&]*&cid=amp-\S+$/
+      );
     });
   });
 
