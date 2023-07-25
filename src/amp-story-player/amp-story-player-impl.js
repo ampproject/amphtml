@@ -11,11 +11,12 @@ import {findIndex, toArray} from '#core/types/array';
 import {isEnumValue} from '#core/types/enum';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
+import {copyTextToClipboard} from '#core/window/clipboard';
 
 import {createCustomEvent, listenOnce} from '#utils/event-helper';
 
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {AMP_STORY_PLAYER_EVENT} from './event';
+import {AMP_STORY_COPY_URL, AMP_STORY_PLAYER_EVENT} from './event';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
@@ -1599,6 +1600,9 @@ export class AmpStoryPlayer {
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
+      case AMP_STORY_COPY_URL:
+        this.onCopyUrl_(/** @type {string} */ (data.value), messaging);
+        break;
       default:
         break;
     }
@@ -1619,6 +1623,38 @@ export class AmpStoryPlayer {
         this.element_.dispatchEvent(createCustomEvent(this.win_, value, {}));
         break;
     }
+  }
+
+  /**
+   * Reacts to the copy url request coming from the story.
+   * @private
+   * @param {string} value
+   * @param {Messaging} messaging
+   */
+  onCopyUrl_(value, messaging) {
+    copyTextToClipboard(
+      this.win_,
+      value,
+      () => {
+        messaging.sendRequest(
+          'copyComplete',
+          {
+            'success': true,
+            'url': value,
+          },
+          false
+        );
+      },
+      () => {
+        messaging.sendRequest(
+          'copyComplete',
+          {
+            'success': false,
+          },
+          false
+        );
+      }
+    );
   }
 
   /**
