@@ -796,7 +796,8 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
        * Both save and retrieve to a cookie named `foo`. They should be isolated and the cookies should not be shared.
        * But, for some reason they are. So, for now use a cookie called bar here.
        */
-      const url = 'https://www.foo.example/?cid=CLIENT_ID(bar)';
+      const url =
+        'https://www.foo.example/?title=TITLE&src=SOURCE_URL&cid=CLIENT_ID(bar)';
       rtc.rtcConfig_ = {
         timeoutMillis: 1000,
       };
@@ -809,11 +810,9 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       );
       await rtc.promiseArray_[0];
       expect(fetchJsonStub).to.be.called;
-      expect(
-        fetchJsonStub.calledWithMatch(
-          /https:\/\/www.foo.example\/\?cid=amp-\S+$/
-        )
-      ).to.be.true;
+      expect(fetchJsonStub).to.be.calledWithMatch(
+        /https:\/\/www\.foo\.example\/\?title=[^&]*&src=[^&]*&cid=amp-\S+$/
+      );
     });
   });
 

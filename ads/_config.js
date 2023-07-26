@@ -652,6 +652,11 @@ const adConfig = jsonConfiguration({
   },
   'improvedigital': {},
 
+  'incrementx': {
+    prefetch: 'https://cdn.incrementxserv.com/ixamp.js',
+    renderStartImplemented: true,
+  },
+
   'industrybrains': {
     prefetch: 'https://web.industrybrains.com/js/ads/async/show.js',
     preconnect: [
