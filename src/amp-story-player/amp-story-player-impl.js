@@ -559,7 +559,7 @@ export class AmpStoryPlayer {
       setStyle(iframeEl, 'backgroundImage', story.posterImage);
     }
     iframeEl.classList.add('story-player-iframe');
-    iframeEl.setAttribute('allow', 'autoplay');
+    iframeEl.setAttribute('allow', 'autoplay; web-share');
 
     applySandbox(iframeEl);
     this.addSandboxFlags_(iframeEl);
