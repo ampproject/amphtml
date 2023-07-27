@@ -945,6 +945,7 @@ describes.realWin(
           'adsense-tfcd': 1,
         };
         return impl.getAdUrl({consentSharedData}).then((url) => {
+          expect(url).to.match(/(\?|&)tfua=0(&|$)/);
           expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
         });
       });
@@ -957,6 +958,7 @@ describes.realWin(
         };
         return impl.getAdUrl({consentSharedData}).then((url) => {
           expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+          expect(url).to.match(/(\?|&)tfcd=0(&|$)/);
         });
       });
 

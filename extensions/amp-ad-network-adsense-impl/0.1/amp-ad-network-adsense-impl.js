@@ -405,8 +405,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${this.size_.width}x${this.size_.height}`
         : null,
-      'tfcd': consentSharedData?.['adsense-tfcd'] || null,
-      'tfua': consentSharedData?.['adsense-tfua'] || null,
+      'tfcd': consentSharedData?.['adsense-tfcd'] ?? null,
+      'tfua': consentSharedData?.['adsense-tfua'] ?? null,
     };
 
     const experimentIds = [];

@@ -1227,6 +1227,7 @@ for (const {config, name} of [
             'doubleclick-tfcd': 1,
           };
           return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=0(&|$)/);
             expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
           });
         });
@@ -1239,6 +1240,7 @@ for (const {config, name} of [
           };
           return impl.getAdUrl({consentSharedData}).then((url) => {
             expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=0(&|$)/);
           });
         });
       });

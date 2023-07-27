@@ -653,8 +653,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
           ? consentString
           : null,
-      'tfcd': tfcdFromSharedData || tfcdFromJson || null,
-      'tfua': tfuaFromSharedData || tfuaFromJson || null,
+      'tfcd': tfcdFromSharedData ?? tfcdFromJson ?? null,
+      'tfua': tfuaFromSharedData ?? tfuaFromJson ?? null,
     };
   }
 
