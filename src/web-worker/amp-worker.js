@@ -81,34 +81,34 @@ class AmpWorker {
     //let url = '';
 
     //const policy = {
-      //createScriptURL: function (url) {
-        //// Only allow the correct webworker url to pass through
-        //const regexURL =
-          ///^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
+    //createScriptURL: function (url) {
+    //// Only allow the correct webworker url to pass through
+    //const regexURL =
+    ///^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
 
-        //if (
-          //(regexURL.test(url) || getMode().test) &&
-          //(url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js')
-        //) {
-          //return url;
-        //} else {
-          //return '';
-        //}
-      //},
+    //if (
+    //(regexURL.test(url) || getMode().test) &&
+    //(url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js')
+    //) {
+    //return url;
+    //} else {
+    //return '';
+    //}
+    //},
     //};
 
     //if (self.trustedTypes && self.trustedTypes.createPolicy) {
-      //const policy = self.trustedTypes.createPolicy(
-        //'amp-worker#fetchUrl',
-        //policy
-      //);
+    //const policy = self.trustedTypes.createPolicy(
+    //'amp-worker#fetchUrl',
+    //policy
+    //);
     //}
 
     //url = policy
-      //.createScriptURL(
-        //calculateEntryPointScriptUrl(loc, 'ww', useLocal, useRtvVersion)
-      //)
-      //.toString();
+    //.createScriptURL(
+    //calculateEntryPointScriptUrl(loc, 'ww', useLocal, useRtvVersion)
+    //)
+    //.toString();
 
     dev().fine(TAG, 'Fetching web worker from', url);
 
