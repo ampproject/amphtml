@@ -207,7 +207,7 @@ export function facebook(global, data) {
         );
       });
 
-      FB.init({xfbml: true, version: 'v2.5'});
+      FB.init({xfbml: true, version: 'v17.0'});
 
       // Report to parent that the SDK has loaded and is ready to paint
       const message = JSON.stringify({
