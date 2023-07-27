@@ -6,6 +6,7 @@
     {
       owners: [
         {name: 'powerivq'},
+        {name: 'sliketech'},
         {name: 'erwinmombay'},
         {name: 'ampproject/wg-components'},
       ],
