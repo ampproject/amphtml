@@ -46,7 +46,7 @@ const resolveMock = sinon.fake((s, resolveDir, unusedAbsRootDir) => {
 
 /**
  * @param {Array<string>} externals
- * @param {Object} remaps
+ * @param {object} remaps
  * @return {*}
  */
 function setup(externals, remaps) {

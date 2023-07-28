@@ -109,7 +109,7 @@ class AmpWorker {
 
     /**
      * Array of in-flight messages pending response from worker.
-     * @const @private {!Object<number, PendingMessageDef>}
+     * @const @private {!{[key: number]: PendingMessageDef}}
      */
     this.messages_ = {};
 

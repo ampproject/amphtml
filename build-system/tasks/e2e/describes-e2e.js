@@ -4,7 +4,6 @@ require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
-const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const selenium = require('selenium-webdriver');
 const {
@@ -20,7 +19,6 @@ const {configureHelpers} = require('../../../testing/helpers');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isCiBuild} = require('../../common/ci');
-const {buildBentoE2E} = require('./build-bento-e2e');
 const {Builder, Capabilities, logging} = selenium;
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -29,8 +27,6 @@ const TEST_TIMEOUT = 3000;
 // This can be much lower when the OSX container can be sped up allowing tests
 // in extensions/amp-script/0.1/test-e2e/test-amp-script.js to run faster
 const SETUP_TIMEOUT = 10000;
-// Circle CI is much slower to build the react bundle, so the timeout is raised currently
-const BUILD_E2E_TIMEOUT = 20000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
@@ -282,7 +278,7 @@ envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
 class ItConfig {
   /**
    * @param {function} it
-   * @param {Object} env
+   * @param {object} env
    */
   constructor(it, env) {
     this.it = /** @type {Mocha.it} */ (it);
@@ -453,28 +449,13 @@ function describeEnv(factory) {
     /**
      *
      * @param {string} _name
-     * @param {Object} variant
+     * @param {object} variant
      * @param {string} browserName
      */
     function doTemplate(_name, variant, browserName) {
       const env = Object.create(variant);
       // @ts-ignore
       this.timeout(TEST_TIMEOUT);
-      before(async function () {
-        if (spec.bentoComponentName && spec.testFor) {
-          this.timeout(BUILD_E2E_TIMEOUT);
-          await buildBentoE2E(
-            {
-              fortesting: true,
-              localDev: true,
-              minify: true,
-              watch: false,
-            },
-            spec.bentoComponentName,
-            spec.testFor
-          );
-        }
-      });
       beforeEach(async function () {
         this.timeout(SETUP_TIMEOUT);
         configureHelpers(env);
@@ -670,7 +651,7 @@ function getDriver({headless = false}, browserName, deviceName) {
  */
 async function setUpTest(
   {ampDriver, controller, environment},
-  {testUrl = '', version, experiments = [], initialRect}
+  {experiments = [], initialRect, testUrl = '', version}
 ) {
   const url = new URL(testUrl);
 

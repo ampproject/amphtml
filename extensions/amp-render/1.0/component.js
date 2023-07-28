@@ -26,14 +26,14 @@ const DEFAULT_GET_JSON = (url) => {
  */
 export function RenderWithRef(
   {
-    src = '',
-    getJson = DEFAULT_GET_JSON,
-    render = DEFAULT_RENDER,
     ariaLiveValue = 'polite',
-    onLoading,
-    onLoad,
-    onRefresh,
+    getJson = DEFAULT_GET_JSON,
     onError,
+    onLoad,
+    onLoading,
+    onRefresh,
+    render = DEFAULT_RENDER,
+    src = '',
     ...rest
   },
   ref

@@ -208,7 +208,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   /**
    * Chooses RTC callout with highest bid price
    * @param {Array<Object>} rtcResponseArray
-   * @return {Object}
+   * @return {object}
    */
   getBestRtcCallout_(rtcResponseArray) {
     if (!rtcResponseArray) {
@@ -234,7 +234,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   /**
    *
    * Modify the response from vendors to have one standard response
-   * @param {Object} vendorsResponses
+   * @param {object} vendorsResponses
    * @return {*}
    * @memberof AmpAdNetworkSmartadserverImpl
    */

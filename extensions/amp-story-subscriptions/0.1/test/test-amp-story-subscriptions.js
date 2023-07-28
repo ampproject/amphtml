@@ -2,7 +2,7 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 
-import {afterRenderPromise} from '#testing/helpers';
+import {afterRenderPromise, macroTask} from '#testing/helpers';
 
 import {getLocalizationService} from 'extensions/amp-story/1.0/amp-story-localization-service';
 import {AdvancementMode} from 'extensions/amp-story/1.0/story-analytics';
@@ -33,8 +33,6 @@ describes.realWin(
     let storeService;
     let storySubscriptions;
     let subscriptionService;
-
-    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     beforeEach(async () => {
       win = env.win;
@@ -203,7 +201,7 @@ describes.realWin(
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(false));
 
-      await nextTick();
+      await macroTask();
 
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
         SubscriptionsState.BLOCKED
@@ -215,7 +213,7 @@ describes.realWin(
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(true));
 
-      await nextTick();
+      await macroTask();
 
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
         SubscriptionsState.GRANTED
@@ -287,7 +285,7 @@ describes.realWin(
       buttonEl.click();
 
       doc.body.appendChild(<swg-popup-background></swg-popup-background>);
-      await nextTick();
+      await macroTask();
 
       const swgPopupBackgroundEl = doc.querySelector('swg-popup-background');
       expect(

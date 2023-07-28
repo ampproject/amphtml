@@ -33,7 +33,7 @@ export const VISITED_ATTR = 'i-amphtml-auto-lightbox-visited';
 /**
  * Types of document by LD+JSON schema `@type` field where auto-lightbox should
  * be enabled.
- * @private @const {!Object<string|undefined, boolean>}
+ * @private @const {!{[key: string|undefined]: boolean}}
  */
 export const ENABLED_LD_JSON_TYPES = {
   'Article': true,

@@ -20,7 +20,7 @@ export class IframeTransportClient {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {!Object<string, IframeTransportContext>} */
+    /** @private {!{[key: string]: IframeTransportContext}} */
     this.creativeIdToContext_ = {};
 
     const parsedFrameName = tryParseJson(this.win_.name);
@@ -161,7 +161,7 @@ export class IframeTransportContext {
 
   /**
    * Sends a response message back to the creative.
-   * @param {!Object<string, string>} data
+   * @param {!{[key: string]: string}} data
    */
   sendResponseToCreative(data) {
     this.iframeMessagingClient_./*OK*/ sendMessage(

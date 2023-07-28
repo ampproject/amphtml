@@ -18,7 +18,7 @@ export class BatchedXhr extends Xhr {
   constructor(win) {
     super(win);
 
-    /** @const {!Object<!Promise<!Response>>} */
+    /** @const {!{[key: string]: !Promise<!Response>}} */
     this.fetchPromises_ = map();
   }
 

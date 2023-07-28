@@ -14,7 +14,10 @@ import {Services} from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
+import {
+  AttributionReportingStatus,
+  isAttributionReportingAllowed,
+} from '#utils/privacy-sandbox-utils';
 
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
@@ -40,29 +43,19 @@ const TAG = 'amp-ad-exit';
  */
 let NavigationTargetDef;
 
-/**
- * Indicates the status of the `attribution-reporting` API.
- * @enum
- */
-const AttributionReportingStatus = {
-  ATTRIBUTION_MACRO_PRESENT: 4,
-  ATTRIBUTION_DATA_PRESENT: 5,
-  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 6,
-};
-
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /**
-     * @private @const {!Object<string, !NavigationTargetDef>}
+     * @private @const {!{[key: string]: !NavigationTargetDef}}
      */
     this.targets_ = {};
 
     /**
      * Maps variable target name to an actual target name.
-     * @private @const {!Object<string, string>}
+     * @private @const {!{[key: string]: string}}
      */
     this.variableTargets_ = {};
 
@@ -87,7 +80,7 @@ export class AmpAdExit extends AMP.BaseElement {
       ActionTrust_Enum.LOW
     );
 
-    /** @private @const {!Object<string, !Object<string, string>>} */
+    /** @private @const {!{[key: string]: !{[key: string]: string}}} */
     this.vendorResponses_ = {};
 
     /** @private {?function()} */
@@ -96,7 +89,7 @@ export class AmpAdExit extends AMP.BaseElement {
     /** @private {?string} */
     this.ampAdResourceId_ = null;
 
-    /** @private @const {!Object<string,string>} */
+    /** @private @const {!{[key: string]: string}} */
     this.expectedOriginToVendor_ = {};
 
     /** @private @const {boolean} */
@@ -190,7 +183,7 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object<string, string|number|boolean>} args
+   * @param {!{[key: string]: string|number|boolean}} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
    * @param {!NavigationTargetDef} target
    * @return {function(string): string}

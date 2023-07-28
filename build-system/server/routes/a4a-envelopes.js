@@ -1,5 +1,4 @@
 const express = require('express');
-const fetch = require('node-fetch');
 const fs = require('fs');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
@@ -122,14 +121,14 @@ function getInaboxUrl(req, extraExperiment) {
  * If the URL does not return text, returns null.
  * @param {string} template
  * @param {string} url
- * @param {Object} query
+ * @param {object} query
  * @return {!Promise<?string>}
  */
 async function requestFromUrl(template, url, query) {
   const response = await fetch(url);
   if (
     !response.headers.has('Content-Type') ||
-    response.headers.get('Content-Type').startsWith('text/html')
+    response.headers.get('Content-Type')?.startsWith('text/html')
   ) {
     return fillTemplate(template, url, query, await response.text());
   }
@@ -140,7 +139,7 @@ async function requestFromUrl(template, url, query) {
  * Fill out a template with some common variables.
  * @param {string} template
  * @param {string} url
- * @param {Object} query
+ * @param {object} query
  * @param {string=} body
  * @return {string}
  */

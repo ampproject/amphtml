@@ -167,12 +167,17 @@ example below.
 </amp-geo>
 ```
 
-#### U.S. Virginia Detection
+#### U.S. Virginia, Colorado, Connecticut Detection
 
 The `amp-geo` component provides the
 [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when it
-determines a request is from Virginia. The `us-va` (`${country}-${subdivision}` format) value from the
-list supports this feature.
+determines a request is from Virginia, Colorado, or Connecticut.
+The values are in a `${country}-${subdivision}` format and the following codes
+are supported.
+
+-   `us-co` - Colorado
+-   `us-ct` - Connecticut
+-   `us-va` - Virginia
 
 Additional countries/subdivision may be included with the preset list as in the `usWithSubdivisions`
 example below.
@@ -183,8 +188,10 @@ example below.
     {
       "ISOCountryGroups": {
         "usca": ["preset-us-ca"],
+        "usco":["us-co"],
+        "usct":["us-ct"],
         "usva":["us-va"],
-        "usWithSubdivisions": ["us-ca", "us-va"]
+        "usWithSubdivisions": ["us-ca", "us-co", "us-ct", "us-va"]
       }
     }
   </script>

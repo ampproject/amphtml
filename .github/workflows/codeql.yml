@@ -12,9 +12,6 @@ on:
 permissions:
   contents: read
 
-paths-ignore:
-  - 'extensions/**/test/**'
-
 jobs:
   analyze:
     name: Analyze
@@ -32,20 +29,21 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@6b3083af2869dc3314a0257a42f4af696cc79ba3 # v2.3.1
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Checkout repository
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@8662eabe0e9f338a07350b7fd050732745f93848 # v2.3.1
+        uses: github/codeql-action/init@1813ca74c3faaa3a2da2070b9b8a0b3e7373a0d8 # v2.21.0
         with:
+          config-file: ./.github/codeql/config.yml
           languages: ${{ matrix.language }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@8662eabe0e9f338a07350b7fd050732745f93848 # v2.3.1
+        uses: github/codeql-action/analyze@1813ca74c3faaa3a2da2070b9b8a0b3e7373a0d8 # v2.21.0
         with:
           category: '/language:${{matrix.language}}'

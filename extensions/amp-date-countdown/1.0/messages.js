@@ -9,7 +9,7 @@ export function getLocaleStrings(locale) {
 
 /**
  * Strings representing years, minutes, etc. in various locales
- * @type {Object<string, !Array<string>>}
+ * @type {{[key: string]: !Array<string>}}
  */
 const LOCALE_WORD = {
   'de': ['Jahren', 'Monaten', 'Tagen', 'Stunden', 'Minuten', 'Sekunden'],

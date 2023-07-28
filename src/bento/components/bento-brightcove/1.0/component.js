@@ -38,13 +38,13 @@ function BentoBrightcoveWithRef(props, ref) {
     autoplay,
     embed = DEFAULT,
     muted: mutedProp,
+    onLoad,
+    onPlayingState,
     player = DEFAULT,
     playlistId,
     referrer,
-    videoId,
-    onPlayingState,
     urlParams,
-    onLoad,
+    videoId,
     ...rest
   } = props;
 

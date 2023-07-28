@@ -19,7 +19,13 @@ const TAG = 'amp-ad-network-doubleclick-impl';
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
-/** @private {!Array<function(!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>):?Object<string,string>>} */
+/**
+ * @const {string}
+ * @visibleForTesting
+ */
+export const TFUA = 'tagForUnderAgeTreatment';
+
+/** @private {!Array<function(!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>):?{[key: string]: string}>} */
 const SRA_JOINERS = [
   combineInventoryUnits,
   getCookieOptOut,
@@ -29,7 +35,6 @@ const SRA_JOINERS = [
   isAdTest,
   getTargetingAndExclusions,
   getExperimentIds,
-  getIdentity,
   getForceSafeframe,
   getPageOffsets,
   getContainers,
@@ -38,7 +43,7 @@ const SRA_JOINERS = [
 
 /**
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {!Object<string, *>}
+ * @return {!{[key: string]: *}}
  */
 export function constructSRABlockParameters(impls) {
   const parameters = {'output': 'ldjh', 'impl': 'fifs'};
@@ -73,7 +78,7 @@ function getFirstInstanceValue_(impls, extractFn) {
  * Example: /123/foo/bar and /blah/foo/bar/123 =>
  *    iu_parts=123,foo,bar,blah & enc_prev_ius=/0/1/2,/3/1/2/0
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function combineInventoryUnits(impls) {
@@ -110,7 +115,7 @@ export function combineInventoryUnits(impls) {
  * Indicates SRA request is cookie opt out if any of the blocks includes
  * cookie opt out in targeting.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getCookieOptOut(impls) {
@@ -124,7 +129,7 @@ export function getCookieOptOut(impls) {
 /**
  * Combine ad unit key of each block via comma separated values.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getAdks(impls) {
@@ -134,7 +139,7 @@ export function getAdks(impls) {
 /**
  * Combine block sizes via comma separated values.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getSizes(impls) {
@@ -147,7 +152,7 @@ export function getSizes(impls) {
  * Indicate SRA request is tagForChildDirectedTreatment if any blocks includes
  * in targeting.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getTfcd(impls) {
@@ -162,7 +167,7 @@ export function getTfcd(impls) {
  * Indicate SRA request should include adtest=on if any block includes the
  * manual experiment id.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function isAdTest(impls) {
@@ -176,7 +181,7 @@ export function isAdTest(impls) {
  * a given block is separated by =) and exclusions are given special excl_cat
  * key (list of categories are comma separated).
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getTargetingAndExclusions(impls) {
@@ -239,7 +244,7 @@ export function getTargetingAndExclusions(impls) {
  * the unique set of experiment ids which are comma separated (order does not
  * matter).
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getExperimentIds(impls) {
@@ -257,22 +262,11 @@ export function getExperimentIds(impls) {
 }
 
 /**
- * Identity token is page level therefore SRA uses the value of the first
- * block.
- * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
- * @visibleForTesting
- */
-export function getIdentity(impls) {
-  return getFirstInstanceValue_(impls, (impl) => impl.buildIdentityParams());
-}
-
-/**
  * Combine force safeframe values for each block via comma separated numeric
  * values based on boolean value (e.g. false = 0, true = 1).  If none of the
  * blocks has force safeframe, parameter is not included in SRA request.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getForceSafeframe(impls) {
@@ -289,7 +283,7 @@ export function getForceSafeframe(impls) {
  * Combine page offset info for each block by constructing separate parameter
  * for left (adxs) and top (adyx) via comma separated.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getPageOffsets(impls) {
@@ -308,7 +302,7 @@ export function getPageOffsets(impls) {
  * separator (as block can have multiple values that are comma separated).  If
  * none of the blocks have a container, then parameter is not sent.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getContainers(impls) {
@@ -325,7 +319,7 @@ export function getContainers(impls) {
 /**
  * Combine fluid settings for each block via comma separator.
  * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
- * @return {?Object<string,string>}
+ * @return {?{[key: string]: string}}
  * @visibleForTesting
  */
 export function getIsFluid(impls) {
@@ -343,9 +337,9 @@ export function getIsFluid(impls) {
 }
 
 /**
- * @param {?Object<string, (!Array<string>|string)>} targeting
+ * @param {?{[key: string]: (!Array<string>|string)}} targeting
  * @param {?(!Array<string>|string)} categoryExclusions
- * @param {?Object<string, (!Array<string>|string)>} commonTargeting
+ * @param {?{[key: string]: (!Array<string>|string)}} commonTargeting
  * @return {?string}
  */
 export function serializeTargeting(
@@ -385,7 +379,7 @@ function serializeItem_(key, value) {
  * such that sendXhrRequest is resolved from standard A4A flow.  Done boolean
  * used to verify array of resolvers is empty once all results are returned.
  * @param {string} creative
- * @param {!Object<string,string>} headersObj
+ * @param {!{[key: string]: string}} headersObj
  * @param {boolean} done
  * @param {!Array<function(?Response)>} sraRequestAdUrlResolvers
  * @param {string} sraUrl url of SRA request for error reporting
@@ -463,7 +457,7 @@ export function sraBlockCallbackHandler(
  * converts them back to the orginal stringified version.
  * TODO above indicates this might get fixed upstream at some point.
  * @param {!Object} headersObj
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function stringifyHeaderValues(headersObj) {
   return Object.keys(headersObj).reduce((stringifiedHeaders, headerName) => {

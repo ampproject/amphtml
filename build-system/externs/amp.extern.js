@@ -885,7 +885,7 @@ let BindExpressionResultDef;
 
 /**
  * Structured cloneable return value for 'bind.evaluateBindings' API.
- * @typedef {{results: !Object<string, BindExpressionResultDef>, errors: !Object<string, !BindEvaluatorErrorDef>}}
+ * @typedef {{results: !{[key: string]: BindExpressionResultDef}, errors: !{[key: string]: !BindEvaluatorErrorDef}}}
  */
 let BindEvaluateBindingsResultDef;
 
@@ -969,7 +969,7 @@ let WebCompAnimationDef;
 let WebKeyframeAnimationDef;
 
 /**
- * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
+ * @typedef {!{[key: string]: *}|!Array<!{[key: string]: *}>}
  */
 let WebKeyframesDef;
 
@@ -995,7 +995,7 @@ let WebAnimationTimingDef;
  * specified as properties with the name in the format of `--varName`.
  *
  * @mixin
- * @typedef {Object}
+ * @typedef {object}
  */
 let WebAnimationVarsDef;
 

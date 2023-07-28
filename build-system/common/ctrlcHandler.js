@@ -38,9 +38,13 @@ exports.createCtrlcHandler = function (command, pid = process.pid) {
     trap 'ctrlcHandler' INT
     read _ # Waits until the process is terminated
   `;
-  return execScriptAsync(listenerCmd, {
+  const {pid: handlerPid} = execScriptAsync(listenerCmd, {
     'stdio': [null, process.stdout, process.stderr],
-  }).pid;
+  });
+  if (!handlerPid) {
+    throw new Error(`Failed to create ctrlcHandler for ${command}`);
+  }
+  return handlerPid;
 };
 
 /**

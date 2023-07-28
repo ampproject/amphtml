@@ -343,6 +343,14 @@
   "navegg": {
     "pageview": "https://amp.navdmp.com/amp?aid=_client_id(navegg_id)_&url=_canonical_url_&ref=_document_referrer_&tit=_title_&lan=_browser_language_&acc=!account&v=7"
   },
+  "neodata": {
+    "base": "https://tra.neodatagroup.com",
+    "sysId": "999",
+    "tagId": "12321",
+    "advId": "56785",
+    "pageview": "https://tra.neodatagroup.com/pv?sid=!sysId&rnd=_random_&id=!tagId&ad=!advId&rs=_screen_width_x_screen_height_&lg=_browser_language_&tz=_timezone_&re=_document_referrer_&co=_screen_color_depth_&ur=_ampdoc_url_",
+    "cmDbm": "https://cm.g.doubleclick.net/pixel?google_nid=neodata_dmp&google_cm&pv=dbm&sid=!sysId&rt=img&rnd=_random_"
+  },
   "newrelic": {
     "pageview": "https://bam.nr-data.net/amp?appId=!appId&licenseKey=!licenseKey&ampUrl=_ampdoc_url_&canonicalUrl=_canonical_url_&timeToDomContentLoadedEventEnd=_nav_timing(domContentLoadedEventEnd)_&timeToDomInteractive=_nav_timing(domInteractive)_&timeToDomComplete=_nav_timing(domComplete)_&timeToDomLoading=_nav_timing(domLoading)_&timeToResponseStart=_nav_timing(responseStart)_&timeToResponseEnd=_nav_timing(responseEnd)_&timeToLoadEventStart=_nav_timing(loadEventStart)_&timeToLoadEventEnd=_nav_timing(loadEventEnd)_&timeToConnectStart=_nav_timing(connectStart)_&timeToConnectEnd=_nav_timing(connectEnd)_&timeToFetchStart=_nav_timing(fetchStart)_&timeToRequestStart=_nav_timing(requestStart)_&timeToUnloadEventStart=_nav_timing(unloadEventStart)_&timeToUnloadEventEnd=_nav_timing(unloadEventEnd)_&timeToDomainLookupStart=_nav_timing(domainLookupStart)_&timeToDomainLookupEnd=_nav_timing(domainLookupEnd)_&timeToRedirectStart=_nav_timing(redirectStart)_&timeToRedirectEnd=_nav_timing(redirectEnd)_&timeToSecureConnection=_nav_timing(secureConnectionStart)_&timestamp=_timestamp_&ampVersion=_amp_version_&pageLoadTime=_page_load_time_"
   },

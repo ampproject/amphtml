@@ -6,7 +6,7 @@ const {getUnminifiedConfig} = require('./unminified-config');
 
 /**
  * @param {!Object} config
- * @return {Object}
+ * @return {object}
  */
 function mergeReactBabelConfig(config) {
   const rootDir = path.join(__dirname, '../../');

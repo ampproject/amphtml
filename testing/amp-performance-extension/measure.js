@@ -1,5 +1,5 @@
 let cumulativeLayoutShift, largestContentfulPaint, longTasks;
-let measureStarted;
+let measureStarted; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 function renderMeasurement(container, label, count) {
   container./*OK*/ innerHTML += `<div class='i-amphtml-performance-line'>
@@ -60,7 +60,7 @@ function measureLongTasks() {
 }
 
 function measureTimeToInteractive() {
-  measureStarted = Date.now(); // eslint-disable-line @typescript-eslint/no-unused-vars
+  measureStarted = Date.now();
 }
 
 function getMaxFirstInputDelay(firstContentfulPaint) {

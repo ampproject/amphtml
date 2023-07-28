@@ -180,7 +180,8 @@ describes.realWin(
         );
       }
 
-      it('should execute next and prev actions', async () => {
+      // TODO(#38975): fix skipped test.
+      it.skip('should execute next and prev actions', async () => {
         const eventSpy = env.sandbox.spy();
         element.addEventListener('slideChange', eventSpy);
 

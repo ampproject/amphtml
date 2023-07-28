@@ -112,10 +112,10 @@ describes.realWin(
     }
 
     async function getGallery({
-      slideCount = 5,
-      customArrows = false,
-      width,
       attrs = {},
+      customArrows = false,
+      slideCount = 5,
+      width,
     } = {}) {
       const el = doc.createElement('amp-stream-gallery');
       el.setAttribute('layout', 'fixed');

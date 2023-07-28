@@ -7,7 +7,7 @@ import {
 import {parseJson} from '#core/types/object/json';
 
 /**
- * @const {Object<string, string>}
+ * @const {{[key: string]: string}}
  */
 const ADO_JS_PATHS = {
   'sync': '/files/js/ado.js',
@@ -25,7 +25,7 @@ function isFalseString(str) {
 /**
  * @param {string} mode
  * @param {!Window} global
- * @param {Object} consent
+ * @param {object} consent
  */
 function setupAdoConfig(mode, global, consent) {
   if (global['ado']) {
@@ -208,7 +208,7 @@ function requestCodes(masterId, data, global, callback) {
 class AdoBuffer {
   /**
    *
-   * @param {Object} container
+   * @param {object} container
    * @param {!Window} global
    */
   constructor(container, global) {

@@ -1,3 +1,4 @@
+import {Deferred} from '#core/data-structures/promise';
 import * as Preact from '#core/dom/jsx';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
@@ -35,10 +36,10 @@ describes.realWin(
       doc = win.document;
 
       const storyEl = (
-        <amp-story>
+        <amp-story style="--story-audio-sticker-outline-color:rgb(0, 200, 0)">
           <amp-story-page id="page-1">
             <amp-story-grid-layer>
-              <amp-story-audio-sticker></amp-story-audio-sticker>
+              <amp-story-audio-sticker sticker-style="outline"></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
           <amp-story-page id="page-2">
@@ -46,6 +47,7 @@ describes.realWin(
               <amp-story-audio-sticker></amp-story-audio-sticker>
             </amp-story-grid-layer>
           </amp-story-page>
+          <div class="i-amphtml-system-layer-host"></div>
         </amp-story>
       );
       doc.body.appendChild(storyEl);
@@ -129,7 +131,8 @@ describes.realWin(
         storeService.dispatch(Action.TOGGLE_MUTED, true);
         await nextTick();
 
-        // Wait until the animation is finished to check the opacitiy value.
+        // Wait until the animation is finished to check the opacity value.
+        const deferred = new Deferred();
         setTimeout(() => {
           doc
             .querySelectorAll('.i-amphtml-amp-story-audio-sticker-tap-hint')
@@ -138,7 +141,8 @@ describes.realWin(
                 '1'
               )
             );
-        }, 500);
+          deferred.resolve();
+        }, 750);
 
         doc.querySelectorAll('amp-story-audio-sticker-pretap').forEach((el) => {
           expect(computedStyle(win, el).getPropertyValue('opacity')).equal('1');
@@ -150,6 +154,7 @@ describes.realWin(
               '0'
             )
           );
+        return deferred.promise;
       });
     });
 
@@ -172,6 +177,20 @@ describes.realWin(
         }
         expect(computedStyle(win, el).getPropertyValue('opacity')).equal('0');
       });
+    });
+
+    it('should override the default style color if the custom color is in valid RGB/RGBA format ', async () => {
+      await stickerImpl.layoutCallback();
+      await nextTick();
+
+      const stickerWithOutline = doc.querySelector(
+        'amp-story-audio-sticker[sticker-style="outline"]'
+      );
+      expect(
+        computedStyle(win, stickerWithOutline).getPropertyValue(
+          '--story-audio-sticker-outline-color'
+        )
+      ).equal('rgb(0, 200, 0)');
     });
   }
 );

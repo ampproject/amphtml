@@ -63,7 +63,7 @@ export class ConsentStateManager {
     /** @private {?function()} */
     this.consentReadyResolver_ = null;
 
-    /** @private {Object<string, PURPOSE_CONSENT_STATE>|undefined} */
+    /** @private {{[key: string]: PURPOSE_CONSENT_STATE}|undefined} */
     this.purposeConsents_ = undefined;
 
     const allPurposeConsentsDeferred = new Deferred();
@@ -141,7 +141,7 @@ export class ConsentStateManager {
   /**
    * Update our current purposeConsents, that will be
    * used in subsequent calls to update().
-   * @param {!Object<string, boolean>} purposeMap
+   * @param {!{[key: string]: boolean}} purposeMap
    * @param {boolean} defaultsOnly
    */
   updateConsentInstancePurposes(purposeMap, defaultsOnly = false) {
@@ -357,7 +357,7 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
-   * @param {Object<string, PURPOSE_CONSENT_STATE>=} purposeConsents
+   * @param {{[key: string]: PURPOSE_CONSENT_STATE}=} purposeConsents
    * @param {ConsentMetadataDef=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */

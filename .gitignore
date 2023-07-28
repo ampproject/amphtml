@@ -27,8 +27,6 @@ firebase.json
 .*cache
 .amp-dep-check
 build
-build-system/tasks/performance/cache
-build-system/tasks/performance/results.json
 dist
 dist.3p
 dist.tools

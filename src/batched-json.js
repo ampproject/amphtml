@@ -49,10 +49,10 @@ export const UrlReplacementPolicy_Enum = {
 export function batchFetchJsonFor(ampdoc, element, options = {}) {
   const {
     expr = '.',
-    urlReplacement = UrlReplacementPolicy_Enum.NONE,
     refresh = false,
-    xssiPrefix = undefined,
     url = element.getAttribute('src'),
+    urlReplacement = UrlReplacementPolicy_Enum.NONE,
+    xssiPrefix = undefined,
   } = options;
   assertHttpsUrl(url, element);
   const xhr = Services.batchedXhrFor(ampdoc.win);

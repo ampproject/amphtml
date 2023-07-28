@@ -18,6 +18,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {createCustomEvent} from '#utils/event-helper';
 
 import {FakePerformance} from '#testing/fake-dom';
+import {macroTask} from '#testing/helpers';
 import {whenCalled} from '#testing/helpers/service';
 
 /**
@@ -989,10 +990,6 @@ describes.sandboxed('Multiple handlers action method', {}, (env) => {
     expect(onEnqueue1).to.not.have.been.called;
     expect(xyz).to.not.have.been.called;
     expect(onEnqueue2).to.not.have.been.called;
-
-    // Invocation of chained actions are branched on promiseAbc/promiseXyz,
-    // so wait for macro-task to ensure all queued promises are resolved.
-    const macroTask = () => new Promise((resolve) => setTimeout(resolve, 0));
 
     resolveAbc();
     return macroTask()

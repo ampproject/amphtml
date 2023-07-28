@@ -111,7 +111,7 @@ function removeFromExperimentsConfig(id, removedFromConfig) {
 }
 
 /**
- * @param {!Object<string, *>} config
+ * @param {!{[key: string]: *}} config
  * @param {string} path
  * @param {string} id
  * @return {Array<string>} modified files
@@ -347,13 +347,13 @@ function summaryCommitMessage({
 }
 
 /**
- * @param {!Object<string, *>} prodConfig
- * @param {!Object<string, *>} canaryConfig
+ * @param {!{[key: string]: *}} prodConfig
+ * @param {!{[key: string]: *}} canaryConfig
  * @param {string} cutoffDateFormatted
  * @param {string=} removeExperiment
  * @return {{
- *   include?: Object<string, {percentage: number, previousHistory: Array}>,
- *   exclude?: Object<string, {percentage: number, previousHistory: Array}>
+ *   include?: {[key: string]: {percentage: number, previousHistory: Array}},
+ *   exclude?: {[key: string]: {percentage: number, previousHistory: Array}}
  * }}
  */
 function collectWork(
@@ -373,16 +373,16 @@ function collectWork(
       removeExperiment,
       percentage
     );
-    /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
+    /** @type {{[key: string]: {percentage: number, previousHistory: Array}}} */
     const entries = {[removeExperiment]: {percentage, previousHistory}};
     return isSpecialCannotBeRemoved(removeExperiment)
       ? {exclude: entries}
       : {include: entries};
   }
 
-  /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
+  /** @type {{[key: string]: {percentage: number, previousHistory: Array}}} */
   const include = {};
-  /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
+  /** @type {{[key: string]: {percentage: number, previousHistory: Array}}} */
   const exclude = {};
   for (const [experiment, percentage] of Object.entries(prodConfig)) {
     if (

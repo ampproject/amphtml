@@ -144,7 +144,7 @@ export const LocalizedStringId_Enum = {
 export let LocalizedStringDef;
 
 /**
- * @typedef {!Object<!LocalizedStringId_Enum, !LocalizedStringDef>}
+ * @typedef {!{[key: !LocalizedStringId_Enum]: !LocalizedStringDef}}
  */
 export let LocalizedStringBundleDef;
 

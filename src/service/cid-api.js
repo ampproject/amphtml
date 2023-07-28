@@ -42,7 +42,7 @@ export class GoogleCidApi {
     this.timer_ = Services.timerFor(this.win_);
 
     /**
-     * @private {!Object<string, !Promise<?string>>}
+     * @private {!{[key: string]: !Promise<?string>}}
      */
     this.cidPromise_ = {};
 

@@ -219,7 +219,7 @@ export class IframeMessagingClient {
 
   /**
    * @param {string} messageType
-   * @param {Object} message
+   * @param {object} message
    */
   fireObservable_(messageType, message) {
     if (messageType in this.observableFor_) {

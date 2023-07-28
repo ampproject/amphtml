@@ -5,6 +5,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {
   getDeterministicOuterHTML,
   hypenCaseToCamelCase,
+  sleep,
 } from '#testing/helpers';
 
 import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
@@ -148,11 +149,7 @@ describes.realWin(
 
       // Wait for the resizeObserver recognize the changes
       // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 90);
-      });
+      await sleep(90);
       // Verify that layoutCallback calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
       updateFontSizeSpy.resetHistory();
@@ -164,11 +161,7 @@ describes.realWin(
 
       // Wait for the resizeObserver recognize the changes
       // 90ms chosen so that the wait is less than the throttle value for the ResizeObserver.
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 90);
-      });
+      await sleep(90);
       // Verify that the ResizeObserver calls updateFontSize.
       expect(updateFontSizeSpy).to.be.calledOnce;
     });

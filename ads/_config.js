@@ -46,7 +46,7 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  * }
  *
- * @const {!Object<string, !JsonObject>}
+ * @const {!{[key: string]: !JsonObject}}
  */
 const adConfig = jsonConfiguration({
   '_ping_': {
@@ -238,6 +238,11 @@ const adConfig = jsonConfiguration({
       'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
+  },
+
+  'adsviu': {
+    prefetch: 'https://widget.adsviu.com/adsviuAMP.js',
+    preconnect: ['https://api.adsviu.com'],
   },
 
   'adunity': {
@@ -535,6 +540,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'fairground': {},
+
   'fake': {},
 
   'fake-delayed': {
@@ -645,6 +652,11 @@ const adConfig = jsonConfiguration({
   },
   'improvedigital': {},
 
+  'incrementx': {
+    prefetch: 'https://cdn.incrementxserv.com/ixamp.js',
+    renderStartImplemented: true,
+  },
+
   'industrybrains': {
     prefetch: 'https://web.industrybrains.com/js/ads/async/show.js',
     preconnect: [
@@ -674,7 +686,6 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
     preconnect: [
       'https://tpc.googlesyndication.com',
-      'https://adservice.google.com',
       'https://cdn.insurads.com',
       'https://services.insurads.com',
       'https://messaging.insurads.com',
@@ -792,7 +803,6 @@ const adConfig = jsonConfiguration({
       'https://marfeel-d.openx.net',
       'https://ice.360yield.com',
       'https://mbid.marfeelrev.com',
-      'https://adservice.google.com',
     ],
     consentHandlingOverride: true,
   },
@@ -1037,6 +1047,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pubscale': {
+    renderStartImplemented: true,
+  },
+
   'puffnetwork': {
     prefetch: 'https://static.puffnetwork.com/amp_ad.js',
     renderStartImplemented: true,
@@ -1186,6 +1200,10 @@ const adConfig = jsonConfiguration({
 
   'sklik': {
     prefetch: 'https://c.imedia.cz/js/amp.js',
+  },
+
+  'skoiy': {
+    preconnect: ['https://svas.skoiy.xyz'],
   },
 
   'slimcutmedia': {
