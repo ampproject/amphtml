@@ -1243,6 +1243,22 @@ for (const {config, name} of [
             expect(url).to.match(/(\?|&)tfcd=0(&|$)/);
           });
         });
+
+        it('default tfcd/tfua to 1 if conflicting data detected', () => {
+          element.setAttribute(
+            'json',
+            '{"tagForChildDirectedTreatment": 0,"tagForUnderAgeTreatment": 1}'
+          );
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 0,
+            'doubleclick-tfcd': 1,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+          });
+        });
       });
 
       describe('#getPageParameters', () => {

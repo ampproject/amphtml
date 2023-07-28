@@ -653,8 +653,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
           ? consentString
           : null,
-      'tfcd': tfcdFromSharedData ?? tfcdFromJson ?? null,
-      'tfua': tfuaFromSharedData ?? tfuaFromJson ?? null,
+      'tfcd': combineConsentParams(tfcdFromSharedData, tfcdFromJson),
+      'tfua': combineConsentParams(tfuaFromSharedData, tfuaFromJson),
     };
   }
 
@@ -2057,4 +2057,22 @@ export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
  */
 export function resetTokensToInstancesMap() {
   tokensToInstances = {};
+}
+
+/**
+ * Function to handle the three-state boolean logic of tfcd/tfua params.
+ * - If any params are 1, return 1.
+ * - Else if any of them are 0, return 0.
+ * - Else return null
+ * @param {?number} param1
+ * @param {?number} param2
+ * @return {?string}
+ */
+function combineConsentParams(param1, param2) {
+  if (String(param1) === '1' || String(param2) === '1') {
+    return '1';
+  } else if (String(param1) === '0' || String(param2) === '0') {
+    return '0';
+  }
+  return null;
 }
