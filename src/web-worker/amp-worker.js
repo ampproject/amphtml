@@ -83,7 +83,10 @@ class AmpWorker {
 
         if (
           (regexURL.test(url) || getMode().test) &&
-          (url.slice(-5) === 'ww.js' || url.slice(-9) === 'ww.min.js')
+          (url.slice(-5) === 'ww.js' ||
+            url.slice(-9) === 'ww.min.js' ||
+            url.slice(-6) === 'ww.mjs' ||
+            url.slice(-10) === 'ww.min.mjs')
         ) {
           return url;
         } else {
