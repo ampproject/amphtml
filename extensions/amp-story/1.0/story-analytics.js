@@ -132,7 +132,7 @@ export class StoryAnalyticsService {
     this.incrementPageEventCount_(eventType);
 
     getAmpdoc(this.element_)
-      .whenFirstVisible()
+      .whenNextVisible()
       .then(() =>
         triggerAnalyticsEvent(
           this.element_,
