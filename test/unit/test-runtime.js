@@ -1868,64 +1868,52 @@ describes.realWin(
           };
         }
 
-        it.configure()
-          .skipFirefox()
-          .run('should broadcast to all but sender', () => {
-            doc1.viewer.broadcast({test: 1});
-            return doc1.viewer
-              .sendMessageAwaitResponse('ignore', {})
-              .then(() => {
-                // Sender is not called.
-                expect(doc1.broadcastReceived).to.not.be.called;
+        it('should broadcast to all but sender', () => {
+          doc1.viewer.broadcast({test: 1});
+          return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
+            // Sender is not called.
+            expect(doc1.broadcastReceived).to.not.be.called;
 
-                // All others are called.
-                expect(doc2.broadcastReceived).to.be.calledOnce;
-                expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
-                expect(doc3.broadcastReceived).to.be.calledOnce;
-                expect(doc3.broadcastReceived.args[0][0]).deep.equal({test: 1});
+            // All others are called.
+            expect(doc2.broadcastReceived).to.be.calledOnce;
+            expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
+            expect(doc3.broadcastReceived).to.be.calledOnce;
+            expect(doc3.broadcastReceived.args[0][0]).deep.equal({test: 1});
 
-                // None of the onMessage are called.
-                expect(doc1.onMessage).to.not.be.called;
-                expect(doc2.onMessage).to.not.be.called;
-                expect(doc3.onMessage).to.not.be.called;
-              });
+            // None of the onMessage are called.
+            expect(doc1.onMessage).to.not.be.called;
+            expect(doc2.onMessage).to.not.be.called;
+            expect(doc3.onMessage).to.not.be.called;
           });
+        });
 
-        it.configure()
-          .skipFirefox()
-          .run('should stop broadcasting after close', () => {
-            doc3.amp.close();
-            doc1.viewer.broadcast({test: 1});
-            return doc1.viewer
-              .sendMessageAwaitResponse('ignore', {})
-              .then(() => {
-                // Sender is not called, closed is not called.
-                expect(doc1.broadcastReceived).to.not.be.called;
-                expect(doc3.broadcastReceived).to.not.be.called;
+        it('should stop broadcasting after close', () => {
+          doc3.amp.close();
+          doc1.viewer.broadcast({test: 1});
+          return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
+            // Sender is not called, closed is not called.
+            expect(doc1.broadcastReceived).to.not.be.called;
+            expect(doc3.broadcastReceived).to.not.be.called;
 
-                // All others are called.
-                expect(doc2.broadcastReceived).to.be.calledOnce;
-                expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
-              });
+            // All others are called.
+            expect(doc2.broadcastReceived).to.be.calledOnce;
+            expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
           });
+        });
 
-        it.configure()
-          .skipFirefox()
-          .run('should stop broadcasting after force-close', () => {
-            doc3.hostElement.parentNode.removeChild(doc3.hostElement);
-            doc1.viewer.broadcast({test: 1});
-            return doc1.viewer
-              .sendMessageAwaitResponse('ignore', {})
-              .then(() => {
-                // Sender is not called, closed is not called.
-                expect(doc1.broadcastReceived).to.not.be.called;
-                expect(doc3.broadcastReceived).to.not.be.called;
+        it('should stop broadcasting after force-close', () => {
+          doc3.hostElement.parentNode.removeChild(doc3.hostElement);
+          doc1.viewer.broadcast({test: 1});
+          return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
+            // Sender is not called, closed is not called.
+            expect(doc1.broadcastReceived).to.not.be.called;
+            expect(doc3.broadcastReceived).to.not.be.called;
 
-                // All others are called.
-                expect(doc2.broadcastReceived).to.be.calledOnce;
-                expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
-              });
+            // All others are called.
+            expect(doc2.broadcastReceived).to.be.calledOnce;
+            expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
           });
+        });
 
         it('should send message', () => {
           doc1.onMessage.returns(Promise.resolve());

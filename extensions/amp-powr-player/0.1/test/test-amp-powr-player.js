@@ -4,7 +4,6 @@ import {listenOncePromise} from '#utils/event-helper';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {VideoEvents_Enum} from '../../../../src/video-interface';
 
-// TODO(#38975): fix all skipped tests in this file.
 describes.realWin(
   'amp-powr-player',
   {
@@ -50,7 +49,7 @@ describes.realWin(
       });
     }
 
-    it.skip('renders', () => {
+    it('renders', () => {
       return getPowrPlayer({
         'data-account': '945',
         'data-player': '1',
@@ -66,7 +65,7 @@ describes.realWin(
       });
     });
 
-    it.skip('renders responsively', () => {
+    it('renders responsively', () => {
       return getPowrPlayer(
         {
           'data-account': '945',
@@ -81,14 +80,14 @@ describes.realWin(
       });
     });
 
-    it.skip('requires data-account', () => {
+    it('requires data-account', () => {
       expectAsyncConsoleError(/The data-account attribute is required for/, 1);
       return getPowrPlayer({}).should.eventually.be.rejectedWith(
         /The data-account attribute is required for/
       );
     });
 
-    it.skip('requires data-player', () => {
+    it('requires data-player', () => {
       expectAsyncConsoleError(/The data-player attribute is required for/, 1);
       return getPowrPlayer({
         'data-account': '945',
@@ -97,7 +96,7 @@ describes.realWin(
       );
     });
 
-    it.skip('removes iframe after unlayoutCallback', async () => {
+    it('removes iframe after unlayoutCallback', async () => {
       const bc = await getPowrPlayer(
         {
           'data-account': '945',
@@ -114,7 +113,7 @@ describes.realWin(
       expect(obj.iframe_).to.be.null;
     });
 
-    it.skip('should pass data-param-* attributes to the iframe src', () => {
+    it('should pass data-param-* attributes to the iframe src', () => {
       return getPowrPlayer({
         'data-account': '945',
         'data-player': '1',
@@ -122,12 +121,12 @@ describes.realWin(
         'data-param-foo': 'bar',
       }).then((bc) => {
         const iframe = bc.querySelector('iframe');
-        const params = parseUrlDeprecated(iframe.src).search.split.skip('&');
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
         expect(params).to.contain('foo=bar');
       });
     });
 
-    it.skip('should propagate mutated attributes', () => {
+    it('should propagate mutated attributes', () => {
       return getPowrPlayer({
         'data-account': '945',
         'data-player': '1',
@@ -156,7 +155,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should pass referrer', () => {
+    it('should pass referrer', () => {
       return getPowrPlayer({
         'data-account': '945',
         'data-player': '1',
@@ -169,7 +168,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should force playsinline', () => {
+    it('should force playsinline', () => {
       return getPowrPlayer({
         'data-account': '945',
         'data-player': '1',
@@ -182,7 +181,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should forward events', () => {
+    it('should forward events', () => {
       return getPowrPlayer({
         'data-account': '945',
         'data-player': '1',

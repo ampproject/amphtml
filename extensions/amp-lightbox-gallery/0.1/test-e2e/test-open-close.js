@@ -26,8 +26,7 @@ describes.endtoend(
 
     // TODO(sparhami) Cover swipe to dismiss if possible.
     // TODO(sparhami) Test basic transition to gallery and back.
-    // TODO(#28948) fix this flaky test.
-    it.skip('should open/close lightbox', async () => {
+    it('should open/close lightbox', async () => {
       // First open the gallery.
       const firstAmpImg = await controller.findElement('amp-img');
       await controller.click(firstAmpImg);

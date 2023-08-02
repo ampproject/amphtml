@@ -1059,8 +1059,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         (headerVal) => {
-          // TODO(wg-monetization, #25690): Fails on CI.
-          it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
+          it(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = env.sandbox.stub(dev(), 'error');
             // Make sure there's no signature, so that we go down the 3p
             // iframe path.
