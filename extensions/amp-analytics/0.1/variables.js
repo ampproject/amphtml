@@ -351,6 +351,10 @@ export class VariableService {
             Services.performanceFor(this.ampdoc_.win).getMetric(
               TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT
             ),
+          'INTERACTION_TO_NEXT_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel_Enum.INTERACTION_TO_NEXT_PAINT
+            ),
         };
     const merged = {
       ...this.macros_,

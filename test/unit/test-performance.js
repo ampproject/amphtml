@@ -254,7 +254,7 @@ describes.realWin('performance', {amp: true}, (env) => {
             value: 100,
           });
 
-          expect(flushSpy).to.have.callCount(5);
+          expect(flushSpy).to.have.callCount(6);
           expect(perf.events_.length).to.equal(0);
         });
       });
@@ -284,9 +284,9 @@ describes.realWin('performance', {amp: true}, (env) => {
           perf.coreServicesAvailable(),
           ampdoc.whenFirstVisible(),
         ]).then(() => {
-          expect(flushSpy).to.have.callCount(4);
+          expect(flushSpy).to.have.callCount(5);
           expect(perf.isMessagingReady_).to.be.false;
-          const count = 5;
+          const count = 6;
           expect(perf.events_.length).to.equal(count);
         });
       });
@@ -427,6 +427,12 @@ describes.realWin('performance', {amp: true}, (env) => {
           });
           expect(
             viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
+          ).to.be.jsonEqual({
+            label: 'inp',
+            delta: 0,
+          });
+          expect(
+            viewerSendMessageStub.withArgs('tick').getCall(5).args[1]
           ).to.be.jsonEqual({
             label: 'msr',
             delta: 1,
@@ -1363,6 +1369,136 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         {
           label: 'responseStart',
           delta: 7,
+        },
+      ]);
+    });
+  });
+
+  describe('forwards INP metrics', () => {
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+      PerformanceObserverStub.callsFake((callback) => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+    });
+
+    it('after performance service registered', () => {
+      // Pretend that the Navigation API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['event'];
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+      perf.ampdoc_ = env.ampdoc;
+      perf.registerPerformanceObserver_();
+
+      // Fake interaction events.
+      perf.tickInteractionToNextPaint_(38);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(380);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(30);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
+        },
+      ]);
+    });
+  });
+
+  describe('forwards INP metrics', () => {
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+      PerformanceObserverStub.callsFake((callback) => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+    });
+
+    it('after performance service registered', () => {
+      // Pretend that the Navigation API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['event'];
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+      perf.ampdoc_ = env.ampdoc;
+      perf.registerPerformanceObserver_();
+
+      // Fake interaction events.
+      perf.tickInteractionToNextPaint_(38);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(380);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(30);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
         },
       ]);
     });

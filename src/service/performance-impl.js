@@ -228,6 +228,18 @@ export class Performance {
      */
     this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
+    /**
+     * Whether the user agent supports the interaction to next paint metric.
+     */
+    this.supportsEvents_ = supportedEntryTypes.includes('event');
+
+    if (!this.supportsEvents_) {
+      this.metrics_.rejectSignal(
+        TickLabel_Enum.INTERACTION_TO_NEXT_PAINT,
+        dev().createExpectedError('Interaction to next paint not supported')
+      );
+    }
+
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -241,6 +253,10 @@ export class Performance {
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
+
+    whenDocumentComplete(win.document).then(() =>
+      this.tickInteractionToNextPaint_(0)
+    );
     this.registerPerformanceObserver_();
 
     /**
@@ -430,6 +446,8 @@ export class Performance {
           'responseStart',
         ].forEach((label) => this.tick(label, entry[label]));
         recordedNavigation = true;
+      } else if (entry.entryType == 'event' && entry.interactionId) {
+        this.tickInteractionToNextPaint_(entry.duration);
       }
     };
 
@@ -469,6 +487,14 @@ export class Performance {
       // that will say it supports navigation but throws.
       this.createPerformanceObserver_(processEntry, {
         type: 'navigation',
+        buffered: true,
+      });
+    }
+
+    if (this.supportsEvents_) {
+      this.createPerformanceObserver_(processEntry, {
+        type: 'event',
+        durationThreshold: 16, // Minimim duration of 16ms, as provided by the spec
         buffered: true,
       });
     }
@@ -613,6 +639,25 @@ export class Performance {
       this.metrics_.reset(TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION);
       this.tickDelta(TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT, sum);
       this.tickDelta(TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
+      this.flush();
+    }
+  }
+
+  /**
+   * Record the interaction to next paint score.
+   * @param {number=} duration
+   */
+  tickInteractionToNextPaint_(duration) {
+    if (!this.ampdoc_) {
+      return;
+    }
+
+    const old = this.metrics_.get(TickLabel_Enum.INTERACTION_TO_NEXT_PAINT);
+    if (old == null || duration > old) {
+      this.tickDelta(
+        TickLabel_Enum.INTERACTION_TO_NEXT_PAINT,
+        duration - (old ?? 0)
+      );
       this.flush();
     }
   }
