@@ -198,6 +198,7 @@ function replaceOutputFile(outputFiles, original, text) {
   const file = {
     path: original.path,
     text,
+    hash: md5(text),
     get contents() {
       // eslint-disable-next-line local/no-forbidden-terms
       const te = new TextEncoder();
