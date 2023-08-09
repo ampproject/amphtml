@@ -12,8 +12,8 @@ const {
   ciBuildUrl,
   ciCommitSha,
   ciJobId,
-  ciJobUrl,
   ciRepoSlug,
+  circleciJobUrl,
 } = require('../common/ci');
 const {log} = require('../common/logging');
 
@@ -67,7 +67,7 @@ function addJobAndBuildInfo(testType, reportJson) {
     job: {
       jobId,
       testSuiteType: testType,
-      url: ciJobUrl(),
+      url: circleciJobUrl(),
     },
   };
 }

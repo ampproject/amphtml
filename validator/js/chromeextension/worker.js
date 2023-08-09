@@ -1,3 +1,5 @@
+importScripts('./validator_wasm.js');
+
 const globals = {};
 globals.ampCacheBgcolor = '#ffffff';
 globals.ampCacheIconPrefix = 'amp-link';
@@ -11,7 +13,6 @@ globals.invalidAmpTitle = chrome.i18n.getMessage('pageFailsValidationTitle');
 globals.linkToAmpBgColor = '#ffffff';
 globals.linkToAmpIconPrefix = 'amp-link';
 globals.linkToAmpTitle = chrome.i18n.getMessage('pageHasAmpAltTitle');
-globals.tabToUrl = {};
 globals.userAgentHeader = 'X-AMP-Validator-UA';
 globals.validAmpBgcolor = '#ffd700';
 globals.validAmpIconPrefix = 'valid';
@@ -104,10 +105,10 @@ function handleAmpCache(tabId, ampHref) {
   updateTabStatus(
       tabId, globals.ampCacheIconPrefix, globals.ampCacheTitle,
       '' /*text*/, globals.ampCacheBgcolor);
-  chrome.browserAction.onClicked.addListener(
+  chrome.action.onClicked.addListener(
       function loadAmpHref(tab) {
         if (tab.id == tabId) {
-          chrome.browserAction.onClicked.removeListener(loadAmpHref);
+          chrome.action.onClicked.removeListener(loadAmpHref);
           chrome.tabs.sendMessage(tab.id,
               {'loadAmp': true, 'ampHref': ampHref});
         }
@@ -151,10 +152,10 @@ function handleAmpLink(tabId, ampHref) {
   updateTabStatus(
       tabId, globals.linkToAmpIconPrefix, globals.linkToAmpTitle,
       '' /*text*/, globals.linkToAmpBgColor);
-  chrome.browserAction.onClicked.addListener(
+  chrome.action.onClicked.addListener(
       function loadAmpHref(tab) {
         if (tab.id == tabId) {
-          chrome.browserAction.onClicked.removeListener(loadAmpHref);
+          chrome.action.onClicked.removeListener(loadAmpHref);
           chrome.tabs.sendMessage(tab.id,
               {'loadAmp': true, 'ampHref': ampHref});
         }
@@ -180,9 +181,9 @@ function handleValidatorNotPresent(tabId) {
   updateTabStatus(tabId, globals.validatorNotPresentIconPrefix,
       globals.validatorNotPresentTitle, globals.validatorNotPresentBadge,
       globals.validatorNotPresentBgColor);
-  chrome.tabs.get(tabId, function(tab) {
+  chrome.tabs.get(tabId, () => {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setPopup({
+      chrome.action.setPopup({
         tabId,
         popup: globals.validatorNotPresentPopup,
       });
@@ -209,7 +210,7 @@ function isForbiddenUrl(url) {
 function updateTab(tab) {
   if (!isForbiddenUrl(tab.url)) {
     chrome.tabs.sendMessage(
-        tab.id, {'getAmpDetails': true}, function(response) {
+        tab.id, {'getAmpDetails': true}, response => {
           if (response && response.fromAmpCache && response.ampHref) {
             handleAmpCache(tab.id, response.ampHref);
           } else if (response && response.isAmp) {
@@ -229,9 +230,9 @@ function updateTab(tab) {
  */
 function updateTabPopup(tabId) {
   // Verify tab still exists
-  chrome.tabs.get(tabId, function(tab) {
+  chrome.tabs.get(tabId, () => {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setPopup(
+      chrome.action.setPopup(
           {tabId, popup: globals.validatorPopup});
     }
   });
@@ -248,9 +249,9 @@ function updateTabPopup(tabId) {
  */
 function updateTabStatus(tabId, iconPrefix, title, text, color) {
   // Verify tab still exists
-  chrome.tabs.get(tabId, function(tab) {
+  chrome.tabs.get(tabId, () => {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setIcon({
+      chrome.action.setIcon({
         path: {
           '19': iconPrefix + '-128.png',
           '38': iconPrefix + '-38.png',
@@ -258,11 +259,11 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
         tabId,
       });
       if (title !== undefined)
-      {chrome.browserAction.setTitle({title, tabId});}
+      {chrome.action.setTitle({title, tabId});}
       if (text !== undefined)
-      {chrome.browserAction.setBadgeText({text, tabId});}
+      {chrome.action.setBadgeText({text, tabId});}
       if (color !== undefined)
-      {chrome.browserAction.setBadgeBackgroundColor(
+      {chrome.action.setBadgeBackgroundColor(
           {color: hex2rgba(color), tabId});}
     }
   });
@@ -281,113 +282,73 @@ function validateUrlFromTab(tab, userAgent) {
     handleValidatorNotPresent(tab.id);
     return;
   }
-  const xhr = new XMLHttpRequest();
+
   const url = tab.url.split('#')[0];
-  xhr.open('GET', url, true);
-
-  // We can't set the User-Agent header directly, but we can set this header
-  // and let the onBeforeSendHeaders handler rename it for us.
-  // Add the listener now. It'll be removed after the request is made.
-  // It's not possible to set filters on the listener to only capture our
-  // traffic, so this approach will interfere as little as possible with the
-  // 99.9% of requests which aren't for AMP validation.
-  chrome.webRequest.onBeforeSendHeaders.addListener(
-      updateSendHeadersUserAgent,
-      {urls: [url], types: ['xmlhttprequest'], tabId: -1},
-      ['requestHeaders', 'blocking']
-  );
-  // Add the temporary header to the request
-  xhr.setRequestHeader(globals.userAgentHeader, userAgent);
-
-  xhr.onreadystatechange = async function() {
-    if (xhr.readyState === 4) {
-      // The request is complete; remove our temporary listener.
-      chrome.webRequest.onBeforeSendHeaders.removeListener(
-          updateSendHeadersUserAgent);
-      const doc = xhr.responseText;
-      await amp.validator.init();
-      const validationResult = amp.validator.validateString(doc);
-      window.sessionStorage.setItem(url, JSON.stringify(validationResult));
-      if (validationResult.status == 'PASS') {
-        handleAmpPass(tab.id, validationResult);
-      } else if (onlyErrorIsDevMode(validationResult)) {
-        handleAmpDevMode(tab.id);
-      } else {
-        handleAmpFail(tab.id, validationResult);
-      }
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      'user-agent': userAgent,
     }
-  };
-  xhr.send();
+  }).then(resp => {
+    if (resp.ok) {
+      return resp.text();
+    }
+  }).then(async text => {
+    await amp.validator.init();
+    const validationResult = amp.validator.validateString(text);
+    chrome.storage.session.set({
+      [url]: JSON.stringify(validationResult)
+    });
+    if (validationResult.status == 'PASS') {
+      handleAmpPass(tab.id, validationResult);
+    } else if (onlyErrorIsDevMode(validationResult)) {
+      handleAmpDevMode(tab.id);
+    } else {
+      handleAmpFail(tab.id, validationResult);
+    }
+  });
 }
 
 /**
- * Event handler which gets called for onBeforeSendHeaders
- * (developer.chrome.com/extensions/webRequest#event-onBeforeSendHeaders) and
- * updates the User-Agent header to the value that's been specified.
- *
- * @param {!Object<OnBeforeSendHeadersDetails>} details Details object as
- *   defined by Chrome.
- * @return {Object<HttpHeaders>} Object with HttpHeaders value
- *   (https://developer.chrome.com/extensions/webRequest#type-HttpHeaders)
+ * Remove the URL from storage when the tab is closed.
  */
-function updateSendHeadersUserAgent(details) {
-  let newUserAgent,
-      headers = details.requestHeaders;
-  // Using var instead of let keeps the index in scope for later
-  for (var i = 0; i < headers.length; i++) {
-    if (headers[i].name === globals.userAgentHeader) {
-      // Found a header with our internal User Agent Header
-      newUserAgent = headers[i].value;
-      break;
+function removeTab(tabId) {
+  chrome.tabs.get(tabId, tab => {
+    if (!chrome.runtime.lastError) {
+      chrome.storage.session.remove(tab.url);
     }
-  }
-  if (newUserAgent) {
-    // We previously found our UA header. Delete that by the index.
-    headers.splice(i, 1);
-    // And then update the actual User-Agent header
-    for (i = 0; i < headers.length; i++) {
-      if (headers[i].name == 'User-Agent') {
-        headers[i].value = newUserAgent;
-        break;
-      }
-    }
-    return {requestHeaders: headers};
-  }
+  });
 }
 
 /**
  * Listen for a new tab being created.
  */
-chrome.tabs.onCreated.addListener(function(tab) {
-  updateTab(tab);
-});
+chrome.tabs.onCreated.addListener(updateTab);
 
 /**
  * Listen for a tab being changed.
  */
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  globals.tabToUrl[tabId] = tab.url;
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  removeTab(tabId);
   updateTab(tab);
-});
-
-/**
- * Listen for a tab being removed.
- */
-chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
-  window.sessionStorage.removeItem(globals.tabToUrl[tabId]);
 });
 
 /**
  * Listen for a tab being replaced (due to prerendering or instant).
  */
-chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
-  window.sessionStorage.removeItem(globals.tabToUrl[removedTabId]);
-  chrome.tabs.get(addedTabId, function(tab) {
+chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
+  removeTab(removedTabId);
+  chrome.tabs.get(addedTabId, tab => {
     updateTab(tab);
   });
 });
 
-/**
- * Reload every hour to retrieve the most recent AMP Validator.
- */
-window.setTimeout(() => { location.reload(); } , 60 * 60 * 1000);
+chrome.runtime.onMessage.addListener((url, sender, sendResponse) => {
+  // To ensure that the browser does not drop the reply.
+  (async () => {
+    chrome.storage.session.get(url, result => {
+      sendResponse(result[url]);
+    });
+  })();
+  return true;
+});
