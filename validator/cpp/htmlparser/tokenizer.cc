@@ -1,5 +1,13 @@
 #include "cpp/htmlparser/tokenizer.h"
 
+#include <algorithm>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "absl/flags/flag.h"
 #include "cpp/htmlparser/atom.h"
 #include "cpp/htmlparser/atomutil.h"
@@ -838,7 +846,7 @@ TokenType Tokenizer::Next(bool template_mode) {
     return token_type_;
   }
 
-  if (raw_tag_ != "") {
+  if (!raw_tag_.empty()) {
     if (raw_tag_ == "plaintext") {
       // Read everything up to EOF.
       while (!eof_) {

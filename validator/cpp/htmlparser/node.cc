@@ -2,7 +2,11 @@
 
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
@@ -45,7 +49,7 @@ void Node::DropDuplicateAttributes() {
 }
 
 bool Node::IsSpecialElement() const {
-  if (name_space_ == "" || name_space_ == "html") {
+  if (name_space_.empty() || name_space_ == "html") {
     return std::find(kSpecialElements.begin(),
                      kSpecialElements.end(),
                      atom_) != kSpecialElements.end();
@@ -156,7 +160,7 @@ void Node::ReparentChildrenTo(Node* destination) {
 }
 
 Node* NodeStack::Pop() {
-  if (stack_.size() > 0) {
+  if (!stack_.empty()) {
     Node* node = stack_.back();
     stack_.pop_back();
     return node;
@@ -175,7 +179,7 @@ void NodeStack::Pop(int count) {
 }
 
 Node* NodeStack::Top() {
-  if (stack_.size() > 0) return stack_.at(stack_.size() - 1);
+  if (!stack_.empty()) return stack_.at(stack_.size() - 1);
   return nullptr;
 }
 
