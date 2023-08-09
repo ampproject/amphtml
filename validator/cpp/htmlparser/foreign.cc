@@ -1,6 +1,10 @@
 #include "cpp/htmlparser/foreign.h"
 
 #include <algorithm>
+#include <array>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "cpp/htmlparser/comparators.h"
 #include "cpp/htmlparser/strings.h"
