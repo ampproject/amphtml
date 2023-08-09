@@ -1,6 +1,10 @@
 #include "cpp/htmlparser/json/types.h"
 
 #include <array>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <variant>
 
 namespace htmlparser::json {
 
