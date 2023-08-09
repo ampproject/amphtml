@@ -1,5 +1,7 @@
 #include "cpp/htmlparser/url.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 
 namespace htmlparser {
