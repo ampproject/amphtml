@@ -619,6 +619,12 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js"
     },
     {
+      "url": "examples/visual-tests/amp-form/amp-form-server-error.amp.html",
+      "name": "amp-form (server error)",
+      "interactive_tests": "examples/visual-tests/amp-form/amp-form-server-error.js",
+      "no_base_test": true
+    },
+    {
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,

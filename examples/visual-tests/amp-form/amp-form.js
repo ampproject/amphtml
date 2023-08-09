@@ -38,21 +38,4 @@ module.exports = {
       'div[submit-success] div[id^="rendered-message-amp-form-"]',
     ]);
   },
-
-  // TODO(danielrozenberg): fix and restore this test
-  /*
-  'try to submit to a dead server': async (page, name) => {
-    page.on('request', interceptedRequest => interceptedRequest.abort());
-
-    await page.tap('#name');
-    await page.keyboard.type('Jane Miller');
-    await page.tap('#email');
-    await page.keyboard.type('jane.miller@ampproject.org');
-    await page.tap('#submit');
-    await verifySelectorsVisible(page, name, [
-      '#form.user-valid',
-      'div[submit-error] div[id^="rendered-message-amp-form-"]',
-    ]);
-  }
-  */
 };

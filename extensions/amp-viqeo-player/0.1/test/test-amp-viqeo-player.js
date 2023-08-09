@@ -33,7 +33,7 @@ describes.realWin(
       });
     }
 
-    it.skip('test-get-data', () => {
+    it('test-get-data', () => {
       return getViqeo().then((p) => {
         const {entry, viqeo, viqeoElement} = p;
         expect(entry.video.element).to.equal(viqeoElement);
@@ -61,7 +61,7 @@ describes.realWin(
       });
     });
 
-    describe.skip('test-playing-actions', () => {
+    describe('test-playing-actions', () => {
       it('renders responsively', () => {
         return getViqeo().then((p) => {
           const iframe = p.viqeoElement.querySelector('iframe');
