@@ -1,7 +1,6 @@
 'use strict';
 
 const checkDependencies = require('check-dependencies');
-const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
 const {cyan, red} = require('kleur/colors');
@@ -181,19 +180,6 @@ function patchShadowDom() {
 }
 
 /**
- * Deletes the map file for rrule, which breaks closure compiler.
- * TODO(wg-infra): Remove this workaround after a fix is merged for
- * https://github.com/google/closure-compiler/issues/3720.
- */
-function removeRruleSourcemap() {
-  const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
-  if (fs.existsSync(rruleMapFile)) {
-    del.sync(rruleMapFile);
-    logLocalDev('Deleted', cyan(rruleMapFile));
-  }
-}
-
-/**
  * Checks if all packages are current, and if not, runs `npm install`.
  */
 function updateDeps() {
@@ -227,7 +213,6 @@ function updatePackages() {
   patchIntersectionObserver();
   patchResizeObserver();
   patchShadowDom();
-  removeRruleSourcemap();
   if (isCiBuild()) {
     runNpmChecks();
   }
