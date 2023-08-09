@@ -138,7 +138,7 @@
 // IMPORTANT: Tree like structure must not destroy the child nodes or sibling
 // nodes. Allocator destroys all the objects and call its destructor, it is an
 // error to invoke destructors on objects allocated by this allocator. Allocator
-// is the master owner of all the objects. Client treats all objects as const
+// is the primary owner of all the objects. Client treats all objects as const
 // pointer as far as destruction goes.
 //
 // It is not possible to destroy random objects or free up the slots to be
