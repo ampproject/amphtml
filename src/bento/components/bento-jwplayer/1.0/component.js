@@ -231,7 +231,7 @@ function onMessage_(event, options) {
  * @param {HTMLIFrameElement} iframe
  * @param {{json: string}} config
  * @param {string} adCustParamsJson
- * @param {Object} adMacros
+ * @param {object} adMacros
  */
 function onSetup(iframe, config, adCustParamsJson, adMacros) {
   /** get all data-config-* */
@@ -255,7 +255,7 @@ function onSetup(iframe, config, adCustParamsJson, adMacros) {
 }
 
 /**
- * @param {Object} currentTarget
+ * @param {object} currentTarget
  * @param {{muted: boolean, playlistItem: Object}} readyOptions
  * @param {OnLoadCallback} onLoad
  */

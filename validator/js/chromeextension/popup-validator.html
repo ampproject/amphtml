@@ -4,7 +4,7 @@
     <script src="./bower_components/webcomponentsjs/CustomElements.min.js"></script>
     <link href="polymer.html" rel="import">
     <link href="polymer-extension-toolbar.html" rel="import">
-    <script src="https://cdn.ampproject.org/v0/validator_wasm.js"></script>
+    <script src="./validator_wasm.js"></script>
     <style is="custom-style">
       body {
         background-color: #fff;
@@ -199,27 +199,28 @@
           },
         });
         function processTab(tabs, toolbar, content) {
-          var url = tabs[0].url.split('#')[0];
-          var validationResult;
-          chrome.runtime.getBackgroundPage(function(backgroundPage) {
-            validationResult =
-              JSON.parse(backgroundPage.sessionStorage.getItem(url));
+          const url = tabs[0].url.split('#')[0];
+          chrome.runtime.sendMessage(url).then(function(result) {
+            console.log('worker response: ' + result);
+            const validationResult = JSON.parse(result);
             if (validationResult) {
               processResult(validationResult, toolbar, content, url);
             } else {
-              var xhr = new XMLHttpRequest();
-              xhr.open('GET', url, true);
-              xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                  amp.validator.init().then(function() {
-                    validationResult =
-                      amp.validator.validateString(xhr.responseText);
-                    processResult(validationResult, toolbar, content, url);
-                  });
-                }
-              };
-              xhr.send();
+              throw new Error();
             }
+          }).catch(function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function () {
+              if (xhr.readyState === 4) {
+                amp.validator.init().then(function () {
+                  validationResult =
+                    amp.validator.validateString(xhr.responseText);
+                  processResult(validationResult, toolbar, content, url);
+                });
+              }
+            };
+            xhr.send();
           });
         }
         function processResult(validationResult, toolbar, content, url) {

@@ -1,4 +1,5 @@
 const babel = require('@babel/core');
+const {createHash} = require('crypto');
 const path = require('path');
 const {debug} = require('../compile/debug-compilation-lifecycle');
 const {includeSourcesContent} = require('../tasks/sourcemaps');
@@ -46,7 +47,7 @@ function getEsbuildBabelPlugin(
    * @param {string} filename
    * @param {string} contents
    * @param {string} hash
-   * @param {Object} babelOptions
+   * @param {object} babelOptions
    * @return {!Promise<!CacheMessageDef>}
    */
   async function transformContents(filename, contents, hash, babelOptions) {
@@ -151,9 +152,9 @@ function getEsbuildBabelPlugin(
             const file = path.join(root, f);
             const map = babelMaps.get(file);
             if (!map) {
-              if (file.includes(nodeMods)) {
-                // Excuse node_modules since they may have been marked external
-                // (and so not processed by babel).
+              if (file.includes(nodeMods) || file.endsWith('.json')) {
+                // Excuse node_modules and JSON files since they may have been
+                // marked external (and so not processed by babel).
                 return null;
               }
               throw new Error(`failed to find sourcemap for babel file "${f}"`);
@@ -195,13 +196,22 @@ function replaceOutputFile(outputFiles, original, text) {
   }
 
   let contents;
+  const generateContents = () =>
+    // eslint-disable-next-line local/no-forbidden-terms
+    (contents ||= new TextEncoder().encode(text));
+
+  let hash;
+  const generateHash = () =>
+    (hash ||= createHash('sha1').update(text).digest('hex'));
+
   const file = {
     path: original.path,
     text,
     get contents() {
-      // eslint-disable-next-line local/no-forbidden-terms
-      const te = new TextEncoder();
-      return (contents ||= te.encode(text));
+      return generateContents();
+    },
+    get hash() {
+      return generateHash();
     },
   };
   outputFiles[index] = file;

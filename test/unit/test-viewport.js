@@ -1269,25 +1269,19 @@ describes.fakeWin('Viewport', {}, (env) => {
       root.className = '';
     });
 
-    // TODO(zhouyx, #11827): Make this test work on Safari.
-    it.configure()
-      .skipSafari()
-      .run('should not set pan-y when not embedded', () => {
-        viewer.isEmbedded = () => false;
-        viewport = new ViewportImpl(ampdoc, binding, viewer);
-        expect(win.getComputedStyle(root)['touch-action']).to.equal('auto');
-      });
+    it('should not set pan-y when not embedded', () => {
+      viewer.isEmbedded = () => false;
+      viewport = new ViewportImpl(ampdoc, binding, viewer);
+      expect(win.getComputedStyle(root)['touch-action']).to.equal('auto');
+    });
 
-    // TODO(zhouyx, #11827): Make this test work on Safari.
-    it.configure()
-      .skipSafari()
-      .run('should set pan-y with experiment', () => {
-        viewer.isEmbedded = () => true;
-        viewport = new ViewportImpl(ampdoc, binding, viewer);
-        expect(win.getComputedStyle(root)['touch-action']).to.equal(
-          'pan-y pinch-zoom'
-        );
-      });
+    it('should set pan-y with experiment', () => {
+      viewer.isEmbedded = () => true;
+      viewport = new ViewportImpl(ampdoc, binding, viewer);
+      expect(win.getComputedStyle(root)['touch-action']).to.equal(
+        'pan-y pinch-zoom'
+      );
+    });
   });
 
   describe('for child window', () => {

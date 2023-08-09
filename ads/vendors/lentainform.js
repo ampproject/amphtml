@@ -12,7 +12,7 @@ export function lentainform(global, data) {
 
   document.body.appendChild(scriptRoot);
 
-  const publisherStr = data.publisher.replace(/[^A-z0-9]/g, '');
+  const publisherStr = data.publisher.replace(/[^a-zA-Z0-9]/g, '');
 
   const url =
     `https://jsc.lentainform.com/${encodeURIComponent(publisherStr[0])}/` +

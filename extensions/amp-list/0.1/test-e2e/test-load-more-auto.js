@@ -46,7 +46,7 @@ describes.endtoend(
       );
     });
 
-    it.skip('should load more items on scroll', async () => {
+    it('should load more items on scroll', async () => {
       let listItems = await controller.findElements('.item');
       await expect(listItems).to.have.length(2);
 

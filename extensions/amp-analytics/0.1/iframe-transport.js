@@ -333,11 +333,11 @@ export function isLongTaskApiSupported(win) {
   );
 }
 
-/** @private {Object<string, FrameData>} */
+/** @private {{[key: string]: FrameData}} */
 IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
 
-/** @private {Object<string, PerformanceObserver>} */
+/** @private {{[key: string]: PerformanceObserver}} */
 IframeTransport.performanceObservers_ = {};

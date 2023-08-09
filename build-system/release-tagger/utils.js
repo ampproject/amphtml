@@ -4,16 +4,18 @@
  */
 
 const dedent = require('dedent');
-const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
+const {graphql} = require('@octokit/graphql');
 const {Octokit} = require('@octokit/rest');
+
+/** @typedef {import('@octokit/graphql').GraphQlQueryResponseData} GraphQlQueryResponseData */
 
 /**
  * GitHub API util functions
  */
 class GitHubApi {
   /**
-   * @param {Object} octokitRest
-   * @param {Object} octokitGraphQl
+   * @param {object} octokitRest
+   * @param {object} octokitGraphQl
    */
   constructor(octokitRest, octokitGraphQl) {
     this.octokit = octokitRest
@@ -42,7 +44,7 @@ class GitHubApi {
     this.config = {
       singleNodeQueryLimit: 100,
       totalNodeQueryLimit: 500000,
-      batchSize: 20,
+      batchSize: 5,
     };
   }
 
@@ -154,7 +156,7 @@ class GitHubApi {
   /**
    * Update a GitHub release
    * @param {string} id
-   * @param {Object} changes
+   * @param {object} changes
    * @return {Promise<Object>}
    */
   async updateRelease(id, changes) {

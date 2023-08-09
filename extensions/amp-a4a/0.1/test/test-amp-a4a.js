@@ -1059,8 +1059,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         (headerVal) => {
-          // TODO(wg-monetization, #25690): Fails on CI.
-          it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
+          it(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = env.sandbox.stub(dev(), 'error');
             // Make sure there's no signature, so that we go down the 3p
             // iframe path.
@@ -1585,6 +1584,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies: null,
             consentStringType: null,
             additionalConsent: null,
+            consentSharedData: null,
           },
           rtcResponse
         )
@@ -2788,7 +2788,13 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString, consentMetadata, gdprApplies;
+      let fixture,
+        a4aElement,
+        a4a,
+        consentString,
+        consentMetadata,
+        gdprApplies,
+        consentSharedData;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2806,6 +2812,10 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           'consentStringType': 1,
           'additionalConsent': 'abc123',
         };
+        consentSharedData = {
+          'doubleclick-tfcd': 1,
+          'doubleclick-tfua': 1,
+        };
         return fixture;
       });
 
@@ -2822,6 +2832,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             whenPolicyResolved: () => policyPromise,
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
+            getMergedSharedData: () => consentSharedData,
           })
         );
 
@@ -2845,6 +2856,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
+            consentSharedData,
           })
         ).calledOnce;
         expect(
@@ -2880,6 +2892,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
               Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
+            getMergedSharedData: () => consentSharedData,
           })
         );
 
@@ -2899,6 +2912,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
+            consentSharedData,
           })
         ).calledOnce;
         expect(
@@ -2926,6 +2940,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             getConsentMetadata: () => {
               throw new Error('consent err!');
             },
+            getMergedSharedData: () => {
+              throw new Error('consent err!');
+            },
           })
         );
 
@@ -2945,6 +2962,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentStringType: null,
             gdprApplies: null,
             additionalConsent: null,
+            consentSharedData: null,
           })
         ).calledOnce;
         expect(

@@ -23,6 +23,8 @@ function getLanguageCodeFallbacks(languageCode) {
   if (!languageCode) {
     return [FALLBACK_LANGUAGE_CODE];
   }
+
+  /** @type {string[]} */
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce(
     (fallbackLanguageCodeList, _, index) => {
@@ -55,7 +57,7 @@ async function getLanguageStrings() {
 /**
  * Retrieves the fallback language codes for each current locale
  * and merges any strings from the fallback language.
- * @param {Object} languages
+ * @param {object} languages
  */
 function mergeFallbacks(languages) {
   for (const langKey in languages) {

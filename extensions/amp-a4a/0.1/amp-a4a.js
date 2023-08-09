@@ -47,6 +47,7 @@ import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
+  getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
@@ -143,6 +144,7 @@ export let CreativeMetaDataDef;
       consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
+      consentSharedData: (?Object|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -163,7 +165,7 @@ export const AnalyticsTrigger = {
 
 /**
  * Maps the names of lifecycle events to analytics triggers.
- * @const {!Object<string, !AnalyticsTrigger>}
+ * @const {!{[key: string]: !AnalyticsTrigger}}
  */
 const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'adRequestStart': AnalyticsTrigger.AD_REQUEST_START,
@@ -329,7 +331,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Mapping of feature name to value extracted from ad response header
      * amp-ff-exps with comma separated pairs of '=' separated key/value.
-     * @type {!Object<string,string>}
+     * @type {!{[key: string]: string}}
      */
     this.postAdResponseExperimentFeatures = {};
 
@@ -749,14 +751,23 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           });
 
+          const consentSharedDataPromise = getConsentPolicySharedData(
+            this.element,
+            consentPolicyId
+          ).catch((err) => {
+            user().error(TAG, 'Error determining consent shared data', err);
+            return null;
+          });
+
           return Promise.all([
             consentStatePromise,
             consentStringPromise,
             consentMetadataPromise,
+            consentSharedDataPromise,
           ]);
         }
 
-        return Promise.resolve([null, null, null]);
+        return Promise.resolve([null, null, null, null]);
       })
       // This block returns the ad URL, if one is available.
       /** @return {!Promise<?string>} */
@@ -766,6 +777,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
         const consentMetadata = consentResponse[2];
+        const consentSharedData = consentResponse[3];
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
@@ -785,11 +797,12 @@ export class AmpA4A extends AMP.BaseElement {
                 consentStringType,
                 gdprApplies,
                 additionalConsent,
+                consentSharedData,
               },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
-                /** @type {?Object<string, string|number|boolean|undefined>} */ (
+                /** @type {?{[key: string]: string|number|boolean|undefined}} */ (
                   consentMetadata
                 )
               ),
@@ -2382,7 +2395,7 @@ export class AmpA4A extends AMP.BaseElement {
    * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {?{[key: string]: string|number|boolean|undefined}} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {

@@ -465,7 +465,7 @@ describes.realWin(
         expect(scrollLeakSpy).to.be.calledOnce;
       });
 
-      it.skip('should adjust for IOS safari bottom bar', async () => {
+      it('should adjust for IOS safari bottom bar', async () => {
         env.sandbox.stub(platform, 'isIos').returns(true);
         env.sandbox.stub(platform, 'isSafari').returns(true);
         const sidebarElement = await getAmpSidebar();

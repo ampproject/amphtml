@@ -214,7 +214,7 @@ function toggleRootDataAttribute(state, active) {
 
 /**
  * @param {Document} elementOrDoc
- * @return {!Object<string, !Element>}
+ * @return {!{[key: string]: !Element}}
  */
 function renderElements(elementOrDoc) {
   const html = htmlFor(elementOrDoc);
@@ -1206,7 +1206,7 @@ export function toggleMuted(video, muted) {
 }
 
 /**
- * @param {Object} global
+ * @param {object} global
  */
 function exitFullscreen(global) {
   // The video is currently in fullscreen mode
@@ -1221,7 +1221,7 @@ function exitFullscreen(global) {
 }
 
 /**
- * @param {Object} global
+ * @param {object} global
  */
 function enterFullscreen(global) {
   // Try to enter fullscreen mode in the browser
@@ -1250,7 +1250,7 @@ function enterFullscreen(global) {
 }
 
 /**
- * @param {Object} global
+ * @param {object} global
  */
 function toggleFullscreen(global) {
   if (fullscreen) {
@@ -1262,7 +1262,7 @@ function toggleFullscreen(global) {
 
 /**
  * Called when the fullscreen mode of the browser or content player changes.
- * @param {Object} global
+ * @param {object} global
  */
 function onFullscreenChange(global) {
   if (fullscreen) {
@@ -1643,7 +1643,7 @@ export function setHideControlsTimeoutForTesting(newTimeout) {
 }
 
 /**
- * @param {Object} newContext
+ * @param {object} newContext
  * @visibleForTesting
  */
 export function setContextForTesting(newContext) {

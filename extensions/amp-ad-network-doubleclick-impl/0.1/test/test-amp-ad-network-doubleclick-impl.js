@@ -87,7 +87,6 @@ function createImplTag(config, element, impl, env) {
   env.win.document.body.appendChild(element);
   impl = new AmpAdNetworkDoubleclickImpl(element);
   impl.iframe = iframe;
-  impl.win['goog_identity_prom'] = Promise.resolve({});
   return [element, impl, env];
 }
 
@@ -771,6 +770,15 @@ for (const {config, name} of [
           });
         });
 
+        it('handles tagForUnderAgeTreatment', () => {
+          element.setAttribute('json', '{"tagForUnderAgeTreatment": 1}');
+          new AmpAd(element).upgradeCallback();
+          impl.uiHandler = {isStickyAd: () => false};
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.match(/&tfua=1&/);
+          });
+        });
+
         describe('data-force-safeframe', () => {
           const fsfRegexp = /(\?|&)fsf=1(&|$)/;
           it('handles default', () => {
@@ -1005,24 +1013,6 @@ for (const {config, name} of [
               });
           });
         });
-        it('should include identity', () => {
-          // Force get identity result by overloading window variable.
-          const token =
-            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-              token: 'abcdef',
-              jar: 'some_jar',
-              pucrd: 'some_pucrd',
-            });
-          impl.win['goog_identity_prom'] = Promise.resolve(token);
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            [
-              /(\?|&)adsid=abcdef(&|$)/,
-              /(\?|&)jar=some_jar(&|$)/,
-              /(\?|&)pucrd=some_pucrd(&|$)/,
-            ].forEach((regexp) => expect(url).to.match(regexp));
-          });
-        });
 
         it('should return empty string if unknown consentState', () =>
           impl
@@ -1228,6 +1218,46 @@ for (const {config, name} of [
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)ppid=testId(&|$)/
           );
+        });
+
+        it('should set tfcd parameter if set in shared data', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 0,
+            'doubleclick-tfcd': 1,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=0(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+          });
+        });
+
+        it('should set tfua parameter if set in shared data', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 1,
+            'doubleclick-tfcd': 0,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=0(&|$)/);
+          });
+        });
+
+        it('default tfcd/tfua to 1 if conflicting data detected', () => {
+          element.setAttribute(
+            'json',
+            '{"tagForChildDirectedTreatment": 0,"tagForUnderAgeTreatment": 1}'
+          );
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 0,
+            'doubleclick-tfcd': 1,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+          });
         });
       });
 

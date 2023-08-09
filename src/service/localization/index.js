@@ -26,7 +26,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 /**
  * Gets the string matching the specified localized string ID in the language
  * specified.
- * @param {!Object<string, !LocalizedStringBundleDef>} localizedStringBundles
+ * @param {!{[key: string]: !LocalizedStringBundleDef}} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId_Enum} localizedStringId
  * @return {?string}
@@ -87,7 +87,7 @@ export class LocalizationService {
 
     /**
      * A mapping of language code to localized string bundle.
-     * @private @const {!Object<string, !LocalizedStringBundleDef>}
+     * @private @const {!{[key: string]: !LocalizedStringBundleDef}}
      */
     this.localizedStringBundles_ = {};
 
@@ -114,7 +114,7 @@ export class LocalizationService {
   }
 
   /**
-   * @param {!Object<string, !LocalizedStringBundleDef>} localizedStringBundles
+   * @param {!{[key: string]: !LocalizedStringBundleDef}} localizedStringBundles
    *     The localized string bundle to register.
    * @public
    */

@@ -18,13 +18,13 @@ import {addParamToUrl} from '../../../src/url';
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
 
-/** @type {Object} A map of promises for each value of data-url. The promise
+/** @type {object} A map of promises for each value of data-url. The promise
  *  will fetch data for the URL for the ad server, and return it as a map of
  *  objects, keyed by slot; each object contains the variables to be
  *   substituted into the mustache template. */
 const ampCustomadXhrPromises = {};
 
-/** @type {Object} a map of full urls (i.e. including the ampslots parameter)
+/** @type {object} a map of full urls (i.e. including the ampslots parameter)
  * for each value of data-url */
 let ampCustomadFullUrls = null;
 

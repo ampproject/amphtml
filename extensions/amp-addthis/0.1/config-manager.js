@@ -30,7 +30,7 @@ export class ConfigManager {
    */
   constructor() {
     /**
-     * @type {!Object<string, ConfigManager.PubIdData>}
+     * @type {!{[key: string]: ConfigManager.PubIdData}}
      * @private
      */
     this.dataForPubId_ = {};
@@ -42,7 +42,7 @@ export class ConfigManager {
     this.configProviderIframes_ = [];
 
     /**
-     * @type {Object<string,string>}
+     * @type {{[key: string]: string}}
      * @private
      */
     this.activeToolsMonitor_ = null;
@@ -180,8 +180,8 @@ export class ConfigManager {
    * request/response cycle between frames.
    * @param {{
    *   pubId: string,
-   *   activeToolsMonitor: Object<string,string>,
-   *   atConfig: Object<string,string>,
+   *   activeToolsMonitor: {[key: string]: string},
+   *   atConfig: {[key: string]: string},
    *   widgetId: string,
    *   containerClassName: string,
    *   productCode: string,
@@ -275,7 +275,7 @@ ConfigManager.PubIdData; // purely for typedef
  * @typedef {{
  *   widgetId:string,
  *   productCode:string,
- *   shareConfig:(Object<string,string>|undefined),
+ *   shareConfig:({[key: string]: string}|undefined),
  *   iframe: Element,
  *   atConfig: JsonObject,
  *   containerClassName: string

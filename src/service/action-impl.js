@@ -40,7 +40,7 @@ const DEFAULT_DEBOUNCE_WAIT = 300; // ms
 /** @const {number} */
 const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
-/** @const {!Object<string,!Array<string>>} */
+/** @const {!{[key: string]: !Array<string}>} */
 const NON_AMP_ELEMENTS_ACTIONS_ = {
   'form': ['submit', 'clear'],
 };
@@ -61,7 +61,7 @@ const DEFAULT_EMAIL_ALLOWLIST = [
  * since they are text inputs, readonly, or composite widgets that shouldn't
  * need to trigger tap events from spacebar or enter on their own.
  * See https://www.w3.org/TR/wai-aria-1.1/#widget_roles
- * @const {!Object<boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 export const TAPPABLE_ARIA_ROLES = {
   'button': true,
@@ -95,7 +95,7 @@ let ActionInfoArgValueDef;
 
 /**
  * Map of arg names to their values, e.g. {arg: 123} in `e:t.m(arg=123)`.
- * @typedef {Object<string, ActionInfoArgValueDef>}
+ * @typedef {{[key: string]: ActionInfoArgValueDef}}
  */
 let ActionInfoArgsDef;
 
@@ -264,11 +264,11 @@ export class ActionService {
      */
     this.allowlist_ = this.isEmail_ ? DEFAULT_EMAIL_ALLOWLIST : null;
 
-    /** @const @private {!Object<string, ActionHandlerDef>} */
+    /** @const @private {!{[key: string]: ActionHandlerDef}} */
     this.globalTargets_ = map();
 
     /**
-     * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust_Enum}>}
+     * @const @private {!{[key: string]: {handler: ActionHandlerDef, minTrust: ActionTrust_Enum}}}
      */
     this.globalMethodHandlers_ = map();
 
@@ -774,7 +774,7 @@ export class ActionService {
   /**
    * @param {!Element} node
    * @param {string} actionEventType
-   * @return {?Object<string, !Array<!ActionInfoDef>>}
+   * @return {?{[key: string]: !Array<!ActionInfoDef>}}
    */
   getActionMap_(node, actionEventType) {
     let actionMap = node[ACTION_MAP_];
@@ -943,7 +943,7 @@ function notImplemented() {
 /**
  * @param {string} action
  * @param {!Element} context
- * @return {?Object<string, !Array<!ActionInfoDef>>}
+ * @return {?{[key: string]: !Array<!ActionInfoDef>}}
  * @private Visible for testing only.
  */
 export function parseActionMap(action, context) {

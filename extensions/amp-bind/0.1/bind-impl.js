@@ -42,7 +42,7 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  */
 const MAX_MERGE_DEPTH = 10;
 
-/** @const {!Object<string, !Object<string, boolean>>} */
+/** @const {!{[key: string]: !{[key: string]: boolean}}} */
 const FORM_VALUE_PROPERTIES = {
   'INPUT': {
     'checked': true,
@@ -88,7 +88,7 @@ let BoundElementDef;
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
- * @const {!Object<string, !Array<string>>}
+ * @const {!{[key: string]: !Array<string>}}
  */
 const BIND_ONLY_ATTRIBUTES = map({
   'AMP-CAROUSEL': ['slide'],
@@ -146,7 +146,7 @@ export class Bind {
 
     /**
      * Maps expression string to the element(s) that contain it.
-     * @private @const {!Object<string, !Array<!Element>>}
+     * @private @const {!{[key: string]: !Array<!Element>}}
      */
     this.expressionToElements_ = map();
 
@@ -1044,7 +1044,7 @@ export class Bind {
 
   /**
    * Reevaluates all expressions and returns a map of expressions to results.
-   * @return {!Promise<!Object<string, BindExpressionResultDef>>}
+   * @return {!Promise<!{[key: string]: BindExpressionResultDef}>}
    * @private
    */
   evaluate_() {
@@ -1074,7 +1074,7 @@ export class Bind {
   /**
    * Verifies expression results vs. current DOM state and returns an
    * array of bindings with mismatches (if any).
-   * @param {Object<string, BindExpressionResultDef>} results
+   * @param {{[key: string]: BindExpressionResultDef}} results
    * @param {?Array<!Element>=} elements If provided, only verifies bindings
    *     contained within the given elements. Otherwise, verifies all bindings.
    * @param {boolean=} warn If true, emits a user warning for verification
@@ -1148,7 +1148,7 @@ export class Bind {
    * will only return properties that need to be updated along with their
    * new value.
    * @param {!Array<!BoundPropertyDef>} boundProperties
-   * @param {Object<string, BindExpressionResultDef>} results
+   * @param {{[key: string]: BindExpressionResultDef}} results
    * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>}
    * @private
    */
@@ -1174,7 +1174,7 @@ export class Bind {
   /**
    * Applies expression results to elements in the document.
    *
-   * @param {Object<string, BindExpressionResultDef>} results
+   * @param {{[key: string]: BindExpressionResultDef}} results
    * @param {!ApplyOptionsDef} opts
    * @return {!Promise}
    * @private

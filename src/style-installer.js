@@ -137,7 +137,7 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
 
 /**
  * @param {!Element|!ShadowRoot} cssRoot
- * @param {!Object<string, !Element>} styleMap
+ * @param {!{[key: string]: !Element}} styleMap
  * @param {string} key
  * @return {?Element}
  */

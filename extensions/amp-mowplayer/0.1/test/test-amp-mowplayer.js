@@ -54,8 +54,7 @@ describes.realWin(
         });
     }
 
-    // TODO(#38720): fix flaky test.
-    describe.skip('with data-mediaid', function () {
+    describe('with data-mediaid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
     });
 

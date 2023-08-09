@@ -33,8 +33,7 @@ describes.endtoend(
       ).to.equal(0);
     });
 
-    // TODO(#33413): Fix flaky tests
-    it.skip('should open the lightbox', async () => {
+    it('should open the lightbox', async () => {
       const open = await controller.findElement('#open');
       await controller.click(open);
 

@@ -27,7 +27,7 @@ const MILLISECONDS_IN_SECOND = 1000;
 /** @const {number} */
 const DELAY = 1000;
 
-/** @const {Object<string, number>} */
+/** @const {{[key: string]: number}} */
 const TimeUnit = {
   DAYS: 1,
   HOURS: 2,

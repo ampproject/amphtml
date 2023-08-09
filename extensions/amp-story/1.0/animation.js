@@ -139,7 +139,7 @@ export class AnimationRunner {
 
     /**
      * Evaluated set of CSS properties for first animation frame.
-     * @private @const {!Promise<?Object<string, *>>}
+     * @private @const {!Promise<?{[key: string]: *}>}
      */
     this.firstFrameProps_ = this.resolvedSpecPromise_.then((spec) => {
       const {keyframes} = spec;
@@ -234,7 +234,7 @@ export class AnimationRunner {
   /**
    * Evaluates a preset's keyframes function using dimensions.
    * @param {!WebKeyframesDef|!WebKeyframesCreateFnDef} keyframesOrCreateFn
-   * @param {!Object<string, *>=} keyframeOptions
+   * @param {!{[key: string]: *}=} keyframeOptions
    * @return {!Promise<!WebKeyframesDef>}
    * @private
    */
@@ -810,7 +810,7 @@ export class AnimationManager {
 
   /**
    * @param {!Element} el
-   * @return {!Object<string, *>}
+   * @return {!{[key: string]: *}}
    * @private
    */
   getKeyframeOptions_(el) {
@@ -845,10 +845,10 @@ export class AnimationSequence {
    * @public
    */
   constructor() {
-    /** @private @const {!Object<string, !Promise>} */
+    /** @private @const {!{[key: string]: !Promise}} */
     this.subscriptionPromises_ = map();
 
-    /** @private @const {!Object<string, !Function>} */
+    /** @private @const {!{[key: string]: !Function}} */
     this.subscriptionResolvers_ = map();
   }
 

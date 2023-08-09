@@ -129,7 +129,7 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
-    /** @private {!Object<string,boolean>} */
+    /** @private {!{[key: string]: boolean}} */
     this.enabledExperiments_ = map();
 
     /** @private {string|undefined} */

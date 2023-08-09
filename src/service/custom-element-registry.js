@@ -17,7 +17,7 @@ const docInitializedMap = new WeakMap();
 
 /**
  * @param {!Window} win
- * @return {!Object<string, typeof ../base-element.BaseElement>}
+ * @return {!{[key: string]: typeof ../base-element.BaseElement}}
  */
 function getExtendedElements(win) {
   if (!win.__AMP_EXTENDED_ELEMENTS) {

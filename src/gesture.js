@@ -121,7 +121,7 @@ export class Gestures {
 
     /**
      * Observers for each type of registered gesture types.
-     * @private {!Object<string, !Observable<!Gesture>>}
+     * @private {!{[key: string]: !Observable<!Gesture>}}
      */
     this.overservers_ = Object.create(null);
 

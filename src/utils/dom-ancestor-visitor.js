@@ -4,7 +4,7 @@ import {computedStyle} from '#core/dom/style';
 import {dev} from '#utils/log';
 
 /** @typedef {
- *    function(!Element, !Object<string, string>): *
+ *    function(!Element, !{[key: string]: string}): *
  *  }
  */
 export let VisitorCallbackTypeDef;
@@ -97,7 +97,7 @@ class Visitor {
 
   /**
    * @param {!Element} element
-   * @param {!Object<string, string>} style
+   * @param {!{[key: string]: string}} style
    */
   callback(element, style) {
     devAssert(

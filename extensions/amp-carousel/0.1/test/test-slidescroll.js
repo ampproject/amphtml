@@ -297,8 +297,7 @@ describes.realWin(
       expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal(null);
     });
 
-    // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
-    it.skip('should hide the unwanted slides', async () => {
+    it('should hide the unwanted slides', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
       const impl = await ampSlideScroll.getImpl();
 
@@ -946,8 +945,7 @@ describes.realWin(
         expect(impl.slidesContainer_.scrollLeft).to.equal(impl.slideWidth_);
       });
 
-      // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
-      it.skip('should hide unwanted slides when looping', async () => {
+      it('should hide unwanted slides when looping', async () => {
         const ampSlideScroll = await getAmpSlideScroll(true);
         const impl = await ampSlideScroll.getImpl();
 
@@ -1211,8 +1209,7 @@ describes.realWin(
         expect(showSlideSpy).to.have.callCount(3);
       });
 
-      // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
-      it.skip('should update slide when `slide` attribute is mutated', async () => {
+      it('should update slide when `slide` attribute is mutated', async () => {
         const ampSlideScroll = await getAmpSlideScroll(true);
         const impl = await ampSlideScroll.getImpl();
         expectAsyncConsoleError(/Invalid \[slide\] value:/, 1);

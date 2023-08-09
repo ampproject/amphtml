@@ -16,7 +16,7 @@ const labelConfig = {
  * @param {string} head
  * @param {string} base
  * @param {string} channel
- * @param {Object} api
+ * @param {object} api
  * @return {Promise<Object>}
  */
 async function _setup(head, base, channel, api) {

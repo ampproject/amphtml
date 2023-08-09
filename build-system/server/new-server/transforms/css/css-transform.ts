@@ -55,9 +55,9 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
     attrs: {
       'amp-runtime': '',
       // Prefix 01 to simulate stable/prod version RTV prefix.
-      'i-amphtml-version': `01${version.value}`,
+      'i-amphtml-version': `01${version.value()}`,
     },
-    content: [css.value],
+    content: [css.value()],
   };
   content.unshift(styleNode);
   return {...head, content};

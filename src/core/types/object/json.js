@@ -16,7 +16,7 @@ let JSONScalarDef;
 
 /**
  * JSON object. It's a map with string keys and JSON values.
- * @typedef {Object<string, ?*>} (* should be JSONValueDef)
+ * @typedef {{[key: string]: ?*}} (* should be JSONValueDef)
  */
 let JSONObjectDef;
 
@@ -136,7 +136,7 @@ export function deepEquals(a, b, depth = 5) {
  * configuration to be transformed into an efficient JSON-parsed representation
  * in the dist build. See https://v8.dev/blog/cost-of-javascript-2019#json
  *
- * @param {Object} obj
+ * @param {object} obj
  * @return {JsonObject}
  */
 export function jsonConfiguration(obj) {

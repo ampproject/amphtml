@@ -1,6 +1,6 @@
 /**
  * @const
- * @type {Object<string, string>}
+ * @type {{[key: string]: string}}
  */
 export const AttributionReporting = {
   ID: 'attribution-reporting',

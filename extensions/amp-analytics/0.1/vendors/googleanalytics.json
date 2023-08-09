@@ -74,5 +74,8 @@
     "_ga": {
       "value": "LINKER_PARAM(_gl, _ga)"
     }
+  },
+  "warningMessage": {
+    "message": "Universal analytics is being deprecated. Switch to Google Analytics 4 (see https://support.google.com/analytics/answer/11583528)"
   }
 }

@@ -21,7 +21,7 @@ export class CountPagesAlgorithm {
     /** @private {!StoryAdPageManager} */
     this.pageManager_ = pageManager;
 
-    /** @private {!Object<string, boolean>} */
+    /** @private {!{[key: string]: boolean}} */
     this.uniquePageIds_ = map();
 
     /** @private {number} */

@@ -1374,6 +1374,12 @@ AMP component developers can implement collection of data using AMP analytics.
 For more information, please refer to
 [Implementing analytics for AMP components](amp-components-analytics.md).
 
+### Google Analytics 4 and AMP
+
+For information on how to set up Google Analytics 4 with amp-analytics see
+[amp-analytics dev guide](https://developers.google.com/analytics/devguides/collection/amp-analytics)
+and [gtagjs guide](https://developers.google.com/tag-platform/gtagjs/amp?technology=gtagjs)
+
 ## Validation
 
 See [`amp-analytics` rules](validator-amp-analytics.protoascii)

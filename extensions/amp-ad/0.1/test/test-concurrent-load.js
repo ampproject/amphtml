@@ -109,8 +109,7 @@ describes.realWin('concurrent-load', {}, (env) => {
       installTimerService(env.win);
     });
 
-    // TODO(jeffkaufman, #13422): this test was silently failing
-    it.skip('should block if incremented', () => {
+    it('should block if incremented', () => {
       incrementLoadingAds(env.win);
       const start = Date.now();
       return waitFor3pThrottle(env.win).then(() =>

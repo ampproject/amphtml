@@ -8,7 +8,7 @@ import {VideoEvents_Enum} from '../../video-interface';
  * If the item does not have a value, the event will not be forwarded 1:1, but
  * it will be listened to.
  *
- * @const {!Object<string, ?string>}
+ * @const {!{[key: string]: ?string}}
  */
 export const BRIGHTCOVE_EVENTS = {
   'playing': VideoEvents_Enum.PLAYING,

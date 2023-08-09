@@ -62,7 +62,7 @@ export class SessionManager {
     /** @private {!Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
-    /** @private {!Object<string, ?SessionInfoDef>} */
+    /** @private {!{[key: string]: ?SessionInfoDef}} */
     this.sessions_ = map();
 
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
