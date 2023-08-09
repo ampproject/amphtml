@@ -667,7 +667,7 @@ describes.realWin(
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
-      it('should rewind the story page when viewer becomes inactive', async () => {
+      it('should reset the active page when viewer becomes inactive', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
@@ -678,6 +678,19 @@ describes.realWin(
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.NOT_ACTIVE
         );
+      });
+
+      it('should reset the active page even when viewer becomes inactive before the active page is set', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        // Should not throw error of "Cannot read properties of null (reading 'setState')",
+        // even when the active page is not set yet.
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
+
+        // Resolves the active page and set the page state to inactive.
+        await story.layoutCallback();
       });
 
       it('should pause the story when viewer becomes hidden', async () => {
@@ -1211,6 +1224,25 @@ describes.realWin(
 
           story.activePage_.element.dispatchEvent(clickEvent);
 
+          expect(story.activePage_.element.id).to.equal('page-1');
+        });
+
+        it('should navigate when performing a navigational click even if the click happens before the active page is set', async () => {
+          await createStoryWithPages(4, [
+            'cover',
+            'page-1',
+            'page-2',
+            'page-3',
+          ]);
+
+          // Should not throw error of "Cannot read properties of null (reading 'next')",
+          // even when the active page is not set yet.
+          const firstPageEl = element.querySelector('amp-story-page');
+          const clickEvent = new MouseEvent('click', {clientX: 200});
+          firstPageEl.dispatchEvent(clickEvent);
+
+          // Resolves the active page and navigates to the next page.
+          await story.layoutCallback();
           expect(story.activePage_.element.id).to.equal('page-1');
         });
 
