@@ -1,5 +1,10 @@
 #include "cpp/htmlparser/allocator.h"
 
+#include <array>
+#include <cstdint>
+#include <string>
+#include <vector>
+
 #include "gtest/gtest.h"
 
 // Memory leaks will automatically be detected by the test framework.
@@ -12,9 +17,9 @@ TEST(AllocatorTest, BasicTest) {
     int32_t a;
     int64_t b;
     std::string c;
-    short d;
+    uint16_t d;
     Data() {}
-    Data(int32_t a_, int64_t b_, std::string c_, short d_)
+    Data(int32_t a_, int64_t b_, std::string c_, uint16_t d_)
         : a(a_), b(b_), c(c_), d(d_) {}
   };
 
@@ -146,7 +151,7 @@ TEST(AllocatorTest, DestructorCalled) {
 
 TEST(AllocatorTest, BitFields) {
   struct HasBitFields {
-    short s;
+    uint16_t s;
     char c;
     int flip : 1;
     int nybble : 4;
