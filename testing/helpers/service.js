@@ -97,7 +97,6 @@ const noneValues = {
   'animation-direction': ['normal', 'initial'],
   'animation-fill-mode': ['none', 'initial'],
   'animation-play-state': ['running', 'initial', /* IE11 */ ''],
-  'animation-timeline': ['auto', 'initial'],
 };
 
 /**
