@@ -90,13 +90,14 @@ export function waitFor(callback, errorMessage) {
 
 const noneValues = {
   'animation-name': ['none', 'initial'],
-  'animation-duration': ['0s', 'initial'],
+  'animation-duration': ['0s', 'auto', 'initial'],
   'animation-timing-function': ['ease', 'initial'],
   'animation-delay': ['0s', 'initial'],
   'animation-iteration-count': ['1', 'initial'],
   'animation-direction': ['normal', 'initial'],
   'animation-fill-mode': ['none', 'initial'],
   'animation-play-state': ['running', 'initial', /* IE11 */ ''],
+  'animation-timeline': ['auto', 'initial'],
 };
 
 /**
