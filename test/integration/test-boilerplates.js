@@ -1,5 +1,6 @@
 import {getStyle} from '#core/dom/style';
 
+import {isAnimationNone} from '#testing/helpers/service';
 import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;
@@ -38,8 +39,7 @@ describes.sandboxed('New Visibility Boilerplate', {}, () => {
       expect(getStyle(fixture.win.document.body, 'visibility')).to.equal(
         'visible'
       );
-      // TODO(#39152): this breaks in Microsoft Edge.
-      // expect(isAnimationNone(fixture.win.document.body)).to.be.true;
+      expect(isAnimationNone(fixture.win.document.body, true)).to.be.true;
     });
   });
 });
