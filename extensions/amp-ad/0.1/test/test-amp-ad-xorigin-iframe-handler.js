@@ -407,9 +407,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           sentinel: 'amp3ptest' + testIndex,
         });
 
-        const data3 = await iframe.expectMessageFromParent(
-          'embed-size-changed'
-        );
+        const data3 =
+          await iframe.expectMessageFromParent('embed-size-changed');
 
         expect(data3).to.jsonEqual({
           requestedWidth: 114,

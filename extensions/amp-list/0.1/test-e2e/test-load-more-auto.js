@@ -28,9 +28,8 @@ describes.endtoend(
         'none'
       );
 
-      const failedIndicator = await controller.findElement(
-        '[load-more-failed]'
-      );
+      const failedIndicator =
+        await controller.findElement('[load-more-failed]');
       await expect(failedIndicator).to.be.ok;
       await expect(
         controller.getElementCssValue(failedIndicator, 'display')
