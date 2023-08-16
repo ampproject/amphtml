@@ -96,10 +96,7 @@ class AmpWorker {
     };
 
     if (self.trustedTypes && self.trustedTypes.createPolicy) {
-      const policy = self.trustedTypes.createPolicy(
-        'amp-worker#fetchUrl',
-        policy
-      );
+      policy = self.trustedTypes.createPolicy('amp-worker#fetchUrl', policy);
     }
 
     url = policy
