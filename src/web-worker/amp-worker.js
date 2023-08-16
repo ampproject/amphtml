@@ -75,7 +75,7 @@ class AmpWorker {
 
     let url = '';
 
-    const policy = {
+    let policy = {
       createScriptURL: function (url) {
         // Only allow the correct webworker url to pass through
         const regexURL =
@@ -96,10 +96,7 @@ class AmpWorker {
     };
 
     if (self.trustedTypes && self.trustedTypes.createPolicy) {
-      const policy = self.trustedTypes.createPolicy(
-        'amp-worker#fetchUrl',
-        policy
-      );
+      policy = self.trustedTypes.createPolicy('amp-worker#fetchUrl', policy);
     }
 
     url = policy
