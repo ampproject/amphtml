@@ -75,7 +75,7 @@ class AmpWorker {
 
     let url = '';
 
-    const policy = {
+    let policy = {
       createScriptURL: function (url) {
         // Only allow the correct webworker url to pass through
         const regexURL =
