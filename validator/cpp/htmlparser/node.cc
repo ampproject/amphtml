@@ -431,7 +431,7 @@ void Node::UpdateChildNodesPositions(Node* relative_node) {
   }
 }
 
-std::string Node::DebugString() {
+std::string Node::DebugString() const {
   std::ostringstream ost;
   switch (node_type_) {
     case NodeType::ELEMENT_NODE:
