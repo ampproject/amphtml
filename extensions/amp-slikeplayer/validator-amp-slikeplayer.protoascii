@@ -1,0 +1,33 @@
+tags: {  # amp-slikeplayer
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-slikeplayer"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-slikeplayer>
+  html_format: AMP
+  tag_name: "AMP-SLIKEPLAYER"
+  requires_extension: "amp-slikeplayer"
+   attrs: {
+    name: "data-apikey"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-videoid"
+    mandatory: true
+  }
+  spec_url: "https://developers.slike.in/html5/"
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+  }
+}
