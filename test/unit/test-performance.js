@@ -3,6 +3,8 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
+import {toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
@@ -36,6 +38,7 @@ describes.realWin('performance', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
+    toggleExperiment(win, 'interaction-to-next-paint', true);
     clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
       // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).
@@ -429,7 +432,7 @@ describes.realWin('performance', {amp: true}, (env) => {
             viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
           ).to.be.jsonEqual({
             label: 'inp',
-            delta: 0,
+            delta: 40,
           });
           expect(
             viewerSendMessageStub.withArgs('tick').getCall(5).args[1]
@@ -1377,6 +1380,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
   describe('forwards INP metrics', () => {
     let PerformanceObserverConstructorStub, performanceObserver;
     beforeEach(() => {
+      toggleExperiment(env.win, 'interaction-to-next-paint', true);
+
       // Stub and fake the PerformanceObserver constructor.
       const PerformanceObserverStub = env.sandbox.stub();
       PerformanceObserverStub.callsFake((callback) => {
@@ -1443,6 +1448,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     let PerformanceObserverConstructorStub, performanceObserver;
     beforeEach(() => {
       // Stub and fake the PerformanceObserver constructor.
+      toggleExperiment(env.win, 'interaction-to-next-paint', true);
+
       const PerformanceObserverStub = env.sandbox.stub();
       PerformanceObserverStub.callsFake((callback) => {
         performanceObserver = new PerformanceObserverImpl(callback);

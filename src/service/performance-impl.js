@@ -9,6 +9,8 @@ import {map} from '#core/types/object';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
+import {isExperimentOn} from '#experiments';
+
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
@@ -28,6 +30,8 @@ const QUEUE_LIMIT = 50;
 
 const CLS_SESSION_GAP = 1000;
 const CLS_SESSION_MAX = 5000;
+
+const INP_REPORTING_THRESHOLD = 40;
 
 const TAG = 'Performance';
 
@@ -231,7 +235,9 @@ export class Performance {
     /**
      * Whether the user agent supports the interaction to next paint metric.
      */
-    this.supportsEvents_ = supportedEntryTypes.includes('event');
+    this.supportsEvents_ =
+      supportedEntryTypes.includes('event') &&
+      isExperimentOn(win, 'interaction-to-next-paint');
 
     if (!this.supportsEvents_) {
       this.metrics_.rejectSignal(
@@ -255,7 +261,7 @@ export class Performance {
     whenDocumentComplete(win.document).then(() => this.onload_());
 
     whenDocumentComplete(win.document).then(() =>
-      this.tickInteractionToNextPaint_(0)
+      this.tickInteractionToNextPaint_(INP_REPORTING_THRESHOLD)
     );
     this.registerPerformanceObserver_();
 
@@ -494,7 +500,7 @@ export class Performance {
     if (this.supportsEvents_) {
       this.createPerformanceObserver_(processEntry, {
         type: 'event',
-        durationThreshold: 16, // Minimim duration of 16ms, as provided by the spec
+        durationThreshold: INP_REPORTING_THRESHOLD, // Minimim duration of 40ms, as implemented in Chrome web-vitals
         buffered: true,
       });
     }
