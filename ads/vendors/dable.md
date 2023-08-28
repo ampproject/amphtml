@@ -13,6 +13,7 @@
   data-item-id="testitem"
   data-article-section="politics"
   data-article-section2="global"
+  data-org-service-id="1"
 >
 </amp-embed>
 ```
@@ -33,3 +34,4 @@ For configuration details and to generate your tags, please contact https://admi
 -   `data-article-section`
 -   `data-article-section2`
 -   `data-article-section3`
+-   `data-org-service-id`
