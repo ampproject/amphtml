@@ -164,7 +164,8 @@ export function createExtensionScript(win, extensionId, version) {
       // Only allow trusted URLs
       if (
         regexURL.test(url) ||
-        (getMode().test && testRegexURL.test(new URL(url).hostname)) ||
+        ((getMode().test || getMode().localDev) &&
+          testRegexURL.test(new URL(url).hostname)) ||
         new URL(url).host === 'fonts.googleapis.com'
       ) {
         return url;
