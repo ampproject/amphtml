@@ -113,7 +113,7 @@ transformed_feature_tests/amp-img.html:90:4 The attribute 'slot' in tag 'i-ampht
 transformed_feature_tests/amp-img.html:98:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
 |      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
 |    </amp-img>
-|    
+|
 |    <!-- Invalid: amp-img[layout=responsive] > i-amphtml-sizer[slot="i-amphtml-svc"] fetchpriority="bad" -->
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" fetchpriority="bad" i-amphtml-ssr>
 >>   ^~~~~~~~~
