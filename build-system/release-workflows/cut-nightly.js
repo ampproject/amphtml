@@ -57,11 +57,16 @@ async function getCommit(octokit) {
 
   for (const {sha} of commits.data) {
     const checkRuns = (
-      await octokit.paginate(octokit.rest.checks.listForRef, {
-        ...params,
-        ref: sha,
-        'per_page': 100,
-      })
+      await octokit.paginate(
+        // TODO(danielrozenberg): seems to be related to https://github.com/octokit/plugin-paginate-rest.js/issues/350
+        // restore this when the types match again: await octokit.rest.checks.listForRef,
+        'GET /repos/{owner}/{repo}/commits/{ref}/check-runs',
+        {
+          ...params,
+          ref: sha,
+          'per_page': 100,
+        }
+      )
     ).filter(
       ({'external_id': id, name}) =>
         id !== GITHUB_EXTERNAL_ID && !CHECKS_TO_SKIP.includes(name)
