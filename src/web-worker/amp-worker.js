@@ -82,7 +82,7 @@ class AmpWorker {
           /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
 
         if (
-          (regexURL.test(url) || getMode().test) &&
+          (regexURL.test(url) || getMode().test || getMode().localDev) &&
           (url.endsWith('ww.js') ||
             url.endsWith('ww.min.js') ||
             url.endsWith('ww.mjs') ||
