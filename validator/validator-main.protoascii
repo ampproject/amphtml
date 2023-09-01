@@ -160,6 +160,12 @@ attr_lists: {
   attrs: { name: "charset" value_casei: "utf-8" }
   attrs: { name: "color" }
   attrs: { name: "crossorigin" }
+  attrs: {
+    name: "fetchpriority"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "hreflang" }
   attrs: { name: "media" }
   attrs: { name: "sizes" }
@@ -1800,6 +1806,12 @@ attr_lists: {
     name: "crossorigin"
     value_casei: "anonymous"
     value_casei: "use-credentials"
+  }
+  attrs: {
+    name: "fetchpriority"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
   }
   attrs: { name: "height" }
   attrs: { name: "hspace" }
@@ -3982,6 +3994,12 @@ tags: {  # <amp-img i-amphtml-ssr>
     value_casei: "low"
     value_casei: "auto"
   }
+  attrs: {
+    name: "fetchpriority",
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -4190,6 +4208,12 @@ tags: {
   attrs: { name: "attribution" }
   attrs: { name: "height" }
   # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "fetchpriority"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: {
     name: "importance"
     value_casei: "high"
