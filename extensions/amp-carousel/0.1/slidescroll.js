@@ -400,7 +400,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
         if (this.hasNativeSnapPoints_) {
           this.updateOnScroll_(currentScrollLeft, ActionTrust_Enum.LOW);
         } else {
-          this.customSnap_(currentScrollLeft, undefined, ActionTrust_Enum.LOW);
+          this.customSnap_(currentScrollLeft, undefined, ActionTrust_Enum.HIGH);
         }
       }, timeout)
     );
