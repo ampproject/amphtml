@@ -18,9 +18,9 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "4a8c64d5836fafd66728c5c044d3af2e93ac8bf87ffb809b9675dc120dc6d718",
-    strip_prefix = "protobuf-f7d6dd15b27deeb7d8c879e49c6919d136ee1cb6",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/f7d6dd15b27deeb7d8c879e49c6919d136ee1cb6.zip"],
+    sha256 = "750428a8c7f1a75a8e6027e30b46a1c2f0475205f44563589736e0f279b938c0",
+    strip_prefix = "protobuf-f0dc78d7e6e331b8c6bb2d5283e06aa26883ca7c",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/f0dc78d7e6e331b8c6bb2d5283e06aa26883ca7c.zip"],
 )
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
@@ -65,9 +65,9 @@ rules_proto_toolchains()
 
 http_archive(
     name = "emsdk",
-    sha256 = "05bad056df1286f920c675504787510434ae8b1b2d83746e0a9b0589429dbe55",
-    strip_prefix = "emsdk-9b0db91883452051aca8deddc932363aab29060b/bazel",
-    url = "https://github.com/emscripten-core/emsdk/archive/9b0db91883452051aca8deddc932363aab29060b.tar.gz",
+    sha256 = "836e9dc2ea0df6e9369f58fcb884df0447304a089cdbef2cd06a28cf2d06b53d",
+    strip_prefix = "emsdk-fc645b7626ebf86530dbd82fbece74d457e7ae07/bazel",
+    url = "https://github.com/emscripten-core/emsdk/archive/fc645b7626ebf86530dbd82fbece74d457e7ae07.tar.gz",
 )
 
 load("@emsdk//:deps.bzl", emsdk_deps = "deps")
