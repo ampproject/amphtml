@@ -24,15 +24,13 @@ function pushBuildWorkflow() {
   try {
     generateCircleCiShardTestFileList(unitTestPaths);
     timedExecOrThrow(
-      `amp unit --headless --coverage --report --filelist ${FILELIST_PATH}`,
+      `amp unit --headless --coverage --filelist ${FILELIST_PATH}`,
       'Unit tests failed!'
     );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
     }
-  } finally {
-    timedExecOrDie('amp test-report-upload');
   }
 }
 
