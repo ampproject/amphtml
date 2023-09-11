@@ -66,7 +66,7 @@ function createMocha_() {
   let reporter;
   if (argv.testnames || argv.watch) {
     reporter = '';
-  } else if (argv.report || isCircleciBuild()) {
+  } else if (isCircleciBuild()) {
     // TODO(#28387) clean up this typing.
     reporter = /** @type {*} */ (ciReporter);
   } else {
@@ -229,7 +229,6 @@ e2e.flags = {
   'watch': 'Watch for changes in files, runs corresponding test(s)',
   'headless': 'Run the browser in headless mode',
   'debug': 'Print debugging information while running tests',
-  'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
   'filelist': 'Run tests specified in this comma-separated list of test files',
 };
