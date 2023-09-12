@@ -15,6 +15,7 @@ import {
   installScrollToggledFx,
 } from './providers/fx-provider';
 
+// DO NOT MERGE testing changes
 const TAG = 'amp-fx-collection';
 
 /**
