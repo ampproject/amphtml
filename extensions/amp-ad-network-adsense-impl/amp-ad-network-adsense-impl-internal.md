@@ -39,18 +39,18 @@ The `amp-consent` response may set the following fields in the `sharedData` obje
     <td><strong>Possible Values</strong></td>
   </tr>
   <tr>
-    <td>`"adsense-tfua"`</td>
+    <td><code>"adsense-tfua"</code></td>
     <td>Whether the slot should be treated as under-age of consent.</td>
-    <td>`0` or `1`</td>
+    <td><code>0</code> or <code>1</code></td>
   </tr>
   <tr>
-    <td>`"adsense-tfcd"`</td>
+    <td><code>"adsense-tfcd"</code></td>
     <td>Whether the slot should be treated as child-directed.</td>
-    <td>`0` or `1`</td>
+    <td><code>0</code> or <code>1</code></td>
   </tr>
 </table>
 
-See [AdSense Help Center article](https://support.google.com/dfp_premium/answer/7678538) for more information.
+See [AdSense Help Center article](https://support.google.com/dfp_premium/answer/7678538) and [Restricted Data Processing article](https://support.google.com/adsense/answer/9009582?hl=en) for more information.
 
 #### Examples
 
