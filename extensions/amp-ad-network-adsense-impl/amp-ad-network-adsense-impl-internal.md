@@ -30,6 +30,26 @@ If the user has responded negatively to the amp-consent component (user rejects 
 If the user’s response to the amp-consent is unknown (user dismisses the consent prompt), by default, no ad requests are sent.  
 If `data-npa-on-unknown-consent` is set to true, non-personalized ads will be requested.
 
+The `amp-consent` response may set the following fields in the `sharedData` object for additional controls:
+
+<table>
+  <tr>
+    <td><strong>Key</strong></td>
+    <td><strong>Description</strong></td>
+    <td><strong>Possible Values</strong></td>
+  </tr>
+  <tr>
+    <td>`"adsense-tfua"`</td>
+    <td>Whether the slot should be treated as under-age of consent.</td>
+    <td>`0` or `1`</td>
+  </tr>
+  <tr>
+    <td>`"adsense-tfcd"`</td>
+    <td>Whether the slot should be treated as child-directed.</td>
+    <td>`0` or `1`</td>
+  </tr>
+</table>
+
 See [AdSense Help Center article](https://support.google.com/dfp_premium/answer/7678538) for more information.
 
 #### Examples

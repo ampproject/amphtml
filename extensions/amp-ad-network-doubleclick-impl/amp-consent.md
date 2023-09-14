@@ -7,3 +7,25 @@ If the user’s response to the amp-consent is unknown (user dismisses the conse
 If `data-npa-on-unknown-consent` is set to true, non-personalized ads will be requested but RTC call-outs are not sent.
 
 See [Google Ad Manager Help Center article](https://support.google.com/dfp_premium/answer/7678538) for more information.
+
+## Supported `sharedData` key-values
+
+The `amp-consent` response may set the following fields in the `sharedData` object for additional controls:
+
+<table>
+  <tr>
+    <td><strong>Key</strong></td>
+    <td><strong>Description</strong></td>
+    <td><strong>Possible Values</strong></td>
+  </tr>
+  <tr>
+    <td>`"doubleclick-tfua"`</td>
+    <td>Whether the slot should be treated as under-age of consent.</td>
+    <td>`0` or `1`</td>
+  </tr>
+  <tr>
+    <td>`"doubleclick-tfcd"`</td>
+    <td>Whether the slot should be treated as child-directed.</td>
+    <td>`0` or `1`</td>
+  </tr>
+</table>
