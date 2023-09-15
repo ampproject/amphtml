@@ -5,8 +5,8 @@
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Google Ad Manager implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
-    for Fast Fetch details, and <a href="/extensions/amp-a4a/amp-a4a-format.md">here</a>
+    <td>Google Ad Manager implementation of the AMP Ad tag.  Click <a href="https://github.com/ampproject/amphtml/blob/main/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
+    for Fast Fetch details, and <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md">here</a>
     for AMPHTML ad format details. This tag should
     not be directly referenced by pages and instead is dynamically loaded
     via the amp-ad tag.  However, in order to remove an async script load
