@@ -385,7 +385,10 @@ tags: {
                  "https://(use|pro|kit)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+"
                  "/css/[0-9a-zA-Z-]+\\.css|"
                  "https://(use|pro|kit)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|"
-                 "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
+                 "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css|"
+                 "https://cdnjs\\.cloudflare\\.com/ajax/libs/font-awesome/"
+                 "([0-9]+\\.?)+/css/[0-9a-zA-Z-]+\\.min\\.css"
+
   }
   attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
   attrs: { name: "media" }

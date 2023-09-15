@@ -3,6 +3,8 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
+import {toggleExperiment} from '#experiments';
+
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
@@ -36,6 +38,7 @@ describes.realWin('performance', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
+    toggleExperiment(win, 'interaction-to-next-paint', true);
     clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
       // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).
@@ -254,7 +257,7 @@ describes.realWin('performance', {amp: true}, (env) => {
             value: 100,
           });
 
-          expect(flushSpy).to.have.callCount(5);
+          expect(flushSpy).to.have.callCount(6);
           expect(perf.events_.length).to.equal(0);
         });
       });
@@ -284,9 +287,9 @@ describes.realWin('performance', {amp: true}, (env) => {
           perf.coreServicesAvailable(),
           ampdoc.whenFirstVisible(),
         ]).then(() => {
-          expect(flushSpy).to.have.callCount(4);
+          expect(flushSpy).to.have.callCount(5);
           expect(perf.isMessagingReady_).to.be.false;
-          const count = 5;
+          const count = 6;
           expect(perf.events_.length).to.equal(count);
         });
       });
@@ -427,6 +430,12 @@ describes.realWin('performance', {amp: true}, (env) => {
           });
           expect(
             viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
+          ).to.be.jsonEqual({
+            label: 'inp',
+            delta: 40,
+          });
+          expect(
+            viewerSendMessageStub.withArgs('tick').getCall(5).args[1]
           ).to.be.jsonEqual({
             label: 'msr',
             delta: 1,
@@ -1363,6 +1372,140 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         {
           label: 'responseStart',
           delta: 7,
+        },
+      ]);
+    });
+  });
+
+  describe('forwards INP metrics', () => {
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      toggleExperiment(env.win, 'interaction-to-next-paint', true);
+
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+      PerformanceObserverStub.callsFake((callback) => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+    });
+
+    it('after performance service registered', () => {
+      // Pretend that the Navigation API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['event'];
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+      perf.ampdoc_ = env.ampdoc;
+      perf.registerPerformanceObserver_();
+
+      // Fake interaction events.
+      perf.tickInteractionToNextPaint_(38);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(380);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(30);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
+        },
+      ]);
+    });
+  });
+
+  describe('forwards INP metrics', () => {
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      // Stub and fake the PerformanceObserver constructor.
+      toggleExperiment(env.win, 'interaction-to-next-paint', true);
+
+      const PerformanceObserverStub = env.sandbox.stub();
+      PerformanceObserverStub.callsFake((callback) => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+    });
+
+    it('after performance service registered', () => {
+      // Pretend that the Navigation API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['event'];
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+      perf.ampdoc_ = env.ampdoc;
+      perf.registerPerformanceObserver_();
+
+      // Fake interaction events.
+      perf.tickInteractionToNextPaint_(38);
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(380);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
+        },
+      ]);
+
+      perf.tickInteractionToNextPaint_(30);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'inp',
+          delta: 38,
+        },
+        {
+          label: 'inp',
+          delta: 380 - 38,
         },
       ]);
     });
