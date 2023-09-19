@@ -119,12 +119,12 @@ describes.realWin(
           mockMetadata = getMetadata(false);
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
-            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
+            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata, 4)
           ).to.deep.equals({
             gdprApplies: false,
             cmpLoaded: true,
             cmpStatus: 'loaded',
-            tcfPolicyVersion: 2,
+            tcfPolicyVersion: 4,
           });
         });
 

@@ -252,8 +252,13 @@ export class TcfApiCommandManager {
    * @param {!Window} win
    */
   handlePingEvent_(payload, win) {
-    this.policyManager_.getConsentMetadataInfo('default').then((metadata) => {
-      const returnValue = this.getMinimalPingReturn_(metadata);
+    const metadataPromise =
+      this.policyManager_.getConsentMetadataInfo('default');
+    const tcfPolicyVersionPromise =
+      this.policyManager_.getTcfPolicyVersion('default');
+
+    Promise.all([metadataPromise, tcfPolicyVersionPromise]).then((result) => {
+      const returnValue = this.getMinimalPingReturn_(result[0], result[1]);
       const {callId} = payload;
 
       this.sendTcfApiReturn_(win, returnValue, callId);
@@ -263,15 +268,19 @@ export class TcfApiCommandManager {
   /**
    * Create minimal PingReturn object.
    * @param {?Object} metadata
+   * @param {number=} opt_tcfPolicyVersion
    * @return {!MinimalPingReturn}
    */
-  getMinimalPingReturn_(metadata) {
+  getMinimalPingReturn_(metadata, opt_tcfPolicyVersion) {
     const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
     return {
       gdprApplies,
       cmpLoaded: CMP_LOADED,
       cmpStatus: CMP_STATUS,
-      tcfPolicyVersion: TCF_POLICY_VERSION_FALLBACK,
+      tcfPolicyVersion:
+        typeof opt_tcfPolicyVersion == 'number'
+          ? opt_tcfPolicyVersion
+          : TCF_POLICY_VERSION_FALLBACK,
     };
   }
 
@@ -333,11 +342,12 @@ export class TcfApiCommandManager {
 
   /**
    * @param {?Object} metadata
+   * @param {number=} opt_tcfPolicyVersion
    * @return {!MinimalPingReturn}
    * @visibleForTesting
    */
-  getMinimalPingReturnForTesting(metadata) {
-    return this.getMinimalPingReturn_(metadata);
+  getMinimalPingReturnForTesting(metadata, opt_tcfPolicyVersion) {
+    return this.getMinimalPingReturn_(metadata, opt_tcfPolicyVersion);
   }
 
   /**
