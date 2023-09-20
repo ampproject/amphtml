@@ -33,7 +33,6 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-  maybeInsertOriginTrialToken,
   truncAndTimeUrl,
 } from '#ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '#ads/google/utils';
@@ -566,7 +565,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
-    maybeInsertOriginTrialToken(this.win);
     this.setPageLevelExperiments(this.extractUrlExperimentId_());
     const pubEnabledSra = !!this.win.document.querySelector(
       'meta[name=amp-ad-doubleclick-sra]'
