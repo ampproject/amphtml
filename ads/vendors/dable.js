@@ -17,10 +17,7 @@ export function dable(global, data) {
     'setService',
     data['serviceName'] || global.window.context.location.hostname
   );
-  global.dable(
-    'setURL',
-    global.window.context.canonicalUrl || global.window.context.sourceUrl
-  );
+  global.dable('setURL', global.window.context.sourceUrl);
   global.dable('setRef', global.window.context.referrer);
 
   const slot = global.document.createElement('div');
@@ -37,7 +34,6 @@ export function dable(global, data) {
   const articleSection = data['articleSection'] || '';
   const articleSection2 = data['articleSection2'] || '';
   const articleSection3 = data['articleSection3'] || '';
-  const orgServiceId = data['orgServiceId'] || '';
   const widgetOpts = {};
   const logOpts = {};
 
@@ -55,10 +51,6 @@ export function dable(global, data) {
   if (articleSection3) {
     widgetOpts.category3 = articleSection3;
     logOpts.category3 = articleSection3;
-  }
-  if (orgServiceId) {
-    widgetOpts.orgServiceId = orgServiceId;
-    logOpts.orgServiceId = orgServiceId;
   }
 
   if (itemId) {

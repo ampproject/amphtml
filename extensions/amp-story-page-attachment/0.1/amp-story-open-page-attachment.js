@@ -102,14 +102,9 @@ const ctaLabelFromAttr = (element) =>
  * @return {!Promise<string>}
  */
 const openLabelOrFallback = (element, label) => {
-  // Disallow empty label
   if (label) {
-    const trimmedLabel = label.trim();
-    if (trimmedLabel) {
-      return Promise.resolve(trimmedLabel);
-    }
+    return Promise.resolve(label.trim());
   }
-
   const localizationService = Services.localizationForDoc(element);
   return localizationService.getLocalizedStringAsync(
     LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL

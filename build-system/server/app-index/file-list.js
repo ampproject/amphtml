@@ -14,17 +14,18 @@ const linksToExample = (shouldContainBasepath, opt_name) =>
  * @param {{ name: string, href: string, boundHref?: string|undefined }} config
  * @return {string}
  */
-const FileListItem = ({boundHref, href, name}) => html`
-  <div class="file-link-container" role="listitem">
-    <a
-      class="file-link"
-      ${boundHref ? `[href]="${boundHref}" ` : ''}
-      ${href ? `href="${href}" ` : ''}
-    >
-      ${name}
-    </a>
-  </div>
-`;
+const FileListItem = ({boundHref, href, name}) =>
+  html`
+    <div class="file-link-container" role="listitem">
+      <a
+        class="file-link"
+        ${boundHref ? `[href]="${boundHref}" ` : ''}
+        ${href ? `href="${href}" ` : ''}
+      >
+        ${name}
+      </a>
+    </div>
+  `;
 
 const FileListItemBound = ({href, htmlEnvelopePrefix, name}) =>
   linksToExample(href)
@@ -52,20 +53,21 @@ const FileListHeading = ({basepath}) => html`
   </div>
 `;
 
-const FileList = ({basepath, fileSet, htmlEnvelopePrefix}) => html`
-  <div class="file-list">
-    ${FileListHeading({basepath})}
-    <div role="list">
-      ${joinFragments(fileSet, (name) =>
-        FileListItemBound({
-          name,
-          href: maybePrefixExampleDocHref(basepath, name, htmlEnvelopePrefix),
-          htmlEnvelopePrefix,
-        })
-      )}
+const FileList = ({basepath, fileSet, htmlEnvelopePrefix}) =>
+  html`
+    <div class="file-list">
+      ${FileListHeading({basepath})}
+      <div role="list">
+        ${joinFragments(fileSet, (name) =>
+          FileListItemBound({
+            name,
+            href: maybePrefixExampleDocHref(basepath, name, htmlEnvelopePrefix),
+            htmlEnvelopePrefix,
+          })
+        )}
+      </div>
     </div>
-  </div>
-`;
+  `;
 
 module.exports = {
   FileList,

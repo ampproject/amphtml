@@ -198,9 +198,4 @@ export const EXPERIMENTS = [
     name: 'Enable new privacy preserving attribution reporting APIs',
     spec: 'https://github.com/ampproject/amphtml/pull/35347',
   },
-  {
-    id: 'interaction-to-next-paint',
-    name: 'Enable new INP metrics reporting on amp-analytics',
-    spec: 'https://github.com/ampproject/amphtml/issues/38470',
-  },
 ];

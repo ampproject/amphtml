@@ -18,7 +18,6 @@ import {user} from '#utils/log';
 import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 import {Toast} from 'extensions/amp-story/1.0/toast';
-import {AMP_STORY_COPY_URL} from 'src/amp-story-player/event';
 
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
@@ -27,7 +26,6 @@ import {
   StateProperty,
   UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {AmpStoryViewerMessagingHandler} from '../../amp-story/1.0/amp-story-viewer-messaging-handler';
 import {
   createShadowRootWithStyle,
   dependsOnStoryServices,
@@ -99,12 +97,6 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
 
     /** @private @const {!../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win);
-
-    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = null;
-
-    /** @private {?AmpStoryViewerMessagingHandler} */
-    this.viewerMessagingHandler_ = null;
   }
 
   /**
@@ -122,11 +114,6 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
     localizeTemplate(this.rootEl_, this.element);
     createShadowRootWithStyle(this.element, this.rootEl_, CSS);
     this.initializeListeners_();
-
-    this.viewer_ = Services.viewerForDoc(this.win.document.documentElement);
-    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
-      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
-      : null;
   }
 
   /**
@@ -346,54 +333,29 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
       getAmpdoc(this.storyEl_)
     ).canonicalUrl;
 
-    if (this.viewerMessagingHandler_) {
-      this.viewerMessagingHandler_.onMessage('copyComplete', (data) => {
-        if (data.success) {
-          this.showCopySuccessfulToast_(data.url);
-        } else {
-          this.showCopyFailedToast_();
-        }
-      });
-      this.viewerMessagingHandler_.send('documentStateUpdate', {
-        'state': AMP_STORY_COPY_URL,
-        'value': url,
-      });
-    } else {
-      copyTextToClipboard(
-        this.win,
-        url,
-        this.showCopySuccessfulToast_.bind(this, url),
-        this.showCopyFailedToast_
-      );
-    }
-  }
-
-  /**
-   * @param {string} url
-   * @private
-   */
-  showCopySuccessfulToast_(url) {
-    this.localizationService_
-      .getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
-      )
-      .then((successString) =>
-        Toast.show(
-          this.storyEl_,
-          this.buildCopySuccessfulToast_(url, successString)
-        )
-      );
-  }
-
-  /**
-   * @private
-   */
-  showCopyFailedToast_() {
-    this.localizationService_
-      .getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
-      )
-      .then((failureString) => Toast.show(this.storyEl_, failureString));
+    copyTextToClipboard(
+      this.win,
+      url,
+      () => {
+        this.localizationService_
+          .getLocalizedStringAsync(
+            LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+          )
+          .then((successString) =>
+            Toast.show(
+              this.storyEl_,
+              this.buildCopySuccessfulToast_(url, successString)
+            )
+          );
+      },
+      () => {
+        this.localizationService_
+          .getLocalizedStringAsync(
+            LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+          )
+          .then((failureString) => Toast.show(this.storyEl_, failureString));
+      }
+    );
   }
 
   /**

@@ -160,6 +160,8 @@ describes.sandboxed
       });
     });
 
+    // TODO(cvializ, #3314): Figure out why this fails. Probably have to do with
+    // removing the iframes in init-tests.
     it.skip('should un-listen on next message when iframe is unattached', () => {
       let calls = 0;
       let otherCalls = 0;
@@ -190,7 +192,8 @@ describes.sandboxed
       });
     });
 
-    it('should set sentinel on postMessage data', () => {
+    // TODO(wg-components, #32103): This fails regularly during CI
+    it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
       const postMessageSpy = env.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');

@@ -58,6 +58,7 @@ createTask('serve');
 createTask('server-tests', 'serverTests');
 createTask('storybook');
 createTask('sweep-experiments', 'sweepExperiments');
+createTask('test-report-upload', 'testReportUpload');
 createTask('unit');
 createTask('validate-html-fixtures', 'validateHtmlFixtures');
 createTask('validator');

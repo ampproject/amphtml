@@ -106,6 +106,7 @@ exports.rules = [
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
+      'ads/google/a4a/**->src/consent.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
@@ -242,7 +243,6 @@ exports.rules = [
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/request-utils.js',
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/toast.js',
-      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
 
       // Story Shopping
       'extensions/amp-story-shopping/0.1/amp-story-shopping.js->extensions/amp-story/1.0/utils.js',
@@ -366,13 +366,13 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-redbull-player/0.1/amp-redbull-player.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-delight-player/0.1/amp-delight-player.js->' +
-        'src/service/video-manager-impl.js',
-      'extensions/amp-slikeplayer/0.1/amp-slikeplayer.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',

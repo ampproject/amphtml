@@ -20,13 +20,15 @@ const jobName = 'unminified-tests.js';
 function pushBuildWorkflow() {
   try {
     timedExecOrThrow(
-      'amp integration --nobuild --headless --coverage',
+      'amp integration --nobuild --headless --coverage --report',
       'Integration tests failed!'
     );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
     }
+  } finally {
+    timedExecOrDie('amp test-report-upload');
   }
 }
 

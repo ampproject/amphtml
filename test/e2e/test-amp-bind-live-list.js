@@ -12,8 +12,9 @@ describes.endtoend(
 
     describe('with <amp-live-list>', () => {
       it('should detect bindings in initial live-list elements', async () => {
-        const liveListChildren =
-          await controller.findElements('#liveListItems > *');
+        const liveListChildren = await controller.findElements(
+          '#liveListItems > *'
+        );
         await expect(liveListChildren.length).to.equal(1);
 
         const existingItem = await controller.findElement('#liveListItem1');
@@ -37,8 +38,9 @@ describes.endtoend(
       // TODO(cvializ,choumx): Configure the server to send different data on the
       // second request. A queryparam should be able to implement this.
       it.skip('should apply scope to bindings in new list items', async () => {
-        const liveListChildren =
-          await controller.findElements('#liveListItems > *');
+        const liveListChildren = await controller.findElements(
+          '#liveListItems > *'
+        );
         await expect(liveListChildren.length).to.equal(1);
 
         const existingItem = await controller.findElement('#liveListItem1');

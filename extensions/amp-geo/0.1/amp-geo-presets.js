@@ -22,7 +22,6 @@ export const ampGeoPresets = {
     'AT', // Austria
     'BE', // Belgium
     'BG', // Bulgaria
-    'CQ', // Sark
     'HR', // Croatia
     'CY', // Cyprus
     'CZ', // Czech Republic

@@ -343,9 +343,6 @@ export class AmpStory extends AMP.BaseElement {
      *     preview mode.
      */
     this.indexOfLastPageToPreview_ = null;
-
-    /** @private {!Deferred} a promise that is resolved once the active page is assigned */
-    this.activePageDeferred_ = new Deferred();
   }
 
   /** @override */
@@ -522,13 +519,8 @@ export class AmpStory extends AMP.BaseElement {
     if (
       this.getAmpDoc().getVisibilityState() === VisibilityState_Enum.INACTIVE
     ) {
-      const resetActivePage = () => {
-        this.activePage_.setState(PageState.NOT_ACTIVE);
-        this.activePage_.element.setAttribute('active', '');
-      };
-      this.activePage_
-        ? resetActivePage()
-        : this.activePageDeferred_.promise.then(() => resetActivePage());
+      this.activePage_.setState(PageState.NOT_ACTIVE);
+      this.activePage_.element.setAttribute('active', '');
     }
   }
 
@@ -1336,11 +1328,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   next_(opt_isAutomaticAdvance) {
-    this.activePage_
-      ? this.activePage_.next(opt_isAutomaticAdvance)
-      : this.activePageDeferred_.promise.then(() =>
-          this.activePage_.next(opt_isAutomaticAdvance)
-        );
+    const activePage = devAssert(
+      this.activePage_,
+      'No active page set when navigating to next page.'
+    );
+    activePage.next(opt_isAutomaticAdvance);
   }
 
   /**
@@ -1380,11 +1372,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   previous_() {
-    this.activePage_
-      ? this.activePage_.previous()
-      : this.activePageDeferred_.promise.then(() =>
-          this.activePage_.previous()
-        );
+    const activePage = devAssert(
+      this.activePage_,
+      'No active page set when navigating to previous page.'
+    );
+    activePage.previous();
   }
 
   /**
@@ -1484,7 +1476,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
-    this.activePageDeferred_.resolve();
     if (!targetPage.isAd()) {
       this.updateNavigationPath_(targetPageId, direction);
     }

@@ -2,8 +2,6 @@
 #
 # A script to install dependencies and then build the extension.
 
-curl -f https://cdn.ampproject.org/v0/validator_wasm.js -o validator_wasm.js
-
 echo 'Installing web components'
 bower install
 

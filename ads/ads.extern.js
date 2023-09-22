@@ -326,14 +326,8 @@ data.width;
 data.height;
 data.adtype;
 data.adslot;
-data.slot;
-data.affLayout;
-data.multiSize;
+data['multi-size'];
 data.jsontargeting;
-data.affSticky;
-data.affTitle;
-data.affJson;
-data.affRtcConfig;
 data.extras;
 
 // adreactor.js

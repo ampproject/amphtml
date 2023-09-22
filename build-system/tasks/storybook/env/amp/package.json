@@ -4,6 +4,8 @@
   "description": "packages specific to the amp storybook env",
   "devDependencies": {
     "@ampproject/storybook-addon": "1.1.10",
-    "preact": "10.17.1"
+    "@storybook/preact": "7.0.21",
+    "preact-render-to-string": "6.1.0",
+    "preact": "10.15.1"
   }
 }

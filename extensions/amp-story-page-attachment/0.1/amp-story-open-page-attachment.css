@@ -164,7 +164,7 @@
   --i-amphtml-outlink-cta-text-color: white !important;
 }
 
-.i-amphtml-story-page-open-attachment-outlink[active]:not(.i-amphtml-story-page-open-attachment-outlink-no-animation-exp) .i-amphtml-story-outlink-page-attachment-outlink-chip {
+.i-amphtml-story-page-open-attachment-outlink[active]:not(.i-amphtml-story-page-open-attachment-outlink-no-animation-exp) {
   animation: i-amphtml-tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 

@@ -59,6 +59,7 @@ describes.integration(
       return browser.waitForElementLayout('amp-ad');
     });
 
+    // TODO(#38126): This test is flaky on CI.
     it.skip('should render template', () => {
       expect(doc.querySelectorAll('amp-img')).to.have.length(3);
 

@@ -8,6 +8,7 @@
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
+    "target": "ES2019",
     "module": "CommonJS",
     "allowJs": false,
     "noUnusedLocals": true,

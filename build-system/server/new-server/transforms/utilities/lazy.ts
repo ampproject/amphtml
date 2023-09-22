@@ -6,7 +6,7 @@ export class Lazy<T> {
     this.initializer_ = initializer;
   }
 
-  public value(): T {
+  public get value(): T {
     if (this.value_ == undefined) {
       this.value_ = this.initializer_();
     }

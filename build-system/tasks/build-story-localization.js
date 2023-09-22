@@ -23,8 +23,6 @@ function getLanguageCodeFallbacks(languageCode) {
   if (!languageCode) {
     return [FALLBACK_LANGUAGE_CODE];
   }
-
-  /** @type {string[]} */
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce(
     (fallbackLanguageCodeList, _, index) => {

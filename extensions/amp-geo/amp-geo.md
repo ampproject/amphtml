@@ -167,65 +167,17 @@ example below.
 </amp-geo>
 ```
 
-#### U.S. Subdivisions Detection
+#### U.S. Virginia, Colorado, Connecticut Detection
 
 The `amp-geo` component provides the
 [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when it
-determines a request is from US State or from the District of Columbia
-(Washington DC). The values are in a `${country}-${subdivision}` format and
-the following codes are supported.
+determines a request is from Virginia, Colorado, or Connecticut.
+The values are in a `${country}-${subdivision}` format and the following codes
+are supported.
 
-  - `us-al` - Alabama
-  - `us-ak` - Alaska
-  - `us-az` - Arizona
-  - `us-ar` - Arkansas
-  - `us-ca` - California
-  - `us-co` - Colorado
-  - `us-ct` - Connecticut
-  - `us-de` - Delaware
-  - `us-dc` - District of Columbia
-  - `us-fl` - Florida
-  - `us-ga` - Georgia
-  - `us-hi` - Hawaii
-  - `us-id` - Idaho
-  - `us-il` - Illinois
-  - `us-in` - Indiana
-  - `us-ia` - Iowa
-  - `us-ks` - Kansas
-  - `us-ky` - Kentucky
-  - `us-la` - Louisiana
-  - `us-me` - Maine
-  - `us-md` - Maryland
-  - `us-ma` - Massachusetts
-  - `us-mi` - Michigan
-  - `us-mn` - Minnesota
-  - `us-ms` - Mississippi
-  - `us-mo` - Missouri
-  - `us-mt` - Montana
-  - `us-ne` - Nebraska
-  - `us-nv` - Nevada
-  - `us-nh` - New Hampshire
-  - `us-nj` - New Jersey
-  - `us-nm` - New Mexico
-  - `us-ny` - New York
-  - `us-nc` - North Carolina
-  - `us-nd` - North Dakota
-  - `us-oh` - Ohio
-  - `us-ok` - Oklahoma
-  - `us-or` - Oregon
-  - `us-pa` - Pennsylvania
-  - `us-ri` - Rhode Island
-  - `us-sc` - South Carolina
-  - `us-sd` - South Dakota
-  - `us-tn` - Tennessee
-  - `us-tx` - Texas
-  - `us-ut` - Utah
-  - `us-vt` - Vermont
-  - `us-va` - Virginia
-  - `us-wa` - Washington
-  - `us-wv` - West Virginia
-  - `us-wi` - Wisconsin
-  - `us-wy` - Wyoming
+-   `us-co` - Colorado
+-   `us-ct` - Connecticut
+-   `us-va` - Virginia
 
 Additional countries/subdivision may be included with the preset list as in the `usWithSubdivisions`
 example below.

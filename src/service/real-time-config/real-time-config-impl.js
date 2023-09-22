@@ -63,11 +63,7 @@ export const RTC_ERROR_ENUM = {
 };
 
 /** @const {!{[key: string]: boolean}} */
-const GLOBAL_MACRO_ALLOWLIST = {
-  CLIENT_ID: true,
-  TITLE: true,
-  SOURCE_URL: true,
-};
+const GLOBAL_MACRO_ALLOWLIST = {CLIENT_ID: true};
 
 export class RealTimeConfigService {
   /**

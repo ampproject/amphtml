@@ -1,5 +1,7 @@
 import {addDays, isSameDay, isValid} from 'date-fns';
-import {rrulestr} from 'rrule';
+import * as rrule from 'rrule';
+
+const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // closure imports into .default, esbuild flattens a layer.
 
 /**
  * RRULE returns dates as local time formatted at UTC, so the

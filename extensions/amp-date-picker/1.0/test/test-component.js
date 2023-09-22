@@ -31,8 +31,7 @@ function DatePicker(props) {
   return <BentoDatePicker {...combinedProps}></BentoDatePicker>;
 }
 
-// TODO(wg-components): either fix or remove these tests.
-describes.sandboxed.skip('BentoDatePicker preact component v1.0', {}, (env) => {
+describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   it('should render', () => {
     const wrapper = mount(<DatePicker />);
 

@@ -2,7 +2,9 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {BrowserController, RequestBank} from '#testing/helpers/service';
 
-describes.sandboxed('amp-story analytics', {}, () => {
+const config = describes.sandboxed.configure().skipEdge().skipSafari();
+
+config.run('amp-story analytics', {}, () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
   describes.integration(
     'amp-story analytics',

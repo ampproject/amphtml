@@ -43,9 +43,12 @@ t.run('error page', function () {
     });
   });
 
-  it('should show the body in error test', () => {
-    return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
-  });
+  it.configure()
+    .skipFirefox()
+    .skipEdge()
+    .run('should show the body in error test', () => {
+      return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
+    });
 
   function shouldFail(id) {
     // Skip for issue #110

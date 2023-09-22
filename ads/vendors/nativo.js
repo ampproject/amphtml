@@ -82,13 +82,10 @@ export function nativo(global, data) {
      */
     function loadAdWhenTimedout() {
       const g = global;
-      setTimeout(
-        function () {
-          g.PostRelease.Start();
-          delayedAdLoad = true;
-        },
-        parseInt(data.delayByTime, 10)
-      );
+      setTimeout(function () {
+        g.PostRelease.Start();
+        delayedAdLoad = true;
+      }, parseInt(data.delayByTime, 10));
     }
     /**
      * @param {*} positions

@@ -126,15 +126,6 @@ export class AmpStoryViewerMessagingHandler {
   }
 
   /**
-   * @param {string} eventType
-   * @param {function(!JsonObject)} handler
-   * @return {!UnlistenDef}
-   */
-  onMessage(eventType, handler) {
-    this.viewer_.onMessage(eventType, handler);
-  }
-
-  /**
    * Handles 'getDocumentState' viewer messages.
    * @param {!Object=} data
    * @return {!Promise}

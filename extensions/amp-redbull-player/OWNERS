@@ -4,12 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'powerivq'},
-        {name: 'sliketech'},
-        {name: 'erwinmombay'},
-        {name: 'ampproject/wg-components'},
-      ],
+      owners: [{name: 'wklopf'}, {name: 'ampproject/wg-components'}],
     },
   ],
 }

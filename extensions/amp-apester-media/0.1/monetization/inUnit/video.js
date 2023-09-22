@@ -109,12 +109,9 @@ function addAvElement(playerOptions, apesterElement, consentObj, idleOptions) {
 
   showVideoAd(ampAvAdWrap, progressBarWrap, idleOptions);
   const {skipTimer, timeout} = idleOptions;
-  setInterval(
-    () => {
-      showVideoAd(ampAvAdWrap, progressBarWrap, idleOptions);
-    },
-    (timeout + skipTimer) * 1000
-  );
+  setInterval(() => {
+    showVideoAd(ampAvAdWrap, progressBarWrap, idleOptions);
+  }, (timeout + skipTimer) * 1000);
 
   Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAvAd,

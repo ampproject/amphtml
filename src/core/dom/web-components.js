@@ -49,22 +49,12 @@ export function isShadowDomSupported() {
  * @return {boolean}
  */
 export function isShadowCssSupported() {
-  if (shadowCssSupported !== undefined) {
-    return shadowCssSupported;
-  }
-
-  if (!isShadowDomSupported()) {
-    shadowCssSupported = false;
-  } else {
-    const shadowRoot =
-      getShadowDomSupportedVersion() === ShadowDomVersion_Enum.V0
-        ? self.document.createElement('div').createShadowRoot()
-        : self.document.createElement('div').attachShadow({mode: 'open'});
-
+  if (shadowCssSupported === undefined) {
     shadowCssSupported =
-      isNative(ShadowRoot) && shadowRoot instanceof ShadowRoot;
+      isShadowDomSupported() &&
+      (isNative(Element.prototype.attachShadow) ||
+        isNative(Element.prototype.createShadowRoot));
   }
-
   return shadowCssSupported;
 }
 

@@ -17,7 +17,7 @@ const {resolvePath} = require('../../babel-config/import-resolver');
  */
 function remapDependenciesPlugin({externals, remaps, resolve}) {
   const remapArr = Object.entries(remaps).map(([path, value]) => ({
-    regex: new RegExp(`^${path}(\\.[jt]sx?)?$`),
+    regex: new RegExp(`^${path}(\.js|\.jsx|\.ts|\.tsx)?$`),
     value,
   }));
   const rootDir = process.cwd();

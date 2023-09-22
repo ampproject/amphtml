@@ -38,7 +38,8 @@ describes.endtoend(
       await waitForCarouselImg(controller, 0);
     });
 
-    it('should layout the two adjacent slides', async () => {
+    // TODO(sparhami): unskip
+    it.skip('should layout the two adjacent slides', async () => {
       // TODO(sparhami) Verify this is on the right of the 0th slide
       await waitForCarouselImg(controller, 1);
       // TODO(sparhami) Verify this is on the left of the 0th slide

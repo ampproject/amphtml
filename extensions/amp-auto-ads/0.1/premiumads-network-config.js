@@ -45,7 +45,6 @@ export class PremiumadsNetworkConfig {
     return {
       'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'json': data.json || '',
       'layout': data.layout || Layout_Enum.FIXED,
       'style':
         data['style'] ||

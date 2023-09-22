@@ -652,11 +652,6 @@ const adConfig = jsonConfiguration({
   },
   'improvedigital': {},
 
-  'incrementx': {
-    prefetch: 'https://cdn.incrementxserv.com/ixamp.js',
-    renderStartImplemented: true,
-  },
-
   'industrybrains': {
     prefetch: 'https://web.industrybrains.com/js/ads/async/show.js',
     preconnect: [
@@ -686,6 +681,7 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
     preconnect: [
       'https://tpc.googlesyndication.com',
+      'https://adservice.google.com',
       'https://cdn.insurads.com',
       'https://services.insurads.com',
       'https://messaging.insurads.com',
@@ -803,6 +799,7 @@ const adConfig = jsonConfiguration({
       'https://marfeel-d.openx.net',
       'https://ice.360yield.com',
       'https://mbid.marfeelrev.com',
+      'https://adservice.google.com',
     ],
     consentHandlingOverride: true,
   },

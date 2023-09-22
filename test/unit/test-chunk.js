@@ -161,37 +161,40 @@ describes.sandboxed('chunk2', {}, () => {
         basicTests(env);
       });
 
-      describe('error handling', () => {
-        let fakeWin;
-        let done;
+      describe
+        .configure()
+        .skip(() => !('onunhandledrejection' in window))
+        .run('error handling', () => {
+          let fakeWin;
+          let done;
 
-        function onReject(event) {
-          expect(event.reason.message).to.match(/test async/);
-          done();
-        }
+          function onReject(event) {
+            expect(event.reason.message).to.match(/test async/);
+            done();
+          }
 
-        beforeEach(() => {
-          fakeWin = env.win;
-          const {ampdoc} = env;
-          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
-            return true;
+          beforeEach(() => {
+            fakeWin = env.win;
+            const {ampdoc} = env;
+            env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
+              return true;
+            });
+            window.addEventListener('unhandledrejection', onReject);
           });
-          window.addEventListener('unhandledrejection', onReject);
-        });
 
-        afterEach(() => {
-          window.removeEventListener('unhandledrejection', onReject);
-        });
+          afterEach(() => {
+            window.removeEventListener('unhandledrejection', onReject);
+          });
 
-        it('should proceed on error and rethrowAsync', (d) => {
-          startupChunk(fakeWin.document, () => {
-            throw new Error('test async');
-          });
-          startupChunk(fakeWin.document, () => {
-            done = d;
+          it('should proceed on error and rethrowAsync', (d) => {
+            startupChunk(fakeWin.document, () => {
+              throw new Error('test async');
+            });
+            startupChunk(fakeWin.document, () => {
+              done = d;
+            });
           });
         });
-      });
 
       describe('invisible', () => {
         beforeEach(() => {
@@ -433,27 +436,31 @@ describes.sandboxed('long tasks', {}, () => {
         });
       });
 
-      it('should not issue a macro task after having been idle', (done) => {
-        (async function () {
-          startupChunk(
-            env.win.document,
-            complete('1', false),
-            /* make body visible */ true
-          );
-          // Unwind the promise queue so that subsequent invocations
-          // are scheduled into an empty task queue.
-          for (let i = 0; i < 100; i++) {
-            await Promise.resolve();
-          }
-          expect(progress).to.equal('1');
-          complete('2', true)();
-          startupChunk(env.win.document, () => {
-            expect(postMessageCalls).to.equal(0);
-            expect(progress).to.equal('12');
-            done();
-          });
-        })();
-      });
+      // Skipping Firefox due to issues with the promise ordering in
+      // the async-await polyfill that this test relies on.
+      it.configure()
+        .skipFirefox()
+        .run('should not issue a macro task after having been idle', (done) => {
+          (async function () {
+            startupChunk(
+              env.win.document,
+              complete('1', false),
+              /* make body visible */ true
+            );
+            // Unwind the promise queue so that subsequent invocations
+            // are scheduled into an empty task queue.
+            for (let i = 0; i < 100; i++) {
+              await Promise.resolve();
+            }
+            expect(progress).to.equal('1');
+            complete('2', true)();
+            startupChunk(env.win.document, () => {
+              expect(postMessageCalls).to.equal(0);
+              expect(progress).to.equal('12');
+              done();
+            });
+          })();
+        });
     }
   );
 });

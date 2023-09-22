@@ -1,5 +1,4 @@
 const babel = require('@babel/core');
-const {createHash} = require('crypto');
 const path = require('path');
 const {debug} = require('../compile/debug-compilation-lifecycle');
 const {includeSourcesContent} = require('../tasks/sourcemaps');
@@ -196,22 +195,13 @@ function replaceOutputFile(outputFiles, original, text) {
   }
 
   let contents;
-  const generateContents = () =>
-    // eslint-disable-next-line local/no-forbidden-terms
-    (contents ||= new TextEncoder().encode(text));
-
-  let hash;
-  const generateHash = () =>
-    (hash ||= createHash('sha1').update(text).digest('hex'));
-
   const file = {
     path: original.path,
     text,
     get contents() {
-      return generateContents();
-    },
-    get hash() {
-      return generateHash();
+      // eslint-disable-next-line local/no-forbidden-terms
+      const te = new TextEncoder();
+      return (contents ||= te.encode(text));
     },
   };
   outputFiles[index] = file;

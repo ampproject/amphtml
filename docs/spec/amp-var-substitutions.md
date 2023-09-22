@@ -177,7 +177,6 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [DOM Interactive Time](#dom-interactive-time)           | `DOM_INTERACTIVE_TIME` | `${domInteractiveTime}`     |
 | [First Contentful Paint](#first-contentful-paint)       | N/A                    | `${firstContentfulPaint}`   |
 | [First Input Delay](#first-input-delay)                 | N/A                    | `${firstInputDelay}`        |
-| [Interaction To Next Paint](#interaction-to-next-paint) | N/A                    | `${interactionToNextPaint}` |
 | [Largest Contentful Paint](#largest-contentful-paint)   | N/A                    | `${largestContentfulPaint}` |
 | [Navigation Redirect Count](#navigation-redirect-count) | `NAV_REDIRECT_COUNT`   | `${navRedirectCount}`       |
 | [Navigation Timing ](#navigation-timing)                | `NAV_TIMING`           | `${navTiming}`              |

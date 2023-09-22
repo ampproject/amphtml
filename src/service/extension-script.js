@@ -7,9 +7,6 @@ import {getMode} from '../mode';
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LATEST_VERSION = 'latest';
 
-const regexURL = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
-const testRegexURL = /^([a-zA-Z0-9_-]+\.)?localhost$/;
-
 /**
  * Calculate the base url for any scripts.
  * @param {!Location} location The window's location
@@ -158,31 +155,7 @@ export function createExtensionScript(win, extensionId, version) {
     version,
     getMode(win).localDev
   );
-
-  let policy = {
-    createScriptURL: function (url) {
-      // Only allow trusted URLs
-      if (
-        regexURL.test(url) ||
-        ((getMode().test || getMode().localDev) &&
-          testRegexURL.test(new URL(url).hostname)) ||
-        new URL(url).host === 'fonts.googleapis.com'
-      ) {
-        return url;
-      } else {
-        return '';
-      }
-    },
-  };
-
-  if (self.trustedTypes && self.trustedTypes.createPolicy) {
-    policy = self.trustedTypes.createPolicy(
-      'extension-script#createExtensionScript',
-      policy
-    );
-  }
-
-  scriptElement.src = policy.createScriptURL(scriptSrc);
+  scriptElement.src = scriptSrc;
   return scriptElement;
 }
 

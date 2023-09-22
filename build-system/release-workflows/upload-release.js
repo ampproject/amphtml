@@ -4,7 +4,7 @@ const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
-const {cyan} = require('kleur/colors');
+const {bgWhite, cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
 const {S3} = require('@aws-sdk/client-s3');
@@ -86,7 +86,7 @@ function logProgress_(totalFiles, processedFiles) {
   if (printProgressReady || processedFiles === totalFiles) {
     log(
       '[' +
-        '#'.repeat(percentage) +
+        bgWhite(' '.repeat(percentage)) +
         '.'.repeat(PROGRESS_WIDTH - percentage) +
         ']',
       cyan(processedFiles),
@@ -192,7 +192,6 @@ async function uploadFiles_() {
       accessKeyId,
       secretAccessKey,
     },
-    maxAttempts: 7,
   });
 
   let totalFiles = 0;

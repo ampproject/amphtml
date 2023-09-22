@@ -211,19 +211,6 @@ describes.realWin(
       expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
     });
 
-    it('should build the open attachment UI with default text if the custom text is empty', async () => {
-      attachmentEl.setAttribute('layout', 'nodisplay');
-      attachmentEl.setAttribute('cta-text', ' ');
-
-      await attachment.buildCallback();
-      await attachment.layoutCallback();
-
-      const openAttachmentLabelEl = page.querySelector(
-        '.i-amphtml-story-page-attachment-label'
-      );
-      expect(openAttachmentLabelEl.textContent).to.equal('Swipe up');
-    });
-
     it('should use the correct outlink text', async () => {
       const firstPage = win.document.createElement('amp-story-page');
       storyEl.insertBefore(firstPage, page);

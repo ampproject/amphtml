@@ -36,10 +36,10 @@ amp-social-share::part(button):focus {
   outline-offset: 0 !important;
 }
 
-/* X (fka Twitter) Styling */
+/* Twitter Styling */
 .amp-social-share-twitter {
   color: #fff;
-  background-color: #000;
+  background-color: #1da1f2;
 }
 
 /* Facebook Styling */

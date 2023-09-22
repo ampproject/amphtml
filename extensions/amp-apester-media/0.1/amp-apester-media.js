@@ -273,6 +273,19 @@ class AmpApesterMedia extends AMP.BaseElement {
     return img;
   }
 
+  /**
+   * @return {!Element}
+   */
+  constructOverflow_() {
+    const overflow = this.element.ownerDocument.createElement('div');
+    overflow.setAttribute('overflow', '');
+    overflow.className = 'amp-apester-overflow';
+    const overflowButton = this.element.ownerDocument.createElement('button');
+    overflowButton.textContent = 'Full Size';
+    overflow.appendChild(overflowButton);
+    return overflow;
+  }
+
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -306,6 +319,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
         return vsync
           .mutatePromise(() => {
+            const overflow = this.constructOverflow_();
+            this.element.appendChild(overflow);
             this.element.appendChild(iframe);
             handleAds(media, this.element);
           })

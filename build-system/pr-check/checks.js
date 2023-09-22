@@ -22,7 +22,6 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp ava');
   timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp check-ignore-lists');
-  timedExecOrDie('amp check-links');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');

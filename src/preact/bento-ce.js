@@ -82,10 +82,7 @@ let win;
  * @param {typeof import('./base-element').PreactBaseElement} BaseElement
  * @param {typeof globalThis} _win
  * @return {typeof HTMLElement}
- * @template {{
- *   readyState?: string | undefined;
- *   pause?: (() => void) | undefined;
- * }} T */
+ */
 function createBentoElementClass(BaseElement, _win = self) {
   if (!ExtendableHTMLElement || win !== _win) {
     win = _win;
@@ -99,6 +96,7 @@ function createBentoElementClass(BaseElement, _win = self) {
 
       /**
        * @type {import('./base-element').PreactBaseElement<T>}
+       * @template T
        */
       this.implementation = new BaseElement(
         /** @type {AmpElement} */ (/** @type {?} */ (this))

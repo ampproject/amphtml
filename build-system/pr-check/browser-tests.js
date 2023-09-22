@@ -20,19 +20,21 @@ const jobName = 'browser-tests.js';
  */
 function pushBuildWorkflow() {
   try {
-    timedExecOrThrow(`amp unit --${browser}`, 'Unit tests failed!');
+    timedExecOrThrow(`amp unit --report --${browser}`, 'Unit tests failed!');
     timedExecOrThrow(
-      `amp integration --nobuild --minified --${browser}`,
+      `amp integration --report --nobuild --minified --${browser}`,
       'Integration tests failed!'
     );
     timedExecOrThrow(
-      `amp e2e --nobuild --minified --browsers=${browser}`,
+      `amp e2e --report --nobuild --minified --browsers=${browser}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
     }
+  } finally {
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
