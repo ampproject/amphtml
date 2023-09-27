@@ -249,7 +249,7 @@ export class Transport {
    * @param {boolean} suppressWarnings
    * @param {string|undefined} referrerPolicy
    * @param {string|undefined} attributionSrc
-   * @param {(Element|./service/ampdoc-impl.AmpDoc)=} opt_elementOrAmpDoc Whether services are provided by an
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc Whether services are provided by an
    *     element.
    */
   static sendRequestUsingImage(
@@ -258,7 +258,7 @@ export class Transport {
     suppressWarnings,
     referrerPolicy,
     attributionSrc,
-    opt_elementOrAmpDoc
+    elementOrAmpDoc
   ) {
     if (!win) {
       return;
@@ -268,7 +268,7 @@ export class Transport {
       request.url,
       referrerPolicy,
       attributionSrc,
-      opt_elementOrAmpDoc
+      elementOrAmpDoc
     );
     loadPromise(image)
       .then(() => {
