@@ -40,6 +40,8 @@ describes.realWin(
       sendXhrStub = env.sandbox.stub();
       sendBeaconStub = env.sandbox.stub();
 
+      env.sandbox.spy(Services, 'urlReplacementsForDoc');
+
       // Needed for PreconnectService.
       installDocService(win, true);
     });
@@ -578,6 +580,7 @@ describes.realWin(
 
     function expectImagePixel(url, referrerPolicy, attributionSrc) {
       imagePixelVerifier.verifyRequest(url, referrerPolicy, attributionSrc);
+      expect(Services.urlReplacementsForDoc).to.be.calledWith(ampdoc);
     }
 
     function expectNoImagePixel() {

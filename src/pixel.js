@@ -18,28 +18,44 @@ const TAG = 'pixel';
  * @param {string} src
  * @param {?string=} referrerPolicy
  * @param {string=} attributionSrc
+ * @param {(Element|./service/ampdoc-impl.AmpDoc)=} opt_elementOrAmpDoc Whether services are provided by an
+ *     element.
  * @return {!Element}
  */
-export function createPixel(win, src, referrerPolicy, attributionSrc) {
+export function createPixel(
+  win,
+  src,
+  referrerPolicy,
+  attributionSrc,
+  opt_elementOrAmpDoc
+) {
   // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
 
   return referrerPolicy === 'no-referrer'
-    ? createNoReferrerPixel(win, src, attributionSrc)
-    : createImagePixel(win, src, false, attributionSrc);
+    ? createNoReferrerPixel(win, src, attributionSrc, opt_elementOrAmpDoc)
+    : createImagePixel(win, src, false, attributionSrc, opt_elementOrAmpDoc);
 }
 
 /**
  * @param {!Window} win
  * @param {string} src
  * @param {string=} attributionSrc
+ * @param {(Element|./service/ampdoc-impl.AmpDoc)=} opt_elementOrAmpDoc Whether services are provided by an
+ *     element.
  * @return {!Element}
  */
-function createNoReferrerPixel(win, src, attributionSrc) {
+function createNoReferrerPixel(win, src, attributionSrc, opt_elementOrAmpDoc) {
   if (isReferrerPolicySupported()) {
-    return createImagePixel(win, src, true, attributionSrc);
+    return createImagePixel(
+      win,
+      src,
+      true,
+      attributionSrc,
+      opt_elementOrAmpDoc
+    );
   } else {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
@@ -52,7 +68,13 @@ function createNoReferrerPixel(win, src, attributionSrc) {
       }
     );
     iframe.onload = () => {
-      createImagePixel(iframe.contentWindow, src);
+      createImagePixel(
+        iframe.contentWindow,
+        src,
+        undefined,
+        undefined,
+        opt_elementOrAmpDoc
+      );
     };
     win.document.body.appendChild(iframe);
     return iframe;
@@ -64,9 +86,17 @@ function createNoReferrerPixel(win, src, attributionSrc) {
  * @param {string} src
  * @param {boolean=} noReferrer
  * @param {string=} attributionSrc
+ * @param {(Element|./service/ampdoc-impl.AmpDoc)=} opt_elementOrAmpDoc Whether services are provided by an
+ *     element.
  * @return {!Image}
  */
-function createImagePixel(win, src, noReferrer = false, attributionSrc) {
+function createImagePixel(
+  win,
+  src,
+  noReferrer = false,
+  attributionSrc,
+  opt_elementOrAmpDoc
+) {
   const Image = WindowInterface.getImage(win);
   const image = new Image();
   if (noReferrer) {
@@ -82,7 +112,8 @@ function createImagePixel(win, src, noReferrer = false, attributionSrc) {
       const substituteVariables =
         getAttributionReportingStatusUrlVariableRewriter(
           win,
-          attributionReportingStatus
+          attributionReportingStatus,
+          opt_elementOrAmpDoc
         );
       attributionSrc = substituteVariables(attributionSrc);
       image.attributionSrc = attributionSrc;
@@ -93,7 +124,8 @@ function createImagePixel(win, src, noReferrer = false, attributionSrc) {
   }
   const substituteVariables = getAttributionReportingStatusUrlVariableRewriter(
     win,
-    attributionReportingStatus
+    attributionReportingStatus,
+    opt_elementOrAmpDoc
   );
   src = substituteVariables(src);
   image.src = src;
@@ -113,13 +145,21 @@ function isReferrerPolicySupported() {
 /**
  * @param {!Window} win
  * @param {string=} status
+ * @param {(Element|./service/ampdoc-impl.AmpDoc)=} opt_elementOrAmpDoc Whether services are provided by an
+ *     element.
  * @return {function(string): string}
  */
-function getAttributionReportingStatusUrlVariableRewriter(win, status) {
+function getAttributionReportingStatusUrlVariableRewriter(
+  win,
+  status,
+  opt_elementOrAmpDoc
+) {
   const substitutionFunctions = {
     'ATTRIBUTION_REPORTING_STATUS': () => status,
   };
-  const replacements = Services.urlReplacementsForDoc(win.document);
+  const replacements = Services.urlReplacementsForDoc(
+    opt_elementOrAmpDoc || win.document
+  );
   const allowlist = {
     'ATTRIBUTION_REPORTING_STATUS': true,
   };
