@@ -106,6 +106,9 @@ function maybeOverridePercyEnvironmentVariables() {
       process.env[variable.toUpperCase()] = argv[variable];
     }
   });
+  if (argv.empty) {
+    process.env['PERCY_PARTIAL_BUILD'] = '1';
+  }
 }
 
 /**
@@ -571,7 +574,7 @@ function setDebuggingLevel() {
  * @return {Promise<void>}
  */
 async function createEmptyBuild(browser) {
-  log('info', 'Skipping visual diff tests and generating a blank Percy build');
+  log('info', 'Generating the blank page snapshot');
 
   const page = await newPage(browser);
 
@@ -642,9 +645,7 @@ async function performVisualTests(executablePath) {
   );
 
   try {
-    if (argv.empty) {
-      await createEmptyBuild(browser);
-    } else {
+    if (!argv.empty) {
       // Load and parse the config. Use JSON5 due to JSON comments in file.
       const visualTestsConfig = JSON5.parse(
         fs.readFileSync(
@@ -657,6 +658,7 @@ async function performVisualTests(executablePath) {
       );
       await runVisualTests(browser, visualTestsConfig.webpages);
     }
+    await createEmptyBuild(browser);
   } finally {
     await browser.close();
     exitCtrlcHandler(handlerProcess);
