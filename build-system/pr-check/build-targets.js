@@ -352,6 +352,8 @@ function determineBuildTargets() {
       buildTargets.add(Targets.RUNTIME);
     }
   }
+  buildTargets.clear();
+  buildTargets.add(Targets.DOCS);
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Detected build targets:`,

@@ -1,5 +1,7 @@
 # Contributing to AMP HTML
 
+DO NOT MERGE
+
 The AMP HTML project strongly encourages your participation and [contributions](https://www.ampproject.org/contribute/)!
 
 We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
