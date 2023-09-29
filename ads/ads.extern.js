@@ -661,9 +661,6 @@ data.callback;
 
 // seedtag.js
 data.adunitId;
-data.placement;
-data.publisherId;
-data.forceCreative;
 
 // sharethrough.js
 data.pkey;
