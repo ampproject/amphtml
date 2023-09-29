@@ -133,6 +133,9 @@ function createDriver(browserName, args, deviceName) {
     case 'chrome':
       const chromeOptions = new chrome.Options(capabilities);
       chromeOptions.addArguments(args);
+      if (process.env.CHROME_BIN) {
+        chromeOptions.setChromeBinaryPath(process.env.CHROME_BIN);
+      }
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
