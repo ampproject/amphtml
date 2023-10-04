@@ -163,7 +163,7 @@
     "multer": "1.4.3",
     "open": "8.4.0",
     "plugin-error": "1.0.1",
-    "postcss": "8.3.11",
+    "postcss": "8.4.31",
     "postcss-import": "14.0.2",
     "posthtml": "0.16.5",
     "prettier": "3.0.3",
