@@ -141,7 +141,8 @@ export class Transport {
         getRequest(false),
         suppressWarnings,
         /** @type {string|undefined} */ (this.referrerPolicy_),
-        /** @type {string|undefined} */ (this.attributionSrc_)
+        /** @type {string|undefined} */ (this.attributionSrc_),
+        this.ampdoc_
       );
       return;
     }
@@ -248,18 +249,27 @@ export class Transport {
    * @param {boolean} suppressWarnings
    * @param {string|undefined} referrerPolicy
    * @param {string|undefined} attributionSrc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc Whether services are provided by an
+   *     element.
    */
   static sendRequestUsingImage(
     win,
     request,
     suppressWarnings,
     referrerPolicy,
-    attributionSrc
+    attributionSrc,
+    elementOrAmpDoc
   ) {
     if (!win) {
       return;
     }
-    const image = createPixel(win, request.url, referrerPolicy, attributionSrc);
+    const image = createPixel(
+      win,
+      request.url,
+      referrerPolicy,
+      attributionSrc,
+      elementOrAmpDoc
+    );
     loadPromise(image)
       .then(() => {
         dev().fine(TAG_, 'Sent image request', request.url);

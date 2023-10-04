@@ -1,3 +1,4 @@
+import {Services} from '#service';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {VariableSource} from '#service/variable-source';
 
@@ -21,6 +22,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     await createPixel(
       'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
     );
+    env.sandbox.spy(Services, 'urlReplacementsForDoc');
   });
 
   function createPixel(src, referrerPolicy) {
@@ -170,6 +172,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
       );
       expect(img.attributionSrc).to.equal('');
+      expect(Services.urlReplacementsForDoc).to.be.calledWith(pixel);
     });
   });
 
@@ -189,6 +192,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
       );
       expect(img.attributionSrc).to.equal('https://adtech.example?ars=6');
+      expect(Services.urlReplacementsForDoc).to.be.calledWith(pixel);
     });
   });
 });
