@@ -1,3 +1,5 @@
+import {sleep} from '#testing/helpers';
+
 import {
   getScrollingElement,
   getSlide,
@@ -166,6 +168,9 @@ describes.endtoend(
         left: 0,
       });
 
+      // Arbitrary wait because of an interaction conflict between the scroll
+      // action and click action.
+      await sleep(100);
       await controller.click(goToSlideBtn);
       await expect(controller.getElementRect(firstSlide)).to.include({left: 0});
     });
