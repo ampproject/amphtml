@@ -161,6 +161,7 @@ function getChromeArgs(config) {
     '--no-sandbox',
     '--disable-gpu',
     `--window-size=${DEFAULT_E2E_INITIAL_RECT.width},${DEFAULT_E2E_INITIAL_RECT.height}`,
+    '--hide-scrollbars',
   ];
 
   if (config.headless) {
@@ -671,7 +672,7 @@ async function setUpTest(
       url.searchParams.set('exp', experiments.join(','));
     } else {
       // AMP doc experiments are toggled via cookies
-      await toggleExperiments(ampDriver, url.href, experiments);
+      await toggleExperiments(ampDriver, experiments);
     }
   }
 
@@ -686,12 +687,14 @@ async function setUpTest(
 /**
  * Toggle the given experiments for the given test URL domain.
  * @param {!AmpDriver} ampDriver
- * @param {string} testUrl
  * @param {!Array<string>} experiments
  * @return {!Promise}
  */
-async function toggleExperiments(ampDriver, testUrl, experiments) {
-  await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
+async function toggleExperiments(ampDriver, experiments) {
+  await ampDriver.navigateToEnvironment(
+    AmpdocEnvironment.SINGLE,
+    'http://localhost:8000/'
+  );
 
   for (const experiment of experiments) {
     await ampDriver.toggleExperiment(experiment, true);
