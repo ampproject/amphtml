@@ -8,7 +8,7 @@
     "@percy/puppeteer": "2.0.2",
     "@percy/sdk-utils": "1.27.3",
     "@puppeteer/browsers": "1.7.1",
-    "@types/inquirer": "9.0.3",
+    "@types/inquirer": "9.0.4",
     "inquirer": "9.2.11",
     "puppeteer-core": "21.3.8"
   }
