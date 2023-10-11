@@ -96,7 +96,7 @@ commands:
   setup_node_environment:
     steps:
       - node/install:
-          node-version: '18.17.1'
+          node-version: 'lts'
       - node/install-packages:
           with-cache: false
   setup_vm:
