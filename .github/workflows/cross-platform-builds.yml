@@ -28,7 +28,7 @@ jobs:
       - name: Set Up Node
         uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
         with:
-          node-version: lts/*
+          node-version: 20.8.1
       - name: Install Dependencies
         run: bash ./.github/workflows/install_dependencies.sh
       - name: ${{ matrix.flavor }}

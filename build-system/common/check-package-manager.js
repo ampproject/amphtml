@@ -12,12 +12,10 @@
  *       so it must work with vanilla NodeJS code.
  * github.com/ampproject/amphtml/pull/19386
  */
-const https = require('https');
 const {getStdout} = require('./process');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-quick.md#one-time-setup';
-const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
 
 const warningDelaySecs = 10;
 
@@ -101,88 +99,7 @@ function ensureNpm() {
  * @return {Promise<void>}
  **/
 function checkNodeVersion() {
-  const nodeVersion = getStdout('node --version').trim();
-  return new Promise((resolve) => {
-    https
-      .get(nodeDistributionsUrl, (res) => {
-        res.setEncoding('utf8');
-        let distributions = '';
-        res.on('data', (data) => {
-          distributions += data;
-        });
-        res.on('end', () => {
-          const distributionsJson = JSON.parse(distributions);
-          const latestLtsVersion = getNodeLatestLtsVersion(distributionsJson);
-          if (latestLtsVersion === '') {
-            console.log(
-              yellow(
-                'WARNING: Something went wrong. ' +
-                  'Could not determine the latest LTS version of node.'
-              )
-            );
-          } else if (nodeVersion !== latestLtsVersion) {
-            console.log(
-              yellow('WARNING: Detected node version'),
-              cyan(nodeVersion) +
-                yellow('. Recommended (latest LTS) version is'),
-              cyan(latestLtsVersion) + yellow('.')
-            );
-            console.log(
-              yellow('⤷ To fix this, run'),
-              cyan('"nvm install --lts"'),
-              yellow('or see'),
-              cyan('https://nodejs.org/en/download/package-manager'),
-              yellow('for instructions.')
-            );
-            updatesNeeded.add('node');
-          } else {
-            console.log(
-              green('Detected'),
-              cyan('node'),
-              green('version'),
-              cyan(nodeVersion + ' (latest LTS)') + green('.')
-            );
-          }
-          resolve();
-        });
-      })
-      .on('error', () => {
-        console.log(
-          yellow(
-            'WARNING: Something went wrong. ' +
-              'Could not download node version info from ' +
-              cyan(nodeDistributionsUrl) +
-              yellow('.')
-          )
-        );
-        console.log(
-          yellow('⤷ Detected node version'),
-          cyan(nodeVersion) + yellow('.')
-        );
-        resolve();
-      });
-  });
-}
-
-/**
- * Extracts the latest node version from a JSON object containing version info
- *
- * @param {!Object} distributionsJson
- * @return {string}
- */
-function getNodeLatestLtsVersion(distributionsJson) {
-  if (distributionsJson) {
-    // Versions are in descending order, so the first match is the latest lts.
-    return distributionsJson.find(function (distribution) {
-      return (
-        distribution.hasOwnProperty('version') &&
-        distribution.hasOwnProperty('lts') &&
-        distribution.lts
-      );
-    }).version;
-  } else {
-    return '';
-  }
+  return Promise.resolve();
 }
 
 /**

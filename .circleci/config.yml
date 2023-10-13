@@ -96,7 +96,7 @@ commands:
   setup_node_environment:
     steps:
       - node/install:
-          node-version: 'lts'
+          node-version: '20.8.1'
       - node/install-packages:
           with-cache: false
   setup_vm:
