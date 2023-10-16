@@ -5,7 +5,7 @@
   "description": "amp e2e",
   "devDependencies": {
     "@babel/register": "7.22.15",
-    "@types/selenium-webdriver": "4.1.17",
+    "@types/selenium-webdriver": "4.1.18",
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "118.0.0",
     "geckodriver": "4.2.1",
