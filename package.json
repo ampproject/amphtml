@@ -69,7 +69,7 @@
     "@types/node": "18.16.14",
     "@types/tar": "6.1.5",
     "@typescript-eslint/eslint-plugin": "6.7.5",
-    "@typescript-eslint/parser": "6.7.5",
+    "@typescript-eslint/parser": "6.8.0",
     "acorn-globals": "6.0.0",
     "ajv": "8.10.0",
     "ajv-formats": "2.1.1",
