@@ -1,4 +1,4 @@
-# incrementx
+# IncrementX
 
 ## Example
 
