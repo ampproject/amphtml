@@ -606,7 +606,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           constructMetadata(
             CONSENT_STRING_TYPE.US_PRIVACY_STRING,
             '3~3.33.33.303'
-          )
+          ),
+          undefined,
+          4
         );
         await macroTask();
         expect(requestSpy).to.be.calledTwice;
@@ -622,6 +624,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             '3~3.33.33.303'
           )
         );
+        expect(requestBody.tcfPolicyVersion).to.equal(4);
       });
 
       it('support onUpdateHref expansion', function* () {
@@ -666,7 +669,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         expect(requestBody.consentString).to.undefined;
       });
 
-      it('send update request on local stroage removal', async () => {
+      it('send update request on local storage removal', async () => {
         const testConsentInfo = constructConsentInfo(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',

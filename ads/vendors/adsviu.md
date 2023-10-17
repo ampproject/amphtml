@@ -19,8 +19,6 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="250" type="seedtag" data-adunit-id="0" data-publisher-id="0000-0000-01"
-    data-placement="inArticle">
 <amp-ad
   height="142"
   type="adsviu"

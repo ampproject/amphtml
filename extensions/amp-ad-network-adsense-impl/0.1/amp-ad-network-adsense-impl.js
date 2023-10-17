@@ -24,7 +24,6 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-  maybeInsertOriginTrialToken,
 } from '#ads/google/a4a/utils';
 
 import {
@@ -170,7 +169,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   */
   buildCallback() {
     super.buildCallback();
-    maybeInsertOriginTrialToken(this.win);
 
     // Convert the full-width tag to container width for desktop users.
     if (

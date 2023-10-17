@@ -23,6 +23,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'consentMetadata': undefined,
         'purposeConsents': undefined,
         'isDirty': undefined,
+        'tcfPolicyVersion': undefined,
       });
     });
 
@@ -33,6 +34,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'consentMetadata': undefined,
         'purposeConsents': undefined,
         'isDirty': undefined,
+        'tcfPolicyVersion': undefined,
       });
       expect(getStoredConsentInfo(false)).to.deep.equal({
         'consentState': CONSENT_ITEM_STATE.REJECTED,
@@ -40,6 +42,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'consentMetadata': undefined,
         'purposeConsents': undefined,
         'isDirty': undefined,
+        'tcfPolicyVersion': undefined,
       });
     });
 
@@ -54,11 +57,13 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'consentMetadata': constructMetadata(),
         'purposeConsents': undefined,
         'isDirty': undefined,
+        'tcfPolicyVersion': undefined,
       });
       expect(
         getStoredConsentInfo({
           's': 0,
           'r': 'test',
+          'e': 4,
         })
       ).to.deep.equal({
         'consentState': CONSENT_ITEM_STATE.REJECTED,
@@ -66,6 +71,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'consentMetadata': constructMetadata(),
         'purposeConsents': undefined,
         'isDirty': undefined,
+        'tcfPolicyVersion': 4,
       });
       expect(
         getStoredConsentInfo({
@@ -79,11 +85,13 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'isDirty': undefined,
         'purposeConsents': undefined,
         'consentMetadata': constructMetadata(),
+        'tcfPolicyVersion': undefined,
       });
       expect(
         getStoredConsentInfo({
           's': 0,
           'r': 'test',
+          'e': 4,
           'm': {
             [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
               CONSENT_STRING_TYPE.TCF_V2,
@@ -101,6 +109,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
           '1~1.35.41.101',
           false
         ),
+        'tcfPolicyVersion': 4,
       });
       expect(
         getStoredConsentInfo({
@@ -122,6 +131,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
           CONSENT_STRING_TYPE.TCF_V2,
           '1~1.35.41.101'
         ),
+        'tcfPolicyVersion': undefined,
       });
       expect(
         getStoredConsentInfo({
@@ -142,6 +152,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
           'xyz': PURPOSE_CONSENT_STATE.REJECTED,
         },
         'consentMetadata': constructMetadata(),
+        'tcfPolicyVersion': undefined,
       });
     });
 
@@ -284,6 +295,19 @@ describes.fakeWin('ConsentInfo', {}, () => {
       );
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
+        'r': 'test',
+        'd': 1,
+        'm': {
+          [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+            CONSENT_STRING_TYPE.TCF_V1,
+          [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+          [METADATA_STORAGE_KEY.GDPR_APPLIES]: false,
+        },
+      });
+      consentInfo['tcfPolicyVersion'] = 4;
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
+        's': 0,
+        'e': 4,
         'r': 'test',
         'd': 1,
         'm': {

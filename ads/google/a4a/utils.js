@@ -1,4 +1,3 @@
-import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
@@ -99,26 +98,6 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 /** @const {object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-
-/** @const {string} */
-const TOKEN_VALUE_3P =
-  'A6WNTKQHktfckG5CFrBnDpo3z+BJBC5yt/DyQZMpawyLL5/vrGaDhna4gkc+aZ4bQ/zzE7lO357DTV7QtF96pgYAAACEeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJQcml2YWN5U2FuZGJveEFkc0FQSXMiLCJleHBpcnkiOjE2OTUxNjc5OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9';
-
-/**
- * Inserts origin-trial token for `attribution-reporting` if not already
- * present in the DOM.
- * @param {!Window} win
- */
-export function maybeInsertOriginTrialToken(win) {
-  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE_3P}']`)) {
-    return;
-  }
-  const metaEl = createElementWithAttributes(win.document, 'meta', {
-    'http-equiv': 'origin-trial',
-    content: TOKEN_VALUE_3P,
-  });
-  win.document.head.appendChild(metaEl);
-}
 
 /**
  * Returns the value of some navigation timing parameter.
