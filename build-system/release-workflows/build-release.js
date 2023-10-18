@@ -17,6 +17,7 @@ runReleaseJob(jobName, async () => {
   // becomes the default runtime CDN.
   fs.writeJsonSync('build-system/global-configs/custom-config.json', {
     'cdnUrl': 'https://ampjs.org',
+    'cdnProxyRegex': '^https:\\/\\/ampjs\\.org$',
   });
 
   timedExecOrThrow(`amp release --flavor=${FLAVOR} --${ESM} --dedup_v0`);
