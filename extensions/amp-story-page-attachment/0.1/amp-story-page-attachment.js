@@ -92,8 +92,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     /** @private {?AttachmentType} */
     this.type_ = null;
 
+    /** @private {?Element} */
     this.outlinkEl_ = null;
 
+    /** @private {?Element} */
     this.legacyOutlinkEl_ = null;
   }
 
