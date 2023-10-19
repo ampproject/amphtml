@@ -61,7 +61,7 @@ executors:
     resource_class: xlarge
   jdk-docker-2xlarge:
     docker:
-      - image: cimg/openjdk:20.0-node
+      - image: cimg/openjdk:21.0-node
     resource_class: 2xlarge
   macos-medium:
     macos:
@@ -95,8 +95,20 @@ commands:
                   - .git
   setup_node_environment:
     steps:
+      - restore_cache:
+          name: 'Restore nvm Cache'
+          keys:
+            - nvm-cache-{{ arch }}-v1-
       - node/install:
           node-version: 'lts'
+      - run:
+          name: 'Create nvm Cache Checksum File'
+          command: 'node -v > ~/.node-version'
+      - save_cache:
+          name: 'Save nvm Cache'
+          key: nvm-cache-{{ arch }}-v1-{{ checksum "~/.node-version" }}
+          paths:
+            - ~/.nvm/.cache
       - node/install-packages:
           with-cache: false
   setup_vm:
