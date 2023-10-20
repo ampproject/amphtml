@@ -402,7 +402,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
   /**
    * Get outlink element.
-   * @return {Element}
+   * @return {?Element}
    * @private
    */
   getOutlinkEl_() {
@@ -416,7 +416,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
   /**
    * Get legacy outlink element.
-   * @return {Element}
+   * @return {?Element}
    * @private
    */
   getLegacyOutlinkEl_() {
@@ -431,12 +431,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   /**
    * Check if two URLs have the same origin and path but different hashes at the end.
    * @param {string} url1
-   * @param {string} url2  
-   * @return {Boolean}
+   * @param {string} url2
+   * @return {boolean}
    * @private
    */
   urlsHaveSameOriginAndPath_(url1, url2) {
-    if(!url1 || !url2) {
+    if (!url1 || !url2) {
       return false;
     }
 
