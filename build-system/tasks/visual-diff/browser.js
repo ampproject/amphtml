@@ -22,15 +22,12 @@ const cacheDir = path.join(__dirname, '.cache');
 // Steps:
 // 1. Open a recent Percy build, and click the “ⓘ” icon
 // 2. Note the Chrome major version at the bottom
-// 3. Open https://chromiumdash.appspot.com/releases?platform=Linux
-// 4. In the `Stable` table, look for the highest *full* version number that
-//    matches the major version from Percy (which you noted in Step 2)
-// 5. Click on the “ⓘ” icon next to it and note the Branch Base Position
-// 6. Change the release platfrom to Mac and to Windows; verify that the same
-//    exact full version number is available on all three platform. If it is
-//    not, find the next highest one that does!
-// 7. Update the value below:
-const PUPPETEER_CHROMIUM_REVISION = '1097615'; // 111.0.5563.146
+// 3. Open https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json
+// 4. In this JSON file look for the latest full version number that begins
+//    with the same major version number you noted in step 2. The list is
+//    ordered from earliest to latest version numbers.
+// 5. Update the value below:
+const PUPPETEER_CHROME_VERSION = '115.0.5790.170';
 
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -154,26 +151,26 @@ async function fetchBrowserExecutablePath() {
   const installedBrowsers = await getInstalledBrowsers({cacheDir});
   const installedBrowser = installedBrowsers.find(
     ({browser, buildId}) =>
-      browser == BrowserEnum.CHROMIUM && buildId == PUPPETEER_CHROMIUM_REVISION
+      browser == BrowserEnum.CHROME && buildId == PUPPETEER_CHROME_VERSION
   );
   if (installedBrowser) {
     log(
       'info',
-      'Using cached Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION)
+      'Using cached Percy-compatible version of Chrome',
+      cyan(PUPPETEER_CHROME_VERSION)
     );
   } else {
     log(
       'info',
-      'Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION),
+      'Percy-compatible version of Chrome',
+      cyan(PUPPETEER_CHROME_VERSION),
       'was not found in cache. Downloading...'
     );
     let logThrottler = true;
     await install({
       cacheDir,
-      browser: BrowserEnum.CHROMIUM,
-      buildId: PUPPETEER_CHROMIUM_REVISION,
+      browser: BrowserEnum.CHROME,
+      buildId: PUPPETEER_CHROME_VERSION,
       downloadProgressCallback(downloadedBytes, totalBytes) {
         if (logThrottler) {
           log('info', downloadedBytes, '/', totalBytes, 'bytes');
@@ -184,8 +181,8 @@ async function fetchBrowserExecutablePath() {
         } else if (downloadedBytes == totalBytes) {
           log(
             'info',
-            'Finished downloading Chromium version',
-            cyan(PUPPETEER_CHROMIUM_REVISION)
+            'Finished downloading Chrome version',
+            cyan(PUPPETEER_CHROME_VERSION)
           );
         }
       },
@@ -193,13 +190,12 @@ async function fetchBrowserExecutablePath() {
   }
   return computeExecutablePath({
     cacheDir,
-    browser: BrowserEnum.CHROMIUM,
-    buildId: PUPPETEER_CHROMIUM_REVISION,
+    browser: BrowserEnum.CHROME,
+    buildId: PUPPETEER_CHROME_VERSION,
   });
 }
 
 module.exports = {
-  PUPPETEER_CHROMIUM_REVISION,
   launchBrowser,
   fetchBrowserExecutablePath,
   newPage,
