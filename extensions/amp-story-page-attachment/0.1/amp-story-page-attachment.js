@@ -422,8 +422,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   getLegacyOutlinkEl_() {
     if (!this.legacyOutlinkEl_) {
       this.legacyOutlinkEl_ = this.element.parentElement
-        ?.querySelector('.i-amphtml-story-page-open-attachment-host')
-        .shadowRoot?.querySelector('a.i-amphtml-story-page-open-attachment');
+        .querySelector('.i-amphtml-story-page-open-attachment-host')
+        ?.shadowRoot?.querySelector('a.i-amphtml-story-page-open-attachment');
     }
     return this.legacyOutlinkEl_;
   }
@@ -436,6 +436,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   urlsHaveSameOriginAndPath_(url1, url2) {
+    if(!url1 || !url2) {
+      return false;
+    }
+
     const url1WithoutHash = url1.split('#')[0];
     const url2WithoutHash = url2.split('#')[0];
 
