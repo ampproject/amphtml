@@ -60,7 +60,7 @@
     "@sinonjs/fake-timers": "7.1.2",
     "@types/chai": "4.2.22",
     "@types/dompurify": "2.3.2",
-    "@types/eslint": "8.44.4",
+    "@types/eslint": "8.44.6",
     "@types/estree": "1.0.1",
     "@types/fs-extra": "9.0.13",
     "@types/klaw": "3.0.3",
