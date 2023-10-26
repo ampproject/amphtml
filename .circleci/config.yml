@@ -94,19 +94,25 @@ commands:
                 paths:
                   - .git
   setup_node_environment:
+    parameters:
+      node-version:
+        type: string
+        default: '18' # TODO(wg-infra): restore this to 'lts' once #39510 is fixed.
     steps:
       - restore_cache:
           name: 'Restore nvm Cache'
           keys:
-            - nvm-cache-{{ arch }}-v1-
-      - node/install:
-          node-version: 'lts'
+            - nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-
+      - run:
+          name: 'Create .nvmrc file'
+          command: echo << parameters.node-version >> > .nvmrc
+      - node/install
       - run:
           name: 'Create nvm Cache Checksum File'
-          command: 'node -v > ~/.node-version'
+          command: node -v > ~/.node-version
       - save_cache:
           name: 'Save nvm Cache'
-          key: nvm-cache-{{ arch }}-v1-{{ checksum "~/.node-version" }}
+          key: nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-{{ checksum "~/.node-version" }}
           paths:
             - ~/.nvm/.cache
       - node/install-packages:
