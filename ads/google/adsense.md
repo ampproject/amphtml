@@ -7,7 +7,7 @@
   width="100vw"
   height="320"
   type="adsense"
-  data-ad-client="ca-pub-2005682797531342"
+  data-ad-client="pub-1373903287436271"
   data-ad-slot="7046626912"
   data-auto-format="rspv"
   data-full-width
