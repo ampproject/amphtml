@@ -28,7 +28,7 @@
   "homepage": "https://github.com/ampproject/amp-toolbox#readme",
   "files": ["dist", "package.json", "../LICENSE", "README.md"],
   "dependencies": {
-    "punycode": "2.3.0",
+    "punycode": "2.3.1",
     "url-parse": "1.5.10"
   },
   "devDependencies": {
