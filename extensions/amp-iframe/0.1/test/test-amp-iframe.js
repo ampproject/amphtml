@@ -553,6 +553,12 @@ describes.realWin(
       );
     });
 
+    it('should expand variables in src url', async () => {
+      const ampIframe = createAmpIframe(env);
+
+      // TODO add test for sync and async variable expansions
+    });
+
     it('should listen for resize events', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,

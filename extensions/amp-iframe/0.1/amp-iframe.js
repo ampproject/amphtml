@@ -209,12 +209,17 @@ export class AmpIframe extends AMP.BaseElement {
     if (protocol == 'data:') {
       return src;
     }
+
+    const expandedSrc = Services.urlReplacementsForDoc(
+      this.element
+    ).expandUrlSync(src);
+
     // If fragment already exists, it's not modified.
     if (hash && hash != '#') {
-      return src;
+      return expandedSrc;
     }
     // Add `#amp=1` fragment.
-    return removeFragment(src) + '#amp=1';
+    return removeFragment(expandedSrc) + '#amp=1';
   }
 
   /**
