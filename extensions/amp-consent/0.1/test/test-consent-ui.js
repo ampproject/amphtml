@@ -166,12 +166,12 @@ describes.realWin(
         const config = {
           'promptUISrc': 'https://promptUISrc',
           'sandbox':
-            'allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation',
+            'allow-popups-to-escape-sandbox allow-top-navigation allow-top-navigation-by-user-activation',
         };
         consentUI = new ConsentUI(mockInstance, config);
         expect(consentUI.ui_.tagName).to.equal('IFRAME');
         expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
-          'allow-scripts allow-popups allow-same-origin allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'
+          'allow-scripts allow-popups allow-same-origin allow-popups-to-escape-sandbox allow-top-navigation allow-top-navigation-by-user-activation'
         );
       });
 
@@ -180,7 +180,7 @@ describes.realWin(
 
         const config = {
           'promptUISrc': 'https://promptUISrc',
-          'sandbox': 'allow-top-navigation',
+          'sandbox': 'allow-forms',
         };
         consentUI = new ConsentUI(mockInstance, config);
 
@@ -191,7 +191,7 @@ describes.realWin(
 
         expect(errorSpy).to.be.calledOnce;
         expect(errorSpy.args[0][1]).to.match(
-          /The sandbox attribute "allow-top-navigation" is not allowed/
+          /The sandbox attribute "allow-forms" is not allowed/
         );
 
         errorSpy.resetHistory();
