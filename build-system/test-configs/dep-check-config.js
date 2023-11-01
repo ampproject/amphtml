@@ -356,6 +356,8 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-connatix-player/0.1/amp-connatix-player.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
         'src/service/url-replacements-impl.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
