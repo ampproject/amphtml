@@ -27,7 +27,7 @@ import {
 
 import {BaseElement} from './base-element';
 import {startupChunk} from './chunk';
-import {config} from './config';
+import * as urls from './config/urls';
 import {reportErrorForWin} from './error-reporting';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
@@ -106,8 +106,49 @@ function adoptShared(global, callback) {
     };
   }
 
-  /** @const */
-  global.AMP.config = config;
+  /**
+   * @const {{
+   *   urls: {
+   *     thirdParty: string,
+   *     thirdPartyFrameHost: string,
+   *     thirdPartyFrameRegex: !RegExp,
+   *     cdn: string,
+   *     cdnProxyRegex: !RegExp,
+   *     localhostRegex: !RegExp,
+   *     errorReporting: string,
+   *     betaErrorReporting: string,
+   *     localDev: boolean,
+   *     trustedViewerHosts: !Array<!RegExp>,
+   *     geoApi: ?string,
+   *   }
+   * }}
+   */
+  global.AMP.config = {
+    urls: {
+      thirdParty: urls.thirdParty,
+      thirdPartyFrameHost: urls.thirdPartyFrameHost,
+      thirdPartyFrameRegex: urls.thirdPartyFrameRegex,
+      cdn: urls.cdn,
+      cdnProxyRegex: urls.cdnProxyRegex,
+      localhostRegex: urls.localhostRegex,
+      errorReporting: urls.errorReporting,
+      betaErrorReporting: urls.betaErrorReporting,
+      localDev: urls.localDev,
+      trustedViewerHosts: urls.trustedViewerHosts,
+      geoApi: urls.geoApi,
+    },
+  };
+
+  /**
+   *
+   * NOTE(erwinm, #38644): placeholder for global consent listeners.
+   */
+  global.AMP.addGlobalConsentListener = function () {};
+
+  /**
+   * NOTE(erwinm, #38644): placeholder for global consent listeners.
+   */
+  global.AMP.addGranularConsentListener = function () {};
 
   global.AMP.BaseElement = BaseElement;
 
@@ -392,7 +433,7 @@ export function adoptShadowMode(global) {
      * @param {!Element} hostElement
      * @param {!Document} doc
      * @param {string} url
-     * @param {!Object<string, string>=} opt_initParams
+     * @param {!{[key: string]: string}=} opt_initParams
      * @return {!Object}
      */
     global.AMP.attachShadowDoc = manager.attachShadowDoc.bind(manager);
@@ -401,7 +442,7 @@ export function adoptShadowMode(global) {
      * Registers a shadow root document via a stream.
      * @param {!Element} hostElement
      * @param {string} url
-     * @param {!Object<string, string>=} opt_initParams
+     * @param {!{[key: string]: string}=} opt_initParams
      * @return {!Object}
      */
     global.AMP.attachShadowDocAsStream =

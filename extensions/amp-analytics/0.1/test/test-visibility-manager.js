@@ -159,6 +159,11 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     viewer.setVisibilityState_(VisibilityState_Enum.PRERENDER);
     expect(root.getRootVisibility()).to.equal(0);
 
+    // Go preview. Not considered visible for the purposes of analytics
+    // (privacy-preserving).
+    viewer.setVisibilityState_(VisibilityState_Enum.PREVIEW);
+    expect(root.getRootVisibility()).to.equal(0);
+
     // Go hidden.
     viewer.setVisibilityState_(VisibilityState_Enum.HIDDEN);
     expect(root.getRootVisibility()).to.equal(0);
@@ -754,9 +759,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
       });
   });
 
-  // TODO(micajuineho): Figure why out why `state.totalVisibleTime`
-  // is returning 17.
-  it.skip('should listen on a resource', () => {
+  it('should listen on a resource', () => {
     clock.tick(1);
     const target = win.document.createElement('div');
     target.id = 'targetElementId';

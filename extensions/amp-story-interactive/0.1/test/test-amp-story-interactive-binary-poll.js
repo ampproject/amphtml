@@ -117,8 +117,8 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
-      expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('50%');
-      expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('50%');
+      expect(ampStoryPoll.getOptionElements()[0].textContent).to.contain('50%');
+      expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain('50%');
     });
 
     it('should handle the percentage pipeline with scrambled data', async () => {
@@ -135,8 +135,8 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
-      expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('80%');
-      expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('20%');
+      expect(ampStoryPoll.getOptionElements()[0].textContent).to.contain('80%');
+      expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain('20%');
     });
 
     it('should handle the percentage pipeline with incomplete data', async () => {
@@ -150,8 +150,10 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
-      expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('0%');
-      expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('100%');
+      expect(ampStoryPoll.getOptionElements()[0].textContent).to.contain('0%');
+      expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain(
+        '100%'
+      );
     });
 
     it('should handle the percentage pipeline with out of bounds data', async () => {
@@ -168,8 +170,10 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
-      expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('0%');
-      expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('100%');
+      expect(ampStoryPoll.getOptionElements()[0].textContent).to.contain('0%');
+      expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain(
+        '100%'
+      );
     });
 
     it('should change the font-size wih the emoji content', async () => {
@@ -178,7 +182,7 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable:2'
+        '--post-select-scale-variable: 2.00'
       );
     });
 
@@ -188,7 +192,7 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable:1.14'
+        '--post-select-scale-variable: 1.14'
       );
     });
 
@@ -198,7 +202,7 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable:1'
+        '--post-select-scale-variable: 1.00'
       );
     });
 

@@ -76,6 +76,20 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         ).to.be.true;
         expect(!!advancement.timeoutId_).to.be.false;
       });
+
+      it('should handle click event on amp-story-subscriptions', async () => {
+        const storyEl = win.document.createElement('amp-story');
+        const pageEl = win.document.createElement('amp-story-page');
+        const subscriptionsEl = win.document.createElement(
+          'amp-story-subscriptions'
+        );
+        storyEl.appendChild(pageEl);
+        storyEl.appendChild(subscriptionsEl);
+        const advancement = new ManualAdvancement(win, storyEl);
+
+        expect(advancement.shouldHandleEvent_({target: subscriptionsEl})).to.be
+          .true;
+      });
     });
 
     describe('TimeBasedAdvancement', () => {

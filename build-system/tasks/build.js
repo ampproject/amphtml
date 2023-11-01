@@ -1,7 +1,6 @@
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
@@ -10,11 +9,11 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
-const {buildBentoComponents} = require('./build-bento');
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
 const {parseExtensionFlags} = require('./extension-helpers');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -26,7 +25,11 @@ const argv = require('minimist')(process.argv.slice(2));
  * @return {Promise}
  */
 async function runPreBuildSteps(options) {
-  return Promise.all([compileCss(options), bootstrapThirdPartyFrames(options)]);
+  return Promise.all([
+    buildStoryLocalization(options),
+    compileCss(options),
+    bootstrapThirdPartyFrames(options),
+  ]);
 }
 
 /**
@@ -48,15 +51,13 @@ async function build() {
   await runPreBuildSteps(options);
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
-  } else if (argv.bento_runtime_only) {
-    await compileBentoRuntimeAndCore(options);
   } else {
     await compileAllJs(options);
   }
-  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
+  await buildExtensions(options);
 
   // This step is to be run only during a full `amp build`.
-  if (!argv.core_runtime_only && !argv.bento_runtime_only) {
+  if (!argv.core_runtime_only) {
     await buildVendorConfigs(options);
   }
   if (!argv.watch) {
@@ -79,7 +80,6 @@ build.flags = {
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
-  bento_runtime_only: 'Build only the standalone Bento runtime',
   coverage: 'Add code coverage instrumentation to JS files using istanbul',
   version_override: 'Override the version written to AMP_CONFIG',
   watch: 'Watch for changes in files, re-builds when detected',

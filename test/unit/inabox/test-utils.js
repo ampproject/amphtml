@@ -5,6 +5,8 @@ import {getA4AId, registerIniLoadListener} from '#inabox/utils';
 
 import {Services} from '#service';
 
+import {sleep} from '#testing/helpers';
+
 import * as IniLoad from '../../../src/ini-load';
 
 describes.realWin('inabox-utils', {}, (env) => {
@@ -47,18 +49,15 @@ describes.realWin('inabox-utils', {}, (env) => {
     env.win.dispatchEvent = dispatchEventStub;
   });
 
-  it('should fire custom event and postMessage', () => {
+  it('should fire custom event and postMessage', async () => {
     registerIniLoadListener(ampdoc);
     expect(dispatchEventStub).to.not.be.called;
     expect(parentPostMessageStub).to.not.be.called;
     iniLoadDeferred.resolve([]);
-    const timeDeferred = new Deferred();
-    setTimeout(() => timeDeferred.resolve(), 10);
-    return timeDeferred.promise.then(() => {
-      expect(dispatchEventStub).to.be.calledOnce;
-      expect(initCustomEventStub).to.be.calledWith('amp-ini-load');
-      expect(parentPostMessageStub).to.be.calledWith('amp-ini-load', '*');
-    });
+    await sleep(10);
+    expect(dispatchEventStub).to.be.calledOnce;
+    expect(initCustomEventStub).to.be.calledWith('amp-ini-load');
+    expect(parentPostMessageStub).to.be.calledWith('amp-ini-load', '*');
   });
 
   it('Should not return an a4aId if no a4a meta tag in head', () => {

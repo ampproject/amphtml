@@ -5,7 +5,12 @@ import {LocalizationService} from '#service/localization';
 
 import * as analyticsApi from '#utils/analytics';
 
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {sleep} from '#testing/helpers';
+
+import {
+  getAmpdoc,
+  registerServiceBuilder,
+} from '../../../../src/service-helpers';
 import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {
   Action,
@@ -100,7 +105,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before showing tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(component.focusedStateOverlay_).to.not.have.class(
       'i-amphtml-hidden'
     );
@@ -173,7 +178,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(tooltipIconEl.style['background-image']).to.equal(
       'url("http://localhost:9876/my-icon")'
     );
@@ -207,7 +212,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(tooltipTextEl.textContent).to.equal('my cool text');
   });
 
@@ -220,16 +225,18 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    await timeout(150);
+    await sleep(150);
     expect(tooltipTextEl.textContent).to.equal('google.com');
   });
 
-  it('should fire analytics event when entering a tooltip', () => {
+  it('should fire analytics event when entering a tooltip', async () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
       state: EmbeddedComponentState.FOCUSED,
     });
+
+    await getAmpdoc(win.document).whenFirstVisible();
 
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
@@ -237,7 +244,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
   });
 
-  it('should send data-var specified by publisher in analytics event', () => {
+  it('should send data-var specified by publisher in analytics event', async () => {
     addAttributesToElement(clickableEl, {
       'data-vars-tooltip-id': '1234',
     });
@@ -248,6 +255,8 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
       state: EmbeddedComponentState.FOCUSED,
     });
 
+    await getAmpdoc(win.document).whenFirstVisible();
+
     expect(analyticsTriggerStub).to.be.calledWithMatch(
       parentEl,
       StoryAnalyticsEvent.FOCUS,
@@ -257,7 +266,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
   });
 
-  it('should fire analytics event when clicking on the tooltip of a link', () => {
+  it('should fire analytics event when clicking on the tooltip of a link', async () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
@@ -273,13 +282,15 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
     tooltip.click();
 
+    await getAmpdoc(win.document).whenFirstVisible();
+
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
       StoryAnalyticsEvent.CLICK_THROUGH
     );
   });
 
-  it('should fire analytics event when clicking on the tooltip of a tweet', () => {
+  it('should fire analytics event when clicking on the tooltip of a tweet', async () => {
     clickableEl = win.document.createElement('amp-twitter');
     addAttributesToElement(clickableEl, {
       'data-tweetid': '1166723359696130049',
@@ -300,17 +311,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
     tooltip.click();
 
+    await getAmpdoc(win.document).whenFirstVisible();
+
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
       StoryAnalyticsEvent.FOCUS
     );
   });
 });
-
-/**
- * @param {number} ms
- * @return {!Promise}
- */
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}

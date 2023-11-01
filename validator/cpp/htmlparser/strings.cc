@@ -226,7 +226,7 @@ void Strings::ConvertNewLines(std::string* s) {
   }
 }
 
-std::string Strings::ToHexString(char32_t c) {
+std::string Strings::ToHexString(uint32_t c) {
   std::stringstream ss;
   ss << "0x" << std::hex << c;
   return ss.str();

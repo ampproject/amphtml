@@ -23,6 +23,8 @@ const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
 /** @const {string} */
 const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 /** @const {string} */
+const PAN_SCALING_FACTOR_ATTRIBUTE_NAME = 'pan-scaling-factor';
+/** @const {string} */
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
@@ -33,6 +35,7 @@ const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
 export const PRESET_OPTION_ATTRIBUTES = [
   SCALE_START_ATTRIBUTE_NAME,
   SCALE_END_ATTRIBUTE_NAME,
+  PAN_SCALING_FACTOR_ATTRIBUTE_NAME,
   TRANSLATE_X_ATTRIBUTE_NAME,
   TRANSLATE_Y_ATTRIBUTE_NAME,
 ];
@@ -52,7 +55,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
 
 /**
  * A mapping of animation categories to corresponding CSS class names.
- * @private @const {!Object<string, string>}
+ * @private @const {!{[key: string]: string}}
  */
 const ANIMATION_CSS_CLASS_NAMES = {
   [FULL_BLEED_CATEGORY]:
@@ -75,7 +78,7 @@ export function setStyleForPreset(el, presetName) {
 /**
  * First keyframe will always be considered offset: 0 and will be applied to the
  * element as the first frame before animation starts.
- * @type {!Object<string, !StoryAnimationPresetDef>}
+ * @type {!{[key: string]: !StoryAnimationPresetDef}}
  */
 export const presets = {
   'pulse': {
@@ -285,7 +288,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -306,8 +311,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -328,11 +334,13 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) * 0.5;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(
@@ -349,11 +357,13 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_SCALING_FACTOR_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) * 0.5;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(

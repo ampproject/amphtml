@@ -18,7 +18,11 @@ import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {getData, listen} from '#utils/event-helper';
 
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {getConsentPolicyState} from '../../../src/consent';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {VideoEvents_Enum} from '../../../src/video-interface';
@@ -38,7 +42,7 @@ let SerializableChildDef;
 
 /**
  * @param {!Element} element
- * @return {!Object<string, *>}
+ * @return {!{[key: string]: *}}
  */
 function serializeAttributes(element) {
   const {attributes} = element;
@@ -87,7 +91,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /**
      * Maps events to their unlisteners.
-     * @private {!Object<string, function()>}
+     * @private {!{[key: string]: function()}}
      */
     this.unlisteners_ = {};
 
@@ -177,30 +181,37 @@ class AmpImaVideo extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  getConsentPolicy() {
-    return null;
+  /**
+   * @return {Promise<Object|undefined>}
+   * @private
+   */
+  getIframeContext_() {
+    const consentPolicyId = this.getConsentPolicy();
+    if (!consentPolicyId) {
+      return Promise.resolve();
+    }
+    return Promise.all([
+      getConsentPolicyState(this.element, consentPolicyId),
+      getConsentMetadata(this.element, consentPolicyId),
+      getConsentPolicyInfo(this.element, consentPolicyId),
+    ]).then((result) => ({
+      initialConsentState: result[0],
+      initialConsentMetadata: result[1],
+      initialConsentValue: result[2],
+    }));
   }
 
   /** @override */
   layoutCallback() {
-    const {element, win} = this;
-    const consentPolicyId = super.getConsentPolicy();
-    const consentPromise = consentPolicyId
-      ? getConsentPolicyState(element, consentPolicyId)
-      : Promise.resolve(null);
+    const {element} = this;
     element.setAttribute(
       'data-source-children',
       JSON.stringify(this.sourceChildren_)
     );
-    return consentPromise.then((initialConsentState) => {
-      const iframe = getIframe(
-        win,
-        element,
-        TYPE,
-        {initialConsentState},
-        {allowFullscreen: true}
-      );
+    return this.getIframeContext_().then((context) => {
+      const iframe = getIframe(this.win, element, TYPE, context, {
+        allowFullscreen: true,
+      });
       iframe.title = this.element.title || 'IMA video';
 
       applyFillContent(iframe);

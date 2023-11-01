@@ -481,8 +481,8 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         ":13:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75001 bytes whereas the "
         "limit is 75000 "
-        "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
-        "spec/amphtml/#maximum-size)");
+        "bytes. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/"
+        "spec/amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -527,7 +527,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         ":19:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
-        "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
+        "documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -555,7 +555,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         ":7519:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75014 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
-        "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
+        "documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -601,8 +601,8 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         test_case_name,
         ":17:2 The inline style specified in tag 'div' is too long - it "
         "contains 1001 bytes whereas the limit is 1000 bytes. (see "
-        "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
-        "amphtml/#maximum-size)");
+        "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/"
+        "amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 }
@@ -649,8 +649,8 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         ":13:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75001 bytes whereas the "
         "limit is 75000 "
-        "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
-        "spec/amphtml/#maximum-size)");
+        "bytes. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/"
+        "spec/amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -681,7 +681,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         ":19:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
-        "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
+        "documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -701,7 +701,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         ":3769:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75014 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
-        "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
+        "documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -734,8 +734,8 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         StrCat("FAIL\n", test_case_name,
                ":17:2 The inline style specified in tag 'div' is too long - it "
                "contains 1001 bytes whereas the limit is 1000 bytes. (see "
-               "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
-               "amphtml/#maximum-size)");
+               "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/"
+               "amphtml#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 }
@@ -1664,12 +1664,12 @@ TEST(ValidatorTest, RulesMakeSense) {
   absl::flat_hash_set<std::string> all_satisfies;
   absl::flat_hash_set<std::string> all_requires_and_excludes;
   for (const TagSpec& tag_spec : rules.tags()) {
-    all_satisfies.insert(tag_spec.satisfies().cbegin(),
-                         tag_spec.satisfies().cend());
-    all_requires_and_excludes.insert(tag_spec.requires().cbegin(),
-                                     tag_spec.requires().cend());
-    all_requires_and_excludes.insert(tag_spec.excludes().cbegin(),
-                                     tag_spec.excludes().cend());
+    all_satisfies.insert(tag_spec.satisfies_condition().cbegin(),
+                         tag_spec.satisfies_condition().cend());
+    all_requires_and_excludes.insert(tag_spec.requires_condition().cbegin(),
+                                     tag_spec.requires_condition().cend());
+    all_requires_and_excludes.insert(tag_spec.excludes_condition().cbegin(),
+                                     tag_spec.excludes_condition().cend());
   }
   for (const std::string& satisfy : all_satisfies) {
     EXPECT_TRUE(all_requires_and_excludes.contains(satisfy)) << satisfy;

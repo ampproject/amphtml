@@ -1,3 +1,6 @@
+import {BaseElement} from '#bento/components/bento-brightcove/1.0/base-element';
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {setSuperClass} from '#preact/amp-base-element';
@@ -6,21 +9,18 @@ import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
-
 import {CSS} from '../../../build/amp-brightcove-1.0.css';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';
 
 class AmpBrightcove extends setSuperClass(BaseElement, AmpVideoBaseElement) {
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects() {
     return ['https://players.brightcove.net'];
   }

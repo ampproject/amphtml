@@ -55,7 +55,7 @@ amp-story/1.0/test/validator-amp-story-form-error.html:42:10 The attribute 'form
 |            <!-- Image input types are not allowed. -->
 |            <input type="image">
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-form-error.html:45:10 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form/)
+amp-story/1.0/test/validator-amp-story-form-error.html:45:10 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
 |
 |            <!-- Password input types are only allowed when the form element's method is POST. -->
 |            <input type="password">

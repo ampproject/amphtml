@@ -1,5 +1,5 @@
 const fs = require('fs');
-const selenium = require('selenium-webdriver');
+const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
 const {
   DOMRectDef,
   ElementHandle,
@@ -10,11 +10,13 @@ const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
 
-const {By, Condition, Key: SeleniumKey, error} = selenium;
-
 const {NoSuchElementError} = error;
 
 const ELEMENT_WAIT_TIMEOUT = 5000;
+
+/** @typedef {import('selenium-webdriver').ISize} ISize */
+/** @typedef {import('selenium-webdriver').WebDriver} WebDriver */
+/** @typedef {import('selenium-webdriver').WebElement} WebElement */
 
 /** @enum {string} */
 const KeyToSeleniumMap = {
@@ -48,7 +50,7 @@ function expectCondition(valueFn, condition, opt_mutate) {
 /**
  * Make the test runner wait until the value returned by the valueFn matches
  * the given condition.
- * @param {!selenium.WebDriver} driver
+ * @param {!WebDriver} driver
  * @param {function(): !Promise<T1>} valueFn
  * @param {function(T2): ?T1} condition
  * @param {function(T1): T2} opt_mutate
@@ -72,21 +74,20 @@ async function waitFor(driver, valueFn, condition, opt_mutate) {
 
 class SeleniumWebDriverController {
   /**
-   * @param {!selenium.WebDriver} driver
+   * @param {!WebDriver} driver
    */
   constructor(driver) {
     this.driver = driver;
 
     this.networkLogger = new NetworkLogger(driver);
 
-    /** @private {?selenium.WebElement} */
+    /** @private {?WebElement} */
     this.shadowRoot_ = null;
 
     /** @private {boolean} */
     this.isXpathInstalled_ = false;
   }
 
-  // * @return {function(T1,T1): !Promise<?T1>}
   /**
    * Return a wait function. When called, the function will cause the test
    * runner to wait until the given value matches the expected value.
@@ -107,7 +108,7 @@ class SeleniumWebDriverController {
    * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L237}
    * @param {string} selector
    * @param {number=} timeout
-   * @return {!Promise<!ElementHandle<!selenium.WebElement>>}
+   * @return {!Promise<!ElementHandle<!WebElement>>}
    */
   async findElement(selector, timeout = ELEMENT_WAIT_TIMEOUT) {
     const bySelector = By.css(selector);
@@ -137,7 +138,7 @@ class SeleniumWebDriverController {
    * until.js#elementsLocated
    * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L258}   *
    * @param {string} selector
-   * @return {!Promise<!Array<!ElementHandle<!selenium.WebElement>>>}
+   * @return {!Promise<!Array<!ElementHandle<!WebElement>>>}
    */
   async findElements(selector) {
     const bySelector = By.css(selector);
@@ -161,7 +162,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {string} xpath
-   * @return {!Promise<!ElementHandle<!selenium.WebElement>>}
+   * @return {!Promise<!ElementHandle<!WebElement>>}
    */
   async findElementXPath(xpath) {
     await this.maybeInstallXpath_();
@@ -186,7 +187,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {string} xpath
-   * @return {!Promise<!Array<!ElementHandle<!selenium.WebElement>>>}
+   * @return {!Promise<!Array<!ElementHandle<!WebElement>>>}
    */
   async findElementsXPath(xpath) {
     await this.maybeInstallXpath_();
@@ -229,7 +230,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @return {!Promise<!ElementHandle<!selenium.WebElement>>}
+   * @return {!Promise<!ElementHandle<!WebElement>>}
    */
   async getActiveElement() {
     const root = await this.getRoot_();
@@ -240,7 +241,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @return {!Promise<!ElementHandle<!selenium.WebElement>>}
+   * @return {!Promise<!ElementHandle<!WebElement>>}
    */
   async getDocumentElement() {
     const root = await this.getRoot_();
@@ -253,10 +254,8 @@ class SeleniumWebDriverController {
    * @return {!ControllerPromise<string|null|function>}
    */
   getCurrentUrl() {
-    return new ControllerPromise(
-      this.driver.getCurrentUrl(),
-      this.getWaitFn_(() => this.driver.getCurrentUrl())
-    );
+    const waitForFn = this.getWaitFn_(() => this.driver.getCurrentUrl());
+    return new ControllerPromise(this.driver.getCurrentUrl(), waitForFn);
   }
 
   /**
@@ -268,7 +267,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @param {string|Key} keys
    * @return {!Promise}
    */
@@ -305,19 +304,17 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise<string>}
    */
   getElementText(handle) {
     const webElement = handle.getElement();
-    return new ControllerPromise(
-      webElement.getText(),
-      this.getWaitFn_(() => webElement.getText())
-    );
+    const waitForFn = this.getWaitFn_(() => webElement.getText());
+    return new ControllerPromise(webElement.getText(), waitForFn);
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise<string>}
    */
   getElementTagName(handle) {
@@ -326,7 +323,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @param {string} attribute
    * @return {!Promise<string>}
    */
@@ -342,7 +339,7 @@ class SeleniumWebDriverController {
   /**
    * Gets the element property. Note that this is different
    * than getElementAttribute()
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @param {string} property
    * @return {!Promise<string>}
    */
@@ -359,7 +356,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise<!DOMRectDef>}
    */
   getElementRect(handle) {
@@ -443,8 +440,20 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * Get width/height of the browser area.
+   * @return {!Promise<[number, number]>}
+   */
+  async getWindowRect() {
+    const htmlElement = this.driver.findElement(By.css('html'));
+    return await Promise.all([
+      htmlElement.getAttribute('clientWidth').then(Number),
+      htmlElement.getAttribute('clientHeight').then(Number),
+    ]);
+  }
+
+  /**
    * Sets width/height of the browser area.
-   * @param {!selenium.WindowRectDef} rect
+   * @param {!ISize} rect
    * @return {!Promise}
    */
   async setWindowRect(rect) {
@@ -524,7 +533,7 @@ class SeleniumWebDriverController {
 
   /**
    *
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise}
    */
   async click(handle) {
@@ -532,7 +541,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @param {!ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    */
@@ -546,7 +555,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @param {!ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    */
@@ -600,7 +609,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise}
    */
   async switchToFrame(handle) {
@@ -623,7 +632,7 @@ class SeleniumWebDriverController {
 
   /**
    * Switch controller to shadowRoot body hosted by given element.
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise<void>}
    */
   async switchToShadow(handle) {
@@ -633,7 +642,7 @@ class SeleniumWebDriverController {
 
   /**
    * Switch controller to shadowRoot hosted by given element.
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise<void>}
    */
   async switchToShadowRoot(handle) {
@@ -642,7 +651,7 @@ class SeleniumWebDriverController {
   }
 
   /**.
-   * @param {!ElementHandle<!selenium.WebElement>} handle
+   * @param {!ElementHandle<!WebElement>} handle
    * @param {function(): any} getter
    * @return {!Promise<void>}
    */
@@ -661,7 +670,7 @@ class SeleniumWebDriverController {
 
   /**
    * Get the current root
-   * @return {!Promise<!selenium.WebElement>}
+   * @return {!Promise<!WebElement>}
    */
   getRoot_() {
     if (this.shadowRoot_) {
@@ -673,9 +682,9 @@ class SeleniumWebDriverController {
 
   /**
    * Shutdown the driver.
-   * @return {void}
+   * @return {Promise<void>}
    */
-  dispose() {
+  async dispose() {
     return this.driver.quit();
   }
 }

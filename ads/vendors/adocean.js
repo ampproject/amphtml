@@ -1,10 +1,13 @@
 import {computeInMasterFrame, validateData, writeScript} from '#3p/3p';
 
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
 import {parseJson} from '#core/types/object/json';
 
 /**
- * @const {Object<string, string>}
+ * @const {{[key: string]: string}}
  */
 const ADO_JS_PATHS = {
   'sync': '/files/js/ado.js',
@@ -22,7 +25,7 @@ function isFalseString(str) {
 /**
  * @param {string} mode
  * @param {!Window} global
- * @param {boolean} consent
+ * @param {object} consent
  */
 function setupAdoConfig(mode, global, consent) {
   if (global['ado']) {
@@ -32,7 +35,9 @@ function setupAdoConfig(mode, global, consent) {
       fif: {
         enabled: mode != 'sync',
       },
-      consent,
+      consent: consent.accepted,
+      gdprApplies: consent.gdprApplies,
+      gdprConsent: consent.consentString,
     };
 
     global['ado']['config'](config);
@@ -203,7 +208,7 @@ function requestCodes(masterId, data, global, callback) {
 class AdoBuffer {
   /**
    *
-   * @param {Object} container
+   * @param {object} container
    * @param {!Window} global
    */
   constructor(container, global) {
@@ -306,14 +311,24 @@ export function adocean(global, data) {
   const adoUrl = 'https://' + data['aoEmitter'] + ADO_JS_PATHS[mode];
   const ctx = global.context;
 
-  /*
-   * INSUFFICIENT and UNKNOWN should be treated as INSUFFICIENT
-   * not defined states should be treated as INSUFFICIENT
-   */
-  const consent =
-    ctx.initialConsentState === null /* tags without data-block-on-consent */ ||
-    ctx.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
-    ctx.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
+  const consent = {
+    accepted:
+      /* INSUFFICIENT and UNKNOWN should be treated as INSUFFICIENT
+       * not defined states should be treated as INSUFFICIENT */
+      ctx.initialConsentState ===
+        null /* tags without data-block-on-consent */ ||
+      ctx.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
+      ctx.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+    gdprApplies:
+      typeof ctx.initialConsentMetadata?.gdprApplies === 'boolean'
+        ? ctx.initialConsentMetadata.gdprApplies
+        : undefined,
+    consentString:
+      ctx.initialConsentMetadata?.consentStringType ===
+      CONSENT_STRING_TYPE.TCF_V2
+        ? ctx.initialConsentValue
+        : undefined,
+  };
 
   writeScript(global, adoUrl, () => {
     setupAdoConfig(mode, global, consent);

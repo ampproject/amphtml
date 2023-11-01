@@ -1,17 +1,22 @@
-
-
-/**
-   * Hiding the element and only showing it on the active page so the animation
-   * triggers every time the page becomes active.
-   */
 .i-amphtml-story-page-open-attachment {
-  display: none !important;
+  align-items: center !important;
+  flex-direction: column !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+  -webkit-touch-callout: default !important; /* Allow long pressing the button to open context menu in iOS */
+  text-decoration: none !important;
   --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
   --i-amphtml-img-background-color: white !important;
   --i-amphtml-label-text-color: white !important;
   --i-amphtml-arrow-color: black !important;
   --i-amphtml-page-attachment-ui-animation-delay: 1s !important;
   --i-amphtml-page-attachment-ui-animation-duration: .6s !important;
+  /* Hidden by default to prevent tabbing to inactive page's CTAs. */
+  display: none !important;
 }
 
 [theme="dark"].i-amphtml-story-page-open-attachment {
@@ -22,77 +27,13 @@
 }
 
 .i-amphtml-story-page-open-attachment[active] {
+  /* Displays only on active page. */
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-direction: column !important;
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
-  pointer-events: none !important;
-  z-index: 3 !important;
-  -webkit-touch-callout: default !important; /* Allow long pressing the button to open context menu in iOS */
-  text-decoration: none !important;
-}
-
-.i-amphtml-story-page-open-attachment:not([active]) {
-  /* Prevent tabbing to inactive page's buttons */
-  visibility: hidden !important;
 }
 
 .i-amphtml-story-page-open-attachment > * {
   cursor: pointer !important;
   pointer-events: auto !important;
-}
-
-.i-amphtml-story-page-open-attachment-icon {
-  display: block !important;
-  height: 32px !important;
-  width: 32px !important;
-  cursor: pointer !important;
-  animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0, 0.2, 1) 2s both !important;
-}
-
-.i-amphtml-story-page-open-attachment-icon::after {
-  content: '' !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  height: 100% !important;
-  width: 100% !important;
-  background: #fff !important;
-  border-radius: 100% !important;
-  z-index: -1 !important;
-  animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0, 0.2, 1) 2s
-    both !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-left,
-.i-amphtml-story-page-open-attachment-bar-right,
-.i-amphtml-story-outlink-page-open-attachment-bar-left,
-.i-amphtml-story-outlink-page-open-attachment-bar-right {
-  position: absolute !important;
-  display: block !important;
-  height: 3px !important;
-  width: 12px !important;
-  border-radius: 3px !important;
-  top: 14px !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-left {
-  left: 6px !important;
-  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) 2s
-      both,
-    open-attachment-bar-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-right {
-  right: 6px !important;
-  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) 2s
-      both,
-    open-attachment-bar-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
 }
 
 .i-amphtml-story-page-open-attachment-label {
@@ -122,7 +63,7 @@
   white-space: nowrap !important;
   max-width: 210px !important;
   /* Prevents clipping of decenders. */
-  line-height: 18px !important;
+  line-height: 20px !important;
 }
 
  .i-amphtml-story-page-open-attachment-label {
@@ -138,8 +79,9 @@
   margin-bottom: 12px !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-inline-page-attachment-chip {
-  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+/* Animations only play when page is active. */
+.i-amphtml-story-page-open-attachment-inline[active] .i-amphtml-story-inline-page-attachment-chip {
+  animation: i-amphtml-tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 .i-amphtml-story-inline-page-attachment-chip:only-child {
@@ -186,40 +128,44 @@
   background-repeat: no-repeat !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-inline-page-attachment-arrow:before {
-  animation: move-up-arrow-in-circle var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+.i-amphtml-story-page-open-attachment-inline[active] .i-amphtml-story-inline-page-attachment-arrow:before {
+  animation: i-amphtml-move-up-arrow-in-circle var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 [theme="dark"] .i-amphtml-story-inline-page-attachment-arrow:before {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#fff" xmlns="http://www.w3.org/2000/svg" width="20" height="8"><path d="m18 7.7-.7-.2-7.3-4-7.3 4c-.7.4-1.6.2-2-.6-.4-.7-.1-1.6.6-2l8-4.4a2 2 0 0 1 1.5 0l8 4.4c.7.4 1 1.3.6 2-.4.5-.9.8-1.4.8z"/></svg>') !important;
 }
 
-.i-amphtml-story-page-open-attachment:not([href]) .i-amphtml-story-page-attachment-label {
+.i-amphtml-story-page-open-attachment-inline .i-amphtml-story-page-attachment-label {
   margin-bottom: 20px !important;
   color: var(--i-amphtml-label-text-color) !important;
 }
 
-/** For amp-story-page-outlink button. */
-
-.i-amphtml-story-page-open-attachment {
-  --i-amphtml-outlink-cta-background-color: white !important;
-  --i-amphtml-outlink-cta-text-color: black !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0)) !important;
+.i-amphtml-story-page-open-attachment-inline {
+  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
+  /* Button element overrides. */
+  border: none !important;
+  padding: 0 !important;
 }
 
-[theme="dark"].i-amphtml-story-page-open-attachment {
-  --i-amphtml-outlink-cta-background-color: black !important;
-  --i-amphtml-outlink-cta-text-color: white !important;
+[theme="dark"].i-amphtml-story-page-open-attachment-inline {
   background: linear-gradient(0, rgba(255, 255, 255, .25), rgba(255, 255, 255, 0)) !important;
 }
 
-[href].i-amphtml-story-page-open-attachment {
-  /* Outlink attachments do not need the linear gradient. */
-  background: none !important;
+/** For amp-story-page-outlink button. */
+
+.i-amphtml-story-page-open-attachment-outlink {
+  --i-amphtml-outlink-cta-background-color: white !important;
+  --i-amphtml-outlink-cta-text-color: black !important;
 }
 
-[href].i-amphtml-story-page-open-attachment[active] {
-  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+[theme="dark"].i-amphtml-story-page-open-attachment-outlink {
+  --i-amphtml-outlink-cta-background-color: black !important;
+  --i-amphtml-outlink-cta-text-color: white !important;
+}
+
+.i-amphtml-story-page-open-attachment-outlink[active]:not(.i-amphtml-story-page-open-attachment-outlink-no-animation-exp) .i-amphtml-story-outlink-page-attachment-outlink-chip {
+  animation: i-amphtml-tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-arrow {
@@ -230,11 +176,11 @@
   filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3)) !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-outlink-page-attachment-arrow {
-  animation: move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+.i-amphtml-story-page-open-attachment[active]:not(.i-amphtml-story-page-open-attachment-outlink-no-animation-exp) .i-amphtml-story-outlink-page-attachment-arrow {
+  animation: i-amphtml-move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
-@keyframes move-up-arrow {
+@keyframes i-amphtml-move-up-arrow {
   0%, 100% {
     opacity: 1;
     transform: translateY(0);
@@ -248,7 +194,7 @@
   }
 }
 
-@keyframes move-up-arrow-in-circle {
+@keyframes i-amphtml-move-up-arrow-in-circle {
   0%, 100% {
     opacity: 1;
     transform: translateY(0);
@@ -262,7 +208,7 @@
   }
 }
 
-@keyframes tap-scale {
+@keyframes i-amphtml-tap-scale {
   0%, 100% {
     transform: scale(1);
   }
@@ -294,13 +240,15 @@
   border-radius: 50% !important;
 }
 
-[href] .i-amphtml-story-page-attachment-label {
+.i-amphtml-story-page-open-attachment-outlink
+  .i-amphtml-story-page-attachment-label {
   padding-inline-start: 6px !important;
   padding-inline-end: 8px !important;
   color: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
-[href] .i-amphtml-story-page-attachment-label:only-child {
+.i-amphtml-story-page-open-attachment-outlink
+  .i-amphtml-story-page-attachment-label:only-child {
   padding-inline-start: 8px !important;
 }
 

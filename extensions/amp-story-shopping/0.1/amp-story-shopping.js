@@ -41,7 +41,7 @@ export const loadFonts = (win, fontFaces) => {
 AMP.extension('amp-story-shopping', '0.1', (AMP) => {
   AMP.registerElement(
     'amp-story-shopping-tag',
-    AmpStoryShoppingTag,
+    dependsOnStoryServices(AmpStoryShoppingTag),
     shoppingCSS
   );
   AMP.registerElement(

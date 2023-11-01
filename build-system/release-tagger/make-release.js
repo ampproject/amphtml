@@ -4,14 +4,9 @@
  */
 
 const dedent = require('dedent');
-const {
-  createRelease,
-  createTag,
-  getPullRequestsBetweenCommits,
-  getRef,
-} = require('./utils');
-const {getExtensions, getSemver} = require('../npm-publish/utils');
-const {GraphQlQueryResponseData} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
+const {GitHubApi} = require('./utils');
+
+/** @typedef {import('@octokit/graphql').GraphQlQueryResponseData} GraphQlQueryResponseData */
 
 const prereleaseConfig = {
   'beta-opt-in': true,
@@ -40,45 +35,6 @@ function _formatPullRequestLine(pr) {
   const {abbreviatedOid, commitUrl} = mergeCommit;
   return dedent`\
    <a href="${commitUrl}"><code>${abbreviatedOid}</code></a> - ${title}`;
-}
-
-/**
- * Organize bento changes into sections
- * @param {Array<GraphQlQueryResponseData>} prs
- * @return {PackageMetadata}
- */
-function _createPackageSections(prs) {
-  const bundles = getExtensions();
-  const majors = [...new Set(bundles.map((b) => b.version))];
-  /** @type PackageMetadata */
-  const metadata = {};
-  for (const major of majors) {
-    metadata[major] = {
-      packages: {},
-      unchanged: new Set(),
-    };
-    bundles
-      .filter((b) => b.version == major)
-      .map((b) => metadata[major].unchanged.add(b.extension));
-  }
-
-  for (const pr of prs) {
-    for (const node of pr.files.nodes) {
-      for (const {extension, version} of bundles) {
-        if (node.path.startsWith(`extensions/${extension}/${version}`)) {
-          if (!Object.keys(metadata[version].packages).includes(extension)) {
-            metadata[version].packages[extension] = new Set();
-            metadata[version].unchanged.delete(extension);
-          }
-          metadata[version].packages[extension].add(
-            `<li>${_formatPullRequestLine(pr)}</li>`
-          );
-        }
-      }
-    }
-  }
-
-  return metadata;
 }
 
 /**
@@ -112,12 +68,12 @@ function _createComponentSections(prs) {
 
     // components
     for (const node of pr.files.nodes) {
-      if (node.path.startsWith('extensions/')) {
-        const component = node.path.split('/')[1];
-        if (!Object.keys(sections).includes(component)) {
-          sections[component] = new Set();
+      const componentName = getComponentNameFromPath(node.path);
+      if (componentName) {
+        if (!sections[componentName]) {
+          sections[componentName] = new Set();
         }
-        sections[component].add(_formatPullRequestLine(pr));
+        sections[componentName].add(_formatPullRequestLine(pr));
       }
     }
   }
@@ -139,6 +95,22 @@ function _createComponentSections(prs) {
 }
 
 /**
+ * Gets the name of a component from its directory path.
+ * Returns undefined if the path is not a component directory.
+ * @param {string} path
+ * @return {string|undefined}
+ */
+function getComponentNameFromPath(path) {
+  if (path.startsWith('extensions/')) {
+    return path.split('/')[1];
+  }
+
+  if (path.startsWith('src/bento/components/')) {
+    return path.split('/')[3];
+  }
+}
+
+/**
  * Create body for GitHub release
  * @param {string} head
  * @param {string} base
@@ -146,7 +118,6 @@ function _createComponentSections(prs) {
  * @return {string}
  */
 function _createBody(head, base, prs) {
-  const bento = _createPackageSections(prs);
   const components = _createComponentSections(prs);
   const template = dedent`\
      <h2>Changelog</h2>
@@ -155,25 +126,6 @@ function _createBody(head, base, prs) {
      <code>${base}...${head}</code>
      </a>
      </p>
- 
-     ${Object.entries(bento)
-       .map(
-         // eslint-disable-next-line local/no-deep-destructuring
-         ([major, {packages, unchanged}]) => dedent`\
-         <h2>npm packages @ ${getSemver(major, head)}</h2>
-         ${Object.entries(packages)
-           .sort()
-           .map(
-             ([extension, prs]) =>
-               `<b>${extension}</b>\n<ul>${[...prs].join('\n')}</ul>`
-           )
-           .join('\n')}
-   
-         <b>Packages not changed:</b> <i>${[...unchanged]
-           .sort()
-           .join(', ')}</i>`
-       )
-       .join('\n')}
  
      <h2>Changes by component</h2>
      ${components.sort().join('')}\
@@ -197,20 +149,46 @@ function _createBody(head, base, prs) {
  * @param {string} base
  * @param {string} channel
  * @param {string} sha
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<Object>}
  */
-async function makeRelease(head, base, channel, sha) {
+async function makeRelease(
+  head,
+  base,
+  channel,
+  sha,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
+  const api = new GitHubApi(octokitRest, octokitGraphQl);
   let headRef;
   try {
-    headRef = (await getRef(head)).object;
+    headRef = (await api.getRef(head)).object;
   } catch (_) {
-    headRef = (await createTag(head, sha)).object;
+    headRef = (await api.createTag(head, sha)).object;
   }
-  const {object: baseRef} = await getRef(base);
-  const prs = await getPullRequestsBetweenCommits(headRef.sha, baseRef.sha);
+  const {object: baseRef} = await api.getRef(base);
+  const prs = await api.getPullRequestsBetweenCommits(headRef.sha, baseRef.sha);
   const body = _createBody(head, base, prs);
   const prerelease = prereleaseConfig[channel];
-  return await createRelease(head, headRef.sha, body, prerelease);
+  return await api.createRelease(head, headRef.sha, body, prerelease);
 }
 
-module.exports = {makeRelease};
+/**
+ * Get a release
+ * @param {string} head
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
+ * @return {Promise<Object>}
+ */
+async function getRelease(
+  head,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
+  const api = new GitHubApi(octokitRest, octokitGraphQl);
+  return await api.getRelease(head);
+}
+
+module.exports = {getRelease, makeRelease};

@@ -42,7 +42,7 @@ export function hasOwn(obj, key) {
  * Returns obj[key] iff key is obj's own property (is not inherited).
  * Otherwise, returns undefined.
  *
- * @param {Object<string, *>} obj
+ * @param {{[key: string]: *}} obj
  * @param {string} key
  * @return {*}
  */
@@ -59,11 +59,11 @@ export function ownProperty(obj, key) {
 /**
  * Deep merges source into target.
  *
- * @param {Object} target
- * @param {Object} source
+ * @param {object} target
+ * @param {object} source
  * @param {number} depth The maximum merge depth. If exceeded, Object.assign
  *                       will be used instead.
- * @return {Object}
+ * @return {object}
  * @throws {Error} If source contains a circular reference.
  * Note: Only nested objects are deep-merged, primitives and arrays are not.
  */
@@ -108,9 +108,9 @@ export function deepMerge(target, source, depth = 10) {
 }
 
 /**
- * @param {Object<string, *>} o An object to remove properties from
+ * @param {{[key: string]: *}} o An object to remove properties from
  * @param {Array<string>} props A list of properties to remove from the Object
- * @return {Object<string, *>} An object with the given properties removed
+ * @return {{[key: string]: *}} An object with the given properties removed
  */
 export function omit(o, props) {
   return Object.keys(o).reduce((acc, key) => {
@@ -147,9 +147,41 @@ export function objectsEqualShallow(o1, o2) {
 }
 
 /**
- * @param {Object<string, R|undefined>} obj
+ * Deeply compares 2 objects, and returns `true` if they match.
+ * @param {*} o1
+ * @param {*} o2
+ * @return {boolean}
+ */
+export function objectsEqualDeep(o1, o2) {
+  if (o1 === o2) {
+    return true;
+  }
+  if (o1 && o2 && typeof o1 === 'object' && typeof o2 === 'object') {
+    // Deep array compare:
+    if (Array.isArray(o1)) {
+      return (
+        Array.isArray(o2) &&
+        o1.length === o2.length &&
+        o1.every((value, i) => objectsEqualDeep(value, o2[i]))
+      );
+    }
+
+    // Deep object compare:
+    const o1Keys = Object.keys(o1);
+    const o2Keys = Object.keys(o2);
+    return (
+      o1Keys.length === o2Keys.length &&
+      o1Keys.every((key) => o2Keys.includes(key)) &&
+      o1Keys.every((key) => objectsEqualDeep(o1[key], o2[key]))
+    );
+  }
+  return false;
+}
+
+/**
+ * @param {{[key: string]: R|undefined}} obj
  * @param {string} prop
- * @param {function(Object<string, R|undefined>, string): R} factory
+ * @param {function({[key: string]: R|undefined}, string): R} factory
  * @return {R}
  *
  * @template R

@@ -7,7 +7,7 @@ import {devAssert, user} from '#utils/log';
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 
 /**
@@ -333,11 +333,11 @@ export function isLongTaskApiSupported(win) {
   );
 }
 
-/** @private {Object<string, FrameData>} */
+/** @private {{[key: string]: FrameData}} */
 IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
 
-/** @private {Object<string, PerformanceObserver>} */
+/** @private {{[key: string]: PerformanceObserver}} */
 IframeTransport.performanceObservers_ = {};

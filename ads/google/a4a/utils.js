@@ -1,5 +1,3 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
@@ -17,7 +15,6 @@ import {buildUrl} from './shared/url-builder';
 
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 
@@ -44,7 +41,7 @@ export const ValidAdContainerTypes = {
 
 /**
  * See `VisibilityState_Enum` enum.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
 const visibilityStateCodes = {
   'visible': '1',
@@ -98,29 +95,9 @@ export let NameframeExperimentConfig;
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
-/** @const {Object} */
+/** @const {object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-
-/** @const {string} */
-const TOKEN_VALUE_3P =
-  'AxOH8+XUqIxXfDG7Bxf7YR6oBTF4f73xWZNTyqhrkvIEgEmpxrpX8rzEqe9/yOsCGW9ChT05U9t++yH/aCYKCAgAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
-
-/**
- * Inserts origin-trial token for `attribution-reporting` if not already
- * present in the DOM.
- * @param {!Window} win
- */
-export function maybeInsertOriginTrialToken(win) {
-  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE_3P}']`)) {
-    return;
-  }
-  const metaEl = createElementWithAttributes(win.document, 'meta', {
-    'http-equiv': 'origin-trial',
-    content: TOKEN_VALUE_3P,
-  });
-  win.document.head.appendChild(metaEl);
-}
 
 /**
  * Returns the value of some navigation timing parameter.
@@ -200,7 +177,7 @@ export function isReportingEnabled(ampElement) {
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
- * @return {!Object<string,null|number|string>} block level parameters
+ * @return {!{[key: string]: null|number|string}} block level parameters
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
   const {element: adElement, win} = a4a;
@@ -235,7 +212,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type matching typing attribute.
  * @param {function(!Element):string} groupFn
- * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
+ * @return {!Promise<!{[key: string]: !Array<!Promise<!../../../src/base-element.BaseElement}>>>}
  */
 export function groupAmpAdsByType(ampdoc, type, groupFn) {
   // Look for amp-ad elements of correct type or those contained within
@@ -288,7 +265,7 @@ export function groupAmpAdsByType(ampdoc, type, groupFn) {
 /**
  * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {number} startTime
- * @return {!Promise<!Object<string,null|number|string>>}
+ * @return {!Promise<!{[key: string]: null|number|string}>}
  */
 export function googlePageParameters(a4a, startTime) {
   const {win} = a4a;
@@ -368,6 +345,8 @@ export function googlePageParameters(a4a, startTime) {
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
       'uab': uaDataValues?.bitness,
+      'uafvl': JSON.stringify(uaDataValues?.fullVersionList),
+      'uaw': uaDataValues?.wow64,
     };
   });
 }
@@ -376,7 +355,7 @@ export function googlePageParameters(a4a, startTime) {
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
- * @param {!Object<string,null|number|string>} parameters
+ * @param {!{[key: string]: null|number|string}} parameters
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
@@ -399,7 +378,7 @@ export function googleAdUrl(
 
 /**
  * @param {string} baseUrl
- * @param {!Object<string,null|number|string>} parameters
+ * @param {!{[key: string]: null|number|string}} parameters
  * @param {number} startTime
  * @return {string}
  */
@@ -586,7 +565,7 @@ export function additionalDimensions(win, viewportSize) {
 /**
  * Returns amp-analytics config for a new CSI trigger.
  * @param {string} on The name of the analytics trigger.
- * @param {!Object<string, string>} params Params to be included on the ping.
+ * @param {!{[key: string]: string}} params Params to be included on the ping.
  * @return {!JsonObject}
  */
 function csiTrigger(on, params) {
@@ -938,130 +917,6 @@ export function getBinaryTypeNumericalCode(type) {
       'mod': '43',
     }[type] || null
   );
-}
-
-/** @const {!RegExp} */
-const IDENTITY_DOMAIN_REGEXP_ = /\.google\.(?:com?\.)?[a-z]{2,3}$/;
-
-/** @typedef {{
-      token: (string|undefined),
-      jar: (string|undefined),
-      pucrd: (string|undefined),
-      freshLifetimeSecs: (number|undefined),
-      validLifetimeSecs: (number|undefined),
-      fetchTimeMs: (number|undefined)
-   }} */
-export let IdentityToken;
-
-/**
- * @param {!Window} win
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
- * @param {?string} consentPolicyId
- * @return {!Promise<!IdentityToken>}
- */
-export function getIdentityToken(win, ampDoc, consentPolicyId) {
-  // If configured to use amp-consent, delay request until consent state is
-  // resolved.
-  win['goog_identity_prom'] =
-    win['goog_identity_prom'] ||
-    (consentPolicyId
-      ? getConsentPolicyState(ampDoc.getHeadNode(), consentPolicyId)
-      : Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED)
-    ).then((consentState) =>
-      consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-      consentState == CONSENT_POLICY_STATE.UNKNOWN
-        ? /** @type {!IdentityToken} */ ({})
-        : executeIdentityTokenFetch(win, ampDoc)
-    );
-  return /** @type {!Promise<!IdentityToken>} */ (win['goog_identity_prom']);
-}
-
-/**
- * @param {!Window} win
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
- * @param {number=} redirectsRemaining (default 1)
- * @param {string=} domain
- * @param {number=} startTime
- * @return {!Promise<!IdentityToken>}
- */
-function executeIdentityTokenFetch(
-  win,
-  ampDoc,
-  redirectsRemaining = 1,
-  domain = undefined,
-  startTime = Date.now()
-) {
-  const url = getIdentityTokenRequestUrl(win, ampDoc, domain);
-  return Services.xhrFor(win)
-    .fetchJson(url, {
-      mode: 'cors',
-      method: 'GET',
-      ampCors: false,
-      credentials: 'include',
-    })
-    .then((res) => res.json())
-    .then((obj) => {
-      const token = obj['newToken'];
-      const jar = obj['1p_jar'] || '';
-      const pucrd = obj['pucrd'] || '';
-      const freshLifetimeSecs = parseInt(obj['freshLifetimeSecs'] || '', 10);
-      const validLifetimeSecs = parseInt(obj['validLifetimeSecs'] || '', 10);
-      const altDomain = obj['altDomain'];
-      const fetchTimeMs = Date.now() - startTime;
-      if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {
-        if (!redirectsRemaining--) {
-          // Max redirects, log?
-          return {fetchTimeMs};
-        }
-        return executeIdentityTokenFetch(
-          win,
-          ampDoc,
-          redirectsRemaining,
-          altDomain,
-          startTime
-        );
-      } else if (
-        freshLifetimeSecs > 0 &&
-        validLifetimeSecs > 0 &&
-        typeof token == 'string'
-      ) {
-        return {
-          token,
-          jar,
-          pucrd,
-          freshLifetimeSecs,
-          validLifetimeSecs,
-          fetchTimeMs,
-        };
-      }
-      // returning empty
-      return {fetchTimeMs};
-    })
-    .catch((unusedErr) => {
-      // TODO log?
-      return {};
-    });
-}
-
-/**
- * @param {!Window} win
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
- * @param {string=} domain
- * @return {string} url
- * @visibleForTesting
- */
-export function getIdentityTokenRequestUrl(win, ampDoc, domain = undefined) {
-  if (!domain && win != win.top && win.location.ancestorOrigins) {
-    const matches = IDENTITY_DOMAIN_REGEXP_.exec(
-      win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]
-    );
-    domain = (matches && matches[0]) || undefined;
-  }
-  domain = domain || '.google.com';
-  const canonical = extractHost(
-    Services.documentInfoForDoc(ampDoc).canonicalUrl
-  );
-  return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
 /**

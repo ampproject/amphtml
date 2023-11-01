@@ -9,9 +9,13 @@ amp-story[standalone] {
 /**
  * NOTE: If you change any variables or media queries change:
  * css/amp-story-player-shadow.css
+ *
+ * Story previews are shown on the mobile SERP in a viewer with a 3/4 aspect
+ * ratio, so a 31/40 min-aspect-ratio here ensures that the mobile UI is
+ * displayed instead of the desktop UI.
  */
 
-@media(min-aspect-ratio: 3/4) {
+@media (min-aspect-ratio: 31/40) {
   /** Variables shared between page, system layer and pagination buttons. */
   :root:not([data-story-supports-landscape]):not([i-amphtml-story-mobile]) {
     --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;

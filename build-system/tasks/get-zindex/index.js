@@ -27,7 +27,7 @@ const logChecking = (filename) =>
 const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
 
 /**
- * @param {!Object<string, string>} acc accumulator object for selectors
+ * @param {!{[key: string]: string}} acc accumulator object for selectors
  * @param {!Postcss.Rule} css post css rules object
  */
 function zIndexCollector(acc, css) {
@@ -49,7 +49,7 @@ function zIndexCollector(acc, css) {
 }
 
 /**
- * @param {!Object<string, !Object<string, !Array<number>>>} filesData
+ * @param {!{[key: string]: !{[key: string]: !Array<number>}}} filesData
  *    accumulation of files and the rules and z index values.
  * @return {!Array<!Array<string>>}
  */

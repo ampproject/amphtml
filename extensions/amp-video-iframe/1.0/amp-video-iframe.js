@@ -1,3 +1,7 @@
+import {BUBBLE_MESSAGE_EVENTS} from '#bento/apis/video-iframe-api';
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
+import {BaseElement} from '#bento/components/bento-video-iframe/1.0/base-element';
+
 import {measureIntersection} from '#core/dom/layout/intersection';
 
 import {isExperimentOn} from '#experiments';
@@ -7,13 +11,9 @@ import {setSuperClass} from '#preact/amp-base-element';
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
-
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {postMessageWhenAvailable} from '../../../src/iframe-video';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @const {string} */
 const TAG = 'amp-video-iframe';

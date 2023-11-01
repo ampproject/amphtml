@@ -46,7 +46,7 @@ const TAG = 'amp-onetap-google';
 /** @const {string} */
 export const SENTINEL = 'onetap_google';
 
-/** @const {Object} */
+/** @const {object} */
 export const ACTIONS = {
   READY: 'intermediate_iframe_ready',
   RESIZE: 'intermediate_iframe_resize',

@@ -106,24 +106,29 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * }} API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static R1() {
     return true;
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static requiresShadowDom() {
     return this['usesShadowDom'];
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static usesLoading() {
     return this['loadable'];
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return !this.usesLoading();
+  }
+
+  /** @override */
+  static previewAllowed() {
+    return false;
   }
 
   /**
@@ -223,7 +228,7 @@ export class PreactBaseElement extends BaseElement {
   /**
    * Provides a mapping of Preact prop to AmpElement DOM attributes.
    *
-   * @type {Object<string, AmpElementProp>}
+   * @type {{[key: string]: AmpElementProp}}
    */
   static props = {};
 
@@ -493,7 +498,7 @@ export class PreactBaseElement extends BaseElement {
    * @param {JsonObject} props
    */
   mutateProps(props) {
-    Object.assign(/** @type {Object} */ (this.defaultProps_), props);
+    Object.assign(/** @type {object} */ (this.defaultProps_), props);
     this.scheduleRender_();
   }
 
@@ -909,7 +914,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {Object} api
+   * @param {object} api
    * @param {keyof API_TYPE} key
    * @private
    */

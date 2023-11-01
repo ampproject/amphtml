@@ -20,19 +20,13 @@ const jobName = 'unminified-tests.js';
 function pushBuildWorkflow() {
   try {
     timedExecOrThrow(
-      'amp integration --nobuild --headless --coverage --report',
+      'amp integration --nobuild --headless --coverage',
       'Integration tests failed!'
-    );
-    timedExecOrThrow(
-      'amp codecov-upload',
-      'Failed to upload code coverage to Codecov!'
     );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
     }
-  } finally {
-    timedExecOrDie('amp test-report-upload');
   }
 }
 
@@ -42,7 +36,6 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('amp integration --nobuild --headless --coverage');
-    timedExecOrDie('amp codecov-upload');
   } else {
     skipDependentJobs(
       jobName,

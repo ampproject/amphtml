@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {removeElement} from '#core/dom';
+import {removeElement, toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {closest, closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
@@ -9,6 +9,8 @@ import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
+
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {
@@ -23,11 +25,10 @@ import {
 
 import {CSS as pageAttachmentCss} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
-import {getSourceOrigin} from '../../../src/url';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {HistoryState, setHistoryState} from '../../amp-story/1.0/history';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
@@ -90,6 +91,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     /** @private {?AttachmentType} */
     this.type_ = null;
+
+    /** @private {?Element} */
+    this.outlinkEl_ = null;
+
+    /** @private {?Element} */
+    this.legacyOutlinkEl_ = null;
   }
 
   /**
@@ -132,7 +139,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super.layoutCallback();
     // Outlink renders an image and must be built in layoutCallback.
     if (this.type_ === AttachmentType.OUTLINK) {
-      this.buildOutlink_();
+      return this.buildOutlink_();
     }
   }
 
@@ -148,37 +155,36 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.pageEl_,
-        this.element
-      );
+      renderPageAttachmentUI(this.pageEl_, this.element).then((el) => {
+        this.openAttachmentEl_ = el;
 
-      // This ensures `active` is set on first render.
-      // Otherwise setState may be called before this.openAttachmentEl_ exists.
-      if (this.storyEl_.hasAttribute('active')) {
-        this.openAttachmentEl_.setAttribute('active', '');
-      }
+        // This ensures `active` is set on first render.
+        // Otherwise setState may be called before this.openAttachmentEl_ exists.
+        if (this.storyEl_.hasAttribute('active')) {
+          this.openAttachmentEl_.setAttribute('active', '');
+        }
 
-      const container = (
-        <div
-          class="i-amphtml-story-page-open-attachment-host"
-          role="button"
-          onClick={(e) => {
-            // Prevent default so link can be opened programmatically after URL preview is shown.
-            e.preventDefault();
-            this.open();
-          }}
-        ></div>
-      );
-
-      this.mutateElement(() => {
-        this.pageEl_.appendChild(
-          createShadowRootWithStyle(
-            container,
-            this.openAttachmentEl_,
-            pageAttachmentCss
-          )
+        const container = (
+          <div
+            class="i-amphtml-story-page-open-attachment-host"
+            role="button"
+            onClick={(e) => {
+              // Prevent default so link can be opened programmatically after URL preview is shown.
+              e.preventDefault();
+              this.open();
+            }}
+          ></div>
         );
+
+        this.mutateElement(() => {
+          this.pageEl_.appendChild(
+            createShadowRootWithStyle(
+              container,
+              this.openAttachmentEl_,
+              pageAttachmentCss
+            )
+          );
+        });
       });
     }
   }
@@ -196,16 +202,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       <div class="i-amphtml-story-draggable-drawer-header-title-and-close">
         <button
           class="i-amphtml-story-page-attachment-close-button"
-          aria-label={this.localizationService.getLocalizedString(
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-          )}
+          }
           role="button"
+          onClick={() => this.close_()}
+          tabindex="-1"
         ></button>
         {titleText && (
           <span class="i-amphtml-story-page-attachment-title">{titleText}</span>
         )}
       </div>
     );
+    localizeTemplate(this.headerEl, this.element);
 
     const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
@@ -213,22 +222,20 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
       forms.forEach((form) => {
         // Scroll each response attribute element into view, when displayed.
-        setupResponseAttributeElements(form, this.localizationService).forEach(
-          (el) => {
-            // TODO(wg-stories): Share ResizeObserver for runtime performance.
-            new this.win.ResizeObserver((e) => {
-              if (
-                this.state === DrawerState.OPEN &&
-                e[0].contentRect.height > 0
-              ) {
-                el./*OK*/ scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'nearest',
-                });
-              }
-            }).observe(el);
-          }
-        );
+        setupResponseAttributeElements(form, this.storyEl_).forEach((el) => {
+          // TODO(wg-stories): Share ResizeObserver for runtime performance.
+          new this.win.ResizeObserver((e) => {
+            if (
+              this.state === DrawerState.OPEN &&
+              e[0].contentRect.height > 0
+            ) {
+              el./*OK*/ scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+              });
+            }
+          }).observe(el);
+        });
       });
 
       // Page attachments that contain forms must display the page's publisher
@@ -245,14 +252,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     while (this.element.firstChild && this.element.firstChild !== templateEl) {
       this.contentEl.appendChild(this.element.firstChild);
     }
-
-    // Ensures the content of the attachment won't be rendered/loaded until we
-    // actually need it.
-    toggle(dev().assertElement(this.containerEl), true);
   }
 
   /**
    * Builds outlink CTA drawer UI.
+   * @return {!Promise}
    * @private
    */
   buildOutlink_() {
@@ -296,11 +300,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       >
         {image}
         <span class="i-amphtml-story-page-attachment-remote-title">
-          <span>
-            {this.localizationService.getLocalizedString(
+          <span
+            i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
-            )}
-          </span>
+            }
+          ></span>
           <span>{hrefAttr}</span>
         </span>
         <svg
@@ -332,7 +336,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // can inline the attribute, and avoid the warning.
     link.setAttribute('href', hrefAttr);
 
-    this.contentEl.appendChild(link);
+    return localizeTemplate(link, this.element).then(() =>
+      this.mutateElement(() => this.contentEl.appendChild(link))
+    );
   }
 
   /**
@@ -340,11 +346,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {boolean} isActive
    */
   setOpenAttachmentActive(isActive) {
-    if (isActive) {
-      this.openAttachmentEl_.setAttribute('active', '');
-    } else {
-      this.openAttachmentEl_.removeAttribute('äctive');
-    }
+    this.openAttachmentEl_ &&
+      toggleAttribute(this.openAttachmentEl_, 'active', isActive);
   }
 
   /**
@@ -352,17 +355,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   initializeListeners_() {
     super.initializeListeners_();
-
-    const closeButtonEl = this.headerEl.querySelector(
-      '.i-amphtml-story-page-attachment-close-button'
-    );
-    if (closeButtonEl) {
-      closeButtonEl.addEventListener(
-        'click',
-        () => this.close_(),
-        true /** useCapture */
-      );
-    }
 
     // Always open links in a new tab.
     this.contentEl.addEventListener(
@@ -409,9 +401,88 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
+   * Get outlink element.
+   * @return {?Element}
+   * @private
+   */
+  getOutlinkEl_() {
+    if (!this.outlinkEl_) {
+      this.outlinkEl_ = this.element.parentElement
+        .querySelector('amp-story-page-outlink')
+        ?.querySelector('a');
+    }
+    return this.outlinkEl_;
+  }
+
+  /**
+   * Get legacy outlink element.
+   * @return {?Element}
+   * @private
+   */
+  getLegacyOutlinkEl_() {
+    if (!this.legacyOutlinkEl_) {
+      this.legacyOutlinkEl_ = this.element.parentElement
+        .querySelector('.i-amphtml-story-page-open-attachment-host')
+        ?.shadowRoot?.querySelector('a.i-amphtml-story-page-open-attachment');
+    }
+    return this.legacyOutlinkEl_;
+  }
+
+  /**
+   * Check if two URLs have the same origin and path but different hashes at the end.
+   * @param {string} url1
+   * @param {string} url2
+   * @return {boolean}
+   * @private
+   */
+  urlsHaveSameOriginAndPath_(url1, url2) {
+    if (!url1 || !url2) {
+      return false;
+    }
+
+    const url1WithoutHash = url1.split('#')[0];
+    const url2WithoutHash = url2.split('#')[0];
+
+    return url1WithoutHash === url2WithoutHash;
+  }
+
+  /**
+   * If the element is an amp-story-page-outlink the click target is its anchor element child.
+   * This is for SEO and analytics optimisation.
+   * Otherwise the element is the legacy version, amp-story-page-attachment with an href,
+   * and a click target is the button built by the component.
+   * @private
+   */
+  programmaticallyClickOnOutlink_() {
+    const pageOutlinkChild = this.getOutlinkEl_();
+    const pageAttachmentChild = this.getLegacyOutlinkEl_();
+    if (pageOutlinkChild) {
+      pageOutlinkChild.click();
+    } else if (pageAttachmentChild) {
+      triggerClickFromLightDom(pageAttachmentChild, this.element);
+    }
+  }
+
+  /**
    * @override
    */
   open(shouldAnimate = true) {
+    // If the target is a branching link, redirect immediately without opening the drawer.
+    const outlinkEl = this.getOutlinkEl_() || this.getLegacyOutlinkEl_();
+    if (
+      this.urlsHaveSameOriginAndPath_(window.location.href, outlinkEl?.href) &&
+      outlinkEl?.href.includes('#page=')
+    ) {
+      if (window.location.href === outlinkEl.href) {
+        // Should hard reload if the starting URL is the same as the target URL, otherwise
+        // the page wouldn't do hash navigation at all.
+        window.location.reload(true);
+      } else {
+        this.programmaticallyClickOnOutlink_();
+      }
+      return;
+    }
+
     if (this.state === DrawerState.OPEN) {
       return;
     }
@@ -438,6 +509,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     this.toggleBackgroundOverlay_(true);
+    this.toggleCloseButtonTabIndex_(true);
 
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
     this.analyticsService_.triggerEvent(
@@ -455,34 +527,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemote_() {
-    // If the element is an amp-story-page-outlink the click target is its anchor element child.
-    // This is for SEO and analytics optimisation.
-    // Otherwise the element is the legacy version, amp-story-page-attachment with an href,
-    // and a click target is the button built by the component.
-    const programaticallyClickOnTarget = () => {
-      const pageOutlinkChild = this.element.parentElement
-        .querySelector('amp-story-page-outlink')
-        ?.querySelector('a');
-
-      const pageAttachmentChild = this.element.parentElement
-        ?.querySelector('.i-amphtml-story-page-open-attachment-host')
-        .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
-
-      if (pageOutlinkChild) {
-        pageOutlinkChild.click();
-      } else if (pageAttachmentChild) {
-        triggerClickFromLightDom(pageAttachmentChild, this.element);
-      }
-    };
-
     const isMobileUI =
-      this.storeService.get(StateProperty.UI_STATE) === UIType.MOBILE;
+      this.storeService.get(StateProperty.UI_STATE) === UIType_Enum.MOBILE;
     if (!isMobileUI) {
-      programaticallyClickOnTarget();
+      this.programmaticallyClickOnOutlink_();
     } else {
       // Timeout to shows post-tap animation on mobile only.
       Services.timerFor(this.win).delay(() => {
-        programaticallyClickOnTarget();
+        this.programmaticallyClickOnOutlink_();
       }, POST_TAP_ANIMATION_DURATION);
     }
   }
@@ -519,6 +571,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super.closeInternal_(shouldAnimate);
 
     this.toggleBackgroundOverlay_(false);
+    this.toggleCloseButtonTabIndex_(false);
 
     this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
     this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
@@ -562,6 +615,28 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
+   * Handles tab-ability of header close button.
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleCloseButtonTabIndex_(isActive) {
+    const closeButton = this.headerEl.querySelector(
+      '.i-amphtml-story-page-attachment-close-button'
+    );
+    // If attachment is outlink, there is no close button.
+    if (!closeButton) {
+      return;
+    }
+    this.mutateElement(() => {
+      if (isActive) {
+        closeButton.removeAttribute('tabindex');
+      } else {
+        closeButton.setAttribute('tabindex', -1);
+      }
+    });
+  }
+
+  /**
    * Updates the given element with the appropriate class or attribute, if the
    * page attachment's theme is 'dark'.
    * @param {!Element} element The element upon which to set the dark theme.
@@ -594,7 +669,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   getPublisherOrigin_() {
-    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    const urlService = Services.urlForDoc(this.element);
+    const url = this.getAmpDoc().getUrl();
+    const publisherOrigin = urlService.getSourceOrigin(url);
     return publisherOrigin.replace(/^http(s)?:\/\/(www.)?/, '');
   }
 }

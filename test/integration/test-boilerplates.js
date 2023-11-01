@@ -39,7 +39,7 @@ describes.sandboxed('New Visibility Boilerplate', {}, () => {
       expect(getStyle(fixture.win.document.body, 'visibility')).to.equal(
         'visible'
       );
-      expect(isAnimationNone(fixture.win.document.body)).to.be.true;
+      expect(isAnimationNone(fixture.win.document.body, true)).to.be.true;
     });
   });
 });

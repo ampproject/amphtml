@@ -52,10 +52,12 @@ module.exports = {
   'globals': {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
+    'IS_SSR_CSS': 'readonly',
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
     'IS_PROD': 'readonly',
     'INTERNAL_RUNTIME_VERSION': 'readonly',
+    'AMP_STORY_SUPPORTED_LANGUAGES': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
@@ -381,8 +383,6 @@ module.exports = {
         'test/**/*.js',
         'extensions/**/test/**/*.js',
         'extensions/**/test-e2e/*.js',
-        'src/bento/components/**/test/**/*.js',
-        'src/bento/components/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
         'build-system/**/test/*.js',
@@ -490,12 +490,7 @@ module.exports = {
       'rules': {'import/order': 0},
     },
     {
-      'files': [
-        'extensions/**/1.0/**',
-        'src/bento/**',
-        'src/preact/**',
-        '**/storybook/**',
-      ],
+      'files': ['extensions/**/1.0/**', 'src/preact/**', '**/storybook/**'],
       'rules': {'local/preact-preferred-props': 2},
     },
     {
@@ -512,6 +507,11 @@ module.exports = {
         'extensions/*/0.*/**',
       ],
       'rules': {'local/preact': [2, '#core/dom/jsx']},
+    },
+    {
+      // Allow sinon stub for release tagger tests
+      'files': ['build-system/release-tagger/test/**'],
+      'rules': {'local/no-forbidden-terms': 0},
     },
   ],
 };

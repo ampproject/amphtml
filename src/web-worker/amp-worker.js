@@ -72,12 +72,39 @@ class AmpWorker {
     // Use RTV to make sure we fetch prod/canary/experiment correctly.
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
-    const url = calculateEntryPointScriptUrl(
-      loc,
-      'ww',
-      useLocal,
-      useRtvVersion
-    );
+
+    let url = '';
+
+    let policy = {
+      createScriptURL: function (url) {
+        // Only allow the correct webworker url to pass through
+        const regexURL =
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org(\/.*)?$/;
+
+        if (
+          (regexURL.test(url) || getMode().test || getMode().localDev) &&
+          (url.endsWith('ww.js') ||
+            url.endsWith('ww.min.js') ||
+            url.endsWith('ww.mjs') ||
+            url.endsWith('ww.min.mjs'))
+        ) {
+          return url;
+        } else {
+          return '';
+        }
+      },
+    };
+
+    if (self.trustedTypes && self.trustedTypes.createPolicy) {
+      policy = self.trustedTypes.createPolicy('amp-worker#fetchUrl', policy);
+    }
+
+    url = policy
+      .createScriptURL(
+        calculateEntryPointScriptUrl(loc, 'ww', useLocal, useRtvVersion)
+      )
+      .toString();
+
     dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
@@ -103,13 +130,26 @@ class AmpWorker {
           type: 'text/javascript',
         });
         const blobUrl = win.URL.createObjectURL(blob);
-        this.worker_ = new win.Worker(blobUrl);
+        if (self.trustedTypes && self.trustedTypes.createPolicy) {
+          // We can trust the url for this policy usage because the blobUrl pulls the script from a controlled source, the ww.js file.
+          const policy = self.trustedTypes.createPolicy(
+            'amp-worker#constructor',
+            {
+              createScriptURL: function (url) {
+                return url;
+              },
+            }
+          );
+          this.worker_ = new win.Worker(policy.createScriptURL(blobUrl));
+        } else {
+          this.worker_ = new win.Worker(blobUrl);
+        }
         this.worker_.onmessage = this.receiveMessage_.bind(this);
       });
 
     /**
      * Array of in-flight messages pending response from worker.
-     * @const @private {!Object<number, PendingMessageDef>}
+     * @const @private {!{[key: number]: PendingMessageDef}}
      */
     this.messages_ = {};
 

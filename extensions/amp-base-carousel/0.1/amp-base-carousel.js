@@ -45,7 +45,7 @@ function isSizer(el) {
 }
 
 export class AmpCarousel extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -94,7 +94,7 @@ export class AmpCarousel extends AMP.BaseElement {
 
   /**
    * The configuration for handling attributes on this element.
-   * @return {!Object<string, function(string)>}
+   * @return {!{[key: string]: function(string)}}
    * @private
    */
   getAttributeConfig_() {

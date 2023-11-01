@@ -1,4 +1,6 @@
 import '../amp-carousel';
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -7,6 +9,8 @@ import {Services} from '#service';
 import {ActionService} from '#service/action-impl';
 
 import {user} from '#utils/log';
+
+import {getDeterministicOuterHTML} from '#testing/helpers';
 
 import {buildDom} from '../build-dom';
 import {AmpScrollableCarousel} from '../scrollable-carousel';
@@ -39,7 +43,7 @@ describes.realWin(
       schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
     });
 
-    function getAmpScrollableCarousel(addToDom = true) {
+    function getAmpScrollableCarousel(addToDom = true, doc = env.win.document) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
@@ -50,13 +54,13 @@ describes.realWin(
 
       const slideCount = 7;
       for (let i = 0; i < slideCount; i++) {
-        const img = document.createElement('amp-img');
+        const img = doc.createElement('amp-img');
         img.setAttribute('src', imgUrl);
         img.setAttribute('width', '120');
         img.setAttribute('height', '100');
-        img.style.width = '120px';
-        img.style.height = '100px';
-        img.id = 'img-' + i;
+        img.style.setProperty('width', '120px');
+        img.style.setProperty('height', '100px');
+        img.setAttribute('id', `img-${i}`);
         carouselElement.appendChild(img);
       }
 
@@ -249,6 +253,24 @@ describes.realWin(
         buildDom(el2);
 
         expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      it('buildDom should behave same in browser and in WorkerDOM', async () => {
+        const browserCarousel = await getAmpScrollableCarousel(
+          /* addToDom */ false,
+          env.win.doc
+        );
+        const workerCarousel = await getAmpScrollableCarousel(
+          /* addToDom */ false,
+          createWorkerDomDoc()
+        );
+
+        buildDom(browserCarousel);
+        buildDom(workerCarousel);
+
+        const browserHtml = getDeterministicOuterHTML(browserCarousel);
+        const workerDomHtml = getDeterministicOuterHTML(workerCarousel);
+        expect(workerDomHtml).equal(browserHtml);
       });
 
       it('buildCallback should assign ivars even when server rendered', async () => {

@@ -6,7 +6,7 @@ import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -14,7 +14,7 @@ import {
 } from '../../../src/service-helpers';
 import {parseUrlDeprecated} from '../../../src/url';
 
-/** @private {!Object<string, string|boolean>} */
+/** @private {!{[key: string]: string|boolean}} */
 const TEMPLATE_CORS_CONFIG = {
   mode: 'cors',
   method: 'GET',

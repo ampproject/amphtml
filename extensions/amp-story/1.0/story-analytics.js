@@ -8,7 +8,7 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getVariableService} from './variable-service';
 
-import {registerServiceBuilder} from '../../../src/service-helpers';
+import {getAmpdoc, registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
@@ -27,6 +27,10 @@ export const StoryAnalyticsEvent = {
   STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
+  SHOPPING_BUY_NOW_CLICK: 'story-shopping-buy-now-click',
+  SHOPPING_PLP_VIEW: 'story-shopping-plp-view',
+  SHOPPING_PDP_VIEW: 'story-shopping-pdp-view',
+  SHOPPING_TAG_CLICK: 'story-shopping-tag-click',
 };
 
 /**
@@ -42,10 +46,10 @@ export const AdvancementMode = {
   VIEWER_SELECT_PAGE: 'viewerSelectPage',
 };
 
-/** @typedef {!Object<string, !PageEventCountDef>} */
+/** @typedef {!{[key: string]: !PageEventCountDef}} */
 let EventsPerPageDef;
 
-/** @typedef {!Object<string, number>} */
+/** @typedef {!{[key: string]: number}} */
 let PageEventCountDef;
 
 /**
@@ -127,11 +131,15 @@ export class StoryAnalyticsService {
   triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
 
-    triggerAnalyticsEvent(
-      this.element_,
-      eventType,
-      this.updateDetails(eventType, element)
-    );
+    getAmpdoc(this.element_)
+      .whenNextVisible()
+      .then(() =>
+        triggerAnalyticsEvent(
+          this.element_,
+          eventType,
+          this.updateDetails(eventType, element)
+        )
+      );
   }
 
   /**

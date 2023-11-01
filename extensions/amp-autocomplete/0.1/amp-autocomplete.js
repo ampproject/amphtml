@@ -426,6 +426,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.isSsr_) {
       return requestForBatchFetch(
         this.element,
+        this.element.getAttribute('src'),
         policy,
         /* refresh */ false
       ).then((request) => {
@@ -896,7 +897,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Returns the given tokens array as a dictionary of key: token (str) and
    * value: number of occurrences.
    * @param {!Array<string>} tokens
-   * @return {!Object<string, number>}
+   * @return {!{[key: string]: number}}
    * @private
    */
   mapFromTokensArray_(tokens) {

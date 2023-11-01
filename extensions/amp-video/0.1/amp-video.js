@@ -119,7 +119,7 @@ export class AmpVideo extends AMP.BaseElement {
    * dependent on the value of `prerenderAllowed()`.
    *
    * @override
-   * @nocollapse
+   *
    */
   static prerenderAllowed(element) {
     // Only allow prerender if video sources are cached on CDN or remote video
@@ -168,6 +168,9 @@ export class AmpVideo extends AMP.BaseElement {
 
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {boolean} whether another element is in charge of the captions. */
+    this.hasCaptionsRenderer_ = false;
   }
 
   /**
@@ -387,7 +390,8 @@ export class AmpVideo extends AMP.BaseElement {
     // If not in prerender mode, propagate everything.
     let pendingOriginPromise;
     if (
-      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER ||
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PREVIEW
     ) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
@@ -773,6 +777,13 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsElement) {
       return;
     }
+    const ampdoc = this.getAmpDoc();
+    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      ampdoc,
+      'amp-story-captions',
+      '0.1'
+    );
+    this.hasCaptionsRenderer_ = true;
     captionsElement.getImpl().then((impl) => {
       if (impl.setVideoElement) {
         impl.setVideoElement(this.video_);
@@ -783,6 +794,7 @@ export class AmpVideo extends AMP.BaseElement {
   /** @private */
   onVideoLoaded_() {
     dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
+    this.removePosterForAndroidBug_();
   }
 
   /** @override */
@@ -972,7 +984,6 @@ export class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
-    this.removePosterForAndroidBug_();
   }
 
   /**
@@ -1032,6 +1043,23 @@ export class AmpVideo extends AMP.BaseElement {
   /** @override */
   seekTo(timeSeconds) {
     this.video_.currentTime = timeSeconds;
+  }
+
+  /**
+   * Shows or hides the captions.
+   * @param {boolean} captionsState
+   * @public
+   */
+  toggleCaptions(captionsState) {
+    toArray(this.video_.textTracks).forEach((track) => {
+      if (captionsState) {
+        // If a custom captions renderer is configured (e.g. amp-story-captions),
+        // enable captions but keep them hidden to avoid double rendering.
+        track.mode = this.hasCaptionsRenderer_ ? 'hidden' : 'showing';
+      } else {
+        track.mode = 'disabled';
+      }
+    });
   }
 }
 

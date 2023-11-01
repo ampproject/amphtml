@@ -1008,4 +1008,22 @@ describes.realWin('Platform store', {}, (env) => {
       expect(platform.reset).to.be.calledOnce;
     });
   });
+
+  describe('resetPlatformStore', () => {
+    it('the entitlement resolvement callback added through public API should persist even after the platform store gets reset', async () => {
+      const callbackSpy = env.sandbox.spy();
+      platformStore.addOnEntitlementResolvedCallback(callbackSpy);
+
+      const newStore = platformStore.resetPlatformStore();
+      const newEntitlement = new Entitlement({
+        service: 'platform1',
+        granted: false,
+      });
+      newStore.resolveEntitlement('platform1', newEntitlement);
+      expect(callbackSpy).to.have.been.calledOnceWithExactly({
+        platformKey: 'platform1',
+        entitlement: newEntitlement,
+      });
+    });
+  });
 });

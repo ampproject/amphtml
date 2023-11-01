@@ -160,5 +160,11 @@
   },
   "99": {
     "string": "Skjema sendt inn"
+  },
+  "101": {
+    "string": "Handle nå"
+  },
+  "110": {
+    "string": "Abonner med Google"
   }
 }

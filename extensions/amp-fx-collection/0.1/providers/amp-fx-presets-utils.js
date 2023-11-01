@@ -57,7 +57,7 @@ export function resolvePercentageToNumber(val) {
  *
  * @param {Element} element
  * @param {string} fxType
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 export function installStyles(element, fxType) {
   switch (fxType) {
@@ -149,7 +149,7 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
  * Returns margin values for defaultMarginValues
  *
  * @param {string} fxType
- * @return {!Object<string, number>}
+ * @return {!{[key: string]: number}}
  */
 export function defaultMarginValues(fxType) {
   switch (fxType) {

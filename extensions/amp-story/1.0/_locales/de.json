@@ -1,9 +1,9 @@
 {
   "2": {
-    "string": "Tippe auf \\\"Weiter\\\""
+    "string": "Tippe auf \"Weiter\""
   },
   "3": {
-    "string": "Tippe auf \\\"Zurück\\\""
+    "string": "Tippe auf \"Zurück\""
   },
   "4": {
     "string": "Der Link konnte nicht in die Zwischenablage kopiert werden :("
@@ -160,5 +160,11 @@
   },
   "99": {
     "string": "Formular erfolgreich abgeschickt"
+  },
+  "101": {
+    "string": "Jetzt kaufen"
+  },
+  "110": {
+    "string": "Abonnieren mit Google"
   }
 }

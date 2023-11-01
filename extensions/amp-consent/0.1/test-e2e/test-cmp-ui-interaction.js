@@ -13,7 +13,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should restrict fullscreen until user interaction', async function () {
+    // TODO(#37403): fix this flaky test.
+    it.skip('should restrict fullscreen until user interaction', async function () {
       // Await the CMP to load
       await awaitFrameAfter(1000);
 

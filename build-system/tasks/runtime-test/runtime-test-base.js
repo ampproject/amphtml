@@ -4,7 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const karmaConfig = require('../../test-configs/karma.conf');
 const {
   commonIntegrationTestPaths,
-  commonUnitTestPaths,
+  getCommonUnitTestPaths,
   integrationTestPaths,
   karmaHtmlFixturesPath,
   karmaJsPaths,
@@ -139,13 +139,6 @@ class RuntimeTestConfig {
     if (argv.coverage) {
       this.reporters.push('coverage-istanbul');
     }
-
-    if (argv.report) {
-      this.reporters.push('json-result');
-      this.jsonResultReporter = {
-        outputFile: `result-reports/${this.testType}.json`,
-      };
-    }
   }
 
   /**
@@ -155,6 +148,7 @@ class RuntimeTestConfig {
   updateFiles() {
     switch (this.testType) {
       case 'unit':
+        const commonUnitTestPaths = getCommonUnitTestPaths();
         if (argv.files || argv.filelist) {
           this.files = commonUnitTestPaths
             .concat(getFilesFromArgv())

@@ -1,3 +1,4 @@
+import {Observable} from '#core/data-structures/observable';
 import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
@@ -25,7 +26,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 /**
  * Gets the string matching the specified localized string ID in the language
  * specified.
- * @param {!Object<string, !LocalizedStringBundleDef>} localizedStringBundles
+ * @param {!{[key: string]: !LocalizedStringBundleDef}} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId_Enum} localizedStringId
  * @return {?string}
@@ -86,9 +87,14 @@ export class LocalizationService {
 
     /**
      * A mapping of language code to localized string bundle.
-     * @private @const {!Object<string, !LocalizedStringBundleDef>}
+     * @private @const {!{[key: string]: !LocalizedStringBundleDef}}
      */
     this.localizedStringBundles_ = {};
+
+    /** Fires when new language bundles are added.
+     * @private @const {!Observable<string>}
+     * */
+    this.bundleObserver_ = new Observable();
   }
 
   /**
@@ -108,26 +114,28 @@ export class LocalizationService {
   }
 
   /**
-   * @param {string} languageCode The language code to associate with the
-   *     specified localized string bundle.
-   * @param {!LocalizedStringBundleDef} localizedStringBundle
+   * @param {!{[key: string]: !LocalizedStringBundleDef}} localizedStringBundles
    *     The localized string bundle to register.
-   * @return {!LocalizationService} For chaining.
+   * @public
    */
-  registerLocalizedStringBundle(languageCode, localizedStringBundle) {
-    const normalizedLangCode = languageCode.toLowerCase();
-    if (!this.localizedStringBundles_[normalizedLangCode]) {
-      this.localizedStringBundles_[normalizedLangCode] = {};
-    }
+  registerLocalizedStringBundles(localizedStringBundles) {
+    Object.keys(localizedStringBundles).forEach((languageCode) => {
+      const normalizedLangCode = languageCode.toLowerCase();
+      if (!this.localizedStringBundles_[normalizedLangCode]) {
+        this.localizedStringBundles_[normalizedLangCode] = {};
+      }
+      Object.assign(
+        this.localizedStringBundles_[normalizedLangCode],
+        localizedStringBundles[languageCode]
+      );
+    });
 
-    Object.assign(
-      this.localizedStringBundles_[normalizedLangCode],
-      localizedStringBundle
-    );
-    return this;
+    this.bundleObserver_.fire();
   }
 
   /**
+   * Retrieves the localized string synchronously, useful for strings bundled with a given extension.
+   *
    * @param {!LocalizedStringId_Enum} localizedStringId
    * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the
@@ -143,5 +151,37 @@ export class LocalizationService {
       languageCodes,
       localizedStringId
     );
+  }
+
+  /**
+   * Resolves with the localized string when the registered bundles contain them.
+   * @param {!LocalizedStringId_Enum} localizedStringId
+   * @return {!Promise{?string}}
+   * @public
+   */
+  getLocalizedStringAsync(localizedStringId) {
+    const languageCodes = this.getLanguageCodesForElement(this.element_);
+
+    const localizedString = findLocalizedString(
+      this.localizedStringBundles_,
+      languageCodes,
+      localizedStringId
+    );
+    if (localizedString !== null) {
+      return Promise.resolve(localizedString);
+    }
+    return new Promise((res) => {
+      const remove = this.bundleObserver_.add(() => {
+        const localizedString = findLocalizedString(
+          this.localizedStringBundles_,
+          languageCodes,
+          localizedStringId
+        );
+        if (localizedString) {
+          remove();
+          res(localizedString);
+        }
+      });
+    });
   }
 }

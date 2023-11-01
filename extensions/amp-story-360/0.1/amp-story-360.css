@@ -27,6 +27,7 @@ amp-story-360 amp-img {
   display: flex !important;
   align-items: center !important;
   z-index: 100000 !important;
+  pointer-events: auto !important;
 }
 
 .i-amphtml-story-360-activate-button-icon {

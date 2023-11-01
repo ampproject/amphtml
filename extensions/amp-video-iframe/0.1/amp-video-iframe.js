@@ -1,3 +1,5 @@
+import {BUBBLE_MESSAGE_EVENTS} from '#bento/apis/video-iframe-api';
+
 import {Deferred} from '#core/data-structures/promise';
 import {
   dispatchCustomEvent,
@@ -34,7 +36,6 @@ import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents_Enum,
 } from '../../../src/video-interface';
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -295,7 +296,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     //   event: (undefined|string),
     //   analytics: (undefined|{
     //     eventType: string,
-    //     vars: Object<string, string>,
+    //     vars: {[key: string]: string},
     //   }),
     // }}
 
@@ -355,7 +356,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>=} vars
+   * @param {!{[key: string]: string}=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
     user().assertString(eventType, '`eventType` missing in analytics event');

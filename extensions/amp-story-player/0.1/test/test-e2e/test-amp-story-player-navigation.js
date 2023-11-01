@@ -1,15 +1,9 @@
+import {sleep} from '#testing/helpers';
+
 const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,
 };
-
-/**
- * @param {number} ms
- * @return {!Promise}
- */
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 describes.endtoend(
   'story player navigation',
@@ -25,7 +19,7 @@ describes.endtoend(
     beforeEach(async () => {
       controller = env.controller;
 
-      await timeout(500);
+      await sleep(500);
 
       player = await controller.findElement(
         'amp-story-player.i-amphtml-story-player-loaded'
@@ -51,7 +45,7 @@ describes.endtoend(
         'paused'
       );
 
-      await timeout(800);
+      await sleep(800);
       await expect(isVideoPaused).to.eql(false);
     });
 
@@ -59,7 +53,7 @@ describes.endtoend(
       // Navigate to next story.
       await controller.click(player);
 
-      await timeout(500);
+      await sleep(500);
 
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
@@ -76,7 +70,7 @@ describes.endtoend(
         'paused'
       );
 
-      await timeout(800);
+      await sleep(800);
       await expect(isVideoPaused).to.eql(true);
     });
   }

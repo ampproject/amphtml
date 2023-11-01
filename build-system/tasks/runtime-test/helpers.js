@@ -135,7 +135,7 @@ function maybePrintArgvMessages() {
 }
 
 /**
- * @param {Object} browser
+ * @param {object} browser
  * @return {Promise<void>}
  * @private
  */

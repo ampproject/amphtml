@@ -1,0 +1,9 @@
+
+
+bento-inline-gallery-pagination[inset] {
+  display: block !important;
+  height: 20px; /* Default height. */
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}

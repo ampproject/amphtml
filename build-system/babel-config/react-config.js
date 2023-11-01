@@ -6,7 +6,7 @@ const {getUnminifiedConfig} = require('./unminified-config');
 
 /**
  * @param {!Object} config
- * @return {Object}
+ * @return {object}
  */
 function mergeReactBabelConfig(config) {
   const rootDir = path.join(__dirname, '../../');
@@ -26,14 +26,14 @@ function mergeReactBabelConfig(config) {
  * @return {!Object}
  */
 function getReactUnminifiedConfig() {
-  return mergeReactBabelConfig(getUnminifiedConfig());
+  return mergeReactBabelConfig(getUnminifiedConfig('react'));
 }
 
 /**
  * @return {!Object}
  */
 function getReactMinifiedConfig() {
-  return mergeReactBabelConfig(getMinifiedConfig());
+  return mergeReactBabelConfig(getMinifiedConfig('react'));
 }
 
 module.exports = {

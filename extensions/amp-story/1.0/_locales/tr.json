@@ -160,5 +160,11 @@
   },
   "99": {
     "string": "Form başarıyla gönderildi"
+  },
+  "101": {
+    "string": "Şimdi Satın Al"
+  },
+  "110": {
+    "string": "Google ile Abone Ol"
   }
 }

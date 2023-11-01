@@ -7,9 +7,13 @@ const {getReplacePlugin} = require('./helpers');
 /**
  * Gets the config for babel transforms run during `amp build`.
  *
+ * @param {'preact' | 'react'} buildFor
+ * @param {!Object=} opt_replacePluginOverrides
  * @return {!Object}
  */
-function getUnminifiedConfig() {
+function getUnminifiedConfig(buildFor = 'preact', opt_replacePluginOverrides) {
+  const isEsmBuild = argv.esm || argv.sxg;
+
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -19,27 +23,27 @@ function getUnminifiedConfig() {
     },
   ];
 
-  const targets =
-    argv.esm || argv.sxg ? {esmodules: true} : {browsers: ['Last 2 versions']};
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: false,
       loose: true,
-      targets,
+      targets: isEsmBuild ? {esmodules: true} : {browsers: ['Last 2 versions']},
       shippedProposals: true,
+      exclude: isEsmBuild ? ['@babel/plugin-transform-for-of'] : [],
     },
   ];
   const presetTypescript = [
     '@babel/preset-typescript',
     {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
   ];
-  const replacePlugin = getReplacePlugin();
+  const replacePlugin = getReplacePlugin(opt_replacePluginOverrides);
   const unminifiedPlugins = [
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
-    getImportResolverPlugin(),
+    getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
+    './build-system/babel-plugins/babel-plugin-amp-story-supported-languages',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',

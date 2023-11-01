@@ -66,11 +66,15 @@ const karmaJsPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-  'src/bento/components/**/test/*.js',
   'testing/**/*.js',
 ];
 
-const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
+/**
+ * @return {Array<*>}
+ */
+function getCommonUnitTestPaths() {
+  return initTestsPath.concat(fixturesExamplesPaths);
+}
 
 const commonIntegrationTestPaths = initTestsPath.concat(
   fixturesExamplesPaths,
@@ -81,7 +85,6 @@ const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-  'src/bento/components/**/test/*.js',
 ]);
 
 const unitTestPaths = [
@@ -90,8 +93,6 @@ const unitTestPaths = [
   'ads/**/test/unit/test-*.js',
   'extensions/**/test/*.js',
   'extensions/**/test/unit/*.js',
-  'src/bento/components/**/test/*.js',
-  'src/bento/components/**/test/unit/*.js',
 ];
 
 // TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
@@ -103,14 +104,9 @@ const unitTestCrossBrowserPaths = [
 const integrationTestPaths = [
   'test/integration/**/*.js',
   'extensions/**/test/integration/**/*.js',
-  'src/bento/components/**/test/integration/*.js',
 ];
 
-const e2eTestPaths = [
-  'test/e2e/*.js',
-  'extensions/**/test-e2e/*.js',
-  'src/bento/components/**/test-e2e/*.js',
-];
+const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/test-*.js'];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
@@ -135,12 +131,10 @@ const presubmitGlobs = [
   '!validator/validator.pb.go',
   '!validator/dist/**/*.*',
   '!validator/htmlparser/**/*.*',
-  '!build-system/tasks/performance/cache/**/*.*',
   '!build-system/runner/build/**/*.*',
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
   '!extensions/**/dist/*',
-  '!src/bento/components/**/dist/*',
   '!examples/**/*',
   '!examples/visual-tests/**/*',
   '!test/coverage/**/*.*',
@@ -172,6 +166,7 @@ const linkCheckGlobs = [
   '.github/ISSUE_TEMPLATE/*.yml',
   '**/*.md',
   '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!.github/*.md',
 ];
 
 /**
@@ -197,7 +192,6 @@ const htmlFixtureGlobs = [
   'test/fixtures/e2e/**/*.html',
 
   // The following are not AMP documents and are not meant to validate.
-  '!**/bento/**/*.html',
   '!examples/amp-video-iframe/frame*.html',
   '!examples/viewer-iframe-poll.html',
   '!examples/viewer-webview.html',
@@ -260,7 +254,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-orientation-observer-scroll.amp.html',
   '!examples/amp-orientation-observer.amp.html',
   '!examples/amp-position-observer.amp.html',
-  '!examples/amp-redbull-player.amp.html',
   '!examples/amp-script/example.amp.html',
   '!examples/amp-script/example.sandboxed.amp.html',
   '!examples/amp-script/todomvc.amp.html',
@@ -468,7 +461,7 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 module.exports = {
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
-  commonUnitTestPaths,
+  getCommonUnitTestPaths,
   devDashboardTestPaths,
   e2eTestPaths,
   htmlFixtureGlobs,

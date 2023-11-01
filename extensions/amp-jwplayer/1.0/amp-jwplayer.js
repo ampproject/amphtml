@@ -1,4 +1,5 @@
 import {BaseElement} from '#bento/components/bento-jwplayer/1.0/base-element';
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
 
 import {isExperimentOn} from '#experiments';
 
@@ -11,7 +12,6 @@ import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-jwplayer';

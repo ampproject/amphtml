@@ -4,101 +4,56 @@
 
 namespace htmlparser::json {
 
-constexpr std::array<std::string_view, 35> kIndentSpaces {
-  "",
-  " ",
-  "  ",
-  "   ",
-  "    ",
-  "     ",
-  "      ",
-  "       ",
-  "        ",
-  "         ",
-  "          ",
-  "           ",
-  "            ",
-  "             ",
-  "              ",
-  "               ",
-  "                ",
-  "                 ",
-  "                  ",
-  "                   ",
-  "                    ",
-  "                     ",
-  "                      ",
-  "                       ",
-  "                        ",
-  "                         ",
-  "                          ",
-  "                           ",
-  "                            ",
-  "                             ",
-  "                              ",
-  "                               ",
-  "                                ",
-  "                                 ",
-  "                                  "};
-
 const int64_t MAX_SAFE_INTEGER = 1LL << 53;  // 2 ^^ 53.
 
-void AddIndentation(std::stringbuf* buf, int indent_columns) {
-  if (indent_columns > 35) indent_columns = 35;
-  if (indent_columns > 0) {
-    buf->sputn(kIndentSpaces[indent_columns].data(), indent_columns);
-  }
-}
-
-std::string NullValue::ToString(int indent_columns) const {
+std::string JsonNull::ToString() const {
   std::stringbuf buf;
-  ToString(&buf, indent_columns);
+  ToString(&buf);
   return buf.str();
 }
 
-void NullValue::ToString(std::stringbuf* buf, int indent_columns) const {
-  AddIndentation(buf, indent_columns);
+void JsonNull::ToString(std::stringbuf* buf) const {
   buf->sputn("null", 4);
 }
 
-std::string JsonDict::ToString(int indent_columns) const {
+std::string JsonDict::ToString() const {
   std::stringbuf buf;
-  ToString(&buf, indent_columns);
+  ToString(&buf);
   return buf.str();
 }
 
-void JsonDict::ToString(std::stringbuf* buf, int indent_columns) const {
+JsonObject* JsonDict::Get(std::string_view key) {
+  for (auto iter = items_.rbegin(); iter != items_.rend(); ++iter) {
+    if (iter->first == key) {
+      return &iter->second;
+    }
+  }
+  return nullptr;
+}
+
+void JsonDict::ToString(std::stringbuf* buf) const {
   bool first = true;
   buf->sputc('{');
-  buf->sputc('\n');
-  for (auto& [k, v] : values_) {
+  for (auto& [k, v] : items_) {
     if (!first) {
       buf->sputc(',');
-      buf->sputc('\n');
     }
-    AddIndentation(buf, indent_columns + 2);
     first = false;
     buf->sputc('"');
     buf->sputn(k.c_str(), k.size());
     buf->sputn("\":", 2);
-    if (!v.Has<JsonArray, JsonDict>()) {
-      v.ToString(buf, 1);
-    } else {
-      v.ToString(buf, indent_columns + 2);
-    }
+    v.ToString(buf);
   }
-  buf->sputc('\n');
-  AddIndentation(buf, indent_columns);
   buf->sputc('}');
 }
 
-std::string JsonArray::ToString(int indent_columns) const {
+std::string JsonArray::ToString() const {
   std::stringbuf buf;
-  ToString(&buf, indent_columns);
+  ToString(&buf);
   return buf.str();
 }
 
-void JsonArray::ToString(std::stringbuf* buf, int indent_columns) const {
+void JsonArray::ToString(std::stringbuf* buf) const {
   if (items_.empty()) {
     buf->sputn("[]", 2);
     return;
@@ -106,23 +61,19 @@ void JsonArray::ToString(std::stringbuf* buf, int indent_columns) const {
 
   bool first = true;
   buf->sputc('[');
-  buf->sputc('\n');
   for (auto& i : items_) {
     if (!first) {
       buf->sputc(',');
-      buf->sputc('\n');
     }
     first = false;
-    i.ToString(buf, indent_columns + 2);
+    i.ToString(buf);
   }
-  buf->sputc('\n');
-  AddIndentation(buf, indent_columns);
   buf->sputc(']');
 }
 
-std::string JsonObject::ToString(int indent_columns) const {
+std::string JsonObject::ToString() const {
   std::stringbuf buf;
-  ToString(&buf, indent_columns);
+  ToString(&buf);
   return buf.str();
 }
 
@@ -138,8 +89,7 @@ struct overloaded : Fs... {
 template <class ...Ts>
 overloaded(Ts&&...) -> overloaded<std::remove_reference_t<Ts>...>;
 
-void JsonObject::ToString(std::stringbuf* buf, int indent_columns) const {
-  AddIndentation(buf, indent_columns);
+void JsonObject::ToString(std::stringbuf* buf) const {
   std::visit(
       overloaded{
           [&](int32_t i) {
@@ -173,19 +123,19 @@ void JsonObject::ToString(std::stringbuf* buf, int indent_columns) const {
             buf->sputn(str.c_str(), str.size());
             buf->sputc('"');
           },
-          [&](NullValue n) { buf->sputn("null", 4); },
-          [&](const JsonArray& a) { a.ToString(buf, indent_columns); },
-          [&](const JsonDict& d) { d.ToString(buf, indent_columns); },
-          [&](const Any<JsonArray>& a) {
-            a.ToString(buf, indent_columns);
+          [&](const std::string_view& str) {
+            buf->sputc('"');
+            buf->sputn(str.data(), str.size());
+            buf->sputc('"');
           },
-          [&](const Any<JsonDict>& a) {
-            a.ToString(buf, indent_columns);
-          },
-          [&](const Any<JsonObject>& a) {
-            a.ToString(buf, indent_columns);
-          },
-      }, v_);
+          [&](JsonNull n) { buf->sputn("null", 4); },
+          [&](const JsonArray& a) { a.ToString(buf); },
+          [&](const JsonDict& d) { d.ToString(buf); },
+          [&](const Any<JsonArray>& a) { a.ToString(buf); },
+          [&](const Any<JsonDict>& a) { a.ToString(buf); },
+          [&](const Any<JsonObject>& a) { a.ToString(buf); },
+      },
+      v_);
 }
 
 }  // namespace htmlparser::json

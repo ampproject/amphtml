@@ -28,9 +28,8 @@ describes.endtoend(
         'none'
       );
 
-      const failedIndicator = await controller.findElement(
-        '[load-more-failed]'
-      );
+      const failedIndicator =
+        await controller.findElement('[load-more-failed]');
       await expect(failedIndicator).to.be.ok;
       await expect(
         controller.getElementCssValue(failedIndicator, 'display')
@@ -46,7 +45,7 @@ describes.endtoend(
       );
     });
 
-    it.skip('should load more items on scroll', async () => {
+    it('should load more items on scroll', async () => {
       let listItems = await controller.findElements('.item');
       await expect(listItems).to.have.length(2);
 

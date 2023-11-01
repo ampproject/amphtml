@@ -2,63 +2,51 @@ const argv = require('minimist')(process.argv.slice(2));
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const path = require('path');
+const {posix: path} = require('path');
 const Remapping = require('@ampproject/remapping');
+const ResolveUri = require('@jridgewell/resolve-uri');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
 
+/** @type {ResolveUri.default} */
+const resolveUri = /** @type {*} */ (ResolveUri);
+
 /**
- * @param {!Array<string|object>} sourcemaps
- * @param {Map<string, string|object>} babelMaps
- * @param {*} options
- * @return {string}
+ * @return {boolean}
  */
-function massageSourcemaps(sourcemaps, babelMaps, options) {
-  const root = process.cwd();
-  const remapped = remapping(
-    sourcemaps,
-    (f) => {
-      if (f.includes('__SOURCE__')) {
-        return null;
-      }
-      const file = path.join(root, f);
-      // The Babel tranformed file and the original file have the same path,
-      // which makes it difficult to distinguish during remapping's load phase.
-      // We perform some manual path mangling to destingish the babel files
-      // (which have a sourcemap) from the actual source file by pretending the
-      // source file exists in the '__SOURCE__' root directory.
-      const map = babelMaps.get(file);
-      if (!map) {
-        throw new Error(`failed to find sourcemap for babel file "${f}"`);
-      }
-      return {
-        ...map,
-        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
-      };
-    },
-    !argv.full_sourcemaps
-  );
-
-  remapped.sources = remapped.sources.map((source) => {
-    if (source?.startsWith('/__SOURCE__/')) {
-      return source.slice('/__SOURCE__/'.length);
-    }
-    return source;
-  });
-  remapped.sourceRoot = getSourceRoot(options);
-  if (remapped.file) {
-    remapped.file = path.basename(remapped.file);
+function includeSourcesContent() {
+  if (argv._.includes('dist')) {
+    return !!argv.full_sourcemaps;
   }
+  return true;
+}
 
-  return remapped.toString();
+/**
+ * @param {Array<Object|string>} mapChain
+ * @param {string} destFile
+ * @param {*} options
+ * @return {object}
+ */
+function massageSourcemaps(mapChain, destFile, options) {
+  const map = remapping(mapChain, () => null, !includeSourcesContent());
+  map.file = path.basename(destFile);
+  map.sourceRoot = getSourceRoot(options);
+  map.sources = map.sources.map((s) => {
+    // By default, sources are relative to the map. But we just added an
+    // absolute sourceRoot, and we do not want the file to be relative to that
+    // root.
+    return resolveUri(s || '', destFile);
+  });
+
+  return map;
 }
 
 /**
  * Computes the base url for sourcemaps. Custom sourcemap URLs have placeholder
  * {version} that should be replaced with the actual version. Also, ensures
  * that a trailing slash exists.
- * @param {Object} options
+ * @param {object} options
  * @return {string}
  */
 function getSourceRoot(options) {
@@ -75,4 +63,5 @@ function getSourceRoot(options) {
 
 module.exports = {
   massageSourcemaps,
+  includeSourcesContent,
 };

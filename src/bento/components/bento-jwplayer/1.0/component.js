@@ -1,4 +1,5 @@
 import {JwplayerToDom, makeJwplayerIframeSrc} from '#bento/apis/jwplayer-api';
+import {VideoIframe} from '#bento/components/bento-video/1.0/video-iframe';
 
 import {dispatchCustomEvent} from '#core/dom';
 import {tryParseJson} from '#core/types/object/json';
@@ -7,7 +8,6 @@ import * as Preact from '#preact';
 import {useCallback, useMemo, useRef} from '#preact';
 import {forwardRef} from '#preact/compat';
 
-import {VideoIframe} from '../../../../../extensions/amp-video/1.0/video-iframe';
 import {isJsonOrObj, objOrParseJson} from '../../../../iframe-video';
 
 const JWPLAYER_ORIGIN = /https:\/\/content\.jwplatform\.com/;
@@ -231,7 +231,7 @@ function onMessage_(event, options) {
  * @param {HTMLIFrameElement} iframe
  * @param {{json: string}} config
  * @param {string} adCustParamsJson
- * @param {Object} adMacros
+ * @param {object} adMacros
  */
 function onSetup(iframe, config, adCustParamsJson, adMacros) {
   /** get all data-config-* */
@@ -255,7 +255,7 @@ function onSetup(iframe, config, adCustParamsJson, adMacros) {
 }
 
 /**
- * @param {Object} currentTarget
+ * @param {object} currentTarget
  * @param {{muted: boolean, playlistItem: Object}} readyOptions
  * @param {OnLoadCallback} onLoad
  */

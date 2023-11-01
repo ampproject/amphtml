@@ -35,11 +35,17 @@ export class PremiumadsNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     const data = this.autoAmpAdsElement_.dataset;
     return {
       'type': 'doubleclick',
       'data-ad': 'premiumads',
+      'json': data.json || '',
       'layout': data.layout || Layout_Enum.FIXED,
       'style':
         data['style'] ||

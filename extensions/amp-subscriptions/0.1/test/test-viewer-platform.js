@@ -216,9 +216,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         'entitlements': entitlementData,
       }));
 
-      const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-        'faketoken'
-      );
+      const resolvedEntitlement =
+        await viewerPlatform.verifyAuthToken_('faketoken');
       expect(resolvedEntitlement).to.be.not.undefined;
       expect(resolvedEntitlement.service).to.equal(entitlementData.service);
       expect(resolvedEntitlement.source).to.equal('viewer');
@@ -241,9 +240,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         'entitlements': [entitlementData],
       }));
 
-      const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-        'faketoken'
-      );
+      const resolvedEntitlement =
+        await viewerPlatform.verifyAuthToken_('faketoken');
       expect(resolvedEntitlement).to.be.not.undefined;
       expect(resolvedEntitlement.service).to.equal(entitlementData.service);
       expect(resolvedEntitlement.source).to.equal('viewer');
@@ -287,9 +285,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
           },
         }));
 
-        const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-          'faketoken'
-        );
+        const resolvedEntitlement =
+          await viewerPlatform.verifyAuthToken_('faketoken');
         expect(resolvedEntitlement).to.be.not.undefined;
         expect(resolvedEntitlement.service).to.equal('local');
         expect(resolvedEntitlement.granted).to.be.equal(true);
@@ -317,9 +314,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
           },
         }));
 
-        const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-          'faketoken'
-        );
+        const resolvedEntitlement =
+          await viewerPlatform.verifyAuthToken_('faketoken');
         expect(resolvedEntitlement).to.be.not.undefined;
         expect(resolvedEntitlement.service).to.equal('local');
         expect(resolvedEntitlement.granted).to.be.equal(true);

@@ -1,8 +1,6 @@
 'use strict';
 
-const inquirer = require('inquirer');
 const path = require('path');
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
@@ -17,6 +15,9 @@ const {WebpageDef} = require('./types');
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
+/** @typedef {import('puppeteer-core')} puppeteer */
+/** @typedef {import('puppeteer-core').Browser} puppeteer.Browser */
+
 /**
  * Runs a development mode.
  *
@@ -26,9 +27,11 @@ const ROOT_DIR = path.resolve(__dirname, '../../../');
  * @return {Promise<void>}
  */
 async function devMode(browser, webpages) {
+  const {default: inquirer} = await import('inquirer');
+
   /** @type {WebpageDef} */
-  const webpage = await inquireForWebpage_(webpages);
-  const testName = await inquireForTestFunction_(webpage);
+  const webpage = await inquireForWebpage_(inquirer, webpages);
+  const testName = await inquireForTestFunction_(inquirer, webpage);
 
   log('info', 'The test will now run in a browser window...');
   const page = await newPage(browser, webpage.viewport);
@@ -126,11 +129,12 @@ async function devMode(browser, webpages) {
 /**
  * Queries the user for a webpage, or selects one if only one matched --grep.
  *
+ * @param {import('inquirer').default} inquirer
  * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
  *     details about the webpages to snapshot.
  * @return {Promise<!WebpageDef>}
  */
-async function inquireForWebpage_(webpages) {
+async function inquireForWebpage_(inquirer, webpages) {
   if (webpages.length > 1) {
     return (
       await inquirer.prompt([
@@ -169,11 +173,12 @@ async function inquireForWebpage_(webpages) {
 /**
  * Queries the user for an interactive test, or selects the base case if none.
  *
+ * @param {import('inquirer').default} inquirer
  * @param {!WebpageDef} webpage a JSON object containing details about the
  *     webpage to snapshot.
  * @return {Promise<string>}
  */
-async function inquireForTestFunction_(webpage) {
+async function inquireForTestFunction_(inquirer, webpage) {
   if (Object.keys(webpage.tests_).length > 1) {
     return (
       await inquirer.prompt([

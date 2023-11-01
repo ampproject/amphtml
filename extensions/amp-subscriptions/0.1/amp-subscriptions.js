@@ -115,7 +115,7 @@ export class SubscriptionService {
     /** @private @const {!Promise<!../../../src/service/cid-impl.CidDef>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
-    /** @private {!Object<string, ?Promise<string>>} */
+    /** @private {!{[key: string]: ?Promise<string>}} */
     this.platformKeyToReaderIdPromiseMap_ = {};
 
     /** @private {!CryptoHandler} */
@@ -166,6 +166,13 @@ export class SubscriptionService {
         });
 
       isStoryDocument(this.ampdoc_).then((isStory) => {
+        if (isStory) {
+          // Make the dialog with round corners for AMP Story.
+          const dialogWrapperEl = this.dialog_.getRoot();
+          dialogWrapperEl.classList.add(
+            'i-amphtml-story-subscriptions-dialog-wrapper'
+          );
+        }
         // Delegates the platform selection and activation call if is story.
         this.startAuthorizationFlow_(!isStory /** shouldActivatePlatform */);
       });
@@ -199,6 +206,36 @@ export class SubscriptionService {
    */
   getDialog() {
     return this.dialog_;
+  }
+
+  /**
+   * Maybe renders and opens the dialog using the cached entitlements. Do nothing if the viewer can authorize the user.
+   * @return {!Promise}
+   */
+  maybeRenderDialogForSelectedPlatform() {
+    return this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
+        return;
+      }
+
+      return this.selectAndActivatePlatform_();
+    });
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   */
+  getGrantStatus() {
+    return this.platformStore_.getGrantStatus();
+  }
+
+  /**
+   * This registers a callback which is called whenever a platform key is resolved
+   * with an entitlement.
+   * @param {function(!EntitlementChangeEventDef):void} callback
+   */
+  addOnEntitlementResolvedCallback(callback) {
+    this.platformStore_.addOnEntitlementResolvedCallback(callback);
   }
 
   /**

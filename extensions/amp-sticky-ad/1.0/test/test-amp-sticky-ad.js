@@ -48,8 +48,7 @@ describes.realWin(
           .callsFake(() => addToFixedLayerPromise);
       });
 
-      // TODO(#16916): Make this test work with synchronous throws.
-      it.skip('should listen to scroll event', function* () {
+      it('should listen to scroll event', function* () {
         const spy = env.sandbox.spy(impl, 'removeOnScrollListener_');
         expect(impl.scrollUnlisten_).to.be.null;
         yield macroTask();
@@ -61,7 +60,7 @@ describes.realWin(
         }
       });
 
-      it('should not build when scrollTop not greater than 1', () => {
+      it('should not build when scrollTop not greater than 1', async () => {
         const scheduleLayoutSpy = env.sandbox.spy(
           Services.ownersForDoc(impl.element),
           'scheduleLayout'
@@ -82,13 +81,10 @@ describes.realWin(
           return 300;
         };
         impl.onScroll_();
-        return new Promise((resolve) => {
-          setTimeout(resolve, 0);
-        }).then(() => {
-          expect(getScrollTopSpy).to.have.been.called;
-          expect(scheduleLayoutSpy).to.not.have.been.called;
-          expect(removeOnScrollListenerSpy).to.not.have.been.called;
-        });
+        await macroTask();
+        expect(getScrollTopSpy).to.have.been.called;
+        expect(scheduleLayoutSpy).to.not.have.been.called;
+        expect(removeOnScrollListenerSpy).to.not.have.been.called;
       });
 
       it('should display once user scroll', () => {
@@ -208,7 +204,7 @@ describes.realWin(
         const ad = impl.ad_;
         ad.signals().signal('built');
         await ad.signals().whenSignal('built');
-        await new Promise(setTimeout);
+        await macroTask();
         expect(layoutAdSpy).to.be.called;
         expect(ampStickyAd).to.not.have.attribute('visible');
 

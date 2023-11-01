@@ -1,7 +1,6 @@
 'use strict';
 
 const checkDependencies = require('check-dependencies');
-const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
 const {cyan, red} = require('kleur/colors');
@@ -179,27 +178,6 @@ function patchShadowDom() {
 
   writeIfUpdated(patchedName, file);
 }
-/**
- * Adds a missing export statement to the preact module.
- */
-function patchPreact() {
-  fs.ensureDirSync('node_modules/preact/dom');
-  const file = `export { render, hydrate } from 'preact';`;
-  writeIfUpdated('node_modules/preact/dom/index.js', file);
-}
-
-/**
- * Deletes the map file for rrule, which breaks closure compiler.
- * TODO(rsimha): Remove this workaround after a fix is merged for
- * https://github.com/google/closure-compiler/issues/3720.
- */
-function removeRruleSourcemap() {
-  const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
-  if (fs.existsSync(rruleMapFile)) {
-    del.sync(rruleMapFile);
-    logLocalDev('Deleted', cyan(rruleMapFile));
-  }
-}
 
 /**
  * Checks if all packages are current, and if not, runs `npm install`.
@@ -235,8 +213,6 @@ function updatePackages() {
   patchIntersectionObserver();
   patchResizeObserver();
   patchShadowDom();
-  patchPreact();
-  removeRruleSourcemap();
   if (isCiBuild()) {
     runNpmChecks();
   }

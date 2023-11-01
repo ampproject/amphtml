@@ -19,13 +19,12 @@ import {
   BentoAccordionHeader,
   BentoAccordionSection,
 } from '#bento/components/bento-accordion/1.0/component';
+import {VideoIframe} from '#bento/components/bento-video/1.0/video-iframe';
 
 import * as Preact from '#preact';
 import {useCallback} from '#preact';
 
 import {createCustomEvent} from '#utils/event-helper';
-
-import {VideoIframe} from '../video-iframe';
 
 export default {
   title: 'VideoIframe',

@@ -10,6 +10,10 @@ const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
+const {log} = require('../common/logging');
+const whyIsNodeRunning = require('why-is-node-running');
+const {red} = require('kleur/colors');
+const {isCircleciBuild} = require('../common/ci');
 
 class Runner extends RuntimeTestRunner {
   /**
@@ -41,8 +45,26 @@ async function unit() {
   const runner = new Runner(config);
 
   await runner.setup();
+  // TODO(danielrozenberg): temporary debugging output.
+  const timeoutHandler = isCircleciBuild()
+    ? setTimeout(() => {
+        log(red('[TEMPORARY DEBUGGING STATEMENT]'), 'See #39501 for details.');
+        log(
+          'Unit tests on CircleCI are still running after 7 minutes, probably indicating that the tests are stuck. The following output indicates which handles are still live in Node:'
+        );
+        console./*OK*/ groupCollapsed('why-is-node-running');
+        whyIsNodeRunning();
+        console./*OK*/ groupEnd();
+        process.exit(1);
+      }, 420_000)
+    : null;
+
   await runner.run();
   await runner.teardown();
+
+  if (timeoutHandler) {
+    clearTimeout(timeoutHandler);
+  }
 }
 
 module.exports = {
@@ -62,7 +84,6 @@ unit.flags = {
   'local_changes':
     'Run unit tests directly affected by the files changed in the local branch',
   'nohelp': 'Silence help messages that are printed prior to test run',
-  'report': 'Write test result report to a local file',
   'safari': 'Run tests on Safari',
   'testnames': 'List the name of each test being run',
   'verbose': 'Enable logging',

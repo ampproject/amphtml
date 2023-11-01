@@ -194,7 +194,7 @@ export class Resource {
     /**
      * Really, this is a <number, !Deferred> map,
      * but CC's type system can't handle it.
-     * @private {?Object<string, !Deferred>}
+     * @private {?{[key: string]: !Deferred}}
      */
     this.withViewportDeferreds_ = null;
 
@@ -668,6 +668,14 @@ export class Resource {
   }
 
   /**
+   * Whether this element can be previewed.
+   * @return {boolean}
+   */
+  previewAllowed() {
+    return this.element.previewAllowed();
+  }
+
+  /**
    * Whether this element has render-blocking service.
    * @return {boolean}
    */
@@ -850,7 +858,7 @@ export class Resource {
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
     if (this.state_ != ResourceState_Enum.LAYOUT_SCHEDULED) {
-      const err = dev().createError(
+      const err = dev().createExpectedError(
         'startLayout called but not LAYOUT_SCHEDULED',
         'currently: ',
         this.state_

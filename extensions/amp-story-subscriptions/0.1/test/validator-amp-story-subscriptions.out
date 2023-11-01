@@ -13,12 +13,63 @@ PASS
 |          color: red;
 |        }
 |      </style>
-|      <script async custom-element="amp-story-subscriptions" src="https://cdn.ampproject.org/v0/amp-story-subscriptions-0.1.js"></script>
 |      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|      <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
+|      <script
+|        async
+|        custom-element="amp-subscriptions-google"
+|        src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"
+|      ></script>
+|      <script async custom-element="amp-story"
+|          src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|      <script async custom-element="amp-story-subscriptions" src="https://cdn.ampproject.org/v0/amp-story-subscriptions-0.1.js"></script>
 |    </head>
 |    <body>
-|      <amp-story-subscriptions
-|        layout="container"
-|      ></amp-story-subscriptions>
+|      <amp-story standalone title="My story" publisher="Monocle" publisher-logo-src="https://res.cloudinary.com/crunchbase-production/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/tbvbvipimh2camf5nb2q" poster-portrait-src="POSTER-IMAGE-URL">
+|        <amp-story-page id="cover" auto-advance-after="5s">
+|          <amp-story-grid-layer template="fill">
+|            <amp-img src="https://images.unsplash.com/photo-1552650904-54d0c54b278f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80"
+|                width="720" height="1280"
+|                layout="responsive"
+|                alt="">
+|            </amp-img>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-1" auto-advance-after="5s">
+|          <amp-story-grid-layer template="fill">
+|            <amp-img src="https://images.unsplash.com/photo-1544965563-bb8d8bce9791?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1011&q=80"
+|                width="720" height="1280"
+|                layout="responsive"
+|                alt="">
+|            </amp-img>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-2" auto-advance-after="5s">
+|          <amp-story-grid-layer template="fill">
+|            <amp-img src="https://images.unsplash.com/photo-1599849913403-f45ef2181b49?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3024&q=80"
+|                width="720" height="1280"
+|                layout="responsive"
+|                alt="">
+|            </amp-img>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-page id="page-3">
+|          <amp-story-grid-layer template="fill">
+|            <amp-img src="https://images.unsplash.com/photo-1574236170880-fbbca132d83d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=926&q=80"
+|                width="720" height="1280"
+|                layout="responsive"
+|                alt="">
+|            </amp-img>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-subscriptions layout='container'
+|          price='$0.50/week'
+|          description='Subscribe for unlimited access.'>
+|        </amp-story-subscriptions>
+|      </amp-story>
 |    </body>
 |  </html>

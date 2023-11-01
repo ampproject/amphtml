@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.204 */
+/** Version: 216488bf */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -653,10 +653,10 @@ const RE_ALLOWED_TYPES = new RegExp(ALLOWED_TYPES.join('|'));
  */
 class PageConfigResolver {
   /**
-   * @param {!Window|!Document|!Doc} winOrDoc
+   * @param {!Window|!Document|!DocInterface} winOrDoc
    */
   constructor(winOrDoc) {
-    /** @private @const {!Doc} */
+    /** @private @const {!DocInterface} */
     this.doc_ = resolveDoc(winOrDoc);
 
     /** @private {?function((!PageConfig|!Promise))} */
@@ -693,13 +693,10 @@ class PageConfigResolver {
     if (!this.configResolver_) {
       return null;
     }
-    let config = this.metaParser_.check();
-    if (!config) {
-      config = this.ldParser_.check();
-    }
-    if (!config) {
-      config = this.microdataParser_.check();
-    }
+    const config =
+      this.metaParser_.check() ||
+      this.ldParser_.check() ||
+      this.microdataParser_.check();
     if (config) {
       // Product ID has been found: initialize the rest of the config.
       this.configResolver_(config);
@@ -773,10 +770,10 @@ class TypeChecker {
 
 class MetaParser {
   /**
-   * @param {!Doc} doc
+   * @param {!DocInterface} doc
    */
   constructor(doc) {
-    /** @private @const {!Doc} */
+    /** @private @const {!DocInterface} */
     this.doc_ = doc;
   }
 
@@ -813,10 +810,10 @@ class MetaParser {
 
 class JsonLdParser {
   /**
-   * @param {!Doc} doc
+   * @param {!DocInterface} doc
    */
   constructor(doc) {
-    /** @private @const {!Doc} */
+    /** @private @const {!DocInterface} */
     this.doc_ = doc;
     /** @private @const @function */
     this.checkType_ = new TypeChecker();
@@ -915,26 +912,25 @@ class JsonLdParser {
 
   /**
    * @param {*} value
-   * @param {boolean} def
+   * @param {boolean} defaultValue
    * @return {boolean}
    */
-  bool_(value, def) {
-    if (value == null || value === '') {
-      return def;
-    }
-    if (typeof value == 'boolean') {
+  bool_(value, defaultValue) {
+    if (typeof value === 'boolean') {
       return value;
     }
-    if (typeof value == 'string') {
+
+    if (typeof value === 'string') {
       const lowercase = value.toLowerCase();
-      if (lowercase == 'false') {
+      if (lowercase === 'false') {
         return false;
       }
-      if (lowercase == 'true') {
+      if (lowercase === 'true') {
         return true;
       }
     }
-    return def;
+
+    return defaultValue;
   }
 
   /**
@@ -976,10 +972,10 @@ class JsonLdParser {
 
 class MicrodataParser {
   /**
-   * @param {!Doc} doc
+   * @param {!DocInterface} doc
    */
   constructor(doc) {
-    /** @private @const {!Doc} */
+    /** @private @const {!DocInterface} */
     this.doc_ = doc;
     /** @private {?boolean} */
     this.access_ = null;

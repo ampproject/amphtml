@@ -68,6 +68,11 @@ export class Transport {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win_).runtime == 'inabox';
+
+    /** @private {string|undefined} */
+    this.attributionSrc_ = /** @type {string|undefined} */ (
+      this.options_['attributionsrc']
+    );
   }
 
   /**
@@ -135,7 +140,9 @@ export class Transport {
         this.win_,
         getRequest(false),
         suppressWarnings,
-        /** @type {string|undefined} */ (this.referrerPolicy_)
+        /** @type {string|undefined} */ (this.referrerPolicy_),
+        /** @type {string|undefined} */ (this.attributionSrc_),
+        this.ampdoc_
       );
       return;
     }
@@ -241,12 +248,28 @@ export class Transport {
    * @param {!RequestDef} request
    * @param {boolean} suppressWarnings
    * @param {string|undefined} referrerPolicy
+   * @param {string|undefined} attributionSrc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc Whether services are provided by an
+   *     element.
    */
-  static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
+  static sendRequestUsingImage(
+    win,
+    request,
+    suppressWarnings,
+    referrerPolicy,
+    attributionSrc,
+    elementOrAmpDoc
+  ) {
     if (!win) {
       return;
     }
-    const image = createPixel(win, request.url, referrerPolicy);
+    const image = createPixel(
+      win,
+      request.url,
+      referrerPolicy,
+      attributionSrc,
+      elementOrAmpDoc
+    );
     loadPromise(image)
       .then(() => {
         dev().fine(TAG_, 'Sent image request', request.url);

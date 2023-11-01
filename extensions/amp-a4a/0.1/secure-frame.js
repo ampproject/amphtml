@@ -1,5 +1,7 @@
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
+
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
@@ -24,9 +26,6 @@ const sandboxVals =
   'allow-same-origin ' +
   'allow-scripts ' +
   'allow-top-navigation';
-
-const TOKEN_VALUE_1P =
-  'AlbC5LKqHkvdIY45O3/1Js/EyRmwSjb4wyp3XZy8KbMWhfMknydD4Wx9K9GyEIdG3ojUlZOdpdbX340wPHpYfQoAAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
 
 /**
  * Create the starting html for all FIE ads. If streaming is supported body will be
@@ -53,7 +52,6 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
       default-src 'none';
       style-src ${fontProviderAllowList} 'unsafe-inline';
     ">
-    <meta http-equiv="origin-trial" content=${TOKEN_VALUE_1P}>    
     ${sanitizedHeadElements}
   </head>
   <body>${body}</body>
@@ -87,18 +85,9 @@ export function createSecureFrame(win, title, height, width) {
     })
   );
 
-  if (isAttributionReportingSupported(document)) {
+  if (isAttributionReportingAllowed(document)) {
     iframe.setAttribute('allow', `attribution-reporting 'src'`);
   }
 
   return iframe;
-}
-
-/**
- * Determine if `attribution-reporting` API is available in browser.
- * @param {!Document} doc
- * @return {boolean}
- */
-export function isAttributionReportingSupported(doc) {
-  return doc.featurePolicy?.features().includes('attribution-reporting');
 }

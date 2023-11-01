@@ -66,7 +66,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.videoId_ = '';
 
-    /** @private {Object<string, (number|Array)>} */
+    /** @private {{[key: string]: (number|Array)}} */
     this.meta_ = {};
   }
 

@@ -31,7 +31,9 @@ export let MinimalTcData;
 export let MinimalPingReturn;
 
 const TAG = 'amp-consent';
-const TCF_POLICY_VERSION = 2;
+//TODO: TCF_POLICY_VERSION_FALLBACK could be deleted after the full transition to the TCF v2.2
+const TCF_POLICY_VERSION_FALLBACK = 2;
+const TCF_API_VERSION = 2;
 const CMP_STATUS = 'loaded';
 const CMP_LOADED = true;
 const EVENT_STATUS = 'tcloaded';
@@ -45,7 +47,7 @@ export class TcfApiCommandManager {
     /** @private {!./consent-policy-manager.ConsentPolicyManager} */
     this.policyManager_ = policyManager;
 
-    /** @private {!Object<number, Object>} */
+    /** @private {!{[key: number]: Object}} */
     this.changeListeners_ = map();
 
     /** @private {?string} */
@@ -153,7 +155,8 @@ export class TcfApiCommandManager {
           consentPromises[0],
           consentPromises[1],
           newTcString,
-          listenerId
+          listenerId,
+          consentPromises[3]
         );
 
         this.sendTcfApiReturn_(win, returnValue, callId, true);
@@ -171,11 +174,14 @@ export class TcfApiCommandManager {
       this.policyManager_.getConsentMetadataInfo('default');
     const sharedDataPromise =
       this.policyManager_.getMergedSharedData('default');
+    const tcfPolicyVersionPromise =
+      this.policyManager_.getTcfPolicyVersion('default');
 
     return Promise.all([
       metadataPromise,
       sharedDataPromise,
       consentStringInfoPromise,
+      tcfPolicyVersionPromise,
     ]);
   }
 
@@ -187,7 +193,13 @@ export class TcfApiCommandManager {
    */
   handleGetTcData_(payload, win) {
     this.getTcDataPromises_().then((arr) => {
-      const returnValue = this.getMinimalTcData_(arr[0], arr[1], arr[2]);
+      const returnValue = this.getMinimalTcData_(
+        arr[0],
+        arr[1],
+        arr[2],
+        undefined,
+        arr[3]
+      );
       const {callId} = payload;
 
       this.sendTcfApiReturn_(win, returnValue, callId, true);
@@ -201,9 +213,16 @@ export class TcfApiCommandManager {
    * @param {?Object} sharedData
    * @param {?string} tcString
    * @param {number=} opt_listenerId
+   * @param {number=} opt_tcfPolicyVersion
    * @return {!MinimalTcData} policyManager
    */
-  getMinimalTcData_(metadata, sharedData, tcString, opt_listenerId) {
+  getMinimalTcData_(
+    metadata,
+    sharedData,
+    tcString,
+    opt_listenerId,
+    opt_tcfPolicyVersion
+  ) {
     const purposeOneTreatment = metadata ? metadata['purposeOne'] : undefined;
     const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
     const additionalConsent = metadata
@@ -212,7 +231,10 @@ export class TcfApiCommandManager {
     const additionalData = {...sharedData, additionalConsent};
 
     return {
-      tcfPolicyVersion: TCF_POLICY_VERSION,
+      tcfPolicyVersion:
+        typeof opt_tcfPolicyVersion == 'number'
+          ? opt_tcfPolicyVersion
+          : TCF_POLICY_VERSION_FALLBACK,
       gdprApplies,
       tcString,
       listenerId: opt_listenerId,
@@ -230,8 +252,13 @@ export class TcfApiCommandManager {
    * @param {!Window} win
    */
   handlePingEvent_(payload, win) {
-    this.policyManager_.getConsentMetadataInfo('default').then((metadata) => {
-      const returnValue = this.getMinimalPingReturn_(metadata);
+    const metadataPromise =
+      this.policyManager_.getConsentMetadataInfo('default');
+    const tcfPolicyVersionPromise =
+      this.policyManager_.getTcfPolicyVersion('default');
+
+    Promise.all([metadataPromise, tcfPolicyVersionPromise]).then((result) => {
+      const returnValue = this.getMinimalPingReturn_(result[0], result[1]);
       const {callId} = payload;
 
       this.sendTcfApiReturn_(win, returnValue, callId);
@@ -241,15 +268,19 @@ export class TcfApiCommandManager {
   /**
    * Create minimal PingReturn object.
    * @param {?Object} metadata
+   * @param {number=} opt_tcfPolicyVersion
    * @return {!MinimalPingReturn}
    */
-  getMinimalPingReturn_(metadata) {
+  getMinimalPingReturn_(metadata, opt_tcfPolicyVersion) {
     const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
     return {
       gdprApplies,
       cmpLoaded: CMP_LOADED,
       cmpStatus: CMP_STATUS,
-      tcfPolicyVersion: TCF_POLICY_VERSION,
+      tcfPolicyVersion:
+        typeof opt_tcfPolicyVersion == 'number'
+          ? opt_tcfPolicyVersion
+          : TCF_POLICY_VERSION_FALLBACK,
     };
   }
 
@@ -302,7 +333,7 @@ export class TcfApiCommandManager {
       );
       return false;
     }
-    if (version !== 2) {
+    if (version != TCF_API_VERSION) {
       user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
       return false;
     }
@@ -311,11 +342,12 @@ export class TcfApiCommandManager {
 
   /**
    * @param {?Object} metadata
+   * @param {number=} opt_tcfPolicyVersion
    * @return {!MinimalPingReturn}
    * @visibleForTesting
    */
-  getMinimalPingReturnForTesting(metadata) {
-    return this.getMinimalPingReturn_(metadata);
+  getMinimalPingReturnForTesting(metadata, opt_tcfPolicyVersion) {
+    return this.getMinimalPingReturn_(metadata, opt_tcfPolicyVersion);
   }
 
   /**
@@ -323,10 +355,23 @@ export class TcfApiCommandManager {
    * @param {?Object} sharedData
    * @param {?string} tcString
    * @param {number=} listenerId
+   * @param {number=} tcfPolicyVersion
    * @return {!MinimalPingReturn}
    * @visibleForTesting
    */
-  getMinimalTcDataForTesting(metadata, sharedData, tcString, listenerId) {
-    return this.getMinimalTcData_(metadata, sharedData, tcString, listenerId);
+  getMinimalTcDataForTesting(
+    metadata,
+    sharedData,
+    tcString,
+    listenerId,
+    tcfPolicyVersion
+  ) {
+    return this.getMinimalTcData_(
+      metadata,
+      sharedData,
+      tcString,
+      listenerId,
+      tcfPolicyVersion
+    );
   }
 }

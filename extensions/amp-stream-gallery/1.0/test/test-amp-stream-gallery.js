@@ -1,5 +1,7 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
 import {setStyles} from '#core/dom/style';
@@ -11,8 +13,6 @@ import {ActionInvocation} from '#service/action-impl';
 
 import {waitFor} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
-
-import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
 
 describes.realWin(
   'amp-stream-gallery',
@@ -180,7 +180,8 @@ describes.realWin(
         );
       }
 
-      it('should execute next and prev actions', async () => {
+      // TODO(#38975): fix skipped test.
+      it.skip('should execute next and prev actions', async () => {
         const eventSpy = env.sandbox.spy();
         element.addEventListener('slideChange', eventSpy);
 

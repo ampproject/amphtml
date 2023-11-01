@@ -9,7 +9,7 @@ import {parseJson} from '#core/types/object/json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 103
+ * Next ID: 113
  *
  * @const @enum {string}
  */
@@ -46,7 +46,10 @@ export const LocalizedStringId_Enum = {
   AMP_STORY_PAGE_PLAY_VIDEO: '34',
   AMP_STORY_PAUSE_BUTTON_LABEL: '85',
   AMP_STORY_PLAY_BUTTON_LABEL: '86',
+  AMP_STORY_CAPTIONS_ON_LABEL: '111',
+  AMP_STORY_CAPTIONS_OFF_LABEL: '112',
   AMP_STORY_PREVIOUS_PAGE: '93',
+  AMP_STORY_READ_MORE_LABEL: '106',
   AMP_STORY_REPLAY: '92',
   AMP_STORY_SHARE_BUTTON_LABEL: '69',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
@@ -100,6 +103,16 @@ export const LocalizedStringId_Enum = {
   // amp-story-shopping
   AMP_STORY_SHOPPING_CTA_LABEL: '101',
   AMP_STORY_SHOPPING_PLP_HEADER: '102',
+  AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL: '103',
+  // DEPRECATED_AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL: '104',
+  AMP_STORY_SHOPPING_ATTACHMENT_DETAILS: '105',
+
+  // amp-story-subscriptions
+  AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION: '107',
+  AMP_STORY_SUBSCRIPTIONS_SIGN_IN: '108',
+  AMP_STORY_SUBSCRIPTIONS_CTA: '109',
+  AMP_STORY_SUBSCRIPTIONS_SWG: '110',
+  AMP_STORY_SUBSCRIPTIONS_SKIP: '113',
 
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
@@ -131,7 +144,7 @@ export const LocalizedStringId_Enum = {
 export let LocalizedStringDef;
 
 /**
- * @typedef {!Object<!LocalizedStringId_Enum, !LocalizedStringDef>}
+ * @typedef {!{[key: !LocalizedStringId_Enum]: !LocalizedStringDef}}
  */
 export let LocalizedStringBundleDef;
 

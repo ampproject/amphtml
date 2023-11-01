@@ -1,0 +1,274 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Shopping</title>
+    <link rel="canonical" href="amps.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-auto-analytics" src="https://cdn.ampproject.org/v0/amp-story-auto-analytics-0.1.js"></script>
+    <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
+    <style amp-custom>
+      [data-product-id="lamp"] {
+        top: 31%;
+        left: 1%;
+      }
+      [data-product-id="art"] {
+        top: 15%;
+        left: 40%;
+      }
+      [data-product-id="chair"] {
+        top: 53%;
+        left: 30%;
+      }
+      [data-product-id="flowers"] {
+        top: 46%;
+        left: 83%;
+      }
+      /* Prevents CSS animations from running. */
+      * {
+        animation-duration: 0s !important
+      }
+    </style>
+  </head>
+  <body>
+    <amp-story-auto-analytics gtag-id="UA-174115079-1"></amp-story-auto-analytics>
+    <amp-story
+        standalone
+        title="Story Shopping Component"
+        publisher="AMP Story Shopping"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg"
+        supports-landscape>
+      <amp-story-page id="inline-light-theme">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <!--
+          Example of Inline config. Multiple product tags with icon defined.
+        -->
+        <amp-story-shopping-attachment>
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "lamp",
+                    "productTitle": "Brass Lamp",
+                    "productBrand": "Lamp Co",
+                    "productPrice": 799.00,
+                    "productPriceCurrency": "USD",
+                    "productImages": [
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 1"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 2"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 3"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 4"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 5"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 6"}
+                    ],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "One newline after this. \n Two newlines after this. \n\n  Five consecutive newlines after this, should become 2 newlines. \n\n\n\n\n Many consecutive newlines with different spacing and tabs after this, should become 2 newlines. \n          \n\n   \n  \n \n  \n \n I hope it works!"
+                   },
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "art",
+                    "productTitle": "Abstract Art",
+                    "productBrand": "V. Artsy",
+                    "productPrice": 1200.00,
+                    "productPriceCurrency": "INR",
+                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "art"}],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                   },
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "chair",
+                    "productTitle": "Yellow chair",
+                    "productPrice": 1000.00,
+                    "productPriceCurrency": "BRL",
+                    "productTagText": "The perfectly imperfect yellow chair",
+                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "chair"}],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                   },
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "flowers",
+                    "productTitle": "Flowers",
+                    "productBrand": "Very Long Flower Company Name",
+                    "productPrice": 10.00,
+                    "productPriceCurrency": "USD",
+                    "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
+                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "flowers"}],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-dark-theme">
+        <!--
+          Dark theme example of Inline config. Multiple product tags with icon defined.
+        -->
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment theme="dark">
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "lamp",
+                    "productTitle": "Brass Lamp",
+                    "productBrand": "Lamp Co",
+                    "productPrice": 799.00,
+                    "productPriceCurrency": "USD",
+                    "productImages": [
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 1"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 2"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 3"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 4"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 5"},
+                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 6"}
+                    ],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                   },
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "art",
+                    "productTitle": "Abstract Art",
+                    "productBrand": "V. Artsy",
+                    "productPrice": 1200.00,
+                    "productPriceCurrency": "INR",
+                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "art"}],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                   },
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "chair",
+                    "productTitle": "Yellow chair",
+                    "productPrice": 1000.00,
+                    "productPriceCurrency": "BRL",
+                    "productTagText": "The perfectly imperfect yellow chair",
+                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "chair"}],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                   },
+                   {
+                    "productUrl": "https://www.google.com",
+                    "productId": "flowers",
+                    "productTitle": "Flowers",
+                    "productBrand": "Very Long Flower Company Name",
+                    "productPrice": 10.00,
+                    "productPriceCurrency": "USD",
+                    "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
+                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "flowers"}],
+                    "aggregateRating": {
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
+                      "reviewUrl": "https://www.google.com"
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="remote-with-product">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <!--
+          Example of:
+          CTA Button rendering due to remote product tag existing, but no inline.
+        -->
+        <amp-story-shopping-attachment theme="dark" src="/examples/amp-story/shopping/remote.json">
+          <script type="application/json">
+            {
+              "items" : []
+            }
+          </script>
+        </amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-no-product">
+      <amp-story-grid-layer template="fill">
+        <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+      </amp-story-grid-layer>
+        <!--
+          Example of:
+          CTA Button not rendering due to no product tags.
+        -->
+      <amp-story-shopping-attachment>
+        <script type="application/json">
+          {
+            "items" : []
+          }
+        </script>
+      </amp-story-shopping-attachment>
+      </amp-story-page>
+       <!--
+          Example of:
+          CTA Button not rendering due to no shopping attachment.
+        -->
+      <amp-story-page id="remote-dark-theme">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

@@ -39,12 +39,12 @@
 #include "cpp/htmlparser/css/parse-css.pb.h"
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/elements.h"
-#include "cpp/htmlparser/json/parser.h"
 #include "cpp/htmlparser/logging.h"
 #include "cpp/htmlparser/node.h"
 #include "cpp/htmlparser/parser.h"
 #include "cpp/htmlparser/strings.h"
 #include "cpp/htmlparser/url.h"
+#include "cpp/htmlparser/validators/json.h"
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
@@ -150,7 +150,7 @@ namespace {
 // Sorts and eliminates duplicates in |v|.
 template <typename T>
 void SortAndUniquify(vector<T>* v) {
-  std::sort(v->begin(), v->end());
+  std::stable_sort(v->begin(), v->end());
   v->erase(std::unique(v->begin(), v->end()), v->end());
 }
 
@@ -311,42 +311,62 @@ ScriptTag ParseScriptTag(htmlparser::Node* node) {
     }
   }
 
+  if (src.empty()) {
+    return script_tag;
+  }
+
+  std::string src_str{src};
   // Determine if this has a valid AMP domain and separate the path from the
   // attribute 'src'. Consumes the domain making src just the path.
   if (absl::ConsumePrefix(&src, kAmpProjectDomain)) {
     script_tag.is_amp_domain = true;
-    script_tag.path = std::string(src);
+    script_tag.path = src_str;
+  } else {
+    script_tag.is_amp_domain = false;
+    htmlparser::URL url(src_str);
+    // Error cases, early exit:
+    if (!url.is_valid()) return script_tag;
+    if (!url.has_protocol()) return script_tag;
+    if (url.protocol() != "https" && url.protocol() != "http")
+      return script_tag;
+    if (url.hostname().empty()) return script_tag;
 
-    // Only look at script tags that have attribute 'async'.
-    if (has_async_attr) {
-      // Determine if this is the AMP Runtime.
-      if (!script_tag.is_extension &&
-          RE2::FullMatch(src, *kRuntimeScriptPathRe)) {
-        script_tag.is_runtime = true;
-        script_tag.has_valid_path = true;
-      }
+    src = url.path_params_fragment().data();
+    // Trim the "/" prefix as this is what kExtensionPathRe expects.
+    if (!src.empty() && src[0] == '/') src = src.substr(1);
+    std::string src_str{src};
+    script_tag.path = src_str;
+  }
 
-      // For AMP Extensions, validate path and extract name and version.
-      if (script_tag.is_extension &&
-          RE2::FullMatch(src, *kExtensionPathRe, &script_tag.extension_name,
-                         &script_tag.extension_version)) {
-        script_tag.has_valid_path = true;
-      }
+  // Only look at script tags that have attribute 'async'.
+  if (has_async_attr) {
+    // Determine if this is the AMP Runtime.
+    if (!script_tag.is_extension &&
+        RE2::FullMatch(src, *kRuntimeScriptPathRe)) {
+      script_tag.is_runtime = true;
+      script_tag.has_valid_path = true;
+    }
 
-      // Determine the release version (LTS, module, standard, etc).
-      if ((has_module_attr && RE2::FullMatch(src, *kModuleLtsScriptPathRe)) ||
-          (has_nomodule_attr && RE2::FullMatch(src, *kLtsScriptPathRe))) {
-        script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE_LTS;
-      } else if ((has_module_attr &&
-                  RE2::FullMatch(src, *kModuleScriptPathRe)) ||
-                 (has_nomodule_attr &&
-                  RE2::FullMatch(src, *kStandardScriptPathRe))) {
-        script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE;
-      } else if (RE2::FullMatch(src, *kLtsScriptPathRe)) {
-        script_tag.release_version = ScriptReleaseVersion::LTS;
-      } else if (RE2::FullMatch(src, *kStandardScriptPathRe)) {
-        script_tag.release_version = ScriptReleaseVersion::STANDARD;
-      }
+    // For AMP Extensions, validate path and extract name and version.
+    if (script_tag.is_extension &&
+        RE2::FullMatch(src, *kExtensionPathRe, &script_tag.extension_name,
+                       &script_tag.extension_version)) {
+      script_tag.has_valid_path = true;
+    }
+
+    // Determine the release version (LTS, module, standard, etc).
+    if ((has_module_attr && RE2::FullMatch(src, *kModuleLtsScriptPathRe)) ||
+        (has_nomodule_attr && RE2::FullMatch(src, *kLtsScriptPathRe))) {
+      script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE_LTS;
+    } else if ((has_module_attr &&
+                RE2::FullMatch(src, *kModuleScriptPathRe)) ||
+               (has_nomodule_attr &&
+                RE2::FullMatch(src, *kStandardScriptPathRe))) {
+      script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE;
+    } else if (RE2::FullMatch(src, *kLtsScriptPathRe)) {
+      script_tag.release_version = ScriptReleaseVersion::LTS;
+    } else if (RE2::FullMatch(src, *kStandardScriptPathRe)) {
+      script_tag.release_version = ScriptReleaseVersion::STANDARD;
     }
   }
   return script_tag;
@@ -1012,7 +1032,7 @@ RecordValidated ShouldRecordTagspecValidated(
   // Unique and similar can introduce requirements, ie: there cannot be
   // another such tag. We don't want to introduce requirements for failing
   // tags.
-  if (tag.unique() || tag.unique_warning() || !tag.requires().empty())
+  if (tag.unique() || tag.unique_warning() || !tag.requires_condition().empty())
     return IF_PASSING;
   return NEVER;
 }
@@ -1085,8 +1105,8 @@ class ParsedTagSpec {
     SortAndUniquify(&mandatory_anyofs_);
     SortAndUniquify(&mandatory_attr_ids_);
     c_copy(spec->requires_extension(), std::back_inserter(requires_extension_));
-    c_copy(spec->requires(), std::back_inserter(requires_));
-    c_copy(spec->excludes(), std::back_inserter(excludes_));
+    c_copy(spec->requires_condition(), std::back_inserter(requires_condition_));
+    c_copy(spec->excludes_condition(), std::back_inserter(excludes_condition_));
     for (const std::string& tag_spec_name : spec->also_requires_tag_warning()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(tag_spec_name);
       CHECK(iter != tag_spec_ids_by_tag_spec_name.end());
@@ -1167,8 +1187,8 @@ class ParsedTagSpec {
   const vector<int32_t>& AlsoRequiresTagWarnings() const {
     return also_requires_tag_warnings_;
   }
-  const vector<std::string>& Requires() const { return requires_; }
-  const vector<std::string>& Excludes() const { return excludes_; }
+  const vector<std::string>& Requires() const { return requires_condition_; }
+  const vector<std::string>& Excludes() const { return excludes_condition_; }
 
   // Whether or not the tag should be recorded via
   // Context->RecordTagspecValidated if it was validated
@@ -1229,8 +1249,8 @@ class ParsedTagSpec {
   ParsedCdataSpec parsed_cdata_spec_;
   RecordValidated should_record_tagspec_validated_;
   bool attrs_can_satisfy_extension_ = false;
-  vector<std::string> requires_;
-  vector<std::string> excludes_;
+  vector<std::string> requires_condition_;
+  vector<std::string> excludes_condition_;
   vector<std::string> requires_extension_;
   vector<int32_t> also_requires_tag_warnings_;
   set<int32_t> implicit_attrspecs_;
@@ -2473,7 +2493,7 @@ class Context {
 
   // Record document-level conditions which have been satisfied by the tag spec.
   void SatisfyConditionsFromTagSpec(const ParsedTagSpec& parsed_tag_spec) {
-    c_copy(parsed_tag_spec.spec().satisfies(),
+    c_copy(parsed_tag_spec.spec().satisfies_condition(),
            std::inserter(conditions_satisfied_, conditions_satisfied_.end()));
   }
 
@@ -3294,7 +3314,7 @@ void ValidateAttrValueProperties(const ParsedAttrSpec& parsed_attr_spec,
            mandatory_value_properties_seen);
 
   // To reduce churn emit errors sorted by names instead of memory addresses.
-  std::sort(not_seen.begin(), not_seen.end(),
+  std::stable_sort(not_seen.begin(), not_seen.end(),
             [](const PropertySpec* lhs, const PropertySpec* rhs) {
               return lhs->name() < rhs->name();
             });
@@ -3976,8 +3996,14 @@ void ValidateAmpScriptSrcAttr(const ParsedHtmlTag& tag,
                               const TagSpec& tag_spec, const Context& context,
                               ValidationResult* result) {
   if (!tag.IsAmpDomain()) {
-    context.AddError(ValidationError::DISALLOWED_AMP_DOMAIN, context.line_col(),
-                     /*params=*/{}, /*spec_url=*/"", result);
+    bool is_amp_format =
+        c_find(context.type_identifiers(), TypeIdentifier::kAmp) !=
+        context.type_identifiers().end();
+    if (!is_amp_format || context.is_transformed()) {
+      context.AddError(ValidationError::DISALLOWED_AMP_DOMAIN,
+                       context.line_col(),
+                       /*params=*/{}, /*spec_url=*/"", result);
+    }
   }
 
   if (tag.IsExtensionScript() && tag_spec.has_extension_spec()) {
@@ -4631,7 +4657,7 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
     missing_attrs.push_back(attr_name);
   }
   // Sort this list for stability across implementations.
-  std::sort(missing_attrs.begin(), missing_attrs.end());
+  std::stable_sort(missing_attrs.begin(), missing_attrs.end());
   for (const std::string& missing_attr : missing_attrs) {
     context.AddError(ValidationError::MANDATORY_ATTR_MISSING,
                      context.line_col(),
@@ -4736,7 +4762,7 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
     }
     if (parsed_tag_spec.spec().mandatory()) mandatory_tagspecs_.push_back(ii);
   }
-  std::sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
+  std::stable_sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
 
   error_codes_.resize(ValidationError::Code_MAX + 1);
   for (const ErrorSpecificity& error_specificity : rules_.error_specificity()) {
@@ -4806,8 +4832,9 @@ void ParsedValidatorRules::ExpandModuleExtensionSpec(
     TagSpec* tagspec, const string_view spec_name) const {
   tagspec->set_spec_name(StrCat(spec_name, " module extension script"));
   tagspec->set_descriptive_name(tagspec->spec_name());
-  tagspec->add_satisfies(tagspec->spec_name());
-  tagspec->add_requires(StrCat(spec_name, " nomodule extension script"));
+  tagspec->add_satisfies_condition(tagspec->spec_name());
+  tagspec->add_requires_condition(
+      StrCat(spec_name, " nomodule extension script"));
   AttrSpec* attr = tagspec->add_attrs();
   attr->set_name("crossorigin");
   attr->add_value("anonymous");
@@ -4824,8 +4851,9 @@ void ParsedValidatorRules::ExpandNomoduleExtensionSpec(
     TagSpec* tagspec, const string_view spec_name) const {
   tagspec->set_spec_name(StrCat(spec_name, " nomodule extension script"));
   tagspec->set_descriptive_name(tagspec->spec_name());
-  tagspec->add_satisfies(tagspec->spec_name());
-  tagspec->add_requires(StrCat(spec_name, " module extension script"));
+  tagspec->add_satisfies_condition(tagspec->spec_name());
+  tagspec->add_requires_condition(
+      StrCat(spec_name, " module extension script"));
   AttrSpec* attr = tagspec->add_attrs();
   attr->set_name("nomodule");
   attr->add_value("");
@@ -4850,7 +4878,7 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
       tagspec->set_descriptive_name(tagspec->spec_name());
     tagspec->set_mandatory_parent("HEAD");
     // This is satisfied by any of the `v0.js` variants:
-    tagspec->add_requires("amphtml javascript runtime (v0.js)");
+    tagspec->add_requires_condition("amphtml javascript runtime (v0.js)");
 
     if (extension_spec.deprecated_allow_duplicates()) {
       tagspec->set_unique_warning(true);
@@ -5658,9 +5686,7 @@ class ParsedValidatorRulesProvider {
 class Validator {
  public:
   Validator(const ParsedValidatorRules* rules, int max_errors = -1)
-      : rules_(rules),
-        max_errors_(max_errors),
-        context_(rules_, max_errors_) {}
+      : rules_(rules), max_errors_(max_errors), context_(rules_, max_errors_) {}
 
   ValidationResult Validate(const htmlparser::Document& doc) {
     doc_metadata_ = doc.Metadata();
@@ -5786,7 +5812,7 @@ class Validator {
               (htmlparser::Strings::EqualFold(attr.value, "application/json") ||
                htmlparser::Strings::EqualFold(attr.value,
                                               "application/ld+json"))) {
-            if (auto v = htmlparser::json::JSONParser::Validate(
+            if (auto v = htmlparser::json::Validate(
                     node->FirstChild()->Data());
                 !v.first) {
               std::pair<int, int> json_linecol{0, 0};

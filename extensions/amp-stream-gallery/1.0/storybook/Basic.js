@@ -1,5 +1,3 @@
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {BentoStreamGallery} from '../component';
@@ -11,7 +9,78 @@ const CONTROLS = ['auto', 'always', 'never'];
 export default {
   title: 'StreamGallery',
   component: BentoStreamGallery,
-  decorators: [withKnobs],
+  argTypes: {
+    width: {
+      name: 'width',
+      control: {type: 'number'},
+      defaultValue: 735,
+    },
+    height: {
+      name: 'height',
+      control: {type: 'number'},
+      defaultValue: 225,
+    },
+    slideCount: {
+      name: 'slide count',
+      control: {type: 'number', min: 0, max: 99},
+      defaultValue: 5,
+    },
+    extraSpace: {
+      name: 'extra space around',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+    controls: {
+      name: 'controls',
+      control: {type: 'select'},
+      defaultValue: CONTROLS,
+    },
+    loop: {
+      name: 'loop',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+    snap: {
+      name: 'snap',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+    slideAlign: {
+      name: 'slide align',
+      control: {type: 'select'},
+      options: ['start', 'center'],
+    },
+    minItemWidth: {
+      name: 'min item width',
+      control: {type: 'number', min: 1},
+      defaultValue: 130,
+    },
+    maxItemWidth: {
+      name: 'max item width',
+      control: {type: 'number', min: 1},
+      defaultValue: 180,
+    },
+    minVisibleCount: {
+      name: 'min visible count',
+      control: {type: 'number', min: 1},
+      defaultValue: 3,
+    },
+    maxVisibleCount: {
+      name: 'max visible count',
+      control: {type: 'number', min: 1},
+      defaultValue: 5,
+    },
+    peek: {
+      name: 'peek',
+      control: {type: 'number', min: 1},
+      defaultValue: 0,
+    },
+    outsetArrows: {
+      name: 'outset arrows',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+  },
 };
 
 /**
@@ -34,21 +103,23 @@ function CarouselWithActions(props) {
   );
 }
 
-export const _default = () => {
-  const width = number('width', 735);
-  const height = number('height', 225);
-  const slideCount = number('slide count', 5, {min: 0, max: 99});
-  const extraSpace = boolean('extra space around?', true);
-  const controls = select('controls', CONTROLS);
-  const loop = boolean('loop', true);
-  const snap = boolean('snap', true);
-  const slideAlign = select('slide align', ['start', 'center']);
-  const minItemWidth = number('min item width', 130, {min: 1});
-  const maxItemWidth = number('max item width', 180, {min: 1});
-  const minVisibleCount = number('min visible count', 3, {min: 1});
-  const maxVisibleCount = number('max visible count', 5, {min: 1});
-  const peek = number('peek', 0, {min: 1});
-  const outsetArrows = boolean('outset arrows', true);
+export const Default = ({
+  controls,
+  extraSpace,
+  height,
+  loop,
+  maxItemWidth,
+  maxVisibleCount,
+  minItemWidth,
+  minVisibleCount,
+  outsetArrows,
+  peek,
+  slideAlign,
+  slideCount,
+  snap,
+  width,
+  ...args
+}) => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <>
@@ -65,6 +136,7 @@ export const _default = () => {
         maxVisibleCount={maxVisibleCount}
         peek={peek}
         style={{width, height}}
+        {...args}
       >
         {Array.from({length: slideCount}, (_, i) => {
           const v = colorIncrement * (i + 1);

@@ -2,7 +2,7 @@
 
 /**
  * Maps of factory functions to enforced declared tag name.
- * @type {Object<string, string>}
+ * @type {{[key: string]: string}}
  */
 exports.staticTemplateFactories = {
   'htmlFor': 'html',

@@ -510,7 +510,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!Object<string, number>} price
+   * @param {!{[key: string]: number}} price
    * @return {!Element}
    * @private
    */

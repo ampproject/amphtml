@@ -1,0 +1,73 @@
+tags: {  # amp-google-read-aloud-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-google-read-aloud-player"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-google-read-aloud-player>
+  html_format: AMP
+  tag_name: "AMP-GOOGLE-READ-ALOUD-PLAYER"
+  requires_extension: "amp-google-read-aloud-player"
+  attrs: {
+    name: "data-api-key"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-tracking-ids"
+    mandatory: true;
+    value_regex_casei: "^UA-\\d+-\\d+(\\s*,\\s*UA-\\d+-\\d+)*$";
+  }
+  attrs: {
+    name: "data-voice"
+    mandatory: true;
+  }
+  attrs: {
+    name: "data-url"
+    value_url {
+      protocol: 'https';
+      allow_relative: false;
+    }
+  }
+  attrs: {
+    name: "data-speakable"
+    value: ""
+  }
+  attrs: {
+    name: "data-call-to-action-label"
+  }
+  attrs: {
+    name: "data-locale"
+    value_regex_casei: "[a-z]{2}";
+  }
+  attrs: {
+    name: "data-intro"
+    value_url {
+      protocol: 'https';
+      allow_relative: false;
+    }
+  }
+  attrs: {
+    name: "data-outro"
+    value_url {
+      protocol: 'https';
+      allow_relative: false;
+    }
+  }
+  attrs: {
+    name: "data-ad-tag-url"
+    value_url {
+      protocol: 'https';
+      allow_relative: false;
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-google-read-aloud-player"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+  }
+}

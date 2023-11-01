@@ -3,7 +3,6 @@
  */
 
 import '#polyfills';
-import {maybeInsertOriginTrialToken} from '#ads/google/a4a/utils';
 
 import {TickLabel_Enum} from '#core/constants/enums';
 import * as mode from '#core/mode';
@@ -102,7 +101,6 @@ startupChunk(self.document, function initial() {
         self.document,
         function final() {
           Navigation.installAnchorClickInterceptor(ampdoc, self);
-          maybeInsertOriginTrialToken(self);
           maybeRenderInaboxAsStoryAd(ampdoc);
           maybeValidate(self);
           makeBodyVisible(self.document);

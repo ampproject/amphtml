@@ -8,7 +8,7 @@ import {
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
 } from '#core/document/visibility';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
+import {rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
 import {isEnumValue} from '#core/types';
 import {map} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
@@ -30,7 +30,7 @@ const PARAMS_SENTINEL = '__AMP__';
 
 /**
  * @typedef {{
- *   params: (!Object<string, string>|undefined),
+ *   params: (!{[key: string]: string}|undefined),
  *   signals: (?Signals|undefined),
  *   visibilityState: (?VisibilityState_Enum|undefined),
  * }}
@@ -48,6 +48,8 @@ const AmpDocSignals_Enum = {
   FIRST_VISIBLE: '-ampdoc-first-visible',
   // Signals when the document becomes visible the next time.
   NEXT_VISIBLE: '-ampdoc-next-visible',
+  // Signals the document has been previewed for the first time.
+  FIRST_PREVIEWED: '-ampdoc-first-previewed',
 };
 
 /**
@@ -64,7 +66,7 @@ export class AmpDocService {
   /**
    * @param {!Window} win
    * @param {boolean} isSingleDoc
-   * @param {!Object<string, string>=} opt_initParams
+   * @param {!{[key: string]: string}=} opt_initParams
    */
   constructor(win, isSingleDoc, opt_initParams) {
     /** @const {!Window} */
@@ -237,7 +239,7 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME_ENUM, boolean>} */
+    /** @private {!{[key: ../enums.AMPDOC_SINGLETON_NAME_ENUM]: boolean}} */
     this.registeredSingleton_ = map();
 
     /** @public @const {?AmpDoc} */
@@ -246,13 +248,13 @@ export class AmpDoc {
     /** @private @const */
     this.signals_ = (opt_options && opt_options.signals) || new Signals();
 
-    /** @private {!Object<string, string>} */
+    /** @private {!{[key: string]: string}} */
     this.params_ = (opt_options && opt_options.params) || map();
 
-    /** @protected {?Object<string, string>} */
+    /** @protected {?{[key: string]: string}} */
     this.meta_ = null;
 
-    /** @private @const {!Object<string, string>} */
+    /** @private @const {!{[key: string]: string}} */
     this.declaredExtensions_ = {};
 
     const paramsVisibilityState = this.params_['visibilityState'];
@@ -345,7 +347,7 @@ export class AmpDoc {
   /**
    * Initializes (if necessary) cached map of an ampdoc's meta name values to
    * their associated content values and returns the map.
-   * @return {!Object<string, string>}
+   * @return {!{[key: string]: string}}
    */
   getMeta() {
     if (this.meta_) {
@@ -356,7 +358,7 @@ export class AmpDoc {
     const metaEls = dev()
       .assertElement(this.win.document.head)
       .querySelectorAll('meta[name]');
-    iterateCursor(metaEls, (metaEl) => {
+    metaEls.forEach((metaEl) => {
       const name = metaEl.getAttribute('name');
       const content = metaEl.getAttribute('content');
       if (!name || content === null) {
@@ -604,6 +606,12 @@ export class AmpDoc {
     ) {
       visibilityState = parentVisibilityState;
     } else if (
+      visibilityStateOverride == VisibilityState_Enum.PREVIEW ||
+      naturalVisibilityState == VisibilityState_Enum.PREVIEW ||
+      parentVisibilityState == VisibilityState_Enum.PREVIEW
+    ) {
+      visibilityState = VisibilityState_Enum.PREVIEW;
+    } else if (
       visibilityStateOverride == VisibilityState_Enum.PRERENDER ||
       naturalVisibilityState == VisibilityState_Enum.PRERENDER ||
       parentVisibilityState == VisibilityState_Enum.PRERENDER
@@ -638,9 +646,34 @@ export class AmpDoc {
       } else {
         this.signals_.reset(AmpDocSignals_Enum.NEXT_VISIBLE);
       }
+
+      if (visibilityState == VisibilityState_Enum.PREVIEW) {
+        this.signals_.signal(AmpDocSignals_Enum.FIRST_PREVIEWED);
+      }
+
       this.visibilityState_ = visibilityState;
       this.visibilityStateHandlers_.fire();
     }
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first reaches the `PREVIEW` visibility state.
+   * @return {!Promise}
+   */
+  whenFirstPreviewedOrVisible() {
+    return Promise.race([this.whenFirstPreviewed(), this.whenFirstVisible()]);
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first reaches the `PREVIEW` visibility state.
+   * @return {!Promise}
+   */
+  whenFirstPreviewed() {
+    return this.signals_
+      .whenSignal(AmpDocSignals_Enum.FIRST_PREVIEWED)
+      .then(() => undefined);
   }
 
   /**
@@ -692,6 +725,14 @@ export class AmpDoc {
    */
   getVisibilityState() {
     return devAssert(this.visibilityState_);
+  }
+
+  /**
+   * Whether the AMP document currently being previewed.
+   * @return {boolean}
+   */
+  isPreview() {
+    return this.visibilityState_ == VisibilityState_Enum.PREVIEW;
   }
 
   /**
@@ -921,7 +962,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getMeta() {
-    return /** @type {!Object<string,string>} */ (map(this.meta_));
+    return /** @type {!{[key: string]: string}} */ (map(this.meta_));
   }
 
   /** @override */
@@ -1025,8 +1066,8 @@ export class AmpDocFie extends AmpDoc {
 
 /**
  * @param {!Window} win
- * @param {!Object<string, string>|undefined} initParams
- * @return {!Object<string, string>}
+ * @param {!{[key: string]: string}|undefined} initParams
+ * @return {!{[key: string]: string}}
  */
 function extractSingleDocParams(win, initParams) {
   const params = map();
@@ -1054,7 +1095,7 @@ function extractSingleDocParams(win, initParams) {
  * initial configuration.
  * @param {!Window} win
  * @param {boolean} isSingleDoc
- * @param {!Object<string, string>=} opt_initParams
+ * @param {!{[key: string]: string}=} opt_initParams
  */
 export function installDocService(win, isSingleDoc, opt_initParams) {
   registerServiceBuilder(win, 'ampdoc', function () {

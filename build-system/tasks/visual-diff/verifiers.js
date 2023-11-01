@@ -1,6 +1,5 @@
 'use strict';
 
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {cyan} = require('kleur/colors');
 const {log} = require('./log');
 const {sleep} = require('./helpers');
@@ -8,6 +7,9 @@ const {VisibilityDef} = require('./types');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_TIMEOUT_MS = 10000;
+
+/** @typedef {import('puppeteer-core')} puppeteer */
+/** @typedef {import('puppeteer-core').Page} puppeteer.Page */
 
 /**
  * Verifies that all CSS elements are as expected before taking a snapshot.

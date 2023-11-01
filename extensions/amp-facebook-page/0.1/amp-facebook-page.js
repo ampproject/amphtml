@@ -15,7 +15,7 @@ import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
 const TYPE = 'facebook';
 
 class AmpFacebookPage extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
   }

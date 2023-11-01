@@ -1,7 +1,9 @@
+const {getStaticDirs} = require('../static-dirs');
+
 const rootDir = '../../../../..';
 
 module.exports = {
-  staticDirs: [rootDir],
+  staticDirs: getStaticDirs(rootDir),
   stories: [
     `${rootDir}/src/builtins/storybook/*.amp.js`,
     `${rootDir}/extensions/**/*.*/storybook/*.amp.js`,
@@ -14,9 +16,6 @@ module.exports = {
     // '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',
     '@storybook/addon-controls/register',
-    // TODO(#35923): Remove addon-knobs once all stories are migrated to
-    // addon-controls (args/argTypes).
-    '@storybook/addon-knobs',
     '@ampproject/storybook-addon',
   ],
   webpackFinal: (config) => {

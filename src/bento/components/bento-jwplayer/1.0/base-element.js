@@ -1,10 +1,10 @@
+import {BentoVideoBaseElement} from '#bento/components/bento-video/1.0/base-element';
+
 import {getDataParamsFromAttributes} from '#core/dom';
 
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoJwplayer} from './component';
-
-import {BentoVideoBaseElement} from '../../../../../extensions/amp-video/1.0/base-element';
 
 export class BaseElement extends BentoVideoBaseElement {
   /** @override */
@@ -42,7 +42,7 @@ export class BaseElement extends BentoVideoBaseElement {
 
   /**
    * Merges query params from multiple sources into 1 string
-   * @param {Object} playerParams
+   * @param {object} playerParams
    * @param {string} playerQueryString
    * @return {string}
    */

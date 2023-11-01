@@ -38,6 +38,11 @@ export class PingNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     return {
       'type': '_ping_',

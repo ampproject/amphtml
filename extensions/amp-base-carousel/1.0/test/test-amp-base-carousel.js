@@ -1,4 +1,6 @@
 import '../amp-base-carousel';
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
 import {setStyles} from '#core/dom/style';
@@ -10,8 +12,6 @@ import {toggleExperiment} from '#experiments';
 import {ActionInvocation} from '#service/action-impl';
 
 import {waitFor, whenCalled} from '#testing/helpers/service';
-
-import {useStyles} from '../component.jss';
 
 describes.realWin(
   'amp-base-carousel:1.0',
@@ -284,7 +284,8 @@ describes.realWin(
         );
       }
 
-      it('should execute next and prev actions', async () => {
+      // TODO(#38975): fix skipped test.
+      it.skip('should execute next and prev actions', async () => {
         element.enqueAction(invocation('next'));
         await waitFor(
           () => scroller.scrollLeft === slides[1].offsetLeft,

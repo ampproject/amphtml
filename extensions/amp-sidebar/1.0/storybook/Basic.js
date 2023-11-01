@@ -1,15 +1,12 @@
-import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
-import {BentoSidebar, BentoSidebarToolbar} from '../component';
+import {BentoSidebar} from '../component';
 
 import '../component.jss';
 
 export default {
   title: 'Sidebar',
   component: BentoSidebar,
-  decorators: [withKnobs],
 };
 
 /**
@@ -49,69 +46,58 @@ function BentoSidebarWithActions(props) {
   );
 }
 
-export const _default = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-
+export const Default = ({
+  backdropColor,
+  backgroundColor,
+  foregroundColor,
+  ...args
+}) => {
   return (
     <main>
       <BentoSidebarWithActions
-        side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
+        {...args}
       />
     </main>
   );
 };
 
-export const toolbar = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const toolbarMedia = text('toolbar media', '(max-width: 500px)');
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-
-  return (
-    <main>
-      <BentoSidebarWithActions
-        side={side}
-        style={{color: foregroundColor, backgroundColor}}
-        backdropStyle={{backgroundColor: backdropColor}}
-      >
-        <BentoSidebarToolbar
-          toolbar={toolbarMedia}
-          toolbarTarget="toolbar-target"
-        >
-          <ul>
-            <li>Toolbar Item 1</li>
-            <li>Toolbar Item 2</li>
-          </ul>
-        </BentoSidebarToolbar>
-      </BentoSidebarWithActions>
-      <div id="toolbar-target"></div>
-    </main>
-  );
+Default.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
 };
 
-export const scroll = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-  const moreBackgroundContent = boolean('more background content', false);
-  const moreBentoSidebarContent = boolean('more sidebar content', false);
-
+export const scroll = ({
+  backdropColor,
+  backgroundColor,
+  foregroundColor,
+  moreBackgroundContent,
+  moreBentoSidebarContent,
+  ...args
+}) => {
   return (
     <main>
       <BentoSidebarWithActions
-        side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
+        {...args}
         moreBackgroundContent={
           moreBackgroundContent && (
             <>
@@ -378,4 +364,35 @@ export const scroll = () => {
       </BentoSidebarWithActions>
     </main>
   );
+};
+
+scroll.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
+  moreBackgroundContent: {
+    name: 'moreBackgroundContent',
+    defaultValue: 'false',
+    control: {type: 'boolean'},
+  },
+  moreBentoSidebarContent: {
+    name: 'moreBentoSidebarContent',
+    defaultValue: 'false',
+    control: {type: 'boolean'},
+  },
 };

@@ -5,11 +5,11 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {getContextMetadata} from './iframe-attributes';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
-/** @type {!Object<string,number>} Number of 3p frames on the for that type. */
+/** @type {!{[key: string]: number}} Number of 3p frames on the for that type. */
 let count = {};
 
 /** @type {string} */

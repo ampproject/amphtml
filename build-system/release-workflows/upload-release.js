@@ -4,11 +4,12 @@ const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
-const {bgWhite, cyan} = require('kleur/colors');
+const {cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {runReleaseJob} = require('./release-job');
-const {Storage} = require('@google-cloud/storage');
+const {S3} = require('@aws-sdk/client-s3');
 const {timedExecOrDie} = require('../pr-check/utils');
+const zlib = require('zlib');
 
 /**
  * @fileoverview Script that uploads a release build.
@@ -75,20 +76,20 @@ function mergeFilesTxt_(flavor) {
 let printProgressReady = true;
 
 /**
- * Logs file upload progress every 1 second.
+ * Logs file processing progress every 1 second.
  *
  * @param {number} totalFiles
- * @param {number} uploadedFiles
+ * @param {number} processedFiles
  */
-function logProgress_(totalFiles, uploadedFiles) {
-  const percentage = Math.round((uploadedFiles / totalFiles) * PROGRESS_WIDTH);
-  if (printProgressReady || uploadedFiles === totalFiles) {
+function logProgress_(totalFiles, processedFiles) {
+  const percentage = Math.round((processedFiles / totalFiles) * PROGRESS_WIDTH);
+  if (printProgressReady || processedFiles === totalFiles) {
     log(
       '[' +
-        bgWhite(' '.repeat(percentage)) +
+        '#'.repeat(percentage) +
         '.'.repeat(PROGRESS_WIDTH - percentage) +
         ']',
-      cyan(uploadedFiles),
+      cyan(processedFiles),
       '/',
       cyan(totalFiles)
     );
@@ -101,30 +102,98 @@ function logProgress_(totalFiles, uploadedFiles) {
 }
 
 /**
- * Uploads release files to Google Cloud Storage.
+ * Compresses a single file with Brotli and writes it to ${path}.br.
+ * @param {string} path
+ * @param {number} sizeHint
+ * @return {Promise<void>}
+ */
+async function brotliCompressFile_(path, sizeHint) {
+  const readStream = fs.createReadStream(path);
+  const writeStream = fs.createWriteStream(`${path}.br`);
+  const brotli = zlib.createBrotliCompress({
+    params: {
+      [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+      [zlib.constants.BROTLI_PARAM_SIZE_HINT]: sizeHint,
+    },
+  });
+
+  return new Promise((resolve, reject) => {
+    readStream
+      .pipe(brotli)
+      .pipe(writeStream)
+      .on('finish', resolve)
+      .on('error', reject);
+  });
+}
+
+/**
+ * Compresses all files with Brotli.
+ * @return {Promise<void>}
+ */
+async function brotliCompressAll_() {
+  let totalFiles = 0;
+  for await (const {stats} of klaw(DEST_DIR)) {
+    if (stats.isFile()) {
+      totalFiles++;
+    }
+  }
+
+  log('Brotli compression of', cyan(totalFiles), 'files:');
+  const compressPromises = [];
+  let compressedFiles = 0;
+  for await (const {path, stats} of klaw(DEST_DIR)) {
+    if (!stats.isFile()) {
+      continue;
+    }
+
+    compressPromises.push(
+      brotliCompressFile_(path, stats.size).then(() => {
+        logProgress_(totalFiles, ++compressedFiles);
+      })
+    );
+  }
+
+  await Promise.all(compressPromises);
+  log('Finished Brotli compression of all files.');
+}
+
+/**
+ * Ensures the presence of env variables or throws an error.
+ * @param  {...string} vars
+ * @return {string[]}
+ */
+function ensureEnvVariable_(...vars) {
+  const ret = [];
+  for (const v of vars) {
+    const value = process.env[v];
+    if (!value) {
+      throw new Error(`CircleCI job is missing the ${v} env variable`);
+    }
+    ret.push(value);
+  }
+  return ret;
+}
+
+/**
+ * Uploads release files to Cloudflare R2.
  * @return {Promise<void>}
  */
 async function uploadFiles_() {
-  const {GCLOUD_SERVICE_KEY} = process.env;
-  if (!GCLOUD_SERVICE_KEY) {
-    throw new Error(
-      'CircleCI job is missing the GCLOUD_SERVICE_KEY env variable'
-    );
-  }
+  const [accountId, accessKeyId, secretAccessKey] = ensureEnvVariable_(
+    'R2_ACCOUNT_ID',
+    'R2_ACCESS_KEY_ID',
+    'R2_SECRET_ACCESS_KEY'
+  );
 
-  const credentials = JSON.parse(GCLOUD_SERVICE_KEY);
-  if (
-    !credentials.client_email ||
-    !credentials.private_key ||
-    !credentials.project_id
-  ) {
-    throw new Error(
-      'GCLOUD_SERVICE_KEY is not a Google Cloud JSON service key'
-    );
-  }
-
-  const storage = new Storage({credentials, projectId: credentials.project_id});
-  const bucket = storage.bucket('org-cdn');
+  const s3 = new S3({
+    region: 'auto',
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+    maxAttempts: 7,
+  });
 
   let totalFiles = 0;
   for await (const {stats} of klaw(DEST_DIR)) {
@@ -133,18 +202,22 @@ async function uploadFiles_() {
     }
   }
 
-  log('Uploading', cyan(totalFiles), 'files to storage:');
+  log('Uploading', cyan(totalFiles), 'files to R2:');
   const uploadsPromises = [];
   let uploadedFiles = 0;
   for await (const {path, stats} of klaw(DEST_DIR)) {
-    if (stats.isFile()) {
-      const destination = path.slice(DEST_DIR.length + 1);
-      uploadsPromises.push(
-        bucket.upload(path, {destination, resumable: false}).then(() => {
+    if (!stats.isFile()) {
+      continue;
+    }
+
+    const key = path.slice(DEST_DIR.length + 1);
+    uploadsPromises.push(
+      s3
+        .putObject({Bucket: 'ampjs', Key: key, Body: fs.createReadStream(path)})
+        .then(() => {
           logProgress_(totalFiles, ++uploadedFiles);
         })
-      );
-    }
+    );
   }
 
   await Promise.all(uploadsPromises);
@@ -159,6 +232,7 @@ runReleaseJob(jobName, async () => {
     mergeFilesTxt_(flavor);
   }
 
+  await brotliCompressAll_();
   await uploadFiles_();
 
   log('Archiving releases to', cyan(ARTIFACT_FILE_NAME));

@@ -1,3 +1,5 @@
+import objStr from 'obj-str';
+
 import {removeChildren} from '#core/dom';
 import {escapeCssSelectorNth} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
@@ -6,10 +8,7 @@ import {scale, setImportantStyles} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {hasOwn, map} from '#core/types/object';
 
-import {
-  BranchToTimeValues,
-  StoryAdSegmentExp,
-} from '#experiments/story-ad-progress-segment';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 
@@ -19,7 +18,7 @@ import {getExperimentBranch} from 'src/experiments';
 
 import {
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {EventType} from './events';
@@ -94,7 +93,7 @@ export class ProgressBar {
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
-    /** @private {!Object<string, number>} */
+    /** @private {!{[key: string]: number}} */
     this.segmentIdMap_ = map();
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -118,9 +117,6 @@ export class ProgressBar {
 
     /** @private {!Element} */
     this.storyEl_ = storyEl;
-
-    /** @private {?Element} */
-    this.currentAdSegment_ = null;
   }
 
   /**
@@ -134,16 +130,23 @@ export class ProgressBar {
 
   /**
    * Builds the progress bar.
-   * @param {string} initialSegmentId
+   * @param {string} unusedInitialSegmentId
    * @return {!Element}
    */
-  build(initialSegmentId) {
+  build(unusedInitialSegmentId) {
     if (this.root_) {
       return this.root_;
     }
 
     const root = (
-      <ol aria-hidden="true" class="i-amphtml-story-progress-bar"></ol>
+      <ol
+        aria-hidden="true"
+        class={objStr({
+          'i-amphtml-story-progress-bar': true,
+          'i-amphtml-story-progress-bar-exp-disabled':
+            !this.isProgressBarExperimentEnabled_(),
+        })}
+      ></ol>
     );
     this.root_ = root;
 
@@ -155,16 +158,32 @@ export class ProgressBar {
       StateProperty.PAGE_IDS,
       (pageIds) => {
         const attached = !!root.parentElement;
-        if (attached) {
-          this.clear_();
-        }
 
         this.segmentsAddedPromise_ = this.mutator_.mutateElement(root, () => {
+          if (attached) {
+            this.clear_();
+          }
+
           /** @type {!Array} */ (pageIds).forEach((id) => {
-            if (!(id in this.segmentIdMap_)) {
+            if (
+              // Do not show progress bar for the ad page (control group).
+              // Show progress bar for the ad page (experiment group).
+              (!this.isAdSegment_(id) ||
+                this.isProgressBarExperimentEnabled_()) &&
+              !(id in this.segmentIdMap_)
+            ) {
               this.addSegment_(id);
             }
           });
+
+          if (this.segmentCount_ > MAX_SEGMENTS) {
+            this.getInitialFirstExpandedSegmentIndex_(this.activeSegmentIndex_);
+            this.render_(false /** shouldAnimate */);
+          }
+          root.classList.toggle(
+            'i-amphtml-progress-bar-overflow',
+            this.segmentCount_ > MAX_SEGMENTS
+          );
         });
 
         if (attached) {
@@ -194,29 +213,35 @@ export class ProgressBar {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, (adState) => {
-      this.onAdStateUpdate_(adState);
-    });
-
     Services.viewportForDoc(this.ampdoc_).onResize(
       debounce(this.win_, () => this.onResize_(), 300)
     );
 
-    this.segmentsAddedPromise_.then(() => {
-      if (this.segmentCount_ > MAX_SEGMENTS) {
-        this.getInitialFirstExpandedSegmentIndex_(
-          this.segmentIdMap_[initialSegmentId]
-        );
-
-        this.render_(false /** shouldAnimate */);
-      }
-      root.classList.toggle(
-        'i-amphtml-progress-bar-overflow',
-        this.segmentCount_ > MAX_SEGMENTS
-      );
-    });
-
     return root;
+  }
+
+  /**
+   * Is the progress bar experiment enabled
+   * @return {boolean}
+   */
+  isProgressBarExperimentEnabled_() {
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win_,
+      StoryAdSegmentExp.ID
+    );
+    return (
+      storyAdSegmentBranch && storyAdSegmentBranch != StoryAdSegmentExp.CONTROL
+    );
+  }
+
+  /**
+   * Whether the given id corresponds to an ad page.
+   * @param {string} id
+   * @return {boolean}
+   * @private
+   */
+  isAdSegment_(id) {
+    return id.startsWith('i-amphtml-ad-');
   }
 
   /**
@@ -400,16 +425,16 @@ export class ProgressBar {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     switch (uiState) {
-      case UIType.DESKTOP_FULLBLEED:
+      case UIType_Enum.DESKTOP_FULLBLEED:
         MAX_SEGMENTS = 70;
         ELLIPSE_WIDTH_PX = 3;
         break;
-      case UIType.MOBILE:
+      case UIType_Enum.MOBILE:
         MAX_SEGMENTS = 20;
         ELLIPSE_WIDTH_PX = 2;
         break;
@@ -419,74 +444,20 @@ export class ProgressBar {
   }
 
   /**
-   * Show/hide ad progress bar treatment based on ad visibility.
-   * @param {boolean} adState
-   * TODO(#33969) clean up experiment is launched.
-   */
-  onAdStateUpdate_(adState) {
-    const segmentExpBranch = getExperimentBranch(
-      this.win_,
-      StoryAdSegmentExp.ID
-    );
-    if (
-      !segmentExpBranch ||
-      segmentExpBranch === StoryAdSegmentExp.CONTROL ||
-      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_BOTH ||
-      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_AD
-    ) {
-      return;
-    }
-    // Set CSS signal that we are in the experiment.
-    if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {
-      this.root_.setAttribute('i-amphtml-ad-progress-exp', '');
-    }
-    adState
-      ? this.createAdSegment_(BranchToTimeValues[segmentExpBranch])
-      : this.removeAdSegment_();
-  }
-
-  /**
-   * Create ad progress segment that will be shown when ad is visible.
-   * TODO(#33969) remove variable animation duration when best value is chosen.
-   * @param {string} animationDuration
-   */
-  createAdSegment_(animationDuration) {
-    const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
-    // Fill in segment before ad segment.
-    this.updateProgressByIndex_(index, 1, false);
-    const progressEl = this.getRoot_()?.querySelector(
-      `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
-        // +2 because of zero-index and we want the chip after the ad.
-        index + 2
-      )})`
-    );
-    const adSegment = (
-      <div
-        class="i-amphtml-story-ad-progress-value"
-        style={{animationDuration}}
-      ></div>
-    );
-    this.currentAdSegment_ = adSegment;
-    progressEl.appendChild(adSegment);
-  }
-
-  /**
-   * Remove active ad progress segment when ad is navigated away from
-   */
-  removeAdSegment_() {
-    this.currentAdSegment_?.parentNode.removeChild(this.currentAdSegment_);
-    this.currentAdSegment_ = null;
-  }
-
-  /**
    * Builds a new segment element and appends it to the progress bar.
    *
+   * @param {boolean} isAd
    * @private
    */
-  buildSegmentEl_() {
+  buildSegmentEl_(isAd) {
     const segmentProgressBar = (
       <li class="i-amphtml-story-page-progress-bar">
-        <div class="i-amphtml-story-page-progress-value"></div>
+        <div
+          class={objStr({
+            'i-amphtml-story-page-progress-value': true,
+            'i-amphtml-story-ad-progress-value': isAd,
+          })}
+        ></div>
       </li>
     );
     this.getRoot_().appendChild(segmentProgressBar);
@@ -500,6 +471,7 @@ export class ProgressBar {
     removeChildren(devAssert(this.root_));
     this.segmentIdMap_ = map();
     this.segmentCount_ = 0;
+    this.segments_ = [];
   }
 
   /**
@@ -510,7 +482,7 @@ export class ProgressBar {
    */
   addSegment_(id) {
     this.segmentIdMap_[id] = this.segmentCount_++;
-    this.buildSegmentEl_();
+    this.buildSegmentEl_(this.isAdSegment_(id));
   }
 
   /**

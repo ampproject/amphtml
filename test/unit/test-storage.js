@@ -21,376 +21,372 @@ describes.sandboxed('Storage', {}, (env) => {
   let viewerBroadcastHandler;
   let clock;
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-  describe
-    .configure()
-    .skipSafari()
-    .run('Storage', () => {
-      beforeEach(() => {
-        viewerBroadcastHandler = undefined;
-        viewer = {
-          onBroadcast: (handler) => {
-            viewerBroadcastHandler = handler;
-          },
-          broadcast: () => {},
-        };
-        viewerMock = env.sandbox.mock(viewer);
+  describe('Storage', () => {
+    beforeEach(() => {
+      viewerBroadcastHandler = undefined;
+      viewer = {
+        onBroadcast: (handler) => {
+          viewerBroadcastHandler = handler;
+        },
+        broadcast: () => {},
+      };
+      viewerMock = env.sandbox.mock(viewer);
 
-        windowApi = {
-          document: {},
-          location: 'https://acme.com/document1',
-          performance: new FakePerformance(window),
-        };
-        ampdoc = new AmpDocSingle(windowApi);
+      windowApi = {
+        document: {},
+        location: 'https://acme.com/document1',
+        performance: new FakePerformance(window),
+      };
+      ampdoc = new AmpDocSingle(windowApi);
 
-        binding = {
-          loadBlob: () => {},
-          saveBlob: () => {},
-        };
-        bindingMock = env.sandbox.mock(binding);
+      binding = {
+        loadBlob: () => {},
+        saveBlob: () => {},
+      };
+      bindingMock = env.sandbox.mock(binding);
 
-        storage = new Storage(ampdoc, viewer, binding);
-        storage.start_();
-      });
+      storage = new Storage(ampdoc, viewer, binding);
+      storage.start_();
+    });
 
-      function expectStorage(keyValues) {
-        const list = [];
-        for (const k in keyValues) {
-          list.push(
-            storage.get(k).then((value) => {
-              const expectedValue = keyValues[k];
-              expect(value).to.equal(expectedValue, `For "${k}"`);
-            })
-          );
-        }
-        return Promise.all(list);
+    function expectStorage(keyValues) {
+      const list = [];
+      for (const k in keyValues) {
+        list.push(
+          storage.get(k).then((value) => {
+            const expectedValue = keyValues[k];
+            expect(value).to.equal(expectedValue, `For "${k}"`);
+          })
+        );
       }
+      return Promise.all(list);
+    }
 
-      it('should configure store correctly', () => {
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        store1.set('key2', 'value2');
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .once();
-        return storage
-          .get('key1')
-          .then(() => {
-            return storage.storePromise_;
-          })
-          .then((store) => {
-            expect(store.maxValues_).to.equal(8);
-          });
+    it('should configure store correctly', () => {
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      store1.set('key2', 'value2');
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .once();
+      return storage
+        .get('key1')
+        .then(() => {
+          return storage.storePromise_;
+        })
+        .then((store) => {
+          expect(store.maxValues_).to.equal(8);
+        });
+    });
+
+    it('should initialize empty store with prototype-less objects', () => {
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(null))
+        .once();
+      return storage
+        .get('key1')
+        .then(() => {
+          return storage.storePromise_;
+        })
+        .then((store) => {
+          expect(store.obj.__proto__).to.be.undefined;
+          expect(store.values_.__proto__).to.be.undefined;
+        });
+    });
+
+    it('should restore store with prototype-less objects', () => {
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      store1.set('key2', 'value2');
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .once();
+      return storage
+        .get('key1')
+        .then(() => {
+          return storage.storePromise_;
+        })
+        .then((store) => {
+          expect(store.obj.__proto__).to.be.undefined;
+          expect(store.values_.__proto__).to.be.undefined;
+        });
+    });
+
+    it('should get the value first time and reuse store', () => {
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      store1.set('key2', 'value2');
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .once();
+      expect(storage.storePromise_).to.not.exist;
+      const promise = storage.get('key1');
+      return promise.then((value) => {
+        expect(value).to.equal('value1');
+        const store1Promise = storage.storePromise_;
+        expect(store1Promise).to.exist;
+
+        // Repeat.
+        return storage.get('key2').then((value2) => {
+          expect(value2).to.equal('value2');
+          expect(storage.storePromise_).to.equal(store1Promise);
+        });
       });
+    });
 
-      it('should initialize empty store with prototype-less objects', () => {
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(null))
-          .once();
-        return storage
-          .get('key1')
-          .then(() => {
-            return storage.storePromise_;
-          })
-          .then((store) => {
-            expect(store.obj.__proto__).to.be.undefined;
-            expect(store.values_.__proto__).to.be.undefined;
-          });
+    it('should get the value from first ever request and reuse store', () => {
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(null))
+        .once();
+      expect(storage.storePromise_).to.not.exist;
+      const promise = storage.get('key1');
+      return promise.then((value) => {
+        expect(value).to.be.undefined;
+        const store1Promise = storage.storePromise_;
+        expect(store1Promise).to.exist;
+
+        // Repeat.
+        return storage.get('key2').then((value2) => {
+          expect(value2).to.be.undefined;
+          expect(storage.storePromise_).to.equal(store1Promise);
+        });
       });
+    });
 
-      it('should restore store with prototype-less objects', () => {
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        store1.set('key2', 'value2');
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .once();
-        return storage
-          .get('key1')
-          .then(() => {
-            return storage.storePromise_;
-          })
-          .then((store) => {
-            expect(store.obj.__proto__).to.be.undefined;
-            expect(store.values_.__proto__).to.be.undefined;
-          });
+    it('should recover from binding failure', () => {
+      expectAsyncConsoleError(/Failed to load store/);
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.reject('intentional'))
+        .once();
+      expect(storage.storePromise_).to.not.exist;
+      const promise = storage.get('key1');
+      return promise.then((value) => {
+        expect(value).to.be.undefined;
+        expect(storage.storePromise_).to.exist;
       });
+    });
 
-      it('should get the value first time and reuse store', () => {
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        store1.set('key2', 'value2');
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .once();
-        expect(storage.storePromise_).to.not.exist;
-        const promise = storage.get('key1');
-        return promise.then((value) => {
-          expect(value).to.equal('value1');
+    it('should recover from binding error', () => {
+      expectAsyncConsoleError(/Failed to load store/);
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve('UNKNOWN FORMAT'))
+        .once();
+      expect(storage.storePromise_).to.not.exist;
+      const promise = storage.get('key1');
+      return promise.then((value) => {
+        expect(value).to.be.undefined;
+        expect(storage.storePromise_).to.exist;
+      });
+    });
+
+    it('should save the value first time and reuse store', () => {
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      store1.set('key2', 'value2');
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .once();
+      bindingMock
+        .expects('saveBlob')
+        .withExactArgs(
+          'https://acme.com',
+          env.sandbox.match((arg) => {
+            const store2 = new Store(JSON.parse(atob(arg)));
+            return (
+              store2.get('key1') !== undefined &&
+              store2.get('key2') !== undefined
+            );
+          })
+        )
+        .returns(Promise.resolve())
+        .twice();
+      viewerMock
+        .expects('broadcast')
+        .withExactArgs(
+          env.sandbox.match((arg) => {
+            return (
+              arg['type'] == 'amp-storage-reset' &&
+              arg['origin'] == 'https://acme.com'
+            );
+          })
+        )
+        .twice();
+      expect(storage.storePromise_).to.not.exist;
+      const promise = storage.set('key1', true);
+      return promise
+        .then(() => {
           const store1Promise = storage.storePromise_;
           expect(store1Promise).to.exist;
 
           // Repeat.
-          return storage.get('key2').then((value2) => {
-            expect(value2).to.equal('value2');
+          return storage.set('key2', true).then(() => {
             expect(storage.storePromise_).to.equal(store1Promise);
           });
+        })
+        .then(() => {
+          return expectStorage({
+            'key1': true,
+            'key2': true,
+          });
         });
-      });
+    });
 
-      it('should get the value from first ever request and reuse store', () => {
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(null))
-          .once();
-        expect(storage.storePromise_).to.not.exist;
-        const promise = storage.get('key1');
-        return promise.then((value) => {
-          expect(value).to.be.undefined;
+    it('should remove the key first time and reuse store', () => {
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      store1.set('key2', 'value2');
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .once();
+      bindingMock
+        .expects('saveBlob')
+        .withExactArgs(
+          'https://acme.com',
+          env.sandbox.match((arg) => {
+            const store2 = new Store(JSON.parse(atob(arg)));
+            return store2.get('key1') === undefined;
+          })
+        )
+        .returns(Promise.resolve())
+        .twice();
+      viewerMock
+        .expects('broadcast')
+        .withExactArgs(
+          env.sandbox.match((arg) => {
+            return (
+              arg['type'] == 'amp-storage-reset' &&
+              arg['origin'] == 'https://acme.com'
+            );
+          })
+        )
+        .twice();
+      expect(storage.storePromise_).to.not.exist;
+      const promise = storage.remove('key1');
+      return promise
+        .then(() => {
           const store1Promise = storage.storePromise_;
           expect(store1Promise).to.exist;
 
           // Repeat.
-          return storage.get('key2').then((value2) => {
-            expect(value2).to.be.undefined;
+          return storage.remove('key2').then(() => {
             expect(storage.storePromise_).to.equal(store1Promise);
           });
-        });
-      });
-
-      it('should recover from binding failure', () => {
-        expectAsyncConsoleError(/Failed to load store/);
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.reject('intentional'))
-          .once();
-        expect(storage.storePromise_).to.not.exist;
-        const promise = storage.get('key1');
-        return promise.then((value) => {
-          expect(value).to.be.undefined;
-          expect(storage.storePromise_).to.exist;
-        });
-      });
-
-      it('should recover from binding error', () => {
-        expectAsyncConsoleError(/Failed to load store/);
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve('UNKNOWN FORMAT'))
-          .once();
-        expect(storage.storePromise_).to.not.exist;
-        const promise = storage.get('key1');
-        return promise.then((value) => {
-          expect(value).to.be.undefined;
-          expect(storage.storePromise_).to.exist;
-        });
-      });
-
-      it('should save the value first time and reuse store', () => {
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        store1.set('key2', 'value2');
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .once();
-        bindingMock
-          .expects('saveBlob')
-          .withExactArgs(
-            'https://acme.com',
-            env.sandbox.match((arg) => {
-              const store2 = new Store(JSON.parse(atob(arg)));
-              return (
-                store2.get('key1') !== undefined &&
-                store2.get('key2') !== undefined
-              );
-            })
-          )
-          .returns(Promise.resolve())
-          .twice();
-        viewerMock
-          .expects('broadcast')
-          .withExactArgs(
-            env.sandbox.match((arg) => {
-              return (
-                arg['type'] == 'amp-storage-reset' &&
-                arg['origin'] == 'https://acme.com'
-              );
-            })
-          )
-          .twice();
-        expect(storage.storePromise_).to.not.exist;
-        const promise = storage.set('key1', true);
-        return promise
-          .then(() => {
-            const store1Promise = storage.storePromise_;
-            expect(store1Promise).to.exist;
-
-            // Repeat.
-            return storage.set('key2', true).then(() => {
-              expect(storage.storePromise_).to.equal(store1Promise);
-            });
-          })
-          .then(() => {
-            return expectStorage({
-              'key1': true,
-              'key2': true,
-            });
+        })
+        .then(() => {
+          return expectStorage({
+            'key1': undefined,
+            'key2': undefined,
           });
-      });
-
-      it('should remove the key first time and reuse store', () => {
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        store1.set('key2', 'value2');
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .once();
-        bindingMock
-          .expects('saveBlob')
-          .withExactArgs(
-            'https://acme.com',
-            env.sandbox.match((arg) => {
-              const store2 = new Store(JSON.parse(atob(arg)));
-              return store2.get('key1') === undefined;
-            })
-          )
-          .returns(Promise.resolve())
-          .twice();
-        viewerMock
-          .expects('broadcast')
-          .withExactArgs(
-            env.sandbox.match((arg) => {
-              return (
-                arg['type'] == 'amp-storage-reset' &&
-                arg['origin'] == 'https://acme.com'
-              );
-            })
-          )
-          .twice();
-        expect(storage.storePromise_).to.not.exist;
-        const promise = storage.remove('key1');
-        return promise
-          .then(() => {
-            const store1Promise = storage.storePromise_;
-            expect(store1Promise).to.exist;
-
-            // Repeat.
-            return storage.remove('key2').then(() => {
-              expect(storage.storePromise_).to.equal(store1Promise);
-            });
-          })
-          .then(() => {
-            return expectStorage({
-              'key1': undefined,
-              'key2': undefined,
-            });
-          });
-      });
-
-      it('should get unexpired value based on duration', async () => {
-        clock = env.sandbox.useFakeTimers();
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        expect(store1.values_).to.deep.equal({
-          'key1': {v: 'value1', t: 0},
         });
+    });
 
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .once();
-        bindingMock
-          .expects('saveBlob')
-          .withExactArgs(
-            'https://acme.com',
-            env.sandbox.match((arg) => {
-              const store2 = new Store(JSON.parse(atob(arg)));
-              return store2.get('key1') === undefined;
-            })
-          )
-          .returns(Promise.resolve())
-          .twice();
-        viewerMock
-          .expects('broadcast')
-          .withExactArgs(
-            env.sandbox.match((arg) => {
-              return (
-                arg['type'] == 'amp-storage-reset' &&
-                arg['origin'] == 'https://acme.com'
-              );
-            })
-          )
-          .once();
-
-        expect(await storage.get('key1', 10)).to.equal('value1');
-        clock.tick(100);
-        expect(await storage.get('key1', 5)).to.be.undefined;
+    it('should get unexpired value based on duration', async () => {
+      clock = env.sandbox.useFakeTimers();
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      expect(store1.values_).to.deep.equal({
+        'key1': {v: 'value1', t: 0},
       });
 
-      it('should react to reset messages', () => {
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .twice();
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .once();
+      bindingMock
+        .expects('saveBlob')
+        .withExactArgs(
+          'https://acme.com',
+          env.sandbox.match((arg) => {
+            const store2 = new Store(JSON.parse(atob(arg)));
+            return store2.get('key1') === undefined;
+          })
+        )
+        .returns(Promise.resolve())
+        .twice();
+      viewerMock
+        .expects('broadcast')
+        .withExactArgs(
+          env.sandbox.match((arg) => {
+            return (
+              arg['type'] == 'amp-storage-reset' &&
+              arg['origin'] == 'https://acme.com'
+            );
+          })
+        )
+        .once();
+
+      expect(await storage.get('key1', 10)).to.equal('value1');
+      clock.tick(100);
+      expect(await storage.get('key1', 5)).to.be.undefined;
+    });
+
+    it('should react to reset messages', () => {
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .twice();
+      return storage.get('key1').then((value) => {
+        expect(value).to.equal('value1');
+        const store1Promise = storage.storePromise_;
+        expect(store1Promise).to.exist;
+
+        // Issue broadcast event.
+        viewerBroadcastHandler({
+          'type': 'amp-storage-reset',
+          'origin': 'https://acme.com',
+        });
+        expect(storage.storePromise_).to.not.exist;
         return storage.get('key1').then((value) => {
           expect(value).to.equal('value1');
-          const store1Promise = storage.storePromise_;
-          expect(store1Promise).to.exist;
-
-          // Issue broadcast event.
-          viewerBroadcastHandler({
-            'type': 'amp-storage-reset',
-            'origin': 'https://acme.com',
-          });
-          expect(storage.storePromise_).to.not.exist;
-          return storage.get('key1').then((value) => {
-            expect(value).to.equal('value1');
-            expect(storage.storePromise_).to.exist;
-          });
-        });
-      });
-
-      it('should ignore unrelated reset messages', () => {
-        const store1 = new Store({});
-        store1.set('key1', 'value1');
-        bindingMock
-          .expects('loadBlob')
-          .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
-          .twice();
-        return storage.get('key1').then((value) => {
-          expect(value).to.equal('value1');
-          const store1Promise = storage.storePromise_;
-          expect(store1Promise).to.exist;
-
-          // Issue broadcast event.
-          viewerBroadcastHandler({
-            'type': 'amp-storage-reset',
-            'origin': 'OTHER',
-          });
           expect(storage.storePromise_).to.exist;
         });
       });
     });
+
+    it('should ignore unrelated reset messages', () => {
+      const store1 = new Store({});
+      store1.set('key1', 'value1');
+      bindingMock
+        .expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .twice();
+      return storage.get('key1').then((value) => {
+        expect(value).to.equal('value1');
+        const store1Promise = storage.storePromise_;
+        expect(store1Promise).to.exist;
+
+        // Issue broadcast event.
+        viewerBroadcastHandler({
+          'type': 'amp-storage-reset',
+          'origin': 'OTHER',
+        });
+        expect(storage.storePromise_).to.exist;
+      });
+    });
+  });
 });
 
 describes.sandboxed('Store', {}, (env) => {

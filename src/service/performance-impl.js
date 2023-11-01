@@ -9,6 +9,8 @@ import {map} from '#core/types/object';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
+import {isExperimentOn} from '#experiments';
+
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
@@ -28,6 +30,8 @@ const QUEUE_LIMIT = 50;
 
 const CLS_SESSION_GAP = 1000;
 const CLS_SESSION_MAX = 5000;
+
+const INP_REPORTING_THRESHOLD = 40;
 
 const TAG = 'Performance';
 
@@ -129,7 +133,7 @@ export class Performance {
     /** @private {boolean} */
     this.isPerformanceTrackingOn_ = false;
 
-    /** @private {!Object<string,boolean>} */
+    /** @private {!{[key: string]: boolean}} */
     this.enabledExperiments_ = map();
 
     /** @private {string|undefined} */
@@ -228,6 +232,20 @@ export class Performance {
      */
     this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
+    /**
+     * Whether the user agent supports the interaction to next paint metric.
+     */
+    this.supportsEvents_ =
+      supportedEntryTypes.includes('event') &&
+      isExperimentOn(win, 'interaction-to-next-paint');
+
+    if (!this.supportsEvents_) {
+      this.metrics_.rejectSignal(
+        TickLabel_Enum.INTERACTION_TO_NEXT_PAINT,
+        dev().createExpectedError('Interaction to next paint not supported')
+      );
+    }
+
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -241,6 +259,10 @@ export class Performance {
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
+
+    whenDocumentComplete(win.document).then(() =>
+      this.tickInteractionToNextPaint_(INP_REPORTING_THRESHOLD)
+    );
     this.registerPerformanceObserver_();
 
     /**
@@ -430,6 +452,8 @@ export class Performance {
           'responseStart',
         ].forEach((label) => this.tick(label, entry[label]));
         recordedNavigation = true;
+      } else if (entry.entryType == 'event' && entry.interactionId) {
+        this.tickInteractionToNextPaint_(entry.duration);
       }
     };
 
@@ -469,6 +493,14 @@ export class Performance {
       // that will say it supports navigation but throws.
       this.createPerformanceObserver_(processEntry, {
         type: 'navigation',
+        buffered: true,
+      });
+    }
+
+    if (this.supportsEvents_) {
+      this.createPerformanceObserver_(processEntry, {
+        type: 'event',
+        durationThreshold: INP_REPORTING_THRESHOLD, // Minimim duration of 40ms, as implemented in Chrome web-vitals
         buffered: true,
       });
     }
@@ -613,6 +645,25 @@ export class Performance {
       this.metrics_.reset(TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION);
       this.tickDelta(TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT, sum);
       this.tickDelta(TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
+      this.flush();
+    }
+  }
+
+  /**
+   * Record the interaction to next paint score.
+   * @param {number=} duration
+   */
+  tickInteractionToNextPaint_(duration) {
+    if (!this.ampdoc_) {
+      return;
+    }
+
+    const old = this.metrics_.get(TickLabel_Enum.INTERACTION_TO_NEXT_PAINT);
+    if (old == null || duration > old) {
+      this.tickDelta(
+        TickLabel_Enum.INTERACTION_TO_NEXT_PAINT,
+        duration - (old ?? 0)
+      );
       this.flush();
     }
   }

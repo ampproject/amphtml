@@ -464,16 +464,7 @@ declaration_list {
   declaration: { name: "pitch" }
   declaration: { name: "pitch-range" }
   declaration: { name: "place-items" }
-  # CSS property `position` with values `fixed` and `sticky` are not allowed.
-  # From https://www.w3schools.com/cssref/pr_class_position.asp
-  declaration: {
-    name: "position"
-    value_casei: "absolute"
-    value_casei: "inherit"
-    value_casei: "initial"
-    value_casei: "relative"
-    value_casei: "static"
-  }
+  declaration: { name: "position" }
   declaration: { name: "quotes" }
   declaration: { name: "resize" }
   declaration: { name: "richness" }
@@ -635,7 +626,7 @@ css {
 css {
   html_format: AMP4EMAIL
   disabled_by: "data-css-strict"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
 
   # Due to a bug, we allowed unlimited doc-level bytes for CSS in AMP4EMAIL
   # formats. To avoid breaking emails, this is temporarily set to a warning but
@@ -645,7 +636,7 @@ css {
   max_bytes_per_inline_style: 1000
 
   max_bytes_spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+  "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
   url_bytes_included: true
 
   allow_all_declaration_in_style: true
@@ -662,15 +653,14 @@ css {
 css {
   html_format: AMP4EMAIL
   enabled_by: "data-css-strict"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
 
   max_bytes_is_warning: false
   max_bytes: 75000
   max_bytes_per_inline_style: 1000
 
-  # TODO(b/162314127): add maximum size documentation to the email spec
   max_bytes_spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+  "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
   url_bytes_included: true
 
   allow_all_declaration_in_style: false
@@ -933,7 +923,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
     doc_css_bytes: true
     max_bytes: 75000
     max_bytes_spec_url:
-    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+    "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
 
     css_spec: {
       at_rule_spec: {
@@ -969,7 +959,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
       error_message: "CSS i-amphtml- name prefix"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
 }
 
 tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
@@ -998,7 +988,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
     doc_css_bytes: true
     max_bytes: 75000
     max_bytes_spec_url:
-    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+    "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
 
     css_spec: {
       at_rule_spec: {
@@ -1102,7 +1092,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
       error_message: "CSS i-amphtml- name prefix"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
 }
 
 tags: {  # `<style amp-boilerplate>`, [AMP]
@@ -1110,7 +1100,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP]
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
   descriptive_name: "head > style[amp-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1134,7 +1124,7 @@ tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
   tag_name: "STYLE"
   spec_name: "head > style[amp4ads-boilerplate]"
   descriptive_name: "head > style[amp4ads-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1159,7 +1149,7 @@ tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
   tag_name: "STYLE"
   spec_name: "head > style[amp4email-boilerplate]"
   descriptive_name: "head > style[amp4email-boilerplate]"
-  satisfies: "style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1182,7 +1172,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP]
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
   descriptive_name: "noscript > style[amp-boilerplate]"
-  satisfies: "noscript > style[amp-boilerplate]"
+  satisfies_condition: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"

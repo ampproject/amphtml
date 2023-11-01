@@ -9,7 +9,7 @@ import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
-/** @private {!Object<string, boolean>} */
+/** @private {!{[key: string]: boolean}} */
 const SUPPORTED_TAG_NAMES = {
   'INPUT': true,
   'SELECT': true,
@@ -31,7 +31,7 @@ export class FormDirtiness {
     /** @private {number} */
     this.dirtyFieldCount_ = 0;
 
-    /** @private {!Object<string, boolean>} */
+    /** @private {!{[key: string]: boolean}} */
     this.isFieldNameDirty_ = map();
 
     /** @private {?FormData} */

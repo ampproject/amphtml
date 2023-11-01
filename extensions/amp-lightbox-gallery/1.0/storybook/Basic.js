@@ -1,21 +1,19 @@
-import {withKnobs} from '@storybook/addon-knobs';
-
-import * as Preact from '#preact';
-
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
 import {
   BentoLightboxGalleryProvider,
   WithBentoLightboxGallery,
-} from '../component';
+} from '#bento/components/bento-lightbox-gallery/1.0/component';
 
-import '../component.jss';
+import * as Preact from '#preact';
 
-import '../../../amp-base-carousel/1.0/component.jss';
+import '#bento/components/bento-lightbox-gallery/1.0/component.jss';
+
+import '#bento/components/bento-base-carousel/1.0/component.jss';
 
 export default {
   title: 'LightboxGallery',
   component: BentoLightboxGalleryProvider,
-  decorators: [withKnobs],
+  argTypes: {},
 };
 
 export const _default = () => {

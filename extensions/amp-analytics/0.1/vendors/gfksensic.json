@@ -1,17 +1,19 @@
 {
-  "requestOrigin": "https://${regionID}-config.sensic.net",
+  "requestOrigin": "https://pixel.${regionID}-config${environment}.sensic.net",
   "requests": {
-    "base": "/tp?${page_params}&${client_params}",
-    "page_params": "r=${r}&ua=${ua}&v=${v}&l=${l}",
-    "client_params": "p=${regionID}&m=${mediaID}&cid=${clientId(cid)}",
-    "event_params": "ut=${ut}&pr=${pr}&rn=${rn}&c=${contentID}&vt=${vt}&sp=${sp}&st=${st}",
-    "audio-play": "${base}&${event_params}&ty=PL&sn=COUNTER(play_${pr})",
-    "audio-stop": "${base}&${event_params}&ty=ST&sn=COUNTER(stop_${pr})"
+    "base": "/tp?m=${mediaID}&v=${v}&t=s2s-amp",
+    "page_params": "r=${r}&ua=${ua}&l=${l}",
+    "user_params": "optin=${optin}&gdpr=1&gdpr_consent=${consentString}",
+    "streaming_params": "c=${contentID}&ut=${ut}&pr=${pr}&rn=${rn}&vt=${vt}&sp=${sp}&st=${st}",
+    "impression_params": "c=${contentID}&pr=RANDOM",
+    "custom_params": "",
+    "audio-play": "${base}&ty=PL&${streaming_params}&sn=COUNTER(play_${pr})&${custom_params}&${user_params}&${page_params}",
+    "audio-stop": "${base}&ty=ST&${streaming_params}&sn=COUNTER(stop_${pr})",
+    "impression": "${base}&ty=IM&${impression_params}&${custom_params}&${user_params}&${page_params}"
   },
   "vars": {
-    "ty": "HB",
     "contentID": "default",
-    "v": "0.0.1",
+    "v": "1.0.0",
     "r": "${ampdocHost}",
     "ut": "${timestamp}",
     "ua": "${userAgent}",
@@ -20,7 +22,9 @@
     "rn": "${requestCount}",
     "vt": "1",
     "sp": "-1",
-    "st": "${ut}"
+    "st": "${ut}",
+    "environment": "",
+    "optin": ""
   },
   "transport": {
     "beacon": false,

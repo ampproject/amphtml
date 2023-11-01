@@ -14,6 +14,10 @@ import {Services} from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
+import {
+  AttributionReportingStatus,
+  isAttributionReportingAllowed,
+} from '#utils/privacy-sandbox-utils';
 
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
@@ -39,29 +43,19 @@ const TAG = 'amp-ad-exit';
  */
 let NavigationTargetDef;
 
-/**
- * Indicates the status of the `attribution-reporting` API.
- * @enum
- */
-const AttributionReportingStatus = {
-  ATTRIBUTION_MACRO_PRESENT: 1,
-  ATTRIBUTION_DATA_PRESENT: 2,
-  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 3,
-};
-
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /**
-     * @private @const {!Object<string, !NavigationTargetDef>}
+     * @private @const {!{[key: string]: !NavigationTargetDef}}
      */
     this.targets_ = {};
 
     /**
      * Maps variable target name to an actual target name.
-     * @private @const {!Object<string, string>}
+     * @private @const {!{[key: string]: string}}
      */
     this.variableTargets_ = {};
 
@@ -86,7 +80,7 @@ export class AmpAdExit extends AMP.BaseElement {
       ActionTrust_Enum.LOW
     );
 
-    /** @private @const {!Object<string, !Object<string, string>>} */
+    /** @private @const {!{[key: string]: !{[key: string]: string}}} */
     this.vendorResponses_ = {};
 
     /** @private {?function()} */
@@ -95,7 +89,7 @@ export class AmpAdExit extends AMP.BaseElement {
     /** @private {?string} */
     this.ampAdResourceId_ = null;
 
-    /** @private @const {!Object<string,string>} */
+    /** @private @const {!{[key: string]: string}} */
     this.expectedOriginToVendor_ = {};
 
     /** @private @const {boolean} */
@@ -170,7 +164,11 @@ export class AmpAdExit extends AMP.BaseElement {
         target.behaviors.clickTarget == '_top'
           ? '_top'
           : '_blank';
-      openWindowDialog(this.win, finalUrl, clickTarget, target.windowFeatures);
+
+      const substitutedFeatures = substituteVariables(
+        target.windowFeatures || ''
+      );
+      openWindowDialog(this.win, finalUrl, clickTarget, substitutedFeatures);
     }
   }
 
@@ -185,7 +183,7 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object<string, string|number|boolean>} args
+   * @param {!{[key: string]: string|number|boolean}} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
    * @param {!NavigationTargetDef} target
    * @return {function(string): string}
@@ -206,6 +204,7 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_X': true,
       'CLICK_Y': true,
       'RANDOM': true,
+      'UACH': true,
     };
     if (target['vars']) {
       for (const customVarName in target['vars']) {
@@ -384,19 +383,22 @@ export class AmpAdExit extends AMP.BaseElement {
         const /** !JsonObject */ target = config['targets'][name];
         this.targets_[name] = {
           finalUrl: target['finalUrl'],
-          trackingUrls: target['trackingUrls'] || [],
           vars: target['vars'] || {},
           filters: (target['filters'] || [])
             .map((f) => this.userFilters_[f])
             .filter(Boolean),
           behaviors: target['behaviors'] || {},
         };
-
-        if (this.isAttributionReportingSupported_) {
+        if (
+          this.isAttributionReportingSupported_ &&
+          target?.behaviors?.browserAdConversion
+        ) {
           this.targets_[name]['windowFeatures'] =
             this.getAttributionReportingValues_(
               target?.behaviors?.browserAdConversion
             );
+        } else {
+          this.targets_[name]['trackingUrls'] = target['trackingUrls'] || [];
         }
 
         // Build a map of {vendor, origin} for 3p custom variables in the config
@@ -435,9 +437,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   detectAttributionReportingSupport() {
-    return this.win.document.featurePolicy?.allowsFeature(
-      'attribution-reporting'
-    );
+    return isAttributionReportingAllowed(this.win.document);
   }
 
   /**
@@ -455,7 +455,8 @@ export class AmpAdExit extends AMP.BaseElement {
     // https://groups.google.com/a/chromium.org/g/blink-dev/c/FFX6VkvladY/m/QgaWHK6ZBAAJ
     const parts = ['noopener'];
     for (const key of Object.keys(adConversionData)) {
-      parts.push(`${key.toLowerCase()}=${adConversionData[key]}`);
+      const encoded = encodeURIComponent(adConversionData[key]);
+      parts.push(`${key.toLowerCase()}=${encoded}`);
     }
     return parts.join(',');
   }
@@ -597,7 +598,7 @@ export function getAttributionReportingStatus(
     isAttributionReportingSupported
   ) {
     return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
-  } else if (target?.behaviors?.browserAdConversion) {
+  } else if (target?.behaviors?.browserAdConversion?.attributionsrc) {
     return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
   }
   return AttributionReportingStatus.ATTRIBUTION_MACRO_PRESENT;

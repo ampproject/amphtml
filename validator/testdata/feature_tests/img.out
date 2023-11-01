@@ -20,6 +20,12 @@ FAIL
 |         hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="true"
 |         referrerpolicy="same-origin" usemap="#blah" name="name">
 |
+|    <!-- Valid with fetchpriority -->
+|    <img src="http://www.example.com/blah.jpg" width=92 height=10
+|         alt="blah" decoding=async loading=lazy border="5px solid black" align="top"
+|         hspace=10 vspace=20 fetchpriority="low" importance="high" crossorigin="use-credentials" ismap="true"
+|         referrerpolicy="same-origin" usemap="#blah" name="name">
+|
 |    <!-- Valid with https -->
 |    <img src="https://www.example.com/blah.jpg" width=92 height=10
 |         alt="blah" decoding=async loading=lazy border="5px solid black" align="bottom"
@@ -51,31 +57,37 @@ FAIL
 |    <!-- Invalid with wrong importance -->
 |    <img src=data:image/png:base64,foo width=100 height=10
 >>   ^~~~~~~~~
-feature_tests/img.html:51:2 The attribute 'importance' in tag 'img' is set to the invalid value 'none'.
+feature_tests/img.html:57:2 The attribute 'importance' in tag 'img' is set to the invalid value 'none'.
 |         alt="blah" importance=none>
+|
+|    <!-- Invalid with wrong fetchpriority -->
+|    <img src=data:image/png:base64,foo width=100 height=10
+>>   ^~~~~~~~~
+feature_tests/img.html:61:2 The attribute 'fetchpriority' in tag 'img' is set to the invalid value 'wrongpriority'.
+|         alt="blah" fetchpriority="wrongpriority">
 |
 |    <!-- Invalid with wrong crossorigin -->
 |    <img src=data:image/png:base64,foo width=100 height=10
 >>   ^~~~~~~~~
-feature_tests/img.html:55:2 The attribute 'crossorigin' in tag 'img' is set to the invalid value 'wrongcrossorigin'.
+feature_tests/img.html:65:2 The attribute 'crossorigin' in tag 'img' is set to the invalid value 'wrongcrossorigin'.
 |         alt="blah" crossorigin="wrongcrossorigin">
 |
 |    <!-- Invalid with wrong referrerpolicy -->
 |    <img src=data:image/png:base64,foo width=100 height=10
 >>   ^~~~~~~~~
-feature_tests/img.html:59:2 The attribute 'referrerpolicy' in tag 'img' is set to the invalid value 'wrongreferrerpolicy'.
+feature_tests/img.html:69:2 The attribute 'referrerpolicy' in tag 'img' is set to the invalid value 'wrongreferrerpolicy'.
 |         alt="blah" referrerpolicy="wrongreferrerpolicy">
 |
 |    <!-- Invalid with wrong decoding -->
 |    <img src=data:image/png:base64,foo width=100 height=10
 >>   ^~~~~~~~~
-feature_tests/img.html:63:2 The attribute 'decoding' in tag 'img' is set to the invalid value 'sync'.
+feature_tests/img.html:73:2 The attribute 'decoding' in tag 'img' is set to the invalid value 'sync'.
 |         alt="blah" decoding=sync loading=lazy>
 |
 |    <!-- Invalid with wrong loading -->
 |    <img src="https://www.example.com/blah.jpg" width=92 height=10
 >>   ^~~~~~~~~
-feature_tests/img.html:67:2 The attribute 'loading' in tag 'img' is set to the invalid value 'smart'.
+feature_tests/img.html:77:2 The attribute 'loading' in tag 'img' is set to the invalid value 'smart'.
 |         alt="blah" decoding=async loading=smart>
 |
 |    <!-- Invalid with data-hero loading -->
@@ -129,20 +141,20 @@ feature_tests/img.html:67:2 The attribute 'loading' in tag 'img' is set to the i
 |    <!-- Invalid inside amp-story -->
 |    <amp-story standalone
 >>   ^~~~~~~~~
-feature_tests/img.html:119:2 Tag 'amp-story' is not allowed to have any sibling tags ('body' should only have 1 child). (see https://amp.dev/documentation/components/amp-story)
+feature_tests/img.html:129:2 Tag 'amp-story' is not allowed to have any sibling tags ('body' should only have 1 child). (see https://amp.dev/documentation/components/amp-story)
 >>   ^~~~~~~~~
-feature_tests/img.html:119:2 The tag 'amp-story' requires including the 'amp-story' extension JavaScript. (see https://amp.dev/documentation/components/amp-story)
+feature_tests/img.html:129:2 The tag 'amp-story' requires including the 'amp-story' extension JavaScript. (see https://amp.dev/documentation/components/amp-story)
 |             title=""
 |             publisher=""
 |             publisher-logo-src="logo"
 |             poster-portrait-src="portrait">
 |      <amp-story-page id=page1>
 >>     ^~~~~~~~~
-feature_tests/img.html:124:4 The tag 'amp-story-page' requires including the 'amp-story' extension JavaScript. (see https://amp.dev/documentation/components/amp-story)
+feature_tests/img.html:134:4 The tag 'amp-story-page' requires including the 'amp-story' extension JavaScript. (see https://amp.dev/documentation/components/amp-story)
 |        <amp-story-grid-layer template="vertical">
 |          <img src="http://www.example.com/blah.jpg#fragment" width=92 height=10>"
 >>         ^~~~~~~~~
-feature_tests/img.html:126:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/img.html:136:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |    </amp-story>

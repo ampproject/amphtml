@@ -6,7 +6,7 @@ import {InaboxResources} from '#inabox/inabox-resources';
 
 import {ResourceState_Enum} from '#service/resource';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask, sleep} from '#testing/helpers';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
@@ -65,11 +65,27 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
 
     await env.ampdoc.whenReady();
     expect(buildStub).to.be.calledOnce;
-    await new Promise(setTimeout);
+    await macroTask();
     schedulePassSpy.resetHistory();
     resolveBuild();
-    await new Promise(setTimeout);
+    await macroTask();
     expect(schedulePassSpy).to.be.calledOnce;
+  });
+
+  it('upgraded: should handle when build() returns undefined', async () => {
+    const schedulePassSpy = env.sandbox.stub(resources, 'schedulePass');
+    const element1 = env.createAmpElement('amp-foo');
+    resources.add(element1);
+    const resource1 = resources.getResourceForElement(element1);
+    const buildStub = env.sandbox.stub(resource1, 'build');
+    buildStub.returns(undefined);
+    resources.upgraded(element1);
+
+    await env.ampdoc.whenReady();
+    await macroTask();
+
+    expect(buildStub).to.be.calledOnce;
+    expect(schedulePassSpy).to.be.calledTwice;
   });
 
   it('eagerly builds amp elements', async () => {
@@ -168,8 +184,7 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     resources.upgraded(element1);
 
     resources.schedulePass(0);
-    await new Promise(setTimeout);
-    await new Promise(setTimeout);
+    await sleep(10);
 
     expect(resource1.measure).to.be.called;
     expect(resource2.measure).to.not.be.called;

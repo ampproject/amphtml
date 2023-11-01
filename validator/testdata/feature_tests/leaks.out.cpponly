@@ -144,7 +144,7 @@ feature_tests/leaks.html:90:0 The attribute 'longdesc' may not appear in tag 'im
 |  -->
 |  <input type="image" src="https://leaking.via/input-src" name="test" value="test">
 >> ^~~~~~~~~
-feature_tests/leaks.html:96:0 The attribute 'src' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
+feature_tests/leaks.html:96:0 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
 |  <isindex src="https://leaking.via/isindex-src" type="image">
 >> ^~~~~~~~~
 feature_tests/leaks.html:97:0 The tag 'isindex' is disallowed.
@@ -238,16 +238,16 @@ feature_tests/leaks.html:133:4 The tag 'param' is disallowed.
 |  -->
 |  <script src="https://leaking.via/script-src"></script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:140:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:140:0 The parent tag of tag 'amphtml engine script' is 'isindex', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  <svg><script href="https://leaking.via/svg-script-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:141:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:141:5 The parent tag of tag 'amphtml engine script' is 'svg', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  <svg><script xlink:href="https://leaking.via/svg-script-xlink-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:142:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:142:5 The parent tag of tag 'amphtml engine script' is 'svg', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  <script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:143:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:143:0 The parent tag of tag 'amphtml engine script' is 'isindex', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  //# sourceMappingURL=https://leaking.via/javascript-source-map
 |  </script>
 |

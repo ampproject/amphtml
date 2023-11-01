@@ -14,7 +14,7 @@ import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 const TAG = 'amp-mathml';
 
 class AmpMathml extends setSuperClass(BaseElement, AmpPreactBaseElement) {
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;

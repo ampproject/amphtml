@@ -1,9 +1,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {green, red, yellow} = require('kleur/colors');
 const {log: logBase} = require('../../common/logging');
+
+/** @typedef {import('puppeteer-core')} puppeteer */
+/** @typedef {import('puppeteer-core').Page} puppeteer.Page */
 
 /**
  * Logs a message to the console.

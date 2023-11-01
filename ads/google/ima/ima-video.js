@@ -1,6 +1,9 @@
 import {loadScript} from '#3p/3p';
 
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
 import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
 import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
 import {isArray, isObject} from '#core/types';
@@ -9,9 +12,11 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 
+// Source for this constant is css/amp-ima-video-iframe.css
+import {addParamToUrl} from 'src/url';
+
 import {ImaPlayerData} from './ima-player-data';
 
-// Source for this constant is css/amp-ima-video-iframe.css
 import {cssText} from '../../../build/amp-ima-video-iframe.css';
 
 /**
@@ -177,8 +182,8 @@ let adsRequested;
 // Flag that tracks if the user tapped and dragged on the overlay button.
 let userTappedAndDragged;
 
-// User consent state.
-let consentState;
+// global context
+let context;
 
 // Throttle for the showControls() function
 let showControlsThrottled = throttle(window, showControls, 1000);
@@ -209,7 +214,7 @@ function toggleRootDataAttribute(state, active) {
 
 /**
  * @param {Document} elementOrDoc
- * @return {!Object<string, !Element>}
+ * @return {!{[key: string]: !Element}}
  */
 function renderElements(elementOrDoc) {
   const html = htmlFor(elementOrDoc);
@@ -326,6 +331,8 @@ function maybeAppendChildren(document, parent, childrenDef) {
  * @param {!Object} data
  */
 export function imaVideo(global, data) {
+  context = global.context;
+
   insertCss(global.document.head, cssText);
 
   videoWidth = global./*OK*/ innerWidth;
@@ -434,10 +441,7 @@ export function imaVideo(global, data) {
     );
   });
 
-  consentState = global.context.initialConsentState;
-
-  if (consentState == 4) {
-    // UNKNOWN
+  if (context.initialConsentState == CONSENT_POLICY_STATE.UNKNOWN) {
     // On unknown consent state, do not load IMA. Treat this the same as if IMA
     // failed to load.
     onImaLoadFail();
@@ -626,16 +630,40 @@ function onOverlayButtonTouchMove() {
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
-  if (consentState == CONSENT_POLICY_STATE.UNKNOWN) {
+  const {initialConsentState} = context;
+  if (initialConsentState == CONSENT_POLICY_STATE.UNKNOWN) {
     // We're unaware of the user's consent state - do not request ads.
     imaLoadAllowed = false;
     return;
-  } else if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
+  }
+  adsRequest.adTagUrl = addParamsToAdTagUrl(adsRequest.adTagUrl);
+  adsLoader.requestAds(adsRequest);
+}
+
+/**
+ * @param {string} url
+ * @return {string}
+ */
+function addParamsToAdTagUrl(url) {
+  const {initialConsentMetadata, initialConsentState, initialConsentValue} =
+    context;
+  if (initialConsentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
     // User has provided consent state but has not consented to personalized
     // ads.
-    adsRequest.adTagUrl += '&npa=1';
+    url = addParamToUrl(url, 'npa', '1');
   }
-  adsLoader.requestAds(adsRequest);
+  const {additionalConsent, consentStringType} = initialConsentMetadata || {};
+  const isGdpr =
+    consentStringType != null &&
+    consentStringType !== CONSENT_STRING_TYPE.US_PRIVACY_STRING;
+  if (isGdpr && initialConsentValue != null) {
+    url = addParamToUrl(url, 'gdpr', '1');
+    url = addParamToUrl(url, 'gdpr_consent', initialConsentValue);
+  }
+  if (additionalConsent != null) {
+    url = addParamToUrl(url, 'addtl_consent', additionalConsent);
+  }
+  return url;
 }
 
 /**
@@ -1178,7 +1206,7 @@ export function toggleMuted(video, muted) {
 }
 
 /**
- * @param {Object} global
+ * @param {object} global
  */
 function exitFullscreen(global) {
   // The video is currently in fullscreen mode
@@ -1193,7 +1221,7 @@ function exitFullscreen(global) {
 }
 
 /**
- * @param {Object} global
+ * @param {object} global
  */
 function enterFullscreen(global) {
   // Try to enter fullscreen mode in the browser
@@ -1222,7 +1250,7 @@ function enterFullscreen(global) {
 }
 
 /**
- * @param {Object} global
+ * @param {object} global
  */
 function toggleFullscreen(global) {
   if (fullscreen) {
@@ -1234,7 +1262,7 @@ function toggleFullscreen(global) {
 
 /**
  * Called when the fullscreen mode of the browser or content player changes.
- * @param {Object} global
+ * @param {object} global
  */
 function onFullscreenChange(global) {
   if (fullscreen) {
@@ -1615,12 +1643,13 @@ export function setHideControlsTimeoutForTesting(newTimeout) {
 }
 
 /**
- * Sets the consent state.
- * @param {*} newConsentState
+ * @param {object} newContext
  * @visibleForTesting
  */
-export function setConsentStateForTesting(newConsentState) {
-  consentState = newConsentState;
+export function setContextForTesting(newContext) {
+  for (const k in newContext) {
+    context[k] = newContext[k];
+  }
 }
 
 /**

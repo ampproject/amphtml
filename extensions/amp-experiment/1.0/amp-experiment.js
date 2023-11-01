@@ -19,7 +19,7 @@ import {getServicePromiseForDoc} from '../../../src/service-helpers';
 const TAG = 'amp-experiment';
 
 export class AmpExperiment extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     /*
      * Prerender is allowed because the client_id is only used to calculate
@@ -94,7 +94,7 @@ export class AmpExperiment extends AMP.BaseElement {
           });
         });
 
-        /** @private @const {!Promise<!Object<string, ?string>>} */
+        /** @private @const {!Promise<!{[key: string]: ?string}>} */
         const experimentVariants = Promise.all(variants)
           .then(() => {
             const ampdoc = this.getAmpDoc();
@@ -169,7 +169,7 @@ export class AmpExperiment extends AMP.BaseElement {
    * Object. This is useful for type checking in analytics
    * and disabling all experiments manually.
    * @param {!JsonObject} config
-   * @return {!Object<string, ?string>}
+   * @return {!{[key: string]: ?string}}
    */
   getEmptyExperimentToVariant_(config) {
     const experimentToVariant = Object.create(null);

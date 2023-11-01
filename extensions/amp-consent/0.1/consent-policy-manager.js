@@ -33,10 +33,10 @@ export class ConsentPolicyManager {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Object<string, ?Deferred>} */
+    /** @private {!{[key: string]: ?Deferred}} */
     this.policyInstancesDeferred_ = map();
 
-    /** @private {!Object<string, ConsentPolicyInstance>} */
+    /** @private {!{[key: string]: ConsentPolicyInstance}} */
     this.instances_ = map();
 
     /** @private {!Promise} */
@@ -67,6 +67,9 @@ export class ConsentPolicyManager {
 
     /** @private {?string} */
     this.consentString_ = null;
+
+    /** @private {?number} */
+    this.tcfPolicyVersion_ = null;
 
     /** @private {?Object|undefined} */
     this.consentMetadata_ = null;
@@ -179,15 +182,18 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
+    const tcfPolicyVersion = info['tcfPolicyVersion'];
     const consentMetadata = info['consentMetadata'];
     const purposeConsents = info['purposeConsents'];
     const {
       consentMetadata_: prevConsentMetadata,
       consentString_: prevConsentStr,
       purposeConsents_: prevPurposeConsents,
+      tcfPolicyVersion_: prevTCFPolicyVersion,
     } = this;
 
     this.consentString_ = consentStr;
+    this.tcfPolicyVersion_ = tcfPolicyVersion;
     this.consentMetadata_ = consentMetadata;
     this.purposeConsents_ = purposeConsents;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
@@ -210,6 +216,7 @@ export class ConsentPolicyManager {
       }
       // None of the supplementary consent data changes with dismiss action
       this.consentString_ = prevConsentStr;
+      this.tcfPolicyVersion_ = prevTCFPolicyVersion;
       this.consentMetadata_ = prevConsentMetadata;
       this.purposeConsents_ = prevPurposeConsents;
     } else {
@@ -302,6 +309,18 @@ export class ConsentPolicyManager {
   getConsentStringInfo(policyId) {
     return this.whenPolicyResolved(policyId).then(() => {
       return this.consentString_;
+    });
+  }
+
+  /**
+   * Get the tcf policy version of a policy. Return a promise that resolves
+   * when the policy resolves.
+   * @param {string} policyId
+   * @return {!Promise<?number>}
+   */
+  getTcfPolicyVersion(policyId) {
+    return this.whenPolicyResolved(policyId).then(() => {
+      return this.tcfPolicyVersion_;
     });
   }
 

@@ -4,6 +4,8 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoDateCountdown} from './component';
 
+export const TAG = 'bento-date-countdown';
+
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */

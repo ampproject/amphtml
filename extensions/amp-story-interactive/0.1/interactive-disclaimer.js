@@ -81,9 +81,11 @@ export function buildInteractiveDisclaimer(interactive, attrs = {}) {
     urlEl.textContent = backendUrl;
     linkEl.remove();
   }
-  noteEl.textContent = interactive.localizationService.getLocalizedString(
-    LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
-  );
+  interactive.localizationService
+    .getLocalizedStringAsync(
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+    )
+    .then((str) => (noteEl.textContent = str));
 
   // Set the described-by for a11y.
   const disclaimerDescriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;
@@ -114,8 +116,8 @@ export function buildInteractiveDisclaimerIcon(interactive) {
 /**
  * Returns the corresponding backend specs (as an array of url and specs), or undefined.
  * @param {string} backendUrl
- * @param {!Object<string, !Object<string, string>>} backendsList
- * @return {?Array<string|Object<string, string>>} array that contains: base url of backend, {learnMoreUrl, entity}.
+ * @param {!{[key: string]: !{[key: string]: string}}} backendsList
+ * @return {?Array<string|{[key: string]: string}>} array that contains: base url of backend, {learnMoreUrl, entity}.
  */
 export function getBackendSpecs(backendUrl, backendsList) {
   return Object.entries(backendsList).find((element) => {

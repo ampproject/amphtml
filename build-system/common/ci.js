@@ -170,13 +170,8 @@ function ciJobId() {
  * Returns the URL of the current job.
  * @return {string}
  */
-function ciJobUrl() {
-  return isGithubActions
-    ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
-      `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
-    : isCircleci
-    ? env('CIRCLE_BUILD_URL')
-    : '';
+function circleciJobUrl() {
+  return isCircleci ? env('CIRCLE_BUILD_URL') : '';
 }
 
 /**
@@ -223,7 +218,7 @@ module.exports = {
   ciBuildUrl,
   ciCommitSha,
   ciJobId,
-  ciJobUrl,
+  circleciJobUrl,
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,

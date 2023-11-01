@@ -23,9 +23,8 @@ describes.endtoend(
       // TODO(cvializ, choumx): Update server to have an endpoint that
       // would test the infinite-loop blocking behavior
       it.skip('should not loop infinitely if updates change its src binding', async () => {
-        const changeAmpStateSrcButton = await controller.findElement(
-          '#changeAmpStateSrc'
-        );
+        const changeAmpStateSrcButton =
+          await controller.findElement('#changeAmpStateSrc');
         const setState = await controller.findElement('#setState');
         const ampState = await controller.findElement('#ampState');
 

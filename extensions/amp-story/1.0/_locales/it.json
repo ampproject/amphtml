@@ -160,5 +160,11 @@
   },
   "99": {
     "string": "Invio del modulo riuscito"
+  },
+  "101": {
+    "string": "Acquista ora"
+  },
+  "110": {
+    "string": "Abbonati con Google"
   }
 }

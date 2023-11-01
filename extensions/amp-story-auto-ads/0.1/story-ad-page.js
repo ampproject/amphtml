@@ -10,10 +10,7 @@ import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {getExperimentBranch} from '#experiments';
-import {
-  BranchToTimeValues,
-  StoryAdSegmentExp,
-} from '#experiments/story-ad-progress-segment';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {getData, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
@@ -42,7 +39,7 @@ import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -317,18 +314,15 @@ export class StoryAdPage {
       'id': this.id_,
     };
 
-    const segmentExpBranch = getExperimentBranch(
+    const storyAdSegmentBranch = getExperimentBranch(
       this.win_,
       StoryAdSegmentExp.ID
     );
-
     if (
-      segmentExpBranch &&
-      segmentExpBranch !== StoryAdSegmentExp.CONTROL &&
-      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_BOTH &&
-      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_AD
+      storyAdSegmentBranch &&
+      storyAdSegmentBranch != StoryAdSegmentExp.CONTROL
     ) {
-      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
+      attributes['auto-advance-after'] = '10s';
     }
 
     const page = createElementWithAttributes(
@@ -513,7 +507,7 @@ export class StoryAdPage {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed attribution icon.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -523,14 +517,14 @@ export class StoryAdPage {
 
     this.adChoicesIcon_.classList.toggle(
       DESKTOP_FULLBLEED_CLASS,
-      uiState === UIType.DESKTOP_FULLBLEED
+      uiState === UIType_Enum.DESKTOP_FULLBLEED
     );
   }
 
   /**
    * Construct an analytics event and trigger it.
    * @param {string} eventType
-   * @param {!Object<string, number>} vars A map of vars and their values.
+   * @param {!{[key: string]: number}} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

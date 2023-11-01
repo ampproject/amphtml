@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {toArray} from '#core/types/array';
@@ -37,7 +36,7 @@ const CAROUSEL_SELECTOR =
   '> amp-base-carousel, :not(amp-inline-gallery-thumbnails) > amp-base-carousel';
 
 class AmpInlineGallery extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -92,14 +91,14 @@ class AmpInlineGallery extends AMP.BaseElement {
    * @private
    */
   updateProgress_(total, index, offset, slides) {
-    iterateCursor(
-      scopedQuerySelectorAll(this.element, CHILDREN_FOR_PROGRESS_SELECTOR),
-      (el) => {
-        el.getImpl().then((pagination) => {
-          pagination.updateProgress(total, index, offset, slides);
-        });
-      }
-    );
+    scopedQuerySelectorAll(
+      this.element,
+      CHILDREN_FOR_PROGRESS_SELECTOR
+    ).forEach((el) => {
+      el.getImpl().then((pagination) => {
+        pagination.updateProgress(total, index, offset, slides);
+      });
+    });
   }
 
   /**
@@ -137,14 +136,11 @@ class AmpInlineGallery extends AMP.BaseElement {
     const detail = getDetail(event);
     const index = detail['index'];
 
-    iterateCursor(
-      scopedQuerySelectorAll(this.element, CAROUSEL_SELECTOR),
-      (el) => {
-        el.getImpl().then((carousel) => {
-          carousel.goToSlide(index, {smoothScroll: true});
-        });
-      }
-    );
+    scopedQuerySelectorAll(this.element, CAROUSEL_SELECTOR).forEach((el) => {
+      el.getImpl().then((carousel) => {
+        carousel.goToSlide(index, {smoothScroll: true});
+      });
+    });
   }
 }
 
