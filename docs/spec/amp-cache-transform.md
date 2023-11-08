@@ -25,8 +25,7 @@ indicates the latter.
 
 ### Target-specific constraints
 
-AMP SXG are intended for [privacy-preserving
-prefetch](https://wicg.github.io/webpackage/draft-yasskin-webpackage-use-cases.html#private-prefetch)
+AMP SXG are intended for privacy-preserving prefetch
 from a referring page (such as a Google Search results page) to a coordinating
 AMP cache (such as the Google AMP Cache). If the referrer wishes to prefetch
 subresources as well, they must also be served from a coordinating AMP cache, in
@@ -175,7 +174,7 @@ lower-entropy forms, e.g. by performing the content negotiation (using
 hard-coded knowledge about what variants are available at a given URL) and
 including only the negotiated media-type, without q-values. The publisher may
 also specify
-[Variants](https://httpwg.org/http-extensions/draft-ietf-httpbis-variants.html)
+[Variants](https://datatracker.ietf.org/doc/draft-ietf-httpbis-variants/00/)
 to aid caching proxies that understand that header.
 
 ### URL rewrites
