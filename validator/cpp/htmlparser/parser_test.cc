@@ -126,7 +126,7 @@ TEST(ParserTest, LineColTest) {
            }
            default:
              EXPECT_EQ(htmlparser::AtomUtil::ToString(
-                 t.atom) + " was unexecpted.", "");
+                 t.atom) + " was unexpected.", "");
          }
          num_callbacks++;
        }
@@ -245,7 +245,7 @@ TEST(ParserTest, LineColTest) {
             }
             default:
               EXPECT_EQ(htmlparser::AtomUtil::ToString(
-                  t.atom) + " was unexecpted.", "");
+                  t.atom) + " was unexpected.", "");
           }
           num_callbacks++;
         }
@@ -309,7 +309,7 @@ TEST(ParserTest, LineBreakAtPeekableCharacter) {
 
 // Tests duplicate body tags are ignored but their attributes copied to original
 // body tag.
-TEST(ParserTest, SubsequentyBodyTagAttributesCopied) {
+TEST(ParserTest, SubsequentlyBodyTagAttributesCopied) {
   std::string html = ("<html>\n<body id=\"bdy\">\n<div>hello</div></body>"s
                       "<body class=\"bd-cls\"><div>world</div></body></html>");
   htmlparser::Parser parser(html);

@@ -146,9 +146,9 @@ feature_tests/forms.html:134:4 The tag 'input' may only appear as a descendant o
 |      <div validation-for="bar"></div>
 >>     ^~~~~~~~~
 feature_tests/forms.html:139:4 The attribute 'visible-when-invalid' in tag 'div' is missing or incorrect, but required by attribute 'validation-for'.
-|      <div visibile-when-invalid="valueMissing"></div>
+|      <div visible-when-invalid="valueMissing"></div>
 >>     ^~~~~~~~~
-feature_tests/forms.html:140:4 The attribute 'visibile-when-invalid' may not appear in tag 'div'.
+feature_tests/forms.html:140:4 The attribute 'visible-when-invalid' may not appear in tag 'div'.
 |    </form>
 |    <!-- Invalid: submit-success must be a div -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank"

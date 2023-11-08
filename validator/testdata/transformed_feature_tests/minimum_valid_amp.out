@@ -1,7 +1,7 @@
 PASS
 |  <!--
 |    Test Description:
-|    This is the minimum valid tranformed JavaScript AMP document; it includes
+|    This is the minimum valid transformed JavaScript AMP document; it includes
 |    all of the required fields from the spec, but nothing else.
 |  -->
 |  <!doctype html>

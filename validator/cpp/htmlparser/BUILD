@@ -71,7 +71,7 @@ cc_test(
 )
 
 # Similar to go lang's defer statement. Defers the execution of statement
-# until in which it is decalred goes out of scope.
+# until in which it is declared goes out of scope.
 cc_library(
     name = "defer",
     hdrs = [
@@ -80,7 +80,7 @@ cc_library(
     copts = ["-std=c++17"],
 )
 
-# Helper library decalres various doctype constants and a utility function to
+# Helper library declares various doctype constants and a utility function to
 # parse doctype string and extract various components in it.
 cc_library(
     name = "doctype",
