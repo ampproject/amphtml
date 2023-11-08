@@ -53,7 +53,7 @@ export function insertAnalyticsElement(
 /**
  * A class that handles customEvent reporting of extension element through
  * amp-analytics. This class is not exposed to extension element directly to
- * restrict the genration of the config Please use CustomEventReporterBuilder to
+ * restrict the generation of the config Please use CustomEventReporterBuilder to
  * build a CustomEventReporter instance.
  */
 class CustomEventReporter {

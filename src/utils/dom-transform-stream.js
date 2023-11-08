@@ -27,7 +27,7 @@ export class DomTransformStream {
 
     const transferDefer = new Deferred();
     /**
-     * Resovles when complete doc has been transfered to the target
+     * Resolves when complete doc has been transferred to the target
      * body.
      * @const @private {!Promise}
      */
@@ -83,7 +83,7 @@ export class DomTransformStream {
   /**
    * Callback passed into DetachedDomStream constructor. Called with complete
    * doc when stream is closed.
-   * Schedules final transfer, then resovles body complete promise.
+   * Schedules final transfer, then resolves body complete promise.
    * @param {!Document} unusedCompleteDoc
    */
   onEnd(unusedCompleteDoc) {

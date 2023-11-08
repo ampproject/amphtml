@@ -89,7 +89,7 @@ export function escapeCssSelectorIdent(ident) {
 }
 
 /**
- * Escapes an ident in a way that can be used by :nth-child() psuedo-class.
+ * Escapes an ident in a way that can be used by :nth-child() pseudo-class.
  *
  * See https://github.com/w3c/csswg-drafts/issues/2306.
  *
@@ -98,7 +98,7 @@ export function escapeCssSelectorIdent(ident) {
  */
 export function escapeCssSelectorNth(ident) {
   const escaped = String(ident);
-  // Ensure it doesn't close the nth-child psuedo class.
+  // Ensure it doesn't close the nth-child pseudo class.
   devAssert(escaped.indexOf(')') === -1);
   return escaped;
 }

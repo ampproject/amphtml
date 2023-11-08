@@ -176,7 +176,7 @@ const LOG_TYPE_ENUM = {
 };
 
 /**
- * NOTE: If udpated here, update in amp-story.js
+ * NOTE: If updated here, update in amp-story.js
  * @private @const {number}
  */
 const PANEL_ASPECT_RATIO_THRESHOLD = 31 / 40;
@@ -930,7 +930,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Triggers when swithing from one story to another.
+   * Triggers when switching from one story to another.
    * @private
    */
   onNavigation_() {
@@ -987,7 +987,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Fetches more stories if appropiate.
+   * Fetches more stories if appropriate.
    * @param {number} remaining Number of stories remaining in the player.
    * @private
    */
@@ -1263,7 +1263,7 @@ export class AmpStoryPlayer {
         // 1. Wait for current story to load before evaluating neighbor stories.
         this.currentStoryPromise_(story)
           .then(() => this.maybeGetCacheUrl_(story.href))
-          // 2. Set iframe src when appropiate
+          // 2. Set iframe src when appropriate
           .then((storyUrl) => {
             if (!this.sanitizedUrlsAreEquals_(storyUrl, story.iframe.src)) {
               this.setSrc_(story, storyUrl);
@@ -1703,7 +1703,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Updates the visbility state of the exit control button.
+   * Updates the visibility state of the exit control button.
    * TODO(#30031): delete this once new custom UI API is ready.
    * @param {boolean} isVisible
    * @private
@@ -1751,7 +1751,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Dispatches end of stories event when appropiate.
+   * Dispatches end of stories event when appropriate.
    * @param {!Object} data
    * @private
    */

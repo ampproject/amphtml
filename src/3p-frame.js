@@ -266,7 +266,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 }
 
 /**
- * Function to return the development boostrap base URL
+ * Function to return the development bootstrap base URL
  * @param {!Window} parentWindow
  * @param {string} srcFileBasename
  * @return {string}

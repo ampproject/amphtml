@@ -165,7 +165,7 @@ export class AmpDocService {
   /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
    * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
-   * instance is returned, unless specfically looking for a closer `AmpDoc`.
+   * instance is returned, unless specifically looking for a closer `AmpDoc`.
    * Otherwise, this method locates the `AmpDoc` that contains the specified
    * node and, if necessary, initializes it.
    *
@@ -308,7 +308,7 @@ export class AmpDoc {
    */
   dispose() {
     disposeServicesForDoc(this);
-    this.unsubsribes_.forEach((unsubsribe) => unsubsribe());
+    this.unsubsribes_.forEach((unsubscribe) => unsubscribe());
   }
 
   /**
@@ -747,7 +747,7 @@ export class AmpDoc {
   }
 
   /**
-   * Whether the AMP document has been ever visible before. Since the visiblity
+   * Whether the AMP document has been ever visible before. Since the visibility
    * state of a document can be flipped back and forth we sometimes want to know
    * if a document has ever been visible.
    * @return {boolean}

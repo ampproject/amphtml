@@ -56,7 +56,7 @@ export class PriorityQueue {
         break;
       }
       // Stop searching once p[i] >= target AND p[i-1] < target.
-      // This way, we'll return the index of the first occurence of `target`
+      // This way, we'll return the index of the first occurrence of `target`
       // priority (if any), which preserves FIFO order of same-priority items.
       if (this.queue_[i].priority < target) {
         lo = i + 1;

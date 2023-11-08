@@ -147,7 +147,7 @@ function isDescendantWindow(ancestor, descendant) {
 }
 
 /**
- * Removes any listenFors registed on listenSentinel that do not have
+ * Removes any listenFors registered on listenSentinel that do not have
  * a contentWindow (the frame was removed from the DOM tree).
  * @param {!Array<!WindowEventsDef>} listenSentinel
  */

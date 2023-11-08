@@ -9,7 +9,7 @@ import {registerServiceBuilder} from './service-helpers';
 
 const TAG_ = 'Input';
 
-const MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
+const MAX_MOUSE_CONFIRM_ATTEMPTS_ = 3;
 const CLICK_TIMEOUT_ = 300;
 
 /**
@@ -261,7 +261,7 @@ export class Input {
   mouseCanceled_() {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
-    if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
+    if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPTS_) {
       listenOnce(
         this.win.document,
         'mousemove',

@@ -226,7 +226,7 @@ export class VariableSource {
   /**
    * Sets an async value resolver for the variable with the specified name.
    * The value resolver may optionally take an extra parameter.
-   * Can be called in conjuction with setAsync to allow for additional
+   * Can be called in conjunction with setAsync to allow for additional
    * asynchronous resolver where expand will use async and expandSync the sync
    * version.
    * @param {string} varName

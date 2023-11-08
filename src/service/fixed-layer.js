@@ -101,7 +101,7 @@ export class FixedLayer {
   /**
    * Informs FixedLayer that a lightbox was opened.
    *
-   * - FixedLayer hides any transfer layer elements that may be overlayed on
+   * - FixedLayer hides any transfer layer elements that may be overlaid on
    *   top of the lightbox, which is confusing UX.
    * - When `onComplete` resolves, FixedLayer scans and transfers any fixed
    *   descendants of `lightbox`. This enables unjanky fixed elements in
@@ -656,7 +656,7 @@ export class FixedLayer {
     opt_forceTransfer,
     opt_lightboxMode
   ) {
-    // Warn that pub-authored inline styles may be overriden by FixedLayer.
+    // Warn that pub-authored inline styles may be overridden by FixedLayer.
     if (!opt_forceTransfer) {
       this.warnAboutInlineStylesIfNecessary_(element);
     }
@@ -775,7 +775,7 @@ export class FixedLayer {
    * Mutates the fixed/sticky element. At this point it's determined that the
    * element is indeed fixed/sticky. There are two main functions here:
    *  1. `top` has to be updated to reflect viewer's paddingTop.
-   *  2. The element may need to be transfered to the separate fixed layer.
+   *  2. The element may need to be transferred to the separate fixed layer.
    *
    * @param {!ElementDef} fe
    * @param {number} index
@@ -1083,7 +1083,7 @@ class TransferLayerBody {
     );
 
     if (!fe.placeholder) {
-      // Never been transfered before: ensure that it's properly configured.
+      // Never been transferred before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
       const placeholder = (fe.placeholder =
         this.doc_.createElement('i-amphtml-fpa'));

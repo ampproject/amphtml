@@ -268,7 +268,7 @@ export class ViewportImpl {
       if (visible) {
         this.binding_.connect();
         if (this.size_) {
-          // If the size has already been intialized, check it again in case
+          // If the size has already been initialized, check it again in case
           // the size has changed between `disconnect` and `connect`.
           this.resize_();
         }
