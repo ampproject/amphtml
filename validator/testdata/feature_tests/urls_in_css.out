@@ -2,7 +2,7 @@ FAIL
 |  <!--
 |    Test Description:
 |      Shows an example of a url(...) function within a stylesheet which
-|      has invalid paramters.
+|      has invalid parameters.
 |  -->
 |  <!doctype html>
 |  <html ⚡>

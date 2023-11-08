@@ -396,7 +396,7 @@ void Parser::AddText(const std::string& text) {
 
   text_node->data_.assign(text, 0, text.size());
   AddChild(text_node);
-  // Count number of terms in ths text node, except if this is <script>,
+  // Count number of terms in the text node, except if this is <script>,
   // <textarea> or a comment node.
   if (count_num_terms_in_text_node_ && text_node->Parent() &&
       text_node->Parent()->DataAtom() != Atom::SCRIPT &&
@@ -1140,7 +1140,7 @@ bool Parser::InBodyIM() {  // NOLINT
       ReconstructActiveFormattingElements();
       AddText(d);
       if (frameset_ok_ && !Strings::IsAllWhitespaceChars(d)) {
-        // There were non-whitespace chracters inserted.
+        // There were non-whitespace characters inserted.
         frameset_ok_ = false;
       }
       break;

@@ -1,7 +1,7 @@
 // Declares types in json spec (http://www.json.org):
-// JsonArray: List of hetrogenous types. [1, true, "foo",...]
+// JsonArray: List of heterogenous types. [1, true, "foo",...]
 //
-// JsonDict = Key value pairs of hetrogenous values, key is always std::string.
+// JsonDict = Key value pairs of heterogenous values, key is always std::string.
 // {"foo": "bar", "count": 1,...}
 //
 // JsonObject = Encapsulates any type:

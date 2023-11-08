@@ -1192,7 +1192,7 @@ class ParsedTagSpec {
 
   // Whether or not the tag should be recorded via
   // Context->RecordTagspecValidated if it was validated
-  // successfullly. For performance, this is only done for tags that
+  // successfully. For performance, this is only done for tags that
   // are mandatory, unique, or possibly required by some other tag.
   RecordValidated ShouldRecordTagspecValidated() const {
     return should_record_tagspec_validated_;
@@ -1284,7 +1284,7 @@ std::string TagSpecUrl(const TagSpec& spec) {
     return StrCat(extension_spec_url_prefix, spec.extension_spec().name());
   if (spec.requires_extension_size() > 0)
     // Return the first |requires_extension|, which should be the most
-    // representitive.
+    // representative.
     return StrCat(extension_spec_url_prefix, spec.requires_extension(0));
 
   return "";
@@ -2834,11 +2834,11 @@ class InvalidRuleVisitor : public htmlparser::css::RuleVisitor {
 class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
  public:
   InvalidDeclVisitor(const ParsedDocCssSpec& css_spec, Context* context,
-                     const std::string& tag_decriptive_name,
+                     const std::string& tag_descriptive_name,
                      ValidationResult* result)
       : css_spec_(css_spec),
         context_(context),
-        tag_descriptive_name_(tag_decriptive_name),
+        tag_descriptive_name_(tag_descriptive_name),
         result_(result) {}
 
   void VisitDeclaration(

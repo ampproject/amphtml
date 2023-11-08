@@ -132,7 +132,7 @@ class Strings {
     std::vector<char32_t> out;
     out.reserve(utf8.size() / 2);
     // We use the UnicodeText abstraction because it handles
-    // validation / coersion  under the hood, so what comes out of this is
+    // validation / conversion under the hood, so what comes out of this is
     // surely valid UTF8.
     auto codepoint = DecodeUtf8Symbol(&utf8);
     while (codepoint) {
@@ -194,7 +194,7 @@ class Strings {
   static void ToLower(std::string* s);
   static void ToUpper(std::string* s);
 
-  // Checks if string contains whitespace only chracters.
+  // Checks if string contains whitespace only characters.
   static bool IsAllWhitespaceChars(std::string_view s,
       std::string_view whitespace_chars = kWhitespace);
 

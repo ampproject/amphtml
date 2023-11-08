@@ -18,7 +18,7 @@
 // effects is minimized because this is a cc file not an h file. In fact, the
 // WebAssembly module never calls the glob function, so it is better to split
 // fileutil.cc into two files, and the WebAssembly module will only depend on
-// the one without glob funcitons.
+// the one without glob functions.
 #ifndef GLOB_TILDE
 #define GLOB_TILDE (1 << 12)
 #endif
