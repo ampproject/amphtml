@@ -116,7 +116,7 @@ export class DisplayObserver {
     /** @private @const {!Array<!ObserverDef>} */
     this.observers_ = [];
 
-    // Viewport observer is only needed because `postion:fixed` elements
+    // Viewport observer is only needed because `position:fixed` elements
     // are not observable by a documentElement or body's root.
     this.observers_.push({
       container: null,
