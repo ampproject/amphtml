@@ -44,7 +44,7 @@ feature_tests/urls.html:29:2 Invalid URL protocol 'vbscript:' for attribute 'hre
 >>   ^~~~~~~~~
 feature_tests/urls.html:30:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
 |    <a href="ftp://google.com/">Valid protocol</a>
-|    <!-- invalid (javascript is not an allowed protocol: singular src element) -->
+|    <!-- invalid (javascript is not an allowed protocol: singluar src element) -->
 |    <amp-img srcset="javascript:alert(1)" layout="fill"></amp-img>
 >>   ^~~~~~~~~
 feature_tests/urls.html:33:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img/)
