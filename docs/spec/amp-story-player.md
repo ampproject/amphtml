@@ -119,7 +119,7 @@ The data will come from the `<amp-story>`'s metadata attributes in the story's d
 -   For the string of text: the `entity` attribute (if provided), otherwise the `publisher` attribute.
 -   When the attribution is clicked, it will navigate the user to a URL. This will come from `entity-url` attribute if provided, otherwise it will use the story's canonical domain.
 
-Read more about these attibutes on the [Metadata Guidelines of `amp-story`.](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story.md#metadata-guidelines)
+Read more about these attributes on the [Metadata Guidelines of `amp-story`.](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story.md#metadata-guidelines)
 
 ### JSON Configuration
 
