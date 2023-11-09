@@ -126,7 +126,7 @@ TEST(ParserTest, LineColTest) {
            }
            default:
              EXPECT_EQ(htmlparser::AtomUtil::ToString(
-                 t.atom) + " was unexpected.", "");
+                 t.atom) + " was unexecpted.", "");
          }
          num_callbacks++;
        }
@@ -245,7 +245,7 @@ TEST(ParserTest, LineColTest) {
             }
             default:
               EXPECT_EQ(htmlparser::AtomUtil::ToString(
-                  t.atom) + " was unexpected.", "");
+                  t.atom) + " was unexecpted.", "");
           }
           num_callbacks++;
         }
