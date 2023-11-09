@@ -13,7 +13,7 @@ The following fields are reported:
 -   `m=string` - the error message
 -   `a=1` - whether the error is labeled as "user" error (as opposed to a "dev" error).
 -   `ex=1` - whether the error is labeled as "expected".
--   `3p=1` - whether the error occured in the 3p context.
+-   `3p=1` - whether the error occurred in the 3p context.
 -   `ca=1` - whether this is a canary version of AMP.
 -   `or=string` - the ancestor origin if available.
 -   `iem=1` - whether this document is iframed.

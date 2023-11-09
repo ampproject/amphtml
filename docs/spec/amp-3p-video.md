@@ -9,7 +9,7 @@ Internally these players load an iframe whose page communicates with the outer d
 
 ## I want to contribute my vendor-specific player
 
-You probaby do **_not_** need to build your own player.
+You probably do **_not_** need to build your own player.
 
 The `amp-video-iframe` playback interface supports the following methods, which we believe cover the vast majority of cases AMP documents necessitate:
 
