@@ -2247,7 +2247,7 @@ type CssSpec struct {
 	ValidateKeyframes *bool `protobuf:"varint,6,opt,name=validate_keyframes,json=validateKeyframes" json:"validate_keyframes,omitempty"`
 	// Any declaration listed here are allowed.
 	Declaration []string `protobuf:"bytes,7,rep,name=declaration" json:"declaration,omitempty"`
-	// If fase, declarations tagged with `!important` are considered errors.
+	// If false, declarations tagged with `!important` are considered errors.
 	// Most AMP stylesheets disallow `!important` to reserve this override
 	// for AMP's own styles.
 	AllowImportant *bool         `protobuf:"varint,8,opt,name=allow_important,json=allowImportant,def=0" json:"allow_important,omitempty"`

@@ -91,7 +91,7 @@ would allow applying the validator rules for `AMP4ADS` or `AMP4EMAIL` as well. `
 
 ### 1.0.30
 
--   Remove engine section from pacakge.json to allow any version of nodejs.
+-   Remove engine section from package.json to allow any version of nodejs.
 
 ### 1.0.29
 

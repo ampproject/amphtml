@@ -177,7 +177,7 @@ TEST(URLTest, IPv6Urls) {
   EXPECT_TRUE(URL("http://[1:2:3:4:5:6::abc]").is_valid());
   EXPECT_TRUE(URL("http://[1:2:3:4:5:6::abcd]").is_valid());
 
-  // Illegal characeters.
+  // Illegal characters.
   EXPECT_FALSE(URL("http://[abcd:123_:abcd::]").is_valid());
   EXPECT_FALSE(URL("http://[abcd:123O:abcd::]").is_valid());
   // Two compression not valid.

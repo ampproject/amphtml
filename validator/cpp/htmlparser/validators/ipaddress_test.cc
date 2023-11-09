@@ -112,7 +112,7 @@ TEST(ParserTest, InValidURLs) {
   EXPECT_EQ(V("[xyz::abcd:0a]").second.second, 2 /* x */);
   // More than 4 bytes.
   EXPECT_FALSE(V("[abcd:1234:abcde::]").first);
-  // Illegal characeters.
+  // Illegal characters.
   EXPECT_FALSE(V("[abcd:1234:abcd#::]").first);
   EXPECT_FALSE(V("[abcd:123_:abcd::]").first);
   EXPECT_FALSE(V("[abcd:123O:abcd::]").first);
