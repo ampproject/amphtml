@@ -101,7 +101,7 @@ commands:
         default: false
       node-version:
         type: string
-        default: '18' # TODO(wg-infra): restore this to 'lts' once #39510 is fixed.
+        default: 'lts/*'
     steps:
       - unless:
           condition: << parameters.is-initializing-job >>
