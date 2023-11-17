@@ -1152,8 +1152,8 @@ class CssContextImpl {
       this.vars_ && this.vars_[varName] != undefined
         ? this.vars_[varName]
         : this.currentTarget_
-        ? this.measure(this.currentTarget_, varName)
-        : null;
+          ? this.measure(this.currentTarget_, varName)
+          : null;
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }

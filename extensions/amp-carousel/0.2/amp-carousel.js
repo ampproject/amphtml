@@ -404,8 +404,8 @@ class AmpCarousel extends AMP.BaseElement {
     return currentIndex - 1 >= 0
       ? currentIndex - 1
       : this.element.hasAttribute('loop')
-      ? this.slides_.length - 1
-      : null;
+        ? this.slides_.length - 1
+        : null;
   }
 
   /**
@@ -418,8 +418,8 @@ class AmpCarousel extends AMP.BaseElement {
     return currentIndex + 1 < this.slides_.length
       ? currentIndex + 1
       : this.element.hasAttribute('loop')
-      ? 0
-      : null;
+        ? 0
+        : null;
   }
 
   /**
