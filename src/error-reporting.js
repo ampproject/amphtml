@@ -550,13 +550,16 @@ export function getErrorReportData(
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {
-    data['3p'] = '1';
     runtime = '3p';
+    data['3p'] = '1';
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
 
   data['rt'] = runtime;
+
+  // The value of urls.cdn.
+  data['cdn'] = urls.cdn;
 
   // Add our a4a id if we are inabox
   if (runtime === 'inabox') {
