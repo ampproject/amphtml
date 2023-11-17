@@ -653,8 +653,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             this.readyState_ != ReadyState_Enum.MOUNTING
               ? this.readyState_
               : this.implClass_.usesLoading(this)
-              ? ReadyState_Enum.LOADING
-              : ReadyState_Enum.MOUNTING
+                ? ReadyState_Enum.LOADING
+                : ReadyState_Enum.MOUNTING
           );
           this.mounted_ = true;
           const result = this.impl_.mountCallback(signal);

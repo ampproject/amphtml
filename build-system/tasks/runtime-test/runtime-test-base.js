@@ -109,10 +109,10 @@ class RuntimeTestConfig {
     const browser = argv.edge
       ? 'EdgeCustom'
       : argv.firefox
-      ? 'FirefoxCustom'
-      : argv.safari
-      ? 'SafariCustom'
-      : 'ChromeCustom';
+        ? 'FirefoxCustom'
+        : argv.safari
+          ? 'SafariCustom'
+          : 'ChromeCustom';
     Object.assign(this, {browsers: [browser], customLaunchers});
   }
 

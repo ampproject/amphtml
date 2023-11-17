@@ -743,9 +743,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.initialSize_ = this.isFluidPrimaryRequest_
       ? {width: 0, height: 0}
       : width && height
-      ? // width/height could be 'auto' in which case we fallback to measured.
-        {width, height}
-      : this.getIntersectionElementLayoutBox();
+        ? // width/height could be 'auto' in which case we fallback to measured.
+          {width, height}
+        : this.getIntersectionElementLayoutBox();
     this.jsonTargeting = tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey = this.generateAdKey_(
       `${this.initialSize_.width}x${this.initialSize_.height}`

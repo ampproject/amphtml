@@ -283,18 +283,18 @@ export class AmpDateCountdown extends AMP.BaseElement {
       TimeUnit[this.biggestUnit_] == TimeUnit.HOURS
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_HOUR))
         : TimeUnit[this.biggestUnit_] < TimeUnit.HOURS
-        ? this.supportBackDate_(
-            Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
-          )
-        : 0;
+          ? this.supportBackDate_(
+              Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
+            )
+          : 0;
     const m =
       TimeUnit[this.biggestUnit_] == TimeUnit.MINUTES
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_MINUTE))
         : TimeUnit[this.biggestUnit_] < TimeUnit.MINUTES
-        ? this.supportBackDate_(
-            Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
-          )
-        : 0;
+          ? this.supportBackDate_(
+              Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
+            )
+          : 0;
     const s =
       TimeUnit[this.biggestUnit_] == TimeUnit.SECONDS
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_SECOND))

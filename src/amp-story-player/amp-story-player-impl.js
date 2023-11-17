@@ -1142,8 +1142,8 @@ export class AmpStoryPlayer {
       story.distance === 0
         ? STORY_POSITION_ENUM.CURRENT
         : story.idx > this.currentIdx_
-        ? STORY_POSITION_ENUM.NEXT
-        : STORY_POSITION_ENUM.PREVIOUS;
+          ? STORY_POSITION_ENUM.NEXT
+          : STORY_POSITION_ENUM.PREVIOUS;
 
     requestAnimationFrame(() => {
       const {iframe} = story;

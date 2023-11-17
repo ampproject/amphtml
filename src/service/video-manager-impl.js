@@ -1254,8 +1254,8 @@ export class AutoFullscreenManager {
         const pos = optPos
           ? dev().assertString(optPos)
           : bottom > vh
-          ? 'bottom'
-          : 'top';
+            ? 'bottom'
+            : 'top';
         return viewport.animateScrollIntoView(element, pos);
       });
   }

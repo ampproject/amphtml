@@ -182,18 +182,18 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
     TimeUnit[biggestUnit] == TimeUnit.HOURS
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_HOUR))
       : TimeUnit[biggestUnit] < TimeUnit.HOURS
-      ? supportBackDate(
-          Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
-        )
-      : 0;
+        ? supportBackDate(
+            Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
+          )
+        : 0;
   const m =
     TimeUnit[biggestUnit] == TimeUnit.MINUTES
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_MINUTE))
       : TimeUnit[biggestUnit] < TimeUnit.MINUTES
-      ? supportBackDate(
-          Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
-        )
-      : 0;
+        ? supportBackDate(
+            Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
+          )
+        : 0;
   const s =
     TimeUnit[biggestUnit] == TimeUnit.SECONDS
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_SECOND))
