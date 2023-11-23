@@ -326,15 +326,32 @@ Read more about [Writing Stories](https://storybook.js.org/docs/guides/guide-pre
 
 ## Testing on devices
 
+### Testing with Tunnelmole
+It's much faster to debug with local build (`amp` + `http://localhost:8000/`). In Chrome you can use [DevTools port forwarding](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server). However, iOS Safari does not give a similar option. Instead, you can use an open source tunneling tool like [Tunnelmole](https://github.com/robbie-cahill/tunnelmole-client) to get a public URL for your local server, which you can then visit on iOS or any other device. Install using one of the following options:
+- NPM: `npm install -g tunnelmole`
+- Linux: `curl -s https://tunnelmole.com/sh/install-linux.sh | sudo bash`
+- Mac: `curl -s https://tunnelmole.com/sh/install-mac.sh --output install-mac.sh && sudo bash install-mac.sh`
+- Windows: Install with NPM, or if you don't have NodeJS installed download the `exe` file for Windows [here](https://tunnelmole.com/downloads/tmole.exe) and put it somewhere in your PATH.
+
+Then, run it like this
+```sh
+tmole 8000
+```
+Once started, Tunnelmole will print URLs for both `http` and `https`. E.g. 
+```
+➜  ~ tmole 8000
+http://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
+https://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
+```
+
 ### Testing with ngrok
+Ngrok is a popular closed source, proprietary tunneling tool.
 
-It's much faster to debug with local build (`amp` + `http://localhost:8000/`). In Chrome you can use [DevTools port forwarding](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server). However, iOS Safari does not give a similar option. Instead, you can use [ngrok](https://ngrok.com/). Just [download](https://ngrok.com/download) the ngrok binary for your platform and run it like this:
-
+To use ngrok, first download a binary for your platform at https://ngrok.com/download. Then run it like 
 ```sh
 ngrok http 8000
 ```
-
-Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be used to debug on iOS and elsewhere.
+Once started, ngrok will print URLs for both `http` and `https`. E.g. `http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be used to debug on iOS and elsewhere.
 
 ### Testing with Firebase
 
