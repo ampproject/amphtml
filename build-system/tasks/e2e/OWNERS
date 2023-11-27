@@ -6,7 +6,6 @@
     {
       owners: [
         {name: 'ampproject/wg-infra'},
-        {name: 'estherkim', notify: true},
       ],
     },
   ],
