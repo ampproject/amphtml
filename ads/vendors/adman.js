@@ -6,14 +6,14 @@ import {validateData} from '#3p/3p';
  */
 export function adman(global, data) {
   validateData(data, ['ws', 'host'], []);
-  const {host, ws, s} = data;
+  const {host, s, ws} = data;
   const script = global.document.createElement('script');
   script.src = 'https://static.adman.gr/adman.js';
   global.document.body.appendChild(script);
 
   if (host.match(/grxchange/)) {
     script.onload = function () {
-      Adman.adunit({
+      window.Adman.adunit({
         id: ws,
         h: 'https://' + host,
         elementId: 'c',
