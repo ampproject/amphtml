@@ -1,6 +1,10 @@
 #include "cpp/htmlparser/json/json.h"
 
+#include <memory>
 #include <stack>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "absl/strings/numbers.h"
 #include "cpp/htmlparser/logging.h"
