@@ -62,7 +62,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -110,11 +112,6 @@
   },
   {
     "name": "amp-ad-network-fake-impl",
-    "version": "0.1",
-    "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-ad-network-mgid-impl",
     "version": "0.1",
     "latestVersion": "0.1"
   },
@@ -178,22 +175,9 @@
     }
   },
   {
-    "name": "amp-app-banner",
-    "version": "1.0",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-audio",
     "version": "0.1",
     "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-audio",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {}
   },
   {
     "name": "amp-auto-ads",
@@ -226,7 +210,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -259,7 +245,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -319,7 +307,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "npm": true,
+      "hasCss": true,
+      "bento": true
     }
   },
   {
@@ -332,6 +322,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "npm": true,
+      "bento": true,
       "hasCss": true
     }
   },
@@ -345,20 +337,14 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "npm": true,
+      "bento": true,
       "hasCss": true
     }
   },
   {
     "name": "amp-date-picker",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
-    "name": "amp-date-picker",
-    "version": "1.0",
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
@@ -387,7 +373,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -408,7 +396,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -439,7 +429,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -484,20 +476,9 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-gist",
-    "version": "1.0",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-google-document-embed",
     "version": "0.1",
     "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-google-read-aloud-player",
-    "version": "0.1"
   },
   {
     "name": "amp-gwd-animation",
@@ -522,7 +503,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -546,14 +529,6 @@
   {
     "name": "amp-image-slider",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
-    "name": "amp-image-slider",
-    "version": "1.0",
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
@@ -585,7 +560,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -606,7 +583,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -634,7 +613,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "bento": true,
+      "npm": true
     }
   },
   {
@@ -655,7 +636,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -671,7 +654,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -685,13 +670,6 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
-    }
-  },
-  {
-    "name": "amp-list",
-    "version": "1.0",
-    "options": {
-      "hasCss": false
     }
   },
   {
@@ -723,7 +701,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "bento": true,
+      "npm": true
     }
   },
   {
@@ -818,13 +798,6 @@
     }
   },
   {
-    "name": "amp-pan-zoom",
-    "version": "1.0",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-pinterest",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -862,6 +835,11 @@
     "options": {
       "hasCss": true
     }
+  },
+  {
+    "name": "amp-redbull-player",
+    "version": "0.1",
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-reddit",
@@ -904,7 +882,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -931,7 +911,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -943,11 +925,6 @@
     "// 1": "`amp-slides` is deprecated",
     "// 2": "Please use `<amp-carousel type=slides>` instead.",
     "name": "amp-slides",
-    "version": "0.1",
-    "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-slikeplayer",
     "version": "0.1",
     "latestVersion": "0.1"
   },
@@ -969,7 +946,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -982,7 +961,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1012,26 +993,9 @@
     }
   },
   {
-    "name": "amp-story",
-    "version": "1.0",
-    "latestVersion": "1.0",
-    "options": {
-      "hasCss": false,
-      "additionalSuffix": "ssr-css",
-      "ssrCss": true
-    }
-  },
-  {
     "name": "amp-story-360",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
-    "name": "amp-story-audio-sticker",
-    "version": "0.1",
     "options": {
       "hasCss": true
     }
@@ -1121,13 +1085,6 @@
     }
   },
   {
-    "name": "amp-story-subscriptions",
-    "version": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-stream-gallery",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -1140,7 +1097,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1177,7 +1136,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1198,7 +1159,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1219,7 +1182,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1240,7 +1205,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1265,7 +1232,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1301,7 +1270,9 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1319,7 +1290,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   }
 ]
