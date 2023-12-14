@@ -3,7 +3,11 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
-import {getDataParamsFromAttributes, removeElement} from '#core/dom';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
@@ -24,7 +28,7 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {redispatch} from '../../../src/iframe-video';
+import {mutedOrUnmutedEvent, redispatch} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
 import {
   VideoEvents_Enum,
@@ -92,6 +96,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isFullscreen_ = false;
+
+    /** @private {boolean} */
+    this.muted_ = true;
   }
 
   /**
@@ -323,8 +330,33 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     // bind to amp consent and send consent info to the iframe content and propagate to player
     this.bindToAmpConsent_();
 
+    const mutationObserverConfig = {
+      attributes: true,
+      childList: false,
+      subtree: false,
+    };
+
+    const callback = (mutationList) => {
+      for (const mutation of mutationList) {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class'
+        ) {
+          this.sendCommand_(
+            mutation.target.classList.contains('i-amphtml-video-docked')
+              ? 'dock'
+              : 'undock'
+          );
+        }
+      }
+    };
+
+    const observer = new MutationObserver(callback);
+    observer.observe(this.iframe_, mutationObserverConfig);
+
     observeContentSize(this.element, this.onResized_);
     this.pauseHelper_.updatePlaying(true);
+    dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
 
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
@@ -393,11 +425,15 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   mute() {
+    this.muted_ = true;
+    dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     this.sendCommand_('mute');
   }
 
   /** @override */
   unmute() {
+    this.muted_ = false;
+    dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     this.sendCommand_('unmute');
   }
 
