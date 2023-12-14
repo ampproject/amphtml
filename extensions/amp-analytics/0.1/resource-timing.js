@@ -1,7 +1,9 @@
-import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {findIndex} from '#core/types/array';
 import {isObject} from '#core/types';
+import {findIndex} from '#core/types/array';
+
 import {user} from '#utils/log';
+
+import {ExpansionOptions, variableServiceForDoc} from './variables';
 
 /**
  * A user-supplied JSON object that defines a resource to be reported. It is
@@ -169,7 +171,7 @@ function nameForEntry(entry, resourcesByHost) {
  * patterns) by host pattern. This is used downstream to avoid running RegExps
  * for host patterns multiple times because we expect multiple resources to
  * use the same host pattern.
- * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs A map of
+ * @param {!{[key: string]: !IndividualResourceSpecDef}} resourceDefs A map of
  *     names to the resource spec for that name.
  * @return {!Array<!ResourceSpecForHostDef>}
  */
@@ -205,7 +207,7 @@ function groupSpecsByHost(resourceDefs) {
  * resourceDefs. It returns a new array where each element contains a
  * resource timing entry and the corresponding name.
  * @param {!Array<!PerformanceResourceTiming>} entries
- * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs
+ * @param {!{[key: string]: !IndividualResourceSpecDef}} resourceDefs
  * @return {!Array<{entry: !PerformanceResourceTiming, name: string}>}
  */
 function filterEntries(entries, resourceDefs) {

@@ -1,15 +1,18 @@
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
+import {BaseElement} from '#bento/components/bento-youtube/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
 
-import {userAssert} from '#utils/log';
+import {setSuperClass} from '#preact/amp-base-element';
 
-import {BaseElement} from './base-element';
+import {userAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-youtube-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-youtube';
 
-class AmpYoutube extends BaseElement {
+class AmpYoutube extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

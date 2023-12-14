@@ -5,23 +5,23 @@ import {Messaging} from '@ampproject/viewer-messaging';
 import {devAssertElement} from '#core/assert';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
-import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {isJsonScriptTag, toggleAttribute, tryFocus} from '#core/dom';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
 import {isEnumValue} from '#core/types/enum';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
+import {copyTextToClipboard} from '#core/window/clipboard';
 
 import {createCustomEvent, listenOnce} from '#utils/event-helper';
 
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {AMP_STORY_PLAYER_EVENT} from './event';
+import {AMP_STORY_COPY_URL, AMP_STORY_PLAYER_EVENT} from './event';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 import {
   addParamsToUrl,
@@ -102,6 +102,7 @@ const STORY_MESSAGE_STATE_TYPE_ENUM = {
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
+  DESKTOP_ASPECT_RATIO: 'DESKTOP_ASPECT_RATIO',
 };
 
 /** @const {string} */
@@ -121,7 +122,8 @@ let DocumentStateTypeDef;
  *   title: (?string),
  *   posterImage: (?string),
  *   storyContentLoaded: ?boolean,
- *   connectedDeferred: !Deferred
+ *   connectedDeferred: !Deferred,
+ *   desktopAspectRatio: ?number,
  * }}
  */
 let StoryDef;
@@ -177,7 +179,7 @@ const LOG_TYPE_ENUM = {
  * NOTE: If udpated here, update in amp-story.js
  * @private @const {number}
  */
-const PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+const PANEL_ASPECT_RATIO_THRESHOLD = 31 / 40;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -252,6 +254,9 @@ export class AmpStoryPlayer {
 
     /** @private {?Element} */
     this.nextButton_ = null;
+
+    /** @private {boolean} */
+    this.pageAttachmentOpen_ = false;
 
     return this.element_;
   }
@@ -431,9 +436,7 @@ export class AmpStoryPlayer {
 
   /** @private */
   signalReady_() {
-    this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'ready', dict({}))
-    );
+    this.element_.dispatchEvent(createCustomEvent(this.win_, 'ready', {}));
     this.element_.isReady = true;
   }
 
@@ -500,7 +503,7 @@ export class AmpStoryPlayer {
           isBack
             ? DEPRECATED_EVENT_NAMES_ENUM.BACK
             : DEPRECATED_EVENT_NAMES_ENUM.CLOSE,
-          dict({})
+          {}
         )
       );
     });
@@ -556,7 +559,7 @@ export class AmpStoryPlayer {
       setStyle(iframeEl, 'backgroundImage', story.posterImage);
     }
     iframeEl.classList.add('story-player-iframe');
-    iframeEl.setAttribute('allow', 'autoplay');
+    iframeEl.setAttribute('allow', 'autoplay; web-share');
 
     applySandbox(iframeEl);
     this.addSandboxFlags_(iframeEl);
@@ -617,29 +620,34 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
 
+          messaging.registerHandler('storyContentLoaded', () => {
+            story.storyContentLoaded = true;
+
+            // Store aspect ratio so that it can be updated when the story becomes active.
+            this.storeAndMaybeUpdateAspectRatio_(story);
+          });
+
           messaging.sendRequest(
             'onDocumentState',
-            dict({
+            {
               'state': STORY_MESSAGE_STATE_TYPE_ENUM.PAGE_ATTACHMENT_STATE,
-            }),
+            },
             false
           );
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.CURRENT_PAGE_ID}),
+            {'state': STORY_MESSAGE_STATE_TYPE_ENUM.CURRENT_PAGE_ID},
             false
           );
 
-          messaging.sendRequest(
-            'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE})
-          );
+          messaging.sendRequest('onDocumentState', {
+            'state': STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE,
+          });
 
-          messaging.sendRequest(
-            'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE})
-          );
+          messaging.sendRequest('onDocumentState', {
+            'state': STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE,
+          });
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
@@ -653,7 +661,7 @@ export class AmpStoryPlayer {
 
             messaging.sendRequest(
               'customDocumentUI',
-              dict({'controls': this.playerConfig_.controls}),
+              {'controls': this.playerConfig_.controls},
               false
             );
           }
@@ -778,12 +786,14 @@ export class AmpStoryPlayer {
    * @private
    */
   checkButtonsDisabled_() {
-    this.prevButton_.toggleAttribute(
+    toggleAttribute(
+      this.prevButton_,
       'disabled',
       this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
         !this.isCircularWrappingEnabled_
     );
-    this.nextButton_.toggleAttribute(
+    toggleAttribute(
+      this.nextButton_,
       'disabled',
       this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
         !this.isCircularWrappingEnabled_
@@ -844,25 +854,6 @@ export class AmpStoryPlayer {
         console /*OK*/
           .error(`[${TAG}]`, reason);
       });
-  }
-
-  /**
-   * Resolves currentStoryLoadDeferred_ when given story's content is finished
-   * loading.
-   * @param {!StoryDef} story
-   * @private
-   */
-  initStoryContentLoadedPromise_(story) {
-    this.currentStoryLoadDeferred_ = new Deferred();
-
-    story.messagingPromise.then((messaging) =>
-      messaging.registerHandler('storyContentLoaded', () => {
-        // Stories that already loaded won't dispatch a `storyContentLoaded`
-        // event anymore, which is why we need this sync property.
-        story.storyContentLoaded = true;
-        this.currentStoryLoadDeferred_.resolve();
-      })
-    );
   }
 
   /**
@@ -1151,8 +1142,8 @@ export class AmpStoryPlayer {
       story.distance === 0
         ? STORY_POSITION_ENUM.CURRENT
         : story.idx > this.currentIdx_
-        ? STORY_POSITION_ENUM.NEXT
-        : STORY_POSITION_ENUM.PREVIOUS;
+          ? STORY_POSITION_ENUM.NEXT
+          : STORY_POSITION_ENUM.PREVIOUS;
 
     requestAnimationFrame(() => {
       const {iframe} = story;
@@ -1162,14 +1153,51 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Returns a promise that makes sure current story gets loaded first before
-   * others.
+   * Store aspect ratio of the loaded story and and maybe update the active aspect ratio.
+   * @param {!StoryDef} story
+   * @private
+   */
+  storeAndMaybeUpdateAspectRatio_(story) {
+    story.messagingPromise.then((messaging) => {
+      messaging
+        .sendRequest(
+          'getDocumentState',
+          {state: STORY_MESSAGE_STATE_TYPE_ENUM.DESKTOP_ASPECT_RATIO},
+          true
+        )
+        .then((event) => {
+          story.desktopAspectRatio = event.value;
+          this.maybeUpdateAspectRatio_();
+        });
+    });
+  }
+
+  /**
+   * Update player aspect ratio based on the active story aspect ratio.
+   * @private
+   */
+  maybeUpdateAspectRatio_() {
+    if (this.stories_[this.currentIdx_].desktopAspectRatio) {
+      setStyles(this.rootEl_, {
+        '--i-amphtml-story-player-panel-ratio':
+          this.stories_[this.currentIdx_].desktopAspectRatio,
+      });
+    }
+  }
+
+  /**
+   * Returns a promise that makes sure that the current story gets loaded first
+   * before any others. When the given story is not the current story, it will
+   * block until the current story has finished loading. When the given story
+   * is the current story, then this method will not block.
    * @param {!StoryDef} story
    * @return {!Promise}
    * @private
    */
   currentStoryPromise_(story) {
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
+      this.maybeUpdateAspectRatio_();
+
       return Promise.resolve();
     }
 
@@ -1177,14 +1205,24 @@ export class AmpStoryPlayer {
       return this.currentStoryLoadDeferred_.promise;
     }
 
-    if (this.currentStoryLoadDeferred_) {
-      // Cancel previous story load promise.
-      this.currentStoryLoadDeferred_.reject(
-        `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
-      );
-    }
+    // Cancel previous story load promise.
+    this.currentStoryLoadDeferred_?.reject(
+      `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
+    );
 
-    this.initStoryContentLoadedPromise_(story);
+    this.currentStoryLoadDeferred_ = new Deferred();
+    story.messagingPromise.then((messaging) =>
+      messaging.registerHandler('storyContentLoaded', () => {
+        // Stories that already loaded won't dispatch a `storyContentLoaded`
+        // event anymore, which is why we need this sync property.
+        story.storyContentLoaded = true;
+        this.currentStoryLoadDeferred_.resolve();
+
+        // Store and update the player aspect ratio based on the active story aspect ratio.
+        this.storeAndMaybeUpdateAspectRatio_(story);
+      })
+    );
+
     return Promise.resolve();
   }
 
@@ -1384,9 +1422,9 @@ export class AmpStoryPlayer {
 
     let noFragmentUrl = removeFragment(href);
     if (isProxyOrigin(href)) {
-      const ampJsQueryParam = dict({
+      const ampJsQueryParam = {
         'amp_js_v': '0.1',
-      });
+      };
       noFragmentUrl = addParamsToUrl(noFragmentUrl, ampJsQueryParam);
     }
     const inputUrl = noFragmentUrl + '#' + serializeQueryString(fragmentParams);
@@ -1562,6 +1600,9 @@ export class AmpStoryPlayer {
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
         break;
+      case AMP_STORY_COPY_URL:
+        this.onCopyUrl_(/** @type {string} */ (data.value), messaging);
+        break;
       default:
         break;
     }
@@ -1579,11 +1620,41 @@ export class AmpStoryPlayer {
         this.next_();
         break;
       default:
-        this.element_.dispatchEvent(
-          createCustomEvent(this.win_, value, dict({}))
-        );
+        this.element_.dispatchEvent(createCustomEvent(this.win_, value, {}));
         break;
     }
+  }
+
+  /**
+   * Reacts to the copy url request coming from the story.
+   * @private
+   * @param {string} value
+   * @param {Messaging} messaging
+   */
+  onCopyUrl_(value, messaging) {
+    copyTextToClipboard(
+      this.win_,
+      value,
+      () => {
+        messaging.sendRequest(
+          'copyComplete',
+          {
+            'success': true,
+            'url': value,
+          },
+          false
+        );
+      },
+      () => {
+        messaging.sendRequest(
+          'copyComplete',
+          {
+            'success': false,
+          },
+          false
+        );
+      }
+    );
   }
 
   /**
@@ -1607,19 +1678,15 @@ export class AmpStoryPlayer {
     messaging
       .sendRequest(
         'getDocumentState',
-        dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.STORY_PROGRESS}),
+        {'state': STORY_MESSAGE_STATE_TYPE_ENUM.STORY_PROGRESS},
         true
       )
       .then((progress) => {
         this.element_.dispatchEvent(
-          createCustomEvent(
-            this.win_,
-            'storyNavigation',
-            dict({
-              'pageId': pageId,
-              'progress': progress.value,
-            })
-          )
+          createCustomEvent(this.win_, 'storyNavigation', {
+            'pageId': pageId,
+            'progress': progress.value,
+          })
         );
       });
   }
@@ -1631,6 +1698,7 @@ export class AmpStoryPlayer {
    */
   onPageAttachmentStateUpdate_(pageAttachmentOpen) {
     this.updateButtonVisibility_(!pageAttachmentOpen);
+    this.pageAttachmentOpen_ = pageAttachmentOpen;
     this.dispatchPageAttachmentEvent_(pageAttachmentOpen);
   }
 
@@ -1663,7 +1731,7 @@ export class AmpStoryPlayer {
       createCustomEvent(
         this.win_,
         isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-close',
-        dict({})
+        {}
       )
     );
   }
@@ -1702,7 +1770,7 @@ export class AmpStoryPlayer {
     }
 
     if (endOfStories) {
-      this.element_.dispatchEvent(createCustomEvent(this.win_, name, dict({})));
+      this.element_.dispatchEvent(createCustomEvent(this.win_, name, {}));
     }
   }
 
@@ -1724,13 +1792,9 @@ export class AmpStoryPlayer {
       this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
 
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'amp-story-player-touchstart',
-        dict({
-          'touches': event.touches,
-        })
-      )
+      createCustomEvent(this.win_, 'amp-story-player-touchstart', {
+        'touches': event.touches,
+      })
     );
   }
 
@@ -1746,14 +1810,10 @@ export class AmpStoryPlayer {
     }
 
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'amp-story-player-touchmove',
-        dict({
-          'touches': event.touches,
-          'isNavigationalSwipe': this.touchEventState_.isSwipeX,
-        })
-      )
+      createCustomEvent(this.win_, 'amp-story-player-touchmove', {
+        'touches': event.touches,
+        'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+      })
     );
 
     if (this.touchEventState_.isSwipeX === false) {
@@ -1787,14 +1847,10 @@ export class AmpStoryPlayer {
    */
   onTouchEnd_(event) {
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'amp-story-player-touchend',
-        dict({
-          'touches': event.touches,
-          'isNavigationalSwipe': this.touchEventState_.isSwipeX,
-        })
-      )
+      createCustomEvent(this.win_, 'amp-story-player-touchend', {
+        'touches': event.touches,
+        'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+      })
     );
 
     if (this.touchEventState_.isSwipeX === true) {
@@ -1818,7 +1874,7 @@ export class AmpStoryPlayer {
    * @param {!Object} gesture
    */
   onSwipeX_(gesture) {
-    if (this.stories_.length <= 1) {
+    if (this.stories_.length <= 1 || this.pageAttachmentOpen_) {
       return;
     }
 

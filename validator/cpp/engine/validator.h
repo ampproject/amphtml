@@ -23,6 +23,7 @@
 #ifndef CPP_ENGINE_VALIDATOR_H_
 #define CPP_ENGINE_VALIDATOR_H_
 
+#include "cpp/htmlparser/css/parse-css.h"
 #include "cpp/htmlparser/document.h"
 #include "validator.pb.h"
 
@@ -38,6 +39,7 @@ ValidationResult Validate(std::string_view html,
 
 int RulesSpecVersion();
 int ValidatorVersion();
+htmlparser::css::CssParsingConfig GenCssParsingConfig();
 
 }  // namespace amp::validator
 

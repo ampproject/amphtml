@@ -1,14 +1,20 @@
+import {expect} from 'chai';
+
 import {Services} from '#service';
 
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import * as analyticsApi from '#utils/analytics';
+
+import {
+  getAmpdoc,
+  registerServiceBuilder,
+} from '../../../../src/service-helpers';
+import {AmpStoryShare} from '../amp-story-share';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-
-import {AmpStoryShare} from '../amp-story-share';
-import {expect} from 'chai';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 
 describes.realWin('amp-story-share', {amp: true}, (env) => {
   let ampStoryShare;
@@ -16,6 +22,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
   let storeService;
   let win;
   let installExtensionForDoc;
+  let analyticsTriggerStub;
 
   beforeEach(() => {
     win = env.win;
@@ -42,6 +49,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
     ampStory = win.document.createElement('amp-story');
     win.document.body.appendChild(ampStory);
     ampStoryShare = new AmpStoryShare(win, ampStory);
+    getAnalyticsService(win, ampStory);
   });
 
   it('should build the sharing menu if native sharing is unsupported', () => {
@@ -87,5 +95,26 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
       url: 'https://amp.dev',
       text: 'AMP',
     });
+  });
+
+  it('should send correct analytics tagName and eventType when opening the share menu', async () => {
+    analyticsTriggerStub = env.sandbox.stub(
+      analyticsApi,
+      'triggerAnalyticsEvent'
+    );
+    env.sandbox.stub(ampStoryShare, 'isSystemShareSupported_').returns(false);
+
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+
+    await getAmpdoc(win.document).whenFirstVisible();
+
+    // tagName should be amp-story-share-menu as per extensions/amp-story/amp-story-analytics.md
+    expect(analyticsTriggerStub).to.be.calledWith(
+      ampStory,
+      StoryAnalyticsEvent.OPEN,
+      env.sandbox.match(
+        (val) => val.eventDetails.tagName === 'amp-story-share-menu'
+      )
+    );
   });
 });

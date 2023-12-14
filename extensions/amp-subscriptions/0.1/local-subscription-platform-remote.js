@@ -1,10 +1,13 @@
+import {isArray} from '#core/types';
+
+import {Services} from '#service';
+
+import {devAssert, userAssert} from '#utils/log';
+
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
-import {Services} from '#service';
+
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {devAssert, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {isArray} from '#core/types';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -130,9 +133,9 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: dict({
+        headers: {
           'Content-Type': 'text/plain',
-        }),
+        },
         body: this.stringifyPingbackData_(selectedEntitlement),
       });
     });

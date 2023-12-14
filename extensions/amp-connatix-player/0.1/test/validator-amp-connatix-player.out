@@ -28,6 +28,16 @@ amp-connatix-player/0.1/test/validator-amp-connatix-player.html:23:2 The mandato
 |      width="150"
 |      height="80">
 |    </amp-connatix-player>
+|    <!-- Invalid: dock without amp-video-docking extension -->
+|    <amp-connatix-player
+>>   ^~~~~~~~~
+amp-connatix-player/0.1/test/validator-amp-connatix-player.html:29:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript.
+|      data-player-id="f721b0d8-7a79-42b6-b637-fa4e86138ed9"
+|      layout="responsive"
+|      width="150"
+|      height="80"
+|      dock>
+|    </amp-connatix-player>
 |    <!-- Valid -->
 |    <amp-connatix-player
 |      data-player-id="f721b0d8-7a79-42b6-b637-fa4e86138ed9"

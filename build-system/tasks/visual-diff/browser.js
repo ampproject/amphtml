@@ -3,12 +3,18 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const puppeteer = require('puppeteer');
-const PuppeteerExtraPluginUserPreferences = require('puppeteer-extra-plugin-user-preferences');
-const {addExtra} = require('puppeteer-extra');
+const {
+  Browser: BrowserEnum,
+  computeExecutablePath,
+  getInstalledBrowsers,
+  install,
+} = require('@puppeteer/browsers');
 const {cyan, yellow} = require('kleur/colors');
 const {HOST} = require('./consts');
 const {log} = require('./log');
+const puppeteer = require('puppeteer-core');
+
+const cacheDir = path.join(__dirname, '.cache');
 
 // REPEATING TODO(@ampproject/wg-infra): Update this whenever the Percy backend
 // starts using a new version of Chrome to render DOM snapshots.
@@ -16,26 +22,12 @@ const {log} = require('./log');
 // Steps:
 // 1. Open a recent Percy build, and click the “ⓘ” icon
 // 2. Note the Chrome major version at the bottom
-// 3. Look up the full version at https://en.wikipedia.org/wiki/Google_Chrome_version_history
-// 4. Open https://omahaproxy.appspot.com in a browser
-// 5. Go to "Tools" -> "Version information"
-// 6. Paste the full version (add ".0" at the end) in the "Version" field and click "Lookup"
-// 7. Copy the value next to "Branch Base Position"
-// 8. Clone the Puppeteer repository: `git clone https://github.com/puppeteer/puppeteer`
-// 9. Run `npm ci` in the cloned directory
-// 10. `node utils/check_availability.js ${branchBasePosition} ${branchBasePosition + 1000}`
-//     (e.g., `node utils/check_availability.js 870763 871763)
-// 10. Find the first available value for each platform and update the value below:
-const PUPPETEER_CHROMIUM_REVISION = // 91.0.4472.x
-  process.platform === 'linux'
-    ? '870763'
-    : process.platform === 'darwin' // ('mac' in check_availability.js output)
-    ? '870776'
-    : process.platform === 'win32' && process.arch === 'x32' // ('win32' in check_availability.js output)
-    ? '870768'
-    : process.platform === 'win32' && process.arch === 'x64' // ('win64' in check_availability.js output)
-    ? '870781'
-    : '';
+// 3. Open https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json
+// 4. In this JSON file look for the latest full version number that begins
+//    with the same major version number you noted in step 2. The list is
+//    ordered from earliest to latest version numbers.
+// 5. Update the value below:
+const PUPPETEER_CHROME_VERSION = '115.0.5790.170';
 
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -43,14 +35,12 @@ const VIEWPORT_HEIGHT = 100000;
 /**
  * Launches a Puppeteer controlled browser.
  *
- * Waits until the browser is up and reachable, and ties its lifecycle to this
- * process's lifecycle.
- *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
- * @return {Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
+ * @param {string} executablePath browser executable path.
+ * @return {!Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
  */
-async function launchBrowser(browserFetcher) {
+async function launchBrowser(executablePath) {
+  /** @type {"new" | false} */
+  const headless = !argv.dev && 'new';
   const browserOptions = {
     args: [
       '--disable-background-media-suspend',
@@ -63,26 +53,11 @@ async function launchBrowser(browserFetcher) {
       '--no-startup-window',
     ],
     dumpio: argv.chrome_debug,
-    headless: !argv.dev,
-    executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
-      .executablePath,
+    headless,
+    executablePath,
     waitForInitialPage: false,
   };
-
-  // @ts-ignore type mismatch in puppeteer-extra.
-  const puppeteerExtra = addExtra(puppeteer);
-  puppeteerExtra.use(
-    PuppeteerExtraPluginUserPreferences({
-      userPrefs: {
-        devtools: {
-          preferences: {
-            currentDockState: '"undocked"',
-          },
-        },
-      },
-    })
-  );
-  return await puppeteerExtra.launch(browserOptions);
+  return puppeteer.launch(browserOptions);
 }
 
 /**
@@ -168,43 +143,61 @@ async function resetPage(page, viewport = null) {
 }
 
 /**
- * Loads task-specific dependencies are returns an instance of BrowserFetcher.
+ * Returns the executable path of the browser, potentially installing and caching it.
  *
- * @return {Promise<!puppeteer.BrowserFetcher>}
+ * @return {Promise<string>}
  */
-async function loadBrowserFetcher() {
-  // @ts-ignore Valid method in Puppeteer's nodejs interface.
-  // https://github.com/puppeteer/puppeteer/blob/main/src/node/Puppeteer.ts
-  const browserFetcher = puppeteer.createBrowserFetcher();
-  const chromiumRevisions = await browserFetcher.localRevisions();
-  if (chromiumRevisions.includes(PUPPETEER_CHROMIUM_REVISION)) {
+async function fetchBrowserExecutablePath() {
+  const installedBrowsers = await getInstalledBrowsers({cacheDir});
+  const installedBrowser = installedBrowsers.find(
+    ({browser, buildId}) =>
+      browser == BrowserEnum.CHROME && buildId == PUPPETEER_CHROME_VERSION
+  );
+  if (installedBrowser) {
     log(
       'info',
-      'Using Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION)
+      'Using cached Percy-compatible version of Chrome',
+      cyan(PUPPETEER_CHROME_VERSION)
     );
   } else {
     log(
       'info',
-      'Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION),
-      'was not found. Downloading...'
+      'Percy-compatible version of Chrome',
+      cyan(PUPPETEER_CHROME_VERSION),
+      'was not found in cache. Downloading...'
     );
-    await browserFetcher.download(
-      PUPPETEER_CHROMIUM_REVISION,
-      (/* downloadedBytes, totalBytes */) => {
-        // TODO(@ampproject/wg-infra): display download progress.
-        // Logging every call is too verbose.
-      }
-    );
+    let logThrottler = true;
+    await install({
+      cacheDir,
+      browser: BrowserEnum.CHROME,
+      buildId: PUPPETEER_CHROME_VERSION,
+      downloadProgressCallback(downloadedBytes, totalBytes) {
+        if (logThrottler) {
+          log('info', downloadedBytes, '/', totalBytes, 'bytes');
+          logThrottler = false;
+          setTimeout(() => {
+            logThrottler = true;
+          }, 1000);
+        } else if (downloadedBytes == totalBytes) {
+          log(
+            'info',
+            'Finished downloading Chrome version',
+            cyan(PUPPETEER_CHROME_VERSION)
+          );
+        }
+      },
+    });
   }
-  return browserFetcher;
+  return computeExecutablePath({
+    cacheDir,
+    browser: BrowserEnum.CHROME,
+    buildId: PUPPETEER_CHROME_VERSION,
+  });
 }
 
 module.exports = {
-  PUPPETEER_CHROMIUM_REVISION,
   launchBrowser,
-  loadBrowserFetcher,
+  fetchBrowserExecutablePath,
   newPage,
   resetPage,
 };

@@ -2,7 +2,7 @@ const {getOutput} = require('../../common/process');
 
 /**
  * @param {Array<string>} files
- * @return {Object}
+ * @return {object}
  */
 function format(files) {
   return getOutput(`npx prettier --ignore-unknown --write ${files.join(' ')}`);

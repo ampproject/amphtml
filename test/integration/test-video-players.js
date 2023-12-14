@@ -12,20 +12,15 @@
 
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
-// TODO(aghassemi,#7822): Videos may not be playable on an iOS simulator.
-describes.sandboxed
-  .configure()
-  .skipIos()
-  .run('amp-video', {}, (env) => {
-    runVideoPlayerIntegrationTests(env, (fixture) => {
-      const video = fixture.doc.createElement('amp-video');
-      video.setAttribute('src', '/examples/av/ForBiggerJoyrides-tiny.mp4');
-      return video;
-    });
+describes.sandboxed('amp-video', {}, (env) => {
+  runVideoPlayerIntegrationTests(env, (fixture) => {
+    const video = fixture.doc.createElement('amp-video');
+    video.setAttribute('src', '/examples/av/ForBiggerJoyrides-tiny.mp4');
+    return video;
   });
+});
 
-// TODO(alanorozco): unskip
-describes.sandboxed.skip('amp-video-iframe', {}, (env) => {
+describes.sandboxed('amp-video-iframe', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
@@ -39,8 +34,7 @@ describes.sandboxed.skip('amp-video-iframe', {}, (env) => {
   );
 });
 
-//TODO(aghassemi, #9379): unskip
-describes.sandboxed.skip('amp-youtube', {}, (env) => {
+describes.sandboxed('amp-youtube', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
@@ -53,8 +47,7 @@ describes.sandboxed.skip('amp-youtube', {}, (env) => {
   );
 });
 
-//TODO(aghassemi, #9379): unskip
-describes.sandboxed.skip('amp-dailymotion', {}, (env) => {
+describes.sandboxed('amp-dailymotion', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
@@ -67,7 +60,7 @@ describes.sandboxed.skip('amp-dailymotion', {}, (env) => {
   );
 });
 
-describes.sandboxed.configure().skip('amp-3q-player', {}, (env) => {
+describes.sandboxed('amp-3q-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
@@ -95,8 +88,7 @@ describes.sandboxed.skip('amp-nexxtv-player', {}, (env) => {
   );
 });
 
-//TODO(aghassemi, #9379): unskip
-describes.sandboxed.skip('amp-ima-video', {}, (env) => {
+describes.sandboxed('amp-ima-video', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
@@ -118,8 +110,7 @@ describes.sandboxed.skip('amp-ima-video', {}, (env) => {
   );
 });
 
-//TODO(cvializ, #14833): unskip after brid player is fixed
-describes.sandboxed.skip('amp-brid-player', {}, (env) => {
+describes.sandboxed('amp-brid-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {

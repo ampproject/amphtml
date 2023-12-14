@@ -1,18 +1,22 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {isAdLike} from '../../../../src/iframe-helper';
-import {macroTask} from '#testing/helpers';
-import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
 import {user} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
 import {whenCalled} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
+import {isAdLike} from '../../../../src/iframe-helper';
+import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 
 /** @const {number} */
 const IFRAME_MESSAGE_TIMEOUT = 50;

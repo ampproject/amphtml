@@ -1,6 +1,6 @@
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {dev, user} from '#utils/log';
 
@@ -12,7 +12,7 @@ const NON_SPACE_REGEX = /\S/;
 /** @const {RegExp} */
 const ALL_VALUE_REGEX = /.*/;
 
-/** @const {Object<string, RegExp>} */
+/** @const {{[key: string]: RegExp}} */
 const SUPPORTED_STYLE_VALUE = {
   'color': ALL_VALUE_REGEX,
   'background-color': ALL_VALUE_REGEX,
@@ -26,7 +26,7 @@ const SUPPORTED_STYLE_VALUE = {
   'border-color': ALL_VALUE_REGEX,
 };
 
-/** @const {Object<string, RegExp>} */
+/** @const {{[key: string]: RegExp}} */
 const SUPPORTE_NON_AMP_STYLE_VALUE = {
   'width': ALL_VALUE_REGEX,
   'height': ALL_VALUE_REGEX,
@@ -53,7 +53,7 @@ export class AttributeMutationDefaultStyle {
     this.elements_ = elements;
 
     /** @private {!JsonObject} */
-    this.styles_ = dict({});
+    this.styles_ = {};
 
     /** @private {boolean} */
     this.hasAmpElement_ = false;

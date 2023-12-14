@@ -29,8 +29,8 @@ const customLaunchers = {
     base: argv.headless
       ? 'ChromeHeadless'
       : argv.chrome_canary
-      ? 'ChromeCanary'
-      : 'Chrome',
+        ? 'ChromeCanary'
+        : 'Chrome',
     flags: argv.chrome_flags
       ? argv.chrome_flags.split(',').map((flag) => `--${flag}`)
       : DEFAULT_CHROME_FLAGS,
@@ -43,8 +43,7 @@ const customLaunchers = {
     flags: argv.headless ? ['-headless'] : [],
   },
   EdgeCustom: {
-    // TODO(rsimha): Switch from Beta to Stable once it's available.
-    base: argv.headless ? 'EdgeBetaHeadless' : 'EdgeBeta',
+    base: argv.headless ? 'EdgeHeadless' : 'Edge',
     flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
   },
 };

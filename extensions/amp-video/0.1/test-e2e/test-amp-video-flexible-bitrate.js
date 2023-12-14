@@ -109,8 +109,7 @@ describes.endtoend(
         ).equal('');
       });
 
-      // TODO(#35925): Re-enable this test.
-      it.skip('lowers the quality on close videos that are not already loaded when a video buffers', async () => {
+      it('lowers the quality on close videos that are not already loaded when a video buffers', async () => {
         await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 2);
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
@@ -213,7 +212,7 @@ describes.endtoend(
         );
 
         await expect(
-          'https://amp-dev.cdn.ampproject.org/mbv/s/amp.dev/static/samples/video/tokyo.mp4?amp_video_host_url=https%3A%2F%2Famp.dev%2F&__amp_source_origin=http%3A%2F%2Flocalhost%3A8000'
+          'https://amp-dev.cdn.ampproject.org/mbv/s/amp.dev/static/samples/video/tokyo.mp4?amp_video_host_url=https%3A%2F%2Famp.dev%2F&amp_video_require_acao_header=1&__amp_source_origin=http%3A%2F%2Flocalhost%3A8000'
         ).to.have.been.sent;
       });
     });
@@ -235,8 +234,7 @@ describes.endtoend(
         ).contains('#high');
       });
 
-      // TODO(#35966): fix flaky test (disabled in #35967)
-      it.skip('loads a low quality source on a far video when the connection drops and the user advances to that page', async () => {
+      it('loads a low quality source on a far video when the connection drops and the user advances to that page', async () => {
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
         await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 4);
         await controller.click(story);

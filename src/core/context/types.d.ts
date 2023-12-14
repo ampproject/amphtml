@@ -1,4 +1,4 @@
-import {ContextNode} from './node'
+import {ContextNode} from './node';
 export interface IContextProp<T, DEP> {
   /**
    * A globally unique key. Extensions must use a fully qualified name such
@@ -7,10 +7,10 @@ export interface IContextProp<T, DEP> {
   key: string;
 
   /**
-   * An optional type object that can be used for a using system. E.g.
+   * A type object that can be used for a using system. E.g.
    * this could be a Preact's Context object.
    */
-  type?: Object;
+  type: import('preact').Context<T>;
 
   /**
    * An array of dependencies that are required for the `compute` callback.
@@ -44,7 +44,13 @@ export interface IContextProp<T, DEP> {
    * 3. If it's a recursive property, the parent value.
    * 4. If `deps` are specified - the dep values.
    */
-  compute: (node: Node, inputs: T[], ...deps: DEP[]) => (T | undefined);
+  compute(node: Node, inputs: T[], ...deps: T[]): T | undefined;
+  compute(
+    node: Node,
+    inputs: T[],
+    parentValue: T,
+    ...deps: DEP[]
+  ): T | undefined;
 
   /**
    * The default value of a recursive property.
@@ -67,7 +73,7 @@ export type PendingEnumValue = number;
 
 /** The structure for a property's computed values and subscribers. */
 export interface IContextPropUsed<T, DEP> {
-  prop: IContextProp<T, DEP>
+  prop: IContextProp<T, DEP>;
   subscribers: ((value: T) => void)[];
   value: T;
   pending: PendingEnumValue;
@@ -75,9 +81,9 @@ export interface IContextPropUsed<T, DEP> {
   depValues: DEP[];
   parentValue: T;
   parentContextNode: null | import('./node').ContextNode<?>;
-  ping: (refreshParent: boolean) => void
-  pingDep: ((dep: DEP) => void)[]
-  pingParent: null | ((parentValue: T) => void)
+  ping: (refreshParent: boolean) => void;
+  pingDep: ((dep: DEP) => void)[];
+  pingParent: null | ((parentValue: T) => void);
 }
 declare global {
   interface Node {

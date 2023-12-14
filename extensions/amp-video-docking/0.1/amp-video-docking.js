@@ -14,7 +14,6 @@ import {
 } from '#core/dom/style';
 import {getInternalVideoElementFor} from '#core/dom/video';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -204,24 +203,24 @@ export function getPosterImageSrc(element) {
  * @return {!Element}
  * @private
  */
-const ShadowLayer = (html) =>
-  html` <div class="amp-video-docked-shadow" hidden></div> `;
+const ShadowLayer = (html) => html`
+  <div class="amp-video-docked-shadow" hidden></div>
+`;
 
 /**
  * @param {!HtmlLiteralTagDef} html
  * @return {!Element}
  * @private
  */
-const PlaceholderBackground = (html) =>
-  html`
-    <div class="amp-video-docked-placeholder-background">
-      <div
-        class="amp-video-docked-placeholder-background-poster"
-        ref="poster"
-      ></div>
-      <div class="amp-video-docked-placeholder-icon" ref="icon"></div>
-    </div>
-  `;
+const PlaceholderBackground = (html) => html`
+  <div class="amp-video-docked-placeholder-background">
+    <div
+      class="amp-video-docked-placeholder-background-poster"
+      ref="poster"
+    ></div>
+    <div class="amp-video-docked-placeholder-icon" ref="icon"></div>
+  </div>
+`;
 
 /**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
@@ -267,7 +266,7 @@ export class VideoDocking {
       this.append_(PlaceholderBackground(html))
     );
 
-    /** @private @const {function():!Object<string, !Element>} */
+    /** @private @const {function():!{[key: string]: !Element}} */
     this.getPlaceholderRefs_ = once(() =>
       htmlRefs(this.getPlaceholderBackground_())
     );
@@ -830,7 +829,7 @@ export class VideoDocking {
     const event = createCustomEvent(
       this.ampdoc_.win,
       /** @type {string} */ (action),
-      /* detail */ dict({})
+      {}
     );
     const actions = Services.actionServiceForDoc(element);
     actions.trigger(element, action, event, trust);

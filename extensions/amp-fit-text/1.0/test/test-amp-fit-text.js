@@ -1,10 +1,14 @@
 import '../amp-fit-text';
-import {computedStyle} from '#core/dom/style';
-import {createElementWithAttributes} from '#core/dom';
 import {expect} from 'chai';
+
+import {createElementWithAttributes} from '#core/dom';
+import {computedStyle} from '#core/dom/style';
+
 import {toggleExperiment} from '#experiments';
-import {useStyles} from '../component.jss';
+
 import {waitFor} from '#testing/helpers/service';
+
+import {useStyles} from '../component.jss';
 
 describes.realWin(
   'amp-fit-text component',

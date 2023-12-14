@@ -12,7 +12,7 @@ const {cyan, green, red} = require('kleur/colors');
 const {getFilesToCheck} = require('../common/utils');
 const {getOutput} = require('../common/process');
 const {htmlFixtureGlobs} = require('../test-configs/config');
-const {readFile} = require('fs-extra');
+const {pathExists, readFile} = require('fs-extra');
 
 const defaultFormat = 'AMP';
 
@@ -73,12 +73,39 @@ async function getFileGroups(filesToCheck) {
 }
 
 /**
+ * Checks for the existence of a local wasm / js validator binary and returns
+ * its location. Defaults to the wasm binary on the CDN.
+ * @return {Promise<string>}
+ */
+async function getValidatorJs() {
+  const localWasmValidatorPath =
+    'validator/bazel-bin/cpp/engine/wasm/validator_js_bin.js';
+  const localJsValidatorPath = 'validator/dist/validator_minified.js';
+  if (await pathExists(localWasmValidatorPath)) {
+    log('Using the', cyan('locally built wasm validator') + '...');
+    return localWasmValidatorPath;
+  }
+  if (await pathExists(localJsValidatorPath)) {
+    log('Using the', cyan('locally built js validator') + '...');
+    return localJsValidatorPath;
+  }
+  log('Using the', cyan('wasm validator from the CDN') + '...');
+  logLocalDev(
+    '⤷ To use a locally built wasm or js validator,',
+    'run the build command from',
+    cyan('validator/README.md') + '.'
+  );
+  return 'https://cdn.ampproject.org/v0/validator_wasm.js'; // eslint-disable-line local/no-forbidden-terms
+}
+
+/**
  * Runs amphtml-validator on the given list of files and prints results.
  *
  * @param {Array<string>} filesToCheck
  * @return {Promise<void>}
  */
 async function runCheck(filesToCheck) {
+  const validatorJs = await getValidatorJs();
   const fileGroups = await getFileGroups(filesToCheck);
   const formats = Object.keys(fileGroups);
   let foundValidationErrors = false;
@@ -88,7 +115,10 @@ async function runCheck(filesToCheck) {
     }
     const files = fileGroups[format].sort().join(' ');
     logLocalDev(green('Validating'), cyan(format), green('fixtures...'));
-    const validateFixturesCmd = `FORCE_COLOR=1 npx amphtml-validator --html_format ${format} ${files}`;
+    const validatorCmd = 'FORCE_COLOR=1 npx amphtml-validator';
+    const validatorJsArg = `--validator_js ${validatorJs}`;
+    const htmlFormatArg = `--html_format ${format}`;
+    const validateFixturesCmd = `${validatorCmd} ${validatorJsArg} ${htmlFormatArg} ${files}`;
     const result = getOutput(validateFixturesCmd);
     logWithoutTimestampLocalDev(result.stdout);
     if (result.stderr) {
@@ -99,18 +129,6 @@ async function runCheck(filesToCheck) {
   }
   if (foundValidationErrors) {
     log('Please address the errors listed above.');
-    log(
-      '⤷ If a failing fixture is a',
-      cyan('Bento'),
-      'document, it is not meant to be valid AMP.'
-    );
-    log(
-      '⤷ Place it under any directory named',
-      cyan('bento'),
-      'like',
-      cyan('examples/bento/'),
-      'so that it is not validated.'
-    );
     throw new Error('Validation failed.');
   }
   log(green('SUCCESS:'), 'All HTML fixtures are valid.');

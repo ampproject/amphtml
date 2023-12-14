@@ -1,5 +1,5 @@
 import {
-  WebAnimationPlayState, // eslint-disable-line no-unused-vars
+  WebAnimationPlayState, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from '../web-animation-types';
 
 /**

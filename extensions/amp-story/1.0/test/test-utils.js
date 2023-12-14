@@ -1,5 +1,12 @@
+import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from '#core/dom/amp-element-helpers';
+import * as Preact from '#core/dom/jsx';
+
 import {StateProperty} from '../amp-story-store-service';
 import {
+  dependsOnStoryServices,
   getRGBFromCssColorValue,
   getTextColorForRGB,
   shouldShowStoryUrlInfo,
@@ -149,6 +156,43 @@ describes.fakeWin('amp-story utils', {}, (env) => {
       expect(getStub).to.be.calledOnceWithExactly(
         StateProperty.CAN_SHOW_STORY_URL_INFO
       );
+    });
+  });
+
+  describe('dependsOnStoryServices', () => {
+    class Upgraded extends AMP.BaseElement {}
+
+    const Preupgrade = dependsOnStoryServices(Upgraded);
+
+    it('should upgrade immediately when not inside amp-story', () => {
+      const element = <div></div>;
+
+      const instance = new Preupgrade(element);
+      const upgraded = instance.upgradeCallback();
+
+      expect(upgraded instanceof Upgraded).to.be.true;
+      expect(upgraded.element).to.equal(element);
+    });
+
+    it('should upgrade after ancestor amp-story', async () => {
+      const element = <div></div>;
+      const story = <amp-story>{element}</amp-story>;
+
+      const instance = new Preupgrade(element);
+      const upgradedSpy = env.sandbox.spy((impl) => impl);
+      const upgradedPromise = instance.upgradeCallback().then(upgradedSpy);
+
+      expect(upgradedSpy).to.not.have.been.called;
+
+      story.getImpl = () => Promise.resolve();
+      story[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](story);
+      delete story[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+      delete story[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+
+      const upgraded = await upgradedPromise;
+
+      expect(upgraded instanceof Upgraded).to.be.true;
+      expect(upgraded.element).to.equal(element);
     });
   });
 });

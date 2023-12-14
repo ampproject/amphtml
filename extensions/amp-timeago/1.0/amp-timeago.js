@@ -1,5 +1,7 @@
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -7,7 +9,7 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-timeago';
 
-class AmpTimeago extends BaseElement {
+class AmpTimeago extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

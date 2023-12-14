@@ -56,7 +56,7 @@ message UrlSpec {
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
 
-  // Deprecated fields, do not resuse.
+  // Deprecated fields, do not reuse.
   // reserved 4;
 }
 
@@ -288,7 +288,7 @@ message CssSpec {
   // Any declaration listed here are allowed.
   repeated string declaration = 7;
 
-  // If fase, declarations tagged with `!important` are considered errors.
+  // If false, declarations tagged with `!important` are considered errors.
   // Most AMP stylesheets disallow `!important` to reserve this override
   // for AMP's own styles.
   optional bool allow_important = 8 [default = false];
@@ -635,14 +635,14 @@ message TagSpec {
   repeated string also_requires_tag_warning = 22;
   // Expresses a generic condition which is satisfied if this tag is found. Used
   // in combination with the `requires` attribute on a different tag.
-  repeated string satisfies = 23;
+  repeated string satisfies_condition = 23;
   // Expresses a generic condition which must be satisfied if this tag is found.
   // Used in combination with the `satisfies` attributes on a different tag.
-  repeated string requires = 24;
+  repeated string requires_condition = 24;
   // The excludes field is a generic condition, which must not be satisfied if
   // this tag is found. Otherwise a TAG_EXCLUDED_BY_TAG error will be generated.
   // Used in combination with the `satisfies` attributes on a different tag.
-  repeated string excludes = 32;
+  repeated string excludes_condition = 32;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -827,7 +827,9 @@ message ValidatorRules {
 // on this in new code.
 // TODO(#25188): Remove ErrorCategory completely.
 message ErrorCategory {
-  enum Code { UNKNOWN = 0; }
+  enum Code {
+    UNKNOWN = 0;
+  }
 }
 
 // We record validation errors in a structured form, so that they can be

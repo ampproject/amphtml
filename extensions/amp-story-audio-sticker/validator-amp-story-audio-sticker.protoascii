@@ -1,0 +1,65 @@
+tags: {  # amp-story-audio-sticker
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-audio-sticker"
+    version: "0.1"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-audio-sticker>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUDIO-STICKER"
+  requires_extension: "amp-story-audio-sticker"
+  mandatory_parent: "AMP-STORY-GRID-LAYER"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+  attrs: {
+    name: "size"
+    value: "small"
+    value: "large"
+  }
+  attrs: {
+    name: "sticker"
+    value: "headphone-cat"
+    value: "tape-player"
+    value: "loud-speaker"
+    value: "audio-cloud"
+  }
+  attrs: {
+    name: "sticker-style"
+    value: "outline"
+    value: "dropshadow"
+  }
+}
+
+tags: {  # <amp-story-audio-sticker-pretap>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUDIO-STICKER-PRETAP"
+  requires_extension: "amp-story-audio-sticker"
+  mandatory_parent: "AMP-STORY-AUDIO-STICKER"
+  descendant_tag_list: "amp-story-audio-sticker-allowed-descendants"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+
+tags: {  # <amp-story-audio-sticker-posttap>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUDIO-STICKER-POSTTAP"
+  requires_extension: "amp-story-audio-sticker"
+  mandatory_parent: "AMP-STORY-AUDIO-STICKER"
+  descendant_tag_list: "amp-story-audio-sticker-allowed-descendants"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+
+descendant_tag_list: {
+  name: "amp-story-audio-sticker-allowed-descendants"
+  tag: "AMP-IMG"
+  tag: "DIV"
+  tag: "SPAN"
+}

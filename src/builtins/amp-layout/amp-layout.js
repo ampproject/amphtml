@@ -7,7 +7,7 @@ import {buildDom} from './build-dom';
 import {BaseElement} from '../../base-element';
 
 export class AmpLayout extends BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }

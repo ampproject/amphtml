@@ -1,8 +1,9 @@
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractivePoll} from '../amp-story-interactive-poll';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {measureMutateElementStub} from '#testing/helpers/service';
+
 import {
   addConfigToInteractive,
   getMockIncompleteData,
@@ -10,8 +11,10 @@ import {
   getMockOutOfBoundsData,
   getMockScrambledData,
 } from './helpers';
-import {measureMutateElementStub} from '#testing/helpers/service';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryInteractivePoll} from '../amp-story-interactive-poll';
 
 describes.realWin(
   'amp-story-interactive-poll',
@@ -117,8 +120,12 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
-      expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('50 %');
-      expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('50 %');
+      expect(
+        ampStoryPoll.getOptionElements()[0].textContent.replace(/ |\n/g, '')
+      ).to.contain('50%');
+      expect(
+        ampStoryPoll.getOptionElements()[1].textContent.replace(/ |\n/g, '')
+      ).to.contain('50%');
     });
 
     it('should handle the percentage pipeline with scrambled data', async () => {
@@ -133,10 +140,10 @@ describes.realWin(
 
       const expectedPercentages = [10, 20, 30, 40];
       for (let i = 0; i < NUM_OPTIONS; i++) {
-        const expectedText = `${expectedPercentages[i]} %`;
-        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
-          expectedText
-        );
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(
+          ampStoryPoll.getOptionElements()[i].textContent.replace(/ |\n/g, '')
+        ).to.contain(expectedText);
       }
     });
 
@@ -152,10 +159,10 @@ describes.realWin(
 
       const expectedPercentages = [0, 50, 50, 0];
       for (let i = 0; i < NUM_OPTIONS; i++) {
-        const expectedText = `${expectedPercentages[i]} %`;
-        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
-          expectedText
-        );
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(
+          ampStoryPoll.getOptionElements()[i].textContent.replace(/ |\n/g, '')
+        ).to.contain(expectedText);
       }
     });
 
@@ -171,10 +178,10 @@ describes.realWin(
 
       const expectedPercentages = [20, 0, 0, 80];
       for (let i = 0; i < NUM_OPTIONS; i++) {
-        const expectedText = `${expectedPercentages[i]} %`;
-        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
-          expectedText
-        );
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(
+          ampStoryPoll.getOptionElements()[i].textContent.replace(/ |\n/g, '')
+        ).to.contain(expectedText);
       }
     });
 

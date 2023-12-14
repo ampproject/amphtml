@@ -9,7 +9,13 @@ declare global {
     __AMP_MODE: AmpModeObject;
 
     // AMP Runtime settings, configuration, and environment/build constants.
-    AMP_CONFIG?: AmpConfig & {[key: string]: (boolean|string)};
+    AMP_CONFIG?: AmpConfig & {[key: string]: boolean | string};
+  }
+
+  interface Document {
+    AMP?: {
+      canonicalUrl?: string;
+    };
   }
 
   interface AmpConfig {
@@ -21,5 +27,6 @@ declare global {
 
   interface AmpModeObject {
     esm: boolean;
+    noCssBinary: boolean;
   }
 }

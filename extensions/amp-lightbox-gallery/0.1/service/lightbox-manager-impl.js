@@ -1,6 +1,5 @@
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {iterateCursor} from '#core/dom';
 import {
   childElement,
   childElementByAttr,
@@ -93,7 +92,7 @@ export class LightboxManager {
 
     /**
      * Ordered lists of lightboxable elements according to group
-     * @private {!Object<string, !Array<!Element>>}
+     * @private {!{[key: string]: !Array<!Element>}}
      */
     this.lightboxGroups_ = map({
       default: [],
@@ -153,7 +152,7 @@ export class LightboxManager {
         .getRootNode()
         .querySelectorAll('[lightbox],[data-lightbox]');
       const processLightboxElement = this.processLightboxElement_.bind(this);
-      iterateCursor(matches, processLightboxElement);
+      matches.forEach(processLightboxElement);
     });
   }
 

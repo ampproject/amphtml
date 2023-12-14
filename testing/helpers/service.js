@@ -88,25 +88,40 @@ export function waitFor(callback, errorMessage) {
   );
 }
 
-const noneValues = {
-  'animation-name': ['none', 'initial'],
-  'animation-duration': ['0s', 'initial'],
-  'animation-timing-function': ['ease', 'initial'],
-  'animation-delay': ['0s', 'initial'],
-  'animation-iteration-count': ['1', 'initial'],
-  'animation-direction': ['normal', 'initial'],
-  'animation-fill-mode': ['none', 'initial'],
-  'animation-play-state': ['running', 'initial', /* IE11 */ ''],
-};
+/**
+ * Gets the initial values of an Element's animation state.
+ * For time-based animations, auto is equivalent to a value of 0s.
+ *
+ * @param {boolean} isTimeBasedAnimation
+ */
+function getInitialNoneValues(isTimeBasedAnimation) {
+  const initialValues = {
+    'animation-name': ['none', 'initial'],
+    'animation-duration': ['0s', 'auto', 'initial'],
+    'animation-timing-function': ['ease', 'initial'],
+    'animation-delay': ['0s', 'initial'],
+    'animation-iteration-count': ['1', 'initial'],
+    'animation-direction': ['normal', 'initial'],
+    'animation-fill-mode': ['none', 'initial'],
+    'animation-play-state': ['running', 'initial', /* IE11 */ ''],
+  };
+  if (isTimeBasedAnimation) {
+    initialValues['animation-duration'].unshift('auto');
+  }
+  return initialValues;
+}
 
 /**
  * Browsers are inconsistent when accessing the value for 'animation: none'.
  * Some return 'none', some return the full shorthand, some give the full
  * shorthand in a different order.
+ *
  * @param {!Element} element
+ * @param {boolean=} opt_isTimeBasedAnimation
  * @return {boolean}
  */
-export function isAnimationNone(element) {
+export function isAnimationNone(element, opt_isTimeBasedAnimation = true) {
+  const noneValues = getInitialNoneValues(opt_isTimeBasedAnimation);
   for (const property in noneValues) {
     const value = getStyle(element, property);
     const expectedValues = noneValues[property];
@@ -365,10 +380,11 @@ export class ImagePixelVerifier {
     return this.imagePixels_.length > 0;
   }
 
-  verifyRequest(url, referrerPolicy) {
+  verifyRequest(url, referrerPolicy, attributionSrc) {
     const pixel = this.imagePixels_.shift();
     expect(pixel.src).to.equal(url);
     expect(pixel.referrerPolicy).to.equal(referrerPolicy);
+    expect(pixel.attributionSrc).to.equal(attributionSrc);
   }
 
   verifyRequestMatch(regex) {

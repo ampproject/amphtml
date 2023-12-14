@@ -146,7 +146,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(service.checkSha384).not.to.be.called;
   });
 
-  it('callFunction waits for initialization to complete before returning', async () => {
+  it('should wait for initialization to complete before proxying callFunction', async () => {
     element.setAttribute('script', 'local-script');
     script.workerDom_ = {callFunction: env.sandbox.spy()};
 
@@ -157,7 +157,16 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(script.workerDom_.callFunction).calledWithExactly('fetchData', true);
   });
 
-  describe('Initialization skipped warning due to zero height/width', () => {
+  it('should reject when callFunction on amp-script which failed to initialize', async () => {
+    element.setAttribute('script', 'local-script');
+    script.workerDom_ = null;
+    script.initialize_.resolve();
+
+    const result = script.callFunction('fetchData', true);
+    await expect(result).eventually.rejectedWith('failed initialization.');
+  });
+
+  describe('Initialization skipped warning due to zero size', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
       env.sandbox.stub(script, 'getLayoutSize').returns({height: 1, width: 1});
@@ -165,14 +174,16 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       expect(warnStub).to.have.callCount(0);
     });
 
-    it('should warn if there is zero width/height', () => {
+    it('should warn if there is zero size', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutSize').returns({height: 0, width: 0});
+      env.sandbox
+        .stub(script, 'getLayoutSize')
+        .returns({height: 100, width: 0});
       script.onLayoutMeasure();
 
       expect(warnStub).calledWith(
         'amp-script',
-        'Skipped initializing amp-script due to zero width and height.',
+        'Skipped initializing amp-script due to zero width or height.',
         script.element
       );
       expect(warnStub).to.have.callCount(1);

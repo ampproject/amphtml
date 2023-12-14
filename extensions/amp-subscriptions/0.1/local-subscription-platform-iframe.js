@@ -1,12 +1,15 @@
 import {Deferred} from '#core/data-structures/promise';
-import {Entitlement} from './entitlement';
-import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
-import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {devAssert, userAssert} from '#utils/log';
+import {toggle} from '#core/dom/style';
 import {isArray} from '#core/types';
 import {parseJson} from '#core/types/object/json';
-import {toggle} from '#core/dom/style';
+
+import {devAssert, userAssert} from '#utils/log';
+
+import {Entitlement} from './entitlement';
+import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
+
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
 
 /**
  * Implments the iframe local subscriptions platform which provides

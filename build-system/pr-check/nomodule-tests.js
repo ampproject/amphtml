@@ -35,15 +35,13 @@ function pushBuildWorkflow() {
   prependConfig();
   try {
     timedExecOrThrow(
-      `amp integration --nobuild --headless --minified --report --config=${argv.config}`,
+      `amp integration --nobuild --headless --minified --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
     }
-  } finally {
-    timedExecOrDie('amp test-report-upload');
   }
 }
 

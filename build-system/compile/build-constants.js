@@ -19,7 +19,7 @@ const isMinified = argv._.includes('dist') || !!argv.minified;
  * TODO: move constant replacement to bundlers once either https://github.com/google/closure-compiler/issues/1601
  *       is resolved, or we switch to using a different bundler.
  *
- * @type {Object<string, boolean|string>}
+ * @type {{[key: string]: boolean|string}}
  */
 const BUILD_CONSTANTS = {
   IS_PROD: isProd,
@@ -32,6 +32,9 @@ const BUILD_CONSTANTS = {
   // for conditions only true for SxG.
   IS_ESM: !!(argv.esm || argv.sxg),
   IS_SXG: !!argv.sxg,
+  // IS_SSR is always false by default and can only be overriden on a per
+  // output file basis in bundles.config.extensions through `options.ssr`.
+  IS_SSR_CSS: false,
 };
 
 module.exports = {BUILD_CONSTANTS};

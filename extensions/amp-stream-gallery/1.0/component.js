@@ -1,6 +1,11 @@
+import objstr from 'obj-str';
+
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
+
+import {setStyle} from '#core/dom/style';
+import {getWin} from '#core/window';
+
 import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {Children, forwardRef} from '#preact/compat';
 import {
   useCallback,
   useImperativeHandle,
@@ -8,11 +13,10 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {setStyle} from '#core/dom/style';
-import {getWin} from '#core/window';
-import {useStyles} from './component.jss';
-import objstr from 'obj-str';
+import {Children, forwardRef} from '#preact/compat';
 import {propName} from '#preact/utils';
+
+import {useStyles} from './component.jss';
 
 const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
@@ -24,18 +28,18 @@ const OUTSET_ARROWS_WIDTH = 100;
  */
 function BentoStreamGalleryWithRef(props, ref) {
   const {
-    arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
+    arrowPrevAs = DefaultArrow,
     children,
-    [propName('class')]: className,
     extraSpace,
     maxItemWidth = Number.MAX_VALUE,
-    minItemWidth = 1,
     maxVisibleCount = Number.MAX_VALUE,
+    minItemWidth = 1,
     minVisibleCount = 1,
     outsetArrows,
     peek = 0,
     slideAlign = 'start',
+    [propName('class')]: className,
     ...rest
   } = props;
   const classes = useStyles();

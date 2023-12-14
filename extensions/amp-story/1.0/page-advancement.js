@@ -1,22 +1,26 @@
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closest, matches} from '#core/dom/query';
+
+import {Services} from '#service';
+import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
+
+import {listenOnce} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
+
+import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {
   Action,
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '#service';
-import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
-import {VideoEvents_Enum} from '../../../src/video-interface';
-import {closest, matches} from '#core/dom/query';
-import {dev, user} from '#utils/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
-import {listenOnce} from '#utils/event-helper';
-import {interactiveElementsSelectors} from './amp-story-embedded-component';
+
+import {getAmpdoc} from '../../../src/service-helpers';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -67,6 +71,14 @@ export const TapNavigationDirection = {
   'PREVIOUS': 2,
 };
 
+/** @enum {number} */
+export const AdvancementConfigType = {
+  ADVANCEMENT_CONFIG: 0,
+  MANUAL_ADVANCEMENT: 1,
+  TIME_BASED_ADVANCEMENT: 2,
+  MEDIA_BASED_ADVANCEMENT: 3,
+};
+
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
  * tracking its internal state when started/stopped, and listeners will never be
@@ -91,6 +103,14 @@ export class AdvancementConfig {
 
     /** @private {boolean} */
     this.isRunning_ = false;
+  }
+
+  /**
+   * @return {AdvancementConfigType} A value indicating the type of advancement
+   *     config.
+   */
+  getType() {
+    return AdvancementConfigType.ADVANCEMENT_CONFIG;
   }
 
   /**
@@ -127,10 +147,20 @@ export class AdvancementConfig {
     this.tapNavigationListeners_.push(onTapNavigationListener);
   }
 
+  /** Removes all listeners added to this advancement config. */
+  removeAllAddedListeners() {
+    this.progressListeners_ = [];
+    this.advanceListeners_ = [];
+    this.previousListeners_ = [];
+    this.tapNavigationListeners_ = [];
+  }
+
   /**
    * Invoked when the advancement configuration should begin taking effect.
+   * @param {number=} unusedProgressStartVal An optional value at which to
+   *     start the advancement.
    */
-  start() {
+  start(unusedProgressStartVal = undefined) {
     this.isRunning_ = true;
   }
 
@@ -165,9 +195,12 @@ export class AdvancementConfig {
     return 1;
   }
 
-  /** @protected */
-  onProgressUpdate() {
-    const progress = this.getProgress();
+  /**
+   * @param {number=} progressOverride
+   * @protected
+   */
+  onProgressUpdate(progressOverride = undefined) {
+    const progress = progressOverride ?? this.getProgress();
     this.progressListeners_.forEach((progressListener) => {
       progressListener(progress);
     });
@@ -295,6 +328,11 @@ export class ManualAdvancement extends AdvancementConfig {
           : TapNavigationDirection.NEXT,
       },
     };
+  }
+
+  /** @override */
+  getType() {
+    return AdvancementConfigType.MANUAL_ADVANCEMENT;
   }
 
   /** @override */
@@ -478,7 +516,17 @@ export class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
+        if (tagName === 'amp-story-audio-sticker') {
+          shouldHandleEvent = false;
+          return true;
+        }
+
         if (tagName === 'amp-story-page') {
+          shouldHandleEvent = true;
+          return true;
+        }
+
+        if (tagName === 'amp-story-subscriptions') {
           shouldHandleEvent = true;
           return true;
         }
@@ -515,7 +563,6 @@ export class ManualAdvancement extends AdvancementConfig {
         tagName = el.tagName.toLowerCase();
 
         if (
-          tagName === 'amp-story-cta-layer' ||
           tagName === 'amp-story-page-attachment' ||
           tagName === 'amp-story-page-outlink'
         ) {
@@ -695,7 +742,7 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Calculates the pageRect based on the UIType.
+   * Calculates the pageRect based on the UIType_Enum.
    * We can an use LayoutBox for mobile since the story page occupies entire screen.
    * Desktop UI needs the most recent value from the getBoundingClientRect function.
    * @return {DOMRect | LayoutBox}
@@ -703,7 +750,7 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   getStoryPageRect_() {
     const uiState = this.storeService_.get(StateProperty.UI_STATE);
-    if (uiState !== UIType.DESKTOP_ONE_PANEL) {
+    if (uiState !== UIType_Enum.DESKTOP_ONE_PANEL) {
       return this.element_.getLayoutBox();
     } else {
       return this.element_
@@ -788,6 +835,11 @@ export class TimeBasedAdvancement extends AdvancementConfig {
     }
   }
 
+  /** @override */
+  getType() {
+    return AdvancementConfigType.TIME_BASED_ADVANCEMENT;
+  }
+
   /**
    * @return {number} The current timestamp, in milliseconds.
    * @private
@@ -797,8 +849,16 @@ export class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  start() {
+  start(progressStartVal = undefined) {
     super.start();
+
+    if (progressStartVal) {
+      // We calculate this advancement's remaining milliseconds, based upon the
+      // the given start value. This enables the advancement to begin at a
+      // progress percentage greater than 0%.
+      const remainingDelayPct = 1 - progressStartVal;
+      this.remainingDelayMs_ = this.delayMs_ * remainingDelayPct;
+    }
 
     if (this.remainingDelayMs_) {
       this.startTimeMs_ =
@@ -849,9 +909,7 @@ export class TimeBasedAdvancement extends AdvancementConfig {
       return 0;
     }
 
-    const progress =
-      (this.getCurrentTimestampMs_() - this.startTimeMs_) / this.delayMs_;
-
+    const progress = this.getProgressMs() / this.delayMs_;
     return Math.min(Math.max(progress, 0), 1);
   }
 
@@ -877,6 +935,24 @@ export class TimeBasedAdvancement extends AdvancementConfig {
       this.remainingDelayMs_ += newDelayMs - this.delayMs_;
     }
     this.delayMs_ = newDelayMs;
+  }
+
+  /**
+   * @return {number} The progress, in terms of milliseconds elapsed.
+   */
+  getProgressMs() {
+    if (this.startTimeMs_ === null) {
+      return 0;
+    }
+    return this.getCurrentTimestampMs_() - this.startTimeMs_;
+  }
+
+  /**
+   * @return {number} The time, in milliseconds, that this advancement was
+   *     configured to wait before advancing.
+   */
+  getDelayMs() {
+    return this.delayMs_;
   }
 
   /**
@@ -948,6 +1024,11 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     this.storeService_ = getStoreService(win);
   }
 
+  /** @override */
+  getType() {
+    return AdvancementConfigType.MEDIA_BASED_ADVANCEMENT;
+  }
+
   /**
    * Determines whether the element for auto advancement implements the video
    * interface.
@@ -982,19 +1063,23 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  start() {
+  start(progressStartVal = undefined) {
     super.start();
 
     // Prevents race condition when checking for video interface classname.
     (this.element_.build ? this.element_.build() : Promise.resolve()).then(() =>
-      this.startWhenBuilt_()
+      this.startWhenBuilt_(progressStartVal)
     );
   }
 
-  /** @private */
-  startWhenBuilt_() {
+  /**
+   * @param {number=} progressStartVal An optional value at which to start
+   *     the advancement.
+   * @private
+   */
+  startWhenBuilt_(progressStartVal = undefined) {
     if (this.isVideoInterfaceVideo_()) {
-      this.startVideoInterfaceElement_();
+      this.startVideoInterfaceElement_(progressStartVal);
       return;
     }
 
@@ -1003,7 +1088,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     }
 
     if (this.mediaElement_) {
-      this.startHtmlMediaElement_();
+      this.startHtmlMediaElement_(progressStartVal);
       return;
     }
 
@@ -1014,8 +1099,12 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     );
   }
 
-  /** @private */
-  startHtmlMediaElement_() {
+  /**
+   * @param {number=} progressStartVal An optional value at which to start
+   *     the advancement.
+   * @private
+   */
+  startHtmlMediaElement_(progressStartVal = undefined) {
     const mediaElement = dev().assertElement(
       this.mediaElement_,
       'Media element was unspecified.'
@@ -1028,7 +1117,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       listenOnce(mediaElement, 'ended', () => this.onAdvance())
     );
 
-    this.onProgressUpdate();
+    this.onProgressUpdate(progressStartVal);
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -1036,8 +1125,12 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     });
   }
 
-  /** @private */
-  startVideoInterfaceElement_() {
+  /**
+   * @param {number=} progressStartVal An optional value at which to start
+   *     the advancement.
+   * @private
+   */
+  startVideoInterfaceElement_(progressStartVal = undefined) {
     this.element_.getImpl().then((video) => {
       this.video_ = video;
     });
@@ -1056,7 +1149,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       )
     );
 
-    this.onProgressUpdate();
+    this.onProgressUpdate(progressStartVal);
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();

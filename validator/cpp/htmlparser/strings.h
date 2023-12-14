@@ -56,7 +56,7 @@ class Strings {
     std::string_view uri);
 
   // Returns hex string representation of a 4 byte codepoint.
-  static std::string ToHexString(char32_t c);
+  static std::string ToHexString(uint32_t c);
 
   // byte is in the range 0x41-0x5A or 0x61-0x7A (A-Z or a-z).
   static bool IsCharAlphabet(char c);
@@ -132,7 +132,7 @@ class Strings {
     std::vector<char32_t> out;
     out.reserve(utf8.size() / 2);
     // We use the UnicodeText abstraction because it handles
-    // validation / coersion  under the hood, so what comes out of this is
+    // validation / conversion under the hood, so what comes out of this is
     // surely valid UTF8.
     auto codepoint = DecodeUtf8Symbol(&utf8);
     while (codepoint) {
@@ -194,7 +194,7 @@ class Strings {
   static void ToLower(std::string* s);
   static void ToUpper(std::string* s);
 
-  // Checks if string contains whitespace only chracters.
+  // Checks if string contains whitespace only characters.
   static bool IsAllWhitespaceChars(std::string_view s,
       std::string_view whitespace_chars = kWhitespace);
 

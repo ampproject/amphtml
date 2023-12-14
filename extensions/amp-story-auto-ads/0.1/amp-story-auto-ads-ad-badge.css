@@ -31,9 +31,12 @@
 }
 
 .i-amphtml-story-ad-badge {
-  height: 24px !important;
   opacity: 0 !important;
-  width: 24px !important;
+  width: 29px !important;
+  height: 20px !important;
+  background: no-repeat center url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="29" height="20" fill="none"><path fill="white" d="M9.05 5.2h2.02l3.5 9.3h-1.94l-.78-2.22H8.28L7.5 14.5H5.57l3.48-9.3Zm2.22 5.46-1.21-3.45-1.22 3.45h2.43Zm5.33 3.61c-2.09-1.4-2.1-4.76 0-6.15 1.15-.69 2.85-.64 3.64.56V5.19h1.68v9.31h-1.58v-.8c-.73 1.22-2.66 1.2-3.74.57Zm1.93-1.13c1.07 0 1.8-.94 1.8-1.96s-.75-1.93-1.8-1.93c-1.06 0-1.8.93-1.8 1.94 0 1 .75 1.95 1.8 1.95Z"/></svg>'), #0003;
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
   visibility: hidden !important;
 }
 

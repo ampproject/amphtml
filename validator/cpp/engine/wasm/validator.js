@@ -43,7 +43,8 @@ class ProtobufEnum {
   constructor(jspbObject) {
     const entries = Object.entries(jspbObject);
     this.numberByName = new Map(entries);
-    this.nameByNumber = new Map(entries.map(([name, number]) => [number, name]));
+    this.nameByNumber =
+        new Map(entries.map(([name, number]) => [number, name]));
   }
 }
 
@@ -82,10 +83,10 @@ function digitizeValidationErrorFields(error) {
 /**
  * When transforming validation errors and validation results from jspb to plain
  * objects, the protobuf base64 string is also attached to the output.
- * Hence when a plain object neeeds to be transformed back to protobuf,
+ * Hence when a plain object needs to be transformed back to protobuf,
  * the attached base64 could be directly used.
  */
-const PB_BASE64 = Symbol('PB_BASE64');
+const PB_BASE64 = '_PB_BASE64';
 
 /**
  * Validates a document input as a string.
@@ -110,8 +111,7 @@ function validateString(input, opt_htmlFormat) {
         base64.encodeByteArray(errorJspb.serializeBinary());
     return errorObject;
   });
-  resultObject.status =
-      STATUS.nameByNumber.get(resultObject.status);
+  resultObject.status = STATUS.nameByNumber.get(resultObject.status);
   resultObject[PB_BASE64] = resultBase64;
   return resultObject;
 }
@@ -178,7 +178,7 @@ function logValidationResult(validationResult, url) {
     status,
     errors,
   } = validationResult;
-  if (status === ValidationResult.Status.PASS) {
+  if (status === STATUS.nameByNumber.get(ValidationResult.Status.PASS)) {
     console.info('AMP validation successful.');
     console.info(
         `Review our 'publishing checklist' to ensure successful AMP document` +
@@ -186,18 +186,19 @@ function logValidationResult(validationResult, url) {
     if (errors.length === 0) {
       return;
     }
-  } else if (status !== ValidationResult.Status.FAIL) {
+  } else if (status !== STATUS.nameByNumber.get(ValidationResult.Status.FAIL)) {
     console.error(
         'AMP validation had unknown results. This indicates a validator ' +
         'bug. Please report at https://github.com/ampproject/amphtml/issues .');
   }
-  if (status === ValidationResult.Status.FAIL) {
+  if (status === STATUS.nameByNumber.get(ValidationResult.Status.FAIL)) {
     console.error('AMP validation had errors:');
   } else {
     console.error('AMP validation had warnings:');
   }
   for (const error of errors) {
-    if (error.severity === ValidationError.Severity.ERROR) {
+    if (error.severity ===
+        SEVERITY.nameByNumber.get(ValidationError.Severity.ERROR)) {
       console.error(errorLine(url, error));
     } else {
       console.warn(errorLine(url, error));

@@ -1,16 +1,20 @@
-import {DEFAULT_CONFIG} from './default-config';
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {calculateScriptBaseUrl} from '#service/extension-script';
-import {deepMerge, dict, hasOwn} from '#core/types/object';
-import {dev, user, userAssert} from '#utils/log';
 import {getChildJsonConfig} from '#core/dom';
-import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '#core/types';
+import {deepMerge, hasOwn} from '#core/types/object';
+import {toWin} from '#core/window';
+
 import {isCanary} from '#experiments';
 
-import {toWin} from '#core/window';
+import {Services} from '#service';
+import {calculateScriptBaseUrl} from '#service/extension-script';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {DEFAULT_CONFIG} from './default-config';
 import {variableServiceForDoc} from './variables';
+
+import {getMode} from '../../../src/mode';
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-analytics/config';
 
@@ -29,20 +33,20 @@ export class AnalyticsConfig {
      * @const {!JsonObject}
      * @private
      */
-    this.defaultConfig_ = DEFAULT_CONFIG || dict();
+    this.defaultConfig_ = DEFAULT_CONFIG || {};
 
     /** @private {!JsonObject} */
-    this.vendorConfig_ = dict();
+    this.vendorConfig_ = {};
 
     /**
      * @private {JsonObject}
      */
-    this.config_ = dict();
+    this.config_ = {};
 
     /**
      * @private {JsonObject}
      */
-    this.remoteConfig_ = dict();
+    this.remoteConfig_ = {};
 
     /** @private {boolean} */
     this.isSandbox_ = false;
@@ -104,7 +108,7 @@ export class AnalyticsConfig {
       .then((res) => res.json())
       .then(
         (jsonValue) => {
-          this.vendorConfig_ = jsonValue || dict();
+          this.vendorConfig_ = jsonValue || {};
           dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
         },
         (err) => {
@@ -169,7 +173,7 @@ export class AnalyticsConfig {
   processConfigs_() {
     const configRewriterUrl = this.getConfigRewriter_()['url'];
 
-    const config = dict({});
+    const config = {};
     const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
     mergeObjects(inlineConfig, config);
@@ -281,13 +285,13 @@ export class AnalyticsConfig {
 
     // Create object that will later hold all the resolved variables, and any
     // intermediary objects as necessary.
-    pubConfig['configRewriter'] = pubConfig['configRewriter'] || dict();
+    pubConfig['configRewriter'] = pubConfig['configRewriter'] || {};
     const rewriterConfig = pubConfig['configRewriter'];
-    rewriterConfig['vars'] = dict({});
+    rewriterConfig['vars'] = {};
 
     const allPromises = [];
     // Merge publisher && vendor varGroups to see what has been enabled.
-    const mergedConfig = pubVarGroups || dict();
+    const mergedConfig = pubVarGroups || {};
     deepMerge(mergedConfig, vendorVarGroups);
 
     Object.keys(mergedConfig).forEach((groupName) => {
@@ -333,11 +337,11 @@ export class AnalyticsConfig {
    */
   mergeConfigs_(rewrittenConfig) {
     // Initialize config with analytics related vars.
-    const config = dict({
+    const config = {
       'vars': {
         'requestCount': 0,
       },
-    });
+    };
     mergeObjects(expandConfigRequest(this.defaultConfig_), config);
     mergeObjects(
       expandConfigRequest(this.vendorConfig_),
@@ -444,7 +448,7 @@ export class AnalyticsConfig {
    * @return {!Promise<!Object>}
    */
   shallowExpandObject(element, obj) {
-    const expandedObj = dict();
+    const expandedObj = {};
     const keys = [];
     const expansionPromises = [];
 

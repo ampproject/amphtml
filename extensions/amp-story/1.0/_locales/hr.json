@@ -160,5 +160,8 @@
   },
   "99": {
     "string": "Obrazac je uspješno poslan"
+  },
+  "101": {
+    "string": "Kupujte sada"
   }
 }

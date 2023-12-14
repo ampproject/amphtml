@@ -1,17 +1,19 @@
+import {BUBBLE_MESSAGE_EVENTS} from '#bento/apis/video-iframe-api';
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
+import {BaseElement} from '#bento/components/bento-video-iframe/1.0/base-element';
+
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
+
+import {setSuperClass} from '#preact/amp-base-element';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
-
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {postMessageWhenAvailable} from '../../../src/iframe-video';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @const {string} */
 const TAG = 'amp-video-iframe';
@@ -30,7 +32,7 @@ function getIntersectionRatioMinAutoplay(element) {
   );
 }
 
-class AmpVideoIframe extends BaseElement {
+class AmpVideoIframe extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -56,12 +58,10 @@ function onMessage(e) {
         (intersectionRatio) => {
           postMessageWhenAvailable(
             currentTarget,
-            JSON.stringify(
-              dict({
-                'id': messageId,
-                'intersectionRatio': intersectionRatio,
-              })
-            )
+            JSON.stringify({
+              'id': messageId,
+              'intersectionRatio': intersectionRatio,
+            })
           );
         }
       );
@@ -105,10 +105,10 @@ const makeMethodMessage = (method) =>
     'method': method.toLowerCase(),
   });
 
-AmpVideoIframe['staticProps'] = dict({
+AmpVideoIframe['staticProps'] = {
   'onMessage': onMessage,
   'makeMethodMessage': makeMethodMessage,
-});
+};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe, CSS);

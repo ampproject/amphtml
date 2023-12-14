@@ -1,0 +1,9 @@
+{
+  "name": "amp-storybook-amp",
+  "version": "0.1.0",
+  "description": "packages specific to the amp storybook env",
+  "devDependencies": {
+    "@ampproject/storybook-addon": "1.1.10",
+    "preact": "10.19.2"
+  }
+}

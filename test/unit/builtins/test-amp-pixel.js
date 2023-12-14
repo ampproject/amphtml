@@ -1,5 +1,8 @@
+import {Services} from '#service';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {VariableSource} from '#service/variable-source';
+
+import * as privacySandboxUtils from 'src/utils/privacy-sandbox-utils';
 
 describes.realWin('amp-pixel', {amp: true}, (env) => {
   const urlErrorRegex = /src attribute must start with/;
@@ -19,6 +22,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     await createPixel(
       'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
     );
+    env.sandbox.spy(Services, 'urlReplacementsForDoc');
   });
 
   function createPixel(src, referrerPolicy) {
@@ -33,11 +37,15 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
 
   /**
    * @param {string=} opt_src
+   * @param {string=} opt_attributionsrc
    * @return {!Promise<?Image>}
    */
-  function trigger(opt_src) {
+  function trigger(opt_src, opt_attributionsrc) {
     if (opt_src != null) {
       pixel.setAttribute('src', opt_src);
+    }
+    if (opt_attributionsrc != null) {
+      pixel.setAttribute('attributionsrc', opt_attributionsrc);
     }
     whenFirstVisibleResolver();
     return whenFirstVisiblePromise
@@ -130,6 +138,61 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
           expect(reason.message).to.match(/referrerpolicy/);
         }
       );
+    });
+  });
+
+  it('should not allow attribution reporting', () => {
+    const attributionSrc =
+      '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
+    pixel.setAttribute(
+      'src',
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=ATTRIBUTION_REPORTING_STATUS'
+    );
+    return trigger(null, attributionSrc).then((img) => {
+      // Protocol is resolved to `http:` relative to test server.
+      expect(img.src).to.equal(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=5'
+      );
+      expect(img.attributionSrc).to.be.undefined;
+    });
+  });
+
+  it('should allow attribution reporting with empty attributionsrc', () => {
+    env.sandbox
+      .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
+      .returns(true);
+    const attributionSrc = '';
+    pixel.setAttribute(
+      'src',
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=ATTRIBUTION_REPORTING_STATUS'
+    );
+    return trigger(null, attributionSrc).then((img) => {
+      // Protocol is resolved to `http:` relative to test server.
+      expect(img.src).to.equal(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
+      );
+      expect(img.attributionSrc).to.equal('');
+      expect(Services.urlReplacementsForDoc).to.be.calledWith(pixel);
+    });
+  });
+
+  it('should allow attribution reporting with attributionsrc defined', () => {
+    env.sandbox
+      .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
+      .returns(true);
+    pixel.setAttribute(
+      'src',
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=ATTRIBUTION_REPORTING_STATUS'
+    );
+    const attributionSrc =
+      'https://adtech.example?ars=ATTRIBUTION_REPORTING_STATUS';
+    return trigger(null, attributionSrc).then((img) => {
+      // Protocol is resolved to `http:` relative to test server.
+      expect(img.src).to.equal(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=6'
+      );
+      expect(img.attributionSrc).to.equal('https://adtech.example?ars=6');
+      expect(Services.urlReplacementsForDoc).to.be.calledWith(pixel);
     });
   });
 });

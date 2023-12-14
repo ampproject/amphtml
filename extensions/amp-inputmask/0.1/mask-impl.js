@@ -1,5 +1,4 @@
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {dict} from '#core/types/object';
 
 import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
@@ -8,7 +7,7 @@ import {MaskInterface} from './mask-interface';
 
 import {requireExternal} from '../../../src/module';
 
-const NamedMasksToInputmask = dict({
+const NamedMasksToInputmask = {
   [NamedMasks.PAYMENT_CARD]: 'payment-card',
   [NamedMasks.DATE_DD_MM_YYYY]: {
     'alias': 'datetime',
@@ -26,9 +25,9 @@ const NamedMasksToInputmask = dict({
     'alias': 'datetime',
     'inputFormat': 'yyyy-mm-dd',
   },
-});
+};
 
-const MaskCharsToInputmask = dict({
+const MaskCharsToInputmask = {
   [MaskChars.ALPHANUMERIC_REQUIRED]: '*',
   [MaskChars.ALPHANUMERIC_OPTIONAL]: '[*]',
   [MaskChars.ALPHABETIC_REQUIRED]: 'a',
@@ -38,7 +37,7 @@ const MaskCharsToInputmask = dict({
   [MaskChars.NUMERIC_REQUIRED]: '9',
   [MaskChars.NUMERIC_OPTIONAL]: '[9]',
   [MaskChars.ESCAPE]: '\\',
-});
+};
 
 /**
  * TODO(cvializ): allow masks to be passed as data
@@ -55,13 +54,13 @@ export class Mask {
 
     this.element_ = element;
 
-    const config = dict({
+    const config = {
       'placeholder': '\u2000',
       'showMaskOnHover': false,
       'showMaskOnFocus': false,
       'noValuePatching': true,
       'jitMasking': true,
-    });
+    };
 
     const trimmedMask = mask.trim();
     const namedFormat = NamedMasksToInputmask[trimmedMask];
@@ -104,18 +103,16 @@ export class Mask {
     inputmaskCustomAliasFactory(Inputmask);
     inputmaskPaymentCardAliasFactory(Inputmask);
 
-    Inputmask.extendDefaults(
-      dict({
-        // A list of supported input type attribute values
-        'supportsInputType': [
-          'text',
-          'tel',
-          'search',
-          // 'password', // use-case?
-          // 'email', // doesn't support setSelectionRange. workaround?
-        ],
-      })
-    );
+    Inputmask.extendDefaults({
+      // A list of supported input type attribute values
+      'supportsInputType': [
+        'text',
+        'tel',
+        'search',
+        // 'password', // use-case?
+        // 'email', // doesn't support setSelectionRange. workaround?
+      ],
+    });
 
     return Inputmask;
   }

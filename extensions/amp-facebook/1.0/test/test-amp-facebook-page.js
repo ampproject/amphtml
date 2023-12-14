@@ -1,11 +1,14 @@
 import '../amp-facebook';
-import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from 'testing/iframe';
-import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '#core/3p-frame-messaging';
-import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
-import {toggleExperiment} from 'src/experiments';
+import {createElementWithAttributes} from '#core/dom';
+
 import {waitFor} from '#testing/helpers/service';
+
+import {toggleExperiment} from 'src/experiments';
+import {doNotLoadExternalResourcesInTest} from 'testing/iframe';
+
+import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-facebook-page',

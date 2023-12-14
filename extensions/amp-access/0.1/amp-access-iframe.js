@@ -1,7 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 import {toggle} from '#core/dom/style';
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -245,12 +244,10 @@ export class AccessIframeAdapter {
       if (data) {
         storage.setItem(
           TAG,
-          JSON.stringify(
-            dict({
-              't': this.ampdoc.win.Date.now(),
-              'd': data,
-            })
-          )
+          JSON.stringify({
+            't': this.ampdoc.win.Date.now(),
+            'd': data,
+          })
         );
       } else {
         storage.removeItem(TAG);

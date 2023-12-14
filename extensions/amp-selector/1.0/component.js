@@ -16,7 +16,7 @@ import {
   useState,
 } from '#preact';
 import {forwardRef} from '#preact/compat';
-import {propName} from '#preact/utils';
+import {propName, tabindexFromProps} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 
@@ -43,21 +43,24 @@ export const KEYBOARD_SELECT_MODE = {
 function SelectorWithRef(
   {
     as: Comp = 'div',
-    disabled,
+    children,
     defaultValue = [],
+    disabled,
     form,
     keyboardSelectMode = KEYBOARD_SELECT_MODE.NONE,
-    value,
     multiple,
     name,
     onChange,
     role = 'listbox',
-    [propName('tabIndex')]: tabIndex,
-    children,
+    value,
     ...rest
   },
   ref
 ) {
+  const tabindex = tabindexFromProps(
+    rest,
+    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
+  );
   const [selectedState, setSelectedState] = useState(value ?? defaultValue);
   const optionsRef = useRef([]);
   const focusRef = useRef({active: null, focusMap: {}});
@@ -109,8 +112,6 @@ function SelectorWithRef(
     }
   }, [onChange, multiple, selected]);
 
-  const clear = useCallback(() => setSelectedState([]), []);
-
   const toggle = useCallback(
     (option, select) => {
       const isSelected = selected.includes(option);
@@ -132,6 +133,13 @@ function SelectorWithRef(
     },
     [onChange, setSelectedState, selectOption, selected]
   );
+
+  const clear = useCallback(() => {
+    setSelectedState([]);
+    if (onChange) {
+      onChange({value: [], option: value});
+    }
+  }, [setSelectedState, onChange, value]);
 
   /**
    * This method uses the given callback on the target index found by
@@ -245,9 +253,7 @@ function SelectorWithRef(
       multiple={multiple}
       name={name}
       onKeyDown={onKeyDown}
-      tabIndex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
-      }
+      tabindex={tabindex}
       value={selected}
     >
       <input hidden defaultValue={selected} name={name} form={form} />
@@ -274,7 +280,6 @@ export function BentoSelectorOption({
   option,
   role = 'option',
   [propName('class')]: className = '',
-  [propName('tabIndex')]: tabIndex,
   ...rest
 }) {
   const classes = useStyles();
@@ -288,6 +293,11 @@ export function BentoSelectorOption({
     selectOption,
     selected,
   } = useContext(SelectorContext);
+
+  const tabindex = tabindexFromProps(
+    rest,
+    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
+  );
 
   const focus = useCallback(() => {
     customFocus?.();
@@ -361,9 +371,7 @@ export function BentoSelectorOption({
       ref={ref}
       role={role}
       selected={isSelected}
-      tabIndex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
-      }
+      tabindex={tabindex}
       value={option}
     />
   );

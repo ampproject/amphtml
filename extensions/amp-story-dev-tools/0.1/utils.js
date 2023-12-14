@@ -3,7 +3,7 @@ import {parseQueryString} from '#core/types/string/url';
 /**
  * Updates the hashString with the dictionary<string, string> passed in
  * @public
- * @param {!Object<string, string>} updates
+ * @param {!{[key: string]: string}} updates
  * @param {!Window} win
  */
 export function updateHash(updates, win) {

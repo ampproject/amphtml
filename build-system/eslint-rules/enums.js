@@ -36,7 +36,7 @@
  *
  * @return {!Object}
  */
-// eslint-disable-next-line
+
 module.exports = function create(context) {
   const renames = [];
   /**
@@ -92,6 +92,11 @@ module.exports = function create(context) {
     const {parent} = node;
     // import { Enum } from '.'
     if (parent.type === 'ImportSpecifier') {
+      return;
+    }
+
+    // Types are fine
+    if (parent.type === 'TSTypeReference') {
       return;
     }
 

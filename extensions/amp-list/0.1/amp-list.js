@@ -17,7 +17,7 @@ import {
 } from '#core/dom/query';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
 import {isArray, toArray} from '#core/types/array';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -695,11 +695,9 @@ export class AmpList extends AMP.BaseElement {
    */
   triggerFetchErrorEvent_(error) {
     const event = error
-      ? createCustomEvent(
-          this.win,
-          `${TAG}.error`,
-          dict({'response': error.response})
-        )
+      ? createCustomEvent(this.win, `${TAG}.error`, {
+          'response': error.response,
+        })
       : null;
     this.action_.trigger(
       this.element,
@@ -798,7 +796,12 @@ export class AmpList extends AMP.BaseElement {
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
-    return requestForBatchFetch(this.element, this.getPolicy_(), refresh)
+    return requestForBatchFetch(
+      this.element,
+      elementSrc,
+      this.getPolicy_(),
+      refresh
+    )
       .then((r) => {
         request = r;
 
@@ -810,13 +813,13 @@ export class AmpList extends AMP.BaseElement {
         );
         setupJsonFetchInit(r.fetchOpt);
 
-        const attributes = dict({
+        const attributes = {
           'ampListAttributes': {
             'items': this.element.getAttribute('items') || 'items',
             'singleItem': this.element.hasAttribute('single-item'),
             'maxItems': this.element.getAttribute('max-items'),
           },
-        });
+        };
         return this.ssrTemplateHelper_.ssr(
           this.element,
           request,

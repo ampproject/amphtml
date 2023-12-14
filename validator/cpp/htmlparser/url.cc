@@ -1,5 +1,8 @@
 #include "cpp/htmlparser/url.h"
 
+#include <string>
+#include <string_view>
+
 #include "cpp/htmlparser/strings.h"
 
 namespace htmlparser {
@@ -145,6 +148,9 @@ void URL::ParseAuthority() {
     }
     idx++;
   }
+  // Save off whatever is left as the path + params + fragment.
+  // We don't further parse this.
+  path_params_fragment_ = url_.substr(idx);
 
   // Extract the login string if one was found.
   if (at_idx != -1) {
@@ -161,7 +167,8 @@ void URL::ParseAuthority() {
 
   bool is_ipv6_literal = false;
   std::string_view host = url_.substr(host_begin, host_end - host_begin);
-  if (host.front() == '[' && host.back() == ']' && host.size() > 2 /* [] */) {
+  if (!host.empty() && host.front() == '[' && host.back() == ']' &&
+      host.size() > 2 /* [] */) {
     is_ipv6_literal = true;
     host.remove_prefix(1);
     host.remove_suffix(1);

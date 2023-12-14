@@ -1,7 +1,9 @@
-import {AmpAdCustom} from '../amp-ad-custom';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {Services} from '#service';
 import {createElementWithAttributes, removeChildren} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+
+import {Services} from '#service';
+
+import {AmpAdCustom} from '../amp-ad-custom';
 
 describes.realWin('Amp custom ad', {amp: true}, (env) => {
   let win;

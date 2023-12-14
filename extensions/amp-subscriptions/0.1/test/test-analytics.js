@@ -1,10 +1,11 @@
 import * as AmpAnalytics from '#utils/analytics';
+import {user} from '#utils/log';
+
 import {
   ActionStatus,
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
 } from '../analytics';
-import {user} from '#utils/log';
 
 //--> env.sandbox.stub(ServiceUrl, 'adsUrl', url => serverUrl + url);
 

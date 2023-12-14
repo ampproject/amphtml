@@ -2,10 +2,12 @@
  * @fileoverview Some unit tests of the internal carousel implementation.
  */
 
-import {Carousel} from '../carousel';
-import {dev} from '#utils/log';
 import {setInitialDisplay, setStyle, setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+
+import {dev} from '#utils/log';
+
+import {Carousel} from '../carousel';
 
 describes.realWin('carousel implementation', {}, (env) => {
   let win;

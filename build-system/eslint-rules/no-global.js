@@ -1,6 +1,6 @@
 'use strict';
 
-const astUtils = require('eslint/lib/rules/utils/ast-utils');
+const astUtils = require('../../node_modules/eslint/lib/rules/utils/ast-utils');
 
 const GLOBALS = Object.create(null);
 GLOBALS.window = 'Use `self` instead.';

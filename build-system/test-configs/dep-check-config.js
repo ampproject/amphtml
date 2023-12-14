@@ -79,7 +79,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/log.js',
       '3p/**->src/url.js',
-      '3p/**->src/config.js',
+      '3p/**->src/config/urls.js',
       '3p/**->src/mode.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
@@ -106,7 +106,6 @@ exports.rules = [
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
-      'ads/google/a4a/**->src/consent.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
@@ -150,12 +149,13 @@ exports.rules = [
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-dianomi-impl/0.1/amp-ad-network-dianomi-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-smartadserver-impl/0.1/amp-ad-network-smartadserver-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-mgid-impl/0.1/amp-ad-network-mgid-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // A4A impls importing amp fast fetch header name
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
 
-      // And a few mrore things depend on a4a.
+      // And a few more things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/name-frame-renderer.js',
@@ -178,9 +178,6 @@ exports.rules = [
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
 
-      // <amp-brightcove> versions share this message API definition.
-      'extensions/amp-brightcove/**->extensions/amp-brightcove/brightcove-api.js',
-
       // Amp carousel (and friends) depending on base carousel
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel.js',
@@ -188,50 +185,23 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
-      'extensions/amp-inline-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
-      'extensions/amp-inline-gallery/1.0/pagination-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
 
-      'extensions/amp-inline-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/carousel-context.js',
-      'extensions/amp-inline-gallery/1.0/pagination.js->extensions/amp-base-carousel/1.0/carousel-context.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/component.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/responsive-attributes.js',
-      'extensions/amp-stream-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
-      'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
-
-      // <amp-dailymotion> versions share this message API definition.
-      'extensions/amp-dailymotion/**->extensions/amp-dailymotion/dailymotion-api.js',
-
-      // Autolightboxing dependencies
-      'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-base-carousel/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
-      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
 
       // <amp-date-display> versions share these date format helpers
       'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
+
+      // <amp-list> and <amp-render> share some logic
+      'extensions/amp-list/1.0/amp-list.js**->extensions/amp-render/1.0/shared/amp-fetch-utils.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
-
-      // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
-      'extensions/**->extensions/amp-video/1.0/video-base-element.js',
-      'extensions/**->extensions/amp-video/1.0/video-iframe.js',
-
-      // <amp-video-iframe> versions share this message API definition.
-      'extensions/amp-video-iframe/**->extensions/amp-video-iframe/amp-video-iframe-api.js',
-
-      // <amp-vimeo> versions share this message API definition.
-      'extensions/amp-vimeo/**->extensions/amp-vimeo/vimeo-api.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -257,6 +227,10 @@ exports.rules = [
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-ui.js->extensions/amp-story/1.0/utils.js',
+
+      // Story captions
+      'extensions/amp-story-captions/0.1/amp-story-captions.js->extensions/amp-story/1.0/utils.js',
+
       // Story education
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
@@ -268,12 +242,21 @@ exports.rules = [
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/request-utils.js',
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/toast.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
 
       // Story Shopping
+      'extensions/amp-story-shopping/0.1/amp-story-shopping.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/request-utils.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/history.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/history.js',
 
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -285,6 +268,26 @@ exports.rules = [
       'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/0.1/interactive-disclaimer.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-slider.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
+      // AMP Story Subscriptions.
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/story-analytics.js',
+
+      // AMP Story audio sticker.
+      'extensions/amp-story-audio-sticker/0.1/amp-story-audio-sticker.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
+      // Story localization.
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -305,7 +308,7 @@ exports.rules = [
       'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/loading-spinner.js',
-      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-open-page-attachment.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-open-page-attachment.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/history.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/story-analytics.js',
@@ -331,6 +334,8 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
+      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -349,9 +354,9 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
-        'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
+        'src/service/video-manager-impl.js',
+      'extensions/amp-connatix-player/0.1/amp-connatix-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
         'src/service/url-replacements-impl.js',
@@ -363,13 +368,13 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-redbull-player/0.1/amp-redbull-player.js->' +
-        'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-delight-player/0.1/amp-delight-player.js->' +
+        'src/service/video-manager-impl.js',
+      'extensions/amp-slikeplayer/0.1/amp-slikeplayer.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',
@@ -397,6 +402,8 @@ exports.rules = [
         'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
         'src/service/notification-ui-manager.js',
+      'extensions/amp-google-read-aloud-player/0.1/amp-google-read-aloud-player.js->' +
+        'src/service/video-manager-impl.js',
       // Accessing USER_INTERACTED constant:
       'extensions/amp-story/1.0/page-advancement.js->' +
         'src/service/action-impl.js',
@@ -423,6 +430,7 @@ exports.rules = [
       'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization/index.js',
       'extensions/amp-story*/**/*.js->src/service/localization/strings.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization/index.js',
+      'extensions/amp-story/1.0/amp-story.js->src/service/extension-script.js',
 
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
@@ -434,6 +442,9 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/callout-vendors.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/real-time-config-impl.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->src/service/real-time-config/real-time-config-impl.js',
+
+      // For amp-image-slider_1.0: Required for `Gestures.get`
+      'extensions/amp-image-slider/1.0/component.js->src/service/timer-impl.js',
     ],
   },
   {
@@ -494,6 +505,9 @@ exports.rules = [
   {
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
+    allowlist: [
+      // Do not add to this allowlist.
+    ],
   },
   {
     filesMatching: 'src/**/*.js',

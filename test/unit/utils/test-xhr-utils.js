@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {
@@ -165,14 +163,14 @@ describes.sandboxed('utils/xhr-utils', {}, (env) => {
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
-      const msgPayload = dict({
+      const msgPayload = {
         'originalRequest': {
           'input': 'https://www.shouldsendxhrrequesttoviewer.org',
           'init': {
             'body': {},
           },
         },
-      });
+      };
       expect(viewer.sendMessageAwaitResponse).to.have.been.calledOnceWith(
         'xhr',
         msgPayload

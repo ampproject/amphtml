@@ -2,6 +2,11 @@
 
 #include <deque>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include "absl/algorithm/container.h"
 #include "absl/memory/memory.h"
@@ -85,7 +90,7 @@ const std::string& Token::StringValue() const {
 }
 
 std::string Token::ToString() const {
-  // The following are overriden in their class: AT_KEYWORD, CLOSE_CURLY,
+  // The following are overridden in their class: AT_KEYWORD, CLOSE_CURLY,
   // CLOSE_PAREN, CLOSE_SQUARE, DELIM, DIMENSION, FUNCTION_TOKEN, IDENT,
   // NUMBER, OPEN_CURLY, OPEN_PAREN, OPEN_SQUARE, PERCENTAGE, STRING, URL
   switch (Type()) {
@@ -343,7 +348,7 @@ bool Whitespace(char32_t code) {
 char32_t kMaximumallowedcodepoint = 0x10ffff;
 
 // A MarkedPosition object saves position information from the tokenizer
-// rovided as |line| and |col| to the constructor and can later write that
+// provided as |line| and |col| to the constructor and can later write that
 // position back to a Token object.
 class MarkedPosition {
  public:
@@ -2471,7 +2476,7 @@ CombinatorType::Code CombinatorTypeForToken(const Token& token) {
   if (IsDelim(token, "+")) return CombinatorType::ADJACENT_SIBLING;
   if (IsDelim(token, "~")) return CombinatorType::GENERAL_SIBLING;
   // CombinatorTypeForToken is only ever called if the token has one of these
-  // delimitors, so reaching this point is impossible.
+  // delimiters, so reaching this point is impossible.
   CHECK(false) << absl::StrCat(
       "not a combinator token - type=", TokenType::Code_Name(token.Type()),
       " value=", token.StringValue());

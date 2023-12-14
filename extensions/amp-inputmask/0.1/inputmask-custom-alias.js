@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {user} from '#utils/log';
 
 /**
@@ -19,7 +17,7 @@ export function factory(Inputmask) {
  * @private visible for testing
  */
 export function getAliasDefinition() {
-  return dict({
+  return {
     'custom': {
       'prefixes': [],
       /**
@@ -48,7 +46,7 @@ export function getAliasDefinition() {
         return removePrefix(processedValue, prefixes);
       },
     },
-  });
+  };
 }
 
 /**

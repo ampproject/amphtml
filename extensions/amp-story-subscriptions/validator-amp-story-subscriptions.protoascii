@@ -1,0 +1,35 @@
+tags: {  # amp-story-subscriptions
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-subscriptions"
+    version: "0.1"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-subscriptions>
+  html_format: AMP
+  tag_name: "AMP-STORY-SUBSCRIPTIONS"
+  requires_extension: "amp-story-subscriptions"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+  attrs: {
+    name: "price"
+    mandatory: true
+  }
+  attrs: {
+    name: "description"
+    mandatory: true
+  }
+  attrs: {
+    name: "subscriptions-page-index"
+  }
+  attrs: {
+    name: "headline"
+  }
+  attrs: {
+    name: "additional-description"
+  }
+}

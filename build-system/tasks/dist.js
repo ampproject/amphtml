@@ -5,7 +5,6 @@ const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntime,
   compileCoreRuntime,
   compileJs,
   endBuildStep,
@@ -31,6 +30,7 @@ const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {VERSION} = require('../compile/internal-version');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const {cyan, green} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -92,6 +92,7 @@ async function runPreDistSteps(options) {
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
+  await buildStoryLocalization(options);
   displayLifecycleDebugging();
 }
 
@@ -114,8 +115,6 @@ async function dist() {
   // These steps use closure compiler. Small ones before large (parallel) ones.
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
-  } else if (argv.bento_runtime_only) {
-    await compileBentoRuntime(options);
   } else {
     await Promise.all([
       writeVersionFiles(),
@@ -133,7 +132,6 @@ async function dist() {
   // This step is to be run only during a full `amp dist`.
   if (
     !argv.core_runtime_only &&
-    !argv.bento_runtime_only &&
     !argv.extensions &&
     !argv.extensions_from &&
     !argv.noextensions
@@ -204,10 +202,6 @@ function buildLoginDone(version) {
     minify: true,
     minifiedName,
     aliasName,
-    extraGlobs: [
-      `${buildDir}/amp-login-done-0.1.max.js`,
-      `${buildDir}/amp-login-done-dialog.js`,
-    ],
   });
 }
 
@@ -227,7 +221,6 @@ async function buildWebPushPublisherFiles() {
         includePolyfills: true,
         minify: true,
         minifiedName,
-        extraGlobs: [`${tempBuildDir}/*.js`],
       });
     }
   }
@@ -404,20 +397,16 @@ dist.flags = {
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
-  bento_runtime_only: 'Build only the standalone Bento runtime',
   full_sourcemaps: 'Include source code content in sourcemaps',
   sourcemap_url: 'Set a custom sourcemap URL with placeholder {version}',
   type: 'Point sourcemap to fetch files from the correct GitHub tag',
   esm: 'Do not transpile down to ES5',
   version_override: 'Override the version written to AMP_CONFIG',
   watch: 'Watch for changes in files, re-compiles when detected',
-  closure_concurrency: 'Set the number of concurrent invocations of closure',
   debug: 'Output the file contents during compilation lifecycles',
   define_experiment_constant:
     'Build runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     'Sanitize the output to diff build results (requires --pseudo_names)',
   sxg: 'Output the minified code for the SxG build',
-  warning_level:
-    "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };

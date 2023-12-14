@@ -6,7 +6,6 @@ import {
   isFullscreenElement,
 } from '#core/dom/fullscreen';
 import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -192,7 +191,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     const baseUrl =
       'https://www.oo-syringe.com/prod/AMP/minute-media-player.html';
 
-    const moreQueryParams = dict({
+    const moreQueryParams = {
       'content_type': this.contentType_ || undefined,
       'content_id': this.contentId_ || undefined,
       'scanned_element_type': this.scannedElementType_ || undefined,
@@ -201,7 +200,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       'minimum_date_factor': this.minimumDateFactor_ || undefined,
       'scoped_keywords': this.scopedKeywords_ || undefined,
       'player_id': this.playerId_ || undefined,
-    });
+    };
 
     return addParamsToUrl(baseUrl, moreQueryParams);
   }

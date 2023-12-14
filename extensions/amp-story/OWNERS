@@ -7,7 +7,6 @@
       owners: [
         {
           name: 'gmajoulet',
-          notify: true,
         },
         {
           name: 'newmuis',
@@ -21,9 +20,6 @@
         },
         {
           name: 'mszylkowski',
-        },
-        {
-          name: 'raxsha',
         },
       ],
     },

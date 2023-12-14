@@ -40,7 +40,7 @@
 }
 
 .i-amphtml-story-draggable-drawer-container {
-  height: calc(100% - 40px) !important;
+  height: 100% !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -124,10 +124,13 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-dr
 }
 
 [desktop] .i-amphtml-story-draggable-drawer {
-  height: 60vh !important;
+  height: auto !important;
+  max-height: min(60vh, 100%) !important;
+  min-height: min(100%, 700px) !important;
   width: 800px !important;
   border-radius: 8px !important;
   overflow: hidden !important;
+  overflow-y: auto !important;
 }
 
 /* Remote-attachment overrides. */

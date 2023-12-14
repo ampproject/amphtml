@@ -1,5 +1,8 @@
 import {map} from '#core/types/object';
 
+// eslint-disable-next-line no-script-url
+export const INVALID_PROTOCOLS = ['javascript:', 'data:', 'vbscript:'];
+
 const QUERY_STRING_REGEX = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
 /**

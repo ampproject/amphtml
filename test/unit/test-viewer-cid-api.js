@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {ViewerCidApi} from '#service/viewer-cid-api';
 
 import {mockServiceForDoc} from '#testing/helpers/service';
@@ -49,11 +47,11 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
         .getScopedCid(used ? 'api-key' : undefined, 'AMP_ECID_GOOGLE')
         .then((cid) => {
           expect(cid).to.equal('client-id-from-viewer');
-          const payload = dict({
+          const payload = {
             'scope': 'AMP_ECID_GOOGLE',
             'clientIdApi': used,
             'canonicalOrigin': 'http://localhost:9876',
-          });
+          };
           if (used) {
             payload['apiKey'] = 'api-key';
           }
@@ -74,14 +72,11 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
 
     it('should not use client ID API if scope not allowlisted', () => {
       viewerMock.sendMessageAwaitResponse
-        .withArgs(
-          'cid',
-          dict({
-            'scope': 'NON_ALLOWLISTED_SCOPE',
-            'clientIdApi': false,
-            'canonicalOrigin': 'http://localhost:9876',
-          })
-        )
+        .withArgs('cid', {
+          'scope': 'NON_ALLOWLISTED_SCOPE',
+          'clientIdApi': false,
+          'canonicalOrigin': 'http://localhost:9876',
+        })
         .returns(Promise.resolve('client-id-from-viewer'));
       return expect(
         api.getScopedCid(undefined, 'NON_ALLOWLISTED_SCOPE')

@@ -1,9 +1,12 @@
-import * as Preact from '#core/dom/jsx';
-import {Action, getStoreService} from './amp-story-store-service';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Services} from '#service';
+import * as Preact from '#core/dom/jsx';
 import {lastChildElement} from '#core/dom/query';
+
+import {Services} from '#service';
+
 import {userAssert} from '#utils/log';
+
+import {Action, getStoreService} from './amp-story-store-service';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to

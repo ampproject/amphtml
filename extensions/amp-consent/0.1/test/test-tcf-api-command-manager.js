@@ -1,7 +1,9 @@
-import {TcfApiCommandManager} from '../tcf-api-command-manager';
+import {user} from '#utils/log';
+
 import {macroTask} from '#testing/helpers';
 import {mockWindowInterface} from '#testing/helpers/service';
-import {user} from '#utils/log';
+
+import {TcfApiCommandManager} from '../tcf-api-command-manager';
 
 describes.realWin(
   'tcf api commands',
@@ -20,6 +22,7 @@ describes.realWin(
       let msg;
       let tcfApiCommandManager;
       let mockTcString;
+      let mockTcfPolicyVersion;
       let mockSharedData;
       let callId;
 
@@ -29,6 +32,7 @@ describes.realWin(
         mockMetadata = {};
         mockSharedData = {};
         mockTcString = '';
+        mockTcfPolicyVersion = null;
         mockPolicyManager = {
           getConsentMetadataInfo: (opt_policy) => {
             return Promise.resolve(mockMetadata);
@@ -38,6 +42,9 @@ describes.realWin(
           },
           getMergedSharedData: (opt_policy) => {
             return Promise.resolve(mockSharedData);
+          },
+          getTcfPolicyVersion: (opt_policy) => {
+            return Promise.resolve(mockTcfPolicyVersion);
           },
           setOnPolicyChange: env.sandbox.spy(),
         };
@@ -112,12 +119,12 @@ describes.realWin(
           mockMetadata = getMetadata(false);
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
-            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
+            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata, 4)
           ).to.deep.equals({
             gdprApplies: false,
             cmpLoaded: true,
             cmpStatus: 'loaded',
-            tcfPolicyVersion: 2,
+            tcfPolicyVersion: 4,
           });
         });
 
@@ -187,16 +194,19 @@ describes.realWin(
           });
 
           mockTcString = 'abc123';
+          mockTcfPolicyVersion = 4;
           mockSharedData = {'data': 'data1'};
 
           expect(
             tcfApiCommandManager.getMinimalTcDataForTesting(
               mockMetadata,
               mockSharedData,
-              mockTcString
+              mockTcString,
+              undefined,
+              mockTcfPolicyVersion
             )
           ).to.deep.equals({
-            tcfPolicyVersion: 2,
+            tcfPolicyVersion: mockTcfPolicyVersion,
             gdprApplies: false,
             tcString: mockTcString,
             listenerId: undefined,
@@ -207,11 +217,40 @@ describes.realWin(
           });
         });
 
+        it('sends a minimal TcData via PostMessage without tcfPolicyVersion stored - fallback to tcfPolicyVersion 2', async () => {
+          callId = 'getTcDataId';
+          data = getData('getTCData', callId);
+          mockMetadata = getMetadata(false, 'xyz987', false);
+          mockTcString = 'abc123';
+          mockSharedData = {'data': 'data1'};
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          await macroTask();
+
+          const postMessageArgs = mockWin.postMessage.args[0];
+          const tcfApiReturn = getTcfApiReturn(
+            callId,
+            tcfApiCommandManager.getMinimalTcDataForTesting(
+              mockMetadata,
+              mockSharedData,
+              mockTcString
+            ),
+            true
+          );
+          expect(
+            postMessageArgs[0]['__tcfapiReturn']['returnValue'][
+              'tcfPolicyVersion'
+            ]
+          ).to.be.equal(2);
+          expect(postMessageArgs[0]).to.deep.equals(tcfApiReturn);
+        });
+
         it('sends a minimal TcData via PostMessage', async () => {
           callId = 'getTcDataId';
           data = getData('getTCData', callId);
           mockMetadata = getMetadata(false, 'xyz987', false);
           mockTcString = 'abc123';
+          mockTcfPolicyVersion = 4;
           mockSharedData = {'data': 'data1'};
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           tcfApiCommandManager.handleTcfCommand(data, mockWin);
@@ -224,7 +263,9 @@ describes.realWin(
               tcfApiCommandManager.getMinimalTcDataForTesting(
                 mockMetadata,
                 mockSharedData,
-                mockTcString
+                mockTcString,
+                undefined,
+                mockTcfPolicyVersion
               ),
               true
             )

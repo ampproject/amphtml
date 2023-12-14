@@ -1,9 +1,16 @@
 #include <algorithm>
-#include <set>
-#include <tuple>
+#include <functional>
 #ifdef DUMP_NODES
 #include <iostream>  // For DumpDocument
 #endif               // DUMP_NODES
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <set>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include "absl/flags/flag.h"
 #include "absl/status/status.h"
@@ -396,7 +403,7 @@ void Parser::AddText(const std::string& text) {
 
   text_node->data_.assign(text, 0, text.size());
   AddChild(text_node);
-  // Count number of terms in ths text node, except if this is <script>,
+  // Count number of terms in the text node, except if this is <script>,
   // <textarea> or a comment node.
   if (count_num_terms_in_text_node_ && text_node->Parent() &&
       text_node->Parent()->DataAtom() != Atom::SCRIPT &&
@@ -462,7 +469,7 @@ void Parser::AddFormattingElement() {
     Node* node = active_formatting_elements_stack_.at(i);
     if (node->node_type_ == NodeType::SCOPE_MARKER_NODE) break;
     if (node->node_type_ != NodeType::ELEMENT_NODE) continue;
-    if (node->name_space_ != "") continue;
+    if (!node->name_space_.empty()) continue;
     if (node->atom_ != tag_atom) continue;
     if (node->attributes_.size() != token_.attributes.size()) continue;
 
@@ -1140,7 +1147,7 @@ bool Parser::InBodyIM() {  // NOLINT
       ReconstructActiveFormattingElements();
       AddText(d);
       if (frameset_ok_ && !Strings::IsAllWhitespaceChars(d)) {
-        // There were non-whitespace chracters inserted.
+        // There were non-whitespace characters inserted.
         frameset_ok_ = false;
       }
       break;
@@ -1703,7 +1710,7 @@ bool Parser::InBodyIM() {  // NOLINT
       break;
     }
     case TokenType::ERROR_TOKEN: {
-      if (template_stack_.size() > 0) {
+      if (!template_stack_.empty()) {
         insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
         return false;
       } else {
@@ -3313,7 +3320,7 @@ void Parser::RecordLinkRelCanonical(Node* link_node) {
   if (link_node->Type() != NodeType::ELEMENT_NODE ||
       link_node->DataAtom() != Atom::LINK) return;
 
-  bool canonical;
+  bool canonical = false;
   std::string canonical_url;
   for (auto& attr : link_node->Attributes()) {
     if (Strings::EqualFold(attr.key, "rel") &&

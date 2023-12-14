@@ -1,7 +1,6 @@
 import {devAssert, devAssertString} from '#core/assert';
 import {internalListenImplementation} from '#core/dom/event-helper-listen';
 import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 /** @const */
@@ -79,12 +78,7 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
  * @param {?string=} rtvVersion
  * @return {string}
  */
-export function serializeMessage(
-  type,
-  sentinel,
-  data = dict(),
-  rtvVersion = null
-) {
+export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   const message = data;
   message['type'] = type;

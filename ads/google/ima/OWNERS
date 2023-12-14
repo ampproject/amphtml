@@ -5,7 +5,6 @@
   rules: [
     {
       owners: [
-        {name: 'ampproject/wg-bento'},
         {name: 'ampproject/wg-components'},
         {name: 'ampproject/wg-monetization'},
       ],

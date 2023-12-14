@@ -1,3 +1,15 @@
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
 import {
   CONSENT_ITEM_STATE,
   PURPOSE_CONSENT_STATE,
@@ -5,15 +17,7 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
-import {Services} from '#service';
-import {dev} from '#utils/log';
-import {macroTask} from '#testing/helpers';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
 
 describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
   let win;
@@ -602,7 +606,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           constructMetadata(
             CONSENT_STRING_TYPE.US_PRIVACY_STRING,
             '3~3.33.33.303'
-          )
+          ),
+          undefined,
+          4
         );
         await macroTask();
         expect(requestSpy).to.be.calledTwice;
@@ -618,6 +624,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             '3~3.33.33.303'
           )
         );
+        expect(requestBody.tcfPolicyVersion).to.equal(4);
       });
 
       it('support onUpdateHref expansion', function* () {
@@ -662,7 +669,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         expect(requestBody.consentString).to.undefined;
       });
 
-      it('send update request on local stroage removal', async () => {
+      it('send update request on local storage removal', async () => {
         const testConsentInfo = constructConsentInfo(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',

@@ -1,6 +1,6 @@
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev} from '#utils/log';
@@ -9,7 +9,7 @@ import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
-/** @private {!Object<string, boolean>} */
+/** @private {!{[key: string]: boolean}} */
 const SUPPORTED_TAG_NAMES = {
   'INPUT': true,
   'SELECT': true,
@@ -31,7 +31,7 @@ export class FormDirtiness {
     /** @private {number} */
     this.dirtyFieldCount_ = 0;
 
-    /** @private {!Object<string, boolean>} */
+    /** @private {!{[key: string]: boolean}} */
     this.isFieldNameDirty_ = map();
 
     /** @private {?FormData} */
@@ -103,7 +103,7 @@ export class FormDirtiness {
       const formDirtinessChangeEvent = createCustomEvent(
         this.win_,
         AmpEvents_Enum.FORM_DIRTINESS_CHANGE,
-        dict({'isDirty': isDirty}),
+        {'isDirty': isDirty},
         {bubbles: true}
       );
       this.form_.dispatchEvent(formDirtinessChangeEvent);

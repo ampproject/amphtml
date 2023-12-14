@@ -1,4 +1,5 @@
 import {LocalizedStringId_Enum} from '#service/localization/strings';
+
 import localesObjs from '../_locales';
 
 describes.fakeWin('amp-story-localization-strings', {amp: true}, () => {

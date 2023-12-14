@@ -107,7 +107,7 @@ export class ScrollComponent {
   }
 
   /**
-   * @param {Object} updates
+   * @param {object} updates
    * @return {boolean} true if changed
    * @protected
    */

@@ -1,14 +1,16 @@
-import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
-import {LocalizationService} from '#service/localization';
-import {MOCK_URL, getSliderInteractiveData} from './helpers';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {MOCK_URL, getSliderInteractiveData} from './helpers';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {
   MID_SELECTION_CLASS,
   POST_SELECTION_CLASS,
 } from '../amp-story-interactive-abstract';
+import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
 
 describes.realWin(
   'amp-story-interactive-slider',
@@ -27,6 +29,10 @@ describes.realWin(
       const ampStorySliderEl = win.document.createElement(
         'amp-story-interactive-slider'
       );
+
+      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
+      ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
       env.sandbox
@@ -43,8 +49,6 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
-      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
-      ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       const xhr = Services.xhrFor(env.win);
       xhrMock = env.sandbox.mock(xhr);
       xhrMock.expects('fetchJson').resolves({
@@ -81,7 +85,7 @@ describes.realWin(
         .getRootElement()
         .querySelector('input[type="range"]');
       // simulates a change event, which is when the user releases the slider
-      slider.dispatchEvent(new CustomEvent('change'));
+      slider.dispatchEvent(new CustomEvent('mouseup'));
       expect(slider.hasAttribute('disabled')).to.be.true;
     });
 
@@ -136,7 +140,7 @@ describes.realWin(
         .getRootElement()
         .querySelector('input[type="range"]');
       // simulates a change event, which is when the user releases the slider
-      slider.dispatchEvent(new CustomEvent('change'));
+      slider.dispatchEvent(new CustomEvent('mouseup'));
       expect(ampStorySlider.getRootElement()).to.have.class(
         POST_SELECTION_CLASS
       );
@@ -175,7 +179,7 @@ describes.realWin(
       // simulates an input event, which is when the user drags the slider
       // simulates a change event, which is when the user releases the slider
       slider.dispatchEvent(new CustomEvent('input'));
-      slider.dispatchEvent(new CustomEvent('change'));
+      slider.dispatchEvent(new CustomEvent('mouseup'));
       expect(sliderBubble.textContent).to.be.equal('30%');
     });
 

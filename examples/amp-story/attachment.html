@@ -5,7 +5,7 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+    <script async custom-element="amp-story-page-attachment" src="https://cdn.ampproject.org/v0/amp-story-page-attachment-0.1.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
     <title>Attachments</title>
@@ -247,6 +247,21 @@
         </amp-story-page-outlink>
       </amp-story-page>
 
+      <amp-story-page id="outlink-default-hash-navigation">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat2.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="center">
+          <p>
+            <span data-text-background-color="crimson">Outlink linking to another page in the same story.</span></br></br>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-outlink
+          layout="nodisplay">
+          <a href="http://localhost:8000/examples/amp-story/attachment.html#page=outlink-default" title="Link Description"></a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
       <amp-story-page id="outlink-custom-icon-custom-text">
         <amp-story-grid-layer template="fill">
           <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat2.jpg"></amp-img>
@@ -380,6 +395,25 @@
           title="Link Description"
           data-title="Data-Title"
           href="https://www.google.com"
+          cta-text="Shop at Forbes"
+          data-cta-text="Data-CTA-Text"
+          layout="nodisplay">
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="legacy-attachment-hash-navigation">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat2.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="center">
+          <p>
+            <span data-text-background-color="crimson">Page attachment linking to another page in the same story.</span></br></br>
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment
+          title="Link Description"
+          data-title="Data-Title"
+          href="http://localhost:8000/examples/amp-story/attachment.html#page=legacy-attachment"
           cta-text="Shop at Forbes"
           data-cta-text="Data-CTA-Text"
           layout="nodisplay">

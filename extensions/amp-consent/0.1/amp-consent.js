@@ -1,3 +1,23 @@
+import {Deferred} from '#core/data-structures/promise';
+import {realChildElements} from '#core/dom/query';
+import {toggle} from '#core/dom/style';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+import {
+  NOTIFICATION_UI_MANAGER,
+  NotificationUiManager,
+} from '#service/notification-ui-manager';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {
+  ConsentConfig,
+  expandConsentEndpointUrl,
+  expandPolicyConfig,
+} from './consent-config';
 import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
@@ -7,35 +27,19 @@ import {
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
-import {CSS} from '../../../build/amp-consent-0.1.css';
-import {
-  ConsentConfig,
-  expandConsentEndpointUrl,
-  expandPolicyConfig,
-} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '#core/data-structures/promise';
-import {
-  NOTIFICATION_UI_MANAGER,
-  NotificationUiManager,
-} from '#service/notification-ui-manager';
-import {Services} from '#service';
 import {TcfApiCommandManager} from './tcf-api-command-manager';
+
+import {CSS} from '../../../build/amp-consent-0.1.css';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   assertHttpsUrl,
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
-import {getData} from '#utils/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {isArray, isEnumValue, isObject} from '#core/types';
-import {realChildElements} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -157,7 +161,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ = new ConsentUI(
         this,
-        dict({}),
+        {},
         this.consentConfig_['postPromptUI']
       );
     }
@@ -179,7 +183,7 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-    const policyConfig = this.consentConfig_['policy'] || dict({});
+    const policyConfig = this.consentConfig_['policy'] || {};
 
     this.policyConfig_ = expandPolicyConfig(
       policyConfig,
@@ -300,6 +304,7 @@ export class AmpConsent extends AMP.BaseElement {
       }
 
       let consentString;
+      let tcfPolicyVersion;
       let metadata;
       const data = getData(event);
 
@@ -333,6 +338,9 @@ export class AmpConsent extends AMP.BaseElement {
           data['info'] = undefined;
         }
         consentString = data['info'];
+        tcfPolicyVersion = this.validateTCFPolicyVersion_(
+          data['tcfPolicyVersion']
+        );
         metadata = this.validateMetadata_(data['consentMetadata']);
       }
 
@@ -358,7 +366,7 @@ export class AmpConsent extends AMP.BaseElement {
               purposeConsents
             );
           }
-          this.handleAction_(action, consentString, metadata);
+          this.handleAction_(action, consentString, metadata, tcfPolicyVersion);
         }
       }
     });
@@ -451,8 +459,14 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} action
    * @param {string=} consentString
    * @param {!ConsentMetadataDef=} opt_consentMetadata
+   * @param {number=} opt_tcfPolicyVersion
    */
-  handleAction_(action, consentString, opt_consentMetadata) {
+  handleAction_(
+    action,
+    consentString,
+    opt_consentMetadata,
+    opt_tcfPolicyVersion
+  ) {
     const setDirtyBitPromise =
       isEnumValue(ACTION_TYPE, action) &&
       this.consentConfig_['clearDirtyBitOnResponse_dontUseThisItMightBeRemoved']
@@ -462,7 +476,8 @@ export class AmpConsent extends AMP.BaseElement {
       this.handleActionAfterClearingDirtyBit_(
         action,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        opt_tcfPolicyVersion
       );
     });
   }
@@ -471,11 +486,13 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} action
    * @param {string=} consentString
    * @param {!ConsentMetadataDef=} opt_consentMetadata
+   * @param {number=} opt_tcfPolicyVersion
    */
   handleActionAfterClearingDirtyBit_(
     action,
     consentString,
-    opt_consentMetadata
+    opt_consentMetadata,
+    opt_tcfPolicyVersion
   ) {
     this.consentStateChangedViaPromptUI_ = true;
 
@@ -484,14 +501,16 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.ACCEPTED,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        opt_tcfPolicyVersion
       );
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.REJECTED,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        opt_tcfPolicyVersion
       );
     } else if (action == ACTION_TYPE.DISMISS) {
       this.consentStateManager_.updateConsentInstanceState(
@@ -667,7 +686,8 @@ export class AmpConsent extends AMP.BaseElement {
           response['consentStateValue'],
           response['consentString'] || undefined,
           response['consentMetadata'],
-          response['purposeConsents']
+          response['purposeConsents'],
+          response['tcfPolicyVersion']
         );
       }
     });
@@ -680,12 +700,14 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {?string=} responseConsentString
    * @param {?JsonObject=} responseMetadata
    * @param {?JsonObject=} responsePurposeConsents
+   * @param {number=} responseTcfPolicyVersion
    */
   updateCacheIfNotNull_(
     responseStateValue,
     responseConsentString,
     responseMetadata,
-    responsePurposeConsents
+    responsePurposeConsents,
+    responseTcfPolicyVersion
   ) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
     // consentStateValue and consentString are treated as a pair that will update together
@@ -700,10 +722,12 @@ export class AmpConsent extends AMP.BaseElement {
           responsePurposeConsents
         );
       }
+
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
         responseConsentString,
-        this.validateMetadata_(responseMetadata)
+        this.validateMetadata_(responseMetadata),
+        responseTcfPolicyVersion
       );
     }
   }
@@ -726,16 +750,17 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.getLastConsentInstanceInfo();
       this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
         // Note: Expect the request to look different in following versions.
-        const body = dict({
+        const body = {
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentMetadata': storedInfo['consentMetadata'],
           'consentString': storedInfo['consentString'],
+          'tcfPolicyVersion': storedInfo['tcfPolicyVersion'],
           'isDirty': !!storedInfo['isDirty'],
           'matchedGeoGroup': this.matchedGeoGroup_,
           'purposeConsents': storedInfo['purposeConsents'],
           'clientConfig': this.consentConfig_['clientConfig'],
-        });
+        };
         const init = {
           credentials: 'include',
           method: 'POST',
@@ -941,7 +966,32 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Convert valid opt_metadta into ConsentMetadataDef
+   * Check if the opt_tcfPolicyVersion provided is a valid number to use.
+   * @param {number=} opt_tcfPolicyVersion
+   * @return {number|undefined}
+   */
+  validateTCFPolicyVersion_(opt_tcfPolicyVersion) {
+    if (typeof opt_tcfPolicyVersion !== 'number') {
+      return;
+    }
+
+    if (
+      isNaN(opt_tcfPolicyVersion) ||
+      !isFinite(opt_tcfPolicyVersion) ||
+      opt_tcfPolicyVersion.toString().split('.').length > 1
+    ) {
+      user().error(
+        TAG,
+        'CMP tcfPolicyVersion must be a valid number (integer).'
+      );
+      return;
+    }
+
+    return opt_tcfPolicyVersion;
+  }
+
+  /**
+   * Convert valid opt_metadata into ConsentMetadataDef
    * @param {JsonObject=} opt_metadata
    * @return {ConsentMetadataDef|undefined}
    */

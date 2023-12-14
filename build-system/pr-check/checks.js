@@ -16,23 +16,21 @@ const jobName = 'checks.js';
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
   timedExecOrDie('amp check-invalid-whitespaces');
-  timedExecOrDie('amp validate-html-fixtures');
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp check-json-schemas');
   timedExecOrDie('amp ava');
   timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp check-ignore-lists');
+  timedExecOrDie('amp check-links');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
   timedExecOrDie('amp make-extension --name=t --test --cleanup');
-  timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
   timedExecOrDie('amp dep-check');
   timedExecOrDie('amp check-types');
   timedExecOrDie('amp check-sourcemaps');
-  timedExecOrDie('amp performance-urls');
   timedExecOrDie('amp check-analytics-vendors-list');
   timedExecOrDie('amp check-video-interface-list');
   timedExecOrDie('amp get-zindex');
@@ -53,10 +51,6 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.IGNORE_LIST)) {
     timedExecOrDie(`amp check-ignore-lists`);
-  }
-
-  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
-    timedExecOrDie('amp validate-html-fixtures');
   }
 
   if (buildTargetsInclude(Targets.LINT_RULES)) {
@@ -108,14 +102,12 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.AVA, Targets.RUNTIME)) {
     timedExecOrDie('amp make-extension --name=t --test --cleanup');
-    timedExecOrDie('amp make-extension --name=t --test --cleanup --bento');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME)) {
     timedExecOrDie('amp dep-check');
     timedExecOrDie('amp check-types');
     timedExecOrDie('amp check-sourcemaps');
-    timedExecOrDie('amp performance-urls');
     timedExecOrDie('amp check-analytics-vendors-list');
     timedExecOrDie('amp check-video-interface-list');
     timedExecOrDie('amp get-zindex');

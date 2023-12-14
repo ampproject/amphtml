@@ -1,6 +1,5 @@
 import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {dict} from '#core/types/object';
 import {includes} from '#core/types/string';
 
 import * as Preact from '#preact';
@@ -23,7 +22,7 @@ import {
 } from '../../3p-frame';
 import {parseUrlDeprecated} from '../../url';
 
-/** @type {!Object<string,function():void>} 3p frames for that type. */
+/** @type {{[key: string]: function():void}} 3p frames for that type. */
 export const countGenerators = {};
 
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
@@ -40,9 +39,9 @@ const DEFAULT_SANDBOX =
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * @param {!IframeEmbedDef.Props} props
- * @param {{current: (!IframeEmbedDef.Api|null)}} ref
- * @return {PreactDef.Renderable}
+ * @param {import('./types').IframeEmbedProps} props
+ * @param {import('preact').RefObject<import('./types').IframeEmbedApi>} ref
+ * @return {import('preact').VNode}
  */
 function ProxyIframeEmbedWithRef(
   {
@@ -65,7 +64,10 @@ function ProxyIframeEmbedWithRef(
     );
   }
 
+  /** @type {import('preact/hooks').MutableRef<any>} */
   const contentRef = useRef(null);
+  // TODO: this should be IFrameEmbedApi, but it causes some minor type issues.
+  /** @type {import('preact/hooks').MutableRef<any>} */
   const iframeRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
@@ -76,6 +78,7 @@ function ProxyIframeEmbedWithRef(
 
   const [nameAndSrc, setNameAndSrc] = useState({name: nameProp, src: srcProp});
   const {name, src} = nameAndSrc;
+  /** @type {import('preact/hooks').MutableRef<string?>} */
   const sentinelRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -92,34 +95,28 @@ function ProxyIframeEmbedWithRef(
     if (!sentinelRef.current) {
       sentinelRef.current = generateSentinel(win);
     }
-    const context = Object.assign(
-      dict({
-        'location': {
-          'href': win.location.href,
-        },
-        'sentinel': sentinelRef.current,
-      })
-    );
-    const attrs = Object.assign(
-      dict({
-        'title': title,
-        'type': type,
-        '_context': context,
-      }),
-      options
-    );
+    const context = Object.assign({
+      'location': {
+        'href': win.location.href,
+      },
+      'sentinel': sentinelRef.current,
+    });
+    const attrs = {
+      'title': title,
+      'type': type,
+      '_context': context,
+      ...options,
+    };
     setNameAndSrc({
-      name: JSON.stringify(
-        dict({
-          'host': parseUrlDeprecated(src).hostname,
-          'bootstrap': getBootstrapUrl(type),
-          'type': type,
-          // "name" must be unique across iframes, so we add a count.
-          // See: https://github.com/ampproject/amphtml/pull/2955
-          'count': count,
-          'attributes': attrs,
-        })
-      ),
+      name: JSON.stringify({
+        'host': parseUrlDeprecated(src).hostname,
+        'bootstrap': getBootstrapUrl(type),
+        'type': type,
+        // "name" must be unique across iframes, so we add a count.
+        // See: https://github.com/ampproject/amphtml/pull/2955
+        'count': count,
+        'attributes': attrs,
+      }),
       src,
     });
   }, [count, nameProp, options, srcProp, title, type]);
@@ -150,6 +147,7 @@ function ProxyIframeEmbedWithRef(
 
   return (
     <IframeEmbed
+      {...rest}
       allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
@@ -159,7 +157,6 @@ function ProxyIframeEmbedWithRef(
       sandbox={excludeSandbox ? undefined : sandbox}
       src={src}
       title={title}
-      {...rest}
     />
   );
 }

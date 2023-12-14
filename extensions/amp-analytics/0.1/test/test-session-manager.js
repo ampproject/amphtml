@@ -1,18 +1,21 @@
+import {expect} from 'chai';
+
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+
 import * as Listen from '#utils/event-helper';
+import {user} from '#utils/log';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
 import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,
   SessionManager,
   installSessionServiceForTesting,
 } from '../session-manager';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {expect} from 'chai';
 import {installVariableServiceForTesting} from '../variables';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
-import {user} from '#utils/log';
 
 describes.realWin('Session Manager', {amp: true}, (env) => {
   let win;

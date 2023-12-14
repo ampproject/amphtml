@@ -82,7 +82,7 @@ amp-live-list/0.1/test/validator-amp-live-list.html:66:2 The mandatory reference
 amp-live-list/0.1/test/validator-amp-live-list.html:67:4 The tag 'foo' is disallowed.
 |      <script items>
 >>     ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:68:4 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+amp-live-list/0.1/test/validator-amp-live-list.html:68:4 The parent tag of tag 'amphtml engine script' is 'foo', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |        document.writeln('1, 2, 3');
 |      </script>
 |    </amp-live-list>
@@ -94,22 +94,22 @@ amp-live-list/0.1/test/validator-amp-live-list.html:68:4 Custom JavaScript is no
 |      <ul items>
 |        <li id="1" data-update-time="42">1</li>  <!-- data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The tag 'li', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 |        <li id="2" data-sort-time="43" data-update-time="44">2</li>
 |        <li data-update-time="44">3</li> <!-- id and data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The tag 'li', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 |        <p>junk</p> <!-- id, data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The tag 'p', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 |      </ul>

@@ -1,5 +1,4 @@
 import {isAmp4Email} from '#core/document/format';
-import {dict} from '#core/types/object';
 
 import {
   ALLOWLISTED_ATTRS,
@@ -26,9 +25,9 @@ const TAG = 'sanitizer';
  * Allowlist of supported self-closing tags for Caja. These are used for
  * correct parsing on Caja and are not necessary for DOMPurify which uses
  * the browser's HTML parser.
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
-const SELF_CLOSING_TAGS = dict({
+const SELF_CLOSING_TAGS = {
   'br': true,
   'col': true,
   'hr': true,
@@ -45,7 +44,7 @@ const SELF_CLOSING_TAGS = dict({
   'link': true,
   'meta': true,
   'param': true,
-});
+};
 
 /**
  * Regex to allow data-*, aria-* and role attributes.

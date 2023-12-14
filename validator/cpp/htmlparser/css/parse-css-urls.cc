@@ -1,6 +1,8 @@
 #include "cpp/htmlparser/css/parse-css-urls.h"
 
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "absl/algorithm/container.h"
 #include "absl/memory/memory.h"
@@ -47,7 +49,7 @@ void Preprocess(vector<char32_t>* codepoints) {
         out.push_back('\n');
         last_codepoint_was_cr = true;
         break;
-      case '\f':  // also knwon as form feed (FF)
+      case '\f':  // also known as form feed (FF)
         out.push_back('\n');
         last_codepoint_was_cr = false;
         break;

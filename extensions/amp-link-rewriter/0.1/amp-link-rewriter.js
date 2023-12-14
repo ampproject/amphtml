@@ -1,7 +1,9 @@
 import {Layout_Enum} from '#core/dom/layout';
-import {LinkRewriter} from './link-rewriter';
-import {Priority_Enum} from '#service/navigation';
+
 import {Services} from '#service';
+import {Priority_Enum} from '#service/navigation';
+
+import {LinkRewriter} from './link-rewriter';
 
 export class AmpLinkRewriter extends AMP.BaseElement {
   /** @param {!AmpElement} element */

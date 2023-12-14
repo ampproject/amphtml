@@ -1,12 +1,15 @@
+import {htmlFor} from '#core/dom/static-template';
+import {computedStyle, setStyle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {dev} from '#utils/log';
+
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
+
 import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
-import {computedStyle, setStyle} from '#core/dom/style';
-import {dev} from '#utils/log';
-import {htmlFor} from '#core/dom/static-template';
-import {toArray} from '#core/types/array';
 
 /**
  * Generates the template for the poll.

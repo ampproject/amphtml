@@ -6,9 +6,8 @@ const fs = require('fs');
 const JSON5 = require('json5');
 const os = require('os');
 const path = require('path');
-const Percy = require('@percy/core');
+const PercyModulePromise = import('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -20,9 +19,8 @@ const {
   shortSha,
 } = require('../../common/git');
 const {
-  PUPPETEER_CHROMIUM_REVISION,
+  fetchBrowserExecutablePath,
   launchBrowser,
-  loadBrowserFetcher,
   newPage,
   resetPage,
 } = require('./browser');
@@ -40,6 +38,11 @@ const {isCiBuild} = require('../../common/ci');
 const {isPercyEnabled} = require('@percy/sdk-utils');
 const {startServer, stopServer} = require('../serve');
 const {TestErrorDef, WebpageDef} = require('./types');
+
+/** @typedef {import('@percy/core').default} Percy */
+/** @typedef {import('puppeteer-core')} puppeteer */
+/** @typedef {import('puppeteer-core').Browser} puppeteer.Browser */
+/** @typedef {import('puppeteer-core').ConsoleMessage} puppeteer.ConsoleMessage */
 
 // CSS injected in every page tested.
 // Normally, as in https://docs.percy.io/docs/percy-specific-css
@@ -103,6 +106,9 @@ function maybeOverridePercyEnvironmentVariables() {
       process.env[variable.toUpperCase()] = argv[variable];
     }
   });
+  if (argv.empty) {
+    process.env['PERCY_PARTIAL_BUILD'] = '1';
+  }
 }
 
 /**
@@ -135,27 +141,25 @@ function setPercyTargetCommit() {
 }
 
 /**
- * Launches a @percy/cli instance.
+ * Launches a Percy agent instance.
  *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
- * @return {Promise<Percy|undefined>} percy agent instance.
+ * @param {string} executablePath browser executable path.
+ * @return {!Promise<Percy|undefined>} percy agent instance.
  */
-async function launchPercyAgent(browserFetcher) {
+async function launchPercyAgent(executablePath) {
   if (argv.percy_disabled) {
     return;
   }
 
-  // @ts-ignore Type mismatch in library
-  const percy = await Percy.start({
+  const {default: PercyModule} = await PercyModulePromise;
+  const percy = await PercyModule.start({
     token: process.env.PERCY_TOKEN,
     loglevel: argv.percy_agent_debug ? 'debug' : 'info',
     port: PERCY_AGENT_PORT,
     config: path.join(__dirname, '.percy.yaml'),
     discovery: {
       launchOptions: {
-        executable: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
-          .executablePath,
+        executable: executablePath,
       },
     },
   });
@@ -570,7 +574,7 @@ function setDebuggingLevel() {
  * @return {Promise<void>}
  */
 async function createEmptyBuild(browser) {
-  log('info', 'Skipping visual diff tests and generating a blank Percy build');
+  log('info', 'Generating the blank page snapshot');
 
   const page = await newPage(browser);
 
@@ -591,15 +595,8 @@ async function createEmptyBuild(browser) {
  * @return {Promise<void>}
  */
 async function visualDiff() {
-  if (!PUPPETEER_CHROMIUM_REVISION) {
-    throw new Error(
-      `${cyan('amp visual-diff')} is only available on Linux, Mac, and Windows`
-    );
-  }
-
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
-  const browserFetcher = await loadBrowserFetcher();
   decodePercyTokenForCi();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
@@ -617,11 +614,11 @@ async function visualDiff() {
     log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
   }
 
-  const percy = await launchPercyAgent(browserFetcher);
+  const executablePath = await fetchBrowserExecutablePath();
+  const percy = await launchPercyAgent(executablePath);
   try {
-    await performVisualTests(browserFetcher);
+    await performVisualTests(executablePath);
   } finally {
-    // @ts-ignore Type mismatch in library
     await percy?.stop();
   }
   exitCtrlcHandler(handlerProcess);
@@ -630,14 +627,13 @@ async function visualDiff() {
 /**
  * Runs the AMP visual diff tests.
  *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
+ * @param {string} executablePath browser executable path.
  * @return {Promise<void>}
  */
-async function performVisualTests(browserFetcher) {
+async function performVisualTests(executablePath) {
   setDebuggingLevel();
 
-  const browser = await launchBrowser(browserFetcher);
+  const browser = await launchBrowser(executablePath);
   const handlerProcess = createCtrlcHandler(
     'visual-diff:browser',
     browser.process()?.pid
@@ -649,9 +645,7 @@ async function performVisualTests(browserFetcher) {
   );
 
   try {
-    if (argv.empty) {
-      await createEmptyBuild(browser);
-    } else {
+    if (!argv.empty) {
       // Load and parse the config. Use JSON5 due to JSON comments in file.
       const visualTestsConfig = JSON5.parse(
         fs.readFileSync(
@@ -664,6 +658,7 @@ async function performVisualTests(browserFetcher) {
       );
       await runVisualTests(browser, visualTestsConfig.webpages);
     }
+    await createEmptyBuild(browser);
   } finally {
     await browser.close();
     exitCtrlcHandler(handlerProcess);

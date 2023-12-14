@@ -1,20 +1,23 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
+import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
+import {enumValues} from '#core/types/enum';
+import {debounce} from '#core/types/function';
+import {deepMerge, hasOwn} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {
   PlayingStates_Enum,
   VideoAnalyticsEvents_Enum,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {enumValues} from '#core/types/enum';
-import {deepMerge, dict, hasOwn} from '#core/types/object';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {getData} from '#utils/event-helper';
-import {getDataParamsFromAttributes} from '#core/dom';
-import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
-import {debounce} from '#core/types/function';
-import {isExperimentOn} from '#experiments';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -213,7 +216,7 @@ export function getTrackerKeyName(eventType) {
 
 /**
  * @param {string} parentType
- * @return {!Object<string, typeof EventTracker>}
+ * @return {!{[key: string]: typeof EventTracker}}
  */
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
@@ -278,7 +281,7 @@ export class AnalyticsEvent {
    * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
    * attribute value from target element should be included.
    */
-  constructor(target, type, vars = dict(), enableDataVars = true) {
+  constructor(target, type, vars = {}, enableDataVars = true) {
     /** @const */
     this['target'] = target;
     /** @const */
@@ -332,8 +335,8 @@ export class BrowserEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.observables_ = new Observable();
 
-    /** @private {!Object<BrowserEventType, boolean>} */
-    this.listenerMap_ = dict({});
+    /** @private {!{[key: BrowserEventType]: boolean}} */
+    this.listenerMap_ = {};
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
@@ -411,12 +414,12 @@ export class CustomEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
+    /** @const @private {!{[key: string]: !Observable<!AnalyticsEvent>}} */
     this.observables_ = {};
     /**
      * Early events have to be buffered because there's no way to predict
      * how fast all `amp-analytics` elements will be instrumented.
-     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
+     * @private {!{[key: string]: !Array<!AnalyticsEvent>>|undefined}}
      */
     this.buffer_ = {};
 
@@ -425,7 +428,7 @@ export class CustomEventTracker extends EventTracker {
      * be added after parent element's layout. (Time varies, can be later than
      * 10s) sandbox events buffer will never expire but will cleared when
      * handler is ready.
-     * @private {!Object<string, !Array<!AnalyticsEvent>|undefined>|undefined}
+     * @private {!{[key: string]: !Array<!AnalyticsEvent>|undefined>|undefined}}
      */
     this.sandboxBuffer_ = {};
 
@@ -743,8 +746,8 @@ export class ScrollEventTracker extends EventTracker {
 
   /**
    * Function to handle scroll events from the Scroll manager
-   * @param {!Object<number,boolean>} boundsH
-   * @param {!Object<number,boolean>} boundsV
+   * @param {!{[key: number]: boolean}} boundsH
+   * @param {!{[key: number]: boolean}} boundsV
    * @param {boolean} useInitialPageSize
    * @param {function(!AnalyticsEvent)} listener
    * @param {!Object} e
@@ -781,7 +784,7 @@ export class ScrollEventTracker extends EventTracker {
    * @private
    */
   normalizeBoundaries_(bounds) {
-    const result = dict({});
+    const result = {};
     if (!bounds || !Array.isArray(bounds)) {
       return result;
     }
@@ -803,7 +806,7 @@ export class ScrollEventTracker extends EventTracker {
   }
 
   /**
-   * @param {!Object<number, boolean>} bounds
+   * @param {!{[key: number]: boolean}} bounds
    * @param {number} scrollPos Number representing the current scroll
    * @param {string} varName variable name to assign to the bound that
    * @param {function(!AnalyticsEvent)} listener
@@ -825,7 +828,7 @@ export class ScrollEventTracker extends EventTracker {
         continue;
       }
       bounds[bound] = true;
-      const vars = dict();
+      const vars = {};
       vars[varName] = b;
       listener(
         new AnalyticsEvent(
@@ -1152,10 +1155,10 @@ class TimerEventHandler {
       timerDuration = this.calculateDuration_();
       this.lastRequestTime_ = Date.now();
     }
-    return dict({
+    return {
       'timerDuration': timerDuration,
       'timerStart': this.startTime_ || 0,
-    });
+    };
   }
 }
 
@@ -1168,7 +1171,7 @@ export class TimerEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private {!Object<number, TimerEventHandler>} */
+    /** @const @private {!{[key: number]: TimerEventHandler}} */
     this.trackers_ = {};
 
     /** @private {number} */
@@ -1543,7 +1546,7 @@ function normalizeVideoEventType(type, details) {
  */
 function removeInternalVars(details) {
   if (!details) {
-    return dict();
+    return {};
   }
   const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];

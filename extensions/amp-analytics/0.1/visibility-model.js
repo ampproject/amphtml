@@ -1,7 +1,7 @@
-import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+
 import {devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
 
 /**
  * This class implements visibility calculations based on the
@@ -21,14 +21,14 @@ export class VisibilityModel {
      * Spec parameters.
      * @private {!JsonObject}
      */
-    this.spec_ = dict({
+    this.spec_ = {
       'visiblePercentageMin': Number(spec['visiblePercentageMin']) / 100 || 0,
       'visiblePercentageMax': Number(spec['visiblePercentageMax']) / 100 || 1,
       'totalTimeMin': Number(spec['totalTimeMin']) || 0,
       'totalTimeMax': Number(spec['totalTimeMax']) || Infinity,
       'continuousTimeMin': Number(spec['continuousTimeMin']) || 0,
       'continuousTimeMax': Number(spec['continuousTimeMax']) || Infinity,
-    });
+    };
     // Above, if visiblePercentageMax was not specified, assume 100%.
     // Here, do allow 0% to be the value if that is what was specified.
     if (String(spec['visiblePercentageMax']).trim() === '0') {
@@ -268,7 +268,7 @@ export class VisibilityModel {
    * @return {!JsonObject}
    */
   getState(startTime) {
-    return dict({
+    return {
       // Observed times, relative to the `startTime`.
       'firstSeenTime': timeBase(this.firstSeenTime_, startTime),
       'lastSeenTime': timeBase(this.lastSeenTime_, startTime),
@@ -283,7 +283,7 @@ export class VisibilityModel {
       'loadTimeVisibility': this.loadTimeVisibility_ * 100 || 0,
       'minVisiblePercentage': this.minVisiblePercentage_ * 100,
       'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
-    });
+    };
   }
 
   /**

@@ -3,12 +3,14 @@ import {
   deserializeMessage,
   serializeMessage,
 } from '#core/3p-frame-messaging';
-import {canInspectWindow} from '../../src/iframe-helper';
-import {dev, devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+
 import {getData} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {getFrameOverlayManager} from './frame-overlay-manager';
 import {getPositionObserver} from './position-observer';
+
+import {canInspectWindow} from '../../src/iframe-helper';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -22,7 +24,7 @@ class NamedObservable {
    * Creates an instance of NamedObservable.
    */
   constructor() {
-    /** @private {!Object<string, !Function>} */
+    /** @private {!{[key: string]: !Function}} */
     this.map_ = {};
   }
 
@@ -70,7 +72,7 @@ export class InaboxMessagingHost {
     /** @private {!Array<!HTMLIFrameElement>} */
     this.iframes_ = iframes;
 
-    /** @private {!Object<string,!AdFrameDef>} */
+    /** @private {!{[key: string]: !AdFrameDef}} */
     this.iframeMap_ = Object.create(null);
 
     /** @private {!./position-observer.PositionObserver} */
@@ -156,14 +158,10 @@ export class InaboxMessagingHost {
   handleSendPositions_(iframe, request, source, unusedOrigin) {
     const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect = this.positionObserver_.getTargetRect(iframe);
-    this.sendPosition_(
-      request,
-      source,
-      dict({
-        'viewportRect': viewportRect,
-        'targetRect': targetRect,
-      })
-    );
+    this.sendPosition_(request, source, {
+      'viewportRect': viewportRect,
+      'targetRect': targetRect,
+    });
 
     devAssert(this.iframeMap_[request.sentinel]);
     this.iframeMap_[request.sentinel].observeUnregisterFn =
@@ -209,10 +207,10 @@ export class InaboxMessagingHost {
         serializeMessage(
           MessageType_Enum.FULL_OVERLAY_FRAME_RESPONSE,
           request.sentinel,
-          dict({
+          {
             'success': true,
             'boxRect': boxRect,
-          })
+          }
         ),
         origin
       );
@@ -234,10 +232,10 @@ export class InaboxMessagingHost {
         serializeMessage(
           MessageType_Enum.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           request.sentinel,
-          dict({
+          {
             'success': true,
             'boxRect': boxRect,
-          })
+          }
         ),
         origin
       );

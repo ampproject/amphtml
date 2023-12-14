@@ -3,6 +3,7 @@
  */
 
 import '#polyfills';
+
 import {TickLabel_Enum} from '#core/constants/enums';
 import * as mode from '#core/mode';
 

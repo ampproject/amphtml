@@ -1,15 +1,15 @@
 export class Lazy<T> {
-  #value: T | undefined;
-  #initializer: () => T;
+  private declare initializer_: () => T;
+  private declare value_: T | undefined;
 
   constructor(initializer: () => T) {
-    this.#initializer = initializer;
+    this.initializer_ = initializer;
   }
 
-  public get value(): T {
-    if (!this.#value) {
-      this.#value = this.#initializer();
+  public value(): T {
+    if (this.value_ == undefined) {
+      this.value_ = this.initializer_();
     }
-    return this.#value;
+    return this.value_;
   }
 }

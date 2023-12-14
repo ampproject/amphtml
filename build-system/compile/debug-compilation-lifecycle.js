@@ -13,12 +13,6 @@ const pad = (value, length) =>
     length
   );
 
-const LIFECYCLES = {
-  'pre-babel': 'pre-babel',
-  'post-babel': 'post-babel',
-  'complete': 'complete',
-};
-
 /**
  * Output debugging information when developing changes in this functionality.
  *
@@ -28,7 +22,7 @@ const LIFECYCLES = {
  * @param {Object=} sourcemap
  */
 function debug(lifecycle, fullpath, content, sourcemap) {
-  if (argv.debug && Object.keys(LIFECYCLES).includes(lifecycle)) {
+  if (argv.debug) {
     if (!content) {
       content = fs.readFileSync(fullpath, 'utf-8');
     }
@@ -62,5 +56,4 @@ function displayLifecycleDebugging() {
 module.exports = {
   displayLifecycleDebugging,
   debug,
-  CompilationLifecycles: LIFECYCLES,
 };

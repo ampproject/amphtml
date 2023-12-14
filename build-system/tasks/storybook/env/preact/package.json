@@ -1,0 +1,8 @@
+{
+  "name": "amp-storybook-preact",
+  "version": "0.1.0",
+  "description": "packages specific to the preact storybook env",
+  "devDependencies": {
+    "preact": "10.19.2"
+  }
+}

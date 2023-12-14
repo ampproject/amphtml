@@ -3,7 +3,6 @@
 import {tryResolve} from '#core/data-structures/promise';
 import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {getData, listen} from '#utils/event-helper';
@@ -78,13 +77,13 @@ export class AmpVideoIntegration {
     /** @private @const */
     this.callCounter_ = 0;
 
-    /** @private @const {!Object<number, function()>} */
+    /** @private @const {!{[key: number]: function()}} */
     this.callbacks_ = {};
 
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Object<string, function()>} */
+    /** @private @const {!{[key: string]: function()}} */
     this.methods_ = {};
 
     /** @private @const {function()} */
@@ -336,24 +335,22 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    this.postToParent_(dict({'event': event}));
+    this.postToParent_({'event': event});
   }
 
   /**
    * Posts a custom analytics event.
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars
+   * @param {!{[key: string]: string}=} opt_vars
    */
   postAnalyticsEvent(eventType, opt_vars) {
-    this.postToParent_(
-      dict({
-        'event': 'analytics',
-        'analytics': {
-          'eventType': eventType,
-          'vars': opt_vars,
-        },
-      })
-    );
+    this.postToParent_({
+      'event': 'analytics',
+      'analytics': {
+        'eventType': eventType,
+        'vars': opt_vars,
+      },
+    });
   }
 
   /**
@@ -402,7 +399,7 @@ export class AmpVideoIntegration {
    */
   getFromHostForTesting_(method, callback) {
     this.listenToOnce_();
-    return this.postToParent_(dict({'method': method}), callback);
+    return this.postToParent_({'method': method}, callback);
   }
 }
 

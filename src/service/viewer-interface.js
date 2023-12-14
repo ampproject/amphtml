@@ -3,7 +3,7 @@
  */
 export let RequestResponderDef;
 
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -226,4 +226,3 @@ export class ViewerInterface {
    */
   replaceUrl(newUrl) {}
 }
-/* eslint-enable no-unused-vars */

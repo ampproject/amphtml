@@ -1,13 +1,14 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
-import {Dialog} from '../dialog';
-import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
-import {Entitlement, GrantReason} from '../entitlement';
-import {PageConfig} from '#third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../service-adapter';
 import {Services} from '#service';
-import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
-import {dict} from '#core/types/object';
+
+import {PageConfig} from '#third_party/subscriptions-project/config';
+
 import {getWinOrigin} from '../../../../src/url';
+import {Action, SubscriptionAnalytics} from '../analytics';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
+import {Dialog} from '../dialog';
+import {Entitlement, GrantReason} from '../entitlement';
+import {ServiceAdapter} from '../service-adapter';
+import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
   let ampdoc;
@@ -158,15 +159,12 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         .callsFake(() => Promise.resolve({}));
 
       await viewerPlatform.getEntitlements();
-      expect(sendMessageStub).to.be.calledWith(
-        'auth',
-        dict({
-          'publicationId': 'example.org',
-          'productId': 'example.org:basic',
-          'origin': 'origin',
-          'encryptedDocumentKey': 'encryptedDocKey',
-        })
-      );
+      expect(sendMessageStub).to.be.calledWith('auth', {
+        'publicationId': 'example.org',
+        'productId': 'example.org:basic',
+        'origin': 'origin',
+        'encryptedDocumentKey': 'encryptedDocKey',
+      });
     });
   });
 
@@ -218,9 +216,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         'entitlements': entitlementData,
       }));
 
-      const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-        'faketoken'
-      );
+      const resolvedEntitlement =
+        await viewerPlatform.verifyAuthToken_('faketoken');
       expect(resolvedEntitlement).to.be.not.undefined;
       expect(resolvedEntitlement.service).to.equal(entitlementData.service);
       expect(resolvedEntitlement.source).to.equal('viewer');
@@ -243,9 +240,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         'entitlements': [entitlementData],
       }));
 
-      const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-        'faketoken'
-      );
+      const resolvedEntitlement =
+        await viewerPlatform.verifyAuthToken_('faketoken');
       expect(resolvedEntitlement).to.be.not.undefined;
       expect(resolvedEntitlement.service).to.equal(entitlementData.service);
       expect(resolvedEntitlement.source).to.equal('viewer');
@@ -289,9 +285,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
           },
         }));
 
-        const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-          'faketoken'
-        );
+        const resolvedEntitlement =
+          await viewerPlatform.verifyAuthToken_('faketoken');
         expect(resolvedEntitlement).to.be.not.undefined;
         expect(resolvedEntitlement.service).to.equal('local');
         expect(resolvedEntitlement.granted).to.be.equal(true);
@@ -319,9 +314,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
           },
         }));
 
-        const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
-          'faketoken'
-        );
+        const resolvedEntitlement =
+          await viewerPlatform.verifyAuthToken_('faketoken');
         expect(resolvedEntitlement).to.be.not.undefined;
         expect(resolvedEntitlement.service).to.equal('local');
         expect(resolvedEntitlement.granted).to.be.equal(true);

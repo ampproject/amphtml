@@ -61,7 +61,7 @@ class Node {
   // This does not change order or parent/child relationship of this or child
   // nodes in the tree.
   // Generally, treat this as a private function. Part of public interface for
-  // some specific sceanrios:
+  // some specific scenarios:
   // A) Unit testing.
   // B) When parsing a fragment.
   // C) Custom error/warning reporting.
@@ -129,7 +129,7 @@ class Node {
 
   // Debug/Logging utils.
   // Outputs node debug info.
-  std::string DebugString();
+  std::string DebugString() const;
 
  private:
   void SetManufactured(bool is_manufactured) {

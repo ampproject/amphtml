@@ -29,7 +29,7 @@ import {installTimerInEmbedWindow} from '#service/timer-impl';
 import {loadPromise} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
 import {getMode} from './mode';
@@ -382,8 +382,8 @@ export class FriendlyIframeEmbed {
     this.signals_ = this.ampdoc
       ? this.ampdoc.signals()
       : this.host
-      ? this.host.signals()
-      : new Signals();
+        ? this.host.signals()
+        : new Signals();
 
     /** @private @const {!Deferred} */
     this.renderComplete_ = new Deferred();

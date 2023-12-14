@@ -1,11 +1,13 @@
+import {toggleExperiment} from '#experiments';
+
+import {macroTask} from '#testing/helpers';
+
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEvent,
   AnalyticsEventType,
   BrowserEventTracker,
 } from '../events';
-import {macroTask} from '#testing/helpers';
-import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'Events',

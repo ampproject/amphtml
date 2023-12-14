@@ -1,7 +1,7 @@
 import {onDocumentReady} from '#core/document/ready';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -54,7 +54,7 @@ function maybeTimeoutFonts(win) {
     // Find all stylesheets that aren't loaded from the AMP CDN (those are
     // critical if they are present).
     const styleLinkElements = win.document.querySelectorAll(
-      `link[rel~="stylesheet"]:not([href^="${escapeCssSelectorIdent(
+      `link[rel~="stylesheet"]:not([href^="https://translate.googleapis.com/translate_static/css/"]):not([href^="${escapeCssSelectorIdent(
         urls.cdn
       )}"])`
     );

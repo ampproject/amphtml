@@ -1,8 +1,8 @@
 import * as Preact from '#preact';
+import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {Wrapper, useValueRef} from '#preact/component';
 import {useRenderer} from '#preact/component/renderer';
-import {forwardRef} from '#preact/compat';
-import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';
 import {useResourcesNotify} from '#preact/utils';
 
 /**
@@ -26,14 +26,14 @@ const DEFAULT_GET_JSON = (url) => {
  */
 export function RenderWithRef(
   {
-    src = '',
-    getJson = DEFAULT_GET_JSON,
-    render = DEFAULT_RENDER,
     ariaLiveValue = 'polite',
-    onLoading,
-    onLoad,
-    onRefresh,
+    getJson = DEFAULT_GET_JSON,
     onError,
+    onLoad,
+    onLoading,
+    onRefresh,
+    render = DEFAULT_RENDER,
+    src = '',
     ...rest
   },
   ref

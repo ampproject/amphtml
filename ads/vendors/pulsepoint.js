@@ -1,5 +1,6 @@
-import {doubleclick} from '#ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '#3p/3p';
+
+import {doubleclick} from '#ads/google/doubleclick';
 
 /**
  * @param {!Window} global

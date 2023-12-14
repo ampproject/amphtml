@@ -20,15 +20,13 @@ maybeInitializeExtensions(extensionBundles);
 const vendorBundles = generateBundles();
 
 /**
- * Normalizes bento extension names and gets the unminified name of the bundle
- * if it can be lazily built.
+ * Gets the unminified name of the bundle if it can be lazily built.
  *
  * @param {!Object} bundles
  * @param {string} name
  * @return {string}
  */
 function maybeGetUnminifiedName(bundles, name) {
-  name = name.replace('bento-', 'amp-');
   if (argv.minified) {
     for (const key of Object.keys(bundles)) {
       if (

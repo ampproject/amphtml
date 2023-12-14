@@ -53,7 +53,7 @@ const TARGET_ANIM_ID = '__AMP_ANIM_ID';
 let animIdCounter = 0;
 
 /**
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const SERVICE_PROPS = {
   'offset': true,
@@ -211,7 +211,7 @@ export class Builder {
    * @param {?WebAnimationDef|undefined} args
    * @param {?Element} target
    * @param {?number} index
-   * @param {?Object<string, *>} vars
+   * @param {?{[key: string]: *}} vars
    * @param {?WebAnimationTimingDef} timing
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
    * @protected
@@ -246,7 +246,7 @@ export class Builder {
    * @param {!Array<string>} path
    * @param {?Element} target
    * @param {?number} index
-   * @param {?Object<string, *>} vars
+   * @param {?{[key: string]: *}} vars
    * @param {?WebAnimationTimingDef} timing
    * @private
    * @return {*} TODO(#23582): Specify return type
@@ -289,7 +289,7 @@ export class MeasureScanner extends Scanner {
    * @param {!Array<string>} path
    * @param {?Element} target
    * @param {?number} index
-   * @param {?Object<string, *>} vars
+   * @param {?{[key: string]: *}} vars
    * @param {?WebAnimationTimingDef} timing
    */
   constructor(builder, css, path, target, index, vars, timing) {
@@ -310,7 +310,7 @@ export class MeasureScanner extends Scanner {
     /** @private {?number} */
     this.index_ = index;
 
-    /** @private {!Object<string, *>} */
+    /** @private {!{[key: string]: *}} */
     this.vars_ = vars || map();
 
     /** @private {!WebAnimationTimingDef} */
@@ -478,7 +478,7 @@ export class MeasureScanner extends Scanner {
       // allowlisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
-      const object = /** @type {!Object<string, *>} */ (specKeyframes);
+      const object = /** @type {!{[key: string]: *}} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = {};
       for (const prop in object) {
@@ -510,7 +510,7 @@ export class MeasureScanner extends Scanner {
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
-      const array = /** @type {!Array<!Object<string, *>>} */ (specKeyframes);
+      const array = /** @type {!Array<!{[key: string]: *}>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
@@ -703,9 +703,9 @@ export class MeasureScanner extends Scanner {
 
   /**
    * Merges vars by defaulting values from the previous vars.
-   * @param {!Object<string, *>} newVars
-   * @param {!Object<string, *>} prevVars
-   * @return {!Object<string, *>}
+   * @param {!{[key: string]: *}} newVars
+   * @param {!{[key: string]: *}} prevVars
+   * @return {!{[key: string]: *}}
    * @private
    */
   mergeVars_(newVars, prevVars) {
@@ -858,10 +858,10 @@ class CssContextImpl {
     /** @const @private */
     this.baseUrl_ = baseUrl;
 
-    /** @private {!Object<string, !CSSStyleDeclaration>} */
+    /** @private {!{[key: string]: !CSSStyleDeclaration}} */
     this.computedStyleCache_ = map();
 
-    /** @private {!Object<string, ?./parsers/css-expr-ast.CssNode>} */
+    /** @private {!{[key: string]: ?./parsers/css-expr-ast.CssNode}} */
     this.parsedCssCache_ = map();
 
     /** @private {?number} */
@@ -873,7 +873,7 @@ class CssContextImpl {
     /** @private {?number} */
     this.currentIndex_ = null;
 
-    /** @private {?Object<string, *>} */
+    /** @private {?{[key: string]: *}} */
     this.vars_ = null;
 
     /** @private {!Array<string>} */
@@ -992,7 +992,7 @@ class CssContextImpl {
   }
 
   /**
-   * @param {?Object<string, *>} vars
+   * @param {?{[key: string]: *}} vars
    * @param {function():T} callback
    * @return {T}
    * @template T
@@ -1019,8 +1019,8 @@ class CssContextImpl {
   }
 
   /**
-   * @param {!Object<string, *>} input
-   * @return {!Object<string, string|number>}
+   * @param {!{[key: string]: *}} input
+   * @return {!{[key: string]: string|number}}
    */
   resolveCssMap(input) {
     const result = map();
@@ -1152,8 +1152,8 @@ class CssContextImpl {
       this.vars_ && this.vars_[varName] != undefined
         ? this.vars_[varName]
         : this.currentTarget_
-        ? this.measure(this.currentTarget_, varName)
-        : null;
+          ? this.measure(this.currentTarget_, varName)
+          : null;
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }

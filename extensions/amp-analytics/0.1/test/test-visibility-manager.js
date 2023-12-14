@@ -1,13 +1,15 @@
-import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {layoutRectLtwh, rectIntersection} from '#core/dom/layout/rect';
+
 import {Services} from '#service';
+
+import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
+import {setParentWindow} from '../../../../src/service-helpers';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
   provideVisibilityManager,
 } from '../visibility-manager';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {layoutRectLtwh, rectIntersection} from '#core/dom/layout/rect';
-import {setParentWindow} from '../../../../src/service-helpers';
 
 class IntersectionObserverStub {
   constructor(callback, options) {
@@ -155,6 +157,11 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
 
     // Go prerender.
     viewer.setVisibilityState_(VisibilityState_Enum.PRERENDER);
+    expect(root.getRootVisibility()).to.equal(0);
+
+    // Go preview. Not considered visible for the purposes of analytics
+    // (privacy-preserving).
+    viewer.setVisibilityState_(VisibilityState_Enum.PREVIEW);
     expect(root.getRootVisibility()).to.equal(0);
 
     // Go hidden.
@@ -752,9 +759,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
       });
   });
 
-  // TODO(micajuineho): Figure why out why `state.totalVisibleTime`
-  // is returning 17.
-  it.skip('should listen on a resource', () => {
+  it('should listen on a resource', () => {
     clock.tick(1);
     const target = win.document.createElement('div');
     target.id = 'targetElementId';

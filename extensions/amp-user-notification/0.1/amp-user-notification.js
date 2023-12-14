@@ -1,7 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 import {toggle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {
@@ -274,10 +273,10 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Object}
    */
   buildPostDismissRequest_(enctype, elementId, ampUserId) {
-    const body = dict({
+    const body = {
       'elementId': elementId,
       'ampUserId': ampUserId,
-    });
+    };
     return {
       method: 'POST',
       credentials: 'include',
@@ -453,10 +452,10 @@ export class UserNotificationManager {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @private @const {!Object<string,!NotificationInterface>} */
+    /** @private @const {!{[key: string]: !NotificationInterface}} */
     this.registry_ = Object.create(null);
 
-    /** @private @const {!Object<string,!UserNotificationDeferDef>} */
+    /** @private @const {!{[key: string]: !UserNotificationDeferDef}} */
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Promise} */

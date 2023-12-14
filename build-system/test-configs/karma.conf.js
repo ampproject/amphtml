@@ -1,6 +1,5 @@
 'use strict';
 
-const {dotWrappingWidth} = require('../common/logging');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
@@ -12,43 +11,15 @@ module.exports = {
 
   hostname: 'localhost',
 
-  reporters: ['super-dots', 'spec'],
-
-  superDotsReporter: {
-    nbDotsPerLine: dotWrappingWidth,
-    color: {
-      success: 'green',
-      failure: 'red',
-      ignore: 'yellow',
-    },
-    icon: {
-      success: '●',
-      failure: '●',
-      ignore: '○',
-    },
-  },
+  reporters: ['spec'],
 
   specReporter: {
-    suppressPassed: true,
-    suppressSkipped: true,
-    suppressFailed: false,
-    suppressErrorSummary: true,
     maxLogLines: 20,
   },
 
   mochaReporter: {
     output: 'full',
     divider: false,
-    colors: {
-      success: 'green',
-      error: 'red',
-      info: 'yellow',
-    },
-    symbols: {
-      success: '●',
-      error: '●',
-      info: '○',
-    },
   },
 
   port: 9876,
@@ -103,7 +74,7 @@ module.exports = {
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
     'karma-chrome-launcher',
-    'karma-esbuild',
+    'karma-esbuild-up',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
@@ -114,6 +85,5 @@ module.exports = {
     'karma-safarinative-launcher',
     'karma-source-map-support',
     'karma-spec-reporter',
-    'karma-super-dots-reporter',
   ],
 };

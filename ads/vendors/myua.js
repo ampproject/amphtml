@@ -5,7 +5,7 @@ import {validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function myua(global, data) {
-  validateData(data, ['sid', 'iid'], ['demo', 'options']);
+  validateData(data, ['sid', 'iid'], ['env', 'options']);
 
   const informerTag = global.document.createElement('div');
   informerTag.setAttribute('data-top-iid', data.iid);

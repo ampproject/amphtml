@@ -1,5 +1,6 @@
-import {dev} from '#utils/log';
 import {loadScript} from '#3p/3p';
+
+import {dev} from '#utils/log';
 
 /* global Criteo: false */
 

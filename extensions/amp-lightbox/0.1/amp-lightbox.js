@@ -1,12 +1,12 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-lightbox-0.1.css';
-import {Deferred} from '#core/data-structures/promise';
-import {Gestures} from '../../../src/gesture';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {Deferred} from '#core/data-structures/promise';
+import {tryFocus} from '#core/dom';
 import {applyFillContent} from '#core/dom/layout';
+import {realChildElements} from '#core/dom/query';
+import {unmountAll} from '#core/dom/resource-container-helper';
+import {htmlFor} from '#core/dom/static-template';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -17,18 +17,21 @@ import {
   setStyles,
   toggle,
 } from '#core/dom/style';
-import {createCustomEvent} from '#utils/event-helper';
-import {debounce} from '#core/types/function';
-import {dev, devAssert, user} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
-import {isInFie} from '../../../src/iframe-helper';
-import {realChildElements} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {tryFocus} from '#core/dom';
-import {unmountAll} from '#core/dom/resource-container-helper';
+import {debounce} from '#core/types/function';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {CloseWatcherImpl} from '#utils/close-watcher-impl';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
+import {CSS} from '../../../build/amp-lightbox-0.1.css';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {isInFie} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -48,21 +51,21 @@ const LightboxEvents = {
  */
 let AnimationPresetDef;
 
-/** @private @const {!Object<string, !AnimationPresetDef>} */
+/** @private @const {!{[key: string]: !AnimationPresetDef}} */
 const AnimationPresets = {
   'fade-in': {
-    openStyle: dict({'opacity': 1}),
-    closedStyle: dict({'opacity': 0}),
+    openStyle: {'opacity': 1},
+    closedStyle: {'opacity': 0},
     durationSeconds: 0.1,
   },
   'fly-in-bottom': {
-    openStyle: dict({'transform': 'translate(0, 0)'}),
-    closedStyle: dict({'transform': 'translate(0, 100%)'}),
+    openStyle: {'transform': 'translate(0, 0)'},
+    closedStyle: {'transform': 'translate(0, 100%)'},
     durationSeconds: 0.2,
   },
   'fly-in-top': {
-    openStyle: dict({'transform': 'translate(0, 0)'}),
-    closedStyle: dict({'transform': 'translate(0, -100%)'}),
+    openStyle: {'transform': 'translate(0, 0)'},
+    closedStyle: {'transform': 'translate(0, -100%)'},
     durationSeconds: 0.2,
   },
 };
@@ -858,7 +861,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name, trust) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, trust);
   }
 }

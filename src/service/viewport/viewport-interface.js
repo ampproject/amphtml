@@ -21,7 +21,7 @@ export let ViewportChangedEventDef;
  */
 export let ViewportResizedEventDef;
 
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -306,4 +306,3 @@ export class ViewportInterface extends Disposable {
    */
   createFixedLayer(constructor) {}
 }
-/* eslint-enable no-unused-vars */

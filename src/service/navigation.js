@@ -2,7 +2,6 @@ import {PriorityQueue} from '#core/data-structures/priority-queue';
 import {isIframed} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -287,13 +286,10 @@ export class Navigation {
    */
   navigateToAmpUrl(url, requestedBy) {
     if (this.viewer_.hasCapability('a2a')) {
-      this.viewer_.sendMessage(
-        'a2aNavigate',
-        dict({
-          'url': url,
-          'requestedBy': requestedBy,
-        })
-      );
+      this.viewer_.sendMessage('a2aNavigate', {
+        'url': url,
+        'requestedBy': requestedBy,
+      });
       return true;
     }
     return false;
@@ -734,13 +730,10 @@ export class Navigation {
       return false;
     }
 
-    this.viewer_.sendMessage(
-      'navigateTo',
-      dict({
-        'url': url,
-        'requestedBy': requestedBy,
-      })
-    );
+    this.viewer_.sendMessage('navigateTo', {
+      'url': url,
+      'requestedBy': requestedBy,
+    });
     return true;
   }
 }

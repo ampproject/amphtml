@@ -14,7 +14,7 @@ export function throttleTail(handler, defaultScheduler) {
     scheduled = false;
     handler();
   };
-  /** @param {!SchedulerDef=} opt_scheduler */
+  /** @param {SchedulerDef=} opt_scheduler */
   const scheduleIfNotScheduled = (opt_scheduler) => {
     if (!scheduled) {
       scheduled = true;

@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {devAssert, user, userAssert} from '#utils/log';
@@ -120,7 +118,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver)>}
+ * @const {!{[key: string]: (!IntersectionObserver)}}
  */
 const observers = {};
 
@@ -129,7 +127,7 @@ const observers = {};
  * the IntersectionOberserver callback function to find the appropriate element
  * target.
  *
- * @const {!Object<string, !RefreshManager>}
+ * @const {!{[key: string]: !RefreshManager}}
  */
 const managers = {};
 
@@ -158,10 +156,10 @@ export function getRefreshManager(a4a, opt_predicate) {
   }
   return new RefreshManager(
     a4a,
-    dict({
+    {
       'visiblePercentageMin': 50,
       'continuousTimeMin': 1,
-    }),
+    },
     refreshInterval
   );
 }

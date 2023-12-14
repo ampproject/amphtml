@@ -1,12 +1,16 @@
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {assertScreenReaderElement} from '#testing/helpers/service';
-import {clearModalStack, getModalStackLength} from '#core/dom/modal';
 import {createElementWithAttributes} from '#core/dom';
+import {clearModalStack, getModalStackLength} from '#core/dom/modal';
+
 import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {assertScreenReaderElement} from '#testing/helpers/service';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
@@ -461,7 +465,7 @@ describes.realWin(
         expect(scrollLeakSpy).to.be.calledOnce;
       });
 
-      it.skip('should adjust for IOS safari bottom bar', async () => {
+      it('should adjust for IOS safari bottom bar', async () => {
         env.sandbox.stub(platform, 'isIos').returns(true);
         env.sandbox.stub(platform, 'isSafari').returns(true);
         const sidebarElement = await getAmpSidebar();

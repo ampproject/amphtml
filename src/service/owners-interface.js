@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -69,4 +69,3 @@ export class OwnersInterface {
    */
   requireLayout(element, opt_parentPriority) {}
 }
-/* eslint-enable no-unused-vars */

@@ -1,5 +1,6 @@
-import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-base-carousel-1_0',

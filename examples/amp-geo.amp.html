@@ -35,7 +35,8 @@
         "ISOCountryGroups": {
           "nafta": [ "ca", "mx", "us", "unknown" ],
           "waldo": [ "unknown" ],
-          "anz": [ "au", "nz" ]
+          "anz": [ "au", "nz" ],
+          "usSubdivisions": [ "us-ca", "us-ny" ]
         }
       }
     </script>
@@ -52,7 +53,8 @@
           &quot;ISOCountryGroups&quot;: {
             &quot;nafta&quot;: [ &quot;ca&quot;, &quot;mx&quot;, &quot;us&quot;, &quot;unknown&quot; ],
             &quot;waldo&quot;: [ &quot;unknown&quot; ],
-            &quot;anz&quot;: [ &quot;au&quot;, &quot;nz&quot; ]
+            &quot;anz&quot;: [ &quot;au&quot;, &quot;nz&quot; ],
+            &quot;usSubdivisions&quot;: [ &quot;us-ca&quot;, &quot;us-ny&quot; ]
           }
         }
       &lt;/script&gt;
@@ -63,12 +65,13 @@
       This means that if your country is "unknown" you will appear in the
       "nafta" and "unknown" groups.  To change the country for testing
       append #amp-geo=&lt;code&gt; to the url and reload the page
-      (eg #amp-geo=nz)
+      (eg #amp-geo=nz, #amp-geo=us us-ny)
   </p>
 
 
-  <button on="tap:AMP.setState({myCountry: ampGeo.ISOCountry})">Where am I?</button>
+  <button on="tap:AMP.setState({myCountry: ampGeo.ISOCountry, mySubdivision: ampGeo.ISOSubdivision})">Where am I?</button>
   <p [text]="'The country code is: ' + myCountry "></p>
+  <p [text]="'The subdivision code is: ' + mySubdivision "></p>
   <p [text]="'Matched country groups: ' + ampGeo.ISOCountryGroups.join(', ') "></p>
 
   <p>There is an amp-pixel variable substitution example here</p>

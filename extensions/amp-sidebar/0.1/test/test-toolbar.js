@@ -1,9 +1,12 @@
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {Services} from '#service';
-import {Toolbar} from '../toolbar';
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '#testing/iframe';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+
+import {createIframePromise} from '#testing/iframe';
+
+import {adopt} from '../../../../src/runtime';
+import {Toolbar} from '../toolbar';
 
 adopt(window);
 

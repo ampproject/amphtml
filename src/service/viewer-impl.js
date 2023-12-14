@@ -17,7 +17,7 @@ import {dev, devAssert} from '#utils/log';
 
 import {ViewerInterface} from './viewer-interface';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {reportError} from '../error-reporting';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
@@ -85,10 +85,10 @@ export class ViewerImpl {
     /** @private {boolean} */
     this.overtakeHistory_ = false;
 
-    /** @private {!Object<string, !Observable<!JsonObject>>} */
+    /** @private {!{[key: string]: !Observable<!JsonObject>}} */
     this.messageObservables_ = map();
 
-    /** @private {!Object<string, !./viewer-interface.RequestResponderDef>} */
+    /** @private {!{[key: string]: !./viewer-interface.RequestResponderDef}} */
     this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
@@ -128,7 +128,7 @@ export class ViewerImpl {
     /**
      * Subset of this.params_ that only contains parameters in the URL hash,
      * e.g. "#foo=bar".
-     * @const @private {!Object<string, string>}
+     * @const @private {!{[key: string]: string}}
      */
     this.hashParams_ = map();
 

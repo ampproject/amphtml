@@ -1,13 +1,13 @@
 import {user, userAssert} from '#utils/log';
 
-import {
-  assertMutationRecordFormat,
-  getElementsFromMutationRecordSelector,
-} from './mutation-record';
 import {AttributeMutationDefaultClass} from './mutation/attribute-mutation-default-class';
 import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style';
 import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url';
 import {CharacterDataMutation} from './mutation/character-data-mutation';
+import {
+  assertMutationRecordFormat,
+  getElementsFromMutationRecordSelector,
+} from './mutation-record';
 
 const TAG = 'amp-experiment apply-experiment';
 
@@ -30,7 +30,7 @@ const MAX_MUTATIONS = 70;
  *
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} config
- * @param {!Object<string, ?string>} experimentToVariant
+ * @param {!{[key: string]: ?string}} experimentToVariant
  * @return {!Promise}
  */
 export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
@@ -99,7 +99,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
  *  in the respected experiments
  *
  * @param {!JsonObject} config
- * @param {!Object<string, ?string>} experimentToVariant
+ * @param {!{[key: string]: ?string}} experimentToVariant
  * @return {!Array<!JsonObject>}
  */
 export function getMutationRecordsFromExperimentToVariant(

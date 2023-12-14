@@ -1,7 +1,7 @@
 import {bindParser as parser} from '#build/parsers/bind-expr-impl';
 
 import {isArray, isObject} from '#core/types';
-import {dict, hasOwn, map} from '#core/types/object';
+import {hasOwn, map} from '#core/types/object';
 
 import {devAssert, user} from '#utils/log';
 
@@ -22,12 +22,12 @@ const CUSTOM_FUNCTIONS = 'custom-functions';
 
 /**
  * Map of object type to function name to allowlisted function.
- * @private {!Object<string, !Object<string, Function>>}
+ * @private {!{[key: string]: !{[key: string]: Function}}}
  */
 let FUNCTION_ALLOWLIST;
 
 /**
- * @return {!Object<string, !Object<string, Function>>}
+ * @return {!{[key: string]: !{[key: string]: Function}}}
  * @private
  */
 function generateFunctionAllowlist() {
@@ -104,7 +104,7 @@ function generateFunctionAllowlist() {
   }
 
   // Prototype functions.
-  const allowlist = dict({
+  const allowlist = {
     '[object Array]': {
       // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
@@ -140,7 +140,7 @@ function generateFunctionAllowlist() {
       'toLowerCase': String.prototype.toLowerCase,
       'toUpperCase': String.prototype.toUpperCase,
     },
-  });
+  };
 
   // Un-namespaced static functions.
   allowlist[CUSTOM_FUNCTIONS] = {
@@ -200,7 +200,7 @@ function generateFunctionAllowlist() {
 export class BindExpression {
   /**
    * @param {string} expressionString
-   * @param {!Object<string, !./bind-macro.BindMacro>} macros
+   * @param {!{[key: string]: !./bind-macro.BindMacro}} macros
    * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
@@ -212,7 +212,7 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @private @const {!Object<string, !./bind-macro.BindMacro>} */
+    /** @private @const {!{[key: string]: !./bind-macro.BindMacro}} */
     this.macros_ = macros;
 
     /** @const @private {!./bind-expr-defines.AstNode} */

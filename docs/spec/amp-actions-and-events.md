@@ -100,6 +100,14 @@ For example, the following is possible in AMP:
     <td><code>tap</code></td>
     <td>Fired when the element is clicked/tapped.</td>
   </tr>
+  <tr>
+    <td><code>copy-success</code></td>
+    <td>Fired when the content/text is successfully copied into the clipboard.</td>
+  </tr>
+  <tr>
+    <td><code>copy-error</code></td>
+    <td>Fired when there's an error while copying the content. If there's an error while copying the content, the <code>event.data.type</code> will be set to the <code>error</code> value. If the browser is not supporting the copy method, the <code>event.data.type</code> will be set to the <code>browser</code> value.</td>
+  </tr>
 </table>
 
 ### Input elements <a name="input-elements"></a>
@@ -534,7 +542,7 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>changeToLayoutContainer</code></td>
-    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
+    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINER"</code> to allow <a href="../../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
   </tr>
   <tr>
     <td><code>refresh</code></td>
@@ -700,7 +708,7 @@ actions that apply to the whole document.
   <tr>
     <td><code>navigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
     <td>
-      <p>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener</code></a>.</p>
+      <p>Navigates current window to given URL, to the optional specified target if given (currently only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener</code></a>.</p>
       <p><strong>Caveat:</strong> Using normal <code>&lt;a&gt;</code> links is recommended wherever possible since <code>AMP.navigateTo</code> is not recognized by web crawlers.</p>
     </td>
   </tr>
@@ -742,6 +750,10 @@ actions that apply to the whole document.
       <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
   </tr>
   <tr>
+    <td><code>copy(text='content')</code></td>
+    <td>
+      <p>Copy any content to the clipboard. <code>text</code> is optional, and if is set it will copy those content/value into the clipboard.</p>
+    </td>
     <td><code>toggleTheme()</code></td>
     <td>Toggles the amp-dark-mode class on the body element when called and sets users preference to the localStorage. The amp-dark-mode class is added by default to body based on the <code>prefers-color-scheme</code> value. Use <code>data-prefers-dark-mode-class</code> attribute on body tag to override the class to be used for dark mode.</td>
   </tr>

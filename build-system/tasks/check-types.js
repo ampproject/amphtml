@@ -8,12 +8,11 @@ const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('kleur/colors');
 const {execOrThrow} = require('../common/exec');
 const {log} = require('../common/logging');
-const {typecheckNewServer} = require('../server/typescript-compile');
 
 /**
  * Object of targets to check with TypeScript.
  *
- * @type {Object<string, string>}
+ * @type {{[key: string]: string}}
  */
 const TSC_TYPECHECK_TARGETS = {
   'carousel': 'extensions/amp-carousel/0.1',
@@ -21,6 +20,7 @@ const TSC_TYPECHECK_TARGETS = {
   'core': 'src/core',
   'experiments': 'src/experiments',
   'preact': 'src/preact',
+  'new-server': 'build-system/server/new-server/transforms',
 };
 
 /**
@@ -45,7 +45,6 @@ async function checkTypes() {
 
   // Prepare build environment
   process.env.NODE_ENV = 'production';
-  typecheckNewServer();
   await Promise.all([compileCss(), compileJison()]);
 
   // Use the list of targets if provided, otherwise check all targets

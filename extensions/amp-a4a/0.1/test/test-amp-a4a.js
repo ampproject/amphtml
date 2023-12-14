@@ -12,8 +12,6 @@ import {createElementWithAttributes} from '#core/dom';
 import {LayoutPriority_Enum} from '#core/dom/layout';
 import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
 
-import {toggleExperiment} from '#experiments';
-
 import {Services} from '#service';
 import {AmpDoc, installDocService} from '#service/ampdoc-impl';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
@@ -22,6 +20,7 @@ import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real
 
 import * as analytics from '#utils/analytics';
 import {dev, user} from '#utils/log';
+import * as privacySandboxUtils from '#utils/privacy-sandbox-utils';
 
 import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
@@ -52,7 +51,6 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import * as secureFrame from '../secure-frame';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
@@ -245,7 +243,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should fallback when shadow DOM is not supported', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
     attachShadowStub.value(undefined);
     const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
     env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
@@ -256,7 +253,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should fallback when shadow DOM is polyfilled', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
     attachShadowStub.value(function () {
       // A non-native function.
       return null;
@@ -267,17 +263,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     a4a.onLayoutMeasure();
     await a4a.adPromise_;
     expect(fallbackSpy).to.be.called;
-  });
-
-  it('should ignore shadow DOM requirement without an experiment', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', false, true);
-    attachShadowStub.value(undefined);
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).to.not.be.called;
   });
 });
 
@@ -938,7 +923,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
@@ -951,7 +936,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
@@ -1050,7 +1035,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1063,7 +1048,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1074,8 +1059,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         (headerVal) => {
-          // TODO(wg-monetization, #25690): Fails on CI.
-          it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
+          it(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = env.sandbox.stub(dev(), 'error');
             // Make sure there's no signature, so that we go down the 3p
             // iframe path.
@@ -1184,7 +1168,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should set feature policy for attribution-reporting when supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(true);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1201,7 +1185,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should not set feature policy for attribution-reporting when not supported', async () => {
         env.sandbox
-          .stub(secureFrame, 'isAttributionReportingSupported')
+          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
           .returns(false);
         a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
@@ -1600,6 +1584,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies: null,
             consentStringType: null,
             additionalConsent: null,
+            consentSharedData: null,
           },
           rtcResponse
         )
@@ -1662,7 +1647,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       // Remove attachShadow.
       attachShadowStub.value(undefined);
-      toggleExperiment(fixture.win, 'disable-a4a-non-sd', true, true);
 
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -1709,7 +1693,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       attachShadowStub.value(function () {
         return null;
       });
-      toggleExperiment(fixture.win, 'disable-a4a-non-sd', true, true);
 
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -2805,7 +2788,13 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString, consentMetadata, gdprApplies;
+      let fixture,
+        a4aElement,
+        a4a,
+        consentString,
+        consentMetadata,
+        gdprApplies,
+        consentSharedData;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2823,6 +2812,10 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           'consentStringType': 1,
           'additionalConsent': 'abc123',
         };
+        consentSharedData = {
+          'doubleclick-tfcd': 1,
+          'doubleclick-tfua': 1,
+        };
         return fixture;
       });
 
@@ -2839,6 +2832,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             whenPolicyResolved: () => policyPromise,
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
+            getMergedSharedData: () => consentSharedData,
           })
         );
 
@@ -2862,6 +2856,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
+            consentSharedData,
           })
         ).calledOnce;
         expect(
@@ -2897,6 +2892,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
               Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
+            getMergedSharedData: () => consentSharedData,
           })
         );
 
@@ -2916,6 +2912,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
+            consentSharedData,
           })
         ).calledOnce;
         expect(
@@ -2943,6 +2940,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             getConsentMetadata: () => {
               throw new Error('consent err!');
             },
+            getMergedSharedData: () => {
+              throw new Error('consent err!');
+            },
           })
         );
 
@@ -2962,6 +2962,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentStringType: null,
             gdprApplies: null,
             additionalConsent: null,
+            consentSharedData: null,
           })
         ).calledOnce;
         expect(

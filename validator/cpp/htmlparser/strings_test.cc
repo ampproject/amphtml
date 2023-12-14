@@ -1,10 +1,13 @@
 #include "cpp/htmlparser/strings.h"
 
+#include <sstream>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include "gtest/gtest.h"
 
-using namespace std::string_literals;
+using namespace std::string_literals;  // NOLINT(build/namespaces)
 
 TEST(StringsTest, SplitStringAtTest) {
   auto columns = htmlparser::Strings::SplitStringAt("a|b|c", '|');
@@ -410,7 +413,7 @@ TEST(StringsTest, ReplaceTest) {
   htmlparser::Strings::ReplaceAny(&whitespace_and_null2,
                                   htmlparser::Strings::kNullChar,
                                   htmlparser::Strings::kNullReplacementChar);
-  EXPECT_EQ(whitespace_and_null2, "amaltas is ��good �boy");
+  EXPECT_EQ(whitespace_and_null2, "amaltas is ��good �boy");  // NOLINT
 
   std::string many_whitespaces = "  a   m  a lta s  ";
   htmlparser::Strings::RemoveExtraSpaceChars(&many_whitespaces);
@@ -493,7 +496,7 @@ TEST(StringsTest, TranslateTest) {
   // Translate failed.
   EXPECT_FALSE(t8.has_value());
 
-  // Translate ignore chracters if abc is longer than xyz.
+  // Translate ignore characters if abc is longer than xyz.
   // In the following abc string ...wn is removed from translated string.
   auto t9 = htmlparser::Strings::Translate(
       "The quick brown fox.", "brown", "red");

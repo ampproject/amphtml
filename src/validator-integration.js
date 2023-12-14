@@ -3,7 +3,7 @@ import {getHashParams} from '#core/types/string/url';
 
 import {loadPromise} from '#utils/event-helper';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {isModeDevelopment} from './mode';
 
 /**
@@ -44,7 +44,29 @@ export function loadScript(doc, url) {
   const script = /** @type {!HTMLScriptElement} */ (
     doc.createElement('script')
   );
-  script.src = url;
+  // Make script.src assignment Trusted Types compatible for compatible browsers
+  if (self.trustedTypes && self.trustedTypes.createPolicy) {
+    const policy = self.trustedTypes.createPolicy(
+      'validator-integration#loadScript',
+      {
+        createScriptURL: function (url) {
+          // Only allow trusted URLs
+          // Using explicit cdn domain as no other AMP Cache hosts validator_
+          // wasm so we can assume the explicit cdn domain is cdn.ampproject.org
+          // instead of using the dynamic cdn value from src/config/urls.js
+          // eslint-disable-next-line local/no-forbidden-terms
+          if (url === 'https://cdn.ampproject.org/v0/validator_wasm.js') {
+            return url;
+          } else {
+            return '';
+          }
+        },
+      }
+    );
+    script.src = policy.createScriptURL(url);
+  } else {
+    script.src = url;
+  }
   propagateNonce(doc, script);
 
   const promise = loadPromise(script).then(

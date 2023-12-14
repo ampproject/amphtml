@@ -1,6 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("embed_data.bzl", "embed_data")
+load("//tools/build_defs/license:license.bzl", "license")
 
 # Requirements:
 # clang with c++17 support.
@@ -14,7 +15,15 @@ load("embed_data.bzl", "embed_data")
 #
 # bazel test --cxxopt='-std=c++17' validator_test
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_applicable_licenses = [":license"],
+    default_visibility = ["//visibility:public"],
+)
+
+license(
+    name = "license",
+    package_name = "ampvalidator",
+)
 
 licenses(["notice"])
 
@@ -114,6 +123,7 @@ cc_library(
         ":utf8-util",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
+        "//cpp/htmlparser:logging",
         "//cpp/htmlparser:strings",
     ],
 )
@@ -137,6 +147,7 @@ cc_library(
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
+        "//cpp/htmlparser:logging",
         "//cpp/htmlparser:strings",
     ],
 )
@@ -230,6 +241,7 @@ cc_binary(
         "@com_google_protobuf//:protobuf",
         "//cpp/htmlparser:defer",
         "//cpp/htmlparser:fileutil",
+        "//cpp/htmlparser:logging",
         "//:validator_cc_proto",
     ],
 )
@@ -281,7 +293,7 @@ cc_library(
         "//cpp/htmlparser/css:amp4ads-parse-css",
         "//cpp/htmlparser/css:parse-css",
         "//cpp/htmlparser/css:parse_css_cc_proto",
-        "//cpp/htmlparser/json:parser",
+        "//cpp/htmlparser/validators:json",
         "//:validator_cc_proto",
     ],
 )
@@ -294,6 +306,7 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         ":validator-internal",
+        "//cpp/htmlparser/css:parse-css",
         "//:validator_cc_proto",
     ],
     alwayslink = 1,
@@ -321,6 +334,16 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "update-tests",
+    srcs = ["update-tests.cc"],
+    copts = ["-std=c++17"],
+    deps = [
+        ":testing-utils",
+        ":validator",
+    ],
+)
+
 cc_test(
     name = "validator_test",
     srcs = ["validator_test.cc"],
@@ -329,6 +352,8 @@ cc_test(
         ":testing-utils",
         ":validator",
         ":validator_pb",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "//cpp/htmlparser/css:parse_css_cc_proto",

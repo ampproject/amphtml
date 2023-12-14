@@ -19,10 +19,10 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>The Smartadserver fast fetch implementation for serving AMP ads, using `<amp-ad>`.</td>
+    <td>The Smartadserver fast fetch implementation for serving AMP ads using <code>&lt;amp-ad&gt;</code></td>
   </tr>
   <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
+    <td class="col-fourty" width="25%"><strong>Availability</strong></td>
     <td>Launched</td>
   </tr>
   <tr>
@@ -31,11 +31,11 @@ limitations under the License.
   </tr>
 </table>
 
-## Behavior
+# Behavior
 
 Smartadserver supports the Real Time Config (RTC) to preload configuration settings for ad placements. The RTC setup is optional.
 
-## Supported parameters
+# Supported parameters
 
 Smartadserver largely uses the same tags as `<amp-ad>`. The following are required tags for special behaviors of existing ones:
 
@@ -47,9 +47,11 @@ Smartadserver largely uses the same tags as `<amp-ad>`. The following are requir
 These attributes are optional:
 
 -   `data-target`: Targeting string
+-   `data-isasync`: Is call to Smartadserver should be executed in sync or async mode
+-   `data-schain`: SupplyChain Object string
 -   `rtc-config`: Please refer to [RTC Documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md) for details
 
-### Example configuration
+## Example configuration
 
 ```html
 <amp-ad width="300" height="250" type="smartadserver"
@@ -57,6 +59,7 @@ These attributes are optional:
   data-page="1410268"
   data-format="945"
   data-target="test=amp"
+  data-isasync="true"
   data-domain="https://www4.smartadserver.com">
 </amp-ad>
 ```

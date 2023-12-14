@@ -1,11 +1,11 @@
+import {dev, user} from '#utils/log';
+
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {dev, user} from '#utils/log';
-import {dict} from '#core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -26,6 +26,10 @@ let GetStateConfigurationDef;
 
 /** @enum {!GetStateConfigurationDef} */
 const GET_STATE_CONFIGURATIONS = {
+  'CAPTIONS_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.CAPTIONS_STATE,
+  },
   'CURRENT_PAGE_ID': {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.CURRENT_PAGE_ID,
@@ -46,9 +50,17 @@ const GET_STATE_CONFIGURATIONS = {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.UI_STATE,
   },
+  'DESKTOP_ASPECT_RATIO': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.DESKTOP_ASPECT_RATIO,
+  },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
     property: AnalyticsVariable.STORY_PROGRESS,
+  },
+  'STORY_PAGE_COUNT': {
+    dataSource: DataSources.VARIABLE_SERVICE,
+    property: AnalyticsVariable.STORY_PAGE_COUNT,
   },
 };
 
@@ -57,6 +69,10 @@ let SetStateConfigurationDef;
 
 /** @enum {!SetStateConfigurationDef} */
 const SET_STATE_CONFIGURATIONS = {
+  'CAPTIONS_STATE': {
+    action: Action.TOGGLE_CAPTIONS,
+    isValueValid: (value) => typeof value === 'boolean',
+  },
   'MUTED_STATE': {
     action: Action.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
@@ -110,6 +126,15 @@ export class AmpStoryViewerMessagingHandler {
   }
 
   /**
+   * @param {string} eventType
+   * @param {function(!JsonObject)} handler
+   * @return {!UnlistenDef}
+   */
+  onMessage(eventType, handler) {
+    this.viewer_.onMessage(eventType, handler);
+  }
+
+  /**
    * Handles 'getDocumentState' viewer messages.
    * @param {!Object=} data
    * @return {!Promise}
@@ -155,10 +180,10 @@ export class AmpStoryViewerMessagingHandler {
     }
 
     this.storeService_.subscribe(config.property, (value) => {
-      this.viewer_.sendMessage(
-        'documentStateUpdate',
-        dict({'state': state, 'value': value})
-      );
+      this.viewer_.sendMessage('documentStateUpdate', {
+        'state': state,
+        'value': value,
+      });
     });
   }
 

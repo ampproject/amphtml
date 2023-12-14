@@ -4,6 +4,18 @@ formats:
   - stories
 teaser:
   text: A panel of content that opens inline with an AMP story page.
+toc: true
+$title: amp-story-page-attachment
+version: '0.1'
+versions:
+  - '0.1'
+latest_version: '0.1'
+is_current: true
+$path: /documentation/components/amp-story-page-attachment.html
+$localization:
+  path: '/{locale}/documentation/components/amp-story-page-attachment.html'
+layouts:
+  - nodisplay  
 ---
 
 # amp-story-page-attachment
@@ -48,7 +60,7 @@ A UI button prompting the viewer to open the attachment will appear at the botto
 The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
 
 [tip type="important"]
-Both [`amp-story-page-attachment`](amp-story-page-attachment.md) and [`amp-story-page-outlink`](amp-story-page-outlink.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+Both [`amp-story-page-attachment`](amp-story-page-attachment.md) and [`amp-story-page-outlink`](amp-story-page-outlink.md) must be the last child tag of an [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page?format=stories). Because of this, you may include neither or one, but not both.
 [/tip]
 
 ## Attributes

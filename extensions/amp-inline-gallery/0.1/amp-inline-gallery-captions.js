@@ -1,9 +1,12 @@
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {exponentialFalloff} from './amp-inline-gallery-pagination';
-import {isExperimentOn} from '#experiments';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
+
+import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '#utils/log';
+
+import {exponentialFalloff} from './amp-inline-gallery-pagination';
 
 export class AmpInlineGalleryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */

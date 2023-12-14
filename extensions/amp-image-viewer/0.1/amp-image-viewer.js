@@ -171,8 +171,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     const laidOutPromise = haveImg
       ? Promise.resolve()
       : img.tagName === 'IMG'
-      ? loadPromise(img)
-      : img.signals().whenSignal(CommonSignals_Enum.LOAD_END);
+        ? loadPromise(img)
+        : img.signals().whenSignal(CommonSignals_Enum.LOAD_END);
 
     if (!haveImg) {
       Services.ownersForDoc(this.element).scheduleLayout(this.element, img);

@@ -15,13 +15,10 @@ import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {setStyle} from '#core/dom/style';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {isArray, isEnumValue, isObject} from '#core/types';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {padStart} from '#core/types/string';
 import {utf8Decode} from '#core/types/string/bytes';
 import {tryDecodeUriComponent} from '#core/types/string/url';
-
-import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
@@ -31,15 +28,12 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {DomTransformStream} from '#utils/dom-tranform-stream';
 import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
+import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {processHead} from './head-validation';
-import {
-  createSecureDocSkeleton,
-  createSecureFrame,
-  isAttributionReportingSupported,
-} from './secure-frame';
+import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {whenWithinViewport} from './within-viewport';
 
@@ -49,9 +43,11 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
+  getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
@@ -120,14 +116,14 @@ export const XORIGIN_MODE = {
 };
 
 /** @type {!Object} @private */
-const SHARED_IFRAME_PROPERTIES = dict({
+const SHARED_IFRAME_PROPERTIES = {
   'frameborder': '0',
   'allowfullscreen': '',
   'allowtransparency': '',
   'scrolling': 'no',
   'marginwidth': '0',
   'marginheight': '0',
-});
+};
 
 /** @typedef {{width: number, height: number}} */
 export let SizeInfoDef;
@@ -148,6 +144,7 @@ export let CreativeMetaDataDef;
       consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
+      consentSharedData: (?Object|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -168,7 +165,7 @@ export const AnalyticsTrigger = {
 
 /**
  * Maps the names of lifecycle events to analytics triggers.
- * @const {!Object<string, !AnalyticsTrigger>}
+ * @const {!{[key: string]: !AnalyticsTrigger}}
  */
 const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'adRequestStart': AnalyticsTrigger.AD_REQUEST_START,
@@ -334,7 +331,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Mapping of feature name to value extracted from ad response header
      * amp-ff-exps with comma separated pairs of '=' separated key/value.
-     * @type {!Object<string,string>}
+     * @type {!{[key: string]: string}}
      */
     this.postAdResponseExperimentFeatures = {};
 
@@ -408,6 +405,14 @@ export class AmpA4A extends AMP.BaseElement {
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
+
+    this.uiHandler
+      .getScrollPromiseForStickyAd()
+      .then(() => this.uiHandler.maybeInitStickyAd());
+
+    if (this.uiHandler.isStickyAd()) {
+      chunk(this.element, () => this.layoutCallback(), ChunkPriority_Enum.LOW);
+    }
 
     // Disable crypto key fetching if we are not going to use it in no-signing path.
     // TODO(ccordry): clean up with no-signing launch.
@@ -746,14 +751,23 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           });
 
+          const consentSharedDataPromise = getConsentPolicySharedData(
+            this.element,
+            consentPolicyId
+          ).catch((err) => {
+            user().error(TAG, 'Error determining consent shared data', err);
+            return null;
+          });
+
           return Promise.all([
             consentStatePromise,
             consentStringPromise,
             consentMetadataPromise,
+            consentSharedDataPromise,
           ]);
         }
 
-        return Promise.resolve([null, null, null]);
+        return Promise.resolve([null, null, null, null]);
       })
       // This block returns the ad URL, if one is available.
       /** @return {!Promise<?string>} */
@@ -763,6 +777,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
         const consentMetadata = consentResponse[2];
+        const consentSharedData = consentResponse[3];
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
@@ -782,11 +797,12 @@ export class AmpA4A extends AMP.BaseElement {
                 consentStringType,
                 gdprApplies,
                 additionalConsent,
+                consentSharedData,
               },
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
-                /** @type {?Object<string, string|number|boolean|undefined>} */ (
+                /** @type {?{[key: string]: string|number|boolean|undefined}} */ (
                   consentMetadata
                 )
               ),
@@ -1341,15 +1357,10 @@ export class AmpA4A extends AMP.BaseElement {
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
 
-    return Promise.all([
-      this.adPromise_,
-      this.uiHandler.getScrollPromiseForStickyAd(),
-    ])
-      .then((values) => {
+    return this.adPromise_
+      .then((creativeMetaData) => {
         checkStillCurrent();
 
-        this.uiHandler.maybeInitStickyAd();
-        const creativeMetaData = values[0];
         if (this.isCollapsed_) {
           return Promise.resolve();
         }
@@ -1471,6 +1482,16 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Remove the iframe and clean it up.
+   */
+  maybeDestroyIframe_() {
+    if (this.iframe && this.iframe.parentElement) {
+      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe = null;
+    }
+  }
+
+  /**
    * Attempts to remove the current frame and free any associated resources.
    * This function will no-op if this ad slot is currently in the process of
    * being refreshed.
@@ -1488,10 +1509,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.friendlyIframeEmbed_.destroy();
       this.friendlyIframeEmbed_ = null;
     }
-    if (this.iframe && this.iframe.parentElement) {
-      this.iframe.parentElement.removeChild(this.iframe);
-      this.iframe = null;
-    }
+    this.maybeDestroyIframe_();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
@@ -1794,6 +1812,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     const {height, width} = this.creativeSize_;
     const {extensions, fonts, head} = headData;
+    this.maybeDestroyIframe_();
     this.iframe = createSecureFrame(
       this.win,
       this.getIframeTitle(),
@@ -1874,11 +1893,12 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(!!this.element.ownerDocument, 'missing owner document?!');
     this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
+    this.maybeDestroyIframe_();
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe',
-        dict({
+        {
           // NOTE: It is possible for either width or height to be 'auto',
           // a non-numeric value.
           'height': this.creativeSize_.height,
@@ -1891,7 +1911,7 @@ export class AmpA4A extends AMP.BaseElement {
           'role': 'region',
           'aria-label': 'Advertisement',
           'tabindex': '0',
-        })
+        }
       )
     );
     if (!this.uiHandler.isStickyAd()) {
@@ -2010,17 +2030,14 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = Object.assign(
-      attributes,
-      dict({
-        'height': this.creativeSize_.height,
-        'width': this.creativeSize_.width,
-        'title': this.getIframeTitle(),
-        'role': 'region',
-        'aria-label': 'Advertisement',
-        'tabindex': '0',
-      })
-    );
+    const mergedAttributes = Object.assign(attributes, {
+      'height': this.creativeSize_.height,
+      'width': this.creativeSize_.width,
+      'title': this.getIframeTitle(),
+      'role': 'region',
+      'aria-label': 'Advertisement',
+      'tabindex': '0',
+    });
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
@@ -2030,12 +2047,13 @@ export class AmpA4A extends AMP.BaseElement {
     // request completes.
     let featurePolicies = "sync-xhr 'none';";
 
-    if (isAttributionReportingSupported(this.win.document)) {
+    if (isAttributionReportingAllowed(this.win.document)) {
       featurePolicies += "attribution-reporting 'src';";
     }
 
     mergedAttributes['allow'] = featurePolicies;
 
+    this.maybeDestroyIframe_();
     this.iframe = /** @type {!HTMLIFrameElement} */ (
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
@@ -2100,12 +2118,10 @@ export class AmpA4A extends AMP.BaseElement {
     const intersection = this.element.getIntersectionChangeEntry();
     contextMetadata['_context']['initialIntersection'] =
       intersectionEntryToJson(intersection);
-    return this.iframeRenderHelper_(
-      dict({
-        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(contextMetadata),
-      })
-    );
+    return this.iframeRenderHelper_({
+      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'name': JSON.stringify(contextMetadata),
+    });
   }
 
   /**
@@ -2185,7 +2201,7 @@ export class AmpA4A extends AMP.BaseElement {
           `${contextMetadata}`;
       }
 
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+      return this.iframeRenderHelper_({'src': srcPath, 'name': name});
     });
   }
 
@@ -2342,12 +2358,10 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsEvent = devAssert(
       LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]
     );
-    const analyticsVars = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({'time': Math.round(this.getNow_())}),
-        this.getA4aAnalyticsVars(analyticsEvent)
-      )
-    );
+    const analyticsVars = /** @type {!JsonObject} */ ({
+      'time': Math.round(this.getNow_()),
+      ...this.getA4aAnalyticsVars(analyticsEvent),
+    });
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -2360,7 +2374,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   getA4aAnalyticsVars(unusedAnalyticsEvent) {
-    return dict({});
+    return {};
   }
 
   /**
@@ -2381,7 +2395,7 @@ export class AmpA4A extends AMP.BaseElement {
    * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
-   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {?{[key: string]: string|number|boolean|undefined}} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
@@ -2550,13 +2564,7 @@ export function signatureVerifierFor(win) {
  */
 export function isPlatformSupported(win) {
   // Require Shadow DOM support for a4a.
-  if (
-    !isNative(win.Element.prototype.attachShadow) &&
-    isExperimentOn(win, 'disable-a4a-non-sd')
-  ) {
-    return false;
-  }
-  return true;
+  return isNative(win.Element.prototype.attachShadow);
 }
 
 /**
