@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-youtube-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-youtube-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-youtube-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-youtube
+      id="my-video"
+      data-videoid="elyFuXoRZv8"
+      style="aspect-ratio: 16/9"
+    >
+    </bento-youtube>
+    <p>
+      <button id="play">Play</button>
+      <button id="pause">Pause</button>
+      <button id="mute">Mute</button>
+      <button id="unmute">Unmute</button>
+    </p>
+    <script>
+      (async () => {
+        await customElements.whenDefined("amp-youtube");
+
+        const video = document.querySelector("#my-video");
+        const api = await video.getApi();
+
+        document.querySelector("#play").onclick = () => {
+          api.play();
+        };
+        document.querySelector("#pause").onclick = () => {
+          api.pause();
+        };
+        document.querySelector("#mute").onclick = () => {
+          api.mute();
+        };
+        document.querySelector("#unmute").onclick = () => {
+          api.unmute();
+        };
+      })();
+    </script>
+  </body>
+</html>
