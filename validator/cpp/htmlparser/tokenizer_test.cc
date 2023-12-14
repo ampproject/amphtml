@@ -1,5 +1,9 @@
 #include "cpp/htmlparser/tokenizer.h"
 
+#include <string>
+#include <string_view>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "cpp/htmlparser/token.h"
 

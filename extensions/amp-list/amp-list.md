@@ -509,6 +509,10 @@ The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supp
 
 [filter formats="websites, stories"]
 
+### `template`
+
+References an ID of a defined templating element. This attribute is not necessary if the template is a child of the `amp-list` element.
+
 ### `credentials`
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
