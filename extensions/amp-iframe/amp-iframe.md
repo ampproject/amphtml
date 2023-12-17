@@ -23,9 +23,14 @@ designed to make it more secure and avoid AMP files that are dominated by a sing
 -   By default, an `amp-iframe` is sandboxed (see [details](#sandbox)).
 -   An `amp-iframe` must only request resources via HTTPS, from a data-URI, or
     via the `srcdoc` attribute.
+<<<<<<< HEAD
 -   An `amp-iframe` must not be in the same origin as the container unless they
     do not allow `allow-same-origin` in the `sandbox` attribute. See the
     ["Iframe origin policy"](../../docs/spec/amp-iframe-origin-policy.md)
+=======
+-  To allow an `amp-iframe` from the same origin as the container, you must include `allow-same-origin` in the `sandbox` attribute. See the
+    ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md)
+>>>>>>> origin/CrystalOnScript-amp-iframe
     doc for further details on allowed origins for iframes.
 
 ```html
