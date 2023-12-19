@@ -9,7 +9,7 @@
       "type": "string"
     },
     "productUrl": {
-      "description": "Links to the product's website, whne the buy now button is clicked.",
+      "description": "Links to the product's website, when the buy now button is clicked.",
       "type": "string",
       "$ref": "#/$defs/https"
     },

@@ -109,10 +109,10 @@ class RuntimeTestConfig {
     const browser = argv.edge
       ? 'EdgeCustom'
       : argv.firefox
-      ? 'FirefoxCustom'
-      : argv.safari
-      ? 'SafariCustom'
-      : 'ChromeCustom';
+        ? 'FirefoxCustom'
+        : argv.safari
+          ? 'SafariCustom'
+          : 'ChromeCustom';
     Object.assign(this, {browsers: [browser], customLaunchers});
   }
 
@@ -138,13 +138,6 @@ class RuntimeTestConfig {
 
     if (argv.coverage) {
       this.reporters.push('coverage-istanbul');
-    }
-
-    if (argv.report) {
-      this.reporters.push('json-result');
-      this.jsonResultReporter = {
-        outputFile: `result-reports/${this.testType}.json`,
-      };
     }
   }
 

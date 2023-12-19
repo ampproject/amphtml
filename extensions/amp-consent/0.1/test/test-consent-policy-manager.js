@@ -639,6 +639,40 @@ describes.realWin(
       });
     });
 
+    describe('getTcfPolicyVersion', () => {
+      let manager;
+
+      beforeEach(() => {
+        manager = new ConsentPolicyManager(ampdoc);
+        manager.setLegacyConsentInstanceId('ABC');
+        env.sandbox
+          .stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
+          .callsFake(() => {
+            return Promise.resolve();
+          });
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          undefined,
+          undefined,
+          undefined,
+          4
+        );
+      });
+
+      it('should return tcf policy version value from state manager', async () => {
+        manager.registerConsentPolicyInstance('default', {
+          'waitFor': {
+            'ABC': undefined,
+          },
+        });
+        await macroTask();
+        await expect(
+          manager.getTcfPolicyVersion('default')
+        ).to.eventually.be.equal(4);
+      });
+    });
+
     describe('getConsentMetadataInfo', () => {
       let manager;
 

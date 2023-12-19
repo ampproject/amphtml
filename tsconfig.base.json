@@ -39,7 +39,9 @@
       "#test/*": ["./test/*"],
       "#testing/*": ["./testing/*"],
 
-      "#third_party/*": ["./third_party/*"]
+      "#third_party/*": ["./third_party/*"],
+
+      "preact/dom": ["./src/preact/preact-dom.ts"]
     }
   },
 

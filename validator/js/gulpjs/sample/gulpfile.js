@@ -3,7 +3,7 @@ const gulpAmpHtmlValidator = require('gulp-amphtml-validator');
 
 gulp.task('amphtml:validate', () => {
   return gulp.src('../../testdata/feature_tests/*.html')
-  // Valide the input and attach the validation result to the "amp" property
+  // Validate the input and attach the validation result to the "amp" property
   // of the file object.
       .pipe(gulpAmpHtmlValidator.validate())
   // Print the validation results to the console.

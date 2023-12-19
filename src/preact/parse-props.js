@@ -271,8 +271,8 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
         def.type == 'number'
           ? parseFloat(value)
           : def.type == 'boolean'
-          ? parseBooleanAttribute(/** @type {string} */ (value))
-          : value;
+            ? parseBooleanAttribute(/** @type {string} */ (value))
+            : value;
       props[name] = v;
     }
   }

@@ -193,10 +193,10 @@ export class CssConcatNode extends CssNode {
       opt_array instanceof CssConcatNode
         ? opt_array.array_
         : Array.isArray(opt_array)
-        ? opt_array
-        : opt_array
-        ? [opt_array]
-        : [];
+          ? opt_array
+          : opt_array
+            ? [opt_array]
+            : [];
     /** @const @private {?Array<string>} */
     this.dimensions_ = opt_dimensions || null;
   }
@@ -707,8 +707,8 @@ export function createPositionNode(value) {
         kw == 'left' || kw == 'right'
           ? 'w'
           : kw == 'top' || kw == 'bottom'
-          ? 'h'
-          : '';
+            ? 'h'
+            : '';
       dims[i] = dims[i + 1] = dim;
     }
   }
@@ -815,14 +815,14 @@ export class CssTranslateNode extends CssFuncNode {
       suffix == ''
         ? ['w', 'h']
         : suffix == 'x'
-        ? ['w']
-        : suffix == 'y'
-        ? ['h']
-        : suffix == 'z'
-        ? ['z']
-        : suffix == '3d'
-        ? ['w', 'h', 'z']
-        : null
+          ? ['w']
+          : suffix == 'y'
+            ? ['h']
+            : suffix == 'z'
+              ? ['z']
+              : suffix == '3d'
+                ? ['w', 'h', 'z']
+                : null
     );
     /** @const @protected {string} */
     this.suffix_ = suffix;

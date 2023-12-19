@@ -148,8 +148,8 @@ class AmpSocialShare extends AMP.BaseElement {
           this.platform_.isIos() && (isMailTo || isSms)
             ? '_top'
             : this.element.hasAttribute('data-target')
-            ? this.element.getAttribute('data-target')
-            : '_blank';
+              ? this.element.getAttribute('data-target')
+              : '_blank';
         if (isSms) {
           // http://stackoverflow.com/a/19126326
           // This code path seems to be stable for both iOS and Android.

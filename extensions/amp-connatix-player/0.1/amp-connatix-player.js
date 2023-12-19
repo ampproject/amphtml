@@ -13,6 +13,7 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
@@ -23,8 +24,12 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {redispatch} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {setIsMediaComponent} from '../../../src/video-interface';
+import {
+  VideoEvents_Enum,
+  setIsMediaComponent,
+} from '../../../src/video-interface';
 
 /**
  * @param {!Array<T>} promises
@@ -84,6 +89,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {boolean} */
+    this.isFullscreen_ = false;
   }
 
   /**
@@ -149,7 +157,24 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
           this.playerReadyResolver_(this.iframe_);
           break;
         }
+        case 'cnxContentPlaying': {
+          this.pauseHelper_.updatePlaying(true);
+          break;
+        }
+        case 'cnxContentPaused': {
+          this.pauseHelper_.updatePlaying(false);
+          break;
+        }
+        case 'cnxFullscreenChanged': {
+          this.isFullscreen_ = !this.isFullscreen_;
+          break;
+        }
       }
+
+      redispatch(this.element, dataJSON['func'].toString(), {
+        'cnxContentPlaying': VideoEvents_Enum.PLAYING,
+        'cnxContentPaused': VideoEvents_Enum.PAUSE,
+      });
     });
   }
 
@@ -227,6 +252,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    installVideoManagerForDoc(element);
+
     setIsMediaComponent(element);
 
     // Player id is mandatory
@@ -289,6 +316,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
+    Services.videoManagerForDoc(element).register(this);
+
     // bind to player events (playerRendered after we can send commands to player and other)
     this.bindToPlayerCommands_();
     // bind to amp consent and send consent info to the iframe content and propagate to player
@@ -338,6 +367,112 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.pauseHelper_.updatePlaying(false);
 
     return true;
+  }
+
+  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
+  /** @override */
+  supportsPlatform() {
+    return true;
+  }
+
+  /** @override */
+  isInteractive() {
+    return true;
+  }
+
+  /** @override */
+  play(unusedIsAutoplay) {
+    this.sendCommand_('play');
+  }
+
+  /** @override */
+  pause() {
+    this.sendCommand_('pause');
+  }
+
+  /** @override */
+  mute() {
+    this.sendCommand_('mute');
+  }
+
+  /** @override */
+  unmute() {
+    this.sendCommand_('unmute');
+  }
+
+  /** @override */
+  showControls() {
+    // Not supported.
+  }
+
+  /** @override */
+  hideControls() {
+    // Not supported.
+  }
+
+  /** @override */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+
+    this.sendCommand_('enterFullscreen');
+  }
+
+  /** @override */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+
+    this.sendCommand_('exitFullscreen');
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return this.isFullscreen_;
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return true;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not implemented
+    return NaN;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not implemented
+    return NaN;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error('TAG', '`seekTo` not supported.');
   }
 }
 

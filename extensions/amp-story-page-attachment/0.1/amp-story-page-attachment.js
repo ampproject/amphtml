@@ -91,6 +91,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     /** @private {?AttachmentType} */
     this.type_ = null;
+
+    /** @private {?Element} */
+    this.outlinkEl_ = null;
+
+    /** @private {?Element} */
+    this.legacyOutlinkEl_ = null;
   }
 
   /**
@@ -395,9 +401,88 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
+   * Get outlink element.
+   * @return {?Element}
+   * @private
+   */
+  getOutlinkEl_() {
+    if (!this.outlinkEl_) {
+      this.outlinkEl_ = this.element.parentElement
+        .querySelector('amp-story-page-outlink')
+        ?.querySelector('a');
+    }
+    return this.outlinkEl_;
+  }
+
+  /**
+   * Get legacy outlink element.
+   * @return {?Element}
+   * @private
+   */
+  getLegacyOutlinkEl_() {
+    if (!this.legacyOutlinkEl_) {
+      this.legacyOutlinkEl_ = this.element.parentElement
+        .querySelector('.i-amphtml-story-page-open-attachment-host')
+        ?.shadowRoot?.querySelector('a.i-amphtml-story-page-open-attachment');
+    }
+    return this.legacyOutlinkEl_;
+  }
+
+  /**
+   * Check if two URLs have the same origin and path but different hashes at the end.
+   * @param {string} url1
+   * @param {string} url2
+   * @return {boolean}
+   * @private
+   */
+  urlsHaveSameOriginAndPath_(url1, url2) {
+    if (!url1 || !url2) {
+      return false;
+    }
+
+    const url1WithoutHash = url1.split('#')[0];
+    const url2WithoutHash = url2.split('#')[0];
+
+    return url1WithoutHash === url2WithoutHash;
+  }
+
+  /**
+   * If the element is an amp-story-page-outlink the click target is its anchor element child.
+   * This is for SEO and analytics optimisation.
+   * Otherwise the element is the legacy version, amp-story-page-attachment with an href,
+   * and a click target is the button built by the component.
+   * @private
+   */
+  programmaticallyClickOnOutlink_() {
+    const pageOutlinkChild = this.getOutlinkEl_();
+    const pageAttachmentChild = this.getLegacyOutlinkEl_();
+    if (pageOutlinkChild) {
+      pageOutlinkChild.click();
+    } else if (pageAttachmentChild) {
+      triggerClickFromLightDom(pageAttachmentChild, this.element);
+    }
+  }
+
+  /**
    * @override
    */
   open(shouldAnimate = true) {
+    // If the target is a branching link, redirect immediately without opening the drawer.
+    const outlinkEl = this.getOutlinkEl_() || this.getLegacyOutlinkEl_();
+    if (
+      this.urlsHaveSameOriginAndPath_(window.location.href, outlinkEl?.href) &&
+      outlinkEl?.href.includes('#page=')
+    ) {
+      if (window.location.href === outlinkEl.href) {
+        // Should hard reload if the starting URL is the same as the target URL, otherwise
+        // the page wouldn't do hash navigation at all.
+        window.location.reload(true);
+      } else {
+        this.programmaticallyClickOnOutlink_();
+      }
+      return;
+    }
+
     if (this.state === DrawerState.OPEN) {
       return;
     }
@@ -442,34 +527,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemote_() {
-    // If the element is an amp-story-page-outlink the click target is its anchor element child.
-    // This is for SEO and analytics optimisation.
-    // Otherwise the element is the legacy version, amp-story-page-attachment with an href,
-    // and a click target is the button built by the component.
-    const programaticallyClickOnTarget = () => {
-      const pageOutlinkChild = this.element.parentElement
-        .querySelector('amp-story-page-outlink')
-        ?.querySelector('a');
-
-      const pageAttachmentChild = this.element.parentElement
-        ?.querySelector('.i-amphtml-story-page-open-attachment-host')
-        .shadowRoot?.querySelector('a.i-amphtml-story-page-open-attachment');
-
-      if (pageOutlinkChild) {
-        pageOutlinkChild.click();
-      } else if (pageAttachmentChild) {
-        triggerClickFromLightDom(pageAttachmentChild, this.element);
-      }
-    };
-
     const isMobileUI =
       this.storeService.get(StateProperty.UI_STATE) === UIType_Enum.MOBILE;
     if (!isMobileUI) {
-      programaticallyClickOnTarget();
+      this.programmaticallyClickOnOutlink_();
     } else {
       // Timeout to shows post-tap animation on mobile only.
       Services.timerFor(this.win).delay(() => {
-        programaticallyClickOnTarget();
+        this.programmaticallyClickOnOutlink_();
       }, POST_TAP_ANIMATION_DURATION);
     }
   }

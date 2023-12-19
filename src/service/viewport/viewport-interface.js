@@ -306,4 +306,3 @@ export class ViewportInterface extends Disposable {
    */
   createFixedLayer(constructor) {}
 }
-/* eslint-enable no-unused-vars */

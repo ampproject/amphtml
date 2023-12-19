@@ -57,8 +57,8 @@ describes.realWin(
           /(\?|&)dpr=\d+(&|$)/,
           /(\?|&)cxurl=http%3A%2F%2Fcanonical.example%2F%3Fabc%3Dxyz(&|$)/,
           /(\?|&)pr=fake.example(&|$)/,
-          /(\?|&)pvid=[A-z0-9\-_]+(&|$)/,
-          /(\?|&)muid=amp-[A-z0-9\-_]+(&|$)/,
+          /(\?|&)pvid=[a-zA-Z0-9\-_]+(&|$)/,
+          /(\?|&)muid=amp-[a-zA-Z0-9\-_]+(&|$)/,
           /(\?|&)implVersion=15(&|$)/,
         ].forEach((regexp) => {
           expect(url).to.match(regexp);

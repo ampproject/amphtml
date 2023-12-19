@@ -147,22 +147,17 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           });
       });
 
-      // TODO(@lannka): unskip flaky test
-      it.skip(
-        'should resolve on message "no-content" ' +
-          'and remove non-master iframe',
-        () => {
-          expect(iframe.style.visibility).to.equal('hidden');
-          iframe.postMessageToParent({
-            sentinel: 'amp3ptest' + testIndex,
-            type: 'no-content',
-          });
-          return initPromise.then(() => {
-            expect(noContentSpy).to.be.calledWith(false);
-            expect(iframeHandler.iframe).to.be.null;
-          });
-        }
-      );
+      it('should resolve on message "no-content" and remove non-master iframe', () => {
+        expect(iframe.style.visibility).to.equal('hidden');
+        iframe.postMessageToParent({
+          sentinel: 'amp3ptest' + testIndex,
+          type: 'no-content',
+        });
+        return initPromise.then(() => {
+          expect(noContentSpy).to.be.calledWith(false);
+          expect(iframeHandler.iframe).to.be.null;
+        });
+      });
 
       it('should NOT remove master iframe on message "no-content"', () => {
         iframe.name = 'test_master';
@@ -177,8 +172,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
         });
       });
 
-      // TODO(#18656, lannka): Fails due to bad error message.
-      it.skip('should NOT resolve on message "bootstrap-loaded"', () => {
+      it('should NOT resolve on message "bootstrap-loaded"', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           sentinel: 'amp3ptest' + testIndex,
@@ -413,9 +407,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           sentinel: 'amp3ptest' + testIndex,
         });
 
-        const data3 = await iframe.expectMessageFromParent(
-          'embed-size-changed'
-        );
+        const data3 =
+          await iframe.expectMessageFromParent('embed-size-changed');
 
         expect(data3).to.jsonEqual({
           requestedWidth: 114,

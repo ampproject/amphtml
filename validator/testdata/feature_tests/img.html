@@ -19,6 +19,12 @@
        hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="true"
        referrerpolicy="same-origin" usemap="#blah" name="name">
 
+  <!-- Valid with fetchpriority -->
+  <img src="http://www.example.com/blah.jpg" width=92 height=10
+       alt="blah" decoding=async loading=lazy border="5px solid black" align="top"
+       hspace=10 vspace=20 fetchpriority="low" importance="high" crossorigin="use-credentials" ismap="true"
+       referrerpolicy="same-origin" usemap="#blah" name="name">
+
   <!-- Valid with https -->
   <img src="https://www.example.com/blah.jpg" width=92 height=10
        alt="blah" decoding=async loading=lazy border="5px solid black" align="bottom"
@@ -50,6 +56,10 @@
   <!-- Invalid with wrong importance -->
   <img src=data:image/png:base64,foo width=100 height=10
        alt="blah" importance=none>
+
+  <!-- Invalid with wrong fetchpriority -->
+  <img src=data:image/png:base64,foo width=100 height=10
+       alt="blah" fetchpriority="wrongpriority">
 
   <!-- Invalid with wrong crossorigin -->
   <img src=data:image/png:base64,foo width=100 height=10

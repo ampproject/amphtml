@@ -475,7 +475,9 @@ async function prependConfig_(outputDir) {
     const channelPartialConfig = {
       v: rtvNumber,
       type: channelConfig.type,
-      ...require(`../../global-configs/${channelConfig.configBase}-config.json`),
+      ...require(
+        `../../global-configs/${channelConfig.configBase}-config.json`
+      ),
       ...overlayConfig,
     };
 

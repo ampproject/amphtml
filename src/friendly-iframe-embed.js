@@ -382,8 +382,8 @@ export class FriendlyIframeEmbed {
     this.signals_ = this.ampdoc
       ? this.ampdoc.signals()
       : this.host
-      ? this.host.signals()
-      : new Signals();
+        ? this.host.signals()
+        : new Signals();
 
     /** @private @const {!Deferred} */
     this.renderComplete_ = new Deferred();

@@ -304,6 +304,7 @@ export class AmpConsent extends AMP.BaseElement {
       }
 
       let consentString;
+      let tcfPolicyVersion;
       let metadata;
       const data = getData(event);
 
@@ -337,6 +338,9 @@ export class AmpConsent extends AMP.BaseElement {
           data['info'] = undefined;
         }
         consentString = data['info'];
+        tcfPolicyVersion = this.validateTCFPolicyVersion_(
+          data['tcfPolicyVersion']
+        );
         metadata = this.validateMetadata_(data['consentMetadata']);
       }
 
@@ -362,7 +366,7 @@ export class AmpConsent extends AMP.BaseElement {
               purposeConsents
             );
           }
-          this.handleAction_(action, consentString, metadata);
+          this.handleAction_(action, consentString, metadata, tcfPolicyVersion);
         }
       }
     });
@@ -455,8 +459,14 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} action
    * @param {string=} consentString
    * @param {!ConsentMetadataDef=} opt_consentMetadata
+   * @param {number=} opt_tcfPolicyVersion
    */
-  handleAction_(action, consentString, opt_consentMetadata) {
+  handleAction_(
+    action,
+    consentString,
+    opt_consentMetadata,
+    opt_tcfPolicyVersion
+  ) {
     const setDirtyBitPromise =
       isEnumValue(ACTION_TYPE, action) &&
       this.consentConfig_['clearDirtyBitOnResponse_dontUseThisItMightBeRemoved']
@@ -466,7 +476,8 @@ export class AmpConsent extends AMP.BaseElement {
       this.handleActionAfterClearingDirtyBit_(
         action,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        opt_tcfPolicyVersion
       );
     });
   }
@@ -475,11 +486,13 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} action
    * @param {string=} consentString
    * @param {!ConsentMetadataDef=} opt_consentMetadata
+   * @param {number=} opt_tcfPolicyVersion
    */
   handleActionAfterClearingDirtyBit_(
     action,
     consentString,
-    opt_consentMetadata
+    opt_consentMetadata,
+    opt_tcfPolicyVersion
   ) {
     this.consentStateChangedViaPromptUI_ = true;
 
@@ -488,14 +501,16 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.ACCEPTED,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        opt_tcfPolicyVersion
       );
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.REJECTED,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        opt_tcfPolicyVersion
       );
     } else if (action == ACTION_TYPE.DISMISS) {
       this.consentStateManager_.updateConsentInstanceState(
@@ -671,7 +686,8 @@ export class AmpConsent extends AMP.BaseElement {
           response['consentStateValue'],
           response['consentString'] || undefined,
           response['consentMetadata'],
-          response['purposeConsents']
+          response['purposeConsents'],
+          response['tcfPolicyVersion']
         );
       }
     });
@@ -684,12 +700,14 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {?string=} responseConsentString
    * @param {?JsonObject=} responseMetadata
    * @param {?JsonObject=} responsePurposeConsents
+   * @param {number=} responseTcfPolicyVersion
    */
   updateCacheIfNotNull_(
     responseStateValue,
     responseConsentString,
     responseMetadata,
-    responsePurposeConsents
+    responsePurposeConsents,
+    responseTcfPolicyVersion
   ) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
     // consentStateValue and consentString are treated as a pair that will update together
@@ -704,10 +722,12 @@ export class AmpConsent extends AMP.BaseElement {
           responsePurposeConsents
         );
       }
+
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
         responseConsentString,
-        this.validateMetadata_(responseMetadata)
+        this.validateMetadata_(responseMetadata),
+        responseTcfPolicyVersion
       );
     }
   }
@@ -735,6 +755,7 @@ export class AmpConsent extends AMP.BaseElement {
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentMetadata': storedInfo['consentMetadata'],
           'consentString': storedInfo['consentString'],
+          'tcfPolicyVersion': storedInfo['tcfPolicyVersion'],
           'isDirty': !!storedInfo['isDirty'],
           'matchedGeoGroup': this.matchedGeoGroup_,
           'purposeConsents': storedInfo['purposeConsents'],
@@ -945,7 +966,32 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Convert valid opt_metadta into ConsentMetadataDef
+   * Check if the opt_tcfPolicyVersion provided is a valid number to use.
+   * @param {number=} opt_tcfPolicyVersion
+   * @return {number|undefined}
+   */
+  validateTCFPolicyVersion_(opt_tcfPolicyVersion) {
+    if (typeof opt_tcfPolicyVersion !== 'number') {
+      return;
+    }
+
+    if (
+      isNaN(opt_tcfPolicyVersion) ||
+      !isFinite(opt_tcfPolicyVersion) ||
+      opt_tcfPolicyVersion.toString().split('.').length > 1
+    ) {
+      user().error(
+        TAG,
+        'CMP tcfPolicyVersion must be a valid number (integer).'
+      );
+      return;
+    }
+
+    return opt_tcfPolicyVersion;
+  }
+
+  /**
+   * Convert valid opt_metadata into ConsentMetadataDef
    * @param {JsonObject=} opt_metadata
    * @return {ConsentMetadataDef|undefined}
    */

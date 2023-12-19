@@ -95,6 +95,7 @@ window.parent.postMessage(
     action: 'accept',
     info: /string/ /* optional */,
     consentMetadata: /object/ /* optional */,
+    tcfPolicyVersion: /number/ /* optional (integer) - if not provided 2 is default */,
   },
   '*'
 );
@@ -111,6 +112,7 @@ window.parent.postMessage(
     action: 'reject',
     info: /string/ /* optional */,
     consentMetadata: /object/ /* optional */,
+    tcfPolicyVersion: /number/ /* optional (integer) - if not provided 2 is default */,
   },
   '*'
 );

@@ -177,6 +177,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [DOM Interactive Time](#dom-interactive-time)           | `DOM_INTERACTIVE_TIME` | `${domInteractiveTime}`     |
 | [First Contentful Paint](#first-contentful-paint)       | N/A                    | `${firstContentfulPaint}`   |
 | [First Input Delay](#first-input-delay)                 | N/A                    | `${firstInputDelay}`        |
+| [Interaction To Next Paint](#interaction-to-next-paint) | N/A                    | `${interactionToNextPaint}` |
 | [Largest Contentful Paint](#largest-contentful-paint)   | N/A                    | `${largestContentfulPaint}` |
 | [Navigation Redirect Count](#navigation-redirect-count) | `NAV_REDIRECT_COUNT`   | `${navRedirectCount}`       |
 | [Navigation Timing ](#navigation-timing)                | `NAV_TIMING`           | `${navTiming}`              |
@@ -195,7 +196,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Available Screen Width](#available-screen-width)   | `AVAILABLE_SCREEN_WIDTH`  | `${availableScreenWidth}`  |
 | [Browser Language](#browser-language)               | `BROWSER_LANGUAGE`        | `${browserLanguage}`       |
 | [Screen Color Depth](#screen-color-depth)           | `SCREEN_COLOR_DEPTH`      | `${screenColorDepth}`      |
-| [Screen Height](#screen-heigth)                     | `SCREEN_HEIGHT`           | `${screenHeight}`          |
+| [Screen Height](#screen-height)                     | `SCREEN_HEIGHT`           | `${screenHeight}`          |
 | [Screen Width](#screen-width)                       | `SCREEN_WIDTH`            | `${screenWidth}`           |
 | [Scroll Height](#scroll-height)                     | `SCROLL_HEIGHT`           | `${scrollHeight}`          |
 | [Scroll Width](#scroll-width)                       | `SCROLL_WIDTH`            | `${scrollWidth}`           |
@@ -1219,7 +1220,7 @@ Provides the total time from the time page has become visible to the time a ping
 
 #### Total Visible Time
 
-Provides the total time for which the element has met the `visiblitySpec`conditions at time this ping is sent.
+Provides the total time for which the element has met the `visibilitySpec`conditions at time this ping is sent.
 
 -   **platform variable**: N/A
 -   **amp-analytics variable**: `${totalVisibleTime}`

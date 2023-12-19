@@ -470,6 +470,7 @@ describes.realWin(
               'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
               'xyz': PURPOSE_CONSENT_STATE.REJECTED,
             },
+            'tcfPolicyVersion': undefined,
           });
         });
 
@@ -629,6 +630,7 @@ describes.realWin(
                   CONSENT_STRING_TYPE.TCF_V2,
                 [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '3~3.33.303',
               },
+              [STORAGE_KEY.VERSION]: 4,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -653,6 +655,7 @@ describes.realWin(
               true
             ),
             'purposeConsents': undefined,
+            'tcfPolicyVersion': undefined,
           });
         });
 
@@ -717,6 +720,7 @@ describes.realWin(
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
                   CONSENT_STRING_TYPE.TCF_V2,
               },
+              [STORAGE_KEY.VERSION]: 4,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -736,6 +740,7 @@ describes.realWin(
             'isDirty': undefined,
             'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
             'purposeConsents': undefined,
+            'tcfPolicyVersion': 4,
           });
         });
       });
@@ -785,6 +790,7 @@ describes.realWin(
             'isDirty': true,
             'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
             'purposeConsents': {'abc': PURPOSE_CONSENT_STATE.ACCEPTED},
+            'tcfPolicyVersion': undefined,
           });
         });
 
@@ -822,8 +828,50 @@ describes.realWin(
             'isDirty': true,
             'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
             'purposeConsents': undefined,
+            'tcfPolicyVersion': undefined,
           });
         });
+      });
+    });
+
+    describe('TCF Policy version', () => {
+      let ampConsent;
+
+      beforeEach(() => {
+        const defaultConfig = {
+          'consents': {
+            'ABC': {
+              'checkConsentHref': 'https://response1',
+            },
+          },
+        };
+        const consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+      });
+
+      const invalidTCFPolicyVersionValues = [NaN, 2.2, 4.1, Infinity];
+
+      invalidTCFPolicyVersionValues.forEach((invalidTCFPolicyVersionValue) => {
+        it(
+          'should error and return undefined on invalid tcfPolicyVersion test with: ' +
+            invalidTCFPolicyVersionValue,
+          () => {
+            const spy = env.sandbox.stub(user(), 'error');
+            const tcfPolicyVersion = ampConsent.validateTCFPolicyVersion_(
+              invalidTCFPolicyVersionValue
+            );
+            expect(spy.args[0][1]).to.match(
+              /CMP tcfPolicyVersion must be a valid number \(integer\)\./
+            );
+            expect(tcfPolicyVersion).to.be.equal(undefined);
+          }
+        );
+      });
+
+      it('should return the value on invalid tcfPolicyVersion test', () => {
+        const tcfPolicyVersion = ampConsent.validateTCFPolicyVersion_(4);
+        expect(tcfPolicyVersion).to.be.equal(4);
       });
     });
 

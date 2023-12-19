@@ -44,7 +44,7 @@ TEST(SupportedMediaQueryParserTest, InValidQuerySingleExpression) {
   EXPECT_EQ(r.second.second, 13 /* min is invalid expecting min-width etc. */);
 
   r = V("all and (min-width: 200px and max-width: 200px)");
-  // ------------------------------^  only single expression inside paranthesis.
+  // ------------------------------^  only single expression inside parenthesis.
   EXPECT_FALSE(r.first);
   EXPECT_EQ(r.second.second, 27 /* invalid second 'and' operator */);
 

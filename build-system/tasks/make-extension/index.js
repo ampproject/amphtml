@@ -358,7 +358,6 @@ async function makeExtension() {
   // @ts-ignore
   const templateDirs = objstr({
     shared: true,
-    bento: false,
     classic: true,
     css: !nocss,
     jss: !nojss,

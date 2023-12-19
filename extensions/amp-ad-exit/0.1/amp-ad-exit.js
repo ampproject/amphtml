@@ -14,7 +14,10 @@ import {Services} from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
+import {
+  AttributionReportingStatus,
+  isAttributionReportingAllowed,
+} from '#utils/privacy-sandbox-utils';
 
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
@@ -39,16 +42,6 @@ const TAG = 'amp-ad-exit';
  * }}
  */
 let NavigationTargetDef;
-
-/**
- * Indicates the status of the `attribution-reporting` API.
- * @enum
- */
-const AttributionReportingStatus = {
-  ATTRIBUTION_MACRO_PRESENT: 4,
-  ATTRIBUTION_DATA_PRESENT: 5,
-  ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 6,
-};
 
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */

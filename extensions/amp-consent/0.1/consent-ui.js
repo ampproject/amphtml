@@ -570,6 +570,7 @@ export class ConsentUI {
             'consentStateValue': getConsentStateValue(
               consentInfo['consentState']
             ),
+            'tcfPolicyVersion': consentInfo['tcfPolicyVersion'],
             'consentMetadata': consentInfo['consentMetadata'],
             'consentString': consentInfo['consentString'],
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',

@@ -10,6 +10,7 @@ import {useCallback, useEffect, useRef, useState} from '#preact';
  * @return {function(Element):void}
  */
 export function useIntersectionObserver(callback, ioOptions) {
+  /** @type {import('preact/hooks').MutableRef<import('#core/types/function/types').UnlistenCallback?>} */
   const unobserveRef = useRef(null);
   const refCb = useCallback(
     /** @param {Element} node */
