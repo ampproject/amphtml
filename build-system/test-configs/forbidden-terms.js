@@ -45,6 +45,12 @@ const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
     checkProse: true,
   },
+  'ampproject\\.org': {
+    message: 'Please use the the `cdn` property in src/config/urls.js',
+    allowlist: [
+      'validator/js/webui/serve-standalone.go'
+    ]
+  },
   'white[-\\s]*list': {
     message: 'Please use the term allowlist instead',
     checkProse: true,
