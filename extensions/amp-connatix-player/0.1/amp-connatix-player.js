@@ -99,6 +99,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.muted_ = true;
+
+    /** @private {?MutationObserver} */
+    this.mutationObserver_ = null;
   }
 
   /**
@@ -330,29 +333,32 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     // bind to amp consent and send consent info to the iframe content and propagate to player
     this.bindToAmpConsent_();
 
+    if (!this.mutationObserver_) {
+      const mutationObserverCallback = (mutationList) => {
+        for (const mutation of mutationList) {
+          if (
+            mutation.type === 'attributes' &&
+            mutation.attributeName === 'class'
+          ) {
+            this.sendCommand_(
+              mutation.target.classList.contains('i-amphtml-video-docked')
+                ? 'dock'
+                : 'undock'
+            );
+          }
+        }
+      };
+
+      this.mutationObserver_ = new MutationObserver(mutationObserverCallback);
+    }
+
     const mutationObserverConfig = {
       attributes: true,
       childList: false,
       subtree: false,
     };
 
-    const callback = (mutationList) => {
-      for (const mutation of mutationList) {
-        if (
-          mutation.type === 'attributes' &&
-          mutation.attributeName === 'class'
-        ) {
-          this.sendCommand_(
-            mutation.target.classList.contains('i-amphtml-video-docked')
-              ? 'dock'
-              : 'undock'
-          );
-        }
-      }
-    };
-
-    const observer = new MutationObserver(callback);
-    observer.observe(this.iframe_, mutationObserverConfig);
+    this.mutationObserver_.observe(this.iframe_, mutationObserverConfig);
 
     observeContentSize(this.element, this.onResized_);
     this.pauseHelper_.updatePlaying(true);
@@ -396,6 +402,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     unobserveContentSize(this.element, this.onResized_);
+    this.mutationObserver_.disconnect();
     this.pauseHelper_.updatePlaying(false);
 
     return true;
