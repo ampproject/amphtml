@@ -45,12 +45,6 @@ const forbiddenTermsGlobal = {
   'DO NOT SUBMIT': {
     checkProse: true,
   },
-  'ampproject\\.org': {
-    message: 'Please use the the `cdn` property in src/config/urls.js',
-    allowlist: [
-      'validator/js/webui/serve-standalone.go'
-    ]
-  },
   'white[-\\s]*list': {
     message: 'Please use the term allowlist instead',
     checkProse: true,
@@ -925,7 +919,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
-  '(cdn|3p)\\.ampproject\\.': {
+  '((cdn|3p)\\.ampproject\\.)|(ampproject\\.(org|net))': {
     message:
       'The CDN domain should typically not be hardcoded in source ' +
       'code. Use urls from src/config/urls.js instead.',
