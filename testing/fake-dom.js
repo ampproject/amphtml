@@ -328,8 +328,8 @@ class EventListeners {
         typeof captureOrOpts == 'boolean'
           ? captureOrOpts
           : typeof captureOrOpts == 'object'
-          ? captureOrOpts.capture || false
-          : false,
+            ? captureOrOpts.capture || false
+            : false,
       options: typeof captureOrOpts == 'object' ? captureOrOpts : null,
     };
   }

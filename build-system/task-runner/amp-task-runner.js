@@ -45,8 +45,8 @@ function getTime(start) {
   return mins !== 0
     ? `${mins}m ${secs}s`
     : secs != 0
-    ? `${secs}s`
-    : `${msecs}ms`;
+      ? `${secs}s`
+      : `${msecs}ms`;
 }
 
 /**

@@ -542,7 +542,7 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>changeToLayoutContainer</code></td>
-    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
+    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINER"</code> to allow <a href="../../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
   </tr>
   <tr>
     <td><code>refresh</code></td>
@@ -708,7 +708,7 @@ actions that apply to the whole document.
   <tr>
     <td><code>navigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
     <td>
-      <p>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener</code></a>.</p>
+      <p>Navigates current window to given URL, to the optional specified target if given (currently only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener</code></a>.</p>
       <p><strong>Caveat:</strong> Using normal <code>&lt;a&gt;</code> links is recommended wherever possible since <code>AMP.navigateTo</code> is not recognized by web crawlers.</p>
     </td>
   </tr>

@@ -98,8 +98,8 @@ module.exports = function (context) {
         property.type === 'Identifier'
           ? property.name
           : property.type === 'Literal'
-          ? property.value
-          : null;
+            ? property.value
+            : null;
 
       if (!name) {
         context.report({

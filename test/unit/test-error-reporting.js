@@ -227,6 +227,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
     expect(data.r).to.contain('http://localhost');
     expect(data.noAmp).to.equal('1');
     expect(data.args).to.be.undefined;
+    expect(data.cdn).to.equal('https://cdn.ampproject.org');
   });
 
   it('reportError with error and ignore stack', () => {

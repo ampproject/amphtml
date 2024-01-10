@@ -69,4 +69,3 @@ export class OwnersInterface {
    */
   requireLayout(element, opt_parentPriority) {}
 }
-/* eslint-enable no-unused-vars */

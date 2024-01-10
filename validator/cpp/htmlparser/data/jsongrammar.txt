@@ -128,7 +128,7 @@ DICT_KEY_BEGIN_QUOTE "\t\n\r " DICT_KEY_BEGIN_QUOTE;
 DICT "\t\n\r " DICT;
 DICT '}' POP DICT_END;
 DICT_KEY ':' DICT_VALUE DICT_KEY_END;
-# Ignore whitespace betwen key and colon.
+# Ignore whitespace between key and colon.
 DICT_KEY "\t\n\r " DICT_KEY;
 DICT_VALUE '"' STRING|PUSH|DICT_END_OR_SEPARATOR STRING_T;
 DICT_VALUE 't' TRUE_1|PUSH|DICT_END_OR_SEPARATOR TRUE_T;

@@ -129,8 +129,8 @@ function buildKeyframes(keyframesRule) {
       keyframeRule.keyText == 'from'
         ? 0
         : keyframeRule.keyText == 'to'
-        ? 1
-        : parseFloat(keyframeRule.keyText) / 100;
+          ? 1
+          : parseFloat(keyframeRule.keyText) / 100;
     const {style} = keyframeRule;
     for (let j = 0; j < style.length; j++) {
       const styleName = style[j];

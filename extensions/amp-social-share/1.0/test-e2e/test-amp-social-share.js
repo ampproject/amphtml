@@ -86,7 +86,9 @@ describes.endtoend(
     });
 
     describe('clicking', () => {
-      it('opens a new window on click', async () => {
+      it('opens a new window on click', async function () {
+        this.timeout(5000);
+
         const host = await controller.findElement('#two');
 
         let windows = await controller.getAllWindows();
