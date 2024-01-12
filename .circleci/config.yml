@@ -10,6 +10,7 @@ push_and_pr_builds: &push_and_pr_builds
     branches:
       ignore:
         - nightly
+        - /.*/ # TODO DO NOT MERGE
 
 push_builds_only: &push_builds_only
   filters:
@@ -24,6 +25,7 @@ release_builds_only: &release_builds_only
       only:
         - nightly
         - /^amp-release-.*$/
+        - /.*/ # TODO DO NOT MERGE
 
 pr_builds_only: &pr_builds_only
   filters:
@@ -480,7 +482,21 @@ jobs:
       - setup_vm
       - run:
           name: '⭐ amp release ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+          command: echo 1 # TODO DO NOT MERGE node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+      - teardown_vm
+  validator_wasm:
+    executor:
+      name: jdk-docker-2xlarge
+    steps:
+      - setup_vm
+      - run:
+          name: 'Install Validator Dependencies'
+          command: ./.circleci/install_validator_dependencies.sh
+      - run:
+          name: '⭐ Build Validator WASM Library'
+          command: |
+            cd validator/
+            bazel build cpp/engine/wasm:validator_js_bin
       - teardown_vm
   upload_release:
     executor:
@@ -489,7 +505,7 @@ jobs:
       - setup_vm
       - run:
           name: '⭐ Upload Release Artifacts ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
+          command: echo 1 # TODO DO NOT MERGE node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
           path: /tmp/release.tar.gz
       - teardown_vm
@@ -645,11 +661,16 @@ workflows:
           name: 'Initialize Repository'
           <<: *release_builds_only
       - amp_release:
-          name: '<< matrix.flavor >> << matrix.esm >>'
+          name: 'Build Flavor << matrix.flavor >> with --<< matrix.esm >>'
           matrix:
             parameters:
               flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
               esm: ['no-esm', 'esm']
+          <<: *release_builds_only
+          requires:
+            - 'Initialize Repository'
+      - validator_wasm:
+          name: 'Build Validator WASM Library'
           <<: *release_builds_only
           requires:
             - 'Initialize Repository'
@@ -658,6 +679,7 @@ workflows:
           <<: *release_builds_only
           requires:
             - amp_release
+            - 'Build Validator WASM Library'
           context:
             - release-build-uploader
       - trigger_promote:
