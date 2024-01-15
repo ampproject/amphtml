@@ -489,6 +489,7 @@ register('openadstream', openadstream);
 register('openx', openx);
 register('opinary', opinary);
 register('outbrain', outbrain);
+register('pixad', pixad);
 register('pixels', pixels);
 register('playstream', playstream);
 register('plista', plista);
