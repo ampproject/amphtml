@@ -198,6 +198,7 @@ import {openadstream} from '#ads/vendors/openadstream';
 import {openx} from '#ads/vendors/openx';
 import {opinary} from '#ads/vendors/opinary';
 import {outbrain} from '#ads/vendors/outbrain';
+import {pixad} from '#ads/vendors/pixad';
 import {pixels} from '#ads/vendors/pixels';
 import {playstream} from '#ads/vendors/playstream';
 import {plista} from '#ads/vendors/plista';

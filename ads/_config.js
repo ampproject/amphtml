@@ -989,6 +989,8 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'pixad': {},
+
   'pixels': {
     prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
     clientIdCookieName: '__AF',
