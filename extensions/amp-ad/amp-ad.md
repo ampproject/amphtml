@@ -420,6 +420,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Open AdStream (OAS)](../../ads/vendors/openadstream.md)
 -   [OpenX](../../ads/vendors/openx.md)
 -   [opinary](../../ads/vendors/opinary.md)
+-   [Pixad](../../ads/vendors/pixad.md)
 -   [Pixels](../../ads/vendors/pixels.md)
 -   [plista](../../ads/vendors/plista.md)
 -   [polymorphicAds](../../ads/vendors/polymorphicads.md)
