@@ -8,7 +8,7 @@
  * 4. channel (beta-percent|stable|lts)
  */
 
-const dedent = require('dedent');
+const {default: dedent} = require('dedent');
 const {action, base, channel, head, sha} = require('minimist')(
   process.argv.slice(2),
   {

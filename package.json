@@ -94,7 +94,7 @@
     "css-imports": "0.3.1",
     "css-what": "6.1.0",
     "cssnano": "6.0.3",
-    "dedent": "0.7.0",
+    "dedent": "1.5.1",
     "del": "6.0.0",
     "enzyme": "3.11.0",
     "enzyme-adapter-preact-pure": "4.1.0",
