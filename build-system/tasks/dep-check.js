@@ -3,7 +3,7 @@
 const depCheckConfig = require('../test-configs/dep-check-config');
 const esbuild = require('esbuild');
 const fs = require('fs-extra');
-const minimatch = require('minimatch');
+const {minimatch} = require('minimatch');
 const path = require('path');
 const {
   createCtrlcHandler,
