@@ -1,6 +1,6 @@
-# Pixad
+# AdMatic
 
-## Example of Pixad's model implementation
+## Example of AdMatic's model implementation
 
 ### Basic
 
@@ -23,7 +23,7 @@
     type="admatic"
     width="320"
     height="100"
-    data-ad-type-id="778130932"
+    data-ad-type-id="standard"
     data-ad-network="adm-pub-194162670389"
     data-ad-publisher="65943e194d11b285b6173588">
   </amp-ad>

@@ -10,7 +10,7 @@ export function admatic(global, data) {
     publisher: data['adNetwork'],
     adNetwork: data['adPublisher'],
     adTypeId: data['adTypeId'],
-    host: `static.cdn.admatic.com.tr`,
+    host: `static.cdn.pixad.com.tr`,
     prefix: `px`,
   };
 
