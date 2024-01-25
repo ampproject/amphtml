@@ -42,7 +42,7 @@ Note that `<amp-sticky-ad />` component requires the following script to be incl
 
 ## Configuration
 
-For details on the configuration semantics, see [AdMatic documentation](https://developer.admatic.com.tr/).
+For details on the configuration semantics, see [AdMatic documentation](https://www.admatic.com.tr/).
 
 ### Required parameters
 
