@@ -137,6 +137,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'admatic': {},
+
   'admixer': {
     renderStartImplemented: true,
     preconnect: ['https://inv-nets.admixer.net', 'https://cdn.admixer.net'],
