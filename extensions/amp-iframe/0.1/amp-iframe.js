@@ -155,6 +155,7 @@ export class AmpIframe extends AMP.BaseElement {
     userAssert(
       !(
         endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
+        // eslint-disable-next-line local/no-forbidden-terms
         endsWith(hostname, '.ampproject.org')
       ),
       'amp-iframe does not allow embedding of frames from ' +
