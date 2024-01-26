@@ -476,11 +476,12 @@ const mangleIdentifier = {
  */
 async function minify(code, options = {}) {
   /* eslint-disable local/camelcase */
+  /** @type {terser.MinifyOptions} */
   const terserOptions = {
     mangle: {
       properties: {
         regex: '_AMP_PRIVATE_$',
-        keep_quoted: /** @type {'strict'} */ ('strict'),
+        keep_quoted: 'strict',
       },
     },
     compress: {
