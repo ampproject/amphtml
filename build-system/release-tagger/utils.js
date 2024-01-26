@@ -3,7 +3,7 @@
  * GitHub API util functions.
  */
 
-const dedent = require('dedent');
+const {default: dedent} = require('dedent');
 const {graphql} = require('@octokit/graphql');
 const {Octokit} = require('@octokit/rest');
 
