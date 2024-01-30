@@ -28,7 +28,11 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {mutedOrUnmutedEvent, redispatch} from '../../../src/iframe-video';
+import {
+  addUnsafeAllowAutoplay,
+  mutedOrUnmutedEvent,
+  redispatch,
+} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
 import {
   VideoEvents_Enum,
@@ -321,6 +325,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // applyFillContent so that frame covers the entire component.
     applyFillContent(iframe, /* replacedContent */ true);
+    addUnsafeAllowAutoplay(iframe);
 
     // append child iframe for element
     element.appendChild(iframe);
