@@ -543,10 +543,11 @@
   },
   "top100": {
     "host": "https://kraken.rambler.ru",
-    "base": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.1&rn=_random_&tid=_client_id(top100_id)_&ct=amp",
-    "pageview": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.1&rn=_random_&tid=_client_id(top100_id)_&ct=amp&et=pv&url=_canonical_url_&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "base": "https://kraken.rambler.ru/cnt/v2/?project_id=!pid&request_id=_page_view_id_&version=2.0.0&top100_id=_client_id(top100_id)_&counter_type=amp",
+    "pageview": "https://kraken.rambler.ru/cnt/v2/?project_id=!pid&request_id=_page_view_id_&version=2.0.0&top100_id=_client_id(top100_id)_&counter_type=amp&event_type=base&event_name=page_view&session_id=_random_&url=_canonical_url_&event_id=_random_&meta={language:${browserLanguage},title:_title,referer:_document_referrer_,screen_size:_screen_width_x_screen_height_,color_depth:_screen_color_depth_-bit,browser_size:_screen_width_x_screen_height_,timezone:_timezone_}",
     "_screenData": "&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
-    "_pageData": "&url=_canonical_url_&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
+    "_pageData": "&session_id=_page_view_id_&request_id=_page_view_id_&url=_canonical_url_&event_id=_random_",
+    "_metaData": "language:_browser_language_,title:_title,referer:_document_referrer_,screen_size:_screen_width_x_screen_height_,color_depth:_screen_color_depth_-bit,browser_size:_screen_width_x_screen_height_,timezone:_timezone_"
   },
   "topmailru": {
     "pageView": "https://top-fwz1.mail.ru/counter?js=13;id=!id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=!start;gender=!gender;age=!age;pid=!pid;userid=!userid;device=!device;params=!params;_=_random_;title=_title_",

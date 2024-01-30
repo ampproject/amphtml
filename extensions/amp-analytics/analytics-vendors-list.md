@@ -622,7 +622,7 @@ Adds support for Tealium Collect. More details for adding Tealium Collect suppor
 
 Type attribute value: `top100`
 
-Adds support for Rambler/TOP-100. Configuration details can be found at [top100.rambler.ru](https://top100.rambler.ru).
+Adds support for Rambler/TOP-100. Configuration details can be found at [stat-sberads.gitbook.io/documentation](https://stat-sberads.gitbook.io/documentation/nachalo-raboty/ustanovka-schyotchika/ustanovka-v-amp-stranicy).
 
 ### Top.Mail.Ru
 
