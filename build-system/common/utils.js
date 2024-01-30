@@ -36,7 +36,7 @@ function getExperimentConfig(experiment) {
     config?.name &&
     config?.define_experiment_constant &&
     config?.expiration_date_utc &&
-    new Number(new Date(config.expiration_date_utc)) >= Date.now();
+    Number(new Date(config.expiration_date_utc)) >= Date.now();
   return valid ? config : null;
 }
 

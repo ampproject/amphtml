@@ -137,6 +137,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'admatic': {},
+
   'admixer': {
     renderStartImplemented: true,
     preconnect: ['https://inv-nets.admixer.net', 'https://cdn.admixer.net'],
@@ -988,6 +990,8 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://odb.outbrain.com'],
     consentHandlingOverride: true,
   },
+
+  'pixad': {},
 
   'pixels': {
     prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
