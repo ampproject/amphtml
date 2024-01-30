@@ -7,9 +7,9 @@
   },
   "requests": {
     "host": "https://kraken.rambler.ru",
-    "base": "${host}/cnt/v2/?project_id=${pid}&version=${version}&top100_id=${tid}&counter_type=amp",
+    "base": "${host}/cnt/v2/?project_id=${pid}&version=${version}&top100_id=${top100_id}&counter_type=amp",
     "pageview": "${base}&event_type=base&event_name=page_view${_pageData}&meta={${_metaData}}",
-    "_pageData": "&session_id=${rid}&request_id=${rid}&url=${canonicalUrl}&event_id=${random}",
+    "_pageData": "&session_id=${request_id}&request_id=${request_id}&url=${canonicalUrl}&event_id=${random}",
     "_metaData": "language:${browserLanguage},title:${title},referer:${documentReferrer},screen_size:${screenWidth}x${screenHeight},color_depth:${screenColorDepth}-bit,browser_size:${scrollWidth}x${scrollHeight},timezone:${timezone}"
   },
   "triggers": {
