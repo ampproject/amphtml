@@ -183,6 +183,14 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
           this.isFullscreen_ = !this.isFullscreen_;
           break;
         }
+        case 'cnxVolumeChanged': {
+          const newVolume = dataJSON['args'];
+
+          this.muted_ = newVolume === 0;
+          dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
+
+          break;
+        }
       }
 
       redispatch(this.element, dataJSON['func'].toString(), {
@@ -437,15 +445,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   mute() {
-    this.muted_ = true;
-    dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     this.sendCommand_('mute');
   }
 
   /** @override */
   unmute() {
-    this.muted_ = false;
-    dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     this.sendCommand_('unmute');
   }
 
