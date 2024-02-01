@@ -22,7 +22,7 @@ FAIL
 |        <amp-story-page id="page-1" title="Lorem ipsum dolor sit amet">
 |          <amp-story-audio-sticker sticker="audio-cloud"></amp-story-audio-sticker>
 >>         ^~~~~~~~~
-amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker-no-grid-layer.html:22:8 The parent tag of tag 'amp-story-audio-sticker' is 'amp-story-page', but it can only be 'amp-story-grid-layer'. (see https://amp.dev/documentation/components/amp-story-audio-sticker)
+amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker-no-grid-layer.html:22:8 The tag 'amp-story-audio-sticker' may only appear as a descendant of tag 'amp-story-grid-layer'. (see https://amp.dev/documentation/components/amp-story-audio-sticker)
 >>         ^~~~~~~~~
 amp-story-audio-sticker/0.1/test/validator-amp-story-audio-sticker-no-grid-layer.html:22:8 Tag 'amp-story-audio-sticker' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-animation', 'amp-story-auto-analytics', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment', 'amp-story-page-outlink', 'amp-story-shopping-attachment']. (see https://amp.dev/documentation/components/amp-story)
 |        </amp-story-page>
