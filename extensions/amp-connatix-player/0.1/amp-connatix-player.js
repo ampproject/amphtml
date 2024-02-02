@@ -28,7 +28,11 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {mutedOrUnmutedEvent, redispatch} from '../../../src/iframe-video';
+import {
+  addUnsafeAllowAutoplay,
+  mutedOrUnmutedEvent,
+  redispatch,
+} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
 import {
   VideoEvents_Enum,
@@ -179,6 +183,14 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
           this.isFullscreen_ = !this.isFullscreen_;
           break;
         }
+        case 'cnxVolumeChanged': {
+          const newVolume = dataJSON['args'];
+
+          this.muted_ = newVolume === 0;
+          dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
+
+          break;
+        }
       }
 
       redispatch(this.element, dataJSON['func'].toString(), {
@@ -321,6 +333,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // applyFillContent so that frame covers the entire component.
     applyFillContent(iframe, /* replacedContent */ true);
+    addUnsafeAllowAutoplay(iframe);
 
     // append child iframe for element
     element.appendChild(iframe);
@@ -432,15 +445,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   mute() {
-    this.muted_ = true;
-    dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     this.sendCommand_('mute');
   }
 
   /** @override */
   unmute() {
-    this.muted_ = false;
-    dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     this.sendCommand_('unmute');
   }
 
