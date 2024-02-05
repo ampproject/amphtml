@@ -644,9 +644,9 @@ struct ParsedReferencePoint {
 class ParsedReferencePoints {
  public:
   ParsedReferencePoints() : parent_(nullptr) {}
-  ParsedReferencePoints(
-      const TagSpec& parent,
-      const unordered_map<std::string, int32_t>& tag_spec_ids_by_tag_spec_name)
+  ParsedReferencePoints(const TagSpec& parent,
+                        const absl::flat_hash_map<std::string, int32_t>&
+                            tag_spec_ids_by_tag_spec_name)
       : parent_(&parent) {
     for (const ReferencePoint& p : parent.reference_points()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(p.tag_spec_name());
@@ -1041,11 +1041,11 @@ RecordValidated ShouldRecordTagspecValidated(
 // which is unique within its context, the ParsedValidatorRules.
 class ParsedTagSpec {
  public:
-  ParsedTagSpec(
-      ParsedAttrSpecs* parsed_attr_specs,
-      const unordered_map<std::string, int32_t>& tag_spec_ids_by_tag_spec_name,
-      RecordValidated should_record_tagspec_validated, const TagSpec* spec,
-      int32_t id)
+  ParsedTagSpec(ParsedAttrSpecs* parsed_attr_specs,
+                const absl::flat_hash_map<std::string, int32_t>&
+                    tag_spec_ids_by_tag_spec_name,
+                RecordValidated should_record_tagspec_validated,
+                const TagSpec* spec, int32_t id)
       : spec_(spec),
         id_(id),
         reference_points_(*spec, tag_spec_ids_by_tag_spec_name),
@@ -1192,7 +1192,7 @@ class ParsedTagSpec {
 
   // Whether or not the tag should be recorded via
   // Context->RecordTagspecValidated if it was validated
-  // successfully. For performance, this is only done for tags that
+  // successfullly. For performance, this is only done for tags that
   // are mandatory, unique, or possibly required by some other tag.
   RecordValidated ShouldRecordTagspecValidated() const {
     return should_record_tagspec_validated_;
@@ -1218,7 +1218,7 @@ class ParsedTagSpec {
 
   const set<int32_t>& implicit_attrspecs() const { return implicit_attrspecs_; }
 
-  const unordered_map<std::string, int32_t>& attr_ids_by_name() const {
+  const absl::flat_hash_map<std::string, int32_t>& attr_ids_by_name() const {
     return attr_ids_by_name_;
   }
 
@@ -1240,7 +1240,7 @@ class ParsedTagSpec {
   bool is_reference_point_;
   bool is_type_json_ = false;
   bool contains_url_ = false;
-  unordered_map<std::string, int32_t> attr_ids_by_name_;
+  absl::flat_hash_map<std::string, int32_t> attr_ids_by_name_;
   vector<TypeIdentifier> disabled_by_;
   vector<TypeIdentifier> enabled_by_;
   vector<int32_t> mandatory_attr_ids_;
@@ -1284,7 +1284,7 @@ std::string TagSpecUrl(const TagSpec& spec) {
     return StrCat(extension_spec_url_prefix, spec.extension_spec().name());
   if (spec.requires_extension_size() > 0)
     // Return the first |requires_extension|, which should be the most
-    // representative.
+    // representitive.
     return StrCat(extension_spec_url_prefix, spec.requires_extension(0));
 
   return "";
@@ -2476,7 +2476,7 @@ class Context {
     if (!tag_result.best_match_tag_spec) return;
     const ParsedTagSpec* parsed_tag_spec = tag_result.best_match_tag_spec;
     if (!parsed_tag_spec->AttrsCanSatisfyExtension()) return;
-    const unordered_map<std::string, int32_t>& attr_ids_by_name =
+    const absl::flat_hash_map<std::string, int32_t>& attr_ids_by_name =
         parsed_tag_spec->attr_ids_by_name();
     ExtensionsContext* extensions_ctx = mutable_extensions();
     for (const ParsedHtmlTagAttr& attr : encountered_tag.Attributes()) {
@@ -2834,11 +2834,11 @@ class InvalidRuleVisitor : public htmlparser::css::RuleVisitor {
 class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
  public:
   InvalidDeclVisitor(const ParsedDocCssSpec& css_spec, Context* context,
-                     const std::string& tag_descriptive_name,
+                     const std::string& tag_decriptive_name,
                      ValidationResult* result)
       : css_spec_(css_spec),
         context_(context),
-        tag_descriptive_name_(tag_descriptive_name),
+        tag_descriptive_name_(tag_decriptive_name),
         result_(result) {}
 
   void VisitDeclaration(
@@ -4412,7 +4412,7 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
   set<std::string_view> mandatory_anyofs_seen;
   vector<const ParsedAttrTriggerSpec*> parsed_trigger_specs;
   set<int32_t> attrspecs_validated;
-  const unordered_map<std::string, int32_t>& attr_ids_by_name =
+  const absl::flat_hash_map<std::string, int32_t>& attr_ids_by_name =
       parsed_tag_spec.attr_ids_by_name();
 
   for (const ParsedHtmlTagAttr& attr : encountered_tag.Attributes()) {
@@ -4717,7 +4717,7 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
   // |tag_spec_names_to_track| to identify those tagspecs that are
   // referenced by others via "also_requires_tag".  The ParsedTagSpec
   // constructor completes this translation to ids.
-  unordered_map<std::string, int32_t> tag_spec_ids_by_tag_spec_name;
+  absl::flat_hash_map<std::string, int32_t> tag_spec_ids_by_tag_spec_name;
   unordered_set<std::string> tag_spec_names_to_track;
   for (int ii = 0; ii < rules_.tags_size(); ++ii) {
     const TagSpec& tag = rules_.tags(ii);
@@ -5622,7 +5622,7 @@ void ReferencePointMatcher::RecordMatch(const ParsedTagSpec& reference_point) {
 
 void ReferencePointMatcher::ExitParentTag(const Context& context,
                                           ValidationResult* result) const {
-  absl::node_hash_map<int32_t, int32_t> reference_point_by_count;
+  absl::flat_hash_map<int32_t, int32_t> reference_point_by_count;
   for (int32_t r : reference_points_matched_) ++reference_point_by_count[r];
   for (const ParsedReferencePoint& p : *parsed_reference_points_) {
     if (p.point->mandatory() && reference_point_by_count.find(p.tag_spec_id) ==
