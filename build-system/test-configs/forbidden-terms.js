@@ -919,7 +919,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
-  '((cdn|3p)\\.ampproject\\.)|(ampproject\\.(org|net))': {
+  'ampproject\\.': {
     message:
       'The CDN domain should typically not be hardcoded in source ' +
       'code. Use urls from src/config/urls.js instead.',

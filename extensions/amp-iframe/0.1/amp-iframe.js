@@ -159,6 +159,7 @@ export class AmpIframe extends AMP.BaseElement {
         endsWith(hostname, '.ampproject.org')
       ),
       'amp-iframe does not allow embedding of frames from ' +
+        // eslint-disable-next-line local/no-forbidden-terms
         'ampproject.*: %s',
       src
     );
