@@ -25,8 +25,10 @@ const TAG = 'amp-access-server-jwt';
 /** @const {number} */
 const AUTHORIZATION_TIMEOUT = 3000;
 
+/* eslint-disable local/no-forbidden-terms */
 /** @const {string} */
 const AMP_AUD = 'ampproject.org';
+/* eslint-enable local/no-forbidden-terms */
 
 /**
  * This class implements server-side authorization protocol with JWT. In this

@@ -47,6 +47,8 @@ export function getA4ARegistry() {
  * @type {!{[key: string]: string}}
  */
 export const signingServerURLs = {
+  /* eslint-disable local/no-forbidden-terms */
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+  /* eslint-enable local/no-forbidden-terms */
 };
