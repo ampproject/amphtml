@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.4.6
-  codecov: codecov/codecov@4.0.0
+  codecov: codecov/codecov@4.0.1
   node: circleci/node@5.2.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -61,7 +61,7 @@ executors:
     resource_class: xlarge
   jdk-docker-2xlarge:
     docker:
-      - image: cimg/openjdk:21.0-node
+      - image: cimg/openjdk:21.0.2-node
     resource_class: 2xlarge
   macos-medium:
     macos:
