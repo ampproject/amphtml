@@ -78,14 +78,12 @@ function renderTemplate(opt_params = {}) {
     TopLevelWrap(ProxyForm({htmlEnvelopePrefix})),
     TopLevelWrap(FileList({basepath, htmlEnvelopePrefix, fileSet})),
 
-    /* eslint-disable local/no-forbidden-terms */
     html`
       <div class="center">
         Built with 💙 by
-        <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
+        <a href="https://amp.dev" class="underlined">the AMP Project</a>.
       </div>
     `,
-    /* eslint-enable local/no-forbidden-terms */
   ]);
 
   const docWithoutExtensions = AmpDoc({canonical: basepath, css, body});
