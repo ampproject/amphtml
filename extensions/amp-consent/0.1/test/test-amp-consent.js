@@ -911,7 +911,7 @@ describes.realWin(
 
       it('should remove invalid consentStringType', () => {
         const spy = env.sandbox.stub(user(), 'error');
-        const responseMetadata = {'consentStringType': 4};
+        const responseMetadata = {'consentStringType': 400};
         expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
           constructMetadata()
         );
