@@ -72,8 +72,8 @@ commands:
   checkout_repo:
     parameters:
       save-git-cache:
+        description: 'True when this step should save the .git directory to the cache'
         type: boolean
-        default: false
     steps:
       - restore_cache:
           name: 'Restore Git Cache'
@@ -93,12 +93,37 @@ commands:
                 key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
                 paths:
                   - .git
-  setup_node_environment:
+  setup_vm:
     parameters:
+      is-initializing-job:
+        description: 'True when this is an initializing job, which would perform several caching and workspace setup steps'
+        type: boolean
+        default: false
       node-version:
         type: string
         default: '18' # TODO(wg-infra): restore this to 'lts' once #39510 is fixed.
     steps:
+      - unless:
+          condition: << parameters.is-initializing-job >>
+          steps:
+            - checkout_repo:
+                save-git-cache: false
+            - attach_workspace:
+                at: /tmp
+            - run:
+                name: 'Configure Temporary Workspace'
+                command: |
+                  mv /tmp/workspace /tmp/restored-workspace
+                  mkdir -p /tmp/workspace
+            - run:
+                name: 'Maybe Gracefully Halt'
+                command: /tmp/restored-workspace/maybe_gracefully_halt.sh
+            - run:
+                name: 'Configure Development Environment'
+                command: |
+                  ./.circleci/fetch_merge_commit.sh
+                  ./.circleci/restore_build_output.sh
+                  cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - restore_cache:
           name: 'Restore nvm Cache'
           keys:
@@ -107,41 +132,31 @@ commands:
           name: 'Create .nvmrc file'
           command: echo << parameters.node-version >> > .nvmrc
       - node/install
-      - run:
-          name: 'Create nvm Cache Checksum File'
-          command: node -v > ~/.node-version
-      - save_cache:
-          name: 'Save nvm Cache'
-          key: nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-{{ checksum "~/.node-version" }}
-          paths:
-            - ~/.nvm/.cache
-      - node/install-packages:
-          with-cache: false
-  setup_vm:
-    parameters:
-      save-git-cache:
-        type: boolean
-        default: false
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: 'Configure Temporary Workspace'
-          command: |
-            mv /tmp/workspace /tmp/restored-workspace
-            mkdir -p /tmp/workspace
-      - run:
-          name: 'Maybe Gracefully Halt'
-          command: /tmp/restored-workspace/maybe_gracefully_halt.sh
-      - checkout_repo:
-          save-git-cache: << parameters.save-git-cache >>
-      - run:
-          name: 'Configure Development Environment'
-          command: |
-            ./.circleci/fetch_merge_commit.sh
-            ./.circleci/restore_build_output.sh
-            cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
-      - setup_node_environment
+      - when:
+          condition: << parameters.is-initializing-job >>
+          steps:
+            - run:
+                name: 'Create nvm Cache Checksum File'
+                command: node -v > ~/.node-version
+            - save_cache:
+                name: 'Save nvm Cache'
+                key: nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-{{ checksum "~/.node-version" }}
+                paths:
+                  - ~/.nvm/.cache
+      - restore_cache:
+          name: 'Restore node_modules/ Cache'
+          keys:
+            - node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
+      - when:
+          condition: << parameters.is-initializing-job >>
+          steps:
+            - run:
+                name: 'Install npm Packages'
+                command: if [[ ! -d node_modules/ ]]; then npm ci; fi
+            - save_cache:
+                name: 'Save node_modules/ Cache'
+                key: node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
+                paths: node_modules/
   teardown_vm:
     steps:
       - persist_to_workspace:
@@ -198,7 +213,7 @@ commands:
 jobs:
   initialize_repository:
     executor:
-      name: base-docker-small
+      name: node-docker-medium
     steps:
       - checkout_repo:
           save-git-cache: true
@@ -211,6 +226,8 @@ jobs:
       - run:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
+      - setup_vm:
+          is-initializing-job: true
       - teardown_vm
   initialize_mac_os:
     executor:
@@ -218,6 +235,8 @@ jobs:
     steps:
       - checkout_repo:
           save-git-cache: true
+      - setup_vm:
+          is-initializing-job: true
   checks:
     executor:
       name: node-docker-medium
