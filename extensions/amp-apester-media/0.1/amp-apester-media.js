@@ -30,6 +30,7 @@ import {dev, user, userAssert} from '#utils/log';
 import {handleAds} from './monetization';
 import {
   extractTags,
+  getOperatingSystem,
   getPlatform,
   registerEvent,
   setFullscreenOff,
@@ -188,6 +189,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     const queryParams = {};
     queryParams['renderer'] = false;
     queryParams['platform'] = getPlatform();
+    queryParams['os'] = getOperatingSystem();
     if (inative) {
       if (idOrToken) {
         suffix = `/inatives/${idOrToken}`;

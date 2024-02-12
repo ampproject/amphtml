@@ -3,6 +3,11 @@ import {getValueForExpr} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {
+  constructStaticAniviewAd,
+  getCompanionVideoAdSize,
+} from '../ads-constructor';
+
 /**
  * @param {!JsonObject} media
  * @param {!AmpElement} apesterElement
@@ -53,14 +58,14 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
     }
     case 'aniview': {
       const {playerOptions = {}} = videoSettings;
-      if (!playerOptions.aniviewChannelId) {
+      if (!playerOptions.aniviewPlayerId) {
         return;
       }
-      addCompanionAvElement(
-        playerOptions,
-        position,
+      constructStaticAniviewAd(
         apesterElement,
-        consentObj
+        playerOptions.aniviewPlayerId,
+        consentObj,
+        position === 'above'
       );
       break;
     }
@@ -87,53 +92,6 @@ function getCompanionPosition(video) {
     return 'floating';
   }
   return null;
-}
-
-/**
- * @param {!JsonObject} playerOptions
- * @param {string} position
- * @param {!AmpElement} apesterElement
- * @param {!JsonObject} consentObj
- */
-function addCompanionAvElement(
-  playerOptions,
-  position,
-  apesterElement,
-  consentObj
-) {
-  const size = getCompanionVideoAdSize(apesterElement);
-  const ampAvAd = createElementWithAttributes(
-    /** @type {!Document} */ (apesterElement.ownerDocument),
-    'amp-iframe',
-    {
-      'scrolling': 'no',
-      'id': 'amp-iframe',
-      'title': 'Ads',
-      'layout': 'responsive',
-      'sandbox': 'allow-scripts allow-same-origin allow-popups',
-      'allowfullscreen': 'false',
-      'frameborder': '0',
-      'width': size.width,
-      'height': size.height,
-      'src': `https://player.avplayer.com/amp/ampiframe.html?AV_TAGID=${playerOptions.aniviewPlayerId}&AV_PUBLISHERID=5fabb425e5d4cb4bbc0ca7e4`,
-    }
-  );
-
-  if (consentObj['gdpr']) {
-    ampAvAd['data-av_gdpr'] = consentObj['gdpr'];
-    ampAvAd['data-av_consent'] = consentObj['user_consent'];
-  }
-
-  ampAvAd.classList.add('i-amphtml-amp-apester-companion');
-
-  const relativeElement =
-    position === 'below' ? apesterElement.nextSibling : apesterElement;
-  apesterElement.parentNode.insertBefore(ampAvAd, relativeElement);
-
-  Services.mutatorForDoc(apesterElement).requestChangeSize(
-    ampAvAd,
-    size.height
-  );
 }
 
 /**
@@ -172,17 +130,6 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     ampBladeAd,
     size.height
   );
-}
-
-/**
- * @param {!AmpElement} apesterElement
- * @return {{height: number, width: number}}
- */
-export function getCompanionVideoAdSize(apesterElement) {
-  const adWidth = apesterElement./*REVIEW*/ clientWidth;
-  const adRatio = 0.6;
-  const adHeight = Math.ceil(adWidth * adRatio);
-  return {width: adWidth, height: adHeight};
 }
 
 /**

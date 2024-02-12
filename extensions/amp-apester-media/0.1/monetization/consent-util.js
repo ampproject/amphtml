@@ -9,6 +9,22 @@ import {
 
 const TAG = 'amp-apester-media';
 
+export const PLACAMENT_POSITIONS = {
+  above: 'co_above',
+  below: 'co_below',
+  bottom: 'bottom',
+  'in_unit': 'in_unit',
+};
+
+export const AD_TYPES = {
+  display: 'display',
+  video: 'video',
+};
+
+export const defaultBannerSizes = [[300, 250]];
+
+export const defaultRefreshTime = 30;
+
 const AWAIT_TIME_OUT_FOR_RESPONSE = 3000;
 
 const awaitPromiseTimeout = () => {

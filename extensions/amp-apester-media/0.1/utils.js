@@ -65,6 +65,23 @@ function isMobileDevice() {
 }
 
 /**
+ * Gets the user os.
+ * @return {string}
+ */
+export function getOperatingSystem() {
+  const {userAgent} = navigator;
+  if (/android/i.test(userAgent)) {
+    return 'android';
+  }
+
+  if (/iPad|iPhone|iPod|iOS/.test(userAgent) && !window.MSStream) {
+    return 'ios';
+  }
+
+  return 'other';
+}
+
+/**
  * Gets the user platform.
  * @return {string}
  */
