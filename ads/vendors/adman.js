@@ -6,7 +6,8 @@ import {validateData} from '#3p/3p';
  */
 export function adman(global, data) {
   validateData(data, ['ws', 'host'], []);
-  const {host, s, ws} = data;
+  const {host, ws} = data;
+  const s = data?.s;
   const script = global.document.createElement('script');
   script.src = 'https://static.adman.gr/adman.js';
   global.document.body.appendChild(script);
@@ -23,6 +24,8 @@ export function adman(global, data) {
   }
   script.setAttribute('data-ws', ws);
   script.setAttribute('data-h', host);
-  script.setAttribute('data-s', s);
+  if (s) {
+    script.setAttribute('data-s', s);
+  }
   script.setAttribute('data-tech', 'amp');
 }
