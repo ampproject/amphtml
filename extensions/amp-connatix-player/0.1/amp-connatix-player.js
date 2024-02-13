@@ -8,6 +8,10 @@ import {
   getDataParamsFromAttributes,
   removeElement,
 } from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+} from '#core/dom/fullscreen';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
@@ -20,7 +24,7 @@ import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData} from '#utils/event-helper';
-import {userAssert} from '#utils/log';
+import {dev, userAssert} from '#utils/log';
 
 import {
   getConsentMetadata,
@@ -493,6 +497,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       this.sendCommand_('toggleFullscreen', true);
     } else {
       fullscreenEnter(dev().assertElement(this.iframe_));
+      this.isFullscreen_ = true;
       this.sendCommand_('updateFullscreenUi', true);
     }
   }
@@ -506,6 +511,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       this.sendCommand_('toggleFullscreen', false);
     } else {
       fullscreenExit(dev().assertElement(this.iframe_));
+      this.isFullscreen_ = false;
       this.sendCommand_('updateFullscreenUi', false);
     }
   }
