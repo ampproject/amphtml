@@ -191,8 +191,8 @@ export class PaginationButtons {
       win
     );
 
-    this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
+    this.forwardButton_.element.classList.add('next-container');
 
     this.initializeListeners_();
 
