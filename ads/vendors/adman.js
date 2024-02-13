@@ -5,8 +5,8 @@ import {validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function adman(global, data) {
-  validateData(data, ['ws', 'host'], []);
-  const {host, s, ws} = data;
+  validateData(data, ['ws', 's', 'host'], []);
+  const {host, ws, s} = data;
   const script = global.document.createElement('script');
   script.src = 'https://static.adman.gr/adman.js';
   global.document.body.appendChild(script);
