@@ -1147,6 +1147,16 @@ export class AmpList extends AMP.BaseElement {
         this.addElementsToContainer_(elements, container);
       }
 
+      // For amp-list embedded in the amp-story-page-attachment, because the attachment is initially in
+      // nodisplay mode, the layoutCallback of all amp-img elements are not called at all, even after
+      // the attachment is opened and amp-list fetches results and inserted built amp-img(from templates)
+      // into DOM. Force call layoutCallback to render images.
+      if (this.element.closest('amp-story-page-attachment')) {
+        this.container_.querySelectorAll('amp-img').forEach((element) => {
+          element.getImpl().then((impl) => impl.layoutCallback());
+        });
+      }
+
       const event = createCustomEvent(
         this.win,
         AmpEvents_Enum.DOM_UPDATE,
