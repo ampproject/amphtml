@@ -195,6 +195,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
           } else {
             this.fullscreenEnter();
           }
+          break;
         }
         case 'cnxVolumeChanged': {
           const newVolume = dataJSON['args'];
