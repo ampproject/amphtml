@@ -548,3 +548,4 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Yahoo Native Ads](../../ads/vendors/yahoonativeads.md)
 -   [Zen](../../ads/vendors/zen.md)
 -   [ZergNet](../../ads/vendors/zergnet.md)
+-   [Momagic](../../ads/vendors/momagic.md)
