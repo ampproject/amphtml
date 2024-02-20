@@ -49,7 +49,7 @@ const STORY_POSITION_ENUM = {
 };
 
 /** @const @type {!Array<string>} */
-const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
+const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com']; // eslint-disable-line local/no-forbidden-terms
 
 /** @const @type {!Array<string>} */
 const SANDBOX_MIN_LIST = ['allow-top-navigation'];
@@ -1142,8 +1142,8 @@ export class AmpStoryPlayer {
       story.distance === 0
         ? STORY_POSITION_ENUM.CURRENT
         : story.idx > this.currentIdx_
-        ? STORY_POSITION_ENUM.NEXT
-        : STORY_POSITION_ENUM.PREVIOUS;
+          ? STORY_POSITION_ENUM.NEXT
+          : STORY_POSITION_ENUM.PREVIOUS;
 
     requestAnimationFrame(() => {
       const {iframe} = story;
