@@ -101,7 +101,7 @@ commands:
         default: false
       node-version:
         type: string
-        default: 'lts/*'
+        default: '20.11.0'
     steps:
       - unless:
           condition: << parameters.is-initializing-job >>
