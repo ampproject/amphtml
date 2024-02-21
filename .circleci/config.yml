@@ -11,27 +11,12 @@ push_and_pr_builds: &push_and_pr_builds
       ignore:
         - nightly
 
-push_builds_only: &push_builds_only
-  filters:
-    branches:
-      only:
-        - main
-        - /^amp-release-.*$/
-
 release_builds_only: &release_builds_only
   filters:
     branches:
       only:
         - nightly
         - /^amp-release-.*$/
-
-pr_builds_only: &pr_builds_only
-  filters:
-    branches:
-      ignore:
-        - main
-        - /^amp-release-.*$/
-        - nightly
 
 experiment_job: &experiment_job
   parameters:
@@ -72,7 +57,7 @@ commands:
   checkout_repo:
     steps:
       - restore_cache:
-          name: 'Restore Git Cache'
+          name: '♻️ Restore Git Cache'
           keys:
             - git-cache-{{ arch }}-v3-main-{{ .Revision }}
             - git-cache-{{ arch }}-v3-main-
@@ -83,10 +68,10 @@ commands:
             equal: ['main', << pipeline.git.branch >>]
           steps:
             - run:
-                name: 'Garbage Collection for Git'
+                name: '🗜️ Garbage Collection for Git'
                 command: git gc --auto
             - save_cache:
-                name: 'Save Git Cache'
+                name: '💾 Save Git Cache'
                 key: git-cache-{{ arch }}-v3-main-{{ .Revision }}
                 paths:
                   - .git
@@ -107,65 +92,66 @@ commands:
             - attach_workspace:
                 at: /tmp
             - run:
-                name: 'Configure Temporary Workspace'
+                name: '⚙️ Configure Temporary Workspace'
                 command: |
                   mv /tmp/workspace /tmp/restored-workspace
                   mkdir -p /tmp/workspace
             - run:
-                name: 'Maybe Gracefully Halt'
+                name: '❓ Maybe Gracefully Halt'
                 command: /tmp/restored-workspace/maybe_gracefully_halt.sh
             - run:
-                name: 'Configure Development Environment'
+                name: '⚙️ Configure Development Environment'
                 command: |
                   ./.circleci/fetch_merge_commit.sh
                   ./.circleci/restore_build_output.sh
                   cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - restore_cache:
-          name: 'Restore nvm Cache'
+          name: '♻️ Restore nvm Cache'
           keys:
             - nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-
       - run:
-          name: 'Create .nvmrc file'
+          name: '♻️ Create .nvmrc file'
           command: echo << parameters.node-version >> > .nvmrc
       - node/install
       - when:
           condition: << parameters.is-initializing-job >>
           steps:
             - run:
-                name: 'Create nvm Cache Checksum File'
+                name: '⚙️ Create nvm Cache Checksum File'
                 command: node -v > ~/.node-version
             - save_cache:
-                name: 'Save nvm Cache'
+                name: '💾 Save nvm Cache'
                 key: nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-{{ checksum "~/.node-version" }}
                 paths:
                   - ~/.nvm/.cache
       - restore_cache:
-          name: 'Restore node_modules/ Cache'
+          name: '♻️ Restore node_modules/ Cache'
           keys:
             - node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
       - when:
           condition: << parameters.is-initializing-job >>
           steps:
             - run:
-                name: 'Install npm Packages'
+                name: '💿 Install npm Packages'
                 command: if [[ ! -d node_modules/ ]]; then npm ci; fi
             - save_cache:
-                name: 'Save node_modules/ Cache'
+                name: '💾 Save node_modules/ Cache'
                 key: node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
                 paths: node_modules/
   teardown_vm:
     steps:
       - persist_to_workspace:
+          name: '📁 Persist Temporary Workspace'
           root: /tmp
           paths:
             - workspace
   install_chrome:
     steps:
       - run:
-          name: 'Get Pinned Chrome Version'
+          name: '⚙️ Get Pinned Chrome Version'
           command: ./.circleci/get_pinned_chrome_version.sh
       - run:
-          name: 'Update list of available apt packages'
+          name: '💿 Update list of available apt packages'
           command: sudo apt update
       - browser-tools/install-chrome:
           # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
@@ -177,22 +163,22 @@ commands:
   install_edge:
     steps:
       - run:
-          name: 'Install Microsoft Edge'
+          name: '💿 Install Microsoft Edge'
           command: ./.circleci/install_microsoft_edge.sh
   enable_safari_automation:
     steps:
       - run:
-          name: 'Enable Safari Automation'
+          name: '⚙️ Enable Safari Automation'
           command: sudo /usr/bin/safaridriver --enable
   store_test_output:
     steps:
-      - store_artifacts:
-          path: result-reports
       - store_test_results:
+          name: '⬆️ Store Test Results'
           path: result-reports
   store_filelist:
     steps:
       - store_artifacts:
+          name: '⬆️ Store Artifact filelist.txt'
           path: /tmp/filelist.txt
   skip_on_push_builds:
     steps:
@@ -203,7 +189,7 @@ commands:
               value: << pipeline.git.branch >>
           steps:
             - run:
-                name: 'Skip Job on Push Builds'
+                name: '➡️ Skip Job on Push Builds'
                 command: circleci-agent step halt
 
 jobs:
@@ -213,13 +199,13 @@ jobs:
     steps:
       - checkout_repo
       - run:
-          name: 'Initialize Repository'
+          name: '⚙️ Initialize Repository'
           command: ./.circleci/initialize_repo.sh
       - run:
-          name: 'Check Config'
+          name: '🔍 Check Config'
           command: ./.circleci/check_config.sh
       - run:
-          name: 'Initialize Workspace'
+          name: '⚙️ Initialize Temporary Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - setup_vm:
           is-initializing-job: true
@@ -238,7 +224,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Checks ⭐'
+          name: '⭐⭐⭐ Checks ⭐⭐⭐'
           command: node build-system/pr-check/checks.js
       - teardown_vm
   unminified_build:
@@ -247,7 +233,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Unminified Build ⭐'
+          name: '⭐⭐⭐ Unminified Build ⭐⭐⭐'
           command: node build-system/pr-check/unminified-build.js
       - teardown_vm
   nomodule_build_test:
@@ -256,7 +242,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Nomodule Build ⭐'
+          name: '⭐⭐⭐ Nomodule Build ⭐⭐⭐'
           command: node build-system/pr-check/nomodule-build.js
       - teardown_vm
   module_build_test:
@@ -265,7 +251,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Module Build ⭐'
+          name: '⭐⭐⭐ Module Build ⭐⭐⭐'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
   nomodule_build_bundle_size:
@@ -274,7 +260,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Nomodule Build ⭐'
+          name: '⭐⭐⭐ Nomodule Build ⭐⭐⭐'
           command: node build-system/pr-check/bundle-size-nomodule-build.js
       - teardown_vm
   module_build_bundle_size:
@@ -283,7 +269,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Module Build ⭐'
+          name: '⭐⭐⭐ Module Build ⭐⭐⭐'
           command: node build-system/pr-check/bundle-size-module-build.js
       - teardown_vm
   bundle_size:
@@ -292,7 +278,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Bundle Size ⭐'
+          name: '⭐⭐⭐ Bundle Size ⭐⭐⭐'
           command: node build-system/pr-check/bundle-size.js
       - teardown_vm
   validator_tests:
@@ -304,7 +290,7 @@ jobs:
           name: 'Install Validator Dependencies'
           command: ./.circleci/install_validator_dependencies.sh
       - run:
-          name: '⭐ Validator Tests ⭐'
+          name: '⭐⭐⭐ Validator Tests ⭐⭐⭐'
           command: node build-system/pr-check/validator-tests.js
       - store_test_output
       - teardown_vm
@@ -315,7 +301,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Visual Diff Tests ⭐'
+          name: '⭐⭐⭐ Visual Diff Tests ⭐⭐⭐'
           command: node build-system/pr-check/visual-diff-tests.js
       - store_test_output
       - teardown_vm
@@ -327,7 +313,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Local Unit Tests ⭐'
+          name: '⭐⭐⭐ Local Unit Tests ⭐⭐⭐'
           command: node build-system/pr-check/unit-tests-local.js
       - store_test_output
       - teardown_vm
@@ -339,7 +325,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ All Unit Tests ⭐'
+          name: '⭐⭐⭐ All Unit Tests ⭐⭐⭐'
           command: node build-system/pr-check/unit-tests.js
       - codecov/upload:
           file: test/coverage/lcov-unit.info
@@ -354,7 +340,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Unminified Tests ⭐'
+          name: '⭐⭐⭐ Unminified Tests ⭐⭐⭐'
           command: node build-system/pr-check/unminified-tests.js
       - codecov/upload:
           file: test/coverage/lcov-integration.info
@@ -373,7 +359,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Nomodule Tests (<< parameters.config >>) ⭐'
+          name: '⭐⭐⭐ Nomodule Tests (<< parameters.config >>) ⭐⭐⭐'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
@@ -389,7 +375,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Module Tests (<< parameters.config >>) ⭐'
+          name: '⭐⭐⭐ Module Tests (<< parameters.config >>) ⭐⭐⭐'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
@@ -401,7 +387,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ End-to-End Tests ⭐'
+          name: '⭐⭐⭐ End-to-End Tests ⭐⭐⭐'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
       - store_filelist
@@ -413,7 +399,7 @@ jobs:
       - setup_vm
       - enable_safari_automation
       - run:
-          name: '⭐ Browser Tests (Safari) ⭐'
+          name: '⭐⭐⭐ Browser Tests (Safari) ⭐⭐⭐'
           command: node build-system/pr-check/browser-tests.js --browser=safari
       - store_test_output
       - teardown_vm
@@ -424,7 +410,7 @@ jobs:
       - setup_vm
       - install_firefox
       - run:
-          name: '⭐ Browser Tests (Firefox) ⭐'
+          name: '⭐⭐⭐ Browser Tests (Firefox) ⭐⭐⭐'
           command: node build-system/pr-check/browser-tests.js --browser=firefox
       - store_test_output
       - teardown_vm
@@ -435,7 +421,7 @@ jobs:
       - setup_vm
       - install_edge
       - run:
-          name: '⭐ Browser Tests (Edge) ⭐'
+          name: '⭐⭐⭐ Browser Tests (Edge) ⭐⭐⭐'
           command: node build-system/pr-check/browser-tests.js --browser=edge
       - store_test_output
       - teardown_vm
@@ -446,7 +432,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Experiment << parameters.exp >> Build ⭐'
+          name: '⭐⭐⭐ Experiment << parameters.exp >> Build ⭐⭐⭐'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - teardown_vm
   experiment_integration_tests:
@@ -457,7 +443,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Experiment << parameters.exp >> Integration Tests ⭐'
+          name: '⭐⭐⭐ Experiment << parameters.exp >> Integration Tests ⭐⭐⭐'
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
@@ -470,7 +456,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
+          name: '⭐⭐⭐ Experiment << parameters.exp >> End-to-End Tests ⭐⭐⭐'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - store_filelist
@@ -493,7 +479,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ amp release ⭐'
+          name: '⭐⭐⭐ amp release ⭐⭐⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
       - teardown_vm
   upload_release:
@@ -502,9 +488,10 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Upload Release Artifacts ⭐'
+          name: '⭐⭐⭐ Upload Release Artifacts (to Cloudflare R2) ⭐⭐⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
+          name: '⬆️ Upload Release Artifacts (to CircleCI)'
           path: /tmp/release.tar.gz
       - teardown_vm
   trigger_promote:
@@ -513,7 +500,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Trigger Promote Workflow ⭐'
+          name: '⭐⭐⭐ Trigger Promote Workflow ⭐⭐⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
       - teardown_vm
 
