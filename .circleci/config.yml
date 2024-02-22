@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.4.7
+  browser-tools: circleci/browser-tools@1.4.8
   codecov: codecov/codecov@4.0.1
   node: circleci/node@5.2.0
 
@@ -319,6 +319,7 @@ jobs:
       name: node-docker-large
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js

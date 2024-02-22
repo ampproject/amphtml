@@ -60,7 +60,8 @@ describes.sandboxed('amp-dailymotion', {}, (env) => {
   );
 });
 
-describes.sandboxed('amp-3q-player', {}, (env) => {
+// TODO(#39857): Unskip when integration is fixed.
+describes.sandboxed.skip('amp-3q-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
