@@ -38,7 +38,7 @@ AMP is an open source project, and we'd love your help making it better!
 -   The [amp.dev Support page](https://amp.dev/support/) has resources for getting help.
 -   Use [Stack Overflow](http://stackoverflow.com/questions/tagged/amp-html) to ask questions about using AMP and find answers to questions others have asked.
 -   [Let us know about bugs](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#report-a-bug), and [file feature requests](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#make-a-suggestion) to suggest improvements.
--   AMP accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/).
+-   AMP accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/)./
 
 ## Want to help make AMP better?
 
