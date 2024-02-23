@@ -70,27 +70,24 @@ executors:
 
 commands:
   checkout_repo:
-    parameters:
-      save-git-cache:
-        description: 'True when this step should save the .git directory to the cache'
-        type: boolean
     steps:
       - restore_cache:
           name: 'Restore Git Cache'
           keys:
-            - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
-            - git-cache-{{ arch }}-v2-{{ .Branch }}-
-            - git-cache-{{ arch }}-v2-
+            - git-cache-{{ arch }}-v3-main-{{ .Revision }}
+            - git-cache-{{ arch }}-v3-main-
+            - git-cache-{{ arch }}-v3-
       - checkout
       - when:
-          condition: << parameters.save-git-cache >>
+          condition:
+            equal: ['main', << pipeline.git.branch >>]
           steps:
             - run:
                 name: 'Garbage Collection for Git'
                 command: git gc --auto
             - save_cache:
                 name: 'Save Git Cache'
-                key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+                key: git-cache-{{ arch }}-v3-main-{{ .Revision }}
                 paths:
                   - .git
   setup_vm:
@@ -106,8 +103,7 @@ commands:
       - unless:
           condition: << parameters.is-initializing-job >>
           steps:
-            - checkout_repo:
-                save-git-cache: false
+            - checkout_repo
             - attach_workspace:
                 at: /tmp
             - run:
@@ -215,8 +211,7 @@ jobs:
     executor:
       name: node-docker-medium
     steps:
-      - checkout_repo:
-          save-git-cache: true
+      - checkout_repo
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
@@ -233,8 +228,7 @@ jobs:
     executor:
       name: macos-medium
     steps:
-      - checkout_repo:
-          save-git-cache: true
+      - checkout_repo
       - setup_vm:
           is-initializing-job: true
   checks:
