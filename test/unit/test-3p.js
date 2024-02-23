@@ -22,7 +22,7 @@ describes.sandboxed('3p', {}, (env) => {
     it('should throw when a string prefix does not match', () => {
       expect(() => {
         validateSrcPrefix('https:', 'http://example.org');
-      }).to.throw(/Invalid src/);
+      }).to.throw(/Invalid dsfafewaz/);
     });
 
     it('should throw when array prefixes do not match', () => {

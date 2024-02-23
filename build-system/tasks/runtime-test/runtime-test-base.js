@@ -1,6 +1,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const fs = require('node:fs');
 const karmaConfig = require('../../test-configs/karma.conf');
 const {
   commonIntegrationTestPaths,
@@ -27,6 +28,7 @@ const {log} = require('../../common/logging');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
+const {createFilepathTransformer} = require('./karma-filepath-preprocessor');
 
 /**
  * Used to print dots during esbuild + babel transforms
@@ -37,6 +39,15 @@ let wrapCounter = 0;
  * Used to lazy-require the HTML transformer function after the server is built.
  */
 let transform;
+
+/**
+ * Escapes a string into a RegExp that would match that exact string, verbatim.
+ * @param {string} str
+ * @return {string} escaped RegExp as string
+ */
+function escapeConstRegExp_(str) {
+  return str.replace(/[\|\\\{\}\(\)\[\]\^\$\+\*\?\.\-]/g, '\\$&');
+}
 
 /**
  * Consumes {@link karmaConfig} and dynamically populates fields based on test
@@ -59,6 +70,10 @@ class RuntimeTestConfig {
    */
   constructor(testType) {
     this.testType = testType;
+
+    // TODO
+    this.detectSpecListInFileList();
+
     /**
      * TypeScript is used for typechecking here and is unable to infer the type
      * after using Object.assign. This results in errors relating properties of
@@ -73,6 +88,35 @@ class RuntimeTestConfig {
     this.updateClient();
     this.updateMiddleware();
     this.updateCoverageSettings();
+  }
+
+  /**
+   * Returns an array of spec names (as an escaped regex) when the filelist file
+   * contains spec names instead of file names, which indicates that this build is
+   * a rerun of failed tests.
+   */
+  detectSpecListInFileList() {
+    if (isCircleciBuild() && argv.filelist && fs.existsSync(argv.filelist)) {
+      const filelistContent = getFilesFromFileList();
+      if (filelistContent.length && fs.existsSync(filelistContent[0])) {
+        return;
+      }
+
+      const specGreps = filelistContent.map((spec) => escapeConstRegExp_(spec));
+      log(
+        yellow('The file'),
+        cyan(`--filelist=${argv.filelist}`),
+        yellow('contains spec names, not file names.')
+      );
+      log(
+        green(
+          '⤷ This test run will be executed to rerun only those failed tests listed in this file'
+        )
+      );
+
+      argv.grep = `^(?:${specGreps.join('|')})\\b`;
+      argv.filelist = undefined;
+    }
   }
 
   /**
@@ -92,12 +136,17 @@ class RuntimeTestConfig {
       };
     };
     createHtmlTransformer.$inject = [];
-    this.plugins.push({
-      'preprocessor:htmlTransformer': ['factory', createHtmlTransformer],
-    });
+    this.plugins.push(
+      {
+        'preprocessor:htmlTransformer': ['factory', createHtmlTransformer],
+      },
+      {
+        'preprocessor:filepath': ['factory', createFilepathTransformer],
+      }
+    );
     this.preprocessors[karmaHtmlFixturesPath] = ['htmlTransformer', 'html2js'];
     for (const karmaJsPath of karmaJsPaths) {
-      this.preprocessors[karmaJsPath] = ['esbuild'];
+      this.preprocessors[karmaJsPath] = ['esbuild', 'filepath'];
     }
   }
 
@@ -133,6 +182,12 @@ class RuntimeTestConfig {
       this.junitReporter = {
         outputFile: `result-reports/${this.testType}.xml`,
         useBrowserName: false,
+        nameFormatter(_, result) {
+          return [...result.suite, result.description]
+            .map((s) => s.trim())
+            .filter((s) => s.length)
+            .join(' » ');
+        },
       };
     }
 
@@ -243,7 +298,7 @@ class RuntimeTestConfig {
    */
   updateClient() {
     this.singleRun = !argv.watch;
-    this.client.mocha.grep = !!argv.grep;
+    this.client.mocha.grep = argv.grep || undefined;
     this.client.verboseLogging = !!argv.verbose;
     this.client.captureConsole = !!argv.verbose || !!argv.files;
     this.client.amp = {

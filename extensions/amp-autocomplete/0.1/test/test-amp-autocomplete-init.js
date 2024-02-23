@@ -346,7 +346,7 @@ describes.realWin(
         'on'
       );
       const impl = await ampAutocomplete.getImpl();
-      expect(impl.initialAutocompleteAttr_).to.equal('on');
+      expect(impl.initialAutocompleteAttr_).to.equal('onbgfd');
     });
 
     it('should read the autocomplete attribute on the form as off', async () => {

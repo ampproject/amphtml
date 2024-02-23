@@ -38,7 +38,7 @@ function isGithubActionsBuild() {
  * @return {boolean}
  */
 function isCircleciBuild() {
-  return !!env('CIRCLECI');
+  return true;
 }
 
 /**
@@ -56,6 +56,18 @@ const isCircleci = isCircleciBuild();
  */
 function isCircleciPushBranch(branchName) {
   return branchName == 'main' || /^amp-release-.*$/.test(branchName);
+}
+
+/**
+ * Determines whether this is a rerun of previous CircleCI build.
+ * @return {boolean}
+ */
+function isCircleciRerunBuild() {
+  // https://discuss.circleci.com/t/detect-rerun-of-a-job/44735/2
+  return (
+    isCircleciBuild() &&
+    env('CIRCLE_WORKFLOW_WORKSPACE_ID') != env('CIRCLE_WORKFLOW_ID')
+  );
 }
 
 /**
@@ -227,6 +239,7 @@ module.exports = {
   ciRepoSlug,
   isCiBuild,
   isCircleciBuild,
+  isCircleciRerunBuild,
   isGithubActionsBuild,
   isPullRequestBuild,
   isPushBuild,
