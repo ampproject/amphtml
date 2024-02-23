@@ -1,4 +1,4 @@
-import {DomTransformStream} from '#utils/dom-tranform-stream';
+import {DomTransformStream} from '#utils/dom-transform-stream';
 
 import {macroTask} from '#testing/helpers';
 

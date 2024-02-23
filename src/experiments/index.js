@@ -107,7 +107,7 @@ export function toggleExperiment(
 
 /**
  * Calculate whether the experiment is on or off based off of its default value,
- * stored overriden value, or the global config frequency given.
+ * stored overridden value, or the global config frequency given.
  * @param {Window} win
  * @return {ExperimentTogglesMap}
  */

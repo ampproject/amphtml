@@ -456,4 +456,4 @@ AMP provides some channels that you can opt-in to get the latest changes. To opt
 
 If you have found a bug or have an issue request, file a [Github issue](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+label%3A%22WG%3A+stories%22+) and tag the @ampproject/wg-stories working group.
 
-For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and ping us!.
+For questions / discussion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and ping us!.

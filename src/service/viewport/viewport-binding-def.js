@@ -30,7 +30,7 @@ export class ViewportBindingDef {
   getBorderTop() {}
 
   /**
-   * Whether the binding requires fixed elements to be transfered to a
+   * Whether the binding requires fixed elements to be transferred to a
    * independent fixed layer.
    * @return {boolean}
    */

@@ -751,7 +751,7 @@ export class PreactBaseElement extends BaseElement {
       }
     }
 
-    // Add AmpContext with renderable/playable proeprties.
+    // Add AmpContext with renderable/playable properties.
     const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
 
     try {
@@ -818,7 +818,7 @@ export class PreactBaseElement extends BaseElement {
 
   /**
    * Creates a wrapper around a Preact ref. The API surface exposed by this ref
-   * **must** be consistent accross all rerenders.
+   * **must** be consistent across all rerenders.
    *
    * This wrapper is necessary because every time React rerenders, it creates
    * (depending on deps checking) a new imperative handle and sets that to
@@ -844,7 +844,7 @@ export class PreactBaseElement extends BaseElement {
 
   /**
    * Verifies that every Preact render exposes the same API surface as the previous render.
-   * If it does not, the API wrapper is syncrhonized.
+   * If it does not, the API wrapper is synchronized.
    *
    * @param {API_TYPE} current
    * @private

@@ -183,7 +183,7 @@ export class Log {
       return LogLevel_Enum.FINE;
     }
 
-    // LocalDev by default allows INFO level, unless overriden by `#log`.
+    // LocalDev by default allows INFO level, unless overridden by `#log`.
     if (getMode().localDev) {
       return LogLevel_Enum.INFO;
     }

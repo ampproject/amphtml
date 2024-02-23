@@ -82,7 +82,7 @@ export class History {
    * @return {!Promise<!HistoryIdDef>}
    */
   push(opt_onPop, opt_stateUpdate) {
-    return this.enque_(() => {
+    return this.enqueue_(() => {
       return this.binding_.push(opt_stateUpdate).then((historyState) => {
         this.onStateUpdated_(historyState);
         if (opt_onPop) {
@@ -103,7 +103,7 @@ export class History {
    * @return {!Promise}
    */
   pop(stateId) {
-    return this.enque_(() => {
+    return this.enqueue_(() => {
       return this.binding_.pop(stateId).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
@@ -117,7 +117,7 @@ export class History {
    * @return {!Promise}
    */
   replace(opt_stateUpdate) {
-    return this.enque_(() => this.binding_.replace(opt_stateUpdate), 'replace');
+    return this.enqueue_(() => this.binding_.replace(opt_stateUpdate), 'replace');
   }
 
   /**
@@ -126,7 +126,7 @@ export class History {
    * @return {!Promise<!HistoryStateDef>}
    */
   get() {
-    return this.enque_(() => this.binding_.get(), 'get');
+    return this.enqueue_(() => this.binding_.get(), 'get');
   }
 
   /**
@@ -137,7 +137,7 @@ export class History {
    * @return {!Promise}
    */
   goBack(navigate) {
-    return this.enque_(() => {
+    return this.enqueue_(() => {
       if (this.stackIndex_ <= 0 && !navigate) {
         return Promise.resolve();
       }
@@ -232,7 +232,7 @@ export class History {
    * @template RESULT
    * @private
    */
-  enque_(callback, name) {
+  enqueue_(callback, name) {
     const deferred = new Deferred();
     const {promise, reject, resolve} = deferred;
 

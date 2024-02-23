@@ -33,7 +33,7 @@ export class AmpStoryComponentManager {
   }
 
   /**
-   * Builds and layouts the players when appropiate.
+   * Builds and layouts the players when appropriate.
    * @public
    */
   loadPlayers() {

@@ -48,8 +48,8 @@ const AUTOPLAY_SUPPORTED_WIN_PROP = '__AMP_AUTOPLAY';
 /**
  * Determines autoplay support.
  *
- * Note that even if platfrom supports autoplay, users or browsers can disable
- * autoplay to save data / battery. This detects both platfrom support and
+ * Note that even if platform supports autoplay, users or browsers can disable
+ * autoplay to save data / battery. This detects both platform support and
  * when autoplay has been disabled by the user.
  *
  * @param {Window} win

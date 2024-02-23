@@ -219,7 +219,7 @@ export class InaboxResources {
   }
 
   /**
-   * Builds any pending resouces if document is ready, or next element has been
+   * Builds any pending resources if document is ready, or next element has been
    * added to DOM.
    * @private
    */

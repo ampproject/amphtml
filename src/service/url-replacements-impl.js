@@ -1113,7 +1113,7 @@ export class UrlReplacements {
     // additionalUrlParameters in two ways #1: If the outgoing url origin is not
     // allowlisted: additionalUrlParameters are always appended by not expanded,
     // defaultUrlParams will not be appended. #2: If the expansion function is
-    // not allowlisted: additionalUrlParamters will not be expanded,
+    // not allowlisted: additionalUrlParameters will not be expanded,
     // defaultUrlParams will by default support QUERY_PARAM, and will still be
     // expanded.
     if (defaultUrlParams) {

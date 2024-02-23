@@ -223,8 +223,8 @@ class AnimationPlayer {
    * Halts the animation. Depending on the opt_dir value, the following actions
    * can be performed:
    * 0: No action. The state will be as at the moment of halting (default)
-   * 1: Final state. Transitionable will be set to state = 1.
-   * -1: Reset state. Transitionable will be reset to state = 0.
+   * 1: Final state. Transitional will be set to state = 1.
+   * -1: Reset state. Transitional will be reset to state = 0.
    * The animation's promise will be rejected since the transition has been
    * interrupted.
    * @param {number=} opt_dir

@@ -25,7 +25,7 @@ declare global {
     replaceSync: (text: string) => void;
   }
 
-  // Fullscreen proprties
+  // Fullscreen properties
   interface Element {
     requestFullScreen: any;
     exitFullscreen: any;
