@@ -133,6 +133,15 @@ class RuntimeTestConfig {
       this.junitReporter = {
         outputFile: `result-reports/${this.testType}.xml`,
         useBrowserName: false,
+        nameFormatter(_, result) {
+          return result.description.trim();
+        },
+        classNameFormatter(_, result) {
+          return result.suite
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .join(' » ');
+        },
       };
     }
 
