@@ -6,11 +6,12 @@
 
 const {
   skipDependentJobs,
-  storeNomoduleBuildToWorkspace,
+  storeBuildOutputToWorkspace,
   timedExecOrDie,
 } = require('./utils');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
+const {maybeParallelizeCommand} = require('./parallelization');
 
 const jobName = 'bundle-size-nomodule-build.js';
 
@@ -18,10 +19,19 @@ const jobName = 'bundle-size-nomodule-build.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie(
-    'amp dist --noconfig --version_override 0000000000000 --nomanglecache'
+  const command = maybeParallelizeCommand(
+    'amp dist --noconfig --version_override 0000000000000 --nomanglecache',
+    'extensions/amp-*',
+    {
+      callback(results) {
+        return `--extensions=${results.replaceAll(/\bextensions\//g, '').replaceAll(' ', ',')}`;
+      },
+      onZero: '--vendor_configs',
+    }
   );
-  storeNomoduleBuildToWorkspace();
+
+  timedExecOrDie(command);
+  storeBuildOutputToWorkspace();
 }
 
 /**

@@ -5,17 +5,13 @@
  */
 
 const {
-  abortTimedJob,
   skipDependentJobs,
-  startTimer,
-  storeNomoduleBuildToWorkspace,
+  storeBuildOutputToWorkspace,
   timedExecOrDie,
-  timedExecWithError,
 } = require('./utils');
-const {log} = require('../common/logging');
-const {red, yellow} = require('kleur/colors');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
+const {maybeParallelizeCommand} = require('./parallelization');
 
 const jobName = 'nomodule-build.js';
 
@@ -23,8 +19,19 @@ const jobName = 'nomodule-build.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp dist --fortesting');
-  storeNomoduleBuildToWorkspace();
+  const command = maybeParallelizeCommand(
+    'amp dist --fortesting',
+    'extensions/amp-*',
+    {
+      callback(results) {
+        return `--extensions=${results.replaceAll(/\bextensions\//g, '').replaceAll(' ', ',')}`;
+      },
+      onZero: '--vendor_configs',
+    }
+  );
+
+  timedExecOrDie(command);
+  storeBuildOutputToWorkspace();
 }
 
 /**
@@ -32,7 +39,6 @@ function pushBuildWorkflow() {
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {
-  const startTime = startTimer(jobName);
   if (
     buildTargetsInclude(
       Targets.RUNTIME,
@@ -41,15 +47,7 @@ async function prBuildWorkflow() {
       Targets.VISUAL_DIFF
     )
   ) {
-    const process = timedExecWithError('amp dist --fortesting');
-    if (process.status !== 0) {
-      const message = process?.error
-        ? process.error.message
-        : 'Unknown error, check logs';
-      log(red('ERROR'), yellow(message));
-      return abortTimedJob(jobName, startTime);
-    }
-    storeNomoduleBuildToWorkspace();
+    pushBuildWorkflow();
   } else {
     skipDependentJobs(
       jobName,

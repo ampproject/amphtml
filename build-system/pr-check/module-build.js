@@ -6,11 +6,12 @@
 
 const {
   skipDependentJobs,
-  storeModuleBuildToWorkspace,
+  storeBuildOutputToWorkspace,
   timedExecOrDie,
 } = require('./utils');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
+const {maybeParallelizeCommand} = require('./parallelization');
 
 const jobName = 'module-build.js';
 
@@ -18,8 +19,19 @@ const jobName = 'module-build.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp dist --esm --fortesting');
-  storeModuleBuildToWorkspace();
+  const command = maybeParallelizeCommand(
+    'amp dist --esm --fortesting',
+    'extensions/amp-*',
+    {
+      callback(results) {
+        return `--extensions=${results.replaceAll(/\bextensions\//g, '').replaceAll(' ', ',')}`;
+      },
+      onZero: '--vendor_configs',
+    }
+  );
+
+  timedExecOrDie(command);
+  storeBuildOutputToWorkspace();
 }
 
 /**
@@ -33,8 +45,7 @@ function prBuildWorkflow() {
       Targets.VISUAL_DIFF
     )
   ) {
-    timedExecOrDie('amp dist --esm --fortesting');
-    storeModuleBuildToWorkspace();
+    pushBuildWorkflow();
   } else {
     timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(
