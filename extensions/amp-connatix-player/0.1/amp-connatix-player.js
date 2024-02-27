@@ -8,10 +8,7 @@ import {
   getDataParamsFromAttributes,
   removeElement,
 } from '#core/dom';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-} from '#core/dom/fullscreen';
+import {fullscreenEnter, fullscreenExit} from '#core/dom/fullscreen';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
@@ -440,7 +437,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @private
    * @return {boolean}
    */
-   isSafariOrIos_() {
+  isSafariOrIos_() {
     const platform = Services.platformFor(this.win);
 
     return platform.isSafari() || platform.isIos();
@@ -488,8 +485,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     // Not supported.
   }
 
-   /** @override */
-   fullscreenEnter() {
+  /** @override */
+  fullscreenEnter() {
     if (!this.iframe_) {
       return;
     }
