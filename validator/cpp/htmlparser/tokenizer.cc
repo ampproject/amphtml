@@ -8,7 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include "absl/base/attributes.h"
 #include "absl/flags/flag.h"
 #include "cpp/htmlparser/atom.h"
 #include "cpp/htmlparser/atomutil.h"
@@ -761,7 +760,7 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
           // https://html.spec.whatwg.org/multipage/parsing.html#before-attribute-name-state.
           break;
         }
-        ABSL_FALLTHROUGH_INTENDED;
+        [[fallthrough]];
       case '>': {
         UnreadByte();
         std::get<0>(pending_attribute_).end = raw_.end;
