@@ -38,6 +38,13 @@ dist_job: &dist_job
       type: enum
       enum: ['Test', 'Bundle Size']
 
+test_types_job: &test_types_job
+  parameters:
+    test_type:
+      description: 'Which test type to run'
+      type: enum
+      enum: ['Unit', 'Integration', 'End-to-End']
+
 executors:
   base-docker-small:
     docker:
@@ -391,34 +398,37 @@ jobs:
   browser_tests_safari:
     executor:
       name: macos-medium
+    <<: *test_types_job
     steps:
       - setup_vm
       - enable_safari_automation
       - run:
-          name: '⭐⭐⭐ Browser Tests (Safari) ⭐⭐⭐'
-          command: node build-system/pr-check/browser-tests.js --browser=safari
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Safari) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=safari --type=<< parameters.test_type >>
       - store_test_output
       - teardown_vm
   browser_tests_firefox:
     executor:
       name: node-docker-medium
+    <<: *test_types_job
     steps:
       - setup_vm
       - install_firefox
       - run:
-          name: '⭐⭐⭐ Browser Tests (Firefox) ⭐⭐⭐'
-          command: node build-system/pr-check/browser-tests.js --browser=firefox
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Firefox) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=firefox --type=<< parameters.test_type >>
       - store_test_output
       - teardown_vm
   browser_tests_edge:
     executor:
       name: node-docker-medium
+    <<: *test_types_job
     steps:
       - setup_vm
       - install_edge
       - run:
-          name: '⭐⭐⭐ Browser Tests (Edge) ⭐⭐⭐'
-          command: node build-system/pr-check/browser-tests.js --browser=edge
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Edge) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=edge --type=<< parameters.test_type >>
       - store_test_output
       - teardown_vm
   experiment_build:
@@ -602,20 +612,30 @@ workflows:
             - '⛓️ Nomodule Build (Test)'
             - 'Nomodule 3p Build (Test)'
       - browser_tests_safari:
-          name: 'Browser Tests (Safari)'
+          name: '<< matrix.test_type >> Tests (Safari)'
+          matrix:
+            parameters:
+              test_type: ['Unit', 'Integration', 'End-to-End']
           <<: *push_and_pr_builds
           requires:
             - 'Initialize for Mac OS'
             - '⛓️ Nomodule Build (Test)'
             - 'Nomodule 3p Build (Test)'
       - browser_tests_firefox:
-          name: 'Browser Tests (Firefox)'
+          name: '<< matrix.test_type >> Tests (Firefox)'
+          matrix:
+            parameters:
+              test_type: ['Unit', 'Integration', 'End-to-End']
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Nomodule Build (Test)'
             - 'Nomodule 3p Build (Test)'
       - browser_tests_edge:
-          name: 'Browser Tests (Edge)'
+          name: '<< matrix.test_type >> Tests (Edge)'
+          matrix:
+            parameters:
+              # Note: we can't run e2e tests on Edge.
+              test_type: ['Unit', 'Integration']
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Nomodule Build (Test)'
