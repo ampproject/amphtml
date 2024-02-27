@@ -27,6 +27,17 @@ experiment_job: &experiment_job
   environment:
     FLAVOR: experiment<< parameters.exp >>
 
+dist_job: &dist_job
+  parameters:
+    module:
+      description: 'Whether to build Module or Nomodule'
+      type: enum
+      enum: ['Module', 'Nomodule']
+    purpose:
+      description: 'What is the downstream purpose of this build'
+      type: enum
+      enum: ['Test', 'Bundle Size']
+
 executors:
   base-docker-small:
     docker:
@@ -236,45 +247,26 @@ jobs:
           name: '⭐⭐⭐ Unminified Build ⭐⭐⭐'
           command: node build-system/pr-check/unminified-build.js
       - teardown_vm
-  nomodule_build_test:
+  dist:
     executor:
       name: node-docker-xlarge
-    parallelism: 6
+    <<: *dist_job
+    parallelism: 3
     steps:
       - setup_vm
       - run:
-          name: '⭐⭐⭐ Nomodule Build ⭐⭐⭐'
-          command: node build-system/pr-check/nomodule-build.js
+          name: '⭐⭐⭐ << parameters.module >> Build (<< parameters.purpose >>) ⭐⭐⭐'
+          command: node build-system/pr-check/dist.js --type "<< parameters.module >> Build (<< parameters.purpose >>)"
       - teardown_vm
-  module_build_test:
+  dist_3p:
     executor:
       name: node-docker-xlarge
-    parallelism: 6
+    <<: *dist_job
     steps:
       - setup_vm
       - run:
-          name: '⭐⭐⭐ Module Build ⭐⭐⭐'
-          command: node build-system/pr-check/module-build.js
-      - teardown_vm
-  nomodule_build_bundle_size:
-    executor:
-      name: node-docker-xlarge
-    parallelism: 6
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐⭐⭐ Nomodule Build ⭐⭐⭐'
-          command: node build-system/pr-check/bundle-size-nomodule-build.js
-      - teardown_vm
-  module_build_bundle_size:
-    executor:
-      name: node-docker-xlarge
-    parallelism: 6
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐⭐⭐ Module Build ⭐⭐⭐'
-          command: node build-system/pr-check/bundle-size-module-build.js
+          name: '⭐⭐⭐ << parameters.module >> 3p Build (<< parameters.purpose >>) ⭐⭐⭐'
+          command: node build-system/pr-check/dist.js --type "<< parameters.module >> 3p Build (<< parameters.purpose >>)"
       - teardown_vm
   bundle_size:
     executor:
@@ -529,23 +521,21 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - nomodule_build_test:
-          name: '⛓️ Nomodule Build (Test)'
+      - dist:
+          matrix:
+            parameters:
+              module: ['Module', 'Nomodule']
+              purpose: ['Test', 'Bundle Size']
+          name: '⛓️ << matrix.module >> Build (<< matrix.purpose >>)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - module_build_test:
-          name: '⛓️ Module Build (Test)'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - nomodule_build_bundle_size:
-          name: '⛓️ Nomodule Build (Bundle Size)'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - module_build_bundle_size:
-          name: '⛓️ Module Build (Bundle Size)'
+      - dist_3p:
+          matrix:
+            parameters:
+              module: ['Module', 'Nomodule']
+              purpose: ['Test', 'Bundle Size']
+          name: '<< matrix.module >> 3p Build (<< matrix.purpose >>)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
@@ -554,7 +544,9 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Nomodule Build (Bundle Size)'
+            - 'Nomodule 3p Build (Bundle Size)'
             - '⛓️ Module Build (Bundle Size)'
+            - 'Module 3p Build (Bundle Size)'
       - validator_tests:
           name: 'Validator Tests'
           <<: *push_and_pr_builds
@@ -565,7 +557,9 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Module Build (Test)'
+            - 'Module 3p Build (Test)'
             - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - local_unit_tests:
           name: 'Local Unit Tests'
           <<: *push_and_pr_builds
@@ -589,6 +583,7 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - module_tests:
           name: 'Module Tests (<< matrix.config >>)'
           matrix:
@@ -596,29 +591,35 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - '⛓️ Nomodule Build (Test)'
             - '⛓️ Module Build (Test)'
+            - 'Module 3p Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - end_to_end_tests:
           name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - browser_tests_safari:
           name: 'Browser Tests (Safari)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize for Mac OS'
             - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - browser_tests_firefox:
           name: 'Browser Tests (Firefox)'
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - browser_tests_edge:
           name: 'Browser Tests (Edge)'
           <<: *push_and_pr_builds
           requires:
             - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - experiment_build:
           name: 'Experiment << matrix.exp >> Build'
           matrix:

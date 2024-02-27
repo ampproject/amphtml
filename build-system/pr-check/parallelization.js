@@ -4,20 +4,8 @@
 
 const fs = require('node:fs');
 const tempy = require('tempy');
-const {circleciIsParallelized, circleciNodeIndex} = require('../common/ci');
+const {circleciIsParallelized} = require('../common/ci');
 const {timedExecOrDie} = require('./utils');
-
-/** @typedef {{
- *    callback: (results: string) => string,
- *    onZero: string,
- * }} */
-let ParallelizeCommandOptionsDef;
-
-/** @type {ParallelizeCommandOptionsDef} */
-const DEFAULT_OPTIONS = {
-  callback: (s) => s,
-  onZero: '',
-};
 
 /**
  * Splits command execution using a glob string on parallelized CircleCI builds.
@@ -26,26 +14,23 @@ const DEFAULT_OPTIONS = {
  * If parallelization is detected, uses the glob to add an argument to the
  * command by passing it through an optional callback function.
  *
- * Options:
- * - callback: A function that receives a space-delimited list that CircleCI
- *     determines are to be included in this prallelized build, and returns the
- *     new argument to add.
+ * Optional callback: A function that receives a space-delimited list as
+ *     determines by CircleCI, and returns the new argument to add as a string.
  *     e.g., `(items) => '--files=' + item.replaceAll(' ', ',')` will add
  *     '--files=x,y,z' to the command.
- *     Note: the glob returns results with spaces in them this cab get messy.
- * - onZero: An argument to be added only to the first (#0) parallelized build.
+ *
+ * Note: the glob returns results with spaces in them this cab get messy.
  *
  * @param {string} command a CLI command. e.g., `amp dist --fortesting`
  * @param {string} glob e.g., `extensions/amp-*`
- * @param {ParallelizeCommandOptionsDef?} options additional options. See
- *     function description.
+ * @param {(results: string) => string} callback optional callback. See
+ *    function description.
  * @return {string} the CLI command that should be executed.
  */
-function maybeParallelizeCommand(command, glob, options) {
+function maybeParallelizeCommand(command, glob, callback = (s) => s) {
   if (!circleciIsParallelized()) {
     return command;
   }
-  options = {...DEFAULT_OPTIONS, ...(options ?? {})};
 
   const tempFileName = tempy.file();
   timedExecOrDie(
@@ -53,10 +38,7 @@ function maybeParallelizeCommand(command, glob, options) {
   );
   const globAndRunResults = fs.readFileSync(tempFileName, {encoding: 'utf-8'});
 
-  if (options.onZero && circleciNodeIndex() == 0) {
-    command += ` ${options.onZero}`;
-  }
-  return `${command} ${options.callback(globAndRunResults)}`;
+  return `${command} ${callback(globAndRunResults)}`;
 }
 
 module.exports = {maybeParallelizeCommand};
