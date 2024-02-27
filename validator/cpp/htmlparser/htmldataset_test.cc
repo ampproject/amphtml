@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "absl/flags/flag.h"
 #include "cpp/htmlparser/atomutil.h"
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/fileutil.h"
@@ -309,9 +308,7 @@ TEST(HTMLDatasetTest, WebkitData) {
   };
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
-    std::string full_path =
-        absl::GetFlag(FLAGS_test_srcdir) +
-        pattern.data();
+    std::string full_path = ::testing::SrcDir() + pattern.data();
     std::vector<std::string> filenames;
     EXPECT_TRUE(FileUtil::Glob(full_path, &filenames))
         << "Error opening files: " << pattern;
