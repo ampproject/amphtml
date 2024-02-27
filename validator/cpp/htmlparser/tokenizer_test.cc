@@ -233,6 +233,45 @@ TEST(TokenizerTest, BasicTokenizationOfADocument) {
   // their respective test cases.
 }
 
+// Tests that an unexpected equals sign ("="") at the start of an attribute name
+// is treated as part of the attribute name. See §13.2.5.32 "Before attribute
+// name state" in the HTML Living Standard from 2024-02-22 at
+// https://html.spec.whatwg.org/multipage/parsing.html#before-attribute-name-state.
+TEST(TokenizerTest, UnexpectedEqualsSignAtStartOfAttributeName) {
+  // Attribute name is prefixed with "=" and also has a value.
+  htmlparser::Tokenizer t1("<div =a=\"b\" />");
+  t1.Next();
+  htmlparser::Token token1 = t1.token();
+  EXPECT_EQ(token1.token_type, htmlparser::TokenType::SELF_CLOSING_TAG_TOKEN);
+  EXPECT_EQ(token1.attributes.size(), 1);
+  EXPECT_EQ(token1.attributes[0].key, "=a");
+  EXPECT_EQ(token1.attributes[0].value, "b");
+  EXPECT_EQ(t1.Next(), htmlparser::TokenType::ERROR_TOKEN);
+  EXPECT_TRUE(t1.IsEOF());
+
+  // Attribute name is prefixed with "=" without value.
+  htmlparser::Tokenizer t2("<div =a />");
+  t2.Next();
+  htmlparser::Token token2 = t2.token();
+  EXPECT_EQ(token2.token_type, htmlparser::TokenType::SELF_CLOSING_TAG_TOKEN);
+  EXPECT_EQ(token2.attributes.size(), 1);
+  EXPECT_EQ(token2.attributes[0].key, "=a");
+  EXPECT_EQ(token2.attributes[0].value, "");
+  EXPECT_EQ(t2.Next(), htmlparser::TokenType::ERROR_TOKEN);
+  EXPECT_TRUE(t2.IsEOF());
+
+  // Attribute name is "=" without value.
+  htmlparser::Tokenizer t3("<div = />");
+  t3.Next();
+  htmlparser::Token token3 = t3.token();
+  EXPECT_EQ(token3.token_type, htmlparser::TokenType::SELF_CLOSING_TAG_TOKEN);
+  EXPECT_EQ(token3.attributes.size(), 1);
+  EXPECT_EQ(token3.attributes[0].key, "=");
+  EXPECT_EQ(token3.attributes[0].value, "");
+  EXPECT_EQ(t3.Next(), htmlparser::TokenType::ERROR_TOKEN);
+  EXPECT_TRUE(t3.IsEOF());
+}
+
 TEST(TokenizerTest, TestMustangTemplateCase) {
   std::string_view template_html = R"HTML(<html>
 <head></head>
