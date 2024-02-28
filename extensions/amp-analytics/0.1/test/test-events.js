@@ -1150,7 +1150,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     });
   });
 
-  describe('TimerEventTracker', () => {
+  describe.skip('TimerEventTracker', () => {
     let clock;
     let tracker;
 

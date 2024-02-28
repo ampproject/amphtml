@@ -7,8 +7,8 @@
 const {
   FILELIST_PATH,
   generateCircleCiShardTestFileList,
+  haltOnEmptyRerun,
   skipDependentJobs,
-  timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
 const {runCiJob} = require('./ci-job');
@@ -23,6 +23,10 @@ const jobName = 'unit-tests.js';
 function pushBuildWorkflow() {
   try {
     generateCircleCiShardTestFileList(unitTestPaths);
+    if (haltOnEmptyRerun()) {
+      return;
+    }
+
     timedExecOrThrow(
       `amp unit --headless --coverage --filelist ${FILELIST_PATH}`,
       'Unit tests failed!'
@@ -39,10 +43,7 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    generateCircleCiShardTestFileList(unitTestPaths);
-    timedExecOrDie(
-      `amp unit --headless --coverage --filelist ${FILELIST_PATH}`
-    );
+    pushBuildWorkflow();
   } else {
     skipDependentJobs(
       jobName,

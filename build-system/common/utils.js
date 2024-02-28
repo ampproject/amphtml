@@ -94,7 +94,7 @@ function getFilesFromArgv() {
 }
 
 /**
- * Returns list of files in the comma-separated file named at --filelist.
+ * Returns list of files in the line-separated file named at --filelist.
  *
  * @return {Array<string>}
  */
@@ -102,7 +102,7 @@ function getFilesFromFileList() {
   if (!argv.filelist) {
     return [];
   }
-  return fs.readFileSync(argv.filelist, 'utf8').trim().split(',');
+  return fs.readFileSync(argv.filelist, 'utf8').trim().split('\n');
 }
 
 /**

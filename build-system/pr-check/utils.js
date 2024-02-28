@@ -6,6 +6,7 @@ const {
   circleciBuildNumber,
   isCiBuild,
   isCircleciBuild,
+  isCircleciRerunBuild,
 } = require('../common/ci');
 const {
   gitBranchCreationPoint,
@@ -266,25 +267,58 @@ function storeExperimentBuildToWorkspace(exp) {
 }
 
 /**
- * Generates a file with a comma-separated list of test file paths that CircleCI
+ * Generates a file with a line-separated list of test file paths that CircleCI
  * should execute in a parallelized job shard.
+ *
+ * Note: when a rerun is requested for only the tests that have failed in a
+ * previous build, the output will contain spec names instead of file names
+ * (i.e., the 'name' in `describe('name', { ... })`), or will be empty,
+ * depending on which parallelized build is running.
+ *
+ * This can be detected with the `detect*` functions below.
  *
  * @param {!Array<string>} globs array of glob strings for finding test file paths.
  */
 function generateCircleCiShardTestFileList(globs) {
   const joinedGlobs = globs.map((glob) => `"${glob}"`).join(' ');
-  const fileList = getStdout(
-    `circleci tests glob ${joinedGlobs} | circleci tests split --split-by=timings`
-  )
-    .trim()
-    .replace(/\s+/g, ',');
-  fs.writeFileSync(FILELIST_PATH, fileList, 'utf8');
-  logWithoutTimestamp(
-    'Stored list of',
-    cyan(fileList.split(',').length),
-    'test files in',
-    cyan(FILELIST_PATH)
+  execOrDie(
+    `circleci tests glob ${joinedGlobs} | circleci tests run --command=">${FILELIST_PATH} xargs -n1 echo"`
   );
+  /* TODO remove */ logWithoutTimestamp(
+    'QWEQWEQWE',
+    getStdout(`circleci tests glob ${joinedGlobs}`)
+  );
+  /* TODO remove */ logWithoutTimestamp(
+    'ASDASDASD',
+    getStdout(
+      `circleci tests glob ${joinedGlobs} | circleci tests run --command="xargs echo" --verbose`
+    )
+  );
+  logWithoutTimestamp('Stored the test file names in', cyan(FILELIST_PATH));
+}
+
+/**
+ * Returns true and inform CircleCI that this build should halt when a rerun of
+ * failed tests is detected, and this specific build (out of multiple
+ * parallelized builds) has no tests selected to be rerun.
+ *
+ * @return {boolean}
+ */
+function haltOnEmptyRerun() {
+  if (isCircleciRerunBuild() && !fs.existsSync(FILELIST_PATH)) {
+    logWithoutTimestamp(
+      yellow(
+        'Detected a rerun build for failed tests, but no input file for --filelist was generated.'
+      )
+    );
+    logWithoutTimestamp(
+      'This happens because there are less test files that need to be re-run than the total number of parallelized builds.'
+    );
+    logWithoutTimestamp(green('Gracefully halting this build.'));
+    execOrDie('circleci-agent step halt');
+    return true;
+  }
+  return false;
 }
 
 module.exports = {
@@ -303,4 +337,5 @@ module.exports = {
   storeModuleBuildToWorkspace,
   storeExperimentBuildToWorkspace,
   generateCircleCiShardTestFileList,
+  haltOnEmptyRerun,
 };
