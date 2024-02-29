@@ -25,7 +25,7 @@ import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
-import {DomTransformStream} from '#utils/dom-tranform-stream';
+import {DomTransformStream} from '#utils/dom-transform-stream';
 import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';

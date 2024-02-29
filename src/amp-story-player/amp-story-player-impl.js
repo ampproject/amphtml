@@ -1287,7 +1287,10 @@ export class AmpStoryPlayer {
             this.updatePosition_(story);
 
             if (story.distance === 0) {
-              tryFocus(story.iframe);
+              // Focus on the current story iframe after the animation ends.
+              story.iframe.addEventListener('animationend', () => {
+                tryFocus(story.iframe);
+              });
             }
           })
           .catch((err) => {
