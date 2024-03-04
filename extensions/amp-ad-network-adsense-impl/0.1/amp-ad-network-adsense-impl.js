@@ -279,6 +279,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     let additionalConsent = undefined;
     let consentStringType = undefined;
     let consentSharedData = undefined;
+    let gppSectionId = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
@@ -286,6 +287,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       additionalConsent = consentTuple.additionalConsent;
       consentStringType = consentTuple.consentStringType;
       consentSharedData = consentTuple.consentSharedData;
+      gppSectionId = consentTuple.gppSectionId;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -380,10 +382,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ? this.responsiveState_.getRafmtParam()
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent':
-        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
-          ? consentString
-          : null,
+      'gdpr_consent': [
+        undefined,
+        CONSENT_STRING_TYPE.TCF_V1,
+        CONSENT_STRING_TYPE.TCF_V2,
+      ].includes(consentStringType)
+        ? consentString
+        : null,
       'addtl_consent': additionalConsent,
       'us_privacy':
         consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
@@ -405,6 +410,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         : null,
       'tfcd': consentSharedData?.['adsense-tfcd'] ?? null,
       'tfua': consentSharedData?.['adsense-tfua'] ?? null,
+      'gpp':
+        consentStringType == CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM
+          ? consentString
+          : null,
+      'gpp_sid':
+        consentStringType == CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM
+          ? gppSectionId
+          : null,
     };
 
     const experimentIds = [];

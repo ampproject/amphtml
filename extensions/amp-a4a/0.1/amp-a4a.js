@@ -145,6 +145,7 @@ export let CreativeMetaDataDef;
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
       consentSharedData: (?Object|undefined),
+      gppSectionId: (?string|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -787,6 +788,9 @@ export class AmpA4A extends AMP.BaseElement {
         const consentStringType = consentMetadata
           ? consentMetadata['consentStringType']
           : consentMetadata;
+        const gppSectionId = consentMetadata
+          ? consentMetadata['gppSectionId']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (
           this.getServeNpaSignal().then((npaSignal) =>
@@ -798,6 +802,7 @@ export class AmpA4A extends AMP.BaseElement {
                 gdprApplies,
                 additionalConsent,
                 consentSharedData,
+                gppSectionId,
               },
               this.tryExecuteRealTimeConfig_(
                 consentState,
