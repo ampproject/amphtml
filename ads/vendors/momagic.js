@@ -4,13 +4,16 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function mgid(global, data) {
+export function momagic(global, data) {
   validateData(data, ['publisher', 'container'], ['format', 'url']);
 
   const scriptRoot = document.createElement('div');
   scriptRoot.id = data.container;
 
   document.body.appendChild(scriptRoot);
+
+
+  
 
   /**
    * Returns path for provided js filename
@@ -48,5 +51,9 @@ export function mgid(global, data) {
   //   });
   // });
 
-  loadScript(global, data.url || url);
+  const getScript = document.createElement('script');
+  getScript.id = 'interactive_js_adcode';
+  getScript.src = data.url ? data.url : url;
+  document.head.appendChild(getScript);
+  // loadScript(global, data.url || url);
 }
