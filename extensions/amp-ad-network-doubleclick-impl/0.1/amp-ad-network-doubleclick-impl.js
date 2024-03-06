@@ -943,7 +943,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getCustomRealTimeConfigMacros_() {
+  getCustomRealTimeConfigMacros_(hasStorageConsent) {
     /**
      * This lists allowed attributes on the amp-ad element to be used as
      * macros for constructing the RTC URL. Add attributes here, in lowercase,
@@ -971,12 +971,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (tryParseJson(this.element.getAttribute('json')) || {})['targeting']
         ),
       ADCID: (opt_timeout) =>
-        getOrCreateAdCid(
-          this.getAmpDoc(),
-          'AMP_ECID_GOOGLE',
-          '_ga',
-          parseInt(opt_timeout, 10)
-        ),
+        hasStorageConsent
+          ? getOrCreateAdCid(
+              this.getAmpDoc(),
+              'AMP_ECID_GOOGLE',
+              '_ga',
+              parseInt(opt_timeout, 10)
+            )
+          : undefined,
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
           dev().warn(TAG, `Invalid attribute ${name}`);
