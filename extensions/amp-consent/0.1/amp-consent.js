@@ -1008,7 +1008,8 @@ export class AmpConsent extends AMP.BaseElement {
       opt_metadata['consentStringType'],
       opt_metadata['additionalConsent'],
       opt_metadata['gdprApplies'],
-      opt_metadata['purposeOne']
+      opt_metadata['purposeOne'],
+      opt_metadata['gppSectionId']
     );
   }
 
