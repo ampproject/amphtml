@@ -67,6 +67,13 @@ feature_tests/leaks.html:41:0 The attribute 'http-equiv' may not appear in tag '
 feature_tests/leaks.html:41:0 The attribute 'http-equiv' may not appear in tag 'meta'.
 |
 |  <!--
+|  %Redirects (empty attribute)
+|  -->
+|  <meta = http-equiv="refresh" content="10; url=http://leaking.via/meta-refresh">
+>> ^~~~~~~~~
+feature_tests/leaks.html:41:0 The attribute 'http-equiv' may not appear in tag 'meta'.
+|
+|  <!--
 |  %CSP
 |  -->
 |  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri">
