@@ -162,6 +162,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'additionalConsent': undefined,
         'gdprApplies': undefined,
         'purposeOne': undefined,
+        'gppSectionId': undefined,
       });
       expect(
         convertStorageMetadata({
@@ -173,6 +174,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'additionalConsent': undefined,
         'gdprApplies': undefined,
         'purposeOne': undefined,
+        'gppSectionId': undefined,
       });
       expect(
         convertStorageMetadata({
@@ -184,6 +186,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'additionalConsent': '1~1.35.41.101',
         'gdprApplies': undefined,
         'purposeOne': undefined,
+        'gppSectionId': undefined,
       });
       expect(
         convertStorageMetadata({
@@ -191,12 +194,14 @@ describes.fakeWin('ConsentInfo', {}, () => {
             CONSENT_STRING_TYPE.US_PRIVACY_STRING,
           [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '1~1.35.41.101',
           [METADATA_STORAGE_KEY.PURPOSE_ONE]: true,
+          [METADATA_STORAGE_KEY.GPP_SECTION_ID]: '8',
         })
       ).to.deep.equal({
         'consentStringType': CONSENT_STRING_TYPE.US_PRIVACY_STRING,
         'additionalConsent': '1~1.35.41.101',
         'gdprApplies': undefined,
         'purposeOne': true,
+        'gppSectionId': '8',
       });
     });
 
@@ -456,6 +461,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'additionalConsent': undefined,
         'gdprApplies': undefined,
         'purposeOne': undefined,
+        'gppSectionId': undefined,
       });
       expect(
         constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
@@ -464,12 +470,14 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'additionalConsent': undefined,
         'gdprApplies': undefined,
         'purposeOne': undefined,
+        'gppSectionId': undefined,
       });
       expect(constructMetadata(undefined, '1~1.35.41.101')).to.deep.equal({
         'consentStringType': undefined,
         'additionalConsent': '1~1.35.41.101',
         'gdprApplies': undefined,
         'purposeOne': undefined,
+        'gppSectionId': undefined,
       });
       expect(
         constructMetadata(undefined, undefined, true, false)
@@ -478,19 +486,22 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'additionalConsent': undefined,
         'gdprApplies': true,
         'purposeOne': false,
+        'gppSectionId': undefined,
       });
       expect(
         constructMetadata(
           CONSENT_STRING_TYPE.US_PRIVACY_STRING,
           '1~1.35.41.101',
           true,
-          true
+          true,
+          undefined
         )
       ).to.deep.equal({
         'consentStringType': CONSENT_STRING_TYPE.US_PRIVACY_STRING,
         'additionalConsent': '1~1.35.41.101',
         'gdprApplies': true,
         'purposeOne': true,
+        'gppSectionId': undefined,
       });
     });
   });
