@@ -60,6 +60,15 @@ feature_tests/leaks.html:41:0 The attribute '=' may not appear in tag 'meta'.
 feature_tests/leaks.html:41:0 The attribute 'http-equiv' may not appear in tag 'meta'.
 |
 |  <!--
+|  %Redirects (empty attribute)
+|  -->
+|  <meta = http-equiv="refresh" content="10; url=http://leaking.via/meta-refresh">
+>> ^~~~~~~~~
+feature_tests/leaks.html:41:0 The attribute '=' may not appear in tag 'meta'.
+>> ^~~~~~~~~
+feature_tests/leaks.html:41:0 The attribute 'http-equiv' may not appear in tag 'meta'.
+|
+|  <!--
 |  %CSP
 |  -->
 |  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri">
@@ -330,6 +339,11 @@ feature_tests/leaks.html:186:4 The tag 'feimage' is disallowed.
 |  <!--
 |  %XSLT Stylesheets
 |  -->
+|  <?xml-stylesheet type="text/xsl" href="https://leaking.via/xslt-stylesheet" ?>
+|
+>>   ^~~~~~~~~
+feature_tests/leaks.html:193:2 The tag '<?' is disallowed.
+|  <!--
 |  <?xml-stylesheet type="text/xsl" href="https://leaking.via/xslt-stylesheet" ?>
 |
 >>   ^~~~~~~~~
