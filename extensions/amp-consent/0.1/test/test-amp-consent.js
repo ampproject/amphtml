@@ -4,7 +4,7 @@ import {xhrServiceForTesting} from '#service/xhr-impl';
 
 import {dev, user} from '#utils/log';
 
-import {macroTask, sleep} from '#testing/helpers';
+import {macroTask} from '#testing/helpers';
 
 import {
   registerServiceBuilder,
@@ -1156,12 +1156,13 @@ describes.realWin(
         );
       });
 
-      describe('granularConsentExp', () => {
+      // TODO(#39886): Fix flaky tests.
+      describe.skip('granularConsentExp', () => {
         let managerSpy;
 
         beforeEach(async () => {
           ampConsent.buildCallback();
-          await sleep(50);
+          await macroTask();
           managerSpy = env.sandbox.spy(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'

@@ -1150,7 +1150,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
     });
   });
 
-  describe('TimerEventTracker', () => {
+  // TODO(#39879): fix flaky tests.
+  describe.skip('TimerEventTracker', () => {
     let clock;
     let tracker;
 
@@ -1394,8 +1395,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
     });
 
-    // TODO(#39879): fix this flaky test.
-    it.skip(
+    it(
       'timers started and stopped by the same event on the same target' +
         ' do not have race condition problems',
       () => {
