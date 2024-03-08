@@ -8,7 +8,6 @@ const {
   FILELIST_PATH,
   generateCircleCiShardTestFileList,
   skipDependentJobs,
-  timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
 const {runCiJob} = require('./ci-job');
@@ -39,16 +38,14 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    generateCircleCiShardTestFileList(unitTestPaths);
-    timedExecOrDie(
-      `amp unit --headless --coverage --filelist ${FILELIST_PATH}`
-    );
-  } else {
-    skipDependentJobs(
-      jobName,
-      'this PR does not affect the runtime or unit tests'
-    );
+    pushBuildWorkflow();
+    return;
   }
+
+  skipDependentJobs(
+    jobName,
+    'this PR does not affect the runtime or unit tests'
+  );
 }
 
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

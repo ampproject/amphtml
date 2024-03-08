@@ -1,5 +1,3 @@
-'use strict';
-
 const argv = require('minimist')(process.argv.slice(2));
 const karmaConfig = require('../../test-configs/karma.conf');
 const {
@@ -129,20 +127,26 @@ class RuntimeTestConfig {
     }
 
     if (isCircleciBuild()) {
-      this.reporters.push('junit');
-      this.junitReporter = {
-        outputFile: `result-reports/${this.testType}.xml`,
-        useBrowserName: false,
-        nameFormatter(_, result) {
-          return result.description.trim();
-        },
-        classNameFormatter(_, result) {
-          return result.suite
-            .map((s) => s.trim())
-            .filter(Boolean)
-            .join(' » ');
-        },
-      };
+      // this.reporters.push('junit');
+      // this.junitReporter = {
+      //   outputFile: `result-reports/${this.testType}.xml`,
+      //   useBrowserName: false,
+      //   nameFormatter(_, result) {
+      //     if (result.description.trim() === 'ignore info with action dismiss') {
+      //       whyyyyy();
+      //       setTimeout(whyyyyy, 1);
+      //       setTimeout(whyyyyy, 100);
+      //       setTimeout(whyyyyy, 10000);
+      //     }
+      //     return result.description.trim();
+      //   },
+      //   classNameFormatter(_, result) {
+      //     return result.suite
+      //       .map((s) => s.trim())
+      //       .filter(Boolean)
+      //       .join(' » ');
+      //   },
+      // };
     }
 
     if (argv.coverage) {

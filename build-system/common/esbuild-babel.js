@@ -24,6 +24,8 @@ let CacheMessageDef;
  */
 let transformCache;
 
+const DEFAULT_TEXT_ENCODER = new TextEncoder();
+
 /**
  * Creates a babel plugin for esbuild for the given caller. Optionally enables
  * caching to speed up transforms.
@@ -34,7 +36,7 @@ let transformCache;
  *   postLoad?: () => void,
  *   plugins?: null | import('@babel/core').PluginItem[],
  * }} callbacks
- * @return {!Object}
+ * @return {!import('esbuild').Plugin}
  */
 function getEsbuildBabelPlugin(
   callerName,
@@ -85,7 +87,7 @@ function getEsbuildBabelPlugin(
       const {sourcemap} = initialOptions;
       const inlineSourcemap = sourcemap === 'inline' || sourcemap === 'both';
       if (inlineSourcemap) {
-        initialOptions.sorucemap = true;
+        initialOptions.sourcemap = true;
       }
 
       build.onLoad(
@@ -128,6 +130,10 @@ function getEsbuildBabelPlugin(
 
       build.onEnd(async (result) => {
         const {outputFiles} = result;
+        if (!outputFiles) {
+          throw new Error('onEnd called with a result without outputFiles');
+        }
+
         const code = outputFiles.find(({path}) => !path.endsWith('.map'));
         const map = outputFiles.find(({path}) => path.endsWith('.map'));
 
@@ -164,11 +170,11 @@ function getEsbuildBabelPlugin(
           !includeSourcesContent()
         );
 
-        debug('post-esbuild', code.path, code.text, remapped);
+        debug('post-esbuild', code?.path, code?.text, remapped);
 
         const sourcemapJson = remapped.toString();
         replaceOutputFile(outputFiles, map, sourcemapJson);
-        if (inlineSourcemap) {
+        if (inlineSourcemap && code?.text) {
           const base64 = Buffer.from(sourcemapJson).toString('base64');
           replaceOutputFile(
             outputFiles,
@@ -179,6 +185,10 @@ function getEsbuildBabelPlugin(
             )
           );
         }
+      });
+
+      build.onDispose(() => {
+        debug('disposed-esbuild');
       });
     },
   };
@@ -197,8 +207,7 @@ function replaceOutputFile(outputFiles, original, text) {
 
   let contents;
   const generateContents = () =>
-    // eslint-disable-next-line local/no-forbidden-terms
-    (contents ||= new TextEncoder().encode(text));
+    (contents ||= DEFAULT_TEXT_ENCODER.encode(text));
 
   let hash;
   const generateHash = () =>

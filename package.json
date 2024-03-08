@@ -180,6 +180,7 @@
     "terser": "5.14.2",
     "traverse": "0.6.8",
     "typescript": "5.3.3",
-    "util": "0.12.5"
+    "util": "0.12.5",
+    "why-is-node-running": "2.2.2"
   }
 }

@@ -17,31 +17,38 @@ const pad = (value, length) =>
  * Output debugging information when developing changes in this functionality.
  *
  * @param {string} lifecycle
- * @param {string} fullpath
+ * @param {?string=} fullpath
  * @param {?string=} content
- * @param {Object=} sourcemap
+ * @param {?Object=} sourcemap
  */
 function debug(lifecycle, fullpath, content, sourcemap) {
-  if (argv.debug) {
-    if (!content) {
-      content = fs.readFileSync(fullpath, 'utf-8');
-    }
-    const sourcemapPath = `${fullpath}.map`;
-    if (!sourcemap && fs.existsSync(sourcemapPath)) {
-      sourcemap = fs.readFileSync(sourcemapPath, 'utf-8');
-    }
-    const contentsPath = tempy.writeSync(content);
-    if (sourcemap) {
-      fs.writeFileSync(
-        `${contentsPath}.map`,
-        JSON.stringify(sourcemap, null, 4)
-      );
-    }
+  // if (!argv.debug) {
+  //   return;
+  // }
+
+  if (!fullpath || !fs.existsSync(fullpath)) {
     fs.appendFileSync(
       logFile,
-      `${pad(lifecycle, 20)}: ${pad(fullpath, 100)} ${contentsPath}\n`
+      `${pad(lifecycle, 20)}: ${pad('<filepath undefined>', 100)}\n`
     );
+    return;
   }
+
+  if (!content) {
+    content = fs.readFileSync(fullpath, 'utf-8');
+  }
+  const sourcemapPath = `${fullpath}.map`;
+  if (!sourcemap && fs.existsSync(sourcemapPath)) {
+    sourcemap = fs.readFileSync(sourcemapPath, 'utf-8');
+  }
+  const contentsPath = tempy.writeSync(content);
+  if (sourcemap) {
+    fs.writeFileSync(`${contentsPath}.map`, JSON.stringify(sourcemap, null, 4));
+  }
+  fs.appendFileSync(
+    logFile,
+    `${pad(lifecycle, 20)}: ${pad(fullpath, 100)} ${contentsPath}\n`
+  );
 }
 
 /**
