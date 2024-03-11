@@ -2811,6 +2811,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           gdprApplies,
           'consentStringType': 1,
           'additionalConsent': 'abc123',
+          'gppSectionId': '1,2',
         };
         consentSharedData = {
           'doubleclick-tfcd': 1,
@@ -2857,6 +2858,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
             consentSharedData,
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2913,6 +2915,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
             consentSharedData,
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2963,6 +2966,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies: null,
             additionalConsent: null,
             consentSharedData: null,
+            gppSectionId: null,
           })
         ).calledOnce;
         expect(
