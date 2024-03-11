@@ -324,6 +324,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function build(startTime) {
+    console.log('QWEQWEQWE: build() start');
     if (!esbuildContext) {
       esbuildContext = await esbuild.context({
         entryPoints: [entryPoint],
@@ -415,6 +416,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       await esbuildContext.dispose();
       esbuildContext = null;
     }
+    console.log('QWEQWEQWE: build() end');
   }
 
   try {

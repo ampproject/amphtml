@@ -314,6 +314,7 @@ class RuntimeTestRunner {
    * @return {Promise<void>}
    */
   async setup() {
+    console.log('QWEQWEQWE: setup() start');
     await this.maybeBuild();
     await startServer({
       name: 'AMP Test Server',
@@ -323,19 +324,23 @@ class RuntimeTestRunner {
     });
     const handlerProcess = createCtrlcHandler(`amp ${this.config.testType}`);
     this.env = new Map().set('handlerProcess', handlerProcess);
+    console.log('QWEQWEQWE: setup() end');
   }
 
   /**
    * @return {Promise<void>}
    */
   async run() {
+    console.log('QWEQWEQWE: run() start');
     this.exitCode = await createKarmaServer(this.config);
+    console.log('QWEQWEQWE: run() done');
   }
 
   /**
    * @return {Promise<void>}
    */
   async teardown() {
+    console.log('QWEQWEQWE: teardown() start');
     await stopServer();
     exitCtrlcHandler(/** @type {Map} */ (this.env).get('handlerProcess'));
     if (this.exitCode != 0) {
@@ -343,6 +348,7 @@ class RuntimeTestRunner {
       log(red('ERROR:'), yellow(message));
       throw new Error(message);
     }
+    console.log('QWEQWEQWE: teardown() end');
   }
 }
 

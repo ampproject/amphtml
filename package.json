@@ -64,6 +64,7 @@
     "@types/eslint": "8.56.5",
     "@types/estree": "1.0.5",
     "@types/fs-extra": "11.0.4",
+    "@types/karma": "6.3.8",
     "@types/klaw": "3.0.6",
     "@types/minimist": "1.2.5",
     "@types/mocha": "10.0.6",
