@@ -1144,6 +1144,25 @@ TEST(ValidatorTest, InvalidHyphenCharacter) {
   EXPECT_EQ(ValidationResult::FAIL, result.status());
 }
 
+// This test ensures that validation applies to the first "src" attribute
+// of a <script> tag with multiple "src" attributes which matches the standard
+// HTML behavior of ignoring duplicate attribute values beyond the first.
+TEST(ValidatorTest, ScriptEnforcesFirstOfDuplicateAttributes) {
+  const TestCase& test_case =
+      FindOrDie(TestCases(), "feature_tests/minimum_valid_amp.html");
+  const std::string script_with_multiple_src_attributes =
+      "<script async custom-element=\"amp-bind\""
+      " src=\"https://example.com/a.js\""
+      " src=\"https://cdn.ampproject.org/v0/amp-bind-0.1.js\">"
+      "</script>";
+
+  std::string bad_html = StrReplaceAll(
+      test_case.input_content,
+      {{"<script", script_with_multiple_src_attributes + "<script"}});
+  ValidationResult result = amp::validator::Validate(bad_html, HtmlFormat::AMP);
+  EXPECT_EQ(ValidationResult::FAIL, result.status());
+}
+
 // Checks that `type_identifiers` contains no duplicate items, and checks that
 // every item of `type_identifiers` is in `valid_type_identifiers`.
 void TypeIdentifiersAreValidAndUnique(

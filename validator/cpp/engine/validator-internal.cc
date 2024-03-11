@@ -389,7 +389,8 @@ class ParsedHtmlTag {
       lower_tag_name_ = AsciiStrToLower(tagname);
       upper_tag_name_ = AsciiStrToUpper(tagname);
     }
-    node_->SortAttributes(false);
+    bool remove_duplicates = lower_tag_name_ == "script";
+    node_->SortAttributes(remove_duplicates);
     for (const auto& attr : node_->Attributes()) {
       attributes_.push_back(ParsedHtmlTagAttr{attr.KeyPart(), attr.value});
     }
