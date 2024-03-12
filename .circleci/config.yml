@@ -330,7 +330,7 @@ jobs:
       - teardown_vm
   all_unit_tests:
     executor:
-      name: node-docker-medium
+      name: node-docker-large
     parallelism: 6
     steps:
       - setup_vm
@@ -392,7 +392,7 @@ jobs:
       - teardown_vm
   end_to_end_tests:
     executor:
-      name: node-docker-medium
+      name: node-docker-large
     parallelism: 6
     steps:
       - setup_vm
