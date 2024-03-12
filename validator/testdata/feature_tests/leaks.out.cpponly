@@ -54,10 +54,6 @@ feature_tests/leaks.html:36:0 The attribute 'http-equiv' may not appear in tag '
 |  %Redirects (empty attribute)
 |  -->
 |  <meta = http-equiv="refresh" content="10; url=http://leaking.via/meta-refresh">
->> ^~~~~~~~~
-feature_tests/leaks.html:41:0 The attribute '=' may not appear in tag 'meta'.
->> ^~~~~~~~~
-feature_tests/leaks.html:41:0 The attribute 'http-equiv' may not appear in tag 'meta'.
 |
 |  <!--
 |  %CSP
