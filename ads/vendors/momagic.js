@@ -49,6 +49,6 @@ export function momagic(global, data) {
 
   var pathtoscript = data.url ? data.url : url;
   loadScriptNew(pathtoscript, function() {
-    momagicAmp(data);
+    momagicAmpInit(data);
   });
 }
