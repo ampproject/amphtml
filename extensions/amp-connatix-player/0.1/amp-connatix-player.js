@@ -8,6 +8,7 @@ import {
   getDataParamsFromAttributes,
   removeElement,
 } from '#core/dom';
+import {fullscreenEnter, fullscreenExit} from '#core/dom/fullscreen';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
@@ -20,7 +21,7 @@ import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData} from '#utils/event-helper';
-import {userAssert} from '#utils/log';
+import {dev, userAssert} from '#utils/log';
 
 import {
   getConsentMetadata,
@@ -180,7 +181,17 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
           break;
         }
         case 'cnxFullscreenChanged': {
-          this.isFullscreen_ = !this.isFullscreen_;
+          const fullscreenState = dataJSON['args'];
+
+          this.isFullscreen_ = fullscreenState;
+          break;
+        }
+        case 'cnxToggleFullscreen': {
+          if (this.isFullscreen_) {
+            this.fullscreenExit();
+          } else {
+            this.fullscreenEnter();
+          }
           break;
         }
         case 'cnxVolumeChanged': {
@@ -321,6 +332,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
       'url': Services.documentInfoForDoc(element).sourceUrl,
+      'isSafariOrIos': this.isSafariOrIos_(),
       ...getDataParamsFromAttributes(element),
     };
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
@@ -421,6 +433,16 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * @private
+   * @return {boolean}
+   */
+  isSafariOrIos_() {
+    const platform = Services.platformFor(this.win);
+
+    return platform.isSafari() || platform.isIos();
+  }
+
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */
@@ -469,7 +491,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       return;
     }
 
-    this.sendCommand_('enterFullscreen');
+    if (this.isSafariOrIos_()) {
+      this.sendCommand_('toggleFullscreen', true);
+    } else {
+      fullscreenEnter(dev().assertElement(this.iframe_));
+      this.isFullscreen_ = true;
+      this.sendCommand_('updateFullscreenUi', true);
+    }
   }
 
   /** @override */
@@ -477,8 +505,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-
-    this.sendCommand_('exitFullscreen');
+    if (this.isSafariOrIos_()) {
+      this.sendCommand_('toggleFullscreen', false);
+    } else {
+      fullscreenExit(dev().assertElement(this.iframe_));
+      this.isFullscreen_ = false;
+      this.sendCommand_('updateFullscreenUi', false);
+    }
   }
 
   /** @override */
