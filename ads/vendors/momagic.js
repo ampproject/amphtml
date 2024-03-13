@@ -1,59 +1,54 @@
-import {loadScript, validateData} from '#3p/3p';
+import {validateData, loadScript} from '#3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function momagic(global, data) {
-  validateData(data, ['publisher', 'container'], ['format', 'url']);
+  validateData(data, ['publisher', 'container'], ['format', 'url', "extras"]);
 
   const scriptRoot = document.createElement('div');
   scriptRoot.id = data.container;
 
   document.body.appendChild(scriptRoot);
 
-
-  
-
-  /**
-   * Returns path for provided js filename
-   * @param {string} publisher js filename
-   * @return {string} Path to provided filename.
-   */
-  // function getResourceFilePath(publisher) {
-  //   const publisherStr = publisher.replace(/[^a-zA-Z0-9]/g, '');
-  //   return `${publisherStr[0]}/${publisherStr[1]}`;
-  // }
   let url = ''; 
+
   if(data.format){
     url =
-    `https://1437953666.rsc.cdn77.org/${encodeURIComponent(data.publisher)}/${encodeURIComponent(data.format)}/` +
+    `https://amp.truereach.co.in/publisher/${encodeURIComponent(data.publisher)}/${encodeURIComponent(data.format)}/` +
     `truereachAdRender.js?t=` +
     Math.floor(Date.now() / 36e5);
   }else{
     url =
-    `https://1437953666.rsc.cdn77.org/${encodeURIComponent(data.publisher)}/` +
+    `https://amp.truereach.co.in/publisher/${encodeURIComponent(data.publisher)}/` +
     `truereachAdRender.js?t=` +
     Math.floor(Date.now() / 36e5);
   }
 
-  // global.uniqId = (
-  //   '00000' + Math.round(Math.random() * 100000).toString(16)
-  // ).slice(-5);
-  // window['ampOptions' + data.widget + '_' + global.uniqId] = data.options;
+  function loadScriptNew( url, callback ) {
+    var script = document.createElement( "script" )
+    script.type = "text/javascript";
+    if(script.readyState) {  // only required for IE <9
+      script.onreadystatechange = function() {
+        if ( script.readyState === "loaded" || script.readyState === "complete" ) {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else {  //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+    script.id = 'interactive_js_adcode';
+    script.defer = true;
+    script.src = url;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  }
 
-  // global.context.observeIntersection(function (changes) {
-  //   /** @type {!Array} */ (changes).forEach(function (c) {
-  //     window['intersectionRect' + data.widget + '_' + global.uniqId] =
-  //       c.intersectionRect;
-  //     window['boundingClientRect' + data.widget + '_' + global.uniqId] =
-  //       c.boundingClientRect;
-  //   });
-  // });
-
-  const getScript = document.createElement('script');
-  getScript.id = 'interactive_js_adcode';
-  getScript.src = data.url ? data.url : url;
-  document.head.appendChild(getScript);
-  // loadScript(global, data.url || url);
+  var pathtoscript = data.url ? data.url : url;
+  loadScriptNew(pathtoscript, function() {
+    momagicAmp(data);
+  });
 }
