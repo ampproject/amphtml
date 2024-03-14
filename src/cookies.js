@@ -248,14 +248,19 @@ function checkOriginForSettingCookie(win, options, name) {
     );
     return;
   }
+  const metaTag =
+    win.document.head &&
+    win.document.head.querySelector("meta[name='runtime-host']");
+
   userAssert(
-    !isProxyOrigin(win.location.href),
+    !isProxyOrigin(win.location.href) || metaTag != null,
     `Should never attempt to set cookie on proxy origin: ${name}`
   );
   const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
   const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
+
   userAssert(
-    !(current == proxy || endsWith(current, '.' + proxy)),
+    !(current == proxy || endsWith(current, '.' + proxy)) || metaTag != null,
     'Should never attempt to set cookie on proxy origin. (in depth check): ' +
       name
   );
