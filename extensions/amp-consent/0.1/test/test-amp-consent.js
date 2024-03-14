@@ -4,7 +4,7 @@ import {xhrServiceForTesting} from '#service/xhr-impl';
 
 import {dev, user} from '#utils/log';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask, sleep} from '#testing/helpers';
 
 import {
   registerServiceBuilder,
@@ -1161,7 +1161,7 @@ describes.realWin(
 
         beforeEach(async () => {
           ampConsent.buildCallback();
-          await macroTask();
+          await sleep(50);
           managerSpy = env.sandbox.spy(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'

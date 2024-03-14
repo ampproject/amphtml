@@ -5,8 +5,8 @@
  */
 
 const {
-  skipDependentJobs: skipDependentJobs,
-  storeExperimentBuildToWorkspace,
+  skipDependentJobs,
+  storeBuildOutputToWorkspace,
   timedExecOrDie,
 } = require('./utils');
 const {experiment} = require('minimist')(process.argv.slice(2));
@@ -24,7 +24,7 @@ function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
   timedExecOrDie(`amp dist --fortesting ${defineFlag}`);
-  storeExperimentBuildToWorkspace(experiment);
+  storeBuildOutputToWorkspace();
 }
 
 /**

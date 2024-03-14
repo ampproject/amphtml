@@ -621,6 +621,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       consentString,
       consentStringType,
       gdprApplies,
+      gppSectionId,
     } = consentTuple;
 
     const tfcdFromSharedData = consentSharedData?.['doubleclick-tfcd'];
@@ -642,10 +643,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent':
-        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
-          ? consentString
-          : null,
+      'gdpr_consent': [
+        undefined,
+        CONSENT_STRING_TYPE.TCF_V1,
+        CONSENT_STRING_TYPE.TCF_V2,
+      ].includes(consentStringType)
+        ? consentString
+        : null,
       'addtl_consent': additionalConsent,
       'us_privacy':
         consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
@@ -653,6 +657,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           : null,
       'tfcd': combineConsentParams(tfcdFromSharedData, tfcdFromJson),
       'tfua': combineConsentParams(tfuaFromSharedData, tfuaFromJson),
+      'gpp':
+        consentStringType == CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM
+          ? consentString
+          : null,
+      'gpp_sid':
+        consentStringType == CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM
+          ? gppSectionId
+          : null,
     };
   }
 

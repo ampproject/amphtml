@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.4.7
+  browser-tools: circleci/browser-tools@1.4.8
   codecov: codecov/codecov@4.0.1
   node: circleci/node@5.2.0
 
@@ -11,27 +11,12 @@ push_and_pr_builds: &push_and_pr_builds
       ignore:
         - nightly
 
-push_builds_only: &push_builds_only
-  filters:
-    branches:
-      only:
-        - main
-        - /^amp-release-.*$/
-
 release_builds_only: &release_builds_only
   filters:
     branches:
       only:
         - nightly
         - /^amp-release-.*$/
-
-pr_builds_only: &pr_builds_only
-  filters:
-    branches:
-      ignore:
-        - main
-        - /^amp-release-.*$/
-        - nightly
 
 experiment_job: &experiment_job
   parameters:
@@ -41,6 +26,24 @@ experiment_job: &experiment_job
       enum: ['A', 'B', 'C']
   environment:
     FLAVOR: experiment<< parameters.exp >>
+
+dist_job: &dist_job
+  parameters:
+    module:
+      description: 'Whether to build Module or Nomodule'
+      type: enum
+      enum: ['Module', 'Nomodule']
+    purpose:
+      description: 'What is the downstream purpose of this build'
+      type: enum
+      enum: ['Test', 'Bundle Size']
+
+test_types_job: &test_types_job
+  parameters:
+    test_type:
+      description: 'Which test type to run'
+      type: enum
+      enum: ['Unit', 'Integration', 'End-to-End']
 
 executors:
   base-docker-small:
@@ -70,27 +73,24 @@ executors:
 
 commands:
   checkout_repo:
-    parameters:
-      save-git-cache:
-        description: 'True when this step should save the .git directory to the cache'
-        type: boolean
     steps:
       - restore_cache:
-          name: 'Restore Git Cache'
+          name: '♻️ Restore Git Cache'
           keys:
-            - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
-            - git-cache-{{ arch }}-v2-{{ .Branch }}-
-            - git-cache-{{ arch }}-v2-
+            - git-cache-{{ arch }}-v3-main-{{ .Revision }}
+            - git-cache-{{ arch }}-v3-main-
+            - git-cache-{{ arch }}-v3-
       - checkout
       - when:
-          condition: << parameters.save-git-cache >>
+          condition:
+            equal: ['main', << pipeline.git.branch >>]
           steps:
             - run:
-                name: 'Garbage Collection for Git'
+                name: '🗜️ Garbage Collection for Git'
                 command: git gc --auto
             - save_cache:
-                name: 'Save Git Cache'
-                key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+                name: '💾 Save Git Cache'
+                key: git-cache-{{ arch }}-v3-main-{{ .Revision }}
                 paths:
                   - .git
   setup_vm:
@@ -101,75 +101,75 @@ commands:
         default: false
       node-version:
         type: string
-        default: '18' # TODO(wg-infra): restore this to 'lts' once #39510 is fixed.
+        default: 'lts/*'
     steps:
       - unless:
           condition: << parameters.is-initializing-job >>
           steps:
-            - checkout_repo:
-                save-git-cache: false
+            - checkout_repo
             - attach_workspace:
                 at: /tmp
             - run:
-                name: 'Configure Temporary Workspace'
+                name: '⚙️ Configure Temporary Workspace'
                 command: |
                   mv /tmp/workspace /tmp/restored-workspace
                   mkdir -p /tmp/workspace
             - run:
-                name: 'Maybe Gracefully Halt'
+                name: '❓ Maybe Gracefully Halt'
                 command: /tmp/restored-workspace/maybe_gracefully_halt.sh
             - run:
-                name: 'Configure Development Environment'
+                name: '⚙️ Configure Development Environment'
                 command: |
                   ./.circleci/fetch_merge_commit.sh
                   ./.circleci/restore_build_output.sh
                   cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - restore_cache:
-          name: 'Restore nvm Cache'
+          name: '♻️ Restore nvm Cache'
           keys:
             - nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-
       - run:
-          name: 'Create .nvmrc file'
+          name: '♻️ Create .nvmrc file'
           command: echo << parameters.node-version >> > .nvmrc
       - node/install
       - when:
           condition: << parameters.is-initializing-job >>
           steps:
             - run:
-                name: 'Create nvm Cache Checksum File'
+                name: '⚙️ Create nvm Cache Checksum File'
                 command: node -v > ~/.node-version
             - save_cache:
-                name: 'Save nvm Cache'
+                name: '💾 Save nvm Cache'
                 key: nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-{{ checksum "~/.node-version" }}
                 paths:
                   - ~/.nvm/.cache
       - restore_cache:
-          name: 'Restore node_modules/ Cache'
+          name: '♻️ Restore node_modules/ Cache'
           keys:
             - node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
       - when:
           condition: << parameters.is-initializing-job >>
           steps:
             - run:
-                name: 'Install npm Packages'
+                name: '💿 Install npm Packages'
                 command: if [[ ! -d node_modules/ ]]; then npm ci; fi
             - save_cache:
-                name: 'Save node_modules/ Cache'
+                name: '💾 Save node_modules/ Cache'
                 key: node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
                 paths: node_modules/
   teardown_vm:
     steps:
       - persist_to_workspace:
+          name: '📁 Persist Temporary Workspace'
           root: /tmp
           paths:
             - workspace
   install_chrome:
     steps:
       - run:
-          name: 'Get Pinned Chrome Version'
+          name: '⚙️ Get Pinned Chrome Version'
           command: ./.circleci/get_pinned_chrome_version.sh
       - run:
-          name: 'Update list of available apt packages'
+          name: '💿 Update list of available apt packages'
           command: sudo apt update
       - browser-tools/install-chrome:
           # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
@@ -181,22 +181,22 @@ commands:
   install_edge:
     steps:
       - run:
-          name: 'Install Microsoft Edge'
+          name: '💿 Install Microsoft Edge'
           command: ./.circleci/install_microsoft_edge.sh
   enable_safari_automation:
     steps:
       - run:
-          name: 'Enable Safari Automation'
+          name: '⚙️ Enable Safari Automation'
           command: sudo /usr/bin/safaridriver --enable
   store_test_output:
     steps:
-      - store_artifacts:
-          path: result-reports
       - store_test_results:
+          name: '⬆️ Store Test Results'
           path: result-reports
   store_filelist:
     steps:
       - store_artifacts:
+          name: '⬆️ Store Artifact filelist.txt'
           path: /tmp/filelist.txt
   skip_on_push_builds:
     steps:
@@ -207,7 +207,7 @@ commands:
               value: << pipeline.git.branch >>
           steps:
             - run:
-                name: 'Skip Job on Push Builds'
+                name: '➡️ Skip Job on Push Builds'
                 command: circleci-agent step halt
 
 jobs:
@@ -215,16 +215,15 @@ jobs:
     executor:
       name: node-docker-medium
     steps:
-      - checkout_repo:
-          save-git-cache: true
+      - checkout_repo
       - run:
-          name: 'Initialize Repository'
+          name: '⚙️ Initialize Repository'
           command: ./.circleci/initialize_repo.sh
       - run:
-          name: 'Check Config'
+          name: '🔍 Check Config'
           command: ./.circleci/check_config.sh
       - run:
-          name: 'Initialize Workspace'
+          name: '⚙️ Initialize Temporary Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - setup_vm:
           is-initializing-job: true
@@ -233,8 +232,7 @@ jobs:
     executor:
       name: macos-medium
     steps:
-      - checkout_repo:
-          save-git-cache: true
+      - checkout_repo
       - setup_vm:
           is-initializing-job: true
   checks:
@@ -244,7 +242,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Checks ⭐'
+          name: '⭐⭐⭐ Checks ⭐⭐⭐'
           command: node build-system/pr-check/checks.js
       - teardown_vm
   unminified_build:
@@ -253,44 +251,37 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Unminified Build ⭐'
+          name: '⭐⭐⭐ Unminified Build ⭐⭐⭐'
           command: node build-system/pr-check/unminified-build.js
       - teardown_vm
-  nomodule_build_test:
+  dist:
     executor:
       name: node-docker-xlarge
+    <<: *dist_job
+    parallelism: 3
     steps:
       - setup_vm
       - run:
-          name: '⭐ Nomodule Build ⭐'
-          command: node build-system/pr-check/nomodule-build.js
+          name: '⭐⭐⭐ << parameters.module >> Build (<< parameters.purpose >>) ⭐⭐⭐'
+          command: node build-system/pr-check/dist.js --type "<< parameters.module >> Build (<< parameters.purpose >>)"
       - teardown_vm
-  module_build_test:
+  dist_3p:
     executor:
       name: node-docker-xlarge
+    <<: *dist_job
     steps:
       - setup_vm
+      - when:
+          condition:
+            and:
+              - equal: ['Module', <<parameters.module >>]
+              - equal: ['Test', <<parameters.purpose >>]
+          steps:
+            # Required in the edge case where we need to run `amp visual-diff --empty` in this step. See build-system/pr-check/dist.js for details.
+            - install_chrome
       - run:
-          name: '⭐ Module Build ⭐'
-          command: node build-system/pr-check/module-build.js
-      - teardown_vm
-  nomodule_build_bundle_size:
-    executor:
-      name: node-docker-xlarge
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐ Nomodule Build ⭐'
-          command: node build-system/pr-check/bundle-size-nomodule-build.js
-      - teardown_vm
-  module_build_bundle_size:
-    executor:
-      name: node-docker-xlarge
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐ Module Build ⭐'
-          command: node build-system/pr-check/bundle-size-module-build.js
+          name: '⭐⭐⭐ << parameters.module >> 3p Build (<< parameters.purpose >>) ⭐⭐⭐'
+          command: node build-system/pr-check/dist.js --type "<< parameters.module >> 3p Build (<< parameters.purpose >>)"
       - teardown_vm
   bundle_size:
     executor:
@@ -298,7 +289,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Bundle Size ⭐'
+          name: '⭐⭐⭐ Bundle Size ⭐⭐⭐'
           command: node build-system/pr-check/bundle-size.js
       - teardown_vm
   validator_tests:
@@ -310,7 +301,7 @@ jobs:
           name: 'Install Validator Dependencies'
           command: ./.circleci/install_validator_dependencies.sh
       - run:
-          name: '⭐ Validator Tests ⭐'
+          name: '⭐⭐⭐ Validator Tests ⭐⭐⭐'
           command: node build-system/pr-check/validator-tests.js
       - store_test_output
       - teardown_vm
@@ -319,8 +310,9 @@ jobs:
       name: node-docker-large
     steps:
       - setup_vm
+      - install_chrome
       - run:
-          name: '⭐ Visual Diff Tests ⭐'
+          name: '⭐⭐⭐ Visual Diff Tests ⭐⭐⭐'
           command: node build-system/pr-check/visual-diff-tests.js
       - store_test_output
       - teardown_vm
@@ -332,19 +324,19 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Local Unit Tests ⭐'
+          name: '⭐⭐⭐ Local Unit Tests ⭐⭐⭐'
           command: node build-system/pr-check/unit-tests-local.js
       - store_test_output
       - teardown_vm
   all_unit_tests:
     executor:
-      name: node-docker-medium
+      name: node-docker-large
     parallelism: 6
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ All Unit Tests ⭐'
+          name: '⭐⭐⭐ All Unit Tests ⭐⭐⭐'
           command: node build-system/pr-check/unit-tests.js
       - codecov/upload:
           file: test/coverage/lcov-unit.info
@@ -359,7 +351,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Unminified Tests ⭐'
+          name: '⭐⭐⭐ Unminified Tests ⭐⭐⭐'
           command: node build-system/pr-check/unminified-tests.js
       - codecov/upload:
           file: test/coverage/lcov-integration.info
@@ -378,7 +370,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Nomodule Tests (<< parameters.config >>) ⭐'
+          name: '⭐⭐⭐ Nomodule Tests (<< parameters.config >>) ⭐⭐⭐'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
@@ -394,19 +386,19 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Module Tests (<< parameters.config >>) ⭐'
+          name: '⭐⭐⭐ Module Tests (<< parameters.config >>) ⭐⭐⭐'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - store_test_output
       - teardown_vm
   end_to_end_tests:
     executor:
-      name: node-docker-medium
+      name: node-docker-large
     parallelism: 6
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ End-to-End Tests ⭐'
+          name: '⭐⭐⭐ End-to-End Tests ⭐⭐⭐'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
       - store_filelist
@@ -414,34 +406,37 @@ jobs:
   browser_tests_safari:
     executor:
       name: macos-medium
+    <<: *test_types_job
     steps:
       - setup_vm
       - enable_safari_automation
       - run:
-          name: '⭐ Browser Tests (Safari) ⭐'
-          command: node build-system/pr-check/browser-tests.js --browser=safari
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Safari) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=safari --type=<< parameters.test_type >>
       - store_test_output
       - teardown_vm
   browser_tests_firefox:
     executor:
       name: node-docker-medium
+    <<: *test_types_job
     steps:
       - setup_vm
       - install_firefox
       - run:
-          name: '⭐ Browser Tests (Firefox) ⭐'
-          command: node build-system/pr-check/browser-tests.js --browser=firefox
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Firefox) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=firefox --type=<< parameters.test_type >>
       - store_test_output
       - teardown_vm
   browser_tests_edge:
     executor:
       name: node-docker-medium
+    <<: *test_types_job
     steps:
       - setup_vm
       - install_edge
       - run:
-          name: '⭐ Browser Tests (Edge) ⭐'
-          command: node build-system/pr-check/browser-tests.js --browser=edge
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Edge) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=edge --type=<< parameters.test_type >>
       - store_test_output
       - teardown_vm
   experiment_build:
@@ -451,7 +446,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Experiment << parameters.exp >> Build ⭐'
+          name: '⭐⭐⭐ Experiment << parameters.exp >> Build ⭐⭐⭐'
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - teardown_vm
   experiment_integration_tests:
@@ -462,7 +457,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Experiment << parameters.exp >> Integration Tests ⭐'
+          name: '⭐⭐⭐ Experiment << parameters.exp >> Integration Tests ⭐⭐⭐'
           command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - teardown_vm
@@ -475,7 +470,7 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
+          name: '⭐⭐⭐ Experiment << parameters.exp >> End-to-End Tests ⭐⭐⭐'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - store_filelist
@@ -498,7 +493,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ amp release ⭐'
+          name: '⭐⭐⭐ amp release ⭐⭐⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
       - teardown_vm
   upload_release:
@@ -507,9 +502,10 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Upload Release Artifacts ⭐'
+          name: '⭐⭐⭐ Upload Release Artifacts (to Cloudflare R2) ⭐⭐⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
+          name: '⬆️ Upload Release Artifacts (to CircleCI)'
           path: /tmp/release.tar.gz
       - teardown_vm
   trigger_promote:
@@ -518,7 +514,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: '⭐ Trigger Promote Workflow ⭐'
+          name: '⭐⭐⭐ Trigger Promote Workflow ⭐⭐⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
       - teardown_vm
 
@@ -543,23 +539,21 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - nomodule_build_test:
-          name: 'Nomodule Build (Test)'
+      - dist:
+          matrix:
+            parameters:
+              module: ['Module', 'Nomodule']
+              purpose: ['Test', 'Bundle Size']
+          name: '⛓️ << matrix.module >> Build (<< matrix.purpose >>)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - module_build_test:
-          name: 'Module Build (Test)'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - nomodule_build_bundle_size:
-          name: 'Nomodule Build (Bundle Size)'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - module_build_bundle_size:
-          name: 'Module Build (Bundle Size)'
+      - dist_3p:
+          matrix:
+            parameters:
+              module: ['Module', 'Nomodule']
+              purpose: ['Test', 'Bundle Size']
+          name: '<< matrix.module >> 3p Build (<< matrix.purpose >>)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
@@ -567,8 +561,10 @@ workflows:
           name: 'Bundle Size'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Bundle Size)'
-            - 'Module Build (Bundle Size)'
+            - '⛓️ Nomodule Build (Bundle Size)'
+            - 'Nomodule 3p Build (Bundle Size)'
+            - '⛓️ Module Build (Bundle Size)'
+            - 'Module 3p Build (Bundle Size)'
       - validator_tests:
           name: 'Validator Tests'
           <<: *push_and_pr_builds
@@ -578,8 +574,10 @@ workflows:
           name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Module Build (Test)'
-            - 'Nomodule Build (Test)'
+            - '⛓️ Module Build (Test)'
+            - 'Module 3p Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - local_unit_tests:
           name: 'Local Unit Tests'
           <<: *push_and_pr_builds
@@ -602,7 +600,8 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - module_tests:
           name: 'Module Tests (<< matrix.config >>)'
           matrix:
@@ -610,29 +609,45 @@ workflows:
               config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Test)'
-            - 'Module Build (Test)'
+            - '⛓️ Module Build (Test)'
+            - 'Module 3p Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - end_to_end_tests:
           name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - browser_tests_safari:
-          name: 'Browser Tests (Safari)'
+          name: '<< matrix.test_type >> Tests (Safari)'
+          matrix:
+            parameters:
+              test_type: ['Unit', 'Integration', 'End-to-End']
           <<: *push_and_pr_builds
           requires:
             - 'Initialize for Mac OS'
-            - 'Nomodule Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - browser_tests_firefox:
-          name: 'Browser Tests (Firefox)'
+          name: '<< matrix.test_type >> Tests (Firefox)'
+          matrix:
+            parameters:
+              test_type: ['Unit', 'Integration', 'End-to-End']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - browser_tests_edge:
-          name: 'Browser Tests (Edge)'
+          name: '<< matrix.test_type >> Tests (Edge)'
+          matrix:
+            parameters:
+              # Note: we can't run e2e tests on Edge.
+              test_type: ['Unit', 'Integration']
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Test)'
+            - '⛓️ Nomodule Build (Test)'
+            - 'Nomodule 3p Build (Test)'
       - experiment_build:
           name: 'Experiment << matrix.exp >> Build'
           matrix:

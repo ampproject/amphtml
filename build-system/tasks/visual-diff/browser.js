@@ -3,44 +3,48 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {
-  Browser: BrowserEnum,
-  computeExecutablePath,
-  getInstalledBrowsers,
-  install,
-} = require('@puppeteer/browsers');
 const {cyan, yellow} = require('kleur/colors');
 const {HOST} = require('./consts');
 const {log} = require('./log');
 const puppeteer = require('puppeteer-core');
+const {getStdout} = require('../../common/process');
 
-const cacheDir = path.join(__dirname, '.cache');
-
-// REPEATING TODO(@ampproject/wg-infra): Update this whenever the Percy backend
-// starts using a new version of Chrome to render DOM snapshots.
-//
-// Steps:
-// 1. Open a recent Percy build, and click the “ⓘ” icon
-// 2. Note the Chrome major version at the bottom
-// 3. Open https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json
-// 4. In this JSON file look for the latest full version number that begins
-//    with the same major version number you noted in step 2. The list is
-//    ordered from earliest to latest version numbers.
-// 5. Update the value below:
-const PUPPETEER_CHROME_VERSION = '115.0.5790.170';
+const CHROME_BASENAMES = [
+  'chrome',
+  'google-chrome',
+  'google-chrome-stable',
+  'chromium',
+];
 
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 
 /**
+ * Attempts to locale the full executable path for Chrome/Chromium.
+ * @return {string}
+ */
+function locateChromeExecutablePath() {
+  if (argv.executablePath) {
+    return argv.executablePath;
+  }
+  for (const executableBaseName of CHROME_BASENAMES) {
+    const executablePath = getStdout(`which ${executableBaseName}`).trim();
+    if (executablePath) {
+      return executablePath;
+    }
+  }
+  throw new Error(
+    `Could not locate Chrome/Chromium executable. Make sure it is on your $PATH (looking for any of {${CHROME_BASENAMES.join(', ')}}) or pass --executablePath to amp visual-diff`
+  );
+}
+
+/**
  * Launches a Puppeteer controlled browser.
  *
- * @param {string} executablePath browser executable path.
  * @return {!Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
  */
-async function launchBrowser(executablePath) {
-  /** @type {"new" | false} */
-  const headless = !argv.dev && 'new';
+async function launchBrowser() {
+  /** @type {import('puppeteer-core').PuppeteerLaunchOptions} */
   const browserOptions = {
     args: [
       '--disable-background-media-suspend',
@@ -53,8 +57,8 @@ async function launchBrowser(executablePath) {
       '--no-startup-window',
     ],
     dumpio: argv.chrome_debug,
-    headless,
-    executablePath,
+    headless: !!argv.dev,
+    executablePath: locateChromeExecutablePath(),
     waitForInitialPage: false,
   };
   return puppeteer.launch(browserOptions);
@@ -71,7 +75,7 @@ async function launchBrowser(executablePath) {
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
 
-  const context = await browser.createIncognitoBrowserContext();
+  const context = await browser.createBrowserContext();
   const page = await context.newPage();
   page.setDefaultNavigationTimeout(0);
   await page.setJavaScriptEnabled(true);
@@ -142,62 +146,9 @@ async function resetPage(page, viewport = null) {
   await page.setViewport({width, height});
 }
 
-/**
- * Returns the executable path of the browser, potentially installing and caching it.
- *
- * @return {Promise<string>}
- */
-async function fetchBrowserExecutablePath() {
-  const installedBrowsers = await getInstalledBrowsers({cacheDir});
-  const installedBrowser = installedBrowsers.find(
-    ({browser, buildId}) =>
-      browser == BrowserEnum.CHROME && buildId == PUPPETEER_CHROME_VERSION
-  );
-  if (installedBrowser) {
-    log(
-      'info',
-      'Using cached Percy-compatible version of Chrome',
-      cyan(PUPPETEER_CHROME_VERSION)
-    );
-  } else {
-    log(
-      'info',
-      'Percy-compatible version of Chrome',
-      cyan(PUPPETEER_CHROME_VERSION),
-      'was not found in cache. Downloading...'
-    );
-    let logThrottler = true;
-    await install({
-      cacheDir,
-      browser: BrowserEnum.CHROME,
-      buildId: PUPPETEER_CHROME_VERSION,
-      downloadProgressCallback(downloadedBytes, totalBytes) {
-        if (logThrottler) {
-          log('info', downloadedBytes, '/', totalBytes, 'bytes');
-          logThrottler = false;
-          setTimeout(() => {
-            logThrottler = true;
-          }, 1000);
-        } else if (downloadedBytes == totalBytes) {
-          log(
-            'info',
-            'Finished downloading Chrome version',
-            cyan(PUPPETEER_CHROME_VERSION)
-          );
-        }
-      },
-    });
-  }
-  return computeExecutablePath({
-    cacheDir,
-    browser: BrowserEnum.CHROME,
-    buildId: PUPPETEER_CHROME_VERSION,
-  });
-}
-
 module.exports = {
+  locateChromeExecutablePath,
   launchBrowser,
-  fetchBrowserExecutablePath,
   newPage,
   resetPage,
 };
