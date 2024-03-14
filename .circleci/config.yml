@@ -126,22 +126,24 @@ commands:
       - restore_cache:
           name: '♻️ Restore nvm Cache'
           keys:
-            - nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-
+            - nvm-cache-{{ arch }}-vX_20240227.0-<< parameters.node-version >>-
       - run:
-          name: '♻️ Create .nvmrc file'
-          command: echo << parameters.node-version >> > .nvmrc
+          name: '⚙️ Configure nvm Installation'
+          command: |
+            echo << parameters.node-version >> > .nvmrc
+            if [[ -f ~/.nvm/install.sh ]]; then ~/.nvm/install.sh; fi
       - node/install
       - when:
           condition: << parameters.is-initializing-job >>
           steps:
             - run:
                 name: '⚙️ Create nvm Cache Checksum File'
-                command: node -v > ~/.node-version
+                command: echo nvm:$(nvm -v) node:$(node -v) > ~/.nvm-node-cache-key
             - save_cache:
                 name: '💾 Save nvm Cache'
-                key: nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-{{ checksum "~/.node-version" }}
+                key: nvm-cache-{{ arch }}-vX_20240227.0-<< parameters.node-version >>-{{ checksum "~/.nvm-node-cache-key" }}
                 paths:
-                  - ~/.nvm/.cache
+                  - ~/.nvm
       - restore_cache:
           name: '♻️ Restore node_modules/ Cache'
           keys:
