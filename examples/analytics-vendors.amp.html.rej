@@ -1,0 +1,30 @@
+--- examples/analytics-vendors.amp.html
++++ examples/analytics-vendors.amp.html
+@@ -126,6 +126,7 @@
+       <option>top100</option>
+       <option>topmailru</option>
+       <option>treasuredata</option>
++      <option>tribooanalytics</option>
+       <option>umenganalytics</option>
+       <option>upscore</option>
+       <option>vponanalytics</option>
+@@ -1967,6 +1968,19 @@ For complete documentation and additional examples please see: https://marketing
+ </amp-analytics>
+ <!-- End Treasure Data example -->
+ 
++<!-- tribooanalytics example -->
++<amp-analytics type="tribooanalytics" id="tribooanalytics">
++<script type="application/json">
++  {
++    "vars": {
++      "account": "amptest",
++      "page": "Home page"
++    }
++  }
++</script>
++</amp-analytics>
++<!-- End tribooanalytics Example -->
++
+ <!-- Webtrekk tracking -->
+ <amp-analytics type="webtrekk" id="webtrekk">
+ <script type="application/json">
