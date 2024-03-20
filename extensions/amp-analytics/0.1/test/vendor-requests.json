@@ -561,6 +561,16 @@
     "pageview": "https://in.treasuredata.com/postback/v3/event/!database/events?td_write_key=!writeKey&td_global_id=td_global_id&td_client_id=_client_id(_td)_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip",
     "event": "https://in.treasuredata.com/postback/v3/event/!database/events?td_write_key=!writeKey&td_global_id=td_global_id&td_client_id=_client_id(_td)_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip"
   },
+  "tribooanalytics": {
+    "base": "https://amp.tribooanalytics.com/cgi-bin/ampta.cgi",
+    "commpar": "AMP=1&RM=_random_&USER=!account&PAG=!page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id(AMP_CID)_&PAGID=_page_view_id_&TITL=_title_&RQC=1",
+    "pagepar": "&VIE=_viewer_&PLT=_page_load_time_",
+    "eventpar": "&SSXL=1",
+    "linkpar": "&LINK=!outboundLink",
+    "pageview": "https://amp.tribooanalytics.com/cgi-bin/ampta.cgi?AMP=1&RM=_random_&USER=!account&PAG=!page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id(AMP_CID)_&PAGID=_page_view_id_&TITL=_title_&RQC=1&VIE=_viewer_&PLT=_page_load_time_",
+    "event": "https://amp.tribooanalytics.com/cgi-bin/ampta.cgi?AMP=1&RM=_random_&USER=!account&PAG=!page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id(AMP_CID)_&PAGID=_page_view_id_&TITL=_title_&RQC=1&SSXL=1",
+    "link": "https://amp.tribooanalytics.com/cgi-bin/ampta.cgi?AMP=1&RM=_random_&USER=!account&PAG=!page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id(AMP_CID)_&PAGID=_page_view_id_&TITL=_title_&RQC=1&LINK=!outboundLink"
+  },
   "umenganalytics": {
     "base": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id(umeng_amp_id)_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time",
     "pageview": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id(umeng_amp_id)_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time&_ename=$w_page_view&_eprops=!eventProps",
