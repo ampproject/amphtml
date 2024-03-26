@@ -184,12 +184,34 @@ function circleciPrMergeCommit() {
 }
 
 /**
- * Returns an identifier that is unique to each CircleCI job. This is different
- * from the workflow ID, which is common across all jobs in a workflow.
+ * Returns an identifier that is unique to each CircleCI build, discerning for
+ * parallelized builds
+ *
+ * Note that this is different from the workflow ID, which is common across all,
+ * and also different from the build number, which is common across parallelized
+ * builds.
  * @return {string}
  */
-function circleciBuildNumber() {
-  return isCircleci ? env('CIRCLE_BUILD_NUM') : '';
+function circleciUniqueBuildNumber() {
+  return isCircleci
+    ? `${env('CIRCLE_BUILD_NUM')}.${env('CIRCLE_NODE_INDEX')}`
+    : '';
+}
+
+/**
+ * Returns true for parallelized CircleCI builds.
+ * @return {boolean}
+ */
+function circleciIsParallelized() {
+  return isCircleci && env('CIRCLE_NODE_TOTAL') != '1';
+}
+
+/**
+ * Returns the parallelized build's shard number.
+ * @return {number}
+ */
+function circleciNodeIndex() {
+  return isCircleci ? Number(env('CIRCLE_NODE_INDEX')) : 0;
 }
 
 /**
@@ -222,7 +244,9 @@ module.exports = {
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
-  circleciBuildNumber,
+  circleciUniqueBuildNumber,
+  circleciIsParallelized,
+  circleciNodeIndex,
   circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,

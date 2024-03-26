@@ -1259,6 +1259,21 @@ for (const {config, name} of [
             expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
           });
         });
+
+        it('should include gpp, if consentStringType is GLOBAL_PRIVACY_PLATFORM', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          return impl
+            .getAdUrl({
+              consentStringType: CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM,
+              consentString: 'gppString',
+              gppSectionId: '1,2',
+            })
+            .then((url) => {
+              expect(url).to.match(/(\?|&)gpp=gppString(&|$)/);
+              expect(url).to.match(/(\?|&)gpp_sid=1%2C2(&|$)/);
+              expect(url).to.not.match(/(\?|&)us_privacy=/);
+            });
+        });
       });
 
       describe('#getPageParameters', () => {

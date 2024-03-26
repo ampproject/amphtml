@@ -150,7 +150,7 @@ TEST(ParseSrcsetTest, LeadingAndTrailingCommasAndCommasInUrl) {
               EqCandidates({{"example.com/,/,/,/,50w", "1x"}}));
 }
 
-TEST(ParseSrcsetTest, NoWhitespace) {
+TEST(ParseSrcsetTest, NoWhitepsace) {
   SrcsetParsingResult result = ParseSourceSet("image 100w,image 50w");
   EXPECT_TRUE(result.success);
   EXPECT_THAT(result.srcset_images,

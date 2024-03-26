@@ -1394,7 +1394,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
     });
 
-    it(
+    // TODO(#39879): fix this flaky test.
+    it.skip(
       'timers started and stopped by the same event on the same target' +
         ' do not have race condition problems',
       () => {

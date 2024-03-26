@@ -5,10 +5,10 @@
   "description": "amp e2e",
   "devDependencies": {
     "@babel/register": "7.23.7",
-    "@types/selenium-webdriver": "4.1.21",
+    "@types/selenium-webdriver": "4.1.22",
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "119.0.1",
-    "geckodriver": "4.3.1",
-    "selenium-webdriver": "4.17.0"
+    "geckodriver": "4.3.3",
+    "selenium-webdriver": "4.18.1"
   }
 }
