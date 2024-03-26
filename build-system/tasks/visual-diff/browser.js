@@ -57,7 +57,7 @@ async function launchBrowser() {
       '--no-startup-window',
     ],
     dumpio: argv.chrome_debug,
-    headless: !argv.dev && 'new',
+    headless: !!argv.dev,
     executablePath: locateChromeExecutablePath(),
     waitForInitialPage: false,
   };
@@ -75,7 +75,7 @@ async function launchBrowser() {
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
 
-  const context = await browser.createIncognitoBrowserContext();
+  const context = await browser.createBrowserContext();
   const page = await context.newPage();
   page.setDefaultNavigationTimeout(0);
   await page.setJavaScriptEnabled(true);
