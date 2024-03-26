@@ -53,9 +53,5 @@
       "fileMatch": ["test/visual-diff/visual-tests.jsonc"],
       "url": "./build-system/json-schemas/visual-tests.json"
     }
-  ],
-  "editor.bracketPairColorization.enabled": true,
-  "accessibility.accessibleView.closeOnKeyPress": true,
-  "editor.guides.indentation": true,
-  "editor.guides.highlightActiveBracketPair": true
+  ]
 }
