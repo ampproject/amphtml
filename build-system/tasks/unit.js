@@ -22,9 +22,11 @@ class Runner extends RuntimeTestRunner {
 
   /** @override */
   async maybeBuild() {
+    console.log('QWEQWEQWE: maybeBuild() start');
     await analyticsVendorConfigs();
     await css();
     await compileJison();
+    console.log('QWEQWEQWE: maybeBuild() end');
   }
 }
 
@@ -39,10 +41,17 @@ async function unit() {
 
   const config = new RuntimeTestConfig('unit');
   const runner = new Runner(config);
+  console.log('QWEQWEQWE: unit():', {config, runner});
 
+  console.log('QWEQWEQWE: runner.setup(): start');
   await runner.setup();
+  console.log('QWEQWEQWE: runner.setup(): end; runner.run() start');
   await runner.run();
+  console.log(
+    'QWEQWEQWE: runner.setup(): runner.run() end; runner.teardown() start'
+  );
   await runner.teardown();
+  console.log('QWEQWEQWE: runner.teardown(): end');
 }
 
 module.exports = {

@@ -181,7 +181,16 @@ async function createKarmaServer(config) {
 
   karmaServer
     .on('browser_start', karmaBrowserStart_)
-    .on('browser_complete', karmaBrowserComplete_);
+    .on('browser_complete', karmaBrowserComplete_)
+    .on('browser_error', (browser, err) => {
+      console.error('QWEQWEQWE:', browser, err);
+    })
+    .on('browser_register', (browser) => {
+      console.log('QWEQWEQWE: A new browser was registered', browser);
+    })
+    .on('run_complete', (browsers, results) => {
+      console.log('QWEQWEQWE: Run completed:', browsers, results);
+    });
 
   karmaServer.start();
 
