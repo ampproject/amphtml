@@ -42,19 +42,17 @@ const babelTransforms = new Map([
  * @return {!Object}
  */
 module.exports = function (api) {
-  const callerName = api.caller((callerObj) => {
-    return callerObj ? callerObj.name : '<unnamed>';
-  });
-  if (callerName && babelTransforms.has(callerName)) {
-    const configFunctionName = babelTransforms.get(callerName);
-    return require('./build-system/babel-config')[configFunctionName]();
-  } else {
+  const callerName = api.caller((callerObj) => callerObj?.name || '');
+  if (!babelTransforms.has(callerName)) {
     log(
       yellow('WARNING:'),
       'Unrecognized Babel caller',
-      cyan(callerName),
+      cyan(callerName || '<unknown>'),
       '(see babel.config.js).'
     );
-    return {};
+    throw new Error(`Unrecognized Babel caller ${callerName || '<unknown>'}`);
   }
+
+  const configFunctionName = babelTransforms.get(callerName);
+  return require('./build-system/babel-config')[configFunctionName]();
 };

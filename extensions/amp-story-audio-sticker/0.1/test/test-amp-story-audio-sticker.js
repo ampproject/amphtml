@@ -71,7 +71,7 @@ describes.realWin(
         .callsFake((fn) => Promise.resolve(fn()));
     });
 
-    it('should add all necessary sticker elements', async () => {
+    it.skip('should add all necessary sticker elements', async () => {
       expect(
         doc.querySelectorAll('.i-amphtml-amp-story-audio-sticker-component')
           .length

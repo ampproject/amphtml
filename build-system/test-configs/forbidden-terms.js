@@ -823,6 +823,7 @@ const forbiddenTermsSrcInclusive = {
       ' Please use UTF8 utilities from src/bytes.js',
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
+      'build-system/common/esbuild-babel.js',
       'examples/pwa/pwa.js',
       'src/core/dom/stream/response.js',
       'src/core/types/string/bytes.js',
