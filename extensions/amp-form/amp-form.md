@@ -595,16 +595,6 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
-### `enctype`
-
-The enctype attribute specifies how form-data should be encoded before sending it to the server via the `method=POST` submission. The default encoding is set to `multipart/form-data`. This and `application/x-www-form-urlencoded` encoding types are currently supported.
-
-Summary of enctype values:
-
--   `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
--   `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
--   `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
-
 ### `data-initialize-from-url`
 
 Initializes form fields from the window URL's search string, where the query parameter name matches the field's name. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields can optionally be initialized.
@@ -635,6 +625,16 @@ Specifies that a prefix should be stripped prior to parsing the fetched json fro
 This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
 [/filter] <!-- formats="websites, ads" -->
+
+### `enctype`
+
+The enctype attribute specifies how form-data should be encoded before sending it to the server via the `method=POST` submission. The default encoding is set to `multipart/form-data`. This and `application/x-www-form-urlencoded` encoding types are currently supported.
+
+Summary of enctype values:
+
+-   `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
+-   `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
+-   `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
 
 ### Other form attributes
 
