@@ -1035,7 +1035,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     // Set up the __tcfApiLocator window to signal postMessage support
     const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('title', this.element.title || 'AMP Consent');
+    iframe.setAttribute('title', this.element.title || 'Consent Banner');
     iframe.setAttribute('name', TCF_API_LOCATOR);
     iframe.setAttribute('aria-hidden', 'true');
     toggle(iframe, false);
