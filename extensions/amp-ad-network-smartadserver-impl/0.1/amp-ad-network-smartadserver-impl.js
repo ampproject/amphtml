@@ -163,7 +163,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
               '_ga',
               parseInt(opt_timeout, 10)
             )
-          : undefined,
+          : Promise.resolve(undefined),
       ATTR: (name) => {
         if (!allowed[name]) {
           dev().warn(TAG, `Invalid attribute ${name}`);

@@ -2406,10 +2406,10 @@ export class AmpA4A extends AMP.BaseElement {
     const hasStorageConsent =
       consentState != CONSENT_POLICY_STATE.UNKNOWN &&
       consentState != CONSENT_POLICY_STATE.INSUFFICIENT &&
-      ((consentMetadata.gdprApplies &&
+      ((consentMetadata?.gdprApplies &&
         consentString &&
-        consentMetadata.purposeOne) ||
-        !consentMetadata.gdprApplies);
+        consentMetadata?.purposeOne) ||
+        !consentMetadata?.gdprApplies);
     if (this.element.getAttribute('rtc-config')) {
       installRealTimeConfigServiceForDoc(this.getAmpDoc());
       return this.getBlockRtc_().then((shouldBlock) =>

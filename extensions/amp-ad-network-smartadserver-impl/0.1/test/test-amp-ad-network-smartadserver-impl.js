@@ -113,7 +113,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
 
       impl = new AmpAdNetworkSmartadserverImpl(element, env.win.doc, win);
       const docInfo = Services.documentInfoForDoc(element);
-      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/false);
 
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
       expect(customMacros.PAGEVIEWID_64()).to.equal(docInfo.pageViewId64);
@@ -156,6 +156,16 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         macros['not-allowed']
       );
       expect(customMacros.ATTR('not-allowed')).to.equal('');
+    });
+
+    it('should not set adcid if no storage consent', () => {
+      element = createElementWithAttributes(doc, 'amp-ad');
+      impl = new AmpAdNetworkSmartadserverImpl(element);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/false);
+
+      return customMacros.ADCID().then((adcid) => {
+        expect(adcid).to.be.undefined;
+      });
     });
   });
 

@@ -978,7 +978,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               '_ga',
               parseInt(opt_timeout, 10)
             )
-          : undefined,
+          : Promise.resolve(undefined),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
           dev().warn(TAG, `Invalid attribute ${name}`);
