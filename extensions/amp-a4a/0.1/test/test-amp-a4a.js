@@ -3566,7 +3566,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
       purposeOne: true,
       hasStorageConsent: false,
     },
-    // Insufficient consent
+    // GDPR doesn't apply
     {
       consentState: CONSENT_POLICY_STATE.SUFFICIENT,
       gdprApplies: false,
