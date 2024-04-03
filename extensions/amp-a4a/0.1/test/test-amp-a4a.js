@@ -2812,6 +2812,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           'consentStringType': 1,
           'additionalConsent': 'abc123',
           purposeOne: true,
+          'gppSectionId': '1,2',
         };
         consentSharedData = {
           'doubleclick-tfcd': 1,
@@ -2859,6 +2860,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             additionalConsent: consentMetadata['additionalConsent'],
             consentSharedData,
             purposeOne: consentMetadata['purposeOne'],
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2916,6 +2918,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             additionalConsent: consentMetadata['additionalConsent'],
             consentSharedData,
             purposeOne: consentMetadata['purposeOne'],
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2967,6 +2970,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             additionalConsent: null,
             consentSharedData: null,
             purposeOne: null,
+            gppSectionId: null,
           })
         ).calledOnce;
         expect(

@@ -1,11 +1,13 @@
 'use strict';
 
+const {sleep} = require('../../../build-system/tasks/visual-diff/helpers');
+
 module.exports = {
   'shows half-half template with image on the left': async (
-    page,
+    unusedPage,
     unusedName
   ) => {
-    await page.waitForTimeout(1600);
+    await sleep(1600);
   },
   'shows half-half template with image on the right': async (
     page,

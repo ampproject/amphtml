@@ -271,6 +271,14 @@ jobs:
     <<: *dist_job
     steps:
       - setup_vm
+      - when:
+          condition:
+            and:
+              - equal: ['Module', <<parameters.module >>]
+              - equal: ['Test', <<parameters.purpose >>]
+          steps:
+            # Required in the edge case where we need to run `amp visual-diff --empty` in this step. See build-system/pr-check/dist.js for details.
+            - install_chrome
       - run:
           name: '⭐⭐⭐ << parameters.module >> 3p Build (<< parameters.purpose >>) ⭐⭐⭐'
           command: node build-system/pr-check/dist.js --type "<< parameters.module >> 3p Build (<< parameters.purpose >>)"
@@ -322,7 +330,7 @@ jobs:
       - teardown_vm
   all_unit_tests:
     executor:
-      name: node-docker-medium
+      name: node-docker-large
     parallelism: 6
     steps:
       - setup_vm
@@ -384,7 +392,7 @@ jobs:
       - teardown_vm
   end_to_end_tests:
     executor:
-      name: node-docker-medium
+      name: node-docker-large
     parallelism: 6
     steps:
       - setup_vm

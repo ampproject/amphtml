@@ -164,7 +164,8 @@ info = JSON.parse(window.name);
   "consentStringType": {enum} [1: TCF V1, 2: TCF V2, 3: US Privacy String] (optional),
   "gdprApplies": {boolean} (optional),
   "additionalConsent": {string} (optional),
-  "purposeOne": {boolean} (optional)
+  "purposeOne": {boolean} (optional),
+  "gppSectionId": {string} (optional)
 }
 ```
 
