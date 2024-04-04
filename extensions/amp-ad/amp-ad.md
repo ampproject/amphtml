@@ -314,6 +314,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Baidu](../../ads/vendors/baidu.md)
 -   [BeaverAds](../../ads/vendors/beaverads.md)
 -   [BeOpinion](../amp-beopinion/amp-beopinion.md)
+-   [Bidgear](../../ads/vendors/bidgear.md)
 -   [Bidtellect](../../ads/vendors/bidtellect.md)
 -   [Blade](../../ads/vendors/blade.md)
 -   [brainy](../../ads/vendors/brainy.md)

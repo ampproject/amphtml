@@ -1573,6 +1573,11 @@ const adConfig = jsonConfiguration({
   },
 
   'sulvo': {},
+
+  'bidgear': {
+    prefetch: 'https://platform.bidgear.com/bidgear-amp.js',
+    renderStartImplemented: true,
+  },
 });
 
 export {adConfig};
