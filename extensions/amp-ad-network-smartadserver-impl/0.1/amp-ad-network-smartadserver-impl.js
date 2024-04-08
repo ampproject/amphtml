@@ -25,8 +25,11 @@ import {Services} from '#service';
 import {dev} from '#utils/log';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getConsentPolicyInfo} from '../../../src/consent';
+import {getConsentPolicyInfo, getConsentDataToForward} from '../../../src/consent';
 import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
+import {getContextMetadata} from '../../../src/iframe-attributes';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+
 
 /** @type {string} */
 const TAG = 'amp-ad-network-smartadserver-impl';
@@ -42,6 +45,8 @@ const TRUNCATION_PARAM = {
   name: 'trunc',
   value: 1,
 };
+/** @const {object} */
+const consent = null;
 
 /** @final */
 export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
@@ -58,6 +63,29 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     this.exTgt_ = '';
 
     this.addListener();
+    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consentData) => {
+        this.consent = consentData;
+    });
+  }
+
+  /** @override */
+renderViaIframeGet_(adUrl) {
+    this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
+    const contextMetadata = getContextMetadata(
+      this.win,
+      this.element,
+      this.sentinel,
+      {'consentSharedData': this.consent}
+    );
+
+    const intersection = this.element.getIntersectionChangeEntry();
+    contextMetadata['_context']['initialIntersection'] =
+      intersectionEntryToJson(intersection);
+    return this.iframeRenderHelper_({
+      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'name': JSON.stringify(contextMetadata),
+    });
   }
 
   /** @override */

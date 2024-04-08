@@ -173,6 +173,21 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
     });
   });
 
+  describe('renderViaIframeGet_', () => {
+    it('should call maybeTriggerAnalyticsEvent_', async () => {
+     const spy = env.sandbox.spy(impl, 'maybeTriggerAnalyticsEvent_');
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        width: '300',
+        height: '250',
+        type: 'smartadserver',
+      });
+      impl = new AmpAdNetworkSmartadserverImpl(element);
+      expect(spy.called).to.be.false;
+      impl.renderViaIframeGet_("fakeURL");
+      expect(spy.called).to.be.true;
+    });
+  });
+
   describe('getAdUrl', () => {
     it('should return proper url with vendor(default) data', async () => {
       element = createElementWithAttributes(doc, 'amp-ad', {
