@@ -874,7 +874,7 @@ const adConfig = jsonConfiguration({
 
   'momagic': {
     prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-    preconnect: ['https://1437953666.rsc.cdn77.org/'],
+    preconnect: ['https://amp.truereach.co.in/'],
   },
 
   'monetizer101': {

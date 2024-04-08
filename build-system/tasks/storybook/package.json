@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "amp storybook task",
   "devDependencies": {
-    "@babel/core": "7.24.0",
-    "@babel/preset-react": "7.23.3",
-    "@storybook/addon-a11y": "7.6.17",
-    "@storybook/addon-controls": "7.6.17",
-    "@storybook/addon-viewport": "7.6.17",
+    "@babel/core": "7.24.3",
+    "@babel/preset-react": "7.24.1",
+    "@storybook/addon-a11y": "8.0.5",
+    "@storybook/addon-controls": "8.0.5",
+    "@storybook/addon-viewport": "8.0.5",
     "babel-loader": "9.1.3"
   }
 }

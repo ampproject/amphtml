@@ -40,7 +40,7 @@
     "karma-chrome-launcher": "3.2.0",
     "karma-jasmine": "5.1.0",
     "npm-run-all2": "6.1.2",
-    "rollup": "4.13.0",
+    "rollup": "4.14.0",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-filesize": "10.0.0",
     "rollup-plugin-ignore": "1.0.10",

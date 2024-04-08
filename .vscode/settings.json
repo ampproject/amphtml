@@ -13,6 +13,8 @@
     "*.schema.json": "jsonc"
   },
 
+  "files.insertFinalNewline": true,
+
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
   // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
   "editor.codeActionsOnSave": {
@@ -53,9 +55,5 @@
       "fileMatch": ["test/visual-diff/visual-tests.jsonc"],
       "url": "./build-system/json-schemas/visual-tests.json"
     }
-  ],
-  "editor.bracketPairColorization.enabled": true,
-  "accessibility.accessibleView.closeOnKeyPress": true,
-  "editor.guides.indentation": true,
-  "editor.guides.highlightActiveBracketPair": true
+  ]
 }

@@ -46,7 +46,7 @@ export function momagic(global, data) {
     script.src = url;
     document.getElementsByTagName("head")[0].appendChild(script);
   }
-
+  // Path to Script
   var pathtoscript = data.url ? data.url : url;
   loadScriptNew(pathtoscript, function() {
     momagicAmpInit(data);

@@ -399,6 +399,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [MicroAd](../../ads/vendors/microad.md)
 -   [MixiMedia](../../ads/vendors/miximedia.md)
 -   [Mixpo](../../ads/vendors/mixpo.md)
+-   [Momagic](../../ads/vendors/momagic.md)
 -   [Monetizer101](../../ads/vendors/monetizer101.md)
 -   [mox](../../ads/vendors/mox.md)
 -   [my6Sense](../../ads/vendors/my6sense.md)
@@ -548,4 +549,3 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Yahoo Native Ads](../../ads/vendors/yahoonativeads.md)
 -   [Zen](../../ads/vendors/zen.md)
 -   [ZergNet](../../ads/vendors/zergnet.md)
--   [Momagic](../../ads/vendors/momagic.md)
