@@ -430,7 +430,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
       );
       const docViewport = Services.viewportForDoc(impl.getAmpDoc());
       impl.populateAdUrlState();
-      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/true);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ true
+      );
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
       expect(customMacros.PAGEVIEWID_64()).to.equal(docInfo.pageViewId64);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
@@ -469,7 +471,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
         env.win
       );
       impl.populateAdUrlState();
-      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/true);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ true
+      );
       let adcid;
       return customMacros.ADCID().then((adcid1) => {
         adcid = adcid1;
@@ -491,7 +495,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
         env.win
       );
       impl.populateAdUrlState();
-      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/false);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ false
+      );
       return customMacros.ADCID().then((adcid) => {
         expect(adcid).to.be.undefined;
       });
@@ -508,7 +514,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
         env.win
       );
       impl.populateAdUrlState();
-      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/true);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ true
+      );
       return customMacros.ADCID(0).then((adcid) => {
         expect(adcid).to.be.undefined;
       });
@@ -527,7 +535,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
       impl.populateAdUrlState();
       const viewer = Services.viewerForDoc(impl.getAmpDoc());
       env.sandbox.stub(viewer, 'getReferrerUrl').returns(new Promise(() => {}));
-      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/true);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ true
+      );
       return expect(customMacros.REFERRER(0)).to.eventually.be.undefined;
     });
 
@@ -545,7 +555,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
         env.win
       );
       impl.populateAdUrlState();
-      const customMacros = impl.getCustomRealTimeConfigMacros_(/*hasStorageConsent=*/true);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ true
+      );
       expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
     });
   });

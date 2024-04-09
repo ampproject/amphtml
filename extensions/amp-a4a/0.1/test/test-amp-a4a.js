@@ -3546,67 +3546,85 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
 
     beforeEach(() => {
       element.setAttribute('rtc-config', true);
-      getCustomRealTimeConfigMacrosSpy = env.sandbox.spy(a4a, 'getCustomRealTimeConfigMacros_');
+      getCustomRealTimeConfigMacrosSpy = env.sandbox.spy(
+        a4a,
+        'getCustomRealTimeConfigMacros_'
+      );
     });
 
-    for (const {consentState, gdprApplies, consentString, purposeOne, hasStorageConsent} of [
-    // Unknown consent
-    {
-      consentState: CONSENT_POLICY_STATE.UNKNOWN,
-      gdprApplies: true,
-      consentString: 'string',
-      purposeOne: true,
-      hasStorageConsent: false,
-    },
-    // Insufficient consent
-    {
-      consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
-      gdprApplies: true,
-      consentString: 'string',
-      purposeOne: true,
-      hasStorageConsent: false,
-    },
-    // GDPR doesn't apply
-    {
-      consentState: CONSENT_POLICY_STATE.SUFFICIENT,
-      gdprApplies: false,
-      consentString: '',
-      purposeOne: false,
-      hasStorageConsent: true,
-    },
-    // No consent string
-    {
-      consentState: CONSENT_POLICY_STATE.SUFFICIENT,
-      gdprApplies: true,
-      consentString: '',
-      purposeOne: true,
-      hasStorageConsent: false,
-    },
-    // no purpose one consent
-    {
-      consentState: CONSENT_POLICY_STATE.SUFFICIENT,
-      gdprApplies: true,
-      consentString: 'string',
-      purposeOne: false,
-      hasStorageConsent: false,
-    },
-    // GDPR applies and all prerequisite satisfied
-    {
-      consentState: CONSENT_POLICY_STATE.SUFFICIENT,
-      gdprApplies: true,
-      consentString: 'string',
-      purposeOne: true,
-      hasStorageConsent: true,
-    },
+    for (const {
+      consentState,
+      consentString,
+      gdprApplies,
+      hasStorageConsent,
+      purposeOne,
+    } of [
+      // Unknown consent
+      {
+        consentState: CONSENT_POLICY_STATE.UNKNOWN,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // Insufficient consent
+      {
+        consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // GDPR doesn't apply
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: false,
+        consentString: '',
+        purposeOne: false,
+        hasStorageConsent: true,
+      },
+      // No consent string
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: '',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // no purpose one consent
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: false,
+        hasStorageConsent: false,
+      },
+      // GDPR applies and all prerequisite satisfied
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: true,
+      },
     ]) {
-      it(`storageConsent test - consentState=${consentState}, ` +
+      it(
+        `storageConsent test - consentState=${consentState}, ` +
           `consentString=${consentString}, gdprApplies=${gdprApplies},` +
           `purposeOne=${purposeOne} -> hasStorageConsent=${hasStorageConsent}`,
-          () => {
-            return a4a.tryExecuteRealTimeConfig_(consentState, consentString, {gdprApplies, purposeOne}).then(() => {
-              expect(getCustomRealTimeConfigMacrosSpy).to.be.calledWith(hasStorageConsent);
+        () => {
+          return a4a
+            .tryExecuteRealTimeConfig_(consentState, consentString, {
+              gdprApplies,
+              purposeOne,
+            })
+            .then(() => {
+              expect(getCustomRealTimeConfigMacrosSpy).to.be.calledWith(
+                hasStorageConsent
+              );
             });
-          });
+        }
+      );
     }
   });
 
