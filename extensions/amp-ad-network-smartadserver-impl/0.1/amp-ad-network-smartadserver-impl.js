@@ -45,8 +45,6 @@ const TRUNCATION_PARAM = {
   name: 'trunc',
   value: 1,
 };
-/** @const {object} */
-const consent = null;
 
 /** @final */
 export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
@@ -63,30 +61,29 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     this.exTgt_ = '';
 
     this.addListener();
-    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
-      (consentData) => {
-        this.consent = consentData;
-    });
   }
 
   /** @override */
 renderViaIframeGet_(adUrl) {
-    this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
-    const contextMetadata = getContextMetadata(
-      this.win,
-      this.element,
-      this.sentinel,
-      {'consentSharedData': this.consent}
-    );
+  this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
+  return getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+    (consentData) => {
+      const contextMetadata = getContextMetadata(
+        this.win,
+        this.element,
+        this.sentinel,
+        {'consentSharedData': consentData}
+      );
 
-    const intersection = this.element.getIntersectionChangeEntry();
-    contextMetadata['_context']['initialIntersection'] =
-      intersectionEntryToJson(intersection);
-    return this.iframeRenderHelper_({
-      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-      'name': JSON.stringify(contextMetadata),
-    });
-  }
+      const intersection = this.element.getIntersectionChangeEntry();
+      contextMetadata['_context']['initialIntersection'] =
+        intersectionEntryToJson(intersection);
+      return this.iframeRenderHelper_({
+        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        'name': JSON.stringify(contextMetadata),
+      });
+  });
+}
 
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
