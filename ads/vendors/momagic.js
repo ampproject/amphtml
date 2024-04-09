@@ -41,7 +41,7 @@ export function momagic(global, data) {
         callback();
       };
     }
-    script.id = 'interactive_js_adcode';
+    script.id = 'interactive_js_ampcode';
     script.defer = true;
     script.src = url;
     document.getElementsByTagName("head")[0].appendChild(script);
