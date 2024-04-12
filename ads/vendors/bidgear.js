@@ -1,4 +1,4 @@
-import {validateData, writeScript} from '#3p/3p';
+import {validateData, loadScript} from '#3p/3p';
 
 const requiredParams = ['zoneid'];
 
@@ -8,9 +8,23 @@ const requiredParams = ['zoneid'];
  */
 export function bidgear(global, data) {
   validateData(data, requiredParams);
-  writeScript(global, 'https://platform.bidgear.com/bidgear-amp.js');
 
-  global.document.write(
-    '<div id="bg-ssp-' + data.zoneid + '"><script>var bg_id = document.getElementById("bg-ssp-' + data.zoneid + '");bg_id.id = "bg-ssp-' + data.zoneid + '-" + Math.floor(Math.random() * Date.now());window.pubbidgeartag = window.pubbidgeartag || [];window.pubbidgeartag.push({zoneid: ' + data.zoneid + ', id: bg_id.id, wu: window.location.href})</script></div>'
-  );
+  const container = document.getElementById('c');
+  const adDivId = 'bg-ssp-' + encodeURIComponent(data.zoneid);
+  const adDiv = document.createElement('div');
+  adDiv.setAttribute('id', adDivId);
+  container.appendChild(adDiv);
+
+  loadScript(global, 'https://platform.bidgear.com/bidgear-amp.js', () => {
+    // Bidgear has been loaded
+    window.pubbidgeartag = window.pubbidgeartag || [];
+    window.pubbidgeartag.push({
+      zoneid: encodeURIComponent(data.zoneid),
+      id: encodeURIComponent(adDivId),
+      wu: window.location.href
+    })
+  }, () => {
+    // Cannot load bidgear-amp.js
+    global.context.noContentAvailable();
+  });
 }
