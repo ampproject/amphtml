@@ -1,4 +1,4 @@
-import {validateData, loadScript} from '#3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 const requiredParams = ['zoneid'];
 
@@ -15,16 +15,21 @@ export function bidgear(global, data) {
   adDiv.setAttribute('id', adDivId);
   container.appendChild(adDiv);
 
-  loadScript(global, 'https://platform.bidgear.com/bidgear-amp.js', () => {
-    // Bidgear has been loaded
-    window.pubbidgeartag = window.pubbidgeartag || [];
-    window.pubbidgeartag.push({
-      zoneid: encodeURIComponent(data.zoneid),
-      id: encodeURIComponent(adDivId),
-      wu: window.location.href
-    })
-  }, () => {
-    // Cannot load bidgear-amp.js
-    global.context.noContentAvailable();
-  });
+  loadScript(
+    global,
+    'https://platform.bidgear.com/bidgear-amp.js',
+    () => {
+      // Bidgear has been loaded
+      window.pubbidgeartag = window.pubbidgeartag || [];
+      window.pubbidgeartag.push({
+        zoneid: encodeURIComponent(data.zoneid),
+        id: encodeURIComponent(adDivId),
+        wu: window.location.href
+      })
+    },
+    () => {
+      // Cannot load bidgear-amp.js
+      global.context.noContentAvailable();
+    }
+  );
 }
