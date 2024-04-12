@@ -378,6 +378,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'bidgear': {
+    prefetch: 'https://platform.bidgear.com/bidgear-amp.js',
+    renderStartImplemented: true,
+  },
+
   'bidtellect': {},
 
   'blade': {
@@ -1574,10 +1579,6 @@ const adConfig = jsonConfiguration({
 
   'sulvo': {},
 
-  'bidgear': {
-    prefetch: 'https://platform.bidgear.com/bidgear-amp.js',
-    renderStartImplemented: true,
-  },
 });
 
 export {adConfig};
