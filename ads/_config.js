@@ -1578,7 +1578,6 @@ const adConfig = jsonConfiguration({
   },
 
   'sulvo': {},
-
 });
 
 export {adConfig};
