@@ -24,8 +24,8 @@ export function bidgear(global, data) {
       window.pubbidgeartag.push({
         zoneid: encodeURIComponent(data.zoneid),
         id: encodeURIComponent(adDivId),
-        wu: window.location.href
-      })
+        wu: window.location.href,
+      });
     },
     () => {
       // Cannot load bidgear-amp.js
