@@ -16,6 +16,7 @@
 
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
@@ -25,11 +26,12 @@ import {Services} from '#service';
 import {dev} from '#utils/log';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getConsentPolicyInfo, getConsentDataToForward} from '../../../src/consent';
-import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
+import {
+  getConsentDataToForward,
+  getConsentPolicyInfo,
+} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-
+import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-smartadserver-impl';
@@ -64,26 +66,27 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /** @override */
-renderViaIframeGet_(adUrl) {
-  this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
-  return getConsentDataToForward(this.element, this.getConsentPolicy()).then(
-    (consentData) => {
-      const contextMetadata = getContextMetadata(
-        this.win,
-        this.element,
-        this.sentinel,
-        {'consentSharedData': consentData}
-      );
+  renderViaIframeGet_(adUrl) {
+    this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
+    return getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consentData) => {
+        const contextMetadata = getContextMetadata(
+          this.win,
+          this.element,
+          this.sentinel,
+          {'consentSharedData': consentData}
+        );
 
-      const intersection = this.element.getIntersectionChangeEntry();
-      contextMetadata['_context']['initialIntersection'] =
-        intersectionEntryToJson(intersection);
-      return this.iframeRenderHelper_({
-        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(contextMetadata),
-      });
-  });
-}
+        const intersection = this.element.getIntersectionChangeEntry();
+        contextMetadata['_context']['initialIntersection'] =
+          intersectionEntryToJson(intersection);
+        return this.iframeRenderHelper_({
+          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+          'name': JSON.stringify(contextMetadata),
+        });
+      }
+    );
+  }
 
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
