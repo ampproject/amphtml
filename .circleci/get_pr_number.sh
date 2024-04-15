@@ -9,8 +9,8 @@ err=0
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 
-# Push builds are only run against the master, nightly, and amp-release branches.
-if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" == "nightly" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+# Push builds are only run against the main, nightly, and amp-release branches.
+if [[ "$CIRCLE_BRANCH" == "main" || "$CIRCLE_BRANCH" == "nightly" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not a PR branch.")
   # Warn if the build is linked to a PR on a different repo (known CircleCI bug).
   if [[ -n "$CIRCLE_PULL_REQUEST" && ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; then
@@ -21,7 +21,7 @@ if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" == "nightly" || "$CIRCLE_
 fi
 
 # CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
-# originating from a branch on the master repo. In such cases, extract the PR
+# originating from a branch on the main repo. In such cases, extract the PR
 # number from CIRCLE_PULL_REQUEST.
 if [[ "$CIRCLE_PR_NUMBER" ]]; then
   PR_NUMBER=$CIRCLE_PR_NUMBER
