@@ -83,7 +83,7 @@ commands:
       - checkout
       - when:
           condition:
-            equal: ['main', << pipeline.git.branch >>]
+            equal: ['master', << pipeline.git.branch >>]
           steps:
             - run:
                 name: '🗜️ Garbage Collection for Git'
@@ -203,7 +203,7 @@ commands:
       - when:
           condition:
             matches:
-              pattern: ^main|amp-release-.*$
+              pattern: ^master|amp-release-.*$
               value: << pipeline.git.branch >>
           steps:
             - run:
@@ -520,12 +520,7 @@ jobs:
 
 workflows:
   version: 2
-  build-and-publish:
-    jobs:
-      - publish:   
-          filters:
-            branches:
-              only: master
+
 
   'CircleCI':
     jobs:
