@@ -635,6 +635,10 @@ Type attribute value: `treasuredata`
 
 Adds support for Treasure Data. Configuration details can be found at [docs.treasuredata.com](https://docs.treasuredata.com/display/public/INT/Google+Accelerated+Mobile+Pages+AMP).
 
+### Triboo Data Analytics
+
+Type attribute value: `tribooanalytics`
+
 ### Umeng+ Analytics
 
 Type attribute value: `umenganalytics`
