@@ -152,10 +152,7 @@ commands:
             - run:
                 name: '💿 Install npm Packages'
                 command: if [[ ! -d node_modules/ ]]; then npm ci; fi
-            - save_cache:
-                name: '💾 Save node_modules/ Cache'
-                key: node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
-                paths: node_modules/
+            
   teardown_vm:
     steps:
       - persist_to_workspace:
