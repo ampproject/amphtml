@@ -520,14 +520,6 @@ jobs:
 
 workflows:
   version: 2
-  build:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - main
-                - master/*
 
   'CircleCI':
     jobs:
