@@ -133,7 +133,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /** @override */
-  getCustomRealTimeConfigMacros_() {
+  getCustomRealTimeConfigMacros_(hasStorageConsent) {
     const allowed = {
       'width': true,
       'height': true,
@@ -156,12 +156,14 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           (tryParseJson(this.element.getAttribute('json')) || {})['targeting']
         ),
       ADCID: (opt_timeout) =>
-        getOrCreateAdCid(
-          this.getAmpDoc(),
-          'AMP_ECID_GOOGLE',
-          '_ga',
-          parseInt(opt_timeout, 10)
-        ),
+        hasStorageConsent
+          ? getOrCreateAdCid(
+              this.getAmpDoc(),
+              'AMP_ECID_GOOGLE',
+              '_ga',
+              parseInt(opt_timeout, 10)
+            )
+          : Promise.resolve(undefined),
       ATTR: (name) => {
         if (!allowed[name]) {
           dev().warn(TAG, `Invalid attribute ${name}`);

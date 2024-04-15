@@ -788,6 +788,9 @@ export class AmpA4A extends AMP.BaseElement {
         const consentStringType = consentMetadata
           ? consentMetadata['consentStringType']
           : consentMetadata;
+        const purposeOne = consentMetadata
+          ? consentMetadata['purposeOne']
+          : consentMetadata;
         const gppSectionId = consentMetadata
           ? consentMetadata['gppSectionId']
           : consentMetadata;
@@ -802,6 +805,7 @@ export class AmpA4A extends AMP.BaseElement {
                 gdprApplies,
                 additionalConsent,
                 consentSharedData,
+                purposeOne,
                 gppSectionId,
               },
               this.tryExecuteRealTimeConfig_(
@@ -2404,6 +2408,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
+    const hasStorageConsent =
+      consentState != CONSENT_POLICY_STATE.UNKNOWN &&
+      consentState != CONSENT_POLICY_STATE.INSUFFICIENT &&
+      ((consentMetadata?.gdprApplies &&
+        consentString &&
+        consentMetadata?.purposeOne) ||
+        !consentMetadata?.gdprApplies);
     if (this.element.getAttribute('rtc-config')) {
       installRealTimeConfigServiceForDoc(this.getAmpDoc());
       return this.getBlockRtc_().then((shouldBlock) =>
@@ -2413,7 +2424,7 @@ export class AmpA4A extends AMP.BaseElement {
               (realTimeConfig) =>
                 realTimeConfig.maybeExecuteRealTimeConfig(
                   this.element,
-                  this.getCustomRealTimeConfigMacros_(),
+                  this.getCustomRealTimeConfigMacros_(hasStorageConsent),
                   consentState,
                   consentString,
                   consentMetadata,
@@ -2427,10 +2438,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
+   * @param {?boolean} unusedHasStorageConsent
    * @return {!Object<string,
    *   !../../../src/service/variable-source.AsyncResolverDef>}
    */
-  getCustomRealTimeConfigMacros_() {
+  getCustomRealTimeConfigMacros_(unusedHasStorageConsent) {
     return {};
   }
 
