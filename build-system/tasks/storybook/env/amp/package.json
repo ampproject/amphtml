@@ -4,6 +4,10 @@
   "description": "packages specific to the amp storybook env",
   "devDependencies": {
     "@ampproject/storybook-addon": "1.1.10",
+<<<<<<< HEAD
     "preact": "10.20.1"
+=======
+    "preact": "10.20.2"
+>>>>>>> origin/master
   }
 }

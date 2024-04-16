@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "packages specific to the preact storybook env",
   "devDependencies": {
+<<<<<<< HEAD
     "preact": "10.20.1"
+=======
+    "preact": "10.20.2"
+>>>>>>> origin/master
   }
 }
