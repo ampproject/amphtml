@@ -1,2 +1,0 @@
-"className";
-"foobarbaz";

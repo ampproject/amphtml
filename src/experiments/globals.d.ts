@@ -1,1 +1,0 @@
-import './amp-globals.d';

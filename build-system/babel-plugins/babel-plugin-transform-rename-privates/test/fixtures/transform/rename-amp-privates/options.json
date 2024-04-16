@@ -1,7 +1,0 @@
-{
-  "plugins": [
-    "../../../.."
-  ],
-  "sourceType": "module",
-  "filenameRelative": "src/foo.js"
-}

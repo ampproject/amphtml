@@ -1,9 +1,0 @@
-{
-  "triggers": {
-    "pageLoad": {
-      "on": "visible",
-      "request": "iframeMessage",
-      "iframePing": true
-    }
-  }
-}

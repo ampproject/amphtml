@@ -1,6 +1,0 @@
-{
-  "plugins": [
-    "../../../.."
-  ],
-  "throws": "pure() expressions cannot contain member expressions"
-}

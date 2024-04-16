@@ -1,1 +1,0 @@
-dev().assertString(null);

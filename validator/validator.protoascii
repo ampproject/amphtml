@@ -1,4 +1,0 @@
-This file was split up into validator-main.protoascii, validator-css.protoascii,
-validator-svg.protoascii (in this directory), and
-extensions/*/validator-*.protoascii. Please update your bookmarks and
-references.
