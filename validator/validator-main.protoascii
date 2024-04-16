@@ -3279,7 +3279,7 @@ tags: {
 
 # 4.11 Scripting
 # 4.11.1 The script element
-# Only the amphtml script, custom extensions and the LD/JSON or TEXT/PLAIN
+# Only the amphtml script, custom extensions, and the LD/JSON, SPECULATIONRULES, or TEXT/PLAIN
 # description are allowed.
 # Note that the type TEXT/PLAIN description is define in
 # validator-amp-mustache.protoascii.
@@ -3623,6 +3623,26 @@ tags: {
     name: "type"
     mandatory: true
     value_casei: "application/ld+json"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+# JSON Speculation Rules
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "script type=speculationrules"
+  descriptive_name: "script type=speculationrules"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "speculationrules"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
