@@ -1,0 +1,198 @@
+<!--
+  Test Description:
+  This tests that forms are allowed in A4A, but that forbidden inputs are not
+  allowed, like input[type=password].
+-->
+<!doctype html>
+<html ⚡4email data-css-strict>
+<head>
+  <meta charset="utf-8">
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-form"
+      src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+</head>
+<body>
+    <!-- Valid POST form. -->
+    <form method="post" action-xhr="https://example.com/subscribe"
+    custom-validation-reporting="as-you-go">
+    <fieldset>
+      <label>
+        <span>Your name</span>
+        <input id="name" type="text" name="name" required>
+        <span visible-when-invalid="valueMissing" validation-for="name"></span>
+      </label>
+      <label>
+        <span>Your email</span>
+        <input type="email" name="email" required>
+      </label>
+      <input type="button" name="button">
+      <input type="submit" value="Subscribe">
+    </fieldset>
+    <div submit-success>
+      Submission successful!
+    </div>
+    <div submit-error>
+      Submission failed!
+    </div>
+    <div submitting>
+      Submitting form...
+    </div>
+  </form>
+  <!-- Valid GET form. -->
+  <form method="GET" action-xhr="https://someserver.com/endpoint">
+    <div>
+      <input name="googlesearch">
+    </div>
+    <input type="submit" value="OK">
+  </form>
+  <!-- Valid form with templates for submit-success and submit-error -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
+    <div submit-success>
+      <template type="amp-mustache">
+        Submission successful! {{a}}
+      </template>
+    </div>
+    <div submit-error>
+      <template type="amp-mustache">
+        Submission failed! {{a}}
+      </template>
+    </div>
+  </form>
+  <!-- Invalid: only https protocol is supported. -->
+  <form method="GET" action-xhr="http://someserver.com/endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
+  <!-- Invalid: only absolute URL is allowed. -->
+  <form method="GET" action-xhr="endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
+  <form method="POST" action-xhr="endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
+  <!-- Invalid: the action and target attributes are disallowed. -->
+  <form method="GET"
+    action="/components/amp-form/submit-form"
+    target="_top">
+    <div>
+      <input name="googlesearch">
+    </div>
+    <input type="submit" value="OK">
+  </form>
+  <!-- Invalid: input can not be type="file|image". -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="image" name="image">
+  </form>
+  <!-- Invalid: input can not be type="password" -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="password" name="password">
+    <input type="file" name="file">
+  </form>
+  <!-- Invalid: invalid attribute xhr-verify -->
+  <form method="post" action-xhr="https://example.com/subscribe"
+    xhr-verify="https://example.com/subscribe">
+  </form>
+  <!-- Invalid: invalid attribute xhr-verify -->
+  <form method="get" action-xhr="https://example.com/subscribe"
+    xhr-verify="https://example.com/subscribe">
+  </form>
+  <!-- Invalid: amp-bind usage for type in input -->
+  <form method="get" action-xhr="https://example.com/subscribe">
+    <input [type]="state.type" name="name">
+  </form>
+  <!-- Invalid: invalid usage of submitting attribute with nested template -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
+    <div submitting>
+      <template type="amp-mustache">
+        Submitting... {{a}}
+      </template>
+    </div>
+  </form>
+  <!-- Invalid: invalid usage of submitting attribute with template attribute -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
+    <div submitting template="abc">
+    </div>
+  </form>
+  <!-- Invalid: invalid template within a template -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
+    <div submit-error>
+      <template type="amp-mustache">
+        {{a}}
+        <template type="amp-mustache">
+          {{b}}
+        </template>
+      </template>
+    </div>
+  </form>
+  <!-- Invalid: mustache variables are disallowed in action-xhr. -->
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="{{foo}}">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="{{foo}}{{bar}}">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="foo{{bar">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="foo}}bar">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="{{">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="}}">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <!-- Invalid POST form with name. -->
+  <form method="post" name="post-form" action-xhr="https://example.com/subscribe">
+  </form>
+  <!-- Invalid GET form with name. -->
+  <form method="GET" name="get-form" action-xhr="https://someserver.com/endpoint">
+  </form>
+</body>
+</html>

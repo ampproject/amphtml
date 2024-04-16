@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "downlevelIteration": true,
+    "target": "esnext",
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "isolatedModules": true,
+    "lib": ["dom", "esnext", "es6"],
+    "jsx": "preserve",
+
+    "paths": {
+      "#3p/*": ["./3p/*"],
+      "#ads/*": ["./ads/*"],
+      "#build/*": ["./build/*"],
+
+      "#bento/*": ["./src/bento/*"],
+      "#builtins/*": ["./src/builtins/*"],
+      "#compiler": ["./src/compiler"],
+      "#compiler/*": ["./src/compiler/*"],
+      "#core/*": ["./src/core/*"],
+      "#experiments": ["./src/experiments"],
+      "#experiments/*": ["./src/experiments/*"],
+      "#inabox/*": ["./src/inabox/*"],
+      "#polyfills": ["./src/polyfills"],
+      "#polyfills/*": ["./src/polyfills/*"],
+      "#preact": ["./src/preact"],
+      "#preact/*": ["./src/preact/*"],
+      "#purifier": ["./src/purifier"],
+      "#purifier/*": ["./src/purifier/*"],
+      "#service": ["./src/service"],
+      "#service/*": ["./src/service/*"],
+      "#utils": ["./src/utils"],
+      "#utils/*": ["./src/utils/*"],
+
+      "#test/*": ["./test/*"],
+      "#testing/*": ["./testing/*"],
+
+      "#third_party/*": ["./third_party/*"],
+
+      "preact/dom": ["./src/preact/preact-dom.ts"]
+    }
+  },
+
+  "exclude": [
+    "**/build/**",
+    "**/dist/**",
+    "**/dist.*/**",
+    "**/node_modules/**",
+    "**/third_party/**",
+    "**/*.extern.js"
+  ]
+}

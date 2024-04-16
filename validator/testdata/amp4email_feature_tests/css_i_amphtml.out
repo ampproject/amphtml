@@ -1,0 +1,32 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for excluded `i-amphtml` in the author stylesheet and inline style.
+|  -->
+|  <!doctype html>
+|  <html ⚡4email data-css-strict>
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <style amp-custom>
+>>   ^~~~~~~~~
+amp4email_feature_tests/css_i_amphtml.html:11:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css)
+|      i-amphtml-sizer {}
+|      .i-amphtml-hidden {}
+|      #i-amphtml-wrapper {}
+|      .foo-i-amphtml { color: var(--i-amphtml-clr); }
+|    </style>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_i_amphtml.html:16:0 CSS syntax error in tag 'style amp-custom' - end of stylesheet encountered in prelude of a qualified rule.
+|  </head>
+|  <body>
+|    Hello, world.
+|    <div style="i-amphtml-hidden: none;"></div>
+>>   ^~~~~~~~~
+amp4email_feature_tests/css_i_amphtml.html:20:2 The property 'i-amphtml-hidden' in attribute 'style' in tag 'div' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|    <div style="--i-amphtml-clr: #ccc;"></div>
+>>   ^~~~~~~~~
+amp4email_feature_tests/css_i_amphtml.html:21:2 The property '--i-amphtml-clr' in attribute 'style' in tag 'div' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  </body>
+|  </html>

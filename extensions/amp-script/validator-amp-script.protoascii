@@ -1,0 +1,229 @@
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-script"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-script> (local script)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-script extension local script"
+  requires_extension: "amp-script"
+  attrs: {
+    name: "id"
+    add_value_to_set: AMP_SCRIPT_IDS
+    mandatory: true
+    # When updating this disallowed_value_regex, also update for
+    # mandatory-id-attr and $GLOBAL_ATTRS in validator-main.protoascii, and
+    # validator-amp-mustache.protoascii.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
+        "__amp_\\S*|"
+        "__count__|"
+        "__defineGetter__|"
+        "__defineSetter__|"
+        "__lookupGetter__|"
+        "__lookupSetter__|"
+        "__noSuchMethod__|"
+        "__parent__|"
+        "__proto__|"
+        "__AMP_\\S*|"
+        "\\$p|"
+        "\\$proxy|"
+        "acceptCharset|"
+        "addEventListener|"
+        "appendChild|"
+        "assignedSlot|"
+        "attachShadow|"
+        "AMP|"
+        "baseURI|"
+        "checkValidity|"
+        "childElementCount|"
+        "childNodes|"
+        "classList|"
+        "className|"
+        "clientHeight|"
+        "clientLeft|"
+        "clientTop|"
+        "clientWidth|"
+        "compareDocumentPosition|"
+        "computedName|"
+        "computedRole|"
+        "contentEditable|"
+        "createShadowRoot|"
+        "enqueAction|"
+        "firstChild|"
+        "firstElementChild|"
+        "getAnimations|"
+        "getAttribute|"
+        "getAttributeNS|"
+        "getAttributeNode|"
+        "getAttributeNodeNS|"
+        "getBoundingClientRect|"
+        "getClientRects|"
+        "getDestinationInsertionPoints|"
+        "getElementsByClassName|"
+        "getElementsByTagName|"
+        "getElementsByTagNameNS|"
+        "getRootNode|"
+        "hasAttribute|"
+        "hasAttributeNS|"
+        "hasAttributes|"
+        "hasChildNodes|"
+        "hasPointerCapture|"
+        "i-amphtml-\\S*|"
+        "innerHTML|"
+        "innerText|"
+        "inputMode|"
+        "insertAdjacentElement|"
+        "insertAdjacentHTML|"
+        "insertAdjacentText|"
+        "isContentEditable|"
+        "isDefaultNamespace|"
+        "isEqualNode|"
+        "isSameNode|"
+        "lastChild|"
+        "lastElementChild|"
+        "lookupNamespaceURI|"
+        "namespaceURI|"
+        "nextElementSibling|"
+        "nextSibling|"
+        "nodeName|"
+        "nodeType|"
+        "nodeValue|"
+        "offsetHeight|"
+        "offsetLeft|"
+        "offsetParent|"
+        "offsetTop|"
+        "offsetWidth|"
+        "outerHTML|"
+        "outerText|"
+        "ownerDocument|"
+        "parentElement|"
+        "parentNode|"
+        "previousElementSibling|"
+        "previousSibling|"
+        "querySelector|"
+        "querySelectorAll|"
+        "releasePointerCapture|"
+        "removeAttribute|"
+        "removeAttributeNS|"
+        "removeAttributeNode|"
+        "removeChild|"
+        "removeEventListener|"
+        "replaceChild|"
+        "reportValidity|"
+        "requestPointerLock|"
+        "scrollHeight|"
+        "scrollIntoView|"
+        "scrollIntoViewIfNeeded|"
+        "scrollLeft|"
+        "scrollWidth|"
+        "setAttribute|"
+        "setAttributeNS|"
+        "setAttributeNode|"
+        "setAttributeNodeNS|"
+        "setPointerCapture|"
+        "shadowRoot|"
+        "styleMap|"
+        "tabIndex|"
+        "tagName|"
+        "textContent|"
+        "toString|"
+        "valueOf|"
+        "(webkit|ms|moz|o)dropzone|"
+        "(webkit|moz|ms|o)MatchesSelector|"
+        "(webkit|moz|ms|o)RequestFullScreen|"
+        "(webkit|moz|ms|o)RequestFullscreen"
+        ")(\\s|$)"
+  }
+  attrs: {
+    name: "target"
+    mandatory: true
+    value: "amp-script"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "text/plain"
+  }
+  attr_lists: "mandatory-id-attr"
+  attr_lists: "nonce-attr"
+  cdata: {
+    max_bytes: 10000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-script/#faq"
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-script/"
+}
+tags: {  # <amp-script>
+  html_format: AMP
+  tag_name: "AMP-SCRIPT"
+  disallowed_ancestor: "AMP-SCRIPT"
+  requires_extension: "amp-script"
+  attrs: {
+    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27076
+    name: "data-ampdevmode"
+    value: "false"
+    disallowed_value_regex: "false"
+  }
+  attrs: {
+    name: "max-age"
+    value_regex: "[0-9]+"
+    trigger: {
+      # max-age only applies to inline scripts.
+      also_requires_attr: "script"
+    }
+  }
+  attrs: {
+    name: "nodom"
+    value: ""
+  }
+  attrs: {
+    name: "sandboxed"
+    value: ""
+  }
+  attrs: { name: "sandbox" }
+  attrs: {
+    name: "script"
+    mandatory_oneof: "['script', 'src']"
+    value_oneof_set: AMP_SCRIPT_IDS
+  }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['script', 'src']"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout {
+    supported_layouts: CONTAINER
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+# HTML5, 4.8.11 The canvas element.
+tags: {
+  html_format: AMP
+  tag_name: "CANVAS"
+  attrs: { name: "height" }
+  attrs: { name: "width" }
+  mandatory_ancestor: "AMP-SCRIPT"
+  requires_extension: "amp-script"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
+}

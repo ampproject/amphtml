@@ -1,0 +1,13 @@
+diff --git a/third_party/inputmask/inputmask.dependencyLib.js b/third_party/inputmask/inputmask.dependencyLib.js
+index ccc66a9ea..780fe6030 100755
+--- a/third_party/inputmask/inputmask.dependencyLib.js
++++ b/third_party/inputmask/inputmask.dependencyLib.js
+@@ -157,7 +157,7 @@ export function factory(window, document) {
+                         };
+                         if (document.createEvent) {
+                             try {
+-                                evnt = new CustomEvent(ev, params);
++                                evnt = ["change","input","click"].indexOf(ev) > -1 ? new Event(ev, params) : new CustomEvent(ev, params);
+                             } catch (e) {
+                                 evnt = document.createEvent("CustomEvent");
+                                 evnt.initCustomEvent(ev, params.bubbles, params.cancelable, params.detail);

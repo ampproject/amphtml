@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>In-a-box Envelope</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+    }
+    .url {
+      /*
+       * This is to make sure the URL div does not grow in height and causes issues
+       * to scrolling related tests
+       */
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title">In-a-box Envelope</h1>
+  <div class="url">url: AD_URL</div>
+  <div>size: AD_WIDTHxAD_HEIGHT</div>
+
+  <div style="background: #eee; overflow: hidden;; height: OFFSET;">scroll down to see the ad</div>
+
+  <iframe
+      id="inabox-frame"
+      name="NAME"
+      src="SOURCE"
+      SRCDOC_ATTRIBUTE
+      width="AD_WIDTH" height="AD_HEIGHT"
+      scrolling="no"
+      marginwidth="0"
+      marginheight="0"
+      frameborder="0"
+      data-amp-allowed="send-positions,full-overlay-frame,cancel-full-overlay-frame">
+  </iframe>
+
+  <div style="background: #eee; overflow: hidden;; height: 100vh;"></div>
+
+  INABOX_ADS_TAG_INTEGRATION
+</body>
+</html>

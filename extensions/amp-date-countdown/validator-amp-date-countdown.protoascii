@@ -1,0 +1,93 @@
+tags: {  # amp-date-countdown
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-date-countdown"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-date-countdown>
+  html_format: AMP
+  tag_name: "AMP-DATE-COUNTDOWN"
+  requires_extension: "amp-date-countdown"
+  attrs: {
+    name: "biggest-unit"
+    value_casei: "days"
+    value_casei: "hours"
+    value_casei: "minutes"
+    value_casei: "seconds"
+  }
+  attrs: {  # attribute is not used in version 0.1 of the component (see #33480)
+    name: "count-up"
+    value: ""
+  }
+  attrs: {  # attribute is not used in version 1.0 of the component (see #33480)
+    name: "data-count-up"
+    value: ""
+  }
+  attrs: {
+    name: "end-date"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])"
+  }
+  attrs: {
+    name: "locale"
+    value_casei: "de"
+    value_casei: "en"
+    value_casei: "es"
+    value_casei: "fr"
+    value_casei: "id"
+    value_casei: "it"
+    value_casei: "ja"
+    value_casei: "ko"
+    value_casei: "nl"
+    value_casei: "pt"
+    value_casei: "ru"
+    value_casei: "th"
+    value_casei: "tr"
+    value_casei: "vi"
+    value_casei: "zh-cn"
+    value_casei: "zh-tw"
+  }
+  attrs: {
+    name: "offset-seconds"
+    value_regex: "-?\\d+"
+  }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
+  attrs: {
+    name: "timeleft-ms"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "timestamp-ms"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d{13}"
+  }
+  attrs: {
+    name: "timestamp-seconds"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d{10}"
+  }
+  attrs: {
+    name: "when-ended"
+    value_casei: "continue"
+    value_casei: "stop"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

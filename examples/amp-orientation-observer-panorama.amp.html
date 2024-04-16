@@ -1,0 +1,58 @@
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>amp-orientation-observer</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js"></script>
+  <style amp-custom>
+    .panorama {
+        height: 100vh;
+        width: 100vw;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+    .panorama amp-img {
+            transform: translate(-50%, -50%);
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+    <amp-animation id="gammaAnim" layout="nodisplay">
+        <script type="application/json">
+            {
+            "duration": "3s",
+            "fill": "both",
+            "direction": "alternate",
+            "animations": [
+            {
+                "selector": ".panorama amp-img",
+                "keyframes": [
+                { "transform": "translateX(-100%)" },
+                { "transform": "translateX(0%)" }
+                ]
+            }
+            ]
+        }
+        </script>
+    </amp-animation>
+    <amp-orientation-observer
+        gamma-range="-90 90"
+        on="gamma:gammaAnim.seekTo(percent=event.percent)"
+        layout="nodisplay" smoothing="5">
+  </amp-orientation-observer>
+    <div class="panorama">
+        <amp-img alt="A view of the mountains"
+            src="img/panorama1.jpg"
+            width="2920"
+            height="728"
+            layout="fixed">
+        </amp-img>
+    </div>
+</body>
+</html>

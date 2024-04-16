@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>AMP Inabox GPT Test</title>
+<script async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+<script>
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+</script>
+
+<script>
+googletag.cmd.push(function() {
+  googletag.defineSlot('/8479/regtests/AmpInaboxTest.java/firstad', [300, 250], 'div-gpt-ad-1541535279148-0').addService(googletag.pubads());
+  googletag.pubads().enableSingleRequest();
+  googletag.enableServices();
+  googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+    document.getElementById('slotrenderendedannounce').textContent = "SlotRenderEnded fired.";
+    document.documentElement.classList.add('slot-render-ended');
+  });
+  googletag.pubads().addEventListener('slotOnload', function(event) {
+    document.getElementById('slotonloadannounce').textContent = "SlotOnload fired.";
+    document.documentElement.classList.add('slot-onload');
+    // serialize the iframe's content to the DOM
+    var adIframe = document.getElementById('google_ads_iframe_/8479/regtests/AmpInaboxTest.java/firstad_0');
+    adIframe.srcdoc = adIframe.contentDocument.documentElement.outerHTML;
+  });
+});
+</script>
+<p id="slotrenderendedannounce">SlotRenderEnded not fired.</p>
+<p id="slotonloadannounce">SlotOnload not fired.</p>
+<!-- /8479/regtests/AmpInaboxTest.java/firstad -->
+<div id="div-gpt-ad-1541535279148-0" style="height:250px; width:300px; background-color:red;">
+  <script>
+googletag.cmd.push(function() { googletag.display('div-gpt-ad-1541535279148-0'); });
+  </script>
+</div>

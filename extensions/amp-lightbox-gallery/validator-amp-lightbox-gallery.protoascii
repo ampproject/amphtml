@@ -1,0 +1,21 @@
+tags: {  # amp-lightbox-gallery
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-lightbox-gallery"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}
+attr_lists: {
+  name: "lightboxable-elements"
+  attrs: { name: "lightbox" }
+  attrs: {
+    name: "lightbox-thumbnail-id"
+    value_regex_casei: "^[a-z][a-z\\d_-]*"
+  }
+}

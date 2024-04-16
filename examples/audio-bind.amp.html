@@ -1,0 +1,40 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-audio amp-bind</title>
+  <link rel="canonical" href="index.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <style amp-custom>
+  </style>
+</head>
+<body>
+  <amp-state id="source">
+    <script type="application/json">
+      "av/audio.mp3"
+    </script>
+  </amp-state>
+  <amp-state id="artist">
+    <script type="application/json">
+      "Example Artist"
+    </script>
+  </amp-state>
+  <amp-audio id="audio"
+    width="auto" height="50"
+    src="av/audio.mp3"
+    [src]="source"
+    artist="Example Artist"
+    [artist]="artist"
+    layout="fixed-height">
+  </amp-audio>
+  <button on="tap:AMP.setState({source: 'https://ccrma.stanford.edu/~jos/mp3/bachfugue.mp3'})">Change src</button>
+  <button on="tap:AMP.setState({artist: 'The AMP Team'})">Set artist (Media Session)</button>
+  <button on="tap:audio.play">Play</button>
+  <button on="tap:audio.pause">Pause</button>
+</body>
+
+</html>

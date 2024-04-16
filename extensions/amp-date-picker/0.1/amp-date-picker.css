@@ -1,0 +1,247 @@
+
+
+@import '../../../third_party/react-dates/_datepicker.css';
+
+
+amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 10px;
+  z-index: 10;
+}
+
+.i-amphtml-date-picker-fullscreen .i-amphtml-date-picker-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.i-amphtml-date-picker-fullscreen .DayPicker_weekHeader {
+  top: 0;
+  padding: 40px 0 5px;
+}
+
+.i-amphtml-date-picker-fullscreen .CalendarMonth {
+  margin-bottom: 38px;
+}
+
+.i-amphtml-date-picker-fullscreen .CalendarMonth_caption {
+  margin: 0 -30px 10px;
+}
+
+.i-amphtml-date-picker-fullscreen .CalendarMonthGrid {
+  padding-top: 70px;
+}
+
+/**
+ * Remove duplicate calendar view in Chrome for overlay pickers.
+ * To avoid being too opinionated about date inputs in general,
+ * publishers who make static date pickers with `input[type="date"]`
+ * can add a rule like this themselves.
+ */
+ amp-date-picker input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.amp-date-picker-calendar-container * {
+  box-sizing: border-box;
+}
+
+.amp-date-picker-calendar-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.DateInput_input {
+  font-size: 100%;
+}
+
+.CalendarMonth_caption {
+  font-weight: lighter;
+  margin: 0 -30px 38px;
+  padding-bottom: 20px;
+  background-color: #000;
+  color: #fff;
+}
+
+.CalendarMonth_caption > * {
+  font-weight: lighter;
+}
+
+.DayPicker_weekHeader {
+  top: 75px;
+}
+
+.i-amphtml-default-week-day-format .DayPicker_weekHeader li::first-letter {
+  font-size: small;
+}
+
+.i-amphtml-default-week-day-format .DayPicker_weekHeader li {
+  font-size: 0;
+}
+
+.DayPicker {
+  background: #fdfdfd;
+}
+
+.DayPicker__withBorder {
+  background-color: #fdfdfd;
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+amp-lightbox .DayPicker__withBorder {
+  border: 0;
+}
+
+amp-date-picker[mode="overlay"] .DayPicker__withBorder {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.07);
+  border: 0;
+}
+
+.CalendarMonth,
+.CalendarMonthGrid {
+  background-color: transparent;
+}
+
+.CalendarDay__highlighted_calendar,
+.CalendarDay__highlighted_calendar:hover {
+  background-color: #fff;
+  border: 1px solid transparent;
+}
+
+.CalendarDay_container, /* remove after update to react-dates v16 */
+.CalendarDay__default {
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+.CalendarDay_container:hover, /* remove after update to react-dates v16 */
+.CalendarDay__default:hover {
+  background-color: #e4e7e7;
+  border: 1px solid #e4e7e7;
+}
+
+.CalendarDay__blocked_calendar {
+  border: 1px solid #cacccd;
+  background-color: #cacccd;
+}
+
+amp-date-picker:not([allow-blocked-ranges]) .CalendarDay__blocked_calendar.CalendarDay__hovered_span {
+  background-color: #ff8080;
+  border: 1px solid #ff8080;
+}
+
+.CalendarDay__blocked_out_of_range,
+.CalendarDay__blocked_out_of_range:active,
+.CalendarDay__blocked_out_of_range:hover {
+  color: rgb(0, 0, 0, .1);
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.CalendarDay__hovered_span,
+.CalendarDay__hovered_span:hover,
+.CalendarDay__selected_span,
+.CalendarDay__selected_span:active,
+.CalendarDay__selected_span:hover {
+  background-color: #9bbbdd;
+  border: 1px solid #9bbbdd;
+  color: #000;
+}
+
+.CalendarDay__selected,
+.CalendarDay__selected_start,
+.CalendarDay__selected:active,
+.CalendarDay__selected:hover {
+  background-color: #0654ab;
+  border: 1px solid #0654ab;
+  color: #fff;
+}
+
+.DayPickerNavigation_leftButton__horizontal,
+.DayPickerNavigation_leftButton__horizontal:active {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>');
+}
+
+.DayPickerNavigation_rightButton__horizontal,
+.DayPickerNavigation_rightButton__horizontal:active {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>');
+}
+
+.DayPickerNavigation_button__horizontal,
+.DayPickerNavigation_button__horizontal:hover,
+.DayPickerNavigation_button__horizontal:active {
+  border: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 55% 50%;
+  height: 30px;
+  width: 26px;
+  background-size: 13px 20px;
+}
+
+.DayPickerNavigation_svg__horizontal {
+  display: none;
+}
+
+.DateInput_fangShape {
+  fill: #000;
+}
+
+.DayPickerKeyboardShortcuts_show,
+.DayPickerKeyboardShortcuts_show:hover {
+  border: 2px solid #0654ab;
+  border-radius: 50%;
+  color: #0654ab;
+  width: 22px;
+  height: 22px;
+  margin: 10px;
+}
+
+.DayPickerKeyboardShortcuts_show:hover {
+  border: 2px solid #9bbbdd;
+}
+
+.DayPickerKeyboardShortcuts_show:hover .DayPickerKeyboardShortcuts_showSpan {
+  color: #9bbbdd;
+}
+
+.DayPickerKeyboardShortcuts_showSpan {
+  position: static;
+  color: #0654ab;
+  font-weight: bold;
+}
+
+/* Show a blue dot on highlighted days */
+.CalendarDay__highlighted_calendar,
+.CalendarDay__highlighted_calendar:hover {
+  background-image: radial-gradient(circle at 50% 82%, #0654ab 0px, #0654ab 2px, transparent 3px, transparent 100%);
+}
+
+.CalendarDay__selected.CalendarDay__highlighted_calendar {
+  background-image: radial-gradient(circle at 50% 82%, #fff 0px, #fff 2px, transparent 3px, transparent 100%);
+}
+
+.CalendarDay__blocked_out_of_range.CalendarDay__highlighted_calendar::after {
+  background-image: radial-gradient(circle at 50% 82%, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 2px, transparent 3px, transparent 100%);
+}
+
+.i-amphtml-date-picker-info {
+  display: block;
+  padding: 10px;
+}
+
+/**
+ * TODO(cvializ): Fix bug where date picker renders when not visible and cannot measure height.
+ * TODO(cvializ): Fix bug where date picker size adjusts one month behind where it should. (preact vs react difference).
+ * Developers who change day-size will need to adjust this value manually in their styles until the above are resolved.
+ * NOTE: If this is updated, make sure to change DEFAULT_MIN_HEIGHT in amp-date-picker.js
+ */
+.amp-date-picker-resize-bug .DayPicker_transitionContainer {
+  min-height: 354px;
+  max-width: 100%;
+  border-radius: 0;
+}

@@ -1,0 +1,73 @@
+# Cuts a new nightly branch on a schedule.
+
+name: Cut Nightly Branch
+
+on:
+  schedule:
+    # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
+    - cron: '0 8 * * 2-6'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut-nightly:
+    environment: cut_nightly
+    if: github.repository == 'ampproject/amphtml'
+    name: Cut Nightly Branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - name: Checkout Repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 100
+
+      - name: Set Up Node
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: lts/*
+
+      - name: Set Up Environment
+        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: ⭐ Cut Nightly Branch ⭐
+        run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: cut-nightly
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/release-on-duty'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

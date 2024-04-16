@@ -1,0 +1,231 @@
+
+
+/* Placeholder */
+.i-amphtml-loader-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #f8f8f8;
+}
+
+/* Container and sizes */
+.i-amphtml-new-loader {
+  display: inline-block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Firefox: Need a size for the SVG, or it is sized to 300x300 by default. */
+  width: 0;
+  height: 0;
+  color: #aaa;
+}
+
+.i-amphtml-new-loader-size-default,
+.i-amphtml-new-loader-size-small {
+  width: 72px;
+  height: 72px;
+}
+
+/* Logo */
+.i-amphtml-new-loader-logo {
+  transform-origin: center;
+  opacity: 0;
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in forwards;
+  animation-delay: 0.6s;
+  animation-delay: calc(0.6s - var(--loader-delay-offset));
+}
+
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-logo {
+  display: none;
+}
+
+.i-amphtml-new-loader-logo-default {
+  fill: currentColor;
+  /* Default logo fades away, custom ones don't*/
+  animation: i-amphtml-new-loader-fade-out 0.8s ease-out forwards;
+  animation-delay: 1.8s;
+  animation-delay: calc(1.8s - var(--loader-delay-offset));
+}
+
+/* Background shim */
+.i-amphtml-new-loader-has-shim {
+  color: #fff !important;
+}
+
+.i-amphtml-new-loader-shim {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: none;
+  transform-origin: center;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in forwards;
+  animation-delay: 0.6s;
+  animation-delay: calc(0.6s - var(--loader-delay-offset));
+}
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-shim {
+  display: initial;
+}
+
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-shim {
+  width: 48px;
+  height: 48px;
+  margin: 12px;
+}
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-shim {
+  display: initial;
+}
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-logo-default {
+  display: none;
+}
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-transparent-on-shim {
+  /*
+  * The shim sets the color to white above, for anything using currentColor.
+  * Other parts can specify that they want to be transparent while the shim is
+  * present using the `i-amphtml-new-loader-transparent-on-shim` class.
+  */
+  fill: transparent !important;
+}
+
+/* Positioning for various parts */
+.i-amphtml-new-loader-spinner-wrapper,
+.i-amphtml-new-loader-logo,
+.i-amphtml-new-loader-shim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+/* The spinner itself */
+.i-amphtml-new-loader-spinner-wrapper {
+  margin: 12px;
+}
+
+.i-amphtml-new-loader-spinner {
+  stroke: currentColor;
+  stroke-width: 1.5px;
+  opacity: 0;
+  animation: i-amphtml-new-loader-fade-in 0.8s ease-in forwards;
+  animation-delay: 1.8s;
+  animation-delay: calc(1.8s - var(--loader-delay-offset));
+}
+
+.i-amphtml-new-loader-spinner-path {
+  animation: frame-position-first-spin 0.6s steps(30),
+    frame-position-infinite-spin 1.2s steps(59) infinite;
+  animation-delay: 2.8s, 3.4s;
+  animation-delay: calc(2.8s - var(--loader-delay-offset)),
+    calc(3.4s - var(--loader-delay-offset));
+}
+
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner {
+  /** Scale down the spinner to a 12px radius, default is 22. */
+  transform: scale(calc(12 / 22));
+  /** Increase the stroke-width to counteract the scaling. */
+  stroke-width: calc(1.5px * 22 / 12);
+}
+
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-path {
+  animation-delay: 1.4s, 2s;
+  animation-delay: calc(1.4s - var(--loader-delay-offset)),
+    calc(2s - var(--loader-delay-offset));
+}
+
+/* Animations only run when active */
+.i-amphtml-new-loader * {
+  animation-play-state: paused;
+}
+
+.amp-active > .i-amphtml-new-loader * {
+  animation-play-state: running;
+}
+
+/* Ads */
+.i-amphtml-new-loader-ad-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.i-amphtml-new-loader-ad-label {
+  /*
+   * Make sure inherited font properties or those set via other selectors do
+   * not impact rendering of the label.
+   */
+  all: initial !important;
+  display: inline-block !important;
+  padding: 0 0.4ch !important;
+  border: 1px solid currentColor !important;
+  border-radius: 2px !important;
+  color: currentColor !important;
+  font-size: 11px !important;
+  font-family: sans-serif !important;
+  line-height: 1.1 !important;
+  visibility: inherit !important;
+}
+
+@keyframes i-amphtml-new-loader-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes i-amphtml-new-loader-fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes i-amphtml-new-loader-scale-and-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes frame-position-first-spin {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    /* This value is steps * svgSize from spinner,js */
+    transform: translateX(-1440px);
+  }
+}
+
+@keyframes frame-position-infinite-spin {
+  from {
+    /* This value is steps * svgSize from spinner,js */
+    transform: translateX(-1440px);
+  }
+
+  to {
+    /*
+     * This value is based on the transform for the first spin and
+     * (2 * steps - 1) * svgSize from spinner,js */
+    transform: translateX(-4272px);
+  }
+}

@@ -1,0 +1,157 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-gwd-animation</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-gwd-animation" src="https://cdn.ampproject.org/v0/amp-gwd-animation-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    .amp-animate #page1.gwd-play-animation .gwd-gen-1234gwdanimation {
+      animation: gwd-gen-1234gwdanimation_gwd-keyframes 3s linear 0s infinite normal forwards;
+    }
+    .amp-animate #page1.foo .gwd-gen-1234gwdanimation {
+      animation: gwd-gen-1234gwdanimation_gwd-keyframes_foo 3s linear -2.5s infinite normal forwards;
+    }
+    .amp-animate .gwd-play-animation #child .gwd-gen-5678gwdanimation {
+      animation: gwd-gen-1234gwdanimation_gwd-keyframes 3s linear 0s infinite normal forwards;
+    }
+    #page1.nearend .gwd-gen-1l64gwdanimation {
+      animation: gwd-gen-1l64gwdanimation_gwd-keyframes_nearend 3s linear -1.3s infinite normal forwards;
+    }
+    .amp-animate #page1.gwd-pause-animation .gwd-gen-1234gwdanimation {
+      animation-play-state: paused;
+    }
+    .amp-animate #child.gwd-pause-animation .gwd-gen-5678gwdanimation {
+      animation-play-state: paused;
+    }
+    .amp-animate .gwd-play-animation .event-1-animation {
+      animation: gwd-empty-animation 1s linear 0s 1 normal forwards;
+    }
+    .amp-animate .gwd-play-animation .event-2-animation {
+      animation: gwd-empty-animation 2s linear 0s 1 normal forwards;
+    }
+    .amp-animate #page1.gwd-pause-animation .event-2-animation {
+      animation-play-state: paused;
+    }
+    #pagedeck {
+      border: 1px solid #ddd;
+    }
+    #child {
+      background: #ccffff;
+    }
+    #hideText {
+      background: purple;
+      color: #fff;
+      padding: 10px;
+      width: 100px;
+      text-align: center;
+      position: absolute;
+      z-index: 2;
+    }
+    .gwd-page-wrapper {
+      height: 300px;
+    }
+    #amp-carousel_1 {
+      background: #ccffff;
+    }
+  </style>
+</head>
+<body class="amp-animate">
+  <!-- Page deck carousel with one page. -->
+  <amp-carousel
+      id="pagedeck"
+      class="gwd-page-container"
+      layout="fixed"
+      width="400"
+      height="300"
+      type="slides">
+    <div id="page1" class="gwd-page-wrapper">
+      <p>Page 1</p>
+
+      <div id="hideText">This text hides after 1s</div>
+
+      <amp-img id="image1"
+          class="gwd-gen-1234gwdanimation"
+          src="img/sea@2x.jpg"
+          width=260 height=100>
+      </amp-img>
+
+      <div id="child">
+        <p>Child element</p>
+        <amp-img id="image2"
+            class="gwd-gen-5678gwdanimation"
+            src="img/sea@2x.jpg"
+            width=140 height=50>
+        </amp-img>
+      </div>
+
+      <!-- Timeline event elements which fire animationend events after 1s and 2s. -->
+      <div class="gwd-animation-event event-1-animation"
+          data-event-name="event-1" data-event-time="1000"></div>
+      <div class="gwd-animation-event event-2-animation"
+          data-event-name="event-2" data-event-time="2000"></div>
+    </div>
+  </amp-carousel>
+
+  <!-- Demo animation controls. -->
+  <p>
+    Page1 animations:
+    <button on="tap:gwd-animation.play(id=page1)" tabindex="0">Play</button>
+    <button on="tap:gwd-animation.pause(id=page1)" tabindex="0">Pause</button>
+    <button on="tap:gwd-animation.togglePlay(id=page1)" tabindex="0">Toggle</button>
+    <button on="tap:gwd-animation.gotoAndPlay(id=page1, label=foo)" tabindex="0">
+      Play page from label
+    </button>
+  </p>
+  <p>
+    Page1 child animations:
+    <button on="tap:gwd-animation.play(id=child)" tabindex="0">Play</button>
+    <button on="tap:gwd-animation.pause(id=child)" tabindex="0">Pause</button>
+    <button on="tap:gwd-animation.togglePlay(id=child)" tabindex="0">Toggle</button>
+  </p>
+
+  <!-- Configure the animation runtime with handlers for the two timeline events. -->
+  <amp-gwd-animation id="gwd-animation" layout="nodisplay" timeline-event-prefix="tl_"
+      on="tl_event-1:hideText.hide();tl_event-2:gwd-animation.pause(id=child)">
+  </amp-gwd-animation>
+
+  <style amp-keyframes>
+    @keyframes gwd-empty-animation {
+      0% {
+        opacity: 0.001;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+    @keyframes gwd-gen-1234gwdanimation_gwd-keyframes {
+      0% {
+        transform: translate3d(0px, 0px, 0px);
+        opacity: 1;
+        animation-timing-function: linear;
+      }
+      100% {
+        transform: translate3d(100px, 0px, 0px);
+        opacity: 0.25;
+        animation-timing-function: linear;
+      }
+    }
+    @keyframes gwd-gen-1234gwdanimation_gwd-keyframes_foo {
+      0% {
+        transform: translate3d(0px, 0px, 0px);
+        opacity: 1;
+        animation-timing-function: linear;
+      }
+      100% {
+        transform: translate3d(100px, 0px, 0px);
+        opacity: 0.25;
+        animation-timing-function: linear;
+      }
+    }
+  </style>
+</body>
+</html>

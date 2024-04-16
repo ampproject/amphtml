@@ -1,0 +1,62 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests that A4A does not allow obsolete non-conforming tags, which AMP
+|    does.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|  </head>
+|  <body>
+|  These tags are not allowed:
+|  <ACRONYM></ACRONYM>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:16:0 The tag 'acronym' is disallowed.
+|  <BIG></BIG>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:17:0 The tag 'big' is disallowed.
+|  <CENTER></CENTER>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:18:0 The tag 'center' is disallowed.
+|  <DIR></DIR>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:19:0 The tag 'dir' is disallowed.
+|  <HGROUP></HGROUP>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:20:0 The tag 'hgroup' is disallowed.
+|  <LISTING></LISTING>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:21:0 The tag 'listing' is disallowed.
+|  <MULTICOL></MULTICOL>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:22:0 The tag 'multicol' is disallowed.
+|  <NEXTID></NEXTID>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:23:0 The tag 'nextid' is disallowed.
+|  <NOBR></NOBR>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:24:0 The tag 'nobr' is disallowed.
+|  <SPACER></SPACER>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:25:0 The tag 'spacer' is disallowed.
+|  <STRIKE></STRIKE>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:26:0 The tag 'strike' is disallowed.
+|  <TT></TT>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:27:0 The tag 'tt' is disallowed.
+|  <XMP></XMP>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:28:0 The tag 'xmp' is disallowed.
+|  <o:p></o:p>
+>> ^~~~~~~~~
+amp4ads_feature_tests/obsolete_tags.html:29:0 The tag 'o:p' is disallowed.
+|
+|
+|  </body>
+|  </html>

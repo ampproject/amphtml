@@ -1,0 +1,22 @@
+tags: {  # <script custom-element="amp-fx-flying-carpet">
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-fx-flying-carpet"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-fx-flying-carpet>
+  html_format: AMP
+  tag_name: "AMP-FX-FLYING-CARPET"
+  requires_extension: "amp-fx-flying-carpet"
+  attr_lists: "extended-amp-global"
+  attrs: {
+    name: "height"
+    mandatory: true
+  }
+}

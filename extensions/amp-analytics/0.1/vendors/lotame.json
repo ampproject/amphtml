@@ -1,0 +1,16 @@
+{
+  "requests": {
+    "pageview": "https://bcp.crwdcntrl.net/amp?c=${account}&pv=y&gdpr_consent=${consentString}&gdpr=$IF($EQUALS(CONSENT_METADATA(gdprApplies), true), 1)$IF($EQUALS(CONSENT_METADATA(gdprApplies), false), 0)"
+  },
+  "triggers": {
+    "track pageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

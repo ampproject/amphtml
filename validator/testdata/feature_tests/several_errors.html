@@ -1,0 +1,28 @@
+<!--
+  Test Description:
+  This example has several problems - see the .out file.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset='pick-a-key'>
+  <link rel='canonical' href='./regular-html-version.html'>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script type='javascript'>
+  // Let's go crazy. Uhm, no, hahaha.
+  </script>
+</head>
+<body>
+  <table><tr><td>Tables are allowed</td></tr></table>
+  <amp-img src=dimensions_are_missing.jpg layout="fixed"/>
+  <!-- We don't allow percent as a size unit either. -->
+  <amp-ad width=100% height=300>
+    <!-- <script>document.write(…)</script> -->
+  </amp-ad>
+  <amp-ad width="42" height="42" made_up_attribute="oh hi"></amp-ad>
+  <!-- When rendering errors for attribute values, we collapse whitespace -
+       even whitespace that is originally encoded.-->
+  <amp-ad width="42" height="foo&#13;&#10;bar  baz">
+  </amp-ad>
+</body>
+</html>

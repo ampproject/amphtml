@@ -1,0 +1,44 @@
+tags: {  # amp-mathml 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-mathml 1.0"
+  excludes_condition: "amp-mathml 0.1"
+  extension_spec: {
+    name: "amp-mathml"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-mathml 0.1
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-mathml 0.1"
+  excludes_condition: "amp-mathml 1.0"
+  extension_spec: {
+    name: "amp-mathml"
+    version: "0.1"
+    version: "latest"
+    version_name: "v0.1"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # <amp-mathml>
+  html_format: AMP
+  tag_name: "AMP-MATHML"
+  requires_extension: "amp-mathml"
+  attrs: {
+    name: "data-formula"
+    mandatory: true
+  }
+  attrs: {
+    name: "inline"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}

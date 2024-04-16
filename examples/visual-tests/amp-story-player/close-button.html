@@ -1,0 +1,54 @@
+<html lang="en">
+  <head>
+    <title>Story Player (Non-AMP)</title>
+    <script>
+      // TODO(#17108): Remove this when getMode().test is set.
+      __AMP_TEST = true;
+    </script>
+    <script type="module" src="../../../dist/amp-story-player-v0.mjs"></script>
+    <link href="../../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <style injected>
+      .story-player-iframe {
+        background-size: cover;
+        display: block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
+      }
+
+      .title {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 40px;
+        padding: 88px 32px 32px 32px;
+        line-height: 1.25;
+        text-shadow: 3px 3px #000;
+      }
+
+      /* TODO: Remove this when poster image is no longer displayed. */
+      amp-story-player a:first-of-type {
+        display: none;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </head>
+  <body>
+    <amp-story-player style="width: 360px; height: 600px;" exit-control="close-button">
+      <a href="/examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html"
+          class="story">
+        <span class="title">Placeholder</span>
+      </a>
+    </amp-story-player>
+  </body>
+</html>

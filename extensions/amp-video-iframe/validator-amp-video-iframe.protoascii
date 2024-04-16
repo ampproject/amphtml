@@ -1,0 +1,109 @@
+tags: {  # amp-video-iframe
+  html_format: AMP  # Iframes not allowed in ads.
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-video-iframe 1.0"
+  excludes_condition: "amp-video-iframe 0.1"
+  extension_spec: {
+    name: "amp-video-iframe"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-video-iframe
+  html_format: AMP  # Iframes not allowed in ads.
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-video-iframe 0.1"
+  excludes_condition: "amp-video-iframe 1.0"
+  extension_spec: {
+    name: "amp-video-iframe"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+attr_lists: {
+  name: "amp-video-iframe-common"
+  attrs: { name: "album" }
+  attrs: { name: "alt" }
+  attrs: { name: "artist" }
+  attrs: { name: "artwork" }
+  attrs: { name: "attribution" }
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attrs: {
+    name: "implements-media-session"
+    value: ""
+  }
+  attrs: {
+    name: "implements-rotate-to-fullscreen"
+    value: ""
+  }
+  attrs: { name: "poster" }
+  attrs: { name: "referrerpolicy" }
+  attrs: {
+    name: "rotate-to-fullscreen"
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+}
+
+tags: {  # <amp-video-iframe>
+  html_format: AMP
+  disabled_by: "transformed"
+  tag_name: "AMP-VIDEO-IFRAME"
+  requires_extension: "amp-video-iframe"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-iframe-common"
+  attr_lists: "lightboxable-elements"
+  spec_url: "https://amp.dev/documentation/components/amp-video-iframe/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-video-iframe> (transformed)
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "AMP-VIDEO-IFRAME"
+  spec_name: "AMP-VIDEO-IFRAME (transformed)"
+  requires_extension: "amp-video-iframe"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-iframe-common"
+  attr_lists: "lightboxable-elements"
+  spec_url: "https://amp.dev/documentation/components/amp-video-iframe/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

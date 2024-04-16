@@ -1,0 +1,34 @@
+name: Update Session Issues
+
+on:
+  # This schedule should match the time rotation configured on
+  # update-design-review-issues.js.
+  # Times correspond to session end, and additionally 1 hour earlier to account
+  # for Daylight Savings.
+  schedule:
+    - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
+    - cron: '0 21,22 * * 3' # Americas
+
+permissions:
+  contents: read
+
+jobs:
+  update-session-issues:
+    permissions:
+      issues: write
+    if: github.repository == 'ampproject/amphtml'
+    name: Update Session Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - name: Checkout Repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Update Session Issues
+        run: |
+          node ./build-system/common/update-session-issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

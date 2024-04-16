@@ -1,0 +1,105 @@
+
+
+/**
+ * Show the error messaging container on fetch error.
+ */
+amp-list.i-amphtml-list-fetch-error [fetch-error] {
+  display: block;
+}
+
+amp-list[load-more] [load-more-loading].amp-visible,
+amp-list[load-more] [load-more-failed].amp-visible,
+amp-list[load-more] [load-more-button].amp-visible,
+amp-list[load-more] [load-more-end].amp-visible {
+  display: block;
+}
+
+amp-list[load-more] [load-more-loading].i-amphtml-default-ui,
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui,
+amp-list[load-more] [load-more-button].i-amphtml-default-ui {
+  height: 80px;
+  padding: 12px 0px;
+  box-sizing: border-box;
+}
+
+/* TODO (#19798): Standardize the system font string we use across the code base,
+         possibly by factoring it out into its own class. */
+amp-list[load-more] [load-more-loading].i-amphtml-default-ui,
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui,
+amp-list[load-more] [load-more-button].i-amphtml-default-ui,
+.i-amphtml-list-load-more-button {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: rgb(51,51,51);
+  text-align: center;
+}
+
+amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-list-load-more-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  margin: 8px 0px;
+
+  background-image: url("data:image/svg+xml;charset=utf-8,<svg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='grad'><stop stop-color='rgb(51,51,51)' stop-opacity='.75'></stop><stop offset='100%' stop-color='rgb(51,51,51)' stop-opacity='0'></stop></linearGradient></defs><path d='M11,4.4 A18,18, 0,1,0, 38,20' fill='none' stroke='url(#grad)' stroke-width='1.725'></path></svg>");
+  animation: 1000ms amp-list-load-more-spinner linear infinite;
+}
+
+@keyframes amp-list-load-more-spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.i-amphtml-list-load-more-button {
+  border: none; margin: 0; padding: 0; /* poor man's reset */
+
+  display: inline-block;
+  background-color: rgba(51,51,51,.75);
+  color: white;
+  margin: 4px 0px;
+  padding: 0px 32px;
+  box-sizing: border-box;
+
+  height: 48px;
+  border-radius: 24px;
+}
+
+[load-more] div[role="list"] {
+  overflow-y: hidden;
+}
+
+.i-amphtml-list-load-more-button,
+.i-amphtml-list-load-more-button label,
+.i-amphtml-list-load-more-icon {
+  cursor: pointer;
+}
+
+.i-amphtml-list-load-more-button:hover {
+  background-color: rgba(51,51,51,1);
+}
+
+.i-amphtml-list-load-more-button.i-amphtml-list-load-more-button-small {
+  margin: 0px;
+  padding: 4px 16px;
+  height: 32px;
+}
+
+.i-amphtml-list-load-more-button label {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 24px;
+}
+
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui .i-amphtml-list-load-more-message {
+  line-height: 24px;
+}
+
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui .i-amphtml-list-load-more-icon {
+  height: 24px;
+  width: 24px;
+  display: inline-block;
+  vertical-align: middle;
+  background-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path fill='#ffffff' d='M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z'/></svg>");
+}

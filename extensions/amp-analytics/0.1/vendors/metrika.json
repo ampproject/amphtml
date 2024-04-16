@@ -1,0 +1,47 @@
+{
+  "transport": {
+    "beacon": true,
+    "xhrpost": true,
+    "image": false
+  },
+  "vars": {
+    "_commonData": "amp:1:z:${timezone}:i:${timestamp}:rn:${random}:la:${browserLanguage}:en:${documentCharset}:rqn:${requestCount}",
+    "_screenData": ":s:${screenWidth}x${screenHeight}x${screenColorDepth}:w:${availableScreenWidth}x${availableScreenHeight}",
+    "_timings": ":ds:${domainLookupTime},${tcpConnectTime},${serverResponseTime},${pageDownloadTime},${navTiming(navigationStart,fetchStart)},${redirectTime},${navRedirectCount},${navTiming(domLoading,domInteractive)},${navTiming(domContentLoadedEventStart,domContentLoadedEventEnd)},${navTiming(navigationStart,domComplete)},${pageLoadTime},${navTiming(loadEventStart,loadEventEnd)},${contentLoadTime}",
+    "_idInfo": ":u:${clientId(_ym_uid)}:hid:${pageViewId}",
+    "_title": ":t:${title}",
+    "_notBounceBrInfo": "ar:1:nb:1:",
+    "_externalLinkBrInfo": "ln:1:",
+    "_reachGoalBrInfo": "ar:1:",
+    "_pageViewBrInfo": "pv:1:",
+    "_pageUrl": "${sourceUrl}",
+    "_goalUrl": "goal://${sourceHost}/${goalId}"
+  },
+  "cookies": {
+    "enabled": true,
+    "_ym_uid": {
+      "value": "$IF($MATCH(COOKIE(_ym_uid),^\\d{17}\\d?\\d?$),COOKIE(_ym_uid),TIMESTAMP()$SUBSTR(RANDOM(),2,6))",
+      "cookieMaxAge": 525600,
+      "sameSite": "None"
+    }
+  },
+  "requests": {
+    "pageview": "${_prefix}${_pageViewBrInfo}${_brInfo}&${_siteInfo}&${_suffix}",
+    "notBounce": "${_prefix}${_notBounceBrInfo}${_brInfo}&${_suffix}",
+    "externalLink": "${_prefix}${_externalLinkBrInfo}${_brInfo}&${_suffix}",
+    "reachGoal": "${_prefix}${_reachGoalBrInfo}${_brInfo}&${_siteInfo}&${_goalSuffix}",
+    "_prefix": "${_watch}?browser-info=",
+    "_watch": "${_domain}/watch/${counterId}",
+    "_domain": "https://mc.yandex.ru",
+    "_brInfo": "${_commonData}${_screenData}${_timings}${_idInfo}${_title}",
+    "_siteInfo": "site-info=${yaParams}",
+    "_suffix": "page-url=${_pageUrl}&page-ref=${externalReferrer}",
+    "_goalSuffix": "page-url=${_goalUrl}&page-ref=${_pageUrl}"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  }
+}

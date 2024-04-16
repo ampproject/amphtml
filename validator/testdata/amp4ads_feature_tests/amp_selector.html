@@ -1,0 +1,28 @@
+<!--
+  Test Description:
+  This tests that amp-selector is allowed in A4A.
+-->
+<!doctype html>
+<html ⚡4ads>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+</head>
+<body>
+  <amp-selector layout="container">
+    <option option="0" selected>0</option>
+    <option option="1">1</option>
+    <option option="2">2</option>
+    <option option="3" disabled>3</option>
+  </amp-selector>
+  <amp-selector layout="container" multiple>
+    <option option="0" selected>0</option>
+    <option option="1">1</option>
+    <option option="2">2</option>
+    <option option="3" disabled>3</option>
+  </amp-selector>
+</body>
+</html>

@@ -1,0 +1,137 @@
+tags: {  # amp-carousel
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-carousel"
+    version: "0.1"
+    version: "0.2"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-carousel for AMP4EMAIL
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-carousel] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-carousel"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+    version: "0.2"
+  }
+  attr_lists: "common-extension-attrs"
+}
+attr_lists: {
+  name: "amp-carousel-common"
+  attrs: {
+    disabled_by: "amp4email"
+    name: "arrows"
+    value: ""
+  }
+  attrs: {
+    name: "autoplay"
+    value_regex: "(|[0-9]+)"
+  }
+  attrs: { name: "controls" }
+  attrs: {
+    name: "delay"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "dots"
+    value: ""
+  }
+  attrs: {
+    name: "loop"
+    value: ""
+  }
+  attrs: {
+    name: "slide"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "type"
+    value: "carousel"
+    value: "slides"
+  }
+  # <amp-bind>
+  attrs: { name: "[slide]" }
+}
+# There are 2 variants here depending on the presence of the `lightbox`
+# attribute:
+#     - lightbox is only allowed in AMP html format.
+#     - lightbox implies additional reference_point requirements of the
+#       amp-lightbox children.
+tags: {  # <amp-carousel>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL"
+  requires_extension: "amp-carousel"
+  attr_lists: "amp-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-carousel lightbox>
+  html_format: AMP
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL lightbox"
+  requires_extension: "amp-carousel"
+  requires_extension: "amp-lightbox-gallery"
+  attrs: {
+    name: "lightbox"
+    mandatory: true
+  }
+  attr_lists: "amp-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL lightbox [child]"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
+  descriptive_name: "amp-carousel lightbox [lightbox-exclude] child"
+  attrs: {
+    name: "lightbox-exclude"
+    mandatory: true
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-CAROUSEL lightbox [child]"
+  descriptive_name: "amp-carousel lightbox [lightbox-thumbnail-id] child"
+  attrs: {
+    name: "lightbox-thumbnail-id"
+    value_regex_casei: "^[a-z][a-z\\d_-]*"
+  }
+}

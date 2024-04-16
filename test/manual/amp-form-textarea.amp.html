@@ -1,0 +1,106 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Forms Examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <style amp-custom>
+        .scroll-container {
+            height: 200px;
+            overflow-y: scroll;
+        }
+        .scroll-container textarea {
+          background: transparent;
+        }
+        .green { background-color: green; }
+        .blue { background-color: blue; }
+
+        .content-box {
+            box-sizing: content-box;
+        }
+
+        .border-box {
+            box-sizing: border-box;
+        }
+        .wide {
+            width: 100%;
+        }
+        .max-height {
+          max-height: 100px;
+        }
+        .min-height {
+          min-height: 100px;
+        }
+        .fullscreen {
+          width: 100vw;
+          height: 100vh;
+        }
+        .height {
+          height: 100px;
+        }
+    </style>
+</head>
+<body>
+<h1>autoexpand text area</h1>
+
+<p>Copy paste text</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+<form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+
+    <h2>autoexpand</h2>
+    <p><code>textarea</code> element with <code>autoexpand</code> attribute which enables autoexpand and autoshink functionality</p>
+
+    <h3>regular autoexpand</h3>
+    <textarea name="comment" autoexpand>regular autoexpand</textarea>
+
+    <h3>box-sizing: content-box</h3>
+    <textarea class="content-box" name="comment" autoexpand>content box</textarea>
+
+    <h3>box-sizing: border-box</h3>
+    <textarea class="border-box" name="comment" autoexpand>border box</textarea>
+
+    <h3>wide to test window resize</h3>
+    <textarea class="wide" name="comment" autoexpand>wide</textarea>
+
+    <h3><code>max-height: 100px</code></h3>
+    <textarea class="max-height" name="comment" autoexpand>content box</textarea>
+
+    <h3><code>min-height: 100px</code></h3>
+    <textarea class="min-height" name="comment" autoexpand>content box</textarea>
+
+    <h3><code>height: 100px</code></h3>
+    <textarea class="height" name="comment" autoexpand></textarea>
+
+    <h3><code>lots of existing text</code></h3>
+    <textarea class="height" name="comment" autoexpand>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
+
+    <h3><code>wide, lots of existing text</code></h3>
+    <textarea class="wide height" name="comment" autoexpand>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
+
+    <h3>inside scrolling containers</h3>
+    <div class="scroll-container">
+        <div class="scroll-container green">
+            <textarea name="comment" autoexpand></textarea>
+        </div>
+        <div class="scroll-container blue">
+            <textarea name="comment" autoexpand></textarea>
+        </div>
+    </div>
+
+    <h2>amp-bind</h2>
+    <amp-state id="lorem"><script type="application/json">"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</script></amp-state>
+    <amp-state id="height"><script type="application/json">5</script></amp-state>
+    <textarea name="comment" autoexpand [text]="value"></textarea>
+
+    <p>wow text below for spacing</p>
+</form>
+    <button on="tap:AMP.setState({value: lorem})">Lorem</button>
+
+</body>
+</html>

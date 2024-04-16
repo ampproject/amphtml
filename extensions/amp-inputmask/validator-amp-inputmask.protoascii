@@ -1,0 +1,145 @@
+tags: {  # amp-inputmask
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-inputmask"
+    version: "0.1"
+    version: "latest"
+    # amp-inputmask has no associated tag which indicates usage of the extension.
+    # TODO(gregable): Implement a mechanism to associate attributes with
+    # extension usage and then set this to EXEMPTED or ERROR.
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+# The input element is also defined by validator/validator-main.protoascii
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "input [mask] (custom mask)"
+  requires_extension: "amp-inputmask"
+  attrs: {
+    name: "mask"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+    disallowed_value_regex: "(payment-card"
+        "|date-dd-mm-yyyy"
+        "|date-mm-dd-yyyy"
+        "|date-mm-yy"
+        "|date-yyyy-mm-dd"
+        ")"
+  }
+  attrs: {
+    name: "mask-trim-zeros"
+    value_regex: "\\d+"
+  }
+  attr_lists: "amp-inputmask-common-attr"
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  attrs: { name: "[type]" }
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "input [mask=payment-card]"
+  requires_extension: "amp-inputmask"
+  attrs: {
+    name: "mask"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+    value: "payment-card"
+  }
+  attr_lists: "amp-inputmask-common-attr"
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "input [mask=date-dd-mm-yyyy]"
+  requires_extension: "amp-inputmask"
+  attrs: {
+    name: "mask"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+    value: "date-dd-mm-yyyy"
+  }
+  attr_lists: "amp-inputmask-common-attr"
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "input [mask=date-mm-dd-yyyy]"
+  requires_extension: "amp-inputmask"
+  attrs: {
+    name: "mask"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+    value: "date-mm-dd-yyyy"
+  }
+  attr_lists: "amp-inputmask-common-attr"
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "input [mask=date-mm-yy]"
+  requires_extension: "amp-inputmask"
+  attrs: {
+    name: "mask"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+    value: "date-mm-yy"
+  }
+  attr_lists: "amp-inputmask-common-attr"
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "input [mask=date-yyyy-mm-dd]"
+  requires_extension: "amp-inputmask"
+  attrs: {
+    name: "mask"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+    value: "date-yyyy-mm-dd"
+  }
+  attr_lists: "amp-inputmask-common-attr"
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
+}
+
+attr_lists: {
+  name: "amp-inputmask-common-attr"
+  attrs: {
+    name: "mask-output"
+    trigger: {
+      also_requires_attr: "mask"
+    }
+  }
+  attrs: {
+    name: "type"
+    value: "text"
+    value: "tel"
+    value: "search"
+  }
+  # amp-bind
+  attrs: { name: "[type]" }
+}

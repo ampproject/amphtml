@@ -1,0 +1,29 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for a proper auto-analytics component with a gtag
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>STAMP auto analytics</title>
+|    <link rel="canonical" href="http://nonblocking.io/" >
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <script async custom-element="amp-story-auto-analytics" src="https://cdn.ampproject.org/v0/amp-story-auto-analytics-0.1.js"></script>
+|  </head>
+|  <body>
+|    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
+|      <!-- Valid: has correct gtag attribute and value -->
+|      <amp-story-auto-analytics gtag-id="UA-ANALYTICS"></amp-story-auto-analytics>
+|      <amp-story-page id="cover" auto-advance-after="1s">
+|        <amp-story-grid-layer template="fill">
+|          <h1>Title</h1>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>

@@ -1,0 +1,41 @@
+<!--
+  Test Description:
+  Tests for the amp-call-tracking tag.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-call-tracking" src="https://cdn.ampproject.org/v0/amp-call-tracking-latest.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- Valid: Example of amp-call-tracking usage -->
+  <amp-call-tracking config="https://example.com/calltracking.json">
+    <a href="tel:12345678">+1 (23) 45-678</a>
+  </amp-call-tracking>
+
+  <!-- Invalid: no <A> tag -->
+  <amp-call-tracking config="https://example.com/calltracking.json">
+  </amp-call-tracking>
+
+  <!-- Invalid: more than one <A> tag -->
+  <amp-call-tracking config="https://example.com/calltracking.json">
+    <a href="tel:12345678">+1 (23) 45-678</a>
+    <a href="tel:98765432">(987) 654-321</a>
+  </amp-call-tracking>
+
+  <!-- Invalid: no "config" attribute -->
+  <amp-call-tracking>
+    <a href="tel:12345678">+1 (23) 45-678</a>
+  </amp-call-tracking>
+
+  <!-- Invalid: Something other than an <A> child -->
+  <amp-call-tracking config="https://example.com/calltracking.json">
+    <div></div>
+  </amp-call-tracking>
+</body>
+</html>

@@ -1,0 +1,20 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests that the value of the transformed attribute catches malformed version numbers.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="google;v=1..3">
+>> ^~~~~~~~~
+transformed_feature_tests/transformed_attribute_value_version_malformed.html:6:0 The attribute 'transformed' in tag 'html' is set to the invalid value 'google;v=1..3'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name="viewport" content="width=device-width">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <link rel="canonical" href="./regular-html-version.html">
+|  </head>
+|  <body>
+|    Hello, world.
+|  </body>
+|  </html>

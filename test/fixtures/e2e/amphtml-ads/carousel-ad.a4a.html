@@ -1,0 +1,202 @@
+<!doctype html>
+<html amp4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Carousel Ad</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <!-- ## Summary-->
+  <!--
+  Sample AMPHTML ad using [amp-carousel]({{g.doc('/content/amp-dev/documentation/components/reference/amp-carousel.md', locale=doc.locale).url.path}}) to create an interactive ad.
+  -->
+  <!-- ## Styling -->
+  <!--
+  This is an advanced example that requires some styling to make it look and function properly.
+  -->
+  <style amp-custom>
+    .root-container {
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      line-height: 18px;
+      overflow: hidden;
+      background: #6a594b;
+      color: #ffffff;
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-container {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+      flex-direction: column;
+    }
+    .footer {
+      background: #000000;
+      color: #ffffff;
+      padding: 8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+    }
+    .footer-logo {
+      border-right: 1px solid #ffffff;
+      padding: 0 8px 0 0;
+      margin: 0 8px 0 0;
+    }
+    .bg-img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+    }
+    .logo-img {
+      display: block;
+    }
+    .stretch {
+      flex: 1;
+    }
+    .button {
+      cursor: pointer;
+      text-decoration: none;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      color: #ffffff;
+      display: inline-block;
+      background-color: #2979ff;
+    }
+    .carousel-item {
+      width: 184px;
+      height: 105px;
+      padding: 12px 2px;
+      color: #000000;
+      position: relative;
+    }
+    .carousel-item:first-child {
+      padding-left: 12px;
+    }
+    .carousel-item:last-child {
+      padding-right: 12px;
+    }
+    .carousel {
+      width: 100%;
+      position: absolute;
+    }
+    .carousel-item-inner {
+      width: 180px;
+      height: 105px;
+      padding: 2px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 4px;
+      position: relative;
+    }
+    .carousel-img {
+      display: block;
+      border: 2px solid #ffffff;
+      border-radius: 2px;
+    }
+    .carousel-button-container {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px;
+      text-align: center;
+    }
+    .learn-more a {
+      padding: 8px 0;
+      text-transform: uppercase;
+      display: inline-block;
+      color: #2979ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="root-container">
+  <div class="main-container">
+    <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-side-bg.jpg"
+        width="608"
+        height="342"
+        layout="responsive"
+        class="bg-img"></amp-img>
+    <!-- ## Carousel -->
+    <!--
+    We use the `amp-carousel` to display multiple pieces of content along a horizontal axis.
+
+    All elements with the `carousel-item` class-name have essentially the same markup: one container that activates the lightbox, an image, and a button.
+
+    AMP has a system in place for [events and actions](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md). It uses a domain-specific language to describe how actions are triggered. In this example, we set the `on` attribute so the lightbox will activate when a carousel item is tapped. Each button will also toggle the visibility of specific items in the lightbox (see `show` and `hide`).
+    -->
+    <amp-carousel
+        height="132"
+        layout="fixed-height"
+        type="carousel"
+        class="carousel">
+      <div class="carousel-item">
+        <div class="carousel-item-inner">
+          <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-engine.jpg"
+              width="177"
+              height="100"
+              layout="fixed"
+              class="carousel-img"></amp-img>
+          <div class="carousel-button-container">
+            <a href="https://amp.dev/documentation/examples/" target="_blank" class="button carousel-button">
+              6C Tuned Engine
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="carousel-item-inner">
+          <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-gauges.jpg"
+              width="177"
+              height="100"
+              layout="fixed"
+              class="carousel-img"></amp-img>
+          <div class="carousel-button-container">
+            <a href="https://amp.dev/documentation/examples/" target="_blank" class="button carousel-button">
+              Sport Gauge Cluster
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="carousel-item-inner">
+          <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-seats.jpg"
+              width="177"
+              height="100"
+              layout="fixed"
+              class="carousel-img"></amp-img>
+          <div class="carousel-button-container">
+            <a href="https://amp.dev/documentation/examples/" target="_blank" class="button carousel-button">
+              Luxury Seats
+            </a>
+          </div>
+        </div>
+      </div>
+    </amp-carousel>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo">
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-logo.png"
+          width="72"
+          height="32"
+          layout="fixed"
+          alt="Howdy"
+          class="logo-img"></amp-img>
+    </div>
+    <div class="stretch">The All-New WX-S R5</div>
+    <a href="https://amp.dev/documentation/examples/" target="_blank" class="button">
+      Learn more
+    </a>
+  </div>
+</div>
+</body>
+</html>

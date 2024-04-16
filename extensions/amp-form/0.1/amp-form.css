@@ -1,0 +1,47 @@
+
+
+form.amp-form-submitting [submitting],
+form.amp-form-submit-success [submit-success],
+form.amp-form-submit-error [submit-error] {
+  display: block;
+}
+
+textarea[autoexpand]:not(.i-amphtml-textarea-max) {
+  overflow: hidden!important;
+}
+
+.i-amphtml-textarea-clone {
+  visibility: hidden;
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  height: 0!important;
+}
+
+.i-amphtml-validation-bubble {
+  transform: translate(-50%, -100%);
+  background-color: white;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, .5);
+  max-width: 200px;
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.i-amphtml-validation-bubble:after {
+  content: ' ';
+  position: absolute;
+  bottom: -8px;
+  left: 30px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #fff;
+}
+
+[visible-when-invalid] {
+  color: red;
+}

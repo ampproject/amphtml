@@ -1,0 +1,31 @@
+{
+  "name": "gulp-amphtml-validator",
+  "version": "1.0.6",
+  "description": "Gulp plugin for the official AMP HTML validator (www.ampproject.org)",
+  "keywords": [
+    "gulpplugin",
+    "AMP",
+    "validator",
+    "validate",
+    "AMP HTML",
+    "Accelerated Mobile Pages"
+  ],
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml/tree/main/validator/js/gulpjs"
+  },
+  "dependencies": {
+    "amphtml-validator": "1.0.35",
+    "through2": "4.0.2"
+  },
+  "devDependencies": {
+    "gulp": "4.0.2",
+    "mocha": "10.2.0"
+  },
+  "scripts": {
+    "test": " ./node_modules/mocha/bin/mocha",
+    "run-sample": " ./run_sample.sh"
+  }
+}

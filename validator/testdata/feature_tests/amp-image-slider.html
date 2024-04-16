@@ -1,0 +1,76 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    .red {
+      color: red;
+    }
+    .green {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <!-- Valid -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+    <div first class="red">BEFORE</div>
+    <div second class="green">AFTER</div>
+  </amp-image-slider>
+
+  <!-- Invalid, requires at least 2 children -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Invalid, cannot contain other children other than amp-img and div -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
+    <span>BAD CONTENT</span>
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+    <div first class="red">BEFORE</div>
+    <div second class="green">AFTER</div>
+  </amp-image-slider>
+
+  <!-- Invalid, first and second attribute should only exist inside of amp-image-slider -->
+  <div first>Should not be exposed</div>
+  <div second>Should not be exposed</div>
+
+  <!-- Valid, testing disable-hint-reappear -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" disable-hint-reappear>
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Valid, both initial-slider-position and step-size should between 0 and 1 (inclusive) -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="0.3" step-size="0.4">
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Invalid, both initial-slider-position and step-size should not be more than 1 -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="1.5" step-size="1.5">
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Valid, both initial-slider-position and step-size could be 0 -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="0" step-size="0.0">
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <!-- Valid, both initial-slider-position and step-size could be 1 -->
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="1" step-size="1.0">
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+  </amp-image-slider>
+</body>
+</html>

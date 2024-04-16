@@ -1,0 +1,7 @@
+{
+  "plugins": [
+    "../../../.."
+  ],
+  "sourceType": "module",
+  "throws": "could not load JSON file at 'build-system/babel-plugins/babel-plugin-transform-json-import/test/fixtures/transform-assertions/error-cant-load-json/404.json'"
+}

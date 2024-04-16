@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Story Player (Non-AMP)</title>
+    <link href="../../../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <script async src="../../../../dist/amp-story-player-v0.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+
+      .story-player-iframe {
+        background-size: cover;
+        display: block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
+      }
+
+      .title {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 40px;
+        padding: 88px 32px 32px 32px;
+        line-height: 1.25;
+        text-shadow: 3px 3px #000;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </head>
+  <body>
+    <h1>This is a NON-AMP page that embeds a story below:</h1>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+    <amp-story-player style="width: 360px; height: 600px;">
+        <a href="http://localhost:8000/examples/amp-story/ampconf.html"
+            class="story">
+          <span class="title">A local’s guide to what to eat and do in New York City</span>
+        </a>
+    </amp-story-player>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+  </body>
+</html>

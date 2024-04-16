@@ -1,0 +1,85 @@
+<!--
+  Test Description:
+  This tests looks at specific errors related to inputmasks.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-element="amp-inputmask" src="https://cdn.ampproject.org/v0/amp-inputmask-0.1.js"></script>
+</head>
+<body>
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <!-- Valid: mask attr -->
+    <input mask="L0L_0L0">
+    <!-- Valid: empty mask attr -->
+    <input mask="">
+    <!-- Valid: mask attr with the mask-output attr -->
+    <input mask="L0L_0L0" mask-output="raw">
+    <!-- Valid: mask attr with type=text -->
+    <input mask="L0L_0L0" type="text">
+    <!-- Valid: mask attr with type=tel -->
+    <input mask="L0L_0L0" type="tel">
+    <!-- Valid: mask attr with type=search -->
+    <input mask="L0L_0L0" type="search">
+    <!-- Valid: mask attr with multiple custom masks -->
+    <input mask="00000 00000-0000" type="tel">
+    <!-- Valid: mask attr with named mask "payment-card" -->
+    <input mask="payment-card" type="tel">
+    <!-- Valid: mask attr with named mask "date-dd-mm-yyyy" -->
+    <input mask="date-dd-mm-yyyy" type="tel">
+    <!-- Valid: mask attr with named mask "date-mm-dd-yyyy" -->
+    <input mask="date-mm-dd-yyyy" type="tel">
+    <!-- Valid: mask attr with named mask "date-mm-yy" -->
+    <input mask="date-mm-yy" type="tel">
+    <!-- Valid: mask attr with named mask "date-yyyy-mm-dd" -->
+    <input mask="date-yyyy-mm-dd" type="tel">
+    <!-- Valid: mask attr with multiple custom masks -->
+    <input mask="00000 00000-0000" type="tel">
+    <!-- Valid: mask attr with named mask literal with escape char -->
+    <input mask="00000 p\ayment-card" type="tel">
+    <!-- Valid: mask attr with numeric mask-trim-zeros -->
+    <input mask="00000" mask-trim-zeros="0" type="tel">
+  </form>
+
+
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <!-- Invalid: mask-output attr without mask attr -->
+    <input mask-output="raw" type="text">
+    <!-- Invalid: mask attr with type=date -->
+    <input mask="L0L_0L0" type="date">
+    <!-- Invalid: mask attr with type=email -->
+    <input mask="L0L_0L0" type="email">
+    <!-- Invalid: mask attr with type=number -->
+    <input mask="L0L_0L0" type="number">
+    <!-- Invalid: mask attr with type=button -->
+    <input mask="L0L_0L0" type="button">
+    <!-- Invalid: mask attr with type=range -->
+    <input mask="L0L_0L0" type="range">
+    <!-- Invalid: mask attr with type=hidden -->
+    <input mask="L0L_0L0" type="hidden">
+    <!-- Invalid: mask attr with type=password -->
+    <input mask="L0L_0L0" type="password">
+    <!-- Invalid: mask attr with div[contenteditable] -->
+    <div contenteditable mask="L0L_0L0"></div>
+    <!-- Invalid: mask attr with multiple masks that includes named mask -->
+    <input mask="LOL_0L0 payment-card"></div>
+    <!-- Invalid: mask attr with multiple named masks -->
+    <input mask="payment-card payment-card"></div>
+    <input mask="payment-card date-mm-yy"></div>
+    <input mask="payment-card  date-mm-yy"></div>
+    <!-- Invalid: mask attr with spaces named masks -->
+    <input mask="payment-card "></div>
+    <input mask=" payment-card "></div>
+    <!-- Invalid: mask attr with non-numeric mask-trim-zeros -->
+    <input mask="00000" mask-trim-zeros="wow" type="tel">
+  </form>
+  </form>
+
+</body>
+</html>

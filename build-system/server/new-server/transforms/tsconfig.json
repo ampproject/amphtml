@@ -1,0 +1,26 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "outDir": "dist",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "module": "CommonJS",
+    "allowJs": false,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "declaration": true
+  },
+  "include": [
+    "./*.ts",
+    "./**/*.ts"
+  ]
+}

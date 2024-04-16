@@ -1,0 +1,83 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the amp-fx-collection tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <div amp-fx="parallax" data-parallax-factor="0.8"></div>
+|
+|    <!-- Valid -->
+|    <amp-img amp-fx="parallax" data-parallax-factor="1.2" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="parallax"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div amp-fx="fade-in"></div>
+|
+|    <!-- Valid -->
+|    <amp-img amp-fx="fade-in" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="fade-in"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <amp-img amp-fx="fade-in-scroll" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="fly-in-bottom"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div>
+|        <h1 amp-fx="fly-in-left"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div>
+|        <h1 amp-fx="fly-in-right"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div>
+|        <h1 amp-fx="fly-in-top"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div amp-fx="fade-in fly-in-bottom"></div>
+|
+|    <!-- Valid -->
+|    <amp-img amp-fx="fade-in parallax" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="fade-in-scroll parallax"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="float-in-top"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="float-in-bottom"></h1>
+|    </div>
+|  </body>
+|  </html>

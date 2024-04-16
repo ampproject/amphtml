@@ -1,0 +1,18 @@
+PASS
+|  <!--
+|    Test Description:
+|    Test for server side rendering transformer:
+|     - boilerplate is not required.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="self;v=1">
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name="viewport" content="width=device-width">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <link rel="canonical" href="./regular-html-version.html">
+|  </head>
+|  <body>
+|  </body>
+|  </html>

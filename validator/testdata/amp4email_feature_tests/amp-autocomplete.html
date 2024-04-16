@@ -1,0 +1,193 @@
+<!--
+  Test Description:
+  Tests the additional restrictions AMP4EMAIL sets on AMP-AUTOCOMPLETE.
+-->
+<!DOCTYPE html>
+<html ⚡4email data-css-strict>
+  <head>
+    <meta charset="utf-8" />
+    <style amp4email-boilerplate>
+      body {
+        visibility: hidden;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-autocomplete"
+      src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-form"
+      src="https://cdn.ampproject.org/v0/amp-form-0.1.js"
+    ></script>
+    <script
+      async
+      custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+    ></script>
+  </head>
+  <body>
+    <!-- Valid: amp-component with remote data -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <input />
+    </amp-autocomplete>
+
+    <!-- Valid: amp-autocomplete textarea -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <textarea></textarea>
+    </amp-autocomplete>
+
+    <!-- Valid: amp-autocomplete with textarea with other attrs -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <textarea autoexpand placeholder="Reply"></textarea>
+    </amp-autocomplete>
+
+    <!-- Valid: input and src and query attr -->
+    <amp-autocomplete
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      query="q"
+    >
+      <input />
+    </amp-autocomplete>
+
+    <!-- Valid: other attributes -->
+    <amp-autocomplete
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      highlight-user-entry
+      inline
+      min-characters="0"
+      max-items="3"
+      submit-on-enter
+      suggest-first
+    >
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: amp-component with static data -->
+    <amp-autocomplete>
+      <input />
+      <script type="application/json">
+        {}
+      </script>
+    </amp-autocomplete>
+
+    <!-- Invalid: amp-component with filter attribute -->
+    <amp-autocomplete
+      filter="prefix"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+    >
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: amp-component with filter-value attribute -->
+    <amp-autocomplete
+      filter-value="property"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+    >
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: Nested XHRs not allowed. This example is banned in general AMP but
+    for a different reason: a template cannot be a descendant of another template. -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <template type="amp-mustache">
+        <div>
+          <amp-autocomplete
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+          >
+            <template type="amp-mustache" id="1234">
+              <div>
+                <a href="https://somelink.com">{{blah}}</a>
+              </div>
+            </template>
+          </amp-autocomplete>
+        </div>
+      </template>
+    </amp-autocomplete>
+
+    <!-- Invalid: Nested XHRs not allowed. -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <template type="amp-mustache">
+        <div>
+          <amp-state src="https://someserver.json">
+            <script type="application/json">
+              {}
+            </script>
+          </amp-state>
+        </div>
+      </template>
+    </amp-autocomplete>
+
+    <!-- Invalid: Nested XHRs not allowed. -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <template type="amp-mustache">
+        <div>
+          <amp-autocomplete
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            template="1234"
+          >
+          </amp-autocomplete>
+        </div>
+      </template>
+    </amp-autocomplete>
+
+    <!-- Invalid: Nested XHRs not allowed. -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <template type="amp-mustache">
+        <div>
+          <amp-state id="123" src="https://someserver.json" template="1234">
+            <script type="application/json">
+              {}
+            </script>
+          </amp-state>
+        </div>
+      </template>
+    </amp-autocomplete>
+
+    <!-- Invalid: Nested XHRs not allowed. -->
+    <template type="amp-mustache">
+      <div>
+        <amp-autocomplete
+          src="https://data.com/articles.json?ref=CANONICAL_URL"
+          template="1234"
+        >
+        </amp-autocomplete>
+      </div>
+    </template>
+
+    <!-- Invalid: URLs cannot be empty. -->
+    <amp-autocomplete src="">
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: The protocol can only be https -->
+    <amp-autocomplete src="http://data.com/articles.json?ref=CANONICAL_URL">
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: src of amp-autocomplete is not bindable -->
+    <amp-autocomplete [src]="data">
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: Mustache delimiters are disallowed in src -->
+    <amp-autocomplete src="foo{{bar">
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: Mustache delimiters are disallowed in src -->
+    <amp-autocomplete src="foo{{bar">
+      <input />
+    </amp-autocomplete>
+
+    <!-- Invalid: Mustache variables cannot be concatenated in href -->
+    <amp-autocomplete src="http://data.com/articles.json?ref=CANONICAL_URL">
+      <input />
+      <template type="amp-mustache">
+        <a href="{{bar}}{{foo}}">disallowed</a>
+      </template>
+    </amp-autocomplete>
+  </body>
+</html>

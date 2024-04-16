@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html ⚡ allow-viewer-render-template lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Forms Examples in AMP</title>
+    <link rel="canonical" href="//example.com" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
+  </head>
+  <body>
+    <h4>
+      Autocomplete Search (GET xhr cross origin current host > httpbin.org)
+    </h4>
+    <form
+      method="get"
+      action="https://httpbin.org/response-headers"
+      action-xhr="https://httpbin.org/response-headers"
+      target="_blank">
+      <amp-autocomplete
+        src="https://lively-and-awesome.appspot.com/ssr_amp_list/"
+        min-characters="0">
+        <input type="search" name="term" required />
+        <template type="amp-mustache">
+          <div class="product">{{name}}</div>
+        </template>
+      </amp-autocomplete>
+      <input type="submit" value="Search" />
+      <div submit-success>
+        <template type="amp-mustache">
+          <h1>You searched for: {{term}}</h1>
+        </template>
+      </div>
+    </form>
+  </body>
+</html>

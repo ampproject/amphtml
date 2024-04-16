@@ -1,0 +1,86 @@
+<!--
+  Test Description:
+  Test for server side rendering transformer:
+   - html tag attributes i-amphtml-layout and i-amphtml-no-boilerplate present
+   - responsive layout: i-amphtml-sizer tag with style attribute
+   - intrinsic layout: i-amphtml-sizer tag with img tag
+-->
+<!doctype html>
+<html ⚡ transformed="google;v=1" i-amphtml-layout i-amphtml-no-boilerplate>
+<head>
+  <meta charset="utf-8">
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name="viewport" content="width=device-width">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element=amp-social-share src=https://cdn.ampproject.org/v0/amp-social-share-0.1.js></script>
+  <link rel="canonical" href="./regular-html-version.html">
+</head>
+<body>
+  <!-- Valid -->
+  <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
+    <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
+  </amp-img>
+  <!-- Valid -->
+  <amp-img src="https://amp.dev/static/samples/img/amp.jpg" width="1080" height="610" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive" noloading="" i-amphtml-ssr>
+    <i-amphtml-sizer style="display:block;padding-top:56.4815%;"></i-amphtml-sizer>
+    <img class="i-amphtml-blurry-placeholder" placeholder="" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' xmlns%3Axlink='http%3A//www.w3.org/1999/xlink' viewBox='0 0 10 6'%3E%3Cfilter id='b' color-interpolation-filters='sRGB'%3E%3CfeGaussianBlur stdDeviation='.5'%3E%3C/feGaussianBlur%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1 1'%3E%3C/feFuncA%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cimage filter='url(%23b)' x='0' y='0' height='100%25' width='100%25' xlink%3Ahref='data%3Aimage/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAGCAYAAAD68A/GAAAA+ElEQVR4AQXBPS8DYQDA8f9z99xLm9x5uUQYDIaWayMq6WSRIgZB8AEaX0CMEkEMEt/B5BMwMDQ1dPQ6WEikvVWlSBon0d6r30/sVafS89ogSZJQEIJvVSVjmrhJzP1fj04QEgR9lPqDzuH+KpZt09J05jfLlAwNpzxBV8DSoks+N4bUrHEmcw5u3uH2zmN3Z4EzU1KpuDS8NlsbJX66vygry0U+v3zW12YxTIOnR4/t6hzNZhvf7zE6YnPTeEOdLswcn5xe4wzbtLwO2azOwdEFtpXh5fWDMIy4vHpGmLqbqkNFjPCdNO4jpSSKYlBUoigglQPEicE/wDBT/+m3qawAAAAASUVORK5CYII='%3E%3C/image%3E%3C/svg%3E" alt="">
+  </amp-img>
+  <!-- Valid -->
+  <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;100&quot; width=&quot;300&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>"></i-amphtml-sizer>
+  </amp-img>
+  <!-- Valid -->
+  <amp-img src="image.png" height="200" width="400" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height='200' width='400' xmlns='http://www.w3.org/2000/svg' version='1.1'/>"></i-amphtml-sizer>
+  </amp-img>
+  <!-- Valid -->
+  <amp-img src="image.png" height="200.1" width="400.15" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height='200.1' width='400.15' xmlns='http://www.w3.org/2000/svg' version='1.1'/>"></i-amphtml-sizer>
+  </amp-img>
+  <!-- Valid -->
+  <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9Ijc1IiB3aWR0aD0iNzUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIi8+"></i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid i-amphtml-sizer > img does not specify an svg -->
+  <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="image.png"></i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid intrinsic i-amphtml-sizer inside responsive sizer  -->
+  <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer style=display:block;padding-top:171.4370%;>
+    <img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height='100' width='300' xmlns='http://www.w3.org/2000/svg' version='1.1'/>">
+    </i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid i-amphtml-sizer > img  does not specify class -->
+  <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9Ijc1IiB3aWR0aD0iNzUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIi8+"></i-amphtml-sizer>
+  </amp-img>
+  <!-- Valid -->
+  <amp-social-share class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout=fixed style=width:60px;height:44px; type=test></amp-social-share>
+  <!-- Valid -->
+  <amp-img src=image.png class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=300 i-amphtml-layout=responsive layout=responsive width=400 style="aspect-ratio:400/300;">
+    <i-amphtml-sizer i-amphtml-disable-ar style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
+  </amp-img>
+  <!-- Valid -->
+  <amp-img src="image.png" height="300" width="400" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic" style="aspect-ratio:400/300;">
+    <i-amphtml-sizer i-amphtml-disable-ar class="i-amphtml-sizer"><img class="i-amphtml-intrinsic-sizer" alt="" aria-hidden="true" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9Ijc1IiB3aWR0aD0iNzUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIi8+"></i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid i-amphtml-layout attribute value does not match layout value -->
+  <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=nodisplay layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
+    <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid class attribute value due to not matching layout value -->
+  <amp-img class="i-amphtml-layout-nodisplay i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
+    <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
+  </amp-img>
+  <!-- Invalid class attribute value due to layout not being size defined (spaces) -->
+  <amp-img class="i-amphtml-layout-nodisplay i-amphtml-layout-size-defined" i-amphtml-layout=nodisplay layout=nodisplay></amp-img>
+  <!-- Invalid class attribute value due to layout not being size defined (tabs) -->
+  <amp-img class="i-amphtml-layout-nodisplay  i-amphtml-layout-size-defined" i-amphtml-layout=nodisplay layout=nodisplay></amp-img>
+  <!-- Invalid i-amphtml-sizer due to css declarations -->
+  <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
+    <i-amphtml-sizer style=display:none;padding-bottom:171.4370%;></i-amphtml-sizer>
+  </amp-img>
+
+</body>
+</html>

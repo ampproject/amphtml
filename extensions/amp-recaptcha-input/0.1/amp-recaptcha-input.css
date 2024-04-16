@@ -1,0 +1,11 @@
+
+
+.i-amphtml-recaptcha-iframe {
+  position: fixed !important;
+  top: 0px !important;
+  left: 0px !important;
+  height: 1px !important;
+  width: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}

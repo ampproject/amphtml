@@ -1,0 +1,198 @@
+FAIL
+|  <!--
+|    Test Description:
+|      This tests looks at specific errors related to positive and negative
+|      regexps used inside the validator.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style>invalid body</style>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:12:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|
+|    <!--
+|    src value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
+|    The first example is valid. The latter three examples are invalid.
+|    -->
+|    <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"> </script>
+|    <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:21:2 The extension 'amp-vine' has a path 'v0/amp-vine-0.1.js?foobar' which is invalid. Please use a valid path for this extension. (see https://amp.dev/documentation/components/amp-vine)
+|    <script async custom-element="amp-vine" src="http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:22:2 The script tag includes an invalid AMP domain in the src attribute.
+>>   ^~~~~~~~~
+feature_tests/regexps.html:22:2 The attribute 'src' in tag 'amp-vine extension script' is set to the invalid value 'http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://amp.dev/documentation/components/amp-vine)
+|    <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:23:2 The tag 'amp-hulu extension script' contains text, which is disallowed. (see https://amp.dev/documentation/components/amp-hulu)
+|
+|    <!--
+|    href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
+|    The first example is valid, the second example is invalid.
+|    -->
+|    <link rel="stylesheet" type="text/css"
+|          href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+|    <link rel="stylesheet" type="text/css"
+>>   ^~~~~~~~~
+feature_tests/regexps.html:31:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts)
+|          href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
+|
+|    <!--
+|    href value_regex: "https://fonts\\.googleapis\\.com/css2?\\?.*|https://fast\\.fonts\\.net/.*"
+|    The first three examples are valid, the fourth example is invalid.
+|    -->
+|    <link rel="stylesheet" type="text/css"
+|          href="https://fonts.googleapis.com/css?foobar">
+|    <link rel="stylesheet" type="text/css"
+|          href="https://fonts.googleapis.com/css2?foobar">
+|    <link rel="stylesheet" type="text/css"
+|          href="https://cloud.typography.com/6256354/724768/css/fonts.css">
+|    <link rel="stylesheet" type="text/css"
+>>   ^~~~~~~~~
+feature_tests/regexps.html:44:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'http://xss.com/https://fonts.googleapis.com/css?foobar'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts)
+|          href="http://xss.com/https://fonts.googleapis.com/css?foobar">
+|
+|    <!--
+|      Regexp to allow typekit fonts.
+|      href value_regex: "https://use\\.typekit\\.net/\\w+\\.css"
+|      The first example is valid, the second example is invalid.
+|    -->
+|    <link rel="stylesheet" type="text/css"
+|          href="https://use.typekit.net/oeg4hgb.css">
+|    <link rel="stylesheet" type="text/css"
+>>   ^~~~~~~~~
+feature_tests/regexps.html:54:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.typekit.net/css/oeg4hgb.css'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts)
+|          href="https://use.typekit.net/css/oeg4hgb.css">
+|
+|    <!--
+|      Regexp to allow font-awesome css, but not path traversal.
+|      The first example is valid, the second is not.
+|    -->
+|    <link rel="stylesheet" type="text/css"
+|          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+|    <link rel="stylesheet" type="text/css"
+>>   ^~~~~~~~~
+feature_tests/regexps.html:63:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts)
+|          href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
+|    <!--
+|      New Font Awesome url format the first five are valid the last two are not.
+|    -->
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/brands.css" rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css"
+|    rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.11.1/css/v4-shims.css"
+|    rel="stylesheet">
+|    <!-- invalid -->
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/../css/solid.css" rel="stylesheet">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:77:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/../css/solid.css'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts)
+|    <!--
+|      Old Font Awesome url format. Valid.
+|    -->
+|    <link href="https://use.fontawesome.com/abcdefghij.css" rel="stylesheet">
+|
+|    <!--
+|    rel value_regex: lengthy, see protoascii
+|    The first three examples are valid. The latter three examples are invalid.
+|    -->
+|    <link rel="accessibility">
+|    <link rel="accessibility alternate">
+|    <link rel="accessibility alternate archives">
+|    <link rel="import">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:90:2 The attribute 'rel' in tag 'link' is set to the invalid value 'import'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+|    <link rel="accessibility subresource">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:91:2 The attribute 'rel' in tag 'link' is set to the invalid value 'accessibility subresource'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+|    <link rel="manifest accessibility">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:92:2 The attribute 'rel' in tag 'link' is set to the invalid value 'manifest accessibility'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+|
+|    <!--
+|    name disallowed_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
+|    The first two examples are valid. The latter two examples are invalid.
+|    -->
+|    <meta name="valid" content="">
+|    <meta name="validcontent-disposition" content="">
+|    <meta name="content-disposition" content="">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:100:2 The attribute 'name' in tag 'meta' is set to the invalid value 'content-disposition'.
+|    <meta name="invalid content-disposition" content="">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:101:2 The attribute 'name' in tag 'meta' is set to the invalid value 'invalid content-disposition'.
+|
+|    <!--
+|    css selector disallowed_value_regex: "(^|\\W)i-amphtml-"
+|    The first example is valid. The latter four are invalid.
+|    -->
+|    <style amp-custom>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:107:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|      .comic-amp-font-loaded .comic-amp {
+|        font-family: 'Comic AMP', serif, sans-serif;
+|      }
+|      .i-amphtml-hidden {}
+|      #i-amphtml-wrapper {}
+|      i-amphtml-sizer {}
+|      [i-amphtml-section] {}
+|    </style>
+|
+|  </head>
+|  <body>
+|
+|    <!--
+|    class disallowed_value_regex: "(^|\\W)i-amphtml-"
+|    The first example is valid. The latter two are invalid.
+|    -->
+|    <div class="example-amp-font"></div>
+|    <div class="example-amp-font i-amphtml-hidden"></div>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:125:2 The attribute 'class' in tag 'div' is set to the invalid value 'example-amp-font i-amphtml-hidden'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/#disallowed-styles)
+|    <div class="i-amphtml-hidden example-amp-font"></div>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:126:2 The attribute 'class' in tag 'div' is set to the invalid value 'i-amphtml-hidden example-amp-font'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/#disallowed-styles)
+|
+|    <!--
+|    id disallowed_value_regex: lengthy, see protoascii
+|    The first example is valid. The latter two are invalid.
+|    -->
+|    <div id="exampe-amp-font"></div>
+|    <div id="i-amphtml-abc"></div>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:133:2 The attribute 'id' in tag 'div' is set to the invalid value 'i-amphtml-abc'.
+|    <div id="AMP"></div>
+>>   ^~~~~~~~~
+feature_tests/regexps.html:134:2 The attribute 'id' in tag 'div' is set to the invalid value 'AMP'.
+|
+|    <!--
+|    name disallowed_value_regex: lengthy, see protoascii
+|    The first two examples are valid. The latter three are invalid.
+|    -->
+|    <input name="" />
+|    <input name="email" />
+|    <input name="innerHTML" />
+>>   ^~~~~~~~~
+feature_tests/regexps.html:142:2 The attribute 'name' in tag 'input' is set to the invalid value 'innerHTML'. (see https://amp.dev/documentation/components/amp-form/)
+|    <input name="__amp_source_origin" />
+>>   ^~~~~~~~~
+feature_tests/regexps.html:143:2 The attribute 'name' in tag 'input' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-form/)
+|    <input name="webkitRequestFullscreen" />
+>>   ^~~~~~~~~
+feature_tests/regexps.html:144:2 The attribute 'name' in tag 'input' is set to the invalid value 'webkitRequestFullscreen'. (see https://amp.dev/documentation/components/amp-form/)
+|
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/regexps.html:147:6 The tag 'style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>       ^~~~~~~~~
+feature_tests/regexps.html:147:6 The extension 'amp-hulu' was found on this page, but is unused. Please remove this extension.

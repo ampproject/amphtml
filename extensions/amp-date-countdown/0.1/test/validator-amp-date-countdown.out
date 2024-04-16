@@ -1,0 +1,166 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This is the minimum valid AMP document; it includes all of the required
+|    fields from the spec, but nothing else.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-date-countdown example</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-custom>
+|      amp-date-countdown {
+|        display: block;
+|      }
+|      h1{
+|        color: #396;
+|        font-weight: 100;
+|        font-size: 20px;
+|      }
+|
+|      #clockdiv{
+|        font-family: sans-serif;
+|        color: #fff;
+|        display: inline-block;
+|        font-weight: 100;
+|        text-align: center;
+|        font-size: 20px;
+|        background: #00ECB9;
+|        padding: 20px;
+|      }
+|
+|      #clockdiv > div{
+|        padding: 10px;
+|        border-radius: 3px;
+|        background: #00BF96;
+|        display: inline-block;
+|      }
+|
+|      #clockdiv div > span{
+|        padding: 15px;
+|        border-radius: 3px;
+|        background: #00816A;
+|        display: inline-block;
+|      }
+|
+|      .smalltext{
+|        padding-top: 5px;
+|        font-size: 16px;
+|      }
+|      .date-count-down {
+|        color: blue;
+|      }
+|      .date-count-down span{
+|        color: red;
+|      }
+|      #sample2 {
+|        visibility: hidden;
+|      }
+|    </style>
+|    <script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js"></script>
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+|    <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <amp-animation id="hide-timeout-event" layout="nodisplay">
+|        <script type="application/json">
+|            {
+|                "duration": "1s",
+|                "fill": "both",
+|                "selector": "#ampdate, #sample",
+|                "keyframes": { "visibility": "hidden"}
+|            }
+|        </script>
+|    </amp-animation>
+|    <amp-animation id="show-timeout-event" layout="nodisplay">
+|        <script type="application/json">
+|            {
+|                "duration": "1s",
+|                "fill": "both",
+|                "selector": "#sample2",
+|                "keyframes": { "visibility": "visible"}
+|            }
+|        </script>
+|    </amp-animation>
+|    <h1 id="sample">
+|        When Timer hits 0, will hide the timer itself and hide this message.
+|    </h1>
+|    <h1 id="sample2">
+|        When Timer hits 0, will hide the timer itself and display this message.
+|    </h1>
+|    <amp-date-countdown id="ampdate" end-date="2020-06-20T11:22:00+08:00" on="timeout: hide-timeout-event.start, show-timeout-event.start" height="235" width="400" when-ended="stop" locale='en'>
+|      <template type="amp-mustache">
+|        <h1>Countdown Clock</h1>
+|        <div id="clockdiv">
+|          {{#d}}
+|            <div>
+|              <span class="d">{{d}}</span>
+|              <div class="smalltext">{{days}}</div>
+|            </div>
+|          {{/d}}
+|          {{#h}}
+|            <div>
+|              <span class="h">{{h}}</span>
+|              <div class="smalltext">{{hours}}</div>
+|            </div>
+|          {{/h}}
+|          <div>
+|            <span class="m">{{m}}</span>
+|            <div class="smalltext">{{minutes}}</div>
+|          </div>
+|          <div>
+|            <span class="s">{{s}}</span>
+|            <div class="smalltext">{{seconds}}</div>
+|          </div>
+|        </div>
+|        <div class="date-count-down">
+|          {{#d}} {{dd}} <span>{{days}}</span> {{/d}}
+|          {{#hh}} {{h}} <span>{{hours}}</span> {{/hh}}
+|          {{#mm}} {{mm}} <span>{{minutes}}</span> {{/mm}}
+|          {{ss}} <span>{{seconds}}</span>
+|        </div>
+|        <div>
+|          {{dd}} : {{hh}} : {{mm}} : {{ss}}
+|        </div>
+|      </template>
+|    </amp-date-countdown>
+|
+|    <template type="amp-mustache" id="myTemplate">
+|      <div class="date-count-down">
+|        {{#d}} {{d}} <span>{{days}}</span> {{/d}}
+|        {{h}} <span>{{hours}}</span>
+|        {{m}} <span>{{minutes}}</span>
+|        {{s}} <span>{{seconds}}</span>
+|      </div>
+|    </template>
+|
+|    <!-- Should support the `template` attribute to reference <template> by ID. -->
+|    <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360" template="myTemplate">
+|    </amp-date-countdown>
+|
+|    <amp-date-countdown timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+|    </amp-date-countdown>
+|
+|    <!-- Should error if the `template` referent is missing. -->
+|    <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360" template="notMyTemplate">
+>>   ^~~~~~~~~
+amp-date-countdown/0.1/test/validator-amp-date-countdown.html:149:2 Attribute 'template' in tag 'amp-date-countdown' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-date-countdown)
+|    </amp-date-countdown>
+|
+|    <!-- Should allow `data-count-up` attribute. -->
+|    <amp-date-countdown data-count-up timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+|    </amp-date-countdown>
+|
+|    <!-- Should error if `data-count-up` attribute is given a non-empty value. -->
+|    <amp-date-countdown data-count-up="true" timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+>>   ^~~~~~~~~
+amp-date-countdown/0.1/test/validator-amp-date-countdown.html:157:2 The attribute 'data-count-up' in tag 'amp-date-countdown' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-date-countdown)
+|    </amp-date-countdown>
+|
+|  </body>
+|  </html>

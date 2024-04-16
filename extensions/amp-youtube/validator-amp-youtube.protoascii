@@ -1,0 +1,68 @@
+tags: {  # amp-youtube 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-youtube 1.0"
+  excludes_condition: "amp-youtube 0.1"
+  extension_spec: {
+    name: "amp-youtube"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-youtube 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-youtube 0.1"
+  excludes_condition: "amp-youtube 1.0"
+  extension_spec: {
+    name: "amp-youtube"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # <amp-youtube>
+  html_format: AMP
+  tag_name: "AMP-YOUTUBE"
+  requires_extension: "amp-youtube"
+  attrs: { name: "autoplay" }
+  attrs: { name: "loop" }
+  attrs: {
+    name: "credentials"
+    value_casei: "include"
+    value_casei: "omit"
+  }
+  attrs: {
+    name: "data-live-channelid"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
+    value_regex: "[^=/?:]+"
+  }
+  attrs: {
+    name: "data-videoid"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
+    value_regex: "[^=/?:]+"
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  # <amp-bind>
+  attrs: { name: "[data-videoid]" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "lightboxable-elements"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

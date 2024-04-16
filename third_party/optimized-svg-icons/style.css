@@ -1,0 +1,73 @@
+
+// Thanks to codepen.io/alaingalvan for suggesting this color variable:
+
+$background: hsl(210, 45, 10)
+
+
+
+// http://www.paulirish.com/2012/box-sizing-border-box-ftw/
+
+html
+  box-sizing: border-box
+
+*, *:before, *:after
+  box-sizing: inherit
+
+
+
+html
+  background: $background
+  font-size: .625em // 10px for rems
+
+.soc
+  display: block
+  font-size: 0
+  list-style: none
+  margin: 0
+  padding: 48px // IE8
+  padding: 4.8rem
+  text-align: center
+  li
+    display: inline-block
+    margin: 12px // IE8
+    margin: 1.2rem
+  a, svg
+    display: block
+  a
+    position: relative // IE8
+    height: 96px // IE8
+    height: 9.6rem
+    width: 96px // IE8
+    width: 9.6rem
+  svg
+    height: 100%
+    width: 100%
+  // IE8:
+  em
+    font-size: 14px
+    line-height: 1.5
+    margin-top: -.75em
+    position: absolute
+    text-align: center
+    top: 50%
+    right: 0
+    bottom: 0
+    left: 0
+
+// Using placeholder selectors and @extend (keeps output CSS lean) instead of [class*='icon-'] attribute selector because IE8 doesn't support it :<
+
+%social-icon-hover
+  border-radius: 100%
+  color: $background // IE8
+  fill: $background
+  transform: scale(1.25)
+  transition: background-color .5s, transform .5s ease-out
+
+// Neat color trick, <3 Sass
+@for $i from 1 through 30
+  .icon-#{$i}
+    color: hsl($i * 12, 70, 50) // IE8
+    fill: hsl($i * 12, 70, 50)
+    &:hover
+      background: hsl($i * 12, 70, 50)
+      @extend %social-icon-hover

@@ -1,0 +1,114 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://www.ampstart.com/templates/article.amp">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>
+    body {
+      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      animation: -amp-start 8s steps(1, end) 0s 1 normal both
+    }
+
+    @-webkit-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @-moz-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @-ms-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @-o-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+  </style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async="" src="https://cdn.ampproject.org/v0.js"></script>
+  <script custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js" async></script>
+  <script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js"></script>
+
+  <style amp-custom>
+    main {
+      font-family: Helvetica, sans-serif;
+      padding: 10px;
+      max-width: 412px;
+      margin: auto;
+    }
+
+    .spacer {
+      height: 100vh;
+      width: 100%;
+      background-image: -webkit-linear-gradient(#EEE 50%, white 50%);
+      background-image: linear-gradient(#EEE 50%, white 50%);
+      background-size: 100% 3em;
+    }
+
+    .parallax-image-window {
+      overflow: hidden;
+    }
+
+    .parallax-image-window amp-img {
+      margin-bottom: -30%;
+    }
+
+    /*
+    * Carousel transition styles
+    */
+
+    .carousel-container {
+      margin-right: -60%;
+      margin-left: 60%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main>
+    <div>
+      <amp-orientation-observer on="gamma:model.setModelRotation(y=event.percent);" intersection-ratios="1" layout="nodisplay" smoothing="5">
+      </amp-orientation-observer>
+      <amp-3d-gltf id="model" layout="fixed" width="320" height="240" alpha="true" antialiasing="true" autoRotate="false" enableZoom="true" src="https://webgears-3d.github.io/3d-gltf-static/m/DamagedHelmet.glb"></amp-3d-gltf>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+  </main>
+</body>
+
+</html>

@@ -1,0 +1,330 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Experiments</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <script async src="/dist.tools/experiments/experiments.js"></script>
+  <style>
+    body {
+      max-width: 600px;
+      margin: auto;
+      font-family: Roboto, verdana, arial, sans-serif;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .header-title {
+      color: #1b1464;
+      font-family: Roboto, verdana, arial, sans-serif;
+      letter-spacing: 2px;
+      padding-left: 0;
+      padding-top: 18px;
+      text-transform: uppercase;
+      width: 100%;
+      display: inline-block;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+
+    .hero {
+      padding: 16px;
+      background-color: #147bc1;
+      color: #fff;
+    }
+
+    h2 {
+      color: #147bc1;
+    }
+
+    .version {
+      color: gray;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .content {
+      margin: 16px;
+      display: block;
+    }
+
+    .desc {
+      padding: 16px;
+      display: block;
+      color: orange;
+    }
+
+    a {
+      color: #3ab3eb;
+    }
+
+    .content a {
+      text-decoration: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 4px;
+    }
+
+    .button-cell {
+      text-align: center;
+    }
+
+    button {
+      min-width: 60px;
+    }
+
+    details {
+      border: solid 1px gray;
+      margin-top: 5px;
+      padding: 10px;
+    }
+
+    details summary {
+      color: gray;
+      cursor: pointer;
+    }
+
+    details[open] summary {
+      color: inherit;
+    }
+
+    #subdomain {
+      color: gray;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    tr[data-on='0'] button {
+      background: #aaa;
+      color: #777;
+    }
+
+    tr[data-on='1'] button {
+      background: green;
+      color: #fff;
+    }
+
+    .on, .off, .default {
+      display: none;
+    }
+
+    tr[data-on='0'] .off {
+      display: block;
+    }
+
+    tr[data-on='1'] .on {
+      display: block;
+    }
+
+    tr[data-on='default'] .default {
+      display: block;
+    }
+
+    #rtv {
+      border: solid 1px gray;
+      width: calc(100% - 150px);
+      padding: 10px;
+    }
+
+    #rtv-submit {
+      background: #aaa;
+      margin: 5px;
+    }
+
+    #rtv-submit[disabled] {
+      color: #777;
+    }
+
+    #redirect > input {
+      border: solid 1px gray;
+      width: calc(100% - 20px);
+      padding: 10px;
+    }
+
+    #redirect > button {
+      border: solid 1px gray;
+      padding: 5px 15px;
+      margin: 5px;
+    }
+
+    #redirect > h4 {
+      border: inset;
+      padding: 10px;
+    }
+
+    .popup-graypane {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-graypane:not(.show) {
+      display: none;
+    }
+
+    .popup {
+      background: #fff;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      max-width: 90%;
+      max-height: 90%;
+      min-width: 280px;
+      min-height: 120px;
+    }
+
+    .popup-body {
+      padding: 16px;
+    }
+
+    .popup-button-bar {
+      padding: 16px;
+      text-align: right;
+    }
+
+    .popup-button-bar button {
+      margin: 0 4px;
+      border: 1px solid #eee;
+      border-radius: 2px;
+      background: #fff;
+      color: #222;
+    }
+
+    #popup-button-ok {
+      background: #03a9f4;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="tab header-title">
+      AMP Project
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>AMP Experiments</h1>
+  </section>
+
+  <section class="desc">
+    <h2>Version</h2>
+    <p>
+      This is version <span class="version">$internalRuntimeVersion$</span> of the AMP runtime.
+      For a list of commits contained in this release, click
+      <a target="_blank" href="https://github.com/ampproject/amphtml/releases/tag/$internalRuntimeVersion$">here</a>.
+    </p>
+  </section>
+
+  <section class="desc">
+    <h2>Release channels</h2>
+    <p>
+      These switches control which release channel (prod, RC, or dev) of AMP JS
+      will be served through the <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a>.
+    </p>
+    <p>
+      <em>Note:</em> These controls set a cookie on the domain name <code>cdn.ampproject.org</code>. If your browser is
+      set to block all third-party cookies, they will not function. Make sure third-party cookies are enabled, or
+      allowlisted on the websites that you are testing.
+    </p>
+  </section>
+
+  <section class="content">
+    <table id="channels-table" border=1></table>
+    <details id="rtv-details">
+      <summary>Advanced</summary>
+      <p>
+        You can manually opt in to a previously released RTV using this form.
+      </p>
+      <p>
+        <em>Warning:</em> This is an advanced setting. It is intended for use while debugging AMP runtime code, and is
+        not meant to be used to publish AMP documents. To opt out of this setting, clear the RTV in the input field.
+      </p>
+      <div>
+        <input id="rtv" placeholder="E.g., 011912312359590" maxlength="15" type="text">
+        <button id="rtv-submit" disabled>opt-in</button>
+      </div>
+    </details>
+  </section>
+
+  <!-- Only displayed on top-level cdn.ampproject.org. -->
+  <section class="desc" id="redirect">
+    <h2>Experiments</h2>
+
+    <p>
+      Experiments can no longer be enabled on the top-level <strong>cdn.ampproject.org/experiments.html</strong>.
+      They must be toggled on the specific subdomain e.g. <strong>www-example-com.cdn.ampproject.org/experiments.html</strong>.
+    </p>
+
+    <p>
+      Find the AMP Cache experiments page for your source domain or AMP page URL:
+    </p>
+
+    <input type="text" placeholder="E.g. www.example.com">
+    <button>Get experiments page link</button>
+
+    <h4><a href="#"></a></h4>
+  </section>
+
+  <!-- Only displayed on subdomains of cdn.ampproject.org. -->
+  <section class="desc" id="experiments-desc">
+    <h2>Experiments</h2>
+
+    <p>
+      These switches toggle experiments for documents served at the <em>current subdomain</em>
+      of the <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a>:
+    </p>
+
+    <h4 id="subdomain">cdn.ampproject.org</h4>
+
+    <p>
+      <strong>Please exercise caution.</strong> These experiments are not fully tested and might
+      contain bugs or have unexpected side effects. Please only activate them
+      if you work on the <a href="https://github.com/ampproject/amphtml/">AMP Project</a>
+      or plan to create AMP documents that use unreleased features for testing purposes.
+    </p>
+
+    <p>
+      See the AMP project
+      <a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">documentation</a>
+      to find out more about experiments, and how to activate them outside of
+      the Google AMP Cache (including in local development).
+    </p>
+  </section>
+
+  <section class="content">
+    <table id="experiments-table" border=1></table>
+  </section>
+
+  <section class="desc">
+    <a target="_blank" href="https://www.google.com/intl/en/policies/privacy/?fg=1">Privacy Policy</a>
+    <a target="_blank" href="https://www.google.com/intl/en/policies/terms/?fg=1">Terms of Service</a>
+  </section>
+
+  <div class="popup-graypane" id="popup-container">
+    <div class="popup">
+      <div class="popup-body">
+        <div id="popup-message" class="popup-message"></div>
+      </div>
+      <div class="popup-button-bar">
+        <button id="popup-button-cancel">Cancel</button>
+        <button id="popup-button-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

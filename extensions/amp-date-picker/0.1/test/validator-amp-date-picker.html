@@ -1,0 +1,181 @@
+<!--
+  Test Description:
+  Tests for the amp-date-picker tag.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-date-picker"
+    src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
+  <script async custom-template="amp-mustache"
+    src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+</head>
+<body>
+  <!-- Valid: amp-date-picker with only layout attributes -->
+  <amp-date-picker layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with only mode="overlay" attribute -->
+  <amp-date-picker mode="overlay" input-selector="[name=date1]">
+    <input type="text" name="date1">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with only mode="static" attribute -->
+  <amp-date-picker mode="static" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with only type="single" attribute -->
+  <amp-date-picker type="single" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with only type="range" attribute -->
+  <amp-date-picker type="range" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: range amp-date-picker with mode="overlay" attribute -->
+  <amp-date-picker type="range" mode="overlay" start-input-selector="[name=date2]" end-input-selector="[name=date3]">
+    <input type="text" name="date2">
+    <input type="text" name="date3">
+  </amp-date-picker>
+  <!-- Valid: single amp-date-picker with input-selector -->
+  <amp-date-picker type="single" input-selector="#a1" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: range amp-date-picker with input-selector -->
+  <amp-date-picker type="range" start-input-selector="#a2" end-input-selector="#b2" layout="fixed-height" height="360">
+    </amp-date-picker>
+  <!-- Valid: explicit static amp-date-picker with fullscreen attribute -->
+  <amp-date-picker mode="static" layout="fill" fullscreen>
+  </amp-date-picker>
+  <!-- Valid: implicit static amp-date-picker with fullscreen attribute -->
+  <amp-date-picker layout="fill" fullscreen>
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with day-size-->
+  <amp-date-picker type="range" layout="fixed-height" height="360"
+      day-size="50">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with number-of-months -->
+  <amp-date-picker type="range" layout="fixed-height" height="360"
+      number-of-months="12">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with first-day-of-week -->
+  <amp-date-picker type="range" layout="fixed-height" height="360"
+      first-day-of-week="1">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with https src -->
+  <amp-date-picker layout="fixed-height" height="360"
+      src="https://data.com/dates.json?ref=CANONICAL_URL">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with date template -->
+  <amp-date-picker layout="fixed-height" height="360">
+    <template type="amp-mustache" date-template default>{{D}}</template>
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with date-template and/or info-template -->
+  <amp-date-picker layout="fixed-height" height="360">
+    <template info-template type="amp-mustache"></template>
+    <template date-template default type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" type="amp-mustache"></template>
+    <template date-template id="named" type="amp-mustache"></template>
+    <template date-template type="amp-mustache"></template>
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with date-template with mixed attributes -->
+  <amp-date-picker layout="fixed-height" height="360">
+    <template date-template default id="default-with-id" type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" id="dates-with-id" type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" default type="amp-mustache"></template>
+    <template date-template dates="2018-01-01" default id="dates-with-default-and-id" type="amp-mustache"></template>
+  </amp-date-picker>
+  <!-- Valid: range amp-date-picker with maximum nights -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" maximum-nights="3">
+  </amp-date-picker>
+  <!-- Valid: range amp-date-picker with minimum nights -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" minimum-nights="0">
+  </amp-date-picker>
+  <!-- Valid: range amp-date-picker with minimum and maximum nights -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" minimum-nights="0" maximum-nights="3">
+  </amp-date-picker>
+  <!-- Valid: single amp-date-picker with date attribute -->
+  <amp-date-picker layout="fixed-height" height="360" date="2018-01-01">
+  </amp-date-picker>
+  <!-- Valid: range amp-date-picker with start-date and end-date attributes -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" start-date="2018-01-01" end-date="2018-01-01">
+  </amp-date-picker>
+  <!-- Valid: overlay amp-date-picker with touch-keyboard-editable -->
+  <amp-date-picker mode="overlay" touch-keyboard-editable input-selector="#a4">
+    <input id="a4">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with max and min binding -->
+  <amp-date-picker [min]="min" [max]="max" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with https [src] binding -->
+  <amp-date-picker [src]="'https://data.com/dates.json?ref=CANONICAL_URL'" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with http [src] binding -->
+  <amp-date-picker [src]="'http://data.com/dates.json?ref=CANONICAL_URL'" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with allow-blocked-end-date -->
+  <amp-date-picker allow-blocked-end-date layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Valid: amp-date-picker with hide-keyboard-shortcuts-panel -->
+  <amp-date-picker layout="fixed-height" height="360" hide-keyboard-shortcuts-panel>
+  </amp-date-picker>
+
+  <!-- Invalid: single amp-date-picker with start-input-selector -->
+  <amp-date-picker type="single" mode="static" start-input-selector="#x3" layout="fixed-height" height="360">
+  </amp-date-picker>
+  <!-- Invalid: range amp-date-picker with input-selector -->
+  <amp-date-picker type="range" input-selector="#a4" layout="fixed-height" height="360">
+    </amp-date-picker>
+  <!-- Invalid: amp-date-picker with implicit mode="static" without layout -->
+  <amp-date-picker></amp-date-picker>
+  <!-- Invalid: amp-date-picker with explicit mode="static" without layout -->
+  <amp-date-picker mode="static">
+  </amp-date-picker>
+  <!-- Invalid: overlay amp-date-picker with fullscreen attribute -->
+  <amp-date-picker mode="overlay" fullscreen>
+    <input type="text" name="date4">
+  </amp-date-picker>
+  <!-- Invalid: width is mistyped. -->
+  <amp-date-picker height="360" wdith="360">
+  </amp-date-picker>
+  <!-- Invalid: amp-date-picker with bad day-size-->
+  <amp-date-picker type="range" layout="fixed-height" height="360"
+      day-size="five">
+  </amp-date-picker>
+  <!-- Invalid: amp-date-picker with bad number-of-months -->
+  <amp-date-picker type="range" layout="fixed-height" height="360"
+      number-of-months="twele">
+  </amp-date-picker>
+  <!-- Invalid: amp-date-picker with bad first-day-of-week -->
+  <amp-date-picker type="range" layout="fixed-height" height="360"
+      first-day-of-week="7">
+  </amp-date-picker>
+  <!-- Invalid: amp-date-picker templates outside amp-date-picker -->
+  <template info-template type="amp-mustache"></template>
+  <template date-template dates="2018-01-01" type="amp-mustache"></template>
+  <!-- Invalid: amp-date-picker with bad maximum nights -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" maximum-nights="zero">
+  </amp-date-picker>
+  <!-- Invalid: amp-date-picker with bad minimum nights -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" minimum-nights="zero">
+  </amp-date-picker>
+  <!-- Invalid: single amp-date-picker with maximum nights -->
+  <amp-date-picker layout="fixed-height" height="360" maximum-nights="0">
+  </amp-date-picker>
+  <!-- Invalid: single amp-date-picker with minimum nights -->
+  <amp-date-picker layout="fixed-height" height="360" minimum-nights="0">
+  </amp-date-picker>
+  <!-- Invalid: single amp-date-picker with start-date attribute -->
+  <amp-date-picker layout="fixed-height" height="360" start-date="2018-01-01">
+  </amp-date-picker>
+  <!-- Invalid: range amp-date-picker with date attribute -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" date="2018-01-01">
+  </amp-date-picker>
+  <!-- Invalid: static amp-date-picker with touch-keyboard-editable -->
+  <amp-date-picker layout="fixed-height" height="360" touch-keyboard-editable>
+  </amp-date-picker>
+  <!-- Invalid: amp-date-picker with http src -->
+  <amp-date-picker layout="fixed-height" height="360"
+      src="http://data.com/dates.json?ref=CANONICAL_URL">
+  </amp-date-picker>
+</body>
+</html>

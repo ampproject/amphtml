@@ -1,0 +1,22 @@
+
+
+.i-amphtml-story-interactive-results-detailed {
+  position: relative !important;
+  height: 18em !important;
+  width: 100% !important;
+}
+
+.i-amphtml-story-interactive-results-image {
+  margin: auto !important;
+  margin-top: 4em !important;
+  border: 0.3em solid var(--interactive-accent-color) !important;
+}
+
+.i-amphtml-story-interactive-results-result {
+  border-radius: 50% !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-color: var(
+    --i-amphtml-interactive-placeholder-background
+  ) !important;
+}

@@ -1,0 +1,73 @@
+
+
+@import '../../../third_party/optimized-svg-icons/amp-social-share-svgs.css';
+
+amp-social-share {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+}
+
+amp-social-share:focus {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
+}
+
+/**
+ * Note: Attribute selectors were used initially here but we switched to using
+ * class-based selector to style each type because of a bug on iOS Safari 8.
+ * See https://github.com/ampproject/amphtml/issues/4277 for more details.
+ */
+
+/* Twitter Styling */
+.amp-social-share-twitter {
+  background-color: #000;
+}
+
+/* Facebook Styling */
+.amp-social-share-facebook {
+  background-color: #32529f;
+}
+
+/* Pinterest Styling */
+.amp-social-share-pinterest {
+  background-color: #e60023;
+}
+
+/* LinkedIn Styling */
+.amp-social-share-linkedin {
+  background-color: #0077b5;
+}
+
+/* Tumblr Styling */
+.amp-social-share-tumblr {
+  background-color: #3c5a77;
+}
+
+/* Email Styling */
+.amp-social-share-email {
+  background-color: #000000;
+}
+
+/* Whatsapp Styling */
+.amp-social-share-whatsapp {
+  background-color: #25d366;
+}
+
+/* line Styling */
+.amp-social-share-line {
+  background-color: #52b448;
+}
+
+/* SMS Styling */
+.amp-social-share-sms {
+  background-color: #ca2b63;
+}
+
+/* "system" styling */
+.amp-social-share-system {
+  background-color: #000000;
+}

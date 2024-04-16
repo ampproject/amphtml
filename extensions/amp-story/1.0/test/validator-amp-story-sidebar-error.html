@@ -1,0 +1,51 @@
+<!--
+  Test Description:
+  Tests for the amp-sidebar tag.
+-->
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+    <title>amp-story sidebar</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="./template-vertical.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-story-page {
+        background: black;
+        color: white;
+        font-family: sans-serif;
+      }
+      h1.hello-world {
+        color: white;
+        text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
+      }
+    </style>
+  </head>
+   <body>
+      <amp-story standalone title="My Story"
+      publisher="The AMP Team"
+      publisher-logo-src="https://example.com/logo/1x1.png"
+      poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
+      <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
+        <ul>
+          <li>Nav item 1</li>
+          <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
+          <li>Nav item 3</li>
+          <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
+          <li>Nav item 5</li>
+          <li>Nav item 6</li>
+        </ul>
+      </amp-sidebar>
+        <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <h1>This is the cover. Open up the sidebar!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+     </amp-story>
+  </body>

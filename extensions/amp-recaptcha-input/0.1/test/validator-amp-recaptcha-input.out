@@ -1,0 +1,158 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests support for the amp-sidebar tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|  </head>
+|  <body>
+|
+|    <!-- Valid: Example of amp-recaptcha-input usage -->
+|    <form method="get" action="https://httpbin.org/html" target="_blank">
+|      <fieldset>
+|        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+|        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+|        <label>
+|          <span>Search for</span>
+|          <input type="search" name="term" required>
+|        </label>
+|        <input name="submit-button" type="submit" value="Search">
+|        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+|        </amp-recaptcha-input>
+|      </fieldset>
+|
+|      <div class="loading-spinner">
+|        <div class="donut">
+|        </div>
+|      </div>
+|    </form>
+|
+|    <!-- Invalid: Not a child of a <form> element -->
+|    <div>
+|      <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+>>     ^~~~~~~~~
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:40:4 The tag 'amp-recaptcha-input' may only appear as a descendant of tag 'form'. (see https://amp.dev/documentation/components/amp-form)
+|      </amp-recaptcha-input>
+|    </div>
+|
+|    <!-- Invalid: Missing name attribute -->
+|    <form method="get" action="https://httpbin.org/html" target="_blank">
+|      <fieldset>
+|        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+|        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+|        <label>
+|          <span>Search for</span>
+|          <input type="search" name="term" required>
+|        </label>
+|        <input name="submit-button" type="submit" value="Search">
+|        <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+>>       ^~~~~~~~~
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:54:6 The mandatory attribute 'name' is missing in tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form)
+|        </amp-recaptcha-input>
+|      </fieldset>
+|
+|      <div class="loading-spinner">
+|        <div class="donut">
+|        </div>
+|      </div>
+|    </form>
+|
+|    <!-- Invalid: Missing data-sitekey attribute -->
+|    <form method="get" action="https://httpbin.org/html" target="_blank">
+|      <fieldset>
+|        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+|        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+|        <label>
+|          <span>Search for</span>
+|          <input type="search" name="term" required>
+|        </label>
+|        <input name="submit-button" type="submit" value="Search">
+|        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-action="recaptcha_example">
+>>       ^~~~~~~~~
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:74:6 The mandatory attribute 'data-sitekey' is missing in tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form)
+|        </amp-recaptcha-input>
+|      </fieldset>
+|
+|      <div class="loading-spinner">
+|        <div class="donut">
+|        </div>
+|      </div>
+|    </form>
+|
+|    <!-- Invalid: Missing data-action attribute -->
+|    <form method="get" action="https://httpbin.org/html" target="_blank">
+|      <fieldset>
+|        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+|        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+|        <label>
+|          <span>Search for</span>
+|          <input type="search" name="term" required>
+|        </label>
+|        <input name="submit-button" type="submit" value="Search">
+|        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE">
+>>       ^~~~~~~~~
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:94:6 The mandatory attribute 'data-action' is missing in tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form)
+|        </amp-recaptcha-input>
+|      </fieldset>
+|
+|      <div class="loading-spinner">
+|        <div class="donut">
+|        </div>
+|      </div>
+|    </form>
+|
+|    <!-- Invalid: Missing layout attribute -->
+|    <form method="get" action="https://httpbin.org/html" target="_blank">
+|      <fieldset>
+|        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+|        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+|        <label>
+|          <span>Search for</span>
+|          <input type="search" name="term" required>
+|        </label>
+|        <input name="submit-button" type="submit" value="Search">
+|        <amp-recaptcha-input name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+>>       ^~~~~~~~~
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:114:6 The implied layout 'CONTAINER' is not supported by tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form)
+|        </amp-recaptcha-input>
+|      </fieldset>
+|
+|      <div class="loading-spinner">
+|        <div class="donut">
+|        </div>
+|      </div>
+|    </form>
+|
+|    <!-- Invalid: Incorrect layout attribute -->
+|    <form method="get" action="https://httpbin.org/html" target="_blank">
+|      <fieldset>
+|        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+|        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+|        <label>
+|          <span>Search for</span>
+|          <input type="search" name="term" required>
+|        </label>
+|        <input name="submit-button" type="submit" value="Search">
+|        <amp-recaptcha-input layout="responsive" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+>>       ^~~~~~~~~
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:134:6 The specified layout 'RESPONSIVE' is not supported by tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form)
+|        </amp-recaptcha-input>
+|      </fieldset>
+|
+|      <div class="loading-spinner">
+|        <div class="donut">
+|        </div>
+|      </div>
+|    </form>
+|
+|  </body>
+|  </html>

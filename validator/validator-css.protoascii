@@ -1,0 +1,1439 @@
+declaration_list {
+  name: "BASIC_DECLARATIONS"
+  declaration: { name: "align-content" }
+  declaration: { name: "align-items" }
+  declaration: { name: "align-self" }
+  declaration: { name: "all" }
+  declaration: { name: "animation" }
+  declaration: { name: "animation-delay" }
+  declaration: { name: "animation-direction" }
+  declaration: { name: "animation-duration" }
+  declaration: { name: "animation-fill-mode" }
+  declaration: { name: "animation-iteration-count" }
+  declaration: { name: "animation-name" }
+  declaration: { name: "animation-play-state" }
+  declaration: { name: "animation-timing-function" }
+  declaration: { name: "aspect-ratio" }
+  declaration: { name: "backface-visibility" }
+  declaration: { name: "background" }
+  declaration: { name: "background-attachment" }
+  declaration: { name: "background-blend-mode" }
+  declaration: { name: "background-clip" }
+  declaration: { name: "background-color" }
+  declaration: { name: "background-image" }
+  declaration: { name: "background-origin" }
+  declaration: { name: "background-position" }
+  declaration: { name: "background-repeat" }
+  declaration: { name: "background-size" }
+  declaration: { name: "border" }
+  declaration: { name: "border-bottom" }
+  declaration: { name: "border-bottom-color" }
+  declaration: { name: "border-bottom-left-radius" }
+  declaration: { name: "border-bottom-right-radius" }
+  declaration: { name: "border-bottom-style" }
+  declaration: { name: "border-bottom-width" }
+  declaration: { name: "border-collapse" }
+  declaration: { name: "border-color" }
+  declaration: { name: "border-image" }
+  declaration: { name: "border-image-outset" }
+  declaration: { name: "border-image-repeat" }
+  declaration: { name: "border-image-slice" }
+  declaration: { name: "border-image-source" }
+  declaration: { name: "border-image-width" }
+  declaration: { name: "border-left" }
+  declaration: { name: "border-left-color" }
+  declaration: { name: "border-left-style" }
+  declaration: { name: "border-left-width" }
+  declaration: { name: "border-radius" }
+  declaration: { name: "border-right" }
+  declaration: { name: "border-right-color" }
+  declaration: { name: "border-right-style" }
+  declaration: { name: "border-right-width" }
+  declaration: { name: "border-spacing" }
+  declaration: { name: "border-style" }
+  declaration: { name: "border-top" }
+  declaration: { name: "border-top-color" }
+  declaration: { name: "border-top-left-radius" }
+  declaration: { name: "border-top-right-radius" }
+  declaration: { name: "border-top-style" }
+  declaration: { name: "border-top-width" }
+  declaration: { name: "border-width" }
+  declaration: { name: "bottom" }
+  declaration: { name: "box-decoration-break" }
+  declaration: { name: "box-shadow" }
+  declaration: { name: "box-sizing" }
+  declaration: { name: "break-after" }
+  declaration: { name: "break-before" }
+  declaration: { name: "break-inside" }
+  declaration: { name: "caption-side" }
+  declaration: { name: "caret-color" }
+  declaration: { name: "clear" }
+  declaration: { name: "clip" }
+  declaration: { name: "color" }
+  declaration: { name: "column-count" }
+  declaration: { name: "column-fill" }
+  declaration: { name: "column-gap" }
+  declaration: { name: "column-rule" }
+  declaration: { name: "column-rule-color" }
+  declaration: { name: "column-rule-style" }
+  declaration: { name: "column-rule-width" }
+  declaration: { name: "column-span" }
+  declaration: { name: "column-width" }
+  declaration: { name: "columns" }
+  declaration: { name: "content" }
+  declaration: { name: "counter-increment" }
+  declaration: { name: "counter-reset" }
+  declaration: { name: "cursor" }
+  declaration: { name: "direction" }
+  declaration: { name: "display" }
+  declaration: { name: "empty-cells" }
+  declaration: { name: "filter" }
+  declaration: { name: "flex" }
+  declaration: { name: "flex-basis" }
+  declaration: { name: "flex-direction" }
+  declaration: { name: "flex-flow" }
+  declaration: { name: "flex-grow" }
+  declaration: { name: "flex-shrink" }
+  declaration: { name: "flex-wrap" }
+  declaration: { name: "float" }
+  declaration: { name: "font" }
+  declaration: { name: "font-family" }
+  declaration: { name: "font-feature-settings" }
+  declaration: { name: "font-kerning" }
+  declaration: { name: "font-language-override" }
+  declaration: { name: "font-size" }
+  declaration: { name: "font-size-adjust" }
+  declaration: { name: "font-stretch" }
+  declaration: { name: "font-style" }
+  declaration: { name: "font-synthesis" }
+  declaration: { name: "font-variant" }
+  declaration: { name: "font-variant-alternates" }
+  declaration: { name: "font-variant-caps" }
+  declaration: { name: "font-variant-east-asian" }
+  declaration: { name: "font-variant-ligatures" }
+  declaration: { name: "font-variant-numeric" }
+  declaration: { name: "font-variant-position" }
+  declaration: { name: "font-weight" }
+  declaration: { name: "grid" }
+  declaration: { name: "grid-area" }
+  declaration: { name: "grid-auto-columns" }
+  declaration: { name: "grid-auto-flow" }
+  declaration: { name: "grid-auto-rows" }
+  declaration: { name: "grid-column" }
+  declaration: { name: "grid-column-end" }
+  declaration: { name: "grid-column-gap" }
+  declaration: { name: "grid-column-start" }
+  declaration: { name: "grid-gap" }
+  declaration: { name: "grid-row" }
+  declaration: { name: "grid-row-end" }
+  declaration: { name: "grid-row-gap" }
+  declaration: { name: "grid-row-start" }
+  declaration: { name: "grid-template" }
+  declaration: { name: "grid-template-areas" }
+  declaration: { name: "grid-template-columns" }
+  declaration: { name: "grid-template-rows" }
+  declaration: { name: "hanging-punctuation" }
+  declaration: { name: "height" }
+  declaration: { name: "hyphens" }
+  declaration: { name: "image-rendering" }
+  declaration: { name: "isolation" }
+  declaration: { name: "justify-content" }
+  declaration: { name: "left" }
+  declaration: { name: "letter-spacing" }
+  declaration: { name: "line-break" }
+  declaration: { name: "line-height" }
+  declaration: { name: "list-style" }
+  declaration: { name: "list-style-image" }
+  declaration: { name: "list-style-position" }
+  declaration: { name: "list-style-type" }
+  declaration: { name: "margin" }
+  declaration: { name: "margin-bottom" }
+  declaration: { name: "margin-left" }
+  declaration: { name: "margin-right" }
+  declaration: { name: "margin-top" }
+  declaration: { name: "max-height" }
+  declaration: { name: "max-width" }
+  declaration: { name: "min-height" }
+  declaration: { name: "min-width" }
+  declaration: { name: "mix-blend-mode" }
+  declaration: { name: "object-fit" }
+  declaration: { name: "object-position" }
+  declaration: { name: "opacity" }
+  declaration: { name: "order" }
+  declaration: { name: "orphans" }
+  declaration: { name: "outline" }
+  declaration: { name: "outline-color" }
+  declaration: { name: "outline-offset" }
+  declaration: { name: "outline-style" }
+  declaration: { name: "outline-width" }
+  declaration: { name: "overflow" }
+  declaration: { name: "overflow-wrap" }
+  declaration: { name: "overflow-x" }
+  declaration: { name: "overflow-y" }
+  declaration: { name: "padding" }
+  declaration: { name: "padding-bottom" }
+  declaration: { name: "padding-left" }
+  declaration: { name: "padding-right" }
+  declaration: { name: "padding-top" }
+  declaration: { name: "page-break-after" }
+  declaration: { name: "page-break-before" }
+  declaration: { name: "page-break-inside" }
+  declaration: { name: "perspective" }
+  declaration: { name: "perspective-origin" }
+  declaration: { name: "pointer-events" }
+  # CSS property `position` with values `fixed` and `sticky are not allowed.
+  # From https://www.w3schools.com/cssref/pr_class_position.asp
+  declaration: {
+    name: "position"
+    value_casei: "absolute"
+    value_casei: "inherit"
+    value_casei: "initial"
+    value_casei: "relative"
+    value_casei: "static"
+  }
+  declaration: { name: "quotes" }
+  declaration: { name: "resize" }
+  declaration: { name: "right" }
+  declaration: { name: "tab-size" }
+  declaration: { name: "table-layout" }
+  declaration: { name: "text-align" }
+  declaration: { name: "text-align-last" }
+  declaration: { name: "text-combine-upright" }
+  declaration: { name: "text-decoration" }
+  declaration: { name: "text-decoration-color" }
+  declaration: { name: "text-decoration-line" }
+  declaration: { name: "text-decoration-skip-ink" }
+  declaration: { name: "text-decoration-style" }
+  declaration: { name: "text-fill-color" }
+  declaration: { name: "text-indent" }
+  declaration: { name: "text-justify" }
+  declaration: { name: "text-orientation" }
+  declaration: { name: "text-overflow" }
+  declaration: { name: "text-shadow" }
+  declaration: { name: "text-stroke" }
+  declaration: { name: "text-stroke-color" }
+  declaration: { name: "text-stroke-width" }
+  declaration: { name: "text-transform" }
+  declaration: { name: "text-underline-position" }
+  declaration: { name: "top" }
+  declaration: { name: "transform" }
+  declaration: { name: "transform-origin" }
+  declaration: { name: "transform-style" }
+  declaration: { name: "transition" }
+  declaration: { name: "transition-delay" }
+  declaration: { name: "transition-duration" }
+  declaration: { name: "transition-property" }
+  declaration: { name: "transition-timing-function" }
+  declaration: { name: "unicode-bidi" }
+  declaration: { name: "user-select" }
+  declaration: { name: "vertical-align" }
+  declaration: { name: "visibility" }
+  declaration: { name: "white-space" }
+  declaration: { name: "widows" }
+  declaration: { name: "width" }
+  declaration: { name: "word-break" }
+  declaration: { name: "word-spacing" }
+  declaration: { name: "word-wrap" }
+  declaration: { name: "writing-mode" }
+  declaration: {
+     name: "z-index"
+     value_regex_casei: "auto|initial|inherit|[-+]?[0-9]+"
+  }
+}
+
+declaration_list {
+  name: "SVG_BASIC_DECLARATIONS"
+  # SVG specific properties:
+  # https://www.w3.org/TR/SVG11/styling.html#SVGStylingProperties
+  declaration: { name: "alignment-baseline" }
+  declaration: { name: "baseline-shift" }
+  declaration: { name: "clip-path" }
+  declaration: { name: "clip-rule" }
+  declaration: { name: "color-interpolation" }
+  declaration: { name: "color-interpolation-filters" }
+  declaration: { name: "color-profile" } # SVG
+  declaration: { name: "color-rendering" } # SVG
+  declaration: { name: "dominant-baseline" }
+  declaration: { name: "enable-background" }
+  declaration: { name: "fill" }
+  declaration: { name: "fill-opacity" }
+  declaration: { name: "fill-rule" }
+  declaration: { name: "flood-color" }
+  declaration: { name: "flood-opacity" }
+  declaration: { name: "glyph-orientation-horizontal" }
+  declaration: { name: "glyph-orientation-vertical" }
+  declaration: { name: "kerning" }
+  declaration: { name: "lighting-color" }
+  declaration: { name: "marker" }
+  declaration: { name: "marker-end" }
+  declaration: { name: "marker-mid" }
+  declaration: { name: "marker-start" }
+  declaration: { name: "mask" }
+  declaration: { name: "shape-rendering" }
+  declaration: { name: "stop-color" }
+  declaration: { name: "stop-opacity" }
+  declaration: { name: "stroke" }
+  declaration: { name: "stroke-dasharray" }
+  declaration: { name: "stroke-dashoffset" }
+  declaration: { name: "stroke-linecap" }
+  declaration: { name: "stroke-linejoin" }
+  declaration: { name: "stroke-miterlimit" }
+  declaration: { name: "stroke-opacity" }
+  declaration: { name: "stroke-width" }
+  declaration: { name: "text-anchor" }
+  declaration: { name: "text-rendering" }
+}
+
+declaration_list {
+  name: "EMAIL_SPECIFIC_DECLARATIONS"
+  # AMP4EMAIL supported properties:
+  # https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css/#supported-css-properties
+  declaration: { name: "-moz-appearance" }
+  declaration: { name: "-webkit-appearance" }
+  declaration: { name: "-webkit-tap-highlight-color" }
+  declaration: { name: "align-content" }
+  declaration: { name: "align-items" }
+  declaration: { name: "align-self" }
+  declaration: { name: "appearance" }
+  declaration: { name: "aspect-ratio" }
+  declaration: { name: "azimuth" }
+  declaration: { name: "background" }
+  declaration: { name: "background-attachment" }
+  declaration: { name: "background-blend-mode" }
+  declaration: { name: "background-clip" }
+  declaration: { name: "background-color" }
+  declaration: { name: "background-image" }
+  declaration: { name: "background-origin" }
+  declaration: { name: "background-position" }
+  declaration: { name: "background-repeat" }
+  declaration: { name: "background-size" }
+  declaration: { name: "border" }
+  declaration: { name: "border-bottom" }
+  declaration: { name: "border-bottom-color" }
+  declaration: { name: "border-bottom-left-radius" }
+  declaration: { name: "border-bottom-right-radius" }
+  declaration: { name: "border-bottom-style" }
+  declaration: { name: "border-bottom-width" }
+  declaration: { name: "border-collapse" }
+  declaration: { name: "border-color" }
+  declaration: { name: "border-left" }
+  declaration: { name: "border-left-color" }
+  declaration: { name: "border-left-style" }
+  declaration: { name: "border-left-width" }
+  declaration: { name: "border-radius" }
+  declaration: { name: "border-right" }
+  declaration: { name: "border-right-color" }
+  declaration: { name: "border-right-style" }
+  declaration: { name: "border-right-width" }
+  declaration: { name: "border-spacing" }
+  declaration: { name: "border-style" }
+  declaration: { name: "border-top" }
+  declaration: { name: "border-top-color" }
+  declaration: { name: "border-top-left-radius" }
+  declaration: { name: "border-top-right-radius" }
+  declaration: { name: "border-top-style" }
+  declaration: { name: "border-top-width" }
+  declaration: { name: "border-width" }
+  declaration: { name: "bottom" }
+  declaration: { name: "box-shadow" }
+  declaration: { name: "box-sizing" }
+  declaration: { name: "break-after" }
+  declaration: { name: "break-before" }
+  declaration: { name: "break-inside" }
+  declaration: { name: "caption-side" }
+  declaration: { name: "caret-color" }
+  declaration: { name: "clear" }
+  declaration: { name: "color" }
+  declaration: { name: "color-adjust" }
+  declaration: { name: "column-count" }
+  declaration: { name: "column-fill" }
+  declaration: { name: "column-gap" }
+  declaration: { name: "column-rule" }
+  declaration: { name: "column-rule-color" }
+  declaration: { name: "column-rule-style" }
+  declaration: { name: "column-rule-width" }
+  declaration: { name: "column-span" }
+  declaration: { name: "column-width" }
+  declaration: { name: "columns" }
+  declaration: { name: "counter-increment" }
+  declaration: { name: "counter-reset" }
+  declaration: {
+    name: "cursor"
+    value_casei: "initial"
+    value_casei: "pointer"
+  }
+  declaration: { name: "direction" }
+  declaration: { name: "display" }
+  declaration: { name: "elevation" }
+  declaration: { name: "empty-cells" }
+  declaration: {
+    name: "filter"
+    value_regex_casei: "^ *((blur|brightness|contrast|drop-shadow|grayscale|hue-rotate|invert|opacity|saturate|sepia)\\(([^() ]*|(rgb|rgba|hsl|hsla)\\([^()]*\\))( +([^() ]*|(rgb|rgba|hsl|hsla)\\([^()]*\\)))*\\) *)*$"
+  }
+  declaration: { name: "flex" }
+  declaration: { name: "flex-basis" }
+  declaration: { name: "flex-direction" }
+  declaration: { name: "flex-flow" }
+  declaration: { name: "flex-grow" }
+  declaration: { name: "flex-shrink" }
+  declaration: { name: "flex-wrap" }
+  declaration: { name: "float" }
+  declaration: { name: "font" }
+  declaration: { name: "font-family" }
+  declaration: { name: "font-feature-settings" }
+  declaration: { name: "font-kerning" }
+  declaration: { name: "font-size" }
+  declaration: { name: "font-size-adjust" }
+  declaration: { name: "font-stretch" }
+  declaration: { name: "font-style" }
+  declaration: { name: "font-synthesis" }
+  declaration: { name: "font-variant" }
+  declaration: { name: "font-variant-alternates" }
+  declaration: { name: "font-variant-caps" }
+  declaration: { name: "font-variant-east-asian" }
+  declaration: { name: "font-variant-ligatures" }
+  declaration: { name: "font-variant-numeric" }
+  declaration: { name: "font-variation-settings" }
+  declaration: { name: "font-weight" }
+  declaration: { name: "gap" }
+  declaration: { name: "grid" }
+  declaration: { name: "grid-area" }
+  declaration: { name: "grid-auto-columns" }
+  declaration: { name: "grid-auto-flow" }
+  declaration: { name: "grid-auto-rows" }
+  declaration: { name: "grid-column" }
+  declaration: { name: "grid-column-end" }
+  declaration: { name: "grid-column-start" }
+  declaration: { name: "grid-row" }
+  declaration: { name: "grid-row-end" }
+  declaration: { name: "grid-row-start" }
+  declaration: { name: "grid-template" }
+  declaration: { name: "grid-template-areas" }
+  declaration: { name: "grid-template-columns" }
+  declaration: { name: "grid-template-rows" }
+  declaration: { name: "height" }
+  declaration: { name: "hyphens" }
+  declaration: { name: "image-orientation" }
+  declaration: { name: "image-resolution" }
+  declaration: { name: "inline-size" }
+  declaration: { name: "isolation" }
+  declaration: { name: "justify-content" }
+  declaration: { name: "justify-items" }
+  declaration: { name: "justify-self" }
+  declaration: { name: "left" }
+  declaration: { name: "letter-spacing" }
+  declaration: { name: "line-break" }
+  declaration: { name: "line-height" }
+  declaration: { name: "list-style" }
+  declaration: { name: "list-style-position" }
+  declaration: { name: "list-style-type" }
+  declaration: { name: "margin" }
+  declaration: { name: "margin-bottom" }
+  declaration: { name: "margin-left" }
+  declaration: { name: "margin-right" }
+  declaration: { name: "margin-top" }
+  declaration: { name: "max-height" }
+  declaration: { name: "max-width" }
+  declaration: { name: "min-height" }
+  declaration: { name: "min-width" }
+  declaration: { name: "mix-blend-mode" }
+  declaration: { name: "object-fit" }
+  declaration: { name: "object-position" }
+  declaration: { name: "offset-distance" }
+  declaration: { name: "opacity" }
+  declaration: { name: "order" }
+  declaration: { name: "outline" }
+  declaration: { name: "outline-color" }
+  declaration: { name: "outline-offset" }
+  declaration: { name: "outline-style" }
+  declaration: { name: "outline-width" }
+  declaration: { name: "overflow" }
+  declaration: { name: "overflow-wrap" }
+  declaration: { name: "overflow-x" }
+  declaration: { name: "overflow-y" }
+  declaration: { name: "padding" }
+  declaration: { name: "padding-bottom" }
+  declaration: { name: "padding-left" }
+  declaration: { name: "padding-right" }
+  declaration: { name: "padding-top" }
+  declaration: { name: "pause" }
+  declaration: { name: "pause-after" }
+  declaration: { name: "pause-before" }
+  declaration: { name: "perspective" }
+  declaration: { name: "perspective-origin" }
+  declaration: { name: "pitch" }
+  declaration: { name: "pitch-range" }
+  declaration: { name: "place-items" }
+  declaration: { name: "position" }
+  declaration: { name: "quotes" }
+  declaration: { name: "resize" }
+  declaration: { name: "richness" }
+  declaration: { name: "right" }
+  declaration: { name: "row-gap" }
+  declaration: { name: "speak" }
+  declaration: { name: "speak-header" }
+  declaration: { name: "speak-numeral" }
+  declaration: { name: "speak-punctuation" }
+  declaration: { name: "speech-rate" }
+  declaration: { name: "stress" }
+  declaration: { name: "table-layout" }
+  declaration: { name: "text-align" }
+  declaration: { name: "text-align-last" }
+  declaration: { name: "text-combine-upright" }
+  declaration: { name: "text-decoration" }
+  declaration: { name: "text-decoration-color" }
+  declaration: { name: "text-decoration-line" }
+  declaration: { name: "text-decoration-skip" }
+  declaration: { name: "text-decoration-style" }
+  declaration: { name: "text-emphasis" }
+  declaration: { name: "text-emphasis-color" }
+  declaration: { name: "text-emphasis-position" }
+  declaration: { name: "text-emphasis-style" }
+  declaration: { name: "text-indent" }
+  declaration: { name: "text-justify" }
+  declaration: { name: "text-orientation" }
+  declaration: { name: "text-overflow" }
+  declaration: { name: "text-shadow" }
+  declaration: { name: "text-transform" }
+  declaration: { name: "text-underline-position" }
+  declaration: { name: "top" }
+  declaration: { name: "transform" }
+  declaration: { name: "transform-box" }
+  declaration: { name: "transform-origin" }
+  declaration: { name: "transform-style" }
+  declaration: {
+    name: "transition"
+    value_regex_casei: "^ *((initial|unset)|(((none|offset-distance|opacity|transform|visibility)( *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?(s|ms)( *(linear|(ease|ease-in|ease-out|ease-in-out|cubic-bezier\\( *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?(, *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?){3} *\\))|(step-start|step-end|steps\\( *(|-|\\+)[0-9]+(, *(jump-start|jump-end|jump-none|jump-both|start|end))? *\\)))( *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?(s|ms))?)?)?)(, *((none|offset-distance|opacity|transform|visibility)( *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?(s|ms)( *(linear|(ease|ease-in|ease-out|ease-in-out|cubic-bezier\\( *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?(, *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?){3} *\\))|(step-start|step-end|steps\\( *(|-|\\+)[0-9]+(, *(jump-start|jump-end|jump-none|jump-both|start|end))? *\\)))( *(|-|\\+)([0-9]+|[0-9]*\\.[0-9]+)(e(|-|\\+)?[0-9]+)?(s|ms))?)?)?))*)) *$"
+  }
+  declaration: { name: "transition-delay" }
+  declaration: { name: "transition-duration" }
+  declaration: {
+    name: "transition-property"
+    value_regex_casei: "^ *(initial|unset|(none|offset-distance|opacity|transform|visibility)(, *(none|offset-distance|opacity|transform|visibility))*) *$"
+  }
+  declaration: { name: "transition-timing-function" }
+  declaration: { name: "unicode-bidi" }
+  declaration: { name: "vertical-align" }
+  declaration: {
+    name: "visibility"
+    value_casei: "hidden"
+    value_casei: "initial"
+    value_casei: "visible"
+  }
+  declaration: { name: "voice-family" }
+  declaration: { name: "white-space" }
+  declaration: { name: "width" }
+  declaration: { name: "word-break" }
+  declaration: { name: "word-spacing" }
+  declaration: { name: "word-wrap" }
+  declaration: { name: "writing-mode" }
+  declaration: {
+    name: "z-index"
+    value_regex_casei: "([-+]?0)|([-+]?100)|([-+]?[1-9][0-9]?)"
+  }
+}
+
+# DocCSS rules for AMP for non-transformed documents.
+css {
+  html_format: AMP
+  disabled_by: "transformed"
+  spec_url:
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
+
+  max_bytes: 75000
+  max_bytes_per_inline_style: 1000
+  max_bytes_spec_url:
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+  url_bytes_included: true
+
+  allow_all_declaration_in_style: true
+  allow_important: false
+  image_url_spec: {
+    protocol: "https"
+    protocol: "http"
+    protocol: "data"
+    allow_empty: true
+  }
+  font_url_spec: {
+    protocol: "https"
+    protocol: "http"
+    protocol: "data"
+    allow_empty: true
+  }
+  expand_vendor_prefixes: true
+}
+
+# DocCss Rules for AMP transformed documents.
+# Identical to the non-transformed specification except that
+# `url_bytes_included` is false.
+css {
+  html_format: AMP
+  enabled_by: "transformed"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
+
+  max_bytes: 112500
+  max_bytes_per_inline_style: 1500
+  max_bytes_spec_url:
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+  url_bytes_included: false
+
+  allow_all_declaration_in_style: true
+  allow_important: false
+  image_url_spec: {
+    protocol: "https"
+    protocol: "http"
+    protocol: "data"
+    allow_empty: true
+  }
+  font_url_spec: {
+    protocol: "https"
+    protocol: "http"
+    protocol: "data"
+    allow_empty: true
+  }
+  expand_vendor_prefixes: true
+}
+
+# DocCss rules for AMP4ADS.
+css {
+  html_format: AMP4ADS
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
+
+  # AMP4ADS currently allows unlimited inline style, and only limits style in
+  # the <style amp-custom> tag in the document head.
+  # max_bytes: 20000
+  # max_bytes_per_inline_style: 1000
+  max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
+
+  allow_all_declaration_in_style: true
+  allow_important: false
+  image_url_spec: {
+    protocol: "https"
+    protocol: "http"
+    protocol: "data"
+    allow_empty: true
+  }
+  font_url_spec: {
+    protocol: "https"
+    protocol: "http"
+    protocol: "data"
+    allow_empty: true
+  }
+  expand_vendor_prefixes: true
+}
+
+# DocCss rules for AMP4EMAIL, not data-css-strict
+css {
+  html_format: AMP4EMAIL
+  disabled_by: "data-css-strict"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
+
+  # Due to a bug, we allowed unlimited doc-level bytes for CSS in AMP4EMAIL
+  # formats. To avoid breaking emails, this is temporarily set to a warning but
+  # we intend to change to an error at a later time.
+  max_bytes_is_warning: true
+  max_bytes: 75000
+  max_bytes_per_inline_style: 1000
+
+  max_bytes_spec_url:
+  "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
+  url_bytes_included: true
+
+  allow_all_declaration_in_style: true
+  allow_important: false
+  image_url_spec: {
+    protocol: "https"
+  }
+  expand_vendor_prefixes: true
+  declaration_list: "BASIC_DECLARATIONS"
+  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
+}
+
+# DocCss rules for AMP4EMAIL, data-css-strict
+css {
+  html_format: AMP4EMAIL
+  enabled_by: "data-css-strict"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
+
+  max_bytes_is_warning: false
+  max_bytes: 75000
+  max_bytes_per_inline_style: 1000
+
+  max_bytes_spec_url:
+  "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
+  url_bytes_included: true
+
+  allow_all_declaration_in_style: false
+  allow_important: false
+  image_url_spec: {
+    protocol: "https"
+  }
+  expand_vendor_prefixes: false
+  declaration_list: "EMAIL_SPECIFIC_DECLARATIONS"
+}
+
+# This variant of <style amp-custom> is designed to help developers see how
+# close they are to the byte limit, even if the page is passing. By changing
+# the attribute to <style amp-custom-length-check>, this tagspec will be used
+# to match errors. It cannot pass however, as it has a cdata.max_bytes set to
+# -1. As a result, it will always fail and report the length found in the
+# tag's cdata. Deleting this tagspec will never break any valid AMP documents
+# as if it matches, the page will be invalid.
+tags: {  # <style amp-custom-length-check>, ALL FORMATS
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  tag_name: "STYLE"
+  spec_name: "style amp-custom-length-check"
+  descriptive_name: "style amp-custom-length-check"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom-length-check"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    # This will always cause the tagspec matching to fail.
+    max_bytes: -1
+  }
+}
+
+tags: {  # <style amp-custom>, [AMP]
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "style amp-custom"
+  descriptive_name: "style amp-custom"
+  named_id: STYLE_AMP_CUSTOM
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    doc_css_bytes: true
+    max_bytes: 75000
+    max_bytes_spec_url:
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+
+    css_spec: {
+      at_rule_spec: { name: 'font-face' }
+      at_rule_spec: { name: 'keyframes' }
+      at_rule_spec: {
+         name: 'media'
+         media_query_spec: {
+           issues_as_error: false
+           type: 'all'
+           type: 'print'
+           type: 'screen'
+           type: 'speech'
+           type: 'tty'
+           type: 'tv'
+           type: 'projection'
+           type: 'handheld'
+           type: 'braille'
+           type: 'embossesd'
+           type: 'aural'
+           feature: 'any-hover'
+           feature: 'any-pointer'
+           feature: 'aspect-ratio'
+           feature: 'color'
+           feature: 'color-gamut'
+           feature: 'color-index'
+           feature: 'device-aspect-ratio'
+           feature: 'device-height'
+           feature: 'device-width'
+           feature: 'display-mode'
+           feature: 'forced-colors'
+           feature: 'grid'
+           feature: 'height'
+           feature: 'hover'
+           feature: 'inverted-colors'
+           feature: 'light-level'
+           feature: 'max-aspect-ratio'
+           feature: 'max-color-index'
+           feature: 'max-device-aspect-ratio'
+           feature: 'max-device-height'
+           feature: 'max-device-width'
+           feature: 'max-height'
+           feature: 'max-resolution'
+           feature: 'max-width'
+           feature: 'min-aspect-ratio'
+           feature: 'min-color-index'
+           feature: 'min-device-aspect-ratio'
+           feature: 'min-device-height'
+           feature: 'min-device-width'
+           feature: 'min-height'
+           feature: 'min-resolution'
+           feature: 'min-width'
+           feature: 'monochrome'
+           feature: 'orientation'
+           feature: 'overflow-block'
+           feature: 'overflow-inline'
+           feature: 'pointer'
+           feature: 'prefers-color-scheme'
+           feature: 'prefers-contrast'
+           feature: 'prefers-reduced-motion'
+           feature: 'prefers-reduced-transparency'
+           feature: 'resolution'
+           feature: 'scan'
+           feature: 'scripting'
+           feature: 'transform-3d'
+           feature: 'update'
+           feature: 'width'
+           # Other non-standard media types and features commonly seen:
+           type: '-sass-debug-info'
+           type: 'device-pixel-ratio'
+           type: 'device-pixel-ratio2'
+           feature: '--mod'
+           feature: '--md'
+           feature: 'device-pixel-ratio'
+           feature: 'device-pixel-ratio2'
+           feature: 'high-contrast'
+           feature: 'max-device-pixel-ratio'
+           feature: 'min-device-pixel-ratio'
+           feature: 'max-device-pixel-ratio2'
+           feature: 'min-device-pixel-ratio2'
+           feature: 'min--moz-device-pixel-ratio'
+           feature: 'max--moz-device-pixel-ratio'
+         }
+      }
+      at_rule_spec: { name: 'page' }
+      at_rule_spec: { name: 'supports' }
+      # https://github.com/ampproject/amphtml/issues/26406
+      at_rule_spec: { name: '-moz-document' }
+    }
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex denylists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    disallowed_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
+}
+
+tags: {  # <style amp-custom>, AMP4ADS
+  html_format: AMP4ADS
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (AMP4ADS)"
+  descriptive_name: "style amp-custom"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    doc_css_bytes: true
+    max_bytes: 20000  # Smaller than AMP, which is 75,000.
+    max_bytes_spec_url:
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+    css_spec: {
+      at_rule_spec: { name: 'font-face' }
+      at_rule_spec: { name: 'keyframes' }
+      at_rule_spec: {
+        name: 'media'
+        media_query_spec: {
+          issues_as_error: false
+          type: 'all'
+          type: 'print'
+          type: 'screen'
+          type: 'speech'
+          feature: 'width'
+          feature: 'height'
+          feature: 'aspect-ratio'
+          feature: 'orientation'
+          feature: 'resolution'
+        }
+      }
+      at_rule_spec: { name: 'supports' }
+      validate_amp4ads: true
+    }
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex denylists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    disallowed_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
+}
+
+tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
+  html_format: AMP4EMAIL
+  disabled_by: "data-css-strict"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (AMP4EMAIL)"
+  descriptive_name: "style amp-custom"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    doc_css_bytes: true
+    max_bytes: 75000
+    max_bytes_spec_url:
+    "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
+
+    css_spec: {
+      at_rule_spec: {
+        name: 'media'
+        media_query_spec: {
+          issues_as_error: true
+          type: 'all'
+          type: 'screen'
+          feature: 'device-width'
+          feature: 'hover'
+          feature: 'max-device-width'
+          feature: 'max-resolution'
+          feature: 'max-width'
+          feature: 'min-device-width'
+          feature: 'min-resolution'
+          feature: 'min-width'
+          feature: 'orientation'
+          feature: 'pointer'
+          feature: 'resolution'
+          feature: 'width'
+        }
+      }
+      at_rule_spec: { name: 'page' }
+    }
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex denylists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    disallowed_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
+}
+
+tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
+  html_format: AMP4EMAIL
+  enabled_by: "data-css-strict"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (css-strict)"
+  descriptive_name: "style amp-custom"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    doc_css_bytes: true
+    max_bytes: 75000
+    max_bytes_spec_url:
+    "https://amp.dev/documentation/guides-and-tutorials/email/learn/spec/amphtml#maximum-size"
+
+    css_spec: {
+      at_rule_spec: {
+        name: 'media'
+        media_query_spec: {
+          issues_as_error: true
+          type: 'all'
+          type: 'screen'
+          feature: 'device-width'
+          feature: 'hover'
+          feature: 'max-device-width'
+          feature: 'max-resolution'
+          feature: 'max-width'
+          feature: 'min-device-width'
+          feature: 'min-resolution'
+          feature: 'min-width'
+          feature: 'orientation'
+          feature: 'pointer'
+          feature: 'resolution'
+          feature: 'width'
+        }
+      }
+      selector_spec: {
+        attribute_name: "active"
+        attribute_name: "alt"
+        attribute_name: "autocomplete"
+        attribute_name: "autoexpand"
+        attribute_name: "checked"
+        attribute_name: "class"
+        attribute_name: "controls"
+        attribute_name: "dir"
+        attribute_name: "disabled"
+        attribute_name: "expanded"
+        attribute_name: "fallback"
+        attribute_name: "fetch-error"
+        attribute_name: "height"
+        attribute_name: "hidden"
+        attribute_name: "id"
+        attribute_name: "items"
+        attribute_name: "layout"
+        attribute_name: "name"
+        attribute_name: "noloading"
+        attribute_name: "novalidate"
+        attribute_name: "open"
+        attribute_name: "option"
+        attribute_name: "overflow"
+        attribute_name: "placeholder"
+        attribute_name: "readonly"
+        attribute_name: "required"
+        attribute_name: "role"
+        attribute_name: "scrollable"
+        attribute_name: "selected"
+        attribute_name: "side"
+        attribute_name: "sizes"
+        attribute_name: "submit-error"
+        attribute_name: "submit-success"
+        attribute_name: "submitting"
+        attribute_name: "title"
+        attribute_name: "type"
+        attribute_name: "value"
+        attribute_name: "width"
+        pseudo_class: "active"
+        pseudo_class: "checked"
+        pseudo_class: "default"
+        pseudo_class: "disabled"
+        pseudo_class: "empty"
+        pseudo_class: "enabled"
+        pseudo_class: "first-child"
+        pseudo_class: "first-of-type"
+        pseudo_class: "focus"
+        pseudo_class: "focus-within"
+        pseudo_class: "hover"
+        pseudo_class: "in-range"
+        pseudo_class: "indeterminate"
+        pseudo_class: "invalid"
+        pseudo_class: "last-child"
+        pseudo_class: "last-of-type"
+        pseudo_class: "not"
+        pseudo_class: "nth-child"
+        pseudo_class: "nth-last-child"
+        pseudo_class: "nth-last-of-type"
+        pseudo_class: "nth-of-type"
+        pseudo_class: "only-child"
+        pseudo_class: "only-of-type"
+        pseudo_class: "optional"
+        pseudo_class: "out-of-range"
+        pseudo_class: "read-only"
+        pseudo_class: "read-write"
+        pseudo_class: "required"
+        pseudo_class: "valid"
+      }
+    }
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex denylists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    disallowed_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/email/learn/email-spec/amp-email-css"
+}
+
+tags: {  # `<style amp-boilerplate>`, [AMP]
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-boilerplate]"
+  descriptive_name: "head > style[amp-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    doc_css_bytes: false
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
+}
+
+tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
+  html_format: AMP4ADS
+  tag_name: "STYLE"
+  spec_name: "head > style[amp4ads-boilerplate]"
+  descriptive_name: "head > style[amp4ads-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp4ads-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    doc_css_bytes: false
+    # This regex allows arbitrary whitespace around the body statement, but
+    # not inside it. This is a compromise to keep things simple, but allow
+    # pretty printing tools some latitude.
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/?format=ads#boilerplate"
+}
+
+tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
+  html_format: AMP4EMAIL
+  tag_name: "STYLE"
+  spec_name: "head > style[amp4email-boilerplate]"
+  descriptive_name: "head > style[amp4email-boilerplate]"
+  satisfies_condition: "style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp4email-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    doc_css_bytes: false
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-format/?format=email#required-markup"
+}
+
+tags: {  # `<style amp-boilerplate>`, [AMP]
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "noscript > style[amp-boilerplate]"
+  descriptive_name: "noscript > style[amp-boilerplate]"
+  satisfies_condition: "noscript > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata {
+    doc_css_bytes: false
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
+}
+
+tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS]
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "STYLE"
+  spec_name: "style[amp-keyframes]"
+  descriptive_name: "style[amp-keyframes]"
+  unique: true
+  mandatory_parent: "BODY"
+  mandatory_last_child: true
+  attrs: {
+     name: "amp-keyframes"
+     value: ""
+     mandatory: true
+     dispatch_key: NAME_DISPATCH
+  }
+  cdata: {
+    # amp-keyframes CSS bytes do not count against the document CSS byte limit
+    # as these style tags must come at the end of the document and are limited
+    # to animation keyframes rules.
+    doc_css_bytes: false
+    max_bytes: 500000
+    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#keyframes-stylesheet"
+    css_spec: {
+      at_rule_spec: { name: 'keyframes' }
+      at_rule_spec: {
+         name: 'media'
+         media_query_spec: {
+           issues_as_error: false
+           type: 'all'
+           type: 'print'
+           type: 'screen'
+           type: 'speech'
+           type: 'tty'
+           type: 'tv'
+           type: 'projection'
+           type: 'handheld'
+           type: 'braille'
+           type: 'embossesd'
+           type: 'aural'
+           feature: 'any-hover'
+           feature: 'any-pointer'
+           feature: 'aspect-ratio'
+           feature: 'color'
+           feature: 'color-gamut'
+           feature: 'color-index'
+           feature: 'device-aspect-ratio'
+           feature: 'device-height'
+           feature: 'device-width'
+           feature: 'display-mode'
+           feature: 'forced-colors'
+           feature: 'grid'
+           feature: 'height'
+           feature: 'hover'
+           feature: 'inverted-colors'
+           feature: 'light-level'
+           feature: 'monochrome'
+           feature: 'max-aspect-ratio'
+           feature: 'max-color-index'
+           feature: 'max-device-aspect-ratio'
+           feature: 'max-device-height'
+           feature: 'max-device-width'
+           feature: 'max-height'
+           feature: 'max-resolution'
+           feature: 'max-width'
+           feature: 'min-aspect-ratio'
+           feature: 'min-color-index'
+           feature: 'min-device-aspect-ratio'
+           feature: 'min-device-height'
+           feature: 'min-device-width'
+           feature: 'min-height'
+           feature: 'min-resolution'
+           feature: 'min-width'
+           feature: 'orientation'
+           feature: 'overflow-block'
+           feature: 'overflow-inline'
+           feature: 'pointer'
+           feature: 'prefers-color-scheme'
+           feature: 'prefers-contrast'
+           feature: 'prefers-reduced-motion'
+           feature: 'prefers-reduced-transparency'
+           feature: 'resolution'
+           feature: 'scan'
+           feature: 'scripting'
+           feature: 'transform-3d'
+           feature: 'update'
+           feature: 'width'
+           # Other non-standard media types and features commonly seen:
+           type: '-sass-debug-info'
+           type: 'device-pixel-ratio'
+           type: 'device-pixel-ratio2'
+           feature: '--mod'
+           feature: '--md'
+           feature: 'device-pixel-ratio'
+           feature: 'device-pixel-ratio2'
+           feature: 'high-contrast'
+           feature: 'aspect-ratio'
+           feature: 'max-device-pixel-ratio'
+           feature: 'min-device-pixel-ratio'
+           feature: 'max-device-pixel-ratio2'
+           feature: 'min-device-pixel-ratio2'
+         }
+      }
+
+      at_rule_spec: { name: 'supports' }
+      validate_keyframes: true
+      declaration: "animation-timing-function"
+      declaration: "offset-distance"
+      declaration: "opacity"
+      declaration: "transform"
+      declaration: "visibility"
+    }
+  }
+}
+
+tags: {  # '<style amp-runtime>`, transformed AMP
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "style[amp-runtime] (transformed)"
+  descriptive_name: "style[amp-runtime]"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-runtime"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: {
+    name: "i-amphtml-version"
+    mandatory: true
+    value_regex: "^\\d{15}|latest$"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
+}
+
+tags: {  # <style amp-noscript>, [AMP]
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "style amp-noscript"
+  descriptive_name: "style amp-noscript"
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-noscript"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    doc_css_bytes: true
+    max_bytes: 10000
+    max_bytes_spec_url:
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+
+    css_spec: {
+      allow_important: true
+      at_rule_spec: {
+         name: 'media'
+         media_query_spec: {
+           issues_as_error: false
+           type: 'all'
+           type: 'print'
+           type: 'screen'
+           type: 'speech'
+           type: 'tty'
+           type: 'tv'
+           type: 'projection'
+           type: 'handheld'
+           type: 'braille'
+           type: 'embossesd'
+           type: 'aural'
+           feature: 'any-hover'
+           feature: 'any-pointer'
+           feature: 'aspect-ratio'
+           feature: 'color'
+           feature: 'color-gamut'
+           feature: 'color-index'
+           feature: 'device-aspect-ratio'
+           feature: 'device-height'
+           feature: 'device-width'
+           feature: 'display-mode'
+           feature: 'forced-colors'
+           feature: 'grid'
+           feature: 'height'
+           feature: 'hover'
+           feature: 'inverted-colors'
+           feature: 'light-level'
+           feature: 'max-aspect-ratio'
+           feature: 'max-color-index'
+           feature: 'max-device-aspect-ratio'
+           feature: 'max-device-height'
+           feature: 'max-device-width'
+           feature: 'max-height'
+           feature: 'max-resolution'
+           feature: 'max-width'
+           feature: 'min-aspect-ratio'
+           feature: 'min-color-index'
+           feature: 'min-device-aspect-ratio'
+           feature: 'min-device-height'
+           feature: 'min-device-width'
+           feature: 'min-height'
+           feature: 'min-resolution'
+           feature: 'min-width'
+           feature: 'monochrome'
+           feature: 'orientation'
+           feature: 'overflow-block'
+           feature: 'overflow-inline'
+           feature: 'pointer'
+           feature: 'prefers-color-scheme'
+           feature: 'prefers-contrast'
+           feature: 'prefers-reduced-motion'
+           feature: 'prefers-reduced-transparency'
+           feature: 'resolution'
+           feature: 'scan'
+           feature: 'scripting'
+           feature: 'transform-3d'
+           feature: 'update'
+           feature: 'width'
+         }
+      }
+      at_rule_spec: { name: 'page' }
+      at_rule_spec: { name: 'supports' }
+      # https://github.com/ampproject/amphtml/issues/26406
+      at_rule_spec: { name: '-moz-document' }
+    }
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex denylists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    disallowed_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://github.com/ampproject/amphtml/issues/20609"
+}

@@ -1,0 +1,38 @@
+<!--
+  Test Description:
+  Testing some common mistakes for ad creators, like forgetting to specify
+  an enum value,
+-->
+<!DOCTYPE html>
+<html amp4ads>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+
+    <!-- Should fail as an invalid meta tag. -->
+    <meta name="amp-cta" content="https://www.ampproject.org">
+
+    <!-- Should fail due to no `content=`. -->
+    <meta name="amp-cta-type">
+
+    <!-- Should fail due to invalid content choice. -->
+    <meta name="amp-cta-landing-page-type" content="GAME">
+
+    <!-- Should fail due to no `content=`. -->
+    <meta name="amp4ads-vars-foo">
+
+    <!-- Should fail due unrecognized `name` -->
+    <meta name="amp4ads-vars" content="bar">
+    <meta name="amp4ads-vars-" content="bar">
+
+
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <style amp-custom>
+     amp-img {height: 100vh}
+    </style>
+    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  </head>
+  <body>
+    <amp-img src="cats.jpg" layout="responsive" height="1280" width="720"></amp-img>
+  </body>
+</html>

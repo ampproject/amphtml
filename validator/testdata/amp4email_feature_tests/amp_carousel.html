@@ -1,0 +1,37 @@
+<!--
+  Test Description:
+  Tests the additional restrictions AMP4EMAIL sets on AMP-CAROUSEL.
+-->
+<!doctype html>
+<html ⚡4email data-css-strict>
+<head>
+  <meta charset="utf-8">
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element='amp-carousel'
+     src='https://cdn.ampproject.org/v0/amp-carousel-0.1.js'></script>
+</head>
+<body>
+
+<!-- Valid example. -->
+<amp-carousel
+  autoplay
+  delay="2000"
+  width="800" height="600"
+  layout="responsive"
+  type="slides">
+</amp-carousel>
+
+<!--
+  The error message for an amp-carousel containing an invalid `arrows` attribute. There are multiple
+  tagspecs for amp-carousel and we are interested in which error is generated.
+-->
+<amp-carousel
+  arrows
+  width="800" height="600"
+  layout="responsive"
+  type="slides">
+</amp-carousel>
+
+</body>
+</html>

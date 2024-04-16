@@ -1,0 +1,47 @@
+<!--
+  Test Description:
+  Tests for the amp-apester-media tag. See the inline comments.
+-->
+
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Apester Media Smart Unit</title>
+    <link rel="canonical" href="./regular-html-version.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async custom-element="amp-apester-media" src="https://cdn.ampproject.org/v0/amp-apester-media-0.1.js"></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+
+<!-- Valid: simplest possible example -->
+<amp-apester-media
+        height="444"
+        data-apester-media-id="57a336dba187a2ca3005e826">
+</amp-apester-media>
+
+<!-- Valid: a simple example with explicit fixed layout -->
+<amp-apester-media
+        height="444"
+        layout="fixed-height"
+        data-apester-media-id="57a336dba187a2ca3005e826">
+</amp-apester-media>
+
+<!-- Valid: playlist example -->
+<amp-apester-media
+        height="444"
+        data-apester-channel-token="57a36e1e96cd505a7f01ed12">
+</amp-apester-media>
+
+<!-- Valid: a simple playlist example with explicit fixed layout -->
+<amp-apester-media
+        height="444"
+        layout="fixed-height"
+        data-apester-channel-token="57a36e1e96cd505a7f01ed12">
+</amp-apester-media>
+
+</body>
+</html>

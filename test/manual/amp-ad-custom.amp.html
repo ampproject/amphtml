@@ -1,0 +1,112 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Ad examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    amp-ad {
+      border: 2px solid black;
+      padding: 0;
+      margin: 0;
+    }
+    /* Included here to make sure it does not render. */
+    .fixed {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      background-color: #eee;
+      opacity: .8;
+    }
+    .fill {
+      padding: 2px;
+    }
+
+    .green {
+      background-color: green;
+    }
+
+    .red {
+      background-color: red;
+    }
+
+    .yellow {
+      background-color: yellow;
+    }
+
+    .blue {
+      background-color: blue;
+    }
+
+  </style>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+</head>
+<body>
+  <a href="https://google.com/fake">fake link</a>
+
+  <template type="amp-mustache" id="amp-template-id1">
+    <div class='fill yellow'>
+      <a href="{{href}}" target='_blank' rel="noopener noreferrer">
+        <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </div>
+  </template>
+
+  <template type="amp-mustache" id="amp-template-id2">
+    <a href="{{href}}" target="_blank" rel="noopener noreferrer">
+      <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+    </a>
+  </template>
+
+  <template type="amp-mustache" id="amp-template-id3">
+    <div class='fill red'>
+    <a href="{{href}}" target="_blank" rel="noopener noreferrer">
+      <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+    </a>
+    </div>
+  </template>
+
+  <h2 id="custom">Custom leaderboard</h2>
+  <h3>Custom ad with child template should ignore templateId</h3>
+  This ad should display an ad with background color blue.
+  <amp-ad width="500" height="60"
+      type="custom"
+      data-slot="1"
+      data-url="/examples/custom.ad.example.json">
+      <template type="amp-mustache" id="amp-template-id-no-slot">
+      <div class='fill blue'>
+      <a href="{{href}}" target="_blank" rel="noopener noreferrer">
+        <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+      </div>
+    </template>
+  </amp-ad>
+
+  <h2>Custom square</h2>
+  <h3>Custom ad work with templateId, no child template
+  the amp-ad element should have attribute data-vars-a=123, data-vars-b=456
+  </h3>
+  <amp-ad width="200" height="200"
+      type="custom"
+      data-slot="2"
+      data-url="/examples/custom.ad.example.json">
+  </amp-ad>
+
+  <h2>Custom leaderboard with no slot specified</h2>
+  <h3>Custom ad w/o templateId</h3>
+  <amp-ad width="500" height="60"
+      type="custom"
+      data-url="/examples/custom.ad.example.single.json">
+    <template type="amp-mustache" id="amp-template-id-no-slot">
+      <a href="{{href}}" target="_blank" rel="noopener noreferrer">
+        <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
+  </amp-ad>
+</body>
+</html>

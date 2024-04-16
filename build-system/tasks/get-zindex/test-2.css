@@ -1,0 +1,24 @@
+
+
+/**
+ * Horizontal scrolling interferes with embedded scenarios and predominantly
+ * the result of the non-responsive design.
+ *
+ * Notice that it's critical that `overflow-x: hidden` is only set on `html`
+ * and not `body`. Otherwise, adding `overflow-x: hidden` forces `overflow-y`
+ * to be computed to `auto` on both the `body` and `html` elements so they both
+ * potentially get a scrolling box. See #3108 for more details.
+ */
+
+
+.selector-4 {
+  z-index: 80;
+}
+
+.selector-5 {
+  z-index: initial;
+}
+
+.selector-6 {
+  z-index: auto;
+}

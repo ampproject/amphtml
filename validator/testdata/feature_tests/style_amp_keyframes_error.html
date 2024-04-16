@@ -1,0 +1,52 @@
+<!--
+  Test Description:
+    This tests a <style> tag in body and should fail.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>STAMP examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <div></div>
+  <style amp-keyframes>
+    amp-img { opacity: 0 } /* this should fail because it's not an @rule */
+    a.underlined {} /* selector is not @rule and should fail */
+    @font-face {} /* this should fail because it's not an allowed @rule */
+    @supports (offset-distance: 0) {
+      amp-carousel {} /* this should fail because it's not allowed content inside the @supports */
+    }
+    @media (min-width: 300px) {
+      /* this should fail because css style rules are only allowed inside keyframes */
+      from {transform: translateX(-100%);}
+      to {transform: translateX(100%);} /* this should fail because it's a css style rule */
+    }
+    @media (min-width: 300px) {
+      /* this should fail because css style rules are only allowed inside keyframes */
+      100% {transform: translateX(-100%);}
+    }
+    @keyframes anim1 {
+      /* this should fail because the only allowed properties are
+       * [opacity, transform, visibility, offset-distance] */
+      100% {thisshouldfail: translateX(100%);}
+    }
+    @keyframes anim2 {
+      @keyframes anim1 {
+        /* this should fail because you cannot have a keyframe inside of another keyframe */
+        100% {visibility: visible}
+      }
+    }
+    @keyframes anim1 {
+      100% {} /* this should fail because it makes no sense */
+    }
+    @keyframes anim1 {
+      a {} /* this should fail because it makes no sense */
+    }
+  </style>
+</body>
+</html>

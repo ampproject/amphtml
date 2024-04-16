@@ -1,0 +1,21 @@
+URL: https://github.com/webcomponents/webcomponentsjs
+License: BSD
+License File: https://github.com/webcomponents/webcomponentsjs/blob/master/LICENSE.md
+
+Description:
+Shadow DOM-related polyfills
+
+Local Modifications:
+- Stripped to only perform necessary Shadow CSS polyfilling.
+- Shortened License based on intended functionality from build pipeline.
+- Added feature switches that allows certain codepaths to be
+  dead-code-eliminated: `allowArraySelectors` and `isIeSupported`
+- All exported functions were originally part of an object named `ShadowCSS`.
+  We instead export them as plain functions allow them to be
+  dead-code-eliminated, and for their names to be mangled.
+  This also involves changing references to each function from `this.x()` to
+  just `x()`
+- Renamed `scopeSelector()` to `doScopeSelector()` since the original name
+  conflicts with argument `scopeSelector` after removing `this.`.
+- Removed a `strict` argument before `opt_transformer` in `doScopeSelector`
+  to be replaced with the constant value for `strictStyling`.

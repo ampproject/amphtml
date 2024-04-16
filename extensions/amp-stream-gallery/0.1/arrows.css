@@ -1,0 +1,74 @@
+
+
+@import "inset-arrows.css";
+@import "outset-arrows.css";
+
+.i-amphtml-stream-gallery-inset-arrows {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.i-amphtml-stream-gallery-arrow-prev-slot {
+  order: 0;
+}
+
+.i-amphtml-stream-gallery-arrow-next-slot {
+  order: 2;
+}
+
+.i-amphtml-stream-gallery-arrow-prev-slot,
+.i-amphtml-stream-gallery-arrow-next-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+
+.i-amphtml-stream-gallery-arrow-prev-slot > *,
+.i-amphtml-stream-gallery-arrow-next-slot > * {
+  /*
+   * Make sure arrows do not collapse due to parent having no width for inset
+   * arrows. Note this needs to apply to both the default arrows and custom
+   * arrows.
+   */
+  flex-shrink: 0;
+}
+
+.i-amphtml-stream-gallery-prev,
+.i-amphtml-stream-gallery-next {
+  /* Need for stacking, when backdrop-filter is not supported. */
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  border: none;
+  outline: none;
+  box-shadow: 0px 2px 6px 0px rgba(0,0,0,.4);
+  background-color: rgba(255,255,255,0.6);
+  background-size: 24px 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+  backdrop-filter: blur(3px);
+  transition: 200ms opacity ease-in;
+}
+
+.i-amphtml-stream-gallery-prev[disabled],
+.i-amphtml-stream-gallery-next[disabled] {
+  transition-timing-function: ease-out;
+}
+
+/*
+ * TODO(sparhami): Ideally we would use amp-stream-gallery:dir(rtl), but it
+ * does not have wide support. This requires that the page sets an attribute
+ * explicitly and prevents mixed directionality (e.g. ltr content in an rtl
+ * page) from working correctly.
+ */
+[dir="rtl"] .i-amphtml-stream-gallery-prev,
+[dir="rtl"] .i-amphtml-stream-gallery-next {
+  transform: scaleX(-1);
+}

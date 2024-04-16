@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Snapshot Error</title>
+  <style>
+    div {
+      font-family: monospace;
+      background-color: lemonchiffon;
+      padding: 10px;
+    }
+
+    div.snapshot {
+      font-size: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Snapshot error in test <code>__TEST_NAME__</code></h1>
+  <p>Inspect the CI logs for the full error message</p>
+  <div>__TEST_ERROR__</div>
+  <h2>HTML Snapshot</h2>
+  <div class="snapshot">__HTML_SNAPSHOT__</div>
+</body>
+</html>

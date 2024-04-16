@@ -1,0 +1,52 @@
+<!--
+  Test Description:
+  Tests support for the amp-brightcove tag.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+</head>
+<body>
+  <!-- Valid: Example of a valid amp-brightcove. -->
+  <amp-brightcove
+      autoplay
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player-id="SyIOV8yWM"
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <!-- Valid: data-video-id, data-player-id are optional;
+       leaving them out results in the default config. -->
+  <amp-brightcove
+      data-account="1290862519001"
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <!-- Valid: most "data-*" attributes are bindable. -->
+  <amp-brightcove
+      data-account="1290862519001"
+      layout="responsive" width="480" height="270"
+      [data-account]="foo.bar" [data-embed]="foo.bar" [data-player]="foo.bar"
+      [data-player-id]="foo.bar" [data-playlist-id]="foo.bar"
+      [data-video-id]="foo.bar">
+  </amp-brightcove>
+  <!-- Invalid: data-account is mandatory;
+       leaving them out results in an error. -->
+  <amp-brightcove
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <!-- Invalid: `dock` without `amp-video-docking` extension. -->
+  <amp-brightcove
+      dock
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player-id="SyIOV8yWM"
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "vars": {
+    "host": "",
+    "website_id": "",
+    "website_hash": "",
+    "pk_cookie_value": "$REPLACE($CLIENT_ID(_pk_id.${website_id}.${website_hash}),\\.[A-Za-z0-9]*\\.[A-Za-z0-9]*\\.[A-Za-z0-9]*\\.[A-Za-z0-9]*\\.,)",
+    "visitor_id_from_cookie": "$IF($MATCH(${pk_cookie_value},^[0-9a-f]{16}$,0),${pk_cookie_value},$SUBSTR($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($REPLACE($SUBSTR($TOLOWERCASE(${pk_cookie_value}),4,16),g,10),h,11),i,12),j,13),k,14),l,15),m,16),n,17),o,18),p,19),q,1a),r,1b),s,1c),t,1d),u,1e),v,1f),w,20),x,21),y,22),z,23),_,3e),-,3f),0,16))",
+    "request_random": "$SUBSTR($REPLACE(${random},0.,), 0, 6)",
+    "vid": "${visitor_id_from_cookie}"
+  },
+  "requests": {
+    "basePrefix": "https://${host}/ppms.php?",
+    "baseSuffix": "&idsite=${website_id}&rec=1&r=${request_random}&url=${sourceUrl}&_id=${visitor_id_from_cookie}&apiv=1&$IF(${documentReferrer},urlref,ignored)=${documentReferrer}&res=${screenWidth}x${screenHeight}&lang=${browserLanguage}&gt_ms=${serverResponseTime}&cs=${documentCharset}&pv_id=$SUBSTR($PAGE_VIEW_ID_64, 0, 6)",
+    "performanceMetrics": "${basePrefix}ping=1${baseSuffix}&t_di=${domInteractiveTime}&t_le=${contentLoadTime}&t_dc=${pageDownloadTime}&t_ee=${pageLoadTime}",
+    "pageview": "${basePrefix}action_name=${title}${baseSuffix}",
+    "customevent": "${basePrefix}e_c=${event_category}&e_a=${event_action}&e_n=${event_name}&e_v=$DEFAULT(${event_value}, 0)${baseSuffix}",
+    "download": "${basePrefix}download=${download_url}${baseSuffix}",
+    "outlink": "${basePrefix}link=${outlink_url}${baseSuffix}",
+    "search": "${basePrefix}search=${search_keyword}&search_cat=${search_category}&search_count=${search_result_count}${baseSuffix}",
+    "goal": "${basePrefix}idgoal=${goal_id}&revenue=${revenue}${baseSuffix}"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "linkers": {
+    "enabled": true,
+    "pk_vid": {
+      "ids": {
+        "vid": "${visitor_id_from_cookie}",
+        "timestamp": "${timestamp}"
+      },
+      "proxyOnly": false
+    }
+  }
+}

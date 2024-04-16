@@ -1,0 +1,158 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lorem Ipsum | PublisherName</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    amp-live-list > [items] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .amp-live-list-item {
+      height: 100px;
+      background-color: #f8f8f8;
+      border-bottom: 1px solid rgba(0, 0, 0, .12);
+    }
+
+    .card {
+      display: flex;
+      margin: 15px;
+      padding: 10px;
+      justify-content: center;
+      align-items: center;
+      background-color: #fff;
+      box-shadow: rgba(0, 0, 0, .3) 0 0 5px;
+    }
+
+    .card > div {
+      flex-basis: 50%;
+    }
+
+    .side {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+
+    .content {
+      font-size: 1.5rem;
+    }
+
+    header {
+      font-size: 2rem;
+    }
+
+    #live-list-update-button {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
+    .pagination {
+      display: inline-block;
+      padding: 0;
+    }
+
+    amp-live-list [pagination] nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pagination li {
+      display: inline;
+      border: 1px solid black;
+      padding: 10px;
+      list-style-type: none;
+    }
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <header>
+    Scoreboard refresh takes 3 seconds.
+  </header>
+  <amp-live-list
+    layout="container"
+    data-poll-interval="15000"
+    data-max-items-per-page="5"
+    id="my-live-list">
+    <button id="live-list-update-button" update class="button" on="tap:my-live-list.update">You have updates</button>
+    <div items>
+      <div id="list-item-2" data-sort-time="1462814963693">
+        <div class="card">
+          <div class="side side-left">
+            <div class="logo">
+              <amp-img src="img/ampicon.png"
+                  layout="fixed" height="50" width="50">
+              </amp-img>
+            </div>
+            <div class="content">2</div>
+          </div>
+          <div class="side side-right">
+            <div class="content">2</div>
+            <div class="logo">
+              <amp-img src="img/ampicon.png"
+                  layout="fixed" height="50" width="50">
+              </amp-img>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="list-item-1" data-sort-time="1462814955597">
+        <div class="card">
+          <div class="side side-left">
+            <div class="logo">
+              <amp-img src="img/ampicon.png"
+                  layout="fixed" height="50" width="50">
+              </amp-img>
+            </div>
+            <div class="content">2</div>
+          </div>
+          <div class="side side-right">
+            <div class="content">2</div>
+            <div class="logo">
+              <amp-img src="img/ampicon.png"
+                  layout="fixed" height="50" width="50">
+              </amp-img>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div pagination>
+      <nav aria-label="amp live list pagination">
+      <ul class="pagination">
+        <li>1</li>
+      </ul>
+      </nav>
+    </div>
+  </amp-live-list>
+</body>
+</html>

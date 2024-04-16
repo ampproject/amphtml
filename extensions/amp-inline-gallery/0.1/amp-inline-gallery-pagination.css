@@ -1,0 +1,176 @@
+
+
+amp-inline-gallery-pagination {
+  font-size: 12px;
+  /*
+   * TODO(https://github.com/ampproject/amphtml/issues/25888)
+   * Use a better, common set of fonts for sans-serif.
+   */
+  font-family: sans-serif;
+  line-height: 1;
+}
+
+.i-amphtml-inline-gallery-pagination-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.i-amphtml-inline-gallery-pagination-dots {
+  position: relative;
+  align-self: center;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  max-width: 60%;
+}
+
+/**
+ * Used to allow the spacing of the dots to become more compact as more dots
+ * are added.
+ */
+.i-amphtml-inline-gallery-pagination-dot-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 16px;
+  min-width: 14px;
+  justify-content: center;
+}
+
+.i-amphtml-inline-gallery-pagination-dot {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.i-amphtml-inline-gallery-pagination-dot-progress {
+  position: absolute;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  opacity: 0; /** For no custom property support */
+  opacity: calc(1 - var(--percentage-falloff));
+}
+
+[i-amphtml-inline-gallery-pagination-dot-active="true"] .i-amphtml-inline-gallery-pagination-dot-progress {
+  opacity: 1; /** For no custom property support */
+  opacity: calc(1 - var(--percentage-falloff));
+}
+
+.i-amphtml-inline-gallery-pagination-dot,
+.i-amphtml-inline-gallery-pagination-dot-progress {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.i-amphtml-inline-gallery-pagination-numbers {
+  position: relative;
+  align-self: flex-end;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 8px;
+}
+
+.i-amphtml-inline-gallery-pagination-count {
+  z-index: 1;
+}
+
+.i-amphtml-inline-gallery-pagination-dots[hidden],
+.i-amphtml-inline-gallery-pagination-numbers[hidden] {
+  display: none;
+}
+
+/** Inset pagination styling. */
+amp-inline-gallery-pagination[inset]:not(.i-amphtml-hidden-by-media-query) {
+  position: absolute !important;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  bottom: var(--i-amphtml-caption-height, 0);
+  display: flex !important;
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-container {
+  margin: 18px;
+  height: 20px;
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdrop,
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-background,
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-frosting {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 12px;
+}
+
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-frosting {
+  /**
+   * Add a frosted glass effect to the pagination dots background. The backdrop
+   * and background elements will apply a darkening on top of the blurring.
+   */
+  backdrop-filter: blur(3px);
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdrop {
+  /**
+   * Instead of using a plain background color, we use a backdrop-filter to
+   * make the effective background partially dependent on the current
+   * backdrop (e.g. the image on a carousel slide). This allows the pagination
+   * backgroud to be distinguishable on very dark backgrounds, while still
+   * having it be semi-transparent.
+   *
+   * This can be harder to distinguish on middle greys. For this current
+   * current configuration, hsl(0, 0%, 31%) to hsl(0, 0%, 35%) can appear quite
+   * close to the background color.
+   *
+   * The blur here is used for averaging the backdrop color, so that sharp
+   * contrasts (e.g. edge of sky and landscape) do not cause immediate shifts
+   * in the container color.
+   *
+   * The greyscale is used to have the container slightly tinted by the inverse
+   * color, but also not be too tinted.
+   */
+   backdrop-filter: blur(12px) invert(1) grayscale(0.6) brightness(0.8);
+   /**
+    * Note: we use a opacity rather than a filter function due to a bug in
+    * Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=991656.
+    * Otherwise, we could use the opacity function and combine this with the
+    * i-amphtml-inline-gallery-pagination-background class as the background of the pagination container
+    * rather than needing two separate Elements for it.
+    */
+   opacity: 0.5;
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-background {
+  /**
+   * Note: we always add some darkening using background-color, since we do not
+   * change the dot color. Note that this applies on top of the backdrop based
+   * color, rather than affecting it.
+   */
+   background-color: rgba(0, 0, 0, 0.3);
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-dots {
+  padding: 0 4px;
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-numbers {
+  color: #fff;
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-dot {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-dot-progress {
+  background-color: #fff;
+}

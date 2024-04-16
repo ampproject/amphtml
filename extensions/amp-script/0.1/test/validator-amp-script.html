@@ -1,0 +1,109 @@
+<!--
+  Test Description:
+  Tests amp-script.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
+</head>
+<body>
+  <!-- Valid: 'src' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js">
+    <div class="root">
+      <p>Some text to hydrate.</p>
+    </div>
+  </amp-script>
+
+  <!-- Valid: 'nodom' attribute. -->
+  <amp-script nodom layout=container src="https://example.com/foo.js">
+  </amp-script>
+
+  <!-- Invalid: 'src' attribute with non-HTTPS protocol. -->
+  <amp-script layout=container src="http://example.com/foo.js">
+  </amp-script>
+
+  <!-- Valid: 'script' attribute. -->
+  <amp-script layout=container script=hello></amp-script>
+  <script type=text/plain target=amp-script id=hello>
+    document.body.textContent = "Hello world!";
+  </script>
+
+  <!-- Invalid: 'script' attribute with invalid #id reference. -->
+  <amp-script layout=container script=missing></amp-script>
+
+  <!-- Valid: Optional 'sandbox' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" sandbox="allow-forms">
+  </amp-script>
+
+  <!-- Valid: Optional 'max-age' attribute. -->
+  <amp-script layout=container script="hello" max-age="604800">
+  </amp-script>
+
+  <!-- Invalid: Optional 'max-age' attribute with non-numeric chars. -->
+  <amp-script layout=container script="hello" max-age="1d">
+  </amp-script>
+
+  <!-- Invalid: Optional 'max-age' attribute without 'script' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" max-age="604800">
+  </amp-script>
+
+  <!-- Valid: <canvas> child element. -->
+  <amp-script layout=container src="https://example.com/foo.js">
+    <canvas id="myCanvas" width="100px" height="100px"></canvas>
+  </amp-script>
+
+  <!-- Invalid: <canvas> element outside of amp-script tag. -->
+  <canvas id="myCanvas" width="100px" height="100px"></canvas>
+
+  <!-- Invalid: With neither 'script' or 'src' attributes. -->
+  <amp-script layout=container></amp-script>
+
+  <!-- Invalid: Both 'script' and 'src' attributes. -->
+  <amp-script layout=container src="https://example.com/foo.js" script=hello></amp-script>
+
+  <!-- Invalid: Relative URL. -->
+  <amp-script layout=container src="/foo.js"></amp-script>
+
+  <!-- Invalid: Non-https 'src' attribute. -->
+  <amp-script layout=container src="http://not.https.url"></amp-script>
+
+  <!-- Invalid: 'development' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" development></amp-script>
+
+  <!-- Invalid: 'data-ampdevmode' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode></amp-script>
+
+  <!-- Invalid: 'data-ampdevmode' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode="false"></amp-script>
+
+  <!-- Invalid: Local script without 'target' or 'id' attributes. -->
+  <script type=text/plain>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script with invalid 'type'. -->
+  <script type=text/amp-script target=amp-script id=hello>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script with invalid 'target'. -->
+  <script type=text/plain target=amp-js id=hello>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script without 'target' attribute. -->
+  <script type=text/plain id=hello>
+    document.body.textContent = "Hello World!";
+  </script>
+
+  <!-- Invalid: Local script without 'id' attribute. -->
+  <script type=text/plain target=amp-script>
+    document.body.textContent = "Hello World!";
+  </script>
+</body>

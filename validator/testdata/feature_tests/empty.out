@@ -1,0 +1,16 @@
+FAIL
+|
+>> ^~~~~~~~~
+feature_tests/empty.html:1:0 The mandatory tag 'html !doctype' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/empty.html:1:0 The mandatory tag 'html' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/empty.html:1:0 The mandatory tag 'head' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/empty.html:1:0 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/empty.html:1:0 The mandatory tag 'meta charset=utf-8' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/empty.html:1:0 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/empty.html:1:0 The mandatory tag 'body' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

@@ -1,0 +1,117 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests support for the amp-addthis tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-addthis" src="https://cdn.ampproject.org/v0/amp-addthis-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Example of a valid amp-addthis tag. -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-59c2c366435ef478"
+|      data-widget-id="0fyg">
+|    </amp-addthis>
+|
+|    <!-- Example of a valid amp-addthis tag with responsive layout. -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      layout="responsive"
+|      data-pub-id="ra-59c3d23bf51957fd"
+|      data-widget-id="o2x1">
+|    </amp-addthis>
+|
+|    <!-- Example of a valid amp-addthis tag with custom share attributes. -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-59c2c366435ef478"
+|      data-widget-id="0fyg"
+|      data-share-title="This Title Will Be Shared"
+|      data-share-url="https://www.addthis.com"
+|      data-share-media="https://i.imgur.com/yNlQWRM.jpg"
+|      data-share-description="This is the description that will be shared.">
+|    </amp-addthis>
+|
+|    <!-- AddThis WordPress Mode -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5c1a9eed18daaf81"
+|      data-class-name="at-above-post"
+|      data-widget-id="g7wl">
+|    </amp-addthis>
+|    <!-- AddThis WordPress Mode does not render without class-name -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5c1a9eed18daaf81"
+|      data-class-name=""
+|      data-widget-id="g7wl">
+|    </amp-addthis>
+|
+|    <!-- Inline using Widget ID -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5adf5f2869f63c7c"
+|      data-widget-id="1o1v">
+|    </amp-addthis>
+|
+|    <!-- Inline using Product Code -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5adf5f2869f63c7c"
+|      data-product-code="shin">
+|    </amp-addthis>
+|
+|    <!-- Floating using Product Code -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-pub-id="ra-5adf5ec1cb6be565"
+|      data-widget-type="floating"
+|      data-product-code="shfs">
+|    </amp-addthis>
+|
+|    <!-- Inline using Product Code Anonymous Mode -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-product-code="shin">
+|    </amp-addthis>
+|
+|    <!-- Floating using Product Code Anonymous Mode -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-widget-type="floating"
+|      layout="responsive"
+|      data-product-code="shfs">
+|    </amp-addthis>
+|
+|    <!-- Floating using Product Code Anonymous Mode with overrides-->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-widget-type="floating"
+|      layout="responsive"
+|      data-product-code="shfs"
+|      data-attr-counts="none"
+|      data-attr-iconColor="yellow"
+|      data-attr-numPreferredServices="6">
+|    </amp-addthis>
+|
+|  </body>
+|  </html>

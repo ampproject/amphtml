@@ -1,0 +1,41 @@
+tags: {  # amp-orientation-observer
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-orientation-observer"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-orientation-observer>
+  html_format: AMP
+  tag_name: "AMP-ORIENTATION-OBSERVER"
+  requires_extension: "amp-orientation-observer"
+  attr_lists: "extended-amp-global"
+  attrs: {
+    name: "alpha-range"
+    # Regex: (\d+)\s{1}(\d+)
+    # Values such as: "100 100", "0 100", etc..
+    value_regex: "(\\d+)\\s{1}(\\d+)"
+  }
+  attrs: {
+    name: "beta-range"
+    # Regex: (\d+)\s{1}(\d+)
+    # Values such as: "100 100", "0 100", etc..
+    value_regex: "(\\d+)\\s{1}(\\d+)"
+  }
+  attrs: {
+    name: "gamma-range"
+    # Regex: (\d+)\s{1}(\d+)
+    # Values such as: "100 100", "0 100", etc..
+    value_regex: "(\\d+)\\s{1}(\\d+)"
+  }
+  attrs: {
+    name: "smoothing"
+    value_regex: "[0-9]+|"
+  }
+  amp_layout {
+    supported_layouts: NODISPLAY
+  }
+}

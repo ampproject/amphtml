@@ -1,0 +1,26 @@
+{
+  "vars": {
+    "pid": "",
+    "rid": "PAGE_VIEW_ID",
+    "tid": "CLIENT_ID(top100_id)",
+    "version": "1.0.1"
+  },
+  "requests": {
+    "host": "https://kraken.rambler.ru",
+    "base": "${host}/cnt/?pid=${pid}&rid=${rid}&v=${version}&rn=${random}&tid=${tid}&ct=amp",
+    "pageview": "${base}&et=pv${_pageData}${_screenData}",
+    "_screenData": "&sr=${screenWidth}x${screenHeight}&cd=${screenColorDepth}-bit&bs=${scrollWidth}x${scrollHeight}",
+    "_pageData": "&url=${canonicalUrl}&pt=${title}&rf=${documentReferrer}&en=${documentCharset}&la=${browserLanguage}&tz=${timezone}"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

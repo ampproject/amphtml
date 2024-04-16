@@ -1,0 +1,29 @@
+tags: {  # amp-recaptcha-input
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-recaptcha-input"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-form> <amp-recaptcha-input>
+  html_format: AMP
+  tag_name: "AMP-RECAPTCHA-INPUT"
+  mandatory_ancestor: "FORM"
+  requires_extension: "amp-form"
+  requires_extension: "amp-recaptcha-input"
+  attrs: {
+    name: "data-sitekey"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-action"
+    mandatory: true
+  }
+  attr_lists: "mandatory-name-attr"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

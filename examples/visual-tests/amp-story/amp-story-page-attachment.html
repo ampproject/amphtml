@@ -1,0 +1,208 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form"
+        src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <title>AMP Story page attachment</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="index.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-story-page {
+        background: linear-gradient(#de6262, #ffb88c);
+        color: white;
+        font-family: sans-serif;
+      }
+
+      .i-amphtml-story-spinner-container {
+        /* Hide the spinner for loading pages, since this causes flakes */
+        display: none;
+      }
+
+      amp-story-page-attachment {
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 16px;
+        line-height: 1.48em;
+      }
+
+      amp-story-page-attachment h1 {
+        padding: 0 24px;
+        font-size: 28px;
+        line-height: 1.48em;
+      }
+
+      amp-story-page-attachment p {
+        padding: 0 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+        publisher-logo-src="/examples/visual-tests/photos/120.png"
+        poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
+        poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+        poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg"
+        supports-landscape>
+      <amp-story-page id="inline-default">
+        <amp-story-page-attachment layout="nodisplay">
+          <h1>Some really cool video</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="inline-custom-text">
+        <amp-story-page-attachment
+          layout="nodisplay"
+          cta-text="Custom text">
+          <h1>Some really cool video</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="inline-dark-theme">
+        <amp-story-page-attachment
+          layout="nodisplay"
+          theme="dark">
+          <h1>Some really cool video</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="inline-dark-theme-1-image">
+        <amp-story-page-attachment
+          title="Lorem ipsum"
+          layout="nodisplay"
+          cta-image="../../amp-story/img/sweater.jpg"
+          theme="dark"
+          >
+          <h1>Some really cool video</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="inline-dark-theme-2-images">
+        <amp-story-page-attachment
+          title="Lorem ipsum"
+          layout="nodisplay"
+          cta-image="../../amp-story/img/sweater.jpg"
+          cta-image-2="../../amp-story/img/boot.jpg"
+          theme="dark"
+          >
+          <h1>Some really cool video</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="inline-light-theme-2-images">
+        <amp-story-page-attachment
+          title="Lorem ipsum"
+          layout="nodisplay"
+          cta-image="../../amp-story/img/sweater.jpg"
+          cta-image-2="../../amp-story/img/boot.jpg"
+          >
+          <h1>Some really cool video</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-default">
+        <amp-story-page-outlink layout="nodisplay">
+          <a href="https://google.com"></a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-custom-text">
+        <amp-story-page-outlink
+          layout="nodisplay">
+          <a href="https://google.com">Custom text</a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-no-image">
+        <amp-story-page-outlink
+          layout="nodisplay"
+          href="https://google.com"
+          cta-image="none">
+          <a href="https://google.com"></a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-custom-image">
+        <amp-story-page-outlink
+          layout="nodisplay"
+          cta-image="../../amp-story/img/sweater.jpg">
+          <a href="https://google.com"></a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-dark-theme">
+        <amp-story-page-outlink
+          layout="nodisplay"
+          theme="dark">
+          <a href="https://google.com"></a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-custom-background-color">
+        <amp-story-page-outlink
+          layout="nodisplay"
+          theme="custom"
+          cta-accent-color="pink"
+          cta-accent-element="background">
+          <a href="https://google.com"></a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-custom-text-color">
+        <amp-story-page-outlink
+          layout="nodisplay"
+          theme="custom"
+          cta-accent-color="pink"
+          cta-accent-element="text">
+          <a href="https://google.com"></a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+
+      <amp-story-page id="outlink-legacy">
+        <amp-story-page-attachment
+          layout="nodisplay"
+          cta-text="Legacy Outlink"
+          href="https://google.com">
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="attachment-with-form">
+        <amp-story-page-attachment layout="nodisplay">
+          <form>
+            <fieldset>
+              <label>
+                <span>Name:</span>
+                <input type="text" name="name">
+              </label>
+            </fieldset>
+          </form>
+        </amp-story-page-attachment>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

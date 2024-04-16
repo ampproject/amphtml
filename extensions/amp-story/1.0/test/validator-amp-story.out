@@ -1,0 +1,42 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the amp-story tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>STAMP examples</title>
+|    <link rel="canonical" href="http://nonblocking.io/" >
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <meta name="amp-story-generator-name" content="Creation Tool 1">
+|    <meta name="amp-story-generator-version" content="0.1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|  </head>
+|  <body>
+|    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/portrait.jpg" poster-square-src="http://me.com/square.jpg" poster-landscape-src="http://me.com/landscape.jpg" background-audio="http://me.com/path/to/my.mp3" entity="Someone else" entity-logo-src="http://someoneelse.com/logo.png" entity-url="http://someoneelse.com/profile">
+|      <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <h5 animate-in="drop">
+|            <h1>
+|              <h4 animate-in-delay="anything"></h4>
+|            </h1>
+|            <h2></h2>
+|          </h5>
+|          <h3 grid-area="any value">
+|            <h6 animate-in-after="whatever-value"></h6>
+|          </h3>
+|          <h3 align-content="center"></h3>
+|          <h3 align-items="stretch"></h3>
+|          <h3 align-self="start"></h3>
+|        </amp-story-grid-layer>
+|        <amp-story-grid-layer template="horizontal">
+|          <h1></h1>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>

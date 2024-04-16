@@ -1,0 +1,72 @@
+tags: {  # amp-web-push
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-web-push"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-web-push>
+  html_format: AMP
+  tag_name: "AMP-WEB-PUSH"
+  requires_extension: "amp-web-push"
+  attrs: {
+    name: "helper-iframe-url"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+    value: "amp-web-push"
+  }
+  attrs: {
+    name: "permission-dialog-url"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "service-worker-url"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "service-worker-scope"
+    value_url: {
+      protocol: "https"
+    }
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-web-push/"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # <amp-web-push-widget>
+  html_format: AMP
+  tag_name: "AMP-WEB-PUSH-WIDGET"
+  requires_extension: "amp-web-push"
+  attrs: {
+    name: "visibility"
+    mandatory: true
+    value: "blocked"
+    value: "subscribed"
+    value: "unsubscribed"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-web-push/"
+  amp_layout: {
+    supported_layouts: FIXED
+  }
+}

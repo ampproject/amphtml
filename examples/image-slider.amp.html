@@ -1,0 +1,297 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-image-slider example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    #content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .flex {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .label {
+      color: white;
+      border: 4px solid white;
+      padding: 1em;
+      font-family: Arial, Helvetica, sans-serif;
+      box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+    }
+
+    .top-label {
+      top: 0;
+    }
+
+    .center-y-label {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .bottom-label {
+      bottom: 0;
+    }
+
+    .left-label-left {
+      left: 0;
+    }
+
+    .left-label-center {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-label-right {
+      right: 0;
+      left: auto;
+    }
+
+    .right-label-left {
+      left: 0;
+      right: auto;
+    }
+
+    .right-label-center {
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    .right-label-right {
+      right: 0;
+    }
+
+    .left-label-center-xy {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .right-label-center-xy {
+      right: 50%;
+      top: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    .reversed-hint .amp-image-slider-hint-left {
+      background-size: 64px 32px;
+      width: 64px;
+      height: 32px;
+      margin-right: 30px;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cg%3E%3Cpath d='M12 5H0V3h12V0l4 4-4 4z' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+      filter: drop-shadow(3px 3px 4px black);
+    }
+
+    .reversed-hint .amp-image-slider-hint-right {
+      background-size: 64px 32px;
+      width: 64px;
+      height: 32px;
+      margin-left: 30px;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cg%3E%3Cpath d='M4 5h12V3H4V0L0 4l4 4z' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+      filter: drop-shadow(3px 3px 4px black);
+    }
+
+    .triangle-hint .amp-image-slider-hint-left {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-right: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='10,0 0,10 10,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
+
+    .triangle-hint .amp-image-slider-hint-right {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-left: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='0,0 10,10 0,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
+
+    .centered-hint .amp-image-slider-hint-left {
+      display: none;
+    }
+
+    .centered-hint .amp-image-slider-hint-right {
+      width: 10px;
+      height: 60px;
+      margin-left: 0;
+      margin-right: 0;
+      transform: translateX(-50%);
+      filter: none;
+      background-color: white;
+    }
+
+    .lightbox {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      color: white;
+      text-align: center;
+      background-color: rgba(0,0,0,0.75);
+    }
+  </style>
+  <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
+  <!-- to make this work during testing, cp dist/ww.max.js to dist/ww.js -->
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <!-- test lightbox cover issue -->
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <!-- uncomment below to test viewer integration (viewer sandbox) -->
+  <!-- <script async src="https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js"></script> -->
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <main id="content">
+    <h1>Drag/Click Slider with Customizable Labels</h1>
+
+    <p>NO labels; NO whatever modifications</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>Images toggle their own fallback</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="boom" layout="fill">
+        <amp-img fallback src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      </amp-img>
+      <amp-img src="boom" layout="fill">
+        <amp-img fallback src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      </amp-img>
+    </amp-image-slider>
+
+    <p>Labels with NO positioning rules specified (default to both top left)</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels with positioning rules specified</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <div first class="label left-label-center-xy">BEFORE</div>
+      <div second class="label right-label-center-xy">AFTER</div>
+    </amp-image-slider>
+
+    <h1>Customizable Hints</h1>
+
+    <p>Hide hints through display trick</p>
+    <amp-image-slider class="hint-hidden" tabindex="0" layout="responsive" width="1024" height="600"
+        disable-hint-reappear>
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Fully customized hint (current reversing the hint logos, changing sizes and margins)</p>
+    <amp-image-slider class="reversed-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Fully customized hint (replace with triangles)</p>
+    <amp-image-slider class="triangle-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Fully customized hint (centering a box)</p>
+    <amp-image-slider class="centered-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>No Reemerging hint</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
+        disable-hint-reappear>
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <h1>Inside Carousel</h1>
+
+    <p>Carousel would not be scrolled when moving the slider</p>
+    <amp-carousel width="400"
+      height="300"
+      layout="responsive"
+      type="slides"
+      controls>
+      <amp-image-slider layout="responsive" width="1024" height="600">
+        <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+        <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      </amp-image-slider>
+      <amp-img src="https://unsplash.it/200/300?image=0"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="a sample image"></amp-img>
+      <amp-image-slider layout="responsive" width="1024" height="600">
+        <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+        <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+      </amp-image-slider>
+      <amp-img src="https://unsplash.it/200/300?image=1"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="and another sample image"></amp-img>
+    </amp-carousel>
+
+    <h1>Accessibility</h1>
+
+    <p>Has ARIA labels</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill" alt="Mountain"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill" alt="Ocean"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <h1>Customization</h1>
+
+    <p>Set <code>initial-slider-position</code> to 0.3</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" initial-slider-position="0.3">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>Set <code>step-size</code> to 0.2</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" step-size="0.2">
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <h1>Test lightbox overlay</h1>
+    <p>No slider should lay on top of this lightbox</p>
+    <amp-lightbox id="my-lightbox"
+      layout="nodisplay">
+      <div class="lightbox"
+        on="tap:my-lightbox.close"
+        role="button"
+        tabindex="0">
+        <h1>Hello World!</h1>
+      </div>
+    </amp-lightbox>
+    <button class="ampstart-btn caps m2"
+      on="tap:my-lightbox"
+      tabindex="0">
+      Open lightbox
+    </button>
+  </main>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title [text]="'amp-bind: Title (' + myState.count + ')'">amp-bind: Title</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+  <style amp-custom>
+    button {
+      border: solid 1px black;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Title changing example</h2>
+  <p>After clicking the button below, a counter will be appended to this page's title in the browser and the number will increment on each subsequent button push.<p>
+  <div>
+    <button on="tap:AMP.setState({myState: {count: myState.count + 1}})">Click me</button>
+  </div>
+
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        "count": 0
+      }
+    </script>
+  </amp-state>
+</body>
+</html>

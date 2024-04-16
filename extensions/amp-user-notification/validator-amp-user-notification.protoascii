@@ -1,0 +1,43 @@
+tags: {  # amp-user-notification
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-user-notification"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-user-notification>
+  html_format: AMP
+  tag_name: "AMP-USER-NOTIFICATION"
+  requires_extension: "amp-user-notification"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+  # These attributes are allowed implicitly as data-* attributes,
+  # but we make additional constraints on validating URLs.
+  attrs: {
+    name: "data-dismiss-href"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+  attrs: {
+    name: "data-show-if-href"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+  attrs: {
+    name: "enctype"
+    value: "application/x-www-form-urlencoded"
+  }
+}

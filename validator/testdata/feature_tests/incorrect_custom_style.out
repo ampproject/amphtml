@@ -1,0 +1,66 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests what happens when the custom style made by the author
+|    of the document contains things that we disallow.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+|    <style amp-custom>
+|      /* These CSS Rules violate essential CSS validation */
+|      @import url("http://somewhere/on/the/internet.css");
+>>     ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:14:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@import'.
+|      foo.i-amp-class {}
+|      foo.amp-class {}
+|      foo { b: red !important; }
+>>                  ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:17:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|      foo { b: red ! important; }
+>>                  ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:18:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|      /* This is ok though, since it's a comment: { b: red !important } */
+|
+|      @viewport (mumble mumble) { }
+>>     ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:21:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@viewport'.
+|      @media (whatever) { @notallowednested }
+>>             ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:22:12 CSS syntax error in tag 'style amp-custom' - disallowed media feature 'whatever'.
+>>                         ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:22:24 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@notallowednested'.
+|
+|      /* some tests for url verification - images */
+|      foo { background-image: url('') }  /* allowed for now */
+|      foo { background-image: url('invalid://invalid.com/1.jpg') }
+>>                             ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:26:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|      foo { background-image: url('https://valid.com/1.jpg') }
+|      foo { background-image: url('http://valid.com/1.jpg') }
+|      foo { background-image: url('://valid.jpg') }
+|      foo { background-image: url('valid.jpg') }
+|
+|      /* some tests for url verification - fonts */
+|      @font-face { src: url(''); } /* allowed for now */
+|      @font-face { src: url('invalid://invalid.com/1.ttf') }
+>>                       ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:34:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|      @font-face { src: url('https://valid.com/1.ttf') }
+|      @font-face { src: url('http://valid.com/1.ttf') }
+|      @font-face { src: url('://valid.ttf') }
+|      @font-face { src: url('valid.ttf') }
+|    </style>
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script src="https://cdn.ampproject.org/v0.js" async></script>
+|  </head>
+|  <body>
+|    <!-- Invalid due to !important -->
+|    <b style="color: red !important"></div>
+>>   ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:45:2 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  </body>
+|  </html>

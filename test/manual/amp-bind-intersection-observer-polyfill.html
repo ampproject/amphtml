@@ -1,0 +1,73 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>amp-bind: Basic</title>
+    <link rel="canonical" href="amps.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+      <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+      <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+      <style amp-custom>
+        .redBackground {
+          background-color: red;
+        }
+        button {
+          border: solid 1px black;
+        }
+      </style>
+  </head>
+
+  <body>
+
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "requests": {
+            "pageview": "/analytics/pageview",
+            "imagevisible": "/analytics/imagevisible"
+          },
+          "triggers": {
+            "pageview": {
+              "on": "visible",
+              "request": "pageview"
+            },
+            "visibility": {
+              "on": "visible",
+              "request": "imagevisible",
+              "selector": "#analytics-image"
+            }
+          },
+          "transport": {
+            "referrerPolicy": "no-referrer"
+          }
+        }
+      </script>
+    </amp-analytics>
+
+
+    <h2>Basic example</h2>
+    <p [text]="foo">After clicking the button below, this will read 'foo'<p>
+    <p id="foo" [text]="foo + 'bar'">And this will read 'foobar'<p>
+    <p [text]="myState.myStateKey1">This will read 'myStateValue1'<p>
+    <button [disabled]="isButtonDisabled">This button will be disabled</button>
+    <p [class]="textClass">This text will have have a red background color</p>
+    <amp-img src="https://amp.dev/static/samples/img/Border_Collie.jpg" [src]="imgSrc" width=100 [width]="imgSize" height=100 [height]="imgSize" alt="asdf" [alt]="imgAlt" [aria-label]="'Image of a ' + imgAlt"></amp-img>
+    <p>The image above will increase in size and change its src</p>
+    <amp-img src="https://amp.dev/static/samples/img/Border_Collie.jpg" id="analytics-image" hidden [hidden]="hide-analytics-image != false" width="100" height="100" alt="Border Collie">
+    </amp-img>
+    <p>The image above (currently hidden) will fire a visibility trigger for analytics</p>
+    <div>
+      <button on="tap:AMP.setState({'foo': 'foo', 'isButtonDisabled': true, 'textClass': 'redBackground', 'imgSrc': 'https://amp.dev/static/samples/img/Shetland_Sheepdog.jpg', 'imgSize': 200, 'imgAlt': 'Sheepdog', 'hide-analytics-image': false})">Click me</button>
+    </div>
+
+    <amp-state id="myState">
+      <script type="application/json">
+        {
+        "myStateKey1": "myStateValue1"
+      }
+      </script>
+    </amp-state>
+  </body>
+</html>

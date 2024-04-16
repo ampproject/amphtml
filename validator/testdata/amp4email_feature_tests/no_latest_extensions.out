@@ -1,0 +1,61 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This checks that "latest" versions of extensions are not valid.
+|  -->
+|  <!doctype html>
+|  <html ⚡4email data-css-strict>
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:11:2 The extension 'amp-accordion' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-accordion)
+|    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:12:2 The extension 'amp-anim' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-anim)
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:13:2 The extension 'amp-bind' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-bind)
+|    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:14:2 The extension 'amp-carousel' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-carousel)
+|    <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:15:2 The extension 'amp-fit-text' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-fit-text)
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:16:2 The extension 'amp-form' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-form)
+|    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:17:2 The extension 'amp-list' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-list)
+|    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:18:2 The extension 'amp-selector' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-selector)
+|    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:19:2 The extension 'amp-sidebar' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-sidebar)
+|    <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:20:2 The extension 'amp-timeago' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-timeago)
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:21:2 The extension 'amp-mustache' is referenced at version 'latest' which is an invalid version. Please use a valid version of this extension. (see https://amp.dev/documentation/components/amp-mustache)
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:26:6 The extension 'amp-anim' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:26:6 The extension 'amp-carousel' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:26:6 The extension 'amp-list' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:26:6 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:26:6 The extension 'amp-sidebar' was found on this page, but is unused. Please remove this extension.
+>>       ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:26:6 The extension 'amp-timeago' was found on this page, but is unused. Please remove this extension.

@@ -1,0 +1,65 @@
+<!--
+  Test Description:
+  Tests for the amp-story-page-attachment tag.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <title>My Story</title>
+  <meta name="description" content="Get started with amp-story">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="grid-layer-templates.html">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+  <amp-story standalone title="Foo" publisher="AMP" publisher-logo-src="http://example.com/foo.png" poster-portrait-src="http://example.com/foo.png">
+    <amp-story-page id="fill-template-title">
+      <amp-story-grid-layer template="vertical">
+        <h1>fill</h1>
+      </amp-story-grid-layer>
+
+      <amp-story-page-attachment layout="nodisplay" theme="cat">
+        <h1>Amazing title</h1>
+        <p>Bacon ipsum dolor cat cat cat.</p>
+      </amp-story-page-attachment>
+
+      <amp-story-page-attachment layout="nodisplay" href="javascript:alert(1)"></amp-story-page-attachment>
+
+      <amp-story-page-attachment layout="nodisplay" href="https://www.gooogle.com">
+        <h1>Illegal child element</h1>
+      </amp-story-page-attachment>
+
+
+      <amp-story-page-attachment layout="nodisplay">
+        <h1>Amazing title</h1>
+        <p>Bacon ipsum dolor cat cat cat.</p>
+
+        <amp-story-grid-layer template="vertical">
+          <h1>fill</h1>
+        </amp-story-grid-layer>
+
+        <amp-youtube
+            id="myLiveChannel"
+            data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+            width="358"
+            height="204"
+            layout="responsive">
+          <amp-img
+              src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+              placeholder
+              layout="fill">
+          </amp-img>
+        </amp-youtube>
+      </amp-story-page-attachment>
+
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action!</a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+  </amp-story>
+</body>
+</html>

@@ -1,0 +1,130 @@
+---
+name: Cherry-Pick Request
+description: Request a cherry-pick to an AMP release.
+labels:
+  [
+    'Type: Release',
+    'Cherry-pick: Beta',
+    'Cherry-pick: Experimental',
+    'Cherry-pick: LTS',
+    'Cherry-pick: Stable',
+  ]
+title: "\U0001F338 Cherry-pick request for #ISSUE into #RELEASE"
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for filling out this cherry-pick request.
+        - See AMP's [release schedule](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md) to learn about how releases work.
+        - See AMP's [release calendar](https://amp-release-calendar.appspot.com) for information about past releases (e.g. versions, dates, submission times, notes).
+        - See AMP's [code contribution docs](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#Cherry-picks) for an overview of the cherry-pick process.
+  - type: input
+    id: issue
+    attributes:
+      label: Issue (P0 Bug)
+      description: The P0 bug that necessitates this cherry-pick. Remember to update the issue title with this info.
+      placeholder: 'e.g. #11111'
+    validations:
+      required: true
+  - type: input
+    id: pull_request
+    attributes:
+      label: Pull Request(s)
+      description: The PR(s) that fix the bug. Make sure they are merged and have passing [CI builds](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=main).
+      placeholder: 'e.g. #22222, #33333'
+    validations:
+      required: true
+  - type: input
+    id: amp_versions
+    attributes:
+      label: AMP Version(s)
+      description: The AMP version(s) to which the cherry-pick will be applied.
+    validations:
+      required: true
+  - type: dropdown
+    id: channels
+    attributes:
+      label: Channels
+      description: The [release channels](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#release-channels) to which the cherry-pick will be applied. Remember to update the issue labels with this info.
+      multiple: true
+      options:
+        - Beta / Experimental
+        - Stable
+        - LTS
+    validations:
+      required: true
+  - type: dropdown
+    id: formats
+    attributes:
+      label: Formats
+      description: The formats that this bug affects. See https://amp.dev/documentation/components/ for reference.
+      multiple: true
+      options:
+        - Websites
+        - Stories
+        - Ads
+        - Emails
+    validations:
+      required: true
+  - type: textarea
+    id: justification
+    attributes:
+      label: Justification
+      description: Why you believe this issue meets the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#Cherry-picks).
+      placeholder: Provide a specific rationale for why this fix cannot wait until the next Stable release.
+    validations:
+      required: true
+  - type: textarea
+    id: verification_steps
+    attributes:
+      label: Verification Steps
+      description: How the fix can be verified once the cherry-pick has been performed.
+      placeholder: Provide detailed steps to manually verify the changes in this cherry-pick. They will be run by a developer or a QA expert to ensure that the bug was indeed fixed.
+    validations:
+      required: true
+  - type: markdown
+    id: mini_postmortem
+    attributes:
+      value: |
+        ## Mini Postmortem
+        For cherry-picks to Stable or LTS, the following sections serve as a postmortem, and are meant to document things like the bug summary, its root causes, user impact, and action items. Fill in these sections to the best of your knowledge so that similar issues can be prevented in future. For cherry-picks to only Beta / Experimental, these sections can be ignored.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A summary of the problem and its root cause(s).
+      placeholder: |
+        For Stable or LTS cherry-picks, provide answers to questions like:
+        - What is the bug being fixed?
+        - What are its root cause(s)?
+        - Could it have been detected by error reports, error / performance graphs, or CI checks?
+        If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: How users were impacted.
+      placeholder: |
+        For Stable or LTS cherry-picks, provide answers to questions like:
+        - Which users were affected? E.g. Users of Firefox version XXX.
+        - Roughly how many users? E.g. O(YYY) users.
+        - How were they affected? E.g. ZZZ feature did not work.
+        If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
+  - type: textarea
+    id: action_items
+    attributes:
+      label: Action Items
+      description: What can be done to prevent this in future.
+      placeholder: |
+        For Stable or LTS cherry-picks, provide answers to questions like:
+        - How can this class of bugs be prevented in the future?
+        - How do we detect them sooner and mitigate their impact?
+        - How could we make the investigation of these issues easier?
+        If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
+  - type: textarea
+    id: notifications
+    attributes:
+      label: Notifications
+      description: Add working groups or individuals you want to notify about this cherry-pick.
+      value: /cc @ampproject/release-on-duty @ampproject/wg-approvers @ampproject/cherry-pick-approvers

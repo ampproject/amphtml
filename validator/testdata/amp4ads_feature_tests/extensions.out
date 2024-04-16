@@ -1,0 +1,175 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This test illustrates which AMP extensions are allowed in A4A and which
+|    are not. It is likely that this test will not keep up with added extensions
+|    over time, and so it should not be used as a definitive list. For that,
+|    see the AMP and A4A documentation.
+|
+|    Note that the test will generate a bunch of warnings/errors suggesting that
+|    the extensions are unnecessary since corresponding tags are not present.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|
+|    <!-- So many AMP extensions! -->
+|    <script async custom-element="amp-access"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:20:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+|    <script async custom-element="amp-accordion"
+|       src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+|    <script async custom-element="amp-ad"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:24:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+|    <script async custom-element="amp-analytics"
+|       src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+|    <script async custom-element="amp-anim"
+|       src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+|    <script async custom-element="amp-animation"
+|       src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+|    <script async custom-element="amp-audio"
+|       src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+|    <script async custom-element="amp-brid-player"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:34:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js"></script>
+|    <script async custom-element="amp-brightcove"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:36:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+|    <script async custom-element="amp-carousel"
+|       src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+|    <script async custom-element="amp-dailymotion"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:40:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js"></script>
+|    <script async custom-element="amp-dynamic-css-classes"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:42:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
+|    <script async custom-element="amp-experiment"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:44:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
+|    <script async custom-element="amp-facebook"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:46:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
+|    <script async custom-element="amp-fit-text"
+|       src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+|    <script async custom-element="amp-font"
+|       src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
+|    <script async custom-element="amp-form"
+|       src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <script async custom-element="amp-fx-flying-carpet"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:54:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
+|    <script async custom-element="amp-iframe"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:56:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+|    <script async custom-element="amp-image-lightbox"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:58:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+|    <script async custom-element="amp-instagram"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:60:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+|    <script async custom-element="amp-install-serviceworker"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:62:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>
+|    <script async custom-element="amp-jwplayer"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:64:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
+|    <script async custom-element="amp-kaltura-player"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:66:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js"></script>
+|    <script async custom-element="amp-lightbox"
+|       src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+|    <script async custom-element="amp-list"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:70:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+|    <script async custom-element="amp-live-list"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:72:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+|    <script async custom-element="amp-megaphone"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:74:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-megaphone-0.1.js"></script>
+|    <script async custom-element="amp-o2-player"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:76:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js"></script>
+|    <script async custom-element="amp-pinterest"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:78:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"></script>
+|    <script async custom-element="amp-reach-player"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:80:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js"></script>
+|    <script async custom-element="amp-selector"
+|       src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+|    <script async custom-element="amp-sidebar"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:84:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+|    <script async custom-element="amp-slides"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:86:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-slides-0.1.js"></script>
+|    <script async custom-element="amp-social-share"
+|       src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+|    <script async custom-element="amp-soundcloud"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:90:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js"></script>
+|    <script async custom-element="amp-springboard-player"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:92:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js"></script>
+|    <script async custom-element="amp-sticky-ad"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:94:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-sticky-ad-0.1.js"></script>
+|    <script async custom-element="amp-twitter"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:96:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+|    <script async custom-element="amp-user-notification"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:98:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+|    <script async custom-element="amp-vimeo"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:100:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js"></script>
+|    <script async custom-element="amp-vine"
+>>   ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:102:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|       src="https://cdn.ampproject.org/v0/amp-vine-0.1.js"></script>
+|
+|    <script async custom-template="amp-mustache"
+|       src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+|  </head>
+|  <body></body></html>
+>>                    ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:108:19 The extension 'amp-animation' was found on this page, but is unused. Please remove this extension.
+>>                    ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:108:19 The extension 'amp-lightbox' was found on this page, but is unused. Please remove this extension.
+>>                    ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:108:19 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension.

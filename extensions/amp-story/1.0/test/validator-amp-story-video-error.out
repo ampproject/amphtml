@@ -1,0 +1,118 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Test to make sure amp-video under amp-story gets an error if it doesn't have the "poster"
+|    attribute set.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>STAMP examples</title>
+|    <link rel="canonical" href="http://nonblocking.io/" >
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+|  </head>
+|  <body>
+|    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg" background-audio="path/to/my.mp3">
+|      <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <!-- This should fail because amp-video doesn't have the [poster] attribute. -->
+|          <amp-video width="480"
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:23:8 The mandatory attribute 'autoplay' is missing in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:23:8 The mandatory attribute 'poster' is missing in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
+|                     height="270"
+|                     src="/video/tokyo.mp4"
+|                     layout="responsive">
+|               <div fallback>
+|                 <p>Your browser doesn't support HTML5 video.</p>
+|               </div>
+|               <source type="video/mp4" src="/video/tokyo.mp4">
+|               <source type="video/webm" src="/video/tokyo.webm">
+|           </amp-video>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="2" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <!-- This should fail because amp-video volume should be within [0, 1]. -->
+|          <amp-video width="480"
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:38:8 The attribute 'volume' in tag 'amp-video' is set to the invalid value '-1'. (see https://amp.dev/documentation/components/amp-video/)
+|                     height="270"
+|                     poster="/foo.jpg"
+|                     src="/video/tokyo.mp4"
+|                     layout="responsive"
+|                     volume="-1">
+|               <div fallback>
+|                 <p>Your browser doesn't support HTML5 video.</p>
+|               </div>
+|               <source type="video/mp4" src="/video/tokyo.mp4">
+|               <source type="video/webm" src="/video/tokyo.webm">
+|           </amp-video>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="3" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <!-- This should fail because amp-video volume should be within [0, 1]. -->
+|          <amp-video width="480"
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:55:8 The attribute 'volume' in tag 'amp-video' is set to the invalid value '1.01'. (see https://amp.dev/documentation/components/amp-video/)
+|                     height="270"
+|                     poster="/foo.jpg"
+|                     src="/video/tokyo.mp4"
+|                     layout="responsive"
+|                     volume="1.01">
+|               <div fallback>
+|                 <p>Your browser doesn't support HTML5 video.</p>
+|               </div>
+|               <source type="video/mp4" src="/video/tokyo.mp4">
+|               <source type="video/webm" src="/video/tokyo.webm">
+|           </amp-video>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="4" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <!-- This should not fail because amp-video volume is within [0, 1]. -->
+|          <amp-video width="480"
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:72:8 The mandatory attribute 'autoplay' is missing in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
+|                     height="270"
+|                     poster="/foo.jpg"
+|                     src="/video/tokyo.mp4"
+|                     layout="responsive"
+|                     volume="0.42">
+|               <div fallback>
+|                 <p>Your browser doesn't support HTML5 video.</p>
+|               </div>
+|               <source type="video/mp4" src="/video/tokyo.mp4">
+|               <source type="video/webm" src="/video/tokyo.webm">
+|           </amp-video>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="5" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <!-- This should not fail because amp-video volume is within [0, 1]. -->
+|          <amp-video width="480"
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:89:8 The mandatory attribute 'autoplay' is missing in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
+|                     height="270"
+|                     poster="/foo.jpg"
+|                     src="/video/tokyo.mp4"
+|                     layout="responsive"
+|                     volume="0">
+|               <div fallback>
+|                 <p>Your browser doesn't support HTML5 video.</p>
+|               </div>
+|               <source type="video/mp4" src="/video/tokyo.mp4">
+|               <source type="video/webm" src="/video/tokyo.webm">
+|           </amp-video>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>

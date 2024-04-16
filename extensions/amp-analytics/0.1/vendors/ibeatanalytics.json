@@ -1,0 +1,16 @@
+{
+  "requests": {
+    "host": "https://api.ibeat-analytics.com",
+    "track": "${host}/ping-amp?url=${sourceUrl}&sid=${clientId(_iibeat_session)}&ua=${userAgent}&ref=${documentReferrer}&at=${incrementalEngagedTime}&tt=${totalTime}&pid=${pageViewId}&d=${d}&dn=${sourceHostname}&ct=${ct}&pt=${pt}&hid=${hid}&au=${au}&ag=${ag}&aid=${aid}&cn=${canonicalUrl}&pot=${timerStart}&rct=${requestCount}&id=${id}&sec=${sec}&tgs=${tgs}&pc=${pc}&vct=${vct}&xcld=${xcld}"
+  },
+  "triggers": {
+    "trackInterval": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 15,
+        "maxTimerLength": 7200
+      },
+      "request": "track"
+    }
+  }
+}

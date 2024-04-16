@@ -1,0 +1,43 @@
+tags: {  # amp-ad-exit
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec {
+    name: "amp-ad-exit"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-ad-exit>
+  html_format: AMP4ADS
+  tag_name: "AMP-AD-EXIT"
+  requires_extension: "amp-ad-exit"
+  requires_condition: "amp-ad-exit configuration JSON"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-id-attr"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-ad-exit/"
+  amp_layout {
+    supported_layouts: NODISPLAY
+    supported_layouts: CONTAINER  # To allow an unspecified layout (container is default).
+  }
+}
+tags: {  # amp-ad-exit config JSON
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  spec_name: "amp-ad-exit configuration JSON"
+  satisfies_condition: "amp-ad-exit configuration JSON"
+  requires_extension: "amp-ad-exit"
+  mandatory_parent: "AMP-AD-EXIT"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-ad-exit/"
+}

@@ -1,0 +1,29 @@
+tags: {  # amp-facebook-comments
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-facebook-comments 0.1"
+  excludes_condition: "amp-facebook 1.0"
+  extension_spec: {
+    name: "amp-facebook-comments"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-facebook-comments>
+  html_format: AMP
+  tag_name: "AMP-FACEBOOK-COMMENTS"
+  requires_extension: "amp-facebook-comments"
+  requires_condition: "amp-facebook-comments 0.1"
+  # The amp-facebook attr_list is defined in the amp-facebook protoascii
+  attr_lists: "amp-facebook"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

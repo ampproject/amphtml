@@ -1,0 +1,315 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>amp-recaptcha example</title>
+    <link rel="canonical" href="amps.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+      <style amp-custom>
+        h1, h2 {
+          font-family: Verdana,Geneva,sans-serif
+        }
+
+        html, body {
+          min-height: 2500px;
+        }
+
+        #recaptcha-lightbox {
+          background-color: rgba(0,0,0,0.5);
+        }
+
+        .recaptcha-lightbox-container {
+          background-color: #FAFAFA;
+          border: 2px solid #020202;
+          max-width: 800px;
+          min-height: 300px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .push-down {
+          margin-top: 4000px;
+        }
+
+        form.amp-form-submit-success [submit-success],
+        form.amp-form-submit-error [submit-error]{
+          margin-top: 16px;
+        }
+        form.amp-form-submit-success [submit-success] {
+          color: green;
+        }
+        form.amp-form-submit-error [submit-error] {
+          color: red;
+        }
+        form.amp-form-submit-success.hide-inputs > input {
+          display: none;
+        }
+
+        @keyframes donut-spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        .donut {
+          display: inline-block;
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-left-color: #7983ff;
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          animation: donut-spin 1.2s linear infinite;
+        }
+
+        .loading-spinner {
+          display: none;
+          text-align: center;
+          margin: 5px;
+        }
+
+        form.amp-form-submitting > .loading-spinner {
+          display: block;
+        }
+      </style>
+      <script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js"></script>
+      <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+      <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+      <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <h1>Amp Recaptcha Examples</h1>
+    <p>This page is long to show off layout and unlayout callbacks</p>
+    <p>
+      You can paste the following into a dev tools console to run the amp-recaptcha-input getValue().
+      <br />
+      <br />
+      document.querySelector('amp-recaptcha-input').implementation_.getValue().then(token =&gt; {console.log('Got Token!');console.log(token);})
+    </p>
+
+    <!-- Lightbox Example -->
+    <div>
+    <h2>amp-recaptcha-input inside amp-lightbox</h2>
+      <button on="tap:recaptcha-lightbox">Open Lightbox</button>
+      <amp-lightbox id="recaptcha-lightbox" layout="nodisplay">
+        <button on="tap:recaptcha-lightbox.close">Close lightbox</button>
+        <div class="recaptcha-lightbox-container">
+          <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
+          <form method="get"
+                action="https://httpbin.org/response-headers"
+                action-xhr="https://httpbin.org/response-headers"
+                target="_blank">
+            <fieldset>
+              <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+              <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+              <label>
+                <span>Search for</span>
+                <input type="search" name="term" required>
+              </label>
+              <input name="submit-button" type="submit" value="Search">
+              <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+              </amp-recaptcha-input>
+            </fieldset>
+
+            <div class="loading-spinner">
+              <div class="donut">
+              </div>
+            </div>
+
+            <div submit-success>
+              <template type="amp-mustache">
+                <h1>You searched for: {{term}}</h1>
+                <p>Recaptcha token: {{recaptcha_example}}</p>
+              </template>
+            </div>
+
+            <div submit-error>
+              <template type="amp-mustache">
+                <h1>Error! Please check the JS Console in your dev tools.</h1>
+                <p>{{message}}</p>
+              </template>
+            </div>
+
+          </form>
+        </div>
+      </amp-lightbox>
+    <div>
+
+    <!-- Standard Example -->
+    <div>
+      <h2>amp-recaptcha-input Standard Example</h2>
+      <h4>Search (GET non-xhr cross origin - current host > httpbin.org)</h4>
+      <form method="get" action="https://httpbin.org/html" target="_blank">
+        <fieldset>
+          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+          <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+          <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+          </label>
+          <input name="submit-button" type="submit" value="Search">
+          <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+          </amp-recaptcha-input>
+        </fieldset>
+
+        <div class="loading-spinner">
+          <div class="donut">
+          </div>
+        </div>
+      </form>
+      <h4>Search (POST xhr same origin current host > /recaptcha/submit)</h4>
+      <form method="post"
+            action-xhr="/recaptcha/submit"
+            target="_top">
+        <fieldset>
+          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+          <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+          <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+          </label>
+          <input name="submit-button" type="submit" value="Search">
+          <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+          </amp-recaptcha-input>
+        </fieldset>
+
+        <div class="loading-spinner">
+          <div class="donut">
+          </div>
+        </div>
+
+        <div submit-success>
+          <template type="amp-mustache">
+            <h1>You searched for: {{term}}</h1>
+            <p>Recaptcha token: {{recaptcha_example}}</p>
+          </template>
+        </div>
+
+        <div submit-error>
+          <template type="amp-mustache">
+            <h1>Error! Please check the JS Console in your dev tools.</h1>
+            <p>{{message}}</p>
+          </template>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- AMP bind example -->
+    <h4>Search (GET non-xhr same origin) Using AMP Bind and Amp Action (on="tap:....")</h4>
+    <amp-state id="ampBindStateGetNonXhrSameOrigin">
+      <script type="application/json">
+        "Not Changed"
+      </script>
+    </amp-state>
+    <form id="amp-bind-form-get-non-xhr-same-origin" method="get" action="/form/search-html/get" target="_blank">
+      <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+          <span>Search for</span>
+          <input type="search" name="term" required>
+        </label>
+        <input hidden type="text" name="ampBind" [value]="ampBindStateGetNonXhrSameOrigin">
+        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+        </amp-recaptcha-input>
+      </fieldset>
+
+      <button type="button" on="tap:AMP.setState({ ampBindStateGetNonXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetNonXhrSameOrigin' }), amp-bind-form-get-non-xhr-same-origin.submit">
+        Submit AMP Bind Search
+      </button>
+
+
+      <div class="loading-spinner">
+        <div class="donut">
+        </div>
+      </div>
+    </form>
+
+    <h4>Search (POST xhr same origin current host > /recaptcha/submit) Using AMP Bind and Amp Action (on="tap:....")</h4>
+    <amp-state id="ampBindStatePostXhrSameOrigin">
+      <script type="application/json">
+        "Not Changed"
+      </script>
+    </amp-state>
+    <form id="amp-bind-form-post-xhr-same-origin" method="post" action-xhr="/recaptcha/submit" target="_top">
+      <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+          <span>Search for</span>
+          <input type="search" name="term" required>
+        </label>
+        <input hidden type="text" name="additionalFields" [value]="ampBindStatePostXhrSameOrigin">
+        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+        </amp-recaptcha-input>
+      </fieldset>
+
+      <button type="button" on="tap:AMP.setState({ ampBindStatePostXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetXhrSameOrigin' }), amp-bind-form-post-xhr-same-origin.submit">
+        Submit AMP Bind Search
+      </button>
+
+
+      <div class="loading-spinner">
+        <div class="donut">
+        </div>
+      </div>
+
+      <div submit-success>
+        <template type="amp-mustache">
+          <h1>You searched for: {{term}}</h1>
+          <p>Recaptcha token: {{recaptcha_example}}</p>
+          <p>The submitted amp bind state was: {{additionalFields}}</p>
+        </template>
+      </div>
+    </form>
+
+    <!-- Scrolled in Example -->
+    <div class="push-down">
+      <h2>Pushed down amp-recaptcha-input testing layoutCallback()</h2>
+
+      <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
+      <form method="get"
+            action="https://httpbin.org/response-headers"
+            action-xhr="https://httpbin.org/response-headers"
+            target="_blank">
+        <fieldset>
+          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+          <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+          <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+          </label>
+          <input name="submit-button" type="submit" value="Search">
+          <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+          </amp-recaptcha-input>
+        </fieldset>
+
+        <div class="loading-spinner">
+          <div class="donut">
+          </div>
+        </div>
+
+        <div submit-success>
+          <template type="amp-mustache">
+            <h1>You searched for: {{term}}</h1>
+            <p>Recaptcha token: {{recaptcha_example}}</p>
+          </template>
+        </div>
+
+        <div submit-error>
+          <template type="amp-mustache">
+            <h1>Error! Please check the JS Console in your dev tools.</h1>
+            <p>{{message}}</p>
+          </template>
+        </div>
+
+      </form>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<!--
+      This sample AMP HTML file aims to be a minimalist document that
+      follows best practices and guidances for publishers to mark up Video
+      content for inclusion in various platforms.
+-->
+<html AMP lang="en">
+  <!-- you can use "amp" or "AMP" or "⚡" -->
+  <head>
+    <meta charset="utf-8">
+    <title>Lorem Ipsum</title>
+    <link rel="canonical" href="http://example.ampproject.org/video-metadata.html">
+    <!--
+        The canonical document for this article should be linked, as above.
+
+        The canonical document should also have a corresponding <link> tag
+        within pointing at this AMP HTML file:
+
+          <link rel="amphtml" href="http://example.ampproject.org/video-json-ld.amp.html">
+
+        It is possible that this AMP HTML document is the canonical document
+        for this article, in which case, the canonical URL should point to this
+        document, and no "amphtml" link is required.
+    -->
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    <!-- only one style tag is allowed, and it must have an "amp-custom" attribute -->
+    <style amp-custom>
+      body {
+        background-color: white;
+      }
+      amp-img {
+        background-color: gray;
+      }
+    </style>
+    <script type="application/ld+json">
+        //
+        // The document referenced in mainEntityOfPage should be the same as the
+        // canonical link above.
+        //
+        // Also, please be aware that some platforms that use AMP HTML have
+        // further restrictions with regards to some schema components.
+        //
+        // For example:
+        //
+        //   * The leader "image" referenced in the markup below must appear
+        //   somewhere on the AMP HTML document itself.
+        //
+        //   * The URL for that "image" must precisely match the src of the
+        //   amp-img tag.
+        //
+        //   * All marked-up URLs should be absolute.
+        //
+        //   * The "logo" dimensions must not exceed 600x60.
+        //
+      {
+        "@context": "http://schema.org",
+        "@type": "VideoObject",
+        "mainEntityOfPage": "http://example.ampproject.org/video-metadata.html",
+        "name": "The Audience is programing",
+        "description": "A programming audience",
+        "thumbnailUrl": "http://cdn.ampproject.org/leader.jpg",
+        "uploadDate": "2015-02-05T08:00:00+08:00",
+        "duration": "PT1M33S",
+        "contentUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        "interactionCount": "2347",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Google",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "http://cdn.ampproject.org/logo.jpg",
+            "width": 600,
+            "height": 60
+          }
+        }
+      }
+    </script>
+    <!-- this style tag is required -->
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  </head>
+  <body>
+    <h2>The Audience is programing</h2>
+    <p>A programming audience</p>
+    <amp-video
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+        width="358"
+        height="204"
+        layout="responsive"
+        controls></amp-video>
+  </body>
+</html>

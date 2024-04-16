@@ -1,0 +1,56 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the amp-web-push tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html" />
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-web-push" src="https://cdn.ampproject.org/v0/amp-web-push-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: Default amp-web-push usage. -->
+|    <amp-web-push
+|      id="amp-web-push"
+|      layout="nodisplay"
+|      helper-iframe-url="https://example.com/helper-iframe.html"
+|      permission-dialog-url="https://example.com/permission-dialog.html"
+|      service-worker-url="https://example.com/service-worker.js">
+|    </amp-web-push>
+|
+|    <!-- Valid: Has optional service-worker-scope attribute, referencing the root. -->
+|    <amp-web-push
+|      id="amp-web-push"
+|      layout="nodisplay"
+|      helper-iframe-url="https://example.com/helper-iframe.html"
+|      permission-dialog-url="https://example.com/permission-dialog.html"
+|      service-worker-url="https://example.com/service-worker.js"
+|      service-worker-scope="/">
+|    </amp-web-push>
+|
+|    <!-- Valid: Has optional service-worker-scope attribute, referencing a subpath. -->
+|    <amp-web-push
+|      id="amp-web-push"
+|      layout="nodisplay"
+|      helper-iframe-url="https://example.com/subpath/helper-iframe.html"
+|      permission-dialog-url="https://example.com/subpath/permission-dialog.html"
+|      service-worker-url="https://example.com/subpath/service-worker.js"
+|      service-worker-scope="/subpath/">
+|    </amp-web-push>
+|
+|    <amp-web-push-widget visibility="unsubscribed" layout="fixed" width="250" height="80">
+|      <button on="tap:amp-web-push.subscribe">Subscribe to Notifications</button>
+|    </amp-web-push-widget>
+|    <amp-web-push-widget visibility="subscribed" layout="fixed" width="250" height="80">
+|      <button on="tap:amp-web-push.unsubscribe">Unsubscribe from Notifications</button>
+|    </amp-web-push-widget>
+|    <amp-web-push-widget visibility="blocked" layout="fixed" width="250" height="80">
+|      Looks like you've blocked notifications!
+|    </amp-web-push-widget>
+|  </body>
+|  </html>

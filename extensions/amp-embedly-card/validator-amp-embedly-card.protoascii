@@ -1,0 +1,44 @@
+tags: {  # embedly-card
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-embedly-card"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-embedly-card>
+  html_format: AMP
+  tag_name: "AMP-EMBEDLY-CARD"
+  requires_extension: "amp-embedly-card"
+  attrs: {
+    name: "data-url"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-embedly-card/"
+  amp_layout: {
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-embedly-key>
+  html_format: AMP
+  tag_name: "AMP-EMBEDLY-KEY"
+  requires_extension: "amp-embedly-card"
+  unique: true
+  attrs: {
+    name: "value"
+    mandatory: true
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

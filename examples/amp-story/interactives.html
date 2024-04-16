@@ -1,0 +1,559 @@
+<!doctype html>
+<html ⚡ lang="es">
+  <head>
+    <meta charset="utf-8">
+    <title>Interactive Story</title>
+    <link rel="canonical" href="interactives.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Rubik', sans-serif;
+      }
+      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-results {
+        justify-self: center;
+      }
+
+      #expToggle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10000;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="Interactive Story"
+        publisher="AMP Story testing"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+        <amp-story-page id="cover">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/overview.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="vertical">
+            <div style="background: #000000aa;color:white;padding:10px">
+              <h2>What is the best story ever?</h2>
+              <p>and other interactive components</p>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-intl">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/roadshow.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-quiz
+                id="international-quiz-dark"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                style="--interactive-accent-color: #ffa600;--interactive-prompt-background: linear-gradient(150deg, #da450b, #ffa600)"
+                theme="dark"
+                chip-style="shadow"
+                prompt-text="Is this an international quiz?"
+                option-1-text="你好，这是马蒂亚斯"
+                option-2-text="مرحبا هذا ماتياس"
+                option-3-text="Yes it is, this is indeed an international quiz" option-3-correct
+                option-3-confetti="🌎"
+                option-4-text="ब्राज़ील यहाँ होना चाहिए">
+            </amp-story-interactive-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/roadshow.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-quiz
+                id="first-cup-dark"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                style="--interactive-accent-color: #20AC5E;font-size: calc(var(--story-page-vmin) * 4)"
+                theme="dark"
+                prompt-text="Who won the first soccer world cup?"
+                option-1-text="France"
+                option-2-text="Spain"
+                option-3-text="Uruguay" option-3-correct
+                option-3-confetti="🇺🇾"
+                option-4-text="Brazil">
+            </amp-story-interactive-quiz>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <!-- Add div in front, should not be clickable (but the quiz behind should) -->
+            <div style="display: flex; align-items: center; justify-content: center"><p>🇺🇾</p></div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-1b">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/roadshow.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-quiz
+                id="last-cup-dark"
+                prompt-text="Who won the last soccer world cup?"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                style="--interactive-accent-color: rgb(221, 17, 229);"
+                option-1-text="France" option-1-correct
+                option-1-confetti="🇫🇷"
+                option-2-text="Spain"
+                option-3-text="Uruguay"
+                option-4-text="Brazil"
+                chip-style="shadow">
+            </amp-story-interactive-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/blue-stuff.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-quiz
+                id="largest-mammal-light"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                prompt-text="What is the largest mammal?"
+                option-1-text="Blue whale" option-1-correct
+                option-1-confetti="🐳"
+                option-2-text="Etruscan shrew">
+            </amp-story-interactive-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-2b">
+          <amp-story-grid-layer template="fill">
+            <div style="background: linear-gradient(rgb(69, 75, 184), #80c0c4)"></div>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-quiz
+                id="smallest-mammal-light"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                prompt-size="large"
+                chip-style="transparent"
+                theme="dark"
+                prompt-text="What is the smallest mammal?"
+                option-1-text="Blue whale"
+                option-2-text="Etruscan shrew" option-2-correct
+                option-2-confetti="🐀"
+                option-3-text="Persian cat"
+                option-4-text="Baby yoda">
+            </amp-story-interactive-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-2c">
+          <amp-story-grid-layer template="fill">
+            <div style="background: linear-gradient(rgb(83, 87, 158), #699496)"></div>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-quiz
+                id="smallest-mammal-transparent"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                prompt-size="large"
+                chip-style="transparent"
+                prompt-text="What is the smallest mammal?"
+                option-1-text="Blue whale"
+                option-2-text="Etruscan shrew" option-2-correct
+                option-2-confetti="🐀"
+                option-3-text="Persian cat"
+                option-4-text="Baby yoda">
+            </amp-story-interactive-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <amp-story-interactive-binary-poll
+								endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+								prompt-text="What is your favorite movie?"
+								id="movie-light-green"
+								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+                theme="dark"
+                option-1-text="דוקטור מוזר"
+                option-2-text="פנתר שחור"
+                option-1-confetti="🎥"
+                option-2-confetti="🎬">
+              </amp-story-interactive-binary-poll>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-binary-poll
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              id="movie-dark"
+              theme="dark"
+              option-1-text="Doctor Strange"
+              option-2-text="Black Panther"
+              option-1-confetti="😺"
+              option-2-confetti="🐶">
+            </amp-story-interactive-binary-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-interactive-binary-poll
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                id="movie-light-yellow"
+                style="--interactive-accent-color: #FFC700;"
+                option-1-text="🧛"
+                option-2-text="🐆"
+                option-1-confetti="🧛"
+                option-2-confetti="🐆">
+              </amp-story-interactive-binary-poll>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;justify-content:center;flex-direction:column;">
+              <amp-story-interactive-binary-poll
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                id="movie-light-black"
+                style="--interactive-accent-color: rgb(0, 0, 0); transform: translateX(-40%) rotate(-45deg);"
+                option-1-text="Doctor"
+                option-2-text="Panther"
+                option-1-confetti="🎥"
+                option-2-confetti="🎬">
+              </amp-story-interactive-binary-poll>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-5">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="vertical">
+            <amp-story-interactive-binary-poll
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              id="movie-light-connected"
+              theme="dark"
+              style="--interactive-accent-color: #FFFFFF;"
+              option-1-text="This is a really long text"
+              option-2-text="Panther"
+              option-1-confetti="🎥"
+              option-2-confetti="🎬">
+            </amp-story-interactive-binary-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-1"
+              theme="dark"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷"
+              option-3-text="Amsterdam" option-3-confetti="🇳🇱">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-2"
+              theme="dark"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              chip-style="shadow"
+              style="--interactive-accent-color: #f5aa42"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷"
+              option-3-text="Amsterdam" option-3-confetti="🇳🇱"
+              option-4-text="Madrid" option-4-confetti="🇪🇸">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-3"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              style="--interactive-accent-color: rgb(255, 152, 152); --interactive-prompt-text-color: black"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-4"
+              chip-style="shadow"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              style="--interactive-accent-color: #eb50a8"
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷"
+              option-3-text="Amsterdam" option-3-confetti="🇳🇱">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-5">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-5"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #ff6347"
+              theme="dark"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-6">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-6"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #ff6347"
+              theme="light"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon is my favourite food in the world and I eat it everyday"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-7">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(94, 25, 25), rgb(218, 140, 25))">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-7"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              style="--interactive-accent-color: #ff6347"
+              theme="light"
+              chip-style="transparent"
+              prompt-size="large"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-8">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(255, 255, 255), rgb(178, 243, 255))">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-8"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              style="--interactive-accent-color: #ff6347;--interactive-prompt-text-color:black"
+              theme="dark"
+              chip-style="transparent"
+              prompt-size="large"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="results-1">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(17, 55, 87), rgb(1, 17, 20)">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-results
+              style="--interactive-accent-color: #ffb387"
+              theme="dark"
+              chip-style="transparent"
+              prompt-text="You are an"
+              option-1-results-category="Onion" option-1-text="You are sharp and go well with many plates" option-1-image="https://images.unsplash.com/photo-1585849834908-3481231155e8?auto=format&fit=crop&w=200&q=80"
+              option-2-text="Bacon">
+            </amp-story-interactive-results>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="results-2">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-results
+              style="--interactive-accent-color: #233a5c"
+              theme="light"
+              chip-style="transparent"
+              prompt-text="You are an"
+              option-1-results-category="Onion" option-1-text="You are sharp and go well with many plates" option-1-image="https://images.unsplash.com/photo-1585849834908-3481231155e8?auto=format&fit=crop&w=200&q=80"
+              option-2-text="Bacon">
+            </amp-story-interactive-results>
+          </amp-story-grid-layer>
+        </amp-story-page>
+    </amp-story>
+    <button id="expToggle" onclick="
+      AMP.toggleExperiment('amp-story-interactive-disclaimer');
+      location.reload();
+    ">Toggle amp-story-interactive-disclaimer</button>
+  </body>
+  <script>
+    // Indicate whether experiment is on.
+    document.addEventListener('ampstory:load', () => {
+      expToggle.innerHTML = "amp-story-interactive-disclaimer active: " + AMP.isExperimentOn('amp-story-interactive-disclaimer');
+    });
+  </script>
+</html>

@@ -1,0 +1,19 @@
+<!--
+  Test Description:
+  This testcase isn't run verbatim. The template string below is replaced by
+  the test harnesses with various lengths of valid body content. We use
+  this test to verify the max_document_byte_length rules for AMP4EMAIL.
+  (buf:013)
+-->
+<!doctype html>
+<html ⚡4email data-css-strict>
+<head>
+  <meta charset="utf-8">
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  Hello, World!
+  replace_body
+</body>
+</html>

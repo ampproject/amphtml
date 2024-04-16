@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# This file contains the default pre-push hook for AMPHTML. To enable it, run:
+#     "./build-system/common/enable-git-pre-push.sh"
+#
+# Note: The checks in this file must not take more than a few seconds to run.
+# Time consuming checks that call amp build, or run all the tests are
+# forbidden. If you'd like to add something like that to your pre-push, do so
+# by directly editing .git/hooks/pre-push instead of editing this default hook.
+
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+CYAN() { echo -e "\033[0;36m$1\033[0m"; }
+
+AMP_LINT_LOCAL="amp lint --local_changes"
+AMP_PRETTIFY_LOCAL="amp prettify --local_changes"
+AMP_UNIT_LOCAL="amp unit --local_changes --headless"
+
+echo $(GREEN "Running") $(CYAN "pre-push") $(GREEN "hooks. (Run") $(CYAN "git push --no-verify") $(GREEN "to skip them.)")
+echo -e "\n"
+
+echo $(GREEN "Running") $(CYAN "$AMP_LINT_LOCAL")
+eval $AMP_LINT_LOCAL || exit 1
+echo -e "\n"
+
+echo $(GREEN "Running") $(CYAN "$AMP_PRETTIFY_LOCAL")
+eval $AMP_PRETTIFY_LOCAL || exit 1
+echo -e "\n"
+
+echo $(GREEN "Running") $(CYAN "$AMP_UNIT_LOCAL")
+eval $AMP_UNIT_LOCAL || exit 1
+echo -e "\n"
+
+echo $(GREEN "Done with") $(CYAN "pre-push") $(GREEN "hooks. Pushing commits to GitHub...")

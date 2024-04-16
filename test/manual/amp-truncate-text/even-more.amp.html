@@ -1,0 +1,57 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-truncate-text always show expand</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .text {
+      font-size: 1em;
+      line-height: 1.25;
+      height: 2.5em;
+      width: 300px;
+      overflow: hidden;
+    }
+
+    .overflow-button {
+      color: #1b61e0;
+    }
+
+    .overflow-button.compact {
+      font-size: inherit;
+      font-family: inherit;
+      padding-top: 0;
+      padding-bottom: 0;
+      border: none;
+      background-color: transparent;
+      float: right;
+    }
+  </style>
+  <script async custom-element="amp-truncate-text" src="https://cdn.ampproject.org/v0/amp-truncate-text-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Always show the expand button</h1>
+
+  <amp-truncate-text class="text" layout="container">
+    This is some text that should be truncated, but the "whole" content may not be available without another request. So the "Even more" button when expanded can be used.
+    <button slot="collapsed" class="overflow-button compact">See more</button>
+    <span on="tap:foo.scrollTo(pos = 'top')" slot="expanded" class="overflow-button compact"> Even more</a>
+  </amp-truncate-text>
+
+
+  <div style="height: 100vh"></div>
+
+  <section>
+    <h1 id="foo">
+      Some more details.
+    </h1>
+    <p>
+      Some placeholder text.
+    </p>
+  </section>
+
+</body>
+</html>

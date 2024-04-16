@@ -1,0 +1,52 @@
+tags: {  # amp-springboard-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-springboard-player"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-springboard-player>
+  html_format: AMP
+  tag_name: "AMP-SPRINGBOARD-PLAYER"
+  requires_extension: "amp-springboard-player"
+  attrs: {
+    name: "data-content-id"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-domain"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-items"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-mode"
+    mandatory: true
+    value_casei: "playlist"
+    value_casei: "video"
+  }
+  attrs: {
+    name: "data-player-id"
+    mandatory: true
+    value_regex_casei: "[a-z0-9]+"
+  }
+  attrs: {
+    name: "data-site-id"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

@@ -1,0 +1,66 @@
+tags: {  # amp-soundcloud 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-soundcloud 1.0"
+  excludes_condition: "amp-soundcloud 0.1"
+  extension_spec: {
+    name: "amp-soundcloud"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-soundcloud 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-soundcloud 0.1"
+  excludes_condition: "amp-soundcloud 1.0"
+  extension_spec: {
+    name: "amp-soundcloud"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-soundcloud>
+  html_format: AMP
+  tag_name: "AMP-SOUNDCLOUD"
+  requires_extension: "amp-soundcloud"
+  attrs: {
+    name: "data-color"
+    value_regex_casei: "([0-9a-f]{3}){1,2}"
+  }
+  attrs: {
+    name: "data-playlistid"
+    mandatory_oneof: "['data-trackid', 'data-playlistid']"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-secret-token"
+    value_regex: "[A-Za-z0-9_-]+"
+  }
+  attrs: {
+    name: "data-trackid"
+    mandatory_oneof: "['data-trackid', 'data-playlistid']"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-visual"
+    value_casei: "false"
+    value_casei: "true"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

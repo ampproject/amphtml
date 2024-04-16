@@ -1,0 +1,69 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <style amp-custom>
+    body {
+      max-width: 527px;
+      font-family: 'Questrial', Arial;
+    }
+
+    amp-anim {
+      margin: 30px;
+      padding: 30px;
+      border: 10px solid red;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>AMP Anim Test</h1>
+  <h2>AMP Anim Basic</h2>
+  <amp-anim
+      src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no" width="400" height="300">
+  </amp-anim>
+
+  <h2>AMP Anim with Srcset</h2>
+  <amp-anim
+    width="400"
+    height="300"
+    src="https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w"
+    srcset="https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
+            https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w" >
+  </amp-anim>
+
+  <h2>AMP Anim with Placeholder Div</h2>
+  <amp-anim
+    width="400"
+    height="300"
+    srcset="https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
+            https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w" >
+    <div placeholder>This is a placeholder</div>
+  </amp-anim>
+
+  <h2>AMP Anim with Fallback Image</h2>
+  <amp-anim
+    width="400"
+    height="300"
+    srcset="https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
+            https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w" >
+    <amp-img fallback src="/examples/img/sample.jpg" width=400 height=300 layout=responsive noloading></amp-img>
+  </amp-anim>
+
+  <h2>AMP Anim with Fallback Image AND Placeholder Div</h2>
+  <amp-anim
+    width="400"
+    height="300"
+    srcset="https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
+            https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w" >
+    <amp-img fallback src="/examples/img/sample.jpg" width=400 height=300 layout=responsive noloading></amp-img>
+    <div placeholder>This is a placeholder</div>
+  </amp-anim>
+</body>
+</html>

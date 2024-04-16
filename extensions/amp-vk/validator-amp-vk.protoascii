@@ -1,0 +1,25 @@
+tags: {  # amp-vk
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-vk"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-vk>
+  html_format: AMP
+  tag_name: "AMP-VK"
+  requires_extension: "amp-vk"
+  attrs: {
+    name: "data-embedtype"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

@@ -1,0 +1,73 @@
+/**
+ * Vertical scrolling rendering, so the pages are visible to search engine
+ * indexing tools, and not stacked on top of each other.
+ */
+
+html.i-amphtml-story-vertical {
+  --story-page-vh: 1.78vw !important;
+}
+
+amp-story[standalone][i-amphtml-vertical] {
+  height: auto !important;
+  contain: initial !important;
+}
+
+/* Overrides publishers custom CSS animations, if any. */
+[i-amphtml-vertical] * {
+  transition-delay: 0s !important;
+  transition-duration: 0s !important;
+}
+
+[i-amphtml-vertical] amp-story-page {
+  position: relative !important;
+  /* iPhone 6/7/8 ratio. */
+  height: 178vw !important;
+  contain: initial !important;
+  overflow: visible !important;
+}
+
+/* Increase CSS specifity. */
+amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element {
+  transform: none !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
+  opacity: 1 !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content > * {
+  display: block !important;
+}
+
+[i-amphtml-vertical] amp-story-page-attachment {
+  display: block !important;
+  position: relative !important;
+  transform: none !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-page-attachment-remote-title {
+  overflow: visible !important;
+}
+
+[i-amphtml-vertical] .amp-story-draggable-drawer-root {
+  visibility: visible !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-page-description {
+  background: white !important;
+  display: block !important;
+  padding: 32px !important;
+  width: auto !important;
+  z-index: 9999999 !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-page-description > * {
+  background: white !important;
+  color: black !important;
+  font-size: 1rem !important;
+}
+
+
+[i-amphtml-vertical] .i-amphtml-story-page-description > h2 {
+  font-size: 1.5rem !important;
+}

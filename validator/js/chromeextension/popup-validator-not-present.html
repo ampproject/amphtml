@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <link href="polymer.html" rel="import">
+    <link href="polymer-extension-toolbar.html" rel="import">
+    <style is="custom-style">
+      body {
+        background-color: #fff;
+        font-height: 18px;
+        font-size: 14px;
+        font-weight: 300;
+        margin: 0;
+        padding: 0 !important;
+        width: 780px;
+      }
+    </style>
+  </head>
+  <body unresolved>
+    <dom-module id="popup-validator-not-present">
+      <style scope="popup-validator-not-present">
+        #message { margin: 10px 20px 20px; }
+      </style>
+      <template>
+        <extension-toolbar id="toolbar"></extension-toolbar>
+        <div id="message">{{ validatorNotPresentText }}</div>
+      </template>
+      <script>
+        Polymer({
+          is: 'popup-validator-not-present',
+          properties: {
+            validatorNotPresentText: {
+              type: String,
+              value: chrome.i18n.getMessage("validatorNotPresentText"),
+            },
+          },
+          ready: function() {
+            this.$.toolbar.changeSpinnerState(false);
+          },
+        });
+      </script>
+    </dom-module>
+    <popup-validator-not-present></popup-validator-not-present>
+  </body>
+</html>

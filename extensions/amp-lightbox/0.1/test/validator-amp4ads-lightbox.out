@@ -1,0 +1,32 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Format is set to A4A.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|    <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: close-button present -->
+|    <amp-lightbox layout="nodisplay" close-button>
+|    </amp-lightbox>
+|
+|    <!-- Invalid: close-button not present. -->
+|    <amp-lightbox layout="nodisplay">
+>>   ^~~~~~~~~
+amp-lightbox/0.1/test/validator-amp4ads-lightbox.html:20:2 The mandatory attribute 'close-button' is missing in tag 'amp-lightbox'. (see https://amp.dev/documentation/components/amp-lightbox)
+|    </amp-lightbox>
+|
+|    <!-- Invalid: scrollable present. -->
+|    <amp-lightbox layout="nodisplay" close-button scrollable>
+>>   ^~~~~~~~~
+amp-lightbox/0.1/test/validator-amp4ads-lightbox.html:24:2 The attribute 'scrollable' may not appear in tag 'amp-lightbox'. (see https://amp.dev/documentation/components/amp-lightbox)
+|    </amp-lightbox>
+|  </body>
+|  </html>

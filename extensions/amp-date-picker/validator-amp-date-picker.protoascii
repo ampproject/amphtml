@@ -1,0 +1,258 @@
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-date-picker"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=single][mode=static]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    value_casei: "static"
+  }
+  attrs: {
+    name: "type"
+    value_casei: "single"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-single-type-attributes"
+  attr_lists: "amp-date-picker-static-mode-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=single][mode=overlay]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    mandatory: true
+    value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    value_casei: "single"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
+  attr_lists: "amp-date-picker-single-type-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
+  }
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=range][mode=static]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    value_casei: "static"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "range"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-range-type-attributes"
+  attr_lists: "amp-date-picker-static-mode-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=range][mode=overlay]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    mandatory: true
+    value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "range"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
+  attr_lists: "amp-date-picker-range-type-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
+  }
+}
+
+attr_lists: {
+  name: "amp-date-picker-common-attributes"
+  attrs: {
+    name: "allow-blocked-end-date"
+    value: ""
+  }
+  attrs: {
+    name: "allow-blocked-ranges"
+    value: ""
+  }
+  attrs: { name: "blocked" }
+  attrs: {
+    name: "day-size"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "first-day-of-week"
+    value_regex: "[0-6]"
+  }
+  attrs: { name: "format" }
+  attrs: { name: "highlighted" }
+  attrs: { name: "locale" }
+  attrs: { name: "max" }
+  attrs: { name: "min" }
+  attrs: { name: "month-format" }
+  attrs: {
+    name: "number-of-months"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "open-after-clear"
+    value: ""
+  }
+  attrs: {
+    name: "open-after-select"
+    value: ""
+  }
+  attrs: {
+    name: "hide-keyboard-shortcuts-panel"
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "week-day-format" }
+  # amp-bind
+  attrs: { name: "[src]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[min]" }
+}
+
+attr_lists: {
+  name: "amp-date-picker-range-type-attributes"
+  attrs: { name: "end-date" }
+  attrs: { name: "end-input-selector" }
+  attrs: {
+    name: "maximum-nights"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "minimum-nights"
+    value_regex: "[0-9]+"
+  }
+  attrs: { name: "start-date" }
+  attrs: { name: "start-input-selector" }
+
+}
+
+attr_lists: {
+  name: "amp-date-picker-single-type-attributes"
+  attrs: { name: "date" }
+  attrs: { name: "input-selector" }
+}
+
+attr_lists: {
+  name: "amp-date-picker-static-mode-attributes"
+  attrs: {
+    name: "fullscreen"
+    value: ""
+  }
+}
+
+attr_lists: {
+  name: "amp-date-picker-overlay-mode-attributes"
+  attrs: {
+    name: "touch-keyboard-editable"
+    value: ""
+  }
+}
+
+# HTML5, 4.11.3 The template element
+# The template element is also defined at
+# extensions/amp-mustache/validator-amp-mustache.protoascii
+tags: {
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "amp-date-picker > template [date-template]"
+  mandatory_parent: "AMP-DATE-PICKER"
+  requires_extension: "amp-mustache"
+  attrs: {
+    name: "date-template"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "default"
+  }
+  attrs: {
+    name: "dates"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "amp-date-picker > template [info-template]"
+  mandatory_parent: "AMP-DATE-PICKER"
+  requires_extension: "amp-mustache"
+  attrs: {
+    name: "info-template"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+  }
+}

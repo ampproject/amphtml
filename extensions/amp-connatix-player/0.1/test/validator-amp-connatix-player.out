@@ -1,0 +1,49 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-connatix-player tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-connatix-player example</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-custom>
+|      amp-connatix-player {
+|        color: red;
+|      }
+|    </style>
+|    <script async custom-element="amp-connatix-player" src="https://cdn.ampproject.org/v0/amp-connatix-player-0.1.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Invalid: missing required data-player-id attribute -->
+|    <amp-connatix-player
+>>   ^~~~~~~~~
+amp-connatix-player/0.1/test/validator-amp-connatix-player.html:23:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-connatix-player'. (see https://amp.dev/documentation/components/amp-connatix-player/)
+|      layout="responsive"
+|      width="150"
+|      height="80">
+|    </amp-connatix-player>
+|    <!-- Invalid: dock without amp-video-docking extension -->
+|    <amp-connatix-player
+>>   ^~~~~~~~~
+amp-connatix-player/0.1/test/validator-amp-connatix-player.html:29:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript.
+|      data-player-id="f721b0d8-7a79-42b6-b637-fa4e86138ed9"
+|      layout="responsive"
+|      width="150"
+|      height="80"
+|      dock>
+|    </amp-connatix-player>
+|    <!-- Valid -->
+|    <amp-connatix-player
+|      data-player-id="f721b0d8-7a79-42b6-b637-fa4e86138ed9"
+|      layout="responsive"
+|      width="150"
+|      height="80">
+|    </amp-connatix-player>
+|  </body>
+|  </html>

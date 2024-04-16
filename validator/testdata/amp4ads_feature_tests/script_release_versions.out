@@ -1,0 +1,55 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This test demonstrates that module/nomodule, modolue/nomodule LTS, and module
+|    SXG script tags are not valid for AMP4ADS.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads transformed="google;v=1">
+>> ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:7:0 The attribute 'transformed' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|  <head>
+|    <meta charset=utf-8>
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|
+|    <!-- Invalid: AMP4ADS module-nomodule pair for AMP runtime script -->
+|    <script async crossorigin=anonymous src=https://cdn.ampproject.org/v0.mjs type=module></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:14:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|    <script async nomodule src=https://cdn.ampproject.org/v0.js></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:15:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|
+|    <!-- Invalid: AMP4ADS module/nomodule pair for AMP4ADS runtime script -->
+|    <script async crossorigin=anonymous src=https://cdn.ampproject.org/amp4ads-v0.mjs type=module></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:18:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+|    <script async nomodule src=https://cdn.ampproject.org/amp4ads-v0.js></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:19:2 The attribute 'nomodule' may not appear in tag 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+|
+|    <!-- Invalid: AMP4ADS module/nomodule pair for AMP extension script -->
+|    <script async crossorigin=anonymous custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.mjs type=module></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:22:2 The attribute 'type' in tag 'amp-analytics extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-analytics)
+|    <script async custom-element=amp-analytics nomodule src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:23:2 The attribute 'nomodule' may not appear in tag 'amp-analytics extension script'. (see https://amp.dev/documentation/components/amp-analytics)
+|
+|    <!-- Invalid: AMP4ADS module/nomodule LTS pair for AMP extension script -->
+|    <script async crossorigin=anonymous custom-element=amp-audio src=https://cdn.ampproject.org/lts/v0/amp-audio-0.1.mjs type=module></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:26:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the module/nomodule version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:26:2 The attribute 'type' in tag 'amp-audio v0.1 extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-audio)
+|    <script async custom-element=amp-audio nomodule src=https://cdn.ampproject.org/lts/v0/amp-audio-0.1.js></script>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:27:2 The attribute 'nomodule' may not appear in tag 'amp-audio v0.1 extension script'. (see https://amp.dev/documentation/components/amp-audio)
+>>   ^~~~~~~~~
+amp4ads_feature_tests/script_release_versions.html:27:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the module/nomodule version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|  </head>
+|  <body>
+|    Hello, world.
+|  </body>
+|  </html>

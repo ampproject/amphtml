@@ -1,0 +1,13 @@
+URL: https://github.com/google/closure-library
+License: Apache License
+License File: https://github.com/google/closure-library/blob/master/LICENSE
+
+Description:
+Used to pull in selected functions from the closure library.
+We only check in the compiled version.
+Run compile.sh to generate a new version.
+
+Local Modifications:
+Forked base64.js to remove dependency on user agent detection
+because all supported browsers for AMP support native base64
+encoding.

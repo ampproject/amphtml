@@ -1,0 +1,39 @@
+tags: {  # amp-call-tracking
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-call-tracking"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-call-tracking>
+  html_format: AMP
+  tag_name: "AMP-CALL-TRACKING"
+  requires_extension: "amp-call-tracking"
+  attrs: {
+    name: "config"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "extended-amp-global"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "A"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-call-tracking/"
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

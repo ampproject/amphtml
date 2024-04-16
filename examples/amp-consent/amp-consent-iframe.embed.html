@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<body style="background-color:#EEEEEE">
+  <script>
+    function isAmpMessage(event, type) {
+      return (
+        event.source == window.parent &&
+        event.origin != window.location.origin &&
+        event.data &&
+        event.data.sentinel == 'amp' &&
+        event.data.type == type
+      );
+    }
+    window.addEventListener('message', (event) => {
+      if (!isAmpMessage(event, 'consent-data')) {
+        return;
+      }
+      console.log('message', event);
+      document.getElementById('consent').innerText = JSON.stringify(event.data, null, 2);
+    }, false);
+
+    window.parent.postMessage({
+      sentinel: 'amp',
+      type: 'send-consent-data'
+    }, '*');
+  </script>
+  <pre id="consent">
+    Iframe loaded but did not receive consent
+  </pre>
+</body>
+</html>

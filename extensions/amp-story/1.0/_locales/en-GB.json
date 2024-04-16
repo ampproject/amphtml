@@ -1,0 +1,170 @@
+{
+  "2": {
+    "string": "Tap Next"
+  },
+  "3": {
+    "string": "Tap Back"
+  },
+  "4": {
+    "string": "Could not copy link to clipboard :("
+  },
+  "5": {
+    "string": "Link copied!"
+  },
+  "6": {
+    "string": "Email"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Get Link"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "We're sorry, it looks like your browser doesn't support this experience"
+  },
+  "22": {
+    "string": "Accept"
+  },
+  "23": {
+    "string": "Decline"
+  },
+  "25": {
+    "string": "View on original domain:"
+  },
+  "26": {
+    "string": "More about AMP results"
+  },
+  "27": {
+    "string": "Continue Anyway"
+  },
+  "34": {
+    "string": "Play video"
+  },
+  "35": {
+    "string": "Swipe up"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Updated"
+  },
+  "65": {
+    "string": "Video failed to play"
+  },
+  "66": {
+    "string": "Mute story"
+  },
+  "67": {
+    "string": "Unmute story"
+  },
+  "68": {
+    "string": "Story information"
+  },
+  "69": {
+    "string": "Share story"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Tip 1 of 2"
+  },
+  "76": {
+    "string": "Tap to go to the next screen"
+  },
+  "77": {
+    "string": "Next"
+  },
+  "78": {
+    "string": "Tip 2 of 2"
+  },
+  "79": {
+    "string": "Swipe to go to the next story"
+  },
+  "80": {
+    "string": "Got it"
+  },
+  "81": {
+    "string": "Tip"
+  },
+  "83": {
+    "string": "Activate"
+  },
+  "84": {
+    "string": "SCORE:"
+  },
+  "85": {
+    "string": "Pause story"
+  },
+  "86": {
+    "string": "Play story"
+  },
+  "87": {
+    "string": "Close"
+  },
+  "88": {
+    "string": "Skip to next"
+  },
+  "89": {
+    "string": "Your response will be sent to"
+  },
+  "90": {
+    "string": "Next story"
+  },
+  "91": {
+    "string": "Next page"
+  },
+  "92": {
+    "string": "Replay"
+  },
+  "93": {
+    "string": "Previous page"
+  },
+  "96": {
+    "string": "Move device to explore"
+  },
+  "97": {
+    "string": "Opening"
+  },
+  "98": {
+    "string": "Form not submitted. Please try again"
+  },
+  "99": {
+    "string": "Form successfully submitted"
+  },
+  "101": {
+    "string": "Shop now"
+  },
+  "110": {
+    "string": "Subscribe with Google"
+  }
+}

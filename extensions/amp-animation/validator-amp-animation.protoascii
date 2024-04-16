@@ -1,0 +1,52 @@
+tags: {  # amp-animation
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-animation"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-animation> (json)
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  spec_name: "amp-animation extension .json script"
+  mandatory_parent: "AMP-ANIMATION"
+  requires_extension: "amp-animation"
+  satisfies_condition: "amp-animation extension .json script"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # <amp-animation>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-ANIMATION"
+  requires_extension: "amp-animation"
+  requires_condition: "amp-animation extension .json script"
+  attrs: {
+    name: "trigger"
+    value: "visibility"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "SCRIPT"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

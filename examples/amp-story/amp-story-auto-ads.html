@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html amp lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-story</title>
+  <link rel="canonical" href="animations-presets.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    body {
+      font-family: sans-serif;
+    }
+    h1 {
+      font-family: Menlo, Monaco, monospace;
+      font-weight: bold;
+      font-size: 24px;
+      width: 100%;
+      text-align: left;
+    }
+    amp-story-page {
+      background: #ddd;
+    }
+    amp-story-grid-layer {
+      justify-items: center;
+    }
+    .square,
+    .circle {
+      background: #4285f4;
+      width: 80px;
+      height: 80px;
+    }
+    .circle {
+      border-radius: 80px;
+    }
+    .fill-img img {
+      object-fit: cover;
+    }
+    </style>
+</head>
+<body>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "transport": {
+          "beacon": false,
+          "xhrpost": false,
+          "image": true
+        },
+        "requests": {
+          "endpoint": "https://www.cool.example",
+          "base": "${endpoint}?id=${adId}zx=${timestamp}"
+        },
+        "triggers": {
+          "storyAdRequest": {
+            "on": "story-ad-request",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "request"}
+          },
+          "storyAdLoad": {
+            "on": "story-ad-load",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "load"}
+          },
+          "storyAdInsert": {
+            "on": "story-ad-insert",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "insert"}
+          },
+          "storyAdView": {
+            "on": "story-ad-view",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "view"}
+          },
+          "storyAdSwipe": {
+            "on": "story-ad-swipe",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "swipe"}
+          },
+          "storyAdClick": {
+            "on": "story-ad-click",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "click"}
+          },
+          "storyAdExit": {
+            "on": "story-ad-exit",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "exit"}
+          },
+          "storyAdDestroy": {
+            "on": "story-ad-discard",
+            "request": "base",
+            "extraUrlParams": {"amp_stads": "discard"}
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+  <amp-story standalone>
+    <amp-story-auto-ads>
+      <script type="application/json">
+        {
+            "ad-attributes": {
+              "type": "custom",
+              "data-url": "./amp-story-auto-ads-payload.json"
+            }
+        }
+      </script>
+
+      <template type="amp-mustache" id="template-1">
+        <amp-img class="fill-img" layout="fill" src="{{imgSrc}}"></amp-img>
+      </template>
+    </amp-story-auto-ads>
+
+    <amp-story-page id="fade-in-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>fade-in</h1>
+        <div class="circle"
+            animate-in="fade-in"
+            animate-in-duration="0.8s">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="twirl-in-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>twirl-in</h1>
+        <div class="square"
+            animate-in="twirl-in">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="fly-in-left-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>fly-in-left</h1>
+        <div class="square"
+            animate-in="fly-in-left">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="fly-in-right-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>fly-in-right</h1>
+        <div class="square"
+            animate-in="fly-in-right">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="fly-in-top-page" next-page-no-ad>
+      <amp-story-grid-layer template="vertical">
+        <h1>fly-in-top</h1>
+        <div class="square"
+            animate-in="fly-in-top">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="fly-in-bottom-page" next-page-no-ad>
+      <amp-story-grid-layer template="vertical">
+        <h1>fly-in-bottom</h1>
+        <div class="square"
+            animate-in="fly-in-bottom">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="rotate-in-left-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>rotate-in-left</h1>
+        <div class="square"
+            animate-in="rotate-in-left">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="rotate-in-right-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>rotate-in-right</h1>
+        <div class="square"
+            animate-in="rotate-in-right">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="drop-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>drop-in</h1>
+        <div class="circle"
+             animate-in="drop">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="whoosh-in-left-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>whoosh-in-left</h1>
+        <div class="square"
+            animate-in="whoosh-in-left">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="whoosh-in-right-page">
+      <amp-story-grid-layer template="vertical">
+        <h1>whoosh-in-right</h1>
+        <div class="square"
+            animate-in="whoosh-in-right">
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
+</body>
+</html>

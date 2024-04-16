@@ -1,0 +1,22 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [
+        {name: 'ampproject/wg-components'},
+        {name: 'aghassemi', requestReviews: false},
+        {name: 'gmajoulet', requestReviews: false},
+        {name: 'newmuis', requestReviews: false},
+      ],
+    },
+    {
+      pattern: '**/*-player.{js,md}',
+      owners: [
+        {name: 'alanorozco', notify: true},
+        {name: 'wassgha', notify: false},
+      ],
+    },
+  ],
+}

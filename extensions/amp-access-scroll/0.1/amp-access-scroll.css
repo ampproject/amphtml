@@ -1,0 +1,47 @@
+
+
+.amp-access-scroll-bar {
+  position: fixed;
+  background: transparent;
+  z-index: 2147483647;
+
+  bottom: 0;
+  height: 60px;
+  left: auto;
+  right: 0px;
+  width: 48px;
+  margin: 0;
+  padding: 0;
+}
+
+.amp-access-scroll-sheet {
+  position: fixed;
+  background: transparent;
+  z-index: 2147483647;
+}
+
+/*
+  mobile media query needed for !important.
+  !important is necessary because mobile style
+  should override inline style.
+*/
+@media (max-width: 599px) {
+  .amp-access-scroll-sheet {
+    /* mobile */
+    bottom: 60px;
+    height: 100px;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 600px) {
+  .amp-access-scroll-sheet {
+    bottom: 76px;
+    height: 56px;
+    left: auto;
+    right: 16px;
+    width: 475px;
+  }
+}

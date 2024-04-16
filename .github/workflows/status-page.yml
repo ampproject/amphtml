@@ -1,0 +1,70 @@
+name: Update status.amp.dev
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [edited]
+permissions:
+  contents: read
+
+jobs:
+  status-page:
+    if: contains(github.event.issue.title, '🌸 Cherry-pick request')
+    runs-on: ubuntu-latest
+    environment: status_page
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: lts/*
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Add progress comment to cherry-pick issue for Stable and LTS
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        run: |
+          npm ci
+          node ./build-system/status-page/comment.js ${{ github.event.issue.number }} ${{ github.actor }}
+        env:
+          BODY: ${{ github.event.issue.body }}
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+      - name: Sync status page with cherry-pick progress
+        if: github.event_name == 'issue_comment' && github.event.action == 'edited' && contains(github.event.comment.body, '🌸 Cherry-pick Progress 🌸')
+        run: |
+          npm ci
+          node ./build-system/status-page/incident.js ${{ github.event.issue.number }}
+        env:
+          BODY: ${{ github.event.issue.body }}
+          COMMENT_BEFORE: ${{ github.event.changes.body.from }}
+          COMMENT_AFTER: ${{ github.event.comment.body }}
+          STATUS_PAGE_ID: ${{ secrets.STATUS_PAGE_ID }}
+          STATUS_PAGE_TOKEN: ${{ secrets.STATUS_PAGE_TOKEN }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: status-page
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

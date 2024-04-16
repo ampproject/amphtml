@@ -1,0 +1,32 @@
+<!--
+  Test Description:
+  This test demonstrates that module/nomodule, modolue/nomodule LTS, and module
+  SXG script tags are not valid for AMP4ADS.
+-->
+<!doctype html>
+<html ⚡4ads transformed="google;v=1">
+<head>
+  <meta charset=utf-8>
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+
+  <!-- Invalid: AMP4ADS module-nomodule pair for AMP runtime script -->
+  <script async crossorigin=anonymous src=https://cdn.ampproject.org/v0.mjs type=module></script>
+  <script async nomodule src=https://cdn.ampproject.org/v0.js></script>
+
+  <!-- Invalid: AMP4ADS module/nomodule pair for AMP4ADS runtime script -->
+  <script async crossorigin=anonymous src=https://cdn.ampproject.org/amp4ads-v0.mjs type=module></script>
+  <script async nomodule src=https://cdn.ampproject.org/amp4ads-v0.js></script>
+
+  <!-- Invalid: AMP4ADS module/nomodule pair for AMP extension script -->
+  <script async crossorigin=anonymous custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.mjs type=module></script>
+  <script async custom-element=amp-analytics nomodule src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script>
+
+  <!-- Invalid: AMP4ADS module/nomodule LTS pair for AMP extension script -->
+  <script async crossorigin=anonymous custom-element=amp-audio src=https://cdn.ampproject.org/lts/v0/amp-audio-0.1.mjs type=module></script>
+  <script async custom-element=amp-audio nomodule src=https://cdn.ampproject.org/lts/v0/amp-audio-0.1.js></script>
+</head>
+<body>
+  Hello, world.
+</body>
+</html>

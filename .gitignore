@@ -1,0 +1,38 @@
+# OS level files
+.DS_Store
+.g4ignore
+*.swp
+*.swo
+
+# Development environment files
+**/node_modules
+npm-debug.log
+
+# Firebase directories
+.firebaserc
+.firebase
+firebase
+firebase.json
+
+# User configuration files
+# Keep this list in sync with clean.js
+/build-system/global-configs/custom-config.json
+/build-system/global-configs/custom-flavors-config.json
+
+# [GLOBALLY IGNORED]
+# (Don't edit or remove the above comment!)
+# The rules below are synced between .gitignore and .prettierignore, and are
+# removed by `amp clean`.
+
+.*cache
+.amp-dep-check
+build
+dist
+dist.3p
+dist.tools
+export
+examples/storybook
+/release
+result-reports
+test/coverage
+test/coverage-e2e

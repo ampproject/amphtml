@@ -1,0 +1,103 @@
+tags: {  # amp-inline-gallery
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-inline-gallery"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-inline-gallery>
+  html_format: AMP
+  tag_name: "AMP-INLINE-GALLERY"
+  requires_extension: "amp-inline-gallery"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-inline-gallery/"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+tags: {  # <amp-inline-gallery-pagination>
+  html_format: AMP
+  tag_name: "AMP-INLINE-GALLERY-PAGINATION"
+  spec_name: "amp-inline-gallery-pagination"
+  requires_extension: "amp-inline-gallery"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-inline-gallery/"
+  mandatory_ancestor: "AMP-INLINE-GALLERY"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-inline-gallery-pagination inset>
+  html_format: AMP
+  tag_name: "AMP-INLINE-GALLERY-PAGINATION"
+  spec_name: "amp-inline-gallery-pagination [inset]"
+  requires_extension: "amp-inline-gallery"
+  attrs: {
+    name: "inset"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-inline-gallery/"
+  mandatory_ancestor: "AMP-INLINE-GALLERY"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # <amp-inline-gallery-thumbnails>
+  html_format: AMP
+  tag_name: "AMP-INLINE-GALLERY-THUMBNAILS"
+  requires_extension: "amp-inline-gallery"
+  attrs: {
+    name: "aspect-ratio-height"
+    # Non-zero number
+    value_regex: "\\d+(\\.\\d+)?"
+    disallowed_value_regex: "^0+(\\.0+)?$"
+    trigger: {
+      also_requires_attr: "aspect-ratio-width"
+    }
+  }
+  attrs: {
+    name: "aspect-ratio-width" # 0.1 only
+    # Non-zero number
+    value_regex: "\\d+(\\.\\d+)?"
+    disallowed_value_regex: "^0+(\\.0+)?$"
+    trigger: {
+      also_requires_attr: "aspect-ratio-height"
+    }
+  }
+  attrs: {
+    name: "aspect-ratio" # 1.0 only
+    # Non-zero number
+    value_regex: "\\d+(\\.\\d+)?"
+    disallowed_value_regex: "^0+(\\.0+)?$"
+  }
+  attrs: {
+    name: "loop"
+    value: "true"
+    value: "false"
+    value: ""
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-inline-gallery/"
+  mandatory_ancestor: "AMP-INLINE-GALLERY"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

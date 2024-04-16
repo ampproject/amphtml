@@ -1,0 +1,53 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Fake Ad Network Test</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h2>Fake Ad Network:</h2>
+  <amp-ad width="300" height="400"
+      id="i-amphtml-demo-id"
+      type="fake"
+      src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
+    <div placeholder>Loading...</div>
+    <div fallback>Could not display the fake ad :(</div>
+  </amp-ad>
+  <br/>
+
+  <h2>Fake Ad Network [srcdoc]:</h2>
+  <amp-ad width="300" height="400"
+      id="i-amphtml-demo-id-2"
+      type="fake"
+      a4a-conversion="true"
+      srcdoc='
+        <!doctype html>
+        <html ⚡4ads>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,minimum-scale=1">
+          <style amp4ads-boilerplate>body{visibility:hidden}</style>
+          <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+        </head>
+        <body>
+          <p>Hello, fake ad with srcdoc.<p>
+          <amp-img
+            layout="fixed"
+            height="250"
+            width="300"
+            src="https://placekitten.com/300/250"
+          ></amp-img>
+        </body>
+        </html>
+      '>
+    <div placeholder>Loading...</div>
+    <div fallback>Could not display the fake ad :(</div>
+  </amp-ad>
+</body>
+</html>

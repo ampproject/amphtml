@@ -1,0 +1,35 @@
+{
+  "requests": {
+    "host": "https://ping.chartbeat.net",
+    "basePrefix": "/ping?h=${domain}&p=${canonicalPath}&u=${clientId(_cb)}&d=${canonicalHost}&g=${uid}&g0=${sections}&g1=${authors}&g2=${zone}&g3=${sponsorName}&g4=${contentType}&c=${totalTime}&x=${scrollTop}&m=${maxScrollDepth}&y=${scrollHeight}&o=${scrollWidth}&w=${viewportHeight}&j=${decayTime}&R=1&W=0&I=0&E=${totalEngagedTime}&r=${documentReferrer}&t=${pageViewId}${clientId(_cb)}&b=${pageLoadTime}&i=${title}&T=${timestamp}&tz=${timezone}&sn=${requestCount}&C=2",
+    "baseSuffix": "&${extraUrlParams}&_",
+    "interval": "${host}${basePrefix}${baseSuffix}",
+    "anchorClick": "${host}${basePrefix}${baseSuffix}"
+  },
+  "triggers": {
+    "trackInterval": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 15,
+        "maxTimerLength": 7200
+      },
+      "request": "interval",
+      "vars": {
+        "decayTime": 30
+      }
+    },
+    "trackAnchorClick": {
+      "on": "click",
+      "selector": "a",
+      "request": "anchorClick",
+      "vars": {
+        "decayTime": 30
+      }
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

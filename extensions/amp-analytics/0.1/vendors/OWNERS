@@ -1,0 +1,27 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+{
+  rules: [
+    // Vendor file for appsflyer
+    {
+      pattern: 'appsflyer.json',
+      owners: [
+        {name: 'ampproject/wg-components'},
+        {name: 'AppsFlyer'},
+        {name: 'fredsh2k'},
+        {name: 'zvalmog', notify: true},
+      ],
+    },
+    // Vendor file for mapp intelligence
+    {
+      pattern: 'mapp_intelligence.json',
+      owners: [
+        {name: 'ampproject/wg-components'},
+        {name: 'Webtrekk'},
+        {name: 'mapp-digital'},
+        {name: 'StephanGuenther', notify: true},
+        {name: 'stiegi', notify: true},
+      ],
+    },
+  ],
+}

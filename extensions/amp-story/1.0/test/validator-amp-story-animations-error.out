@@ -1,0 +1,60 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Validator should prohibit invalid values in animate-in attribute.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-story</title>
+|    <link rel="canonical" href="/stories/features/animations/">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <style amp-custom>
+|      amp-story-page {
+|        font-family: 'Roboto', sans-serif;
+|        background: #fff;
+|      }
+|      amp-story-grid-layer {
+|        align-items: center;
+|        justify-items: center;
+|      }
+|      .square {
+|        background: #b60845;
+|        width: 96px;
+|        height: 96px;
+|      }
+|      </style>
+|  </head>
+|  <body>
+|    <amp-story standalone poster-portrait-src="portrait.png" poster-landscape-src="landscape.png" poster-square-src="square.png"
+|        title="Example" publisher="The AMP Project" publisher-logo-src="amp.png">
+|      <amp-story-page id="combining-animations">
+|          <amp-story-grid-layer template="thirds">
+|            <h1>invalid animation value + empty animation value</h1>
+|            <div animate-in="invalid animation value"
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-animations-error.html:37:10 The attribute 'animate-in' may not appear in tag 'div'.
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-animations-error.html:37:10 The attribute 'animate-in-duration' may not appear in tag 'div'.
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-animations-error.html:37:10 The attribute 'grid-area' may not appear in tag 'div'.
+|                 animate-in-duration="2s"
+|                 grid-area="middle-third">
+|              <div class="square"
+>>             ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-animations-error.html:40:12 The attribute 'animate-in' may not appear in tag 'div'.
+>>             ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-animations-error.html:40:12 The attribute 'animate-in-duration' may not appear in tag 'div'.
+|                   animate-in-duration="2s"
+|                   animate-in="">
+|              </div>
+|            </div>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>

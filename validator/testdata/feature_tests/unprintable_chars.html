@@ -1,0 +1,26 @@
+﻿﻿﻿<!--
+  Test Description:
+  The first few bytes in this document are \xef\xbb\xbf\xef\xbb\xbf, which is
+  also known as a byte-order-mark (BOM). These are not renderable bytes and
+  many text viewers will not display them. However, they are also not
+  whitespace.
+
+  An HTML5 compliant parser will open the <body> section immediately upon
+  encountering non-whitespace text outside of the body section. This causes
+  tags which appear to be in the document head to actually be placed in the
+  document body. This creates very confusing errors which are hard to debug for
+  most developers.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body data-foo>
+Hello, world.
+</body>
+</html>

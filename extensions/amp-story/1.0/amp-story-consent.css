@@ -1,0 +1,231 @@
+
+
+@import './amp-story-shadow-reset.css';
+
+.i-amphtml-story-consent {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 100005 !important;
+}
+
+/** Black opacity overlay. */
+.i-amphtml-story-consent::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: #000000 !important;
+  opacity: 0.55 !important;
+}
+
+.i-amphtml-story-consent-overflow {
+  margin-top: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  /* Enable iOS momentum scrolling. */
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.i-amphtml-story-consent-container {
+  position: relative !important;
+  margin: 88px 0 72px !important;
+  background: #FFFFFF !important;
+  border-radius: 8px 8px 0 0 !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  font-family: 'Roboto', sans-serif !important;
+  text-align: start !important;
+  overflow: hidden !important;
+}
+
+/** Consent header. */
+
+.i-amphtml-story-consent-header {
+  position: relative !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  background: var(--primary-color, #F0F0F0) !important;
+  z-index: 2 !important;
+}
+
+.i-amphtml-story-consent-logo {
+  position: absolute !important;
+  bottom: -32px !important;
+  margin-left: -32px !important;
+  left: 50% !important;
+  height: 64px !important;
+  width: 64px !important;
+  background: #F0F0F0 !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  border-radius: 5px !important;
+}
+
+.i-amphtml-story-consent-logo::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -6px !important;
+  bottom: -6px !important;
+  left: -6px !important;
+  right: -6px !important;
+  background: #FFFFFF !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12) !important;
+  z-index: -1 !important;
+}
+
+/** Consent content. */
+
+.i-amphtml-story-consent-content {
+  padding: 42px 16px 16px !important;
+  font-size: 14px !important;
+  z-index: 0 !important;
+}
+
+.i-amphtml-story-consent-vendors {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.i-amphtml-story-consent-vendor {
+  height: 40px !important;
+  border-bottom: 1px solid #F0F0F0 !important;
+  line-height: 40px !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-consent-external-link {
+  position: relative !important;
+  display: inline-block !important;
+  margin: 24px 0 !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  text-decoration: none !important;
+}
+
+.i-amphtml-story-consent-external-link:hover {
+  text-decoration: underline !important;
+}
+
+.i-amphtml-story-consent-external-link::after {
+  content: "" !important;
+  position: absolute !important;
+  display: block !important;
+  height: 16px !important;
+  width: 16px !important;
+  top: 3px !important;
+  right: -20px !important;
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgba(0, 0, 0, 0.87)"><path d="M10 6 8.6 7.4l4.6 4.6-4.6 4.6L10 18l6-6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')
+      center center no-repeat !important;
+}
+
+.i-amphtml-story-consent-external-link.i-amphtml-hidden {
+  display: none !important;
+}
+
+/** Consent actions. */
+
+.i-amphtml-story-consent-actions {
+  position: absolute !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 -2px 3px rgba(0, 0, 0, 0.12) !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-consent-action {
+  position: relative !important;
+  padding: 0 24px !important;
+  margin: 0 12px !important;
+  height: 40px !important;
+  width: 40vw !important;
+  background: #FFFFFF !important;
+  border: none !important;
+  border-radius: 40px !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+  line-height: 40px !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+}
+
+.i-amphtml-story-consent-action.i-amphtml-hidden {
+  display: none !important;
+}
+
+.i-amphtml-story-consent-action-accept {
+  background: var(--primary-color, #000000) !important;
+  color: #FFFFFF !important;
+}
+
+.i-amphtml-story-consent-action-reject {
+  border: 1px solid #000000 !important;
+}
+
+/**
+ * Tablets and desktop UI overrides.
+ * Basically triggers for anything bigger than a Pixel XL / iPhone Plus.
+ */
+
+@media (min-width: 420px) {
+  .i-amphtml-story-consent {
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .i-amphtml-story-consent-overflow {
+    margin-top: 0 !important;
+  }
+
+  .i-amphtml-story-consent-container {
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 !important;
+    max-height: 60vh !important;
+    min-height: 40vh !important;
+    width: calc(100vw - 80px) !important;
+    max-width: 800px !important;
+  }
+
+  .i-amphtml-story-consent-content {
+    margin: 0 auto !important;
+    max-width: 424px !important; /** Width of the action buttons. */
+    flex-grow: 1 !important;
+    overflow-y: auto !important;
+  }
+
+  .i-amphtml-story-consent-content::-webkit-scrollbar {
+    width: 0px !important;
+    background: transparent !important;
+  }
+
+  .i-amphtml-story-consent-actions {
+    position: relative !important;
+    left: 0px !important;
+    right: 0px !important;
+  }
+
+  .i-amphtml-story-consent-action {
+    width: 33vw !important;
+    max-width: 200px !important;
+  }
+}

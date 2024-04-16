@@ -1,0 +1,46 @@
+tags: {  # amp-link-rewriter
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-link-rewriter"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+  satisfies_condition: "amp-link-rewriter"
+  excludes_condition: "amp-skimlinks"
+  excludes_condition: "amp-smartlinks"
+}
+tags: {  # amp-link-rewriter (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-link-rewriter extension .json script"
+  requires_extension: "amp-link-rewriter"
+  mandatory_parent: "AMP-LINK-REWRITER"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # <amp-link-rewriter>
+  html_format: AMP
+  tag_name: "AMP-LINK-REWRITER"
+  unique: true
+  requires_extension: "amp-link-rewriter"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

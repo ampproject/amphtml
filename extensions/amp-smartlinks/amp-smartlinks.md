@@ -1,0 +1,88 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - ads
+teaser:
+  text: Run Narrativ's Linkmate process inside your AMP page
+---
+
+# amp-smartlinks
+
+## Overview
+
+At [Narrativ](https://narrativ.com/), we transform static commerce links into dynamic, multimerchant nodes. With a library of millions of products matched to expert reviews from top commerce publishers, we lift publisher revenue through real-time bidding and data solutions.
+
+This AMP extension is our Linkmate service in AMP. See the full documentation for Linkmate [here](https://docs.narrativ.com/en/stable/amp.html).
+
+## Getting started
+
+Your account must be a member of our Linkmate program to use this feature. For more information about this program, feel free to contact your account manager or [hello@narrativ.com](mailto:hello@narrativ.com).
+
+NOTE: If you plan to use `amp-smartlinks` alongside other affiliate partners you will need to specify the meta tag shown below. The tag will specify the order in which the affiliate tags fire.
+
+In your AMP page you will have to add the following snippets:
+
+```html
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    ...
+    <meta
+      name="amp-link-rewriter-priorities"
+      content="amp-smartlinks amp-other-affiliate"
+    />
+    <script
+      async
+      custom-element="amp-smartlinks"
+      src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js"
+    ></script>
+    ...
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    ...
+    <amp-smartlinks
+      layout="nodisplay"
+      nrtv-account-name="supercoolpublisher"
+      linkmate
+    >
+    </amp-smartlinks>
+    ...
+  </body>
+</html>
+```
+
+## Attributes
+
+<table>
+  <tr>
+    <td class="col-fourty"><strong>nrtv-account-name</strong></td>
+    <td><strong>Required</strong></td>
+    <td>Your Narrativ account name given to you by your account manager. Need to know your Narrativ account name? Log into <a href="https://dashboard.narrativ.com/#/login">dashboard.narrativ.com</a> and go to <a href="https://dashboard.narrativ.com/#/publisher/account/setup">setup</a> to see your account name in the snippet, or reach out to your account manager for support as needed.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>linkmate</strong></td>
+    <td><strong>Optional</strong></td>
+    <td>Flag to run our Linkmate service on an article. Inserting the attribute <code>linkmate</code> in the <code>amp-smartlinks</code> element will run our linkmate service.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>exclusive-links</strong></td>
+    <td><strong>Optional</strong></td>
+    <td>Flag to mark links as exclusive. Inserting the attribute <code>exclusive-links</code> in the <code>amp-smartlinks</code> element will generate exclusive links for the article.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>link-attribute</strong></td>
+    <td><strong>Optional</strong></td>
+    <td>If you store the "plain" url for a link in a different element attribute than <code>href</code> you can specify so here. Default value: <code>href</code>.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>link-selector</strong></td>
+    <td><strong>Optional</strong></td>
+    <td>A CSS selector to get all links you want monetized from an article. Default value: <code>a</code>.</td>
+  </tr>
+</table>
+
+## Validation
+
+See [amp-smartlinks rules](validator-amp-smartlinks.protoascii) in the AMP validator specification.

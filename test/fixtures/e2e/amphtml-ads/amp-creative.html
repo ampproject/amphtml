@@ -1,0 +1,62 @@
+<!doctype html>
+<html ⚡4ads>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="amp4ads-id" content="vendor=doubleclick,type=impression-id,value=12345">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <style amp-custom>
+    .left {
+      text-align: left;
+    }
+    .right {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="left">
+    <amp-img id="img-1" width="150" height="100"
+          src="/examples/visual-tests/picsum.photos/image1026_300x200.jpg">
+    </amp-img>
+  </div>
+  <div class="right">
+    <a href="https://google.com" target="_blank">
+      <amp-img id="img-2" width="150" height="100"
+          src="/examples/visual-tests/picsum.photos/image1026_300x200.jpg">
+      </amp-img>
+    </a>
+  </div>
+  <amp-pixel src="https://www.google.com/?cid=CLIENT_ID(a)"></amp-pixel>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "transport": {"beacon": false, "xhrpost": false},
+        "requests": {
+          "visibility": "/${type}?cid=CLIENT_ID(a)&elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&loadTimeVisibility=${loadTimeVisibility}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}&firstSeenTime=${firstSeenTime}&lastSeenTime=${lastSeenTime}&firstVisibleTime=${firstVisibleTime}&lastVisibleTime=${lastVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&intersectionRatio=${intersectionRatio}"
+        },
+        "triggers": {
+          "visible": {
+            "on": "visible",
+            "request": "visibility",
+            "vars": { "type": "visible" },
+            "parentPostMessage": "view"
+          },
+          "continuousVisible": {
+            "on": "visible",
+            "request": "visibility",
+            "visibilitySpec": {
+              "visiblePercentageMin": 0,
+              "continuousTimeMin": 1000
+            },
+            "vars": { "type": "rootVisible" },
+            "parentPostMessage": "activeview"
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+</body>
+</html>

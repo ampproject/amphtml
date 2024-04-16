@@ -1,0 +1,108 @@
+<!doctype html>
+<html ⚡4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+
+  <meta name="amp-cta-type" content="INSTALL">
+  <meta name="amp-cta-url" content="https://www.amp.dev">
+  <meta name="amp4ads-vars-attribution-icon" content="/test/fixtures/e2e/amphtml-ads/resource/icon.png">
+  <meta name="amp4ads-vars-attribution-url" content="https://www.google.com">
+
+  <meta name="amp4ads-vars-cta-accent-element" content="text">
+  <meta name="amp4ads-vars-cta-accent-color" content="#FF00FF">
+  <meta name="amp4ads-vars-cta-image" content="/examples/visual-tests/picsum.photos/image1068_300x169.jpg">
+  <meta name="amp4ads-vars-theme" content="custom">
+
+  <style amp-custom>
+    @font-face {
+      font-family: "Poppins";
+      font-weight: 700;
+      src: url("https://fonts.gstatic.com/s/poppins/v5/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2");
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .container {
+      align-items: center;
+      background-color: #FDC629;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: flex-end;
+      width: 100vw;
+    }
+
+    .logo {
+      border-radius: 1.5vh;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      height: 10vh;
+      margin-bottom: 3vh;
+      width: 10vh;
+    }
+
+    .text-box {
+      height: 10vh;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      margin-bottom: 3vh;
+      position: relative;
+      text-align: center;
+      width: 80vw;
+    }
+
+    .app-img-container {
+      /* 65vh + border width */
+      height: 67vh;
+      /* 65 * (9/16) ~= 37vh + (2 * border width) */
+      width: 41vh;
+    }
+
+    .app-img {
+      background-color: white;
+      border-radius: 4vh 4vh 0 0;
+      border-color: #fff;
+      border-style: solid;
+      border-width: 2vh 2vh 0 2vh;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.24);
+      box-sizing: content-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <amp-img alt="logo"
+        class="logo"
+        src="../img/app-install-logo.jpg"
+        width="100"
+        height="100"
+        layout="responsive">
+    </amp-img>
+    <div class="text-box">
+      <amp-fit-text
+        id="text"
+        width="70"
+        height="12"
+        layout="fill"
+        min-font-size="16"
+        max-font-size="64">
+          Start your journey in the fantasy wasteland.
+      </amp-fit-text>
+    </div>
+    <div class="app-img-container">
+      <amp-img alt="app image"
+          class="app-img"
+          src="../img/app-install-hero.jpg"
+          width="450"
+          height="800"
+          layout="responsive">
+      </amp-img>
+    </div>
+  </div>
+</body>
+</html>

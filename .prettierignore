@@ -1,0 +1,21 @@
+# Files and directories explicitly ignored
+**/package*.json
+**/node_modules/**
+
+# [GLOBALLY IGNORED]
+# (Don't edit or remove the above comment!)
+# The rules below are synced between .gitignore and .prettierignore, and are
+# removed by `amp clean`.
+
+.*cache
+.amp-dep-check
+build
+dist
+dist.3p
+dist.tools
+export
+examples/storybook
+/release
+result-reports
+test/coverage
+test/coverage-e2e

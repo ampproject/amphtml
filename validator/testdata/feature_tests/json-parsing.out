@@ -1,0 +1,55 @@
+PASS
+|  <!--
+|    Test Description:
+|    Test JSON parsing.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|  </head>
+|  <body>
+|
+|  <!-- Valid: The JSON string contains a carriage return `\r` between `:` and `false` -->
+|  <amp-state id="td_amp_menu_state"><script type="application/json">
+|  {"visible":
+|  false}</script></amp-state>
+|
+|  <!-- Valid: The JSON-LD can be parsed -->
+|  <script type="application/ld+json">
+|  {
+|     "@context":"http://schema.org",
+|     "@type":"Webpage",
+|     "url":"https://amp.dev/ ",
+|     "name":"amp.dev",
+|     "headline":"AMP - a web component framework to easily create user-first web experiences",
+|     "description":"Whether you are a publisher, e-commerce company, storyteller, advertiser or email sender, AMP makes it easy to create great experiences on the web. Use AMP to build websites, stories, ads and emails.",
+|     "mainEntityOfPage":{
+|        "@type":"WebPage",
+|        "@id":"https://amp.dev"
+|     },
+|     "publisher":{
+|        "@type":"Organization",
+|        "name":"AMP Project",
+|        "logo":{
+|           "url":"https://amp.dev/static/img/icons/icon-512x512.png",
+|           "width":512,
+|           "height":512,
+|           "@type":"ImageObject"
+|        }
+|     },
+|     "image":{
+|        "@type":"ImageObject",
+|        "url":"https://amp.dev/static/img/sharing/default-600x314.png",
+|        "width":600,
+|        "height":314
+|     }
+|  }
+|  </script>
+|  </body>
+|  </html>

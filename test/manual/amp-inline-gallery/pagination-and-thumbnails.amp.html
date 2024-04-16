@@ -1,0 +1,167 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A Basic inline gallery</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js"></script>
+  <script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-inline-gallery-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    amp-inline-gallery {
+      max-width: 900px;
+      --thumbnail-margin: 4px;
+    }
+
+    .gallery.gallery img {
+      object-fit: cover;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .white {
+      background-color: white;
+    }
+
+    .grey {
+      background-color: hsla(0, 0%, 33%);
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .checkered {
+      background-image:
+          linear-gradient(45deg, #666 25%, transparent 25%),
+          linear-gradient(-45deg, #666 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #666 75%),
+          linear-gradient(-45deg, transparent 75%, #666 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gallery with pagination count and thumbnails</h1>
+  <amp-inline-gallery layout="container">
+    <div layout="container">
+      <!--
+          Note: the thumbnails may use the larger size if that network request
+          is already in flight.
+      -->
+      <amp-base-carousel
+          class="gallery"
+          layout="responsive"
+          width="3" height="2"
+          snap-align="center"
+          loop="true">
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/1/150/100 300w,
+                    https://picsum.photos/id/1/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/2/150/100 300w,
+                    https://picsum.photos/id/2/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/3/150/100 300w,
+                    https://picsum.photos/id/3/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/4/150/100 300w,
+                    https://picsum.photos/id/4/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/5/150/100 300w,
+                    https://picsum.photos/id/5/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/6/150/100 300w,
+                    https://picsum.photos/id/6/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/7/150/100 300w,
+                    https://picsum.photos/id/7/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/8/150/100 300w,
+                    https://picsum.photos/id/8/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/9/150/100 300w,
+                    https://picsum.photos/id/9/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/10/150/100 300w,
+                    https://picsum.photos/id/10/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/11/150/100 300w,
+                    https://picsum.photos/id/11/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/12/150/100 300w,
+                    https://picsum.photos/id/12/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/13/150/100 300w,
+                    https://picsum.photos/id/13/600/400 600w">
+        </amp-img>
+        <amp-img
+            class="slide"
+            layout="flex-item"
+            srcset="https://picsum.photos/id/14/150/100 300w,
+                    https://picsum.photos/id/14/600/400 600w">
+        </amp-img>
+      </amp-base-carousel>
+      <amp-inline-gallery-pagination layout="nodisplay" inset>
+      </amp-inline-gallery-pagination>
+    </div>
+    <amp-inline-gallery-thumbnails class="gallery" responsive="fixed-height" height="96">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <h2>Config</h2>
+  <ul>
+    <li>
+      Looping
+    </li>
+    <li>
+      Inset pagination dots
+    </li>
+    <li>
+      Thumbnails
+    </li>
+  </ul>
+</body>
+</html>

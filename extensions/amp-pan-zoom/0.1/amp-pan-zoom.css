@@ -1,0 +1,36 @@
+
+
+ .i-amphtml-pan-zoom {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+ }
+
+.i-amphtml-pan-zoom-child {
+  position: absolute;
+}
+
+.i-amphtml-pan-zoom-scrollable {
+  cursor: all-scroll;
+}
+
+.amp-pan-zoom-button {
+  position: absolute;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  bottom: 12px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  box-shadow: 1px 1px 2px;
+  background-color: white;
+  border-radius: 3px;
+}
+
+.amp-pan-zoom-in-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+}
+
+.amp-pan-zoom-out-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13H5v-2h14z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+}

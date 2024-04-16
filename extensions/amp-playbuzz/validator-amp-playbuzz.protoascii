@@ -1,0 +1,43 @@
+tags: {  # amp-playbuzz
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-playbuzz"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-playbuzz>
+  html_format: AMP
+  tag_name: "AMP-PLAYBUZZ"
+  requires_extension: "amp-playbuzz"
+  attrs: {
+    name: "data-comments"
+    value_casei: "false"
+    value_casei: "true"
+  }
+  attrs: {
+    name: "data-item"
+    mandatory_oneof: "['data-item', 'src']"
+  }
+  attrs: {
+    name: "data-item-info"
+    value_casei: "false"
+    value_casei: "true"
+  }
+  attrs: {
+    name: "data-share-buttons"
+    value_casei: "false"
+    value_casei: "true"
+  }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['data-item', 'src']"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: RESPONSIVE
+    supported_layouts: FIXED_HEIGHT
+  }
+}

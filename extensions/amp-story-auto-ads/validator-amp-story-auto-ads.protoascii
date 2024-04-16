@@ -1,0 +1,66 @@
+tags: {  # amp-story-auto-ads
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-auto-ads"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+# The following tags form a chain of direct child nodes starting from the
+# document body. As a result, we don't need to bother disallowing ancestors.
+# BODY > AMP-STORY > AMP-STORY-AUTO-ADS > amp-story-auto-ads config script
+# BODY > AMP-STORY > AMP-STORY-AUTO-ADS > TEMPLATE
+tags: {  # <amp-story-auto-ads>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUTO-ADS"
+  requires_extension: "amp-story-auto-ads"
+  mandatory_parent: "AMP-STORY"
+  unique: true
+  spec_url: "https://amp.dev/documentation/components/amp-story-auto-ads/"
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+    }
+  }
+}
+tags: {  # amp-story-auto-ads (json config)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-auto-ads config script"
+  mandatory_parent: "AMP-STORY-AUTO-ADS"
+  requires_extension: "amp-story-auto-ads"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-story-auto-ads/"
+}
+# HTML5, 4.11.3 The template element
+tags: {
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "amp-story-auto-ads > template"
+  mandatory_parent: "AMP-STORY-AUTO-ADS"
+  requires_extension: "amp-mustache"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
+  reference_points: { tag_spec_name: "AMP-STORY-GRID-LAYER default" }
+  reference_points: { tag_spec_name: "AMP-STORY-GRID-LAYER animate-in" }
+}

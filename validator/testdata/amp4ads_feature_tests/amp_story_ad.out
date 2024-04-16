@@ -1,0 +1,40 @@
+PASS
+|  <!--
+|    Test Description:
+|    This tests that an ad designed for amp-story is passing validation.
+|  -->
+|  <!DOCTYPE html>
+|  <html amp4ads>
+|    <head>
+|      <meta charset="utf-8">
+|      <meta name="viewport" content="width=device-width,minimum-scale=1">
+|
+|      <!-- Specifies where the user is directed -->
+|      <meta name="amp-cta-url" content="https://www.ampproject.org">
+|
+|      <!-- Specifies the call to action button text enum -->
+|      <meta name="amp-cta-type" content="EXPLORE">
+|
+|      <!-- Specifies what type of landing page the user is direct to -->
+|      <meta name="amp-cta-landing-page-type" content="NONAMP">
+|
+|      <!-- Specifies where the attribution icon will be loaded from (optional). -->
+|      <meta name="amp4ads-vars-attribution-icon" content="https://placekitten.com/30/30">
+|
+|      <!-- Specifies where a click on attribution icon will land (optional). -->
+|      <meta name="amp4ads-vars-attribution-url" content="https://example.com">
+|
+|      <!-- Optional format for creatives to pass data to AMP runtime.  -->
+|      <meta name="amp4ads-vars-foo" content="bar">
+|
+|
+|      <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|      <style amp-custom>
+|       amp-img {height: 100vh}
+|      </style>
+|      <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|    </head>
+|    <body>
+|      <amp-img src="cats.jpg" layout="responsive" height="1280" width="720"></amp-img>
+|    </body>
+|  </html>

@@ -1,0 +1,167 @@
+{
+  "2": {
+    "string": "Klepnite na Ďalej"
+  },
+  "3": {
+    "string": "Klepnite na Späť"
+  },
+  "4": {
+    "string": "Nepodarilo sa skopírovať odkaz do schránky :("
+  },
+  "5": {
+    "string": "Odkaz bol skopírovaný!"
+  },
+  "6": {
+    "string": "E-mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Získať odkaz"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Ľutujeme, zdá sa, že váš prehliadač toto prostredie nepodporuje"
+  },
+  "22": {
+    "string": "Prijať"
+  },
+  "23": {
+    "string": "Zamietnuť"
+  },
+  "25": {
+    "string": "Zobraziť na pôvodnej doméne:"
+  },
+  "26": {
+    "string": "Viac informácií o výsledkoch AMP"
+  },
+  "27": {
+    "string": "Pokračovať napriek tomu"
+  },
+  "34": {
+    "string": "Prehrať video"
+  },
+  "35": {
+    "string": "Potiahnite nahor"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Aktualizované"
+  },
+  "65": {
+    "string": "Video sa nepodarilo prehrať"
+  },
+  "66": {
+    "string": "Utlmiť príbeh"
+  },
+  "67": {
+    "string": "Obnoviť príbeh"
+  },
+  "68": {
+    "string": "Informácie o príbehu"
+  },
+  "69": {
+    "string": "Zdieľať príbeh"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Tip 1 z 2"
+  },
+  "76": {
+    "string": "Klepnutím prejdete na ďalšiu obrazovku"
+  },
+  "77": {
+    "string": "Ďalej"
+  },
+  "78": {
+    "string": "Tip 2 z 2"
+  },
+  "79": {
+    "string": "Posunutím prejdete na ďalší príbeh"
+  },
+  "80": {
+    "string": "Mám to"
+  },
+  "81": {
+    "string": "Tip"
+  },
+  "83": {
+    "string": "Aktivovať"
+  },
+  "84": {
+    "string": "SKÓRE:"
+  },
+  "85": {
+    "string": "Pozastaviť príbeh"
+  },
+  "86": {
+    "string": "Prehrať príbeh"
+  },
+  "87": {
+    "string": "Zavrieť"
+  },
+  "88": {
+    "string": "Preskočiť ďalej"
+  },
+  "89": {
+    "string": "Vaša odpoveď bude odoslaná na"
+  },
+  "90": {
+    "string": "Ďalší príbeh"
+  },
+  "91": {
+    "string": "Ďalšia strana"
+  },
+  "92": {
+    "string": "Prehrať znova"
+  },
+  "93": {
+    "string": "Predchádzajúca strana"
+  },
+  "96": {
+    "string": "Preskúmajte pohybom zariadenia"
+  },
+  "97": {
+    "string": "Otvára sa"
+  },
+  "98": {
+    "string": "Formulár nebol odoslaný, skúste to znova"
+  },
+  "99": {
+    "string": "Formulár bol úspešne odoslaný"
+  },
+  "101": {
+    "string": "Nakupovať teraz"
+  }
+}

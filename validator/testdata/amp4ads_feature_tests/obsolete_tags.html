@@ -1,0 +1,33 @@
+<!--
+  Test Description:
+  This tests that A4A does not allow obsolete non-conforming tags, which AMP
+  does.
+-->
+<!doctype html>
+<html ⚡4ads>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+</head>
+<body>
+These tags are not allowed:
+<ACRONYM></ACRONYM>
+<BIG></BIG>
+<CENTER></CENTER>
+<DIR></DIR>
+<HGROUP></HGROUP>
+<LISTING></LISTING>
+<MULTICOL></MULTICOL>
+<NEXTID></NEXTID>
+<NOBR></NOBR>
+<SPACER></SPACER>
+<STRIKE></STRIKE>
+<TT></TT>
+<XMP></XMP>
+<o:p></o:p>
+
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+{
+  "2": {
+    "string": "Valitse Seuraava"
+  },
+  "3": {
+    "string": "Valitse Takaisin"
+  },
+  "4": {
+    "string": "Linkkiä ei voitu kopioida leikepöydälle :("
+  },
+  "5": {
+    "string": "Linkki kopioitu!"
+  },
+  "6": {
+    "string": "Sähköposti"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Hae linkki"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "Tekstiviesti"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Valitettavasti selaimesi ei tue tätä ominaisuutta"
+  },
+  "22": {
+    "string": "Hyväksy"
+  },
+  "23": {
+    "string": "Hylkää"
+  },
+  "25": {
+    "string": "Näytä alkuperäisessä verkkotunnuksessa:"
+  },
+  "26": {
+    "string": "Lisätietoja AMP-tuloksista"
+  },
+  "27": {
+    "string": "Jatka silti"
+  },
+  "34": {
+    "string": "Toista video"
+  },
+  "35": {
+    "string": "Pyyhkäise ylös"
+  },
+  "63": {
+    "string": "LINE"
+  },
+  "64": {
+    "string": "Päivitetty"
+  },
+  "65": {
+    "string": "Videon toistaminen epäonnistui"
+  },
+  "66": {
+    "string": "Mykistä tarina"
+  },
+  "67": {
+    "string": "Poista tarinan mykistys"
+  },
+  "68": {
+    "string": "Tarinan tiedot"
+  },
+  "69": {
+    "string": "Jaa tarina"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Vinkki 1/2"
+  },
+  "76": {
+    "string": "Siirry seuraavaan ruutuun napauttamalla"
+  },
+  "77": {
+    "string": "Seuraava"
+  },
+  "78": {
+    "string": "Vinkki 2/2"
+  },
+  "79": {
+    "string": "Siirry seuraavaan tarinaan pyyhkäisemällä"
+  },
+  "80": {
+    "string": "Selvä"
+  },
+  "81": {
+    "string": "Vinkki"
+  },
+  "83": {
+    "string": "Aktivoi"
+  },
+  "84": {
+    "string": "PISTEET:"
+  },
+  "85": {
+    "string": "Keskeytä tarina"
+  },
+  "86": {
+    "string": "Toista tarina"
+  },
+  "87": {
+    "string": "Sulje"
+  },
+  "88": {
+    "string": "Ohita seuraava"
+  },
+  "89": {
+    "string": "Vastauksesi lähetetään taholle"
+  },
+  "90": {
+    "string": "Seuraava tarina"
+  },
+  "91": {
+    "string": "Seuraava sivu"
+  },
+  "92": {
+    "string": "Toista uudelleen"
+  },
+  "93": {
+    "string": "Edellinen sivu"
+  },
+  "96": {
+    "string": "Selaa liikuttamalla laitetta"
+  },
+  "97": {
+    "string": "Avataan"
+  },
+  "98": {
+    "string": "Lomaketta ei lähetetty, yritä uudelleen"
+  },
+  "99": {
+    "string": "Lomake lähetettiin"
+  },
+  "101": {
+    "string": "Osta nyt"
+  }
+}

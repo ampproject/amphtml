@@ -1,0 +1,84 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-consent"
+        src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+    <title>My Story with consent</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="consent.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story {
+        --primary-color: #0379c4;
+      }
+      amp-story-page {
+        background-color: white;
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "./consent.html"
+        },
+        "headline": "My Story",
+        "image":["http://placehold.it/420x740"],
+        "datePublished": "2018-01-01T00:00:00+00:00",
+        "dateModified": "2018-01-01T00:00:00+00:00",
+        "author": {
+          "@type": "Organization",
+          "name": "AMP Project"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "AMP Project",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "http://placehold.it/128x128"
+          }
+        },
+        "description": "My Story"
+      }
+    </script>
+  </head>
+
+  <body>
+    <amp-story standalone publisher-logo-src="https://placekitten.com/g/64/64">
+      <amp-consent id='ABC' layout='nodisplay'>
+        <script type="application/json">{
+          "consentInstanceId": "DEF",
+          "checkConsentHref": "http://localhost:8000/get-consent-v1",
+          "promptUI": "ui0"
+        }</script>
+
+        <amp-story-consent id="ui0" layout="nodisplay">
+          <script type="application/json">{
+            "title": "Headline.",
+            "message": "This is some more information about this choice. Here's a list of items related to this choice.",
+            "vendors": ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10"],
+            "externalLink": {
+              "title": "Data Privacy Settings",
+              "href": "https://example.com"
+            }
+          }</script>
+        </amp-story-consent>
+      </amp-consent>
+
+      <amp-story-page id="cover" auto-advance-after="5s">
+        <amp-story-grid-layer template="vertical">
+          <h1>You just accepted or rejected the consent!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

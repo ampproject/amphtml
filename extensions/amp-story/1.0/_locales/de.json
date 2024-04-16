@@ -1,0 +1,170 @@
+{
+  "2": {
+    "string": "Tippe auf \"Weiter\""
+  },
+  "3": {
+    "string": "Tippe auf \"Zurück\""
+  },
+  "4": {
+    "string": "Der Link konnte nicht in die Zwischenablage kopiert werden :("
+  },
+  "5": {
+    "string": "Link kopiert!"
+  },
+  "6": {
+    "string": "E-Mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Link abrufen"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Leider unterstützt dein Browser diese Art der Präsentation nicht."
+  },
+  "22": {
+    "string": "Akzeptieren"
+  },
+  "23": {
+    "string": "Ablehnen"
+  },
+  "25": {
+    "string": "In ursprünglicher Domain ansehen:"
+  },
+  "26": {
+    "string": "Mehr über AMP Ergebnisse"
+  },
+  "27": {
+    "string": "Trotzdem fortfahren"
+  },
+  "34": {
+    "string": "Video abspielen"
+  },
+  "35": {
+    "string": "Nach oben wischen"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Aktualisiert"
+  },
+  "65": {
+    "string": "Video konnte nicht abgespielt werden"
+  },
+  "66": {
+    "string": "Story stummschalten"
+  },
+  "67": {
+    "string": "Stummschaltung der Story aufheben"
+  },
+  "68": {
+    "string": "Infos zur Story"
+  },
+  "69": {
+    "string": "Story teilen"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Tipp 1 von 2"
+  },
+  "76": {
+    "string": "Hier tippen, um zum nächsten Bildschirm zu gelangen"
+  },
+  "77": {
+    "string": "Weiter"
+  },
+  "78": {
+    "string": "Tipp 2 von 2"
+  },
+  "79": {
+    "string": "Wischen, um zur nächsten Story zu gelangen"
+  },
+  "80": {
+    "string": "Verstanden"
+  },
+  "81": {
+    "string": "Tipp"
+  },
+  "83": {
+    "string": "Aktivieren"
+  },
+  "84": {
+    "string": "SCORE:"
+  },
+  "85": {
+    "string": "Story anhalten"
+  },
+  "86": {
+    "string": "Story abspielen"
+  },
+  "87": {
+    "string": "Schließen"
+  },
+  "88": {
+    "string": "Nächstes Element"
+  },
+  "89": {
+    "string": "Deine Antwort wird gesendet an"
+  },
+  "90": {
+    "string": "Nächste Story"
+  },
+  "91": {
+    "string": "Nächste Seite"
+  },
+  "92": {
+    "string": "Wiederholen"
+  },
+  "93": {
+    "string": "Vorherige Seite"
+  },
+  "96": {
+    "string": "Bewege dein Gerät, um dich umzusehen"
+  },
+  "97": {
+    "string": "Wird geöffnet"
+  },
+  "98": {
+    "string": "Formular nicht abgeschickt, versuche es erneut"
+  },
+  "99": {
+    "string": "Formular erfolgreich abgeschickt"
+  },
+  "101": {
+    "string": "Jetzt kaufen"
+  },
+  "110": {
+    "string": "Abonnieren mit Google"
+  }
+}

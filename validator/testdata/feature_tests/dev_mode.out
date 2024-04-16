@@ -1,0 +1,46 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests the logic for data-ampdevmode attributes.
+|    See https://github.com/ampproject/amphtml/issues/20974 for the
+|    original motivation. The idea is that an author can tag a document with
+|    the data-ampdevmode type identifier, which will emit an error and make
+|    the document invalid. However, any other tags marked with the same
+|    identifier will no longer emit errors, regardless of the error type.
+|  -->
+|  <!doctype html>
+|  <html ⚡ data-ampdevmode>
+>> ^~~~~~~~~
+feature_tests/dev_mode.html:11:0 Tag 'html' marked with attribute 'data-ampdevmode'. Validator will suppress errors regarding any other tag with this attribute.
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
+|  </head>
+|  <body>
+|
+|    <!-- Still produces an error -->
+|    <faketag></faketag>
+>>   ^~~~~~~~~
+feature_tests/dev_mode.html:23:2 The tag 'faketag' is disallowed.
+|    <anotherfaketag></anotherfaketag>
+>>   ^~~~~~~~~
+feature_tests/dev_mode.html:24:2 The tag 'anotherfaketag' is disallowed.
+|
+|    <!-- Tagged with data-ampdevmode, so errors are suppressed. -->
+|    <faketag data-ampdevmode></faketag>
+|
+|    <!-- Also suppresses the entire tree. -->
+|    <faketag data-ampdevmode>
+|      <anotherfaketag></anotherfaketag>
+|    </faketag>
+|
+|    <!-- Yet, it does not prevent the tag from satisfying conditions, such as
+|         the amp-autocomplete-0.1.js being used -->
+|    <amp-autocomplete data-ampdevmode></amp-autocomplete>
+|
+|  </body>
+|  </html>

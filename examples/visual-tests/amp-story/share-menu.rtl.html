@@ -1,0 +1,76 @@
+<!doctype html>
+<html amp lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <title>amp-story share menu visual diff</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="./share-menu.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-story-page {
+        background: black;
+        font-family: sans-serif;
+      }
+
+      .i-amphtml-story-spinner-container {
+        /* Hide the spinner for loading pages, since this causes flakes */
+        display: none;
+      }
+
+      h1#hello-world {
+        color: white;
+        text-align: center;
+        text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
+      }
+      /* Since it doesn't have shadow root, we need to enforce the height */
+      amp-story-share-menu {
+        height: 100%;
+      }
+    </style>
+    <script>
+      // TODO(#17108): Remove this when getMode().test is set.
+      __AMP_TEST = true;
+    </script>
+  </head>
+
+  <body>
+    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+        publisher-logo-src="/examples/visual-tests/photos/120.png"
+        poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
+        poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+        poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg">
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg" width="3" height="5">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 id="hello-world">مرحبا بالعالم</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-social-share layout="nodisplay">
+        <script type="application/json">
+          {
+            "shareProviders": [
+                "email",
+                {"provider": "facebook", "app_id": "254325784911610"},
+                {
+                  "provider": "twitter",
+                  "text": "This is custom share text that I would like for the Twitter platform"
+                },
+                "whatsapp",
+                "pinterest",
+                "line"
+              ]
+          }
+        </script>
+      </amp-story-social-share>
+    </amp-story>
+  </body>
+
+</html>

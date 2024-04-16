@@ -1,0 +1,33 @@
+{
+  "transport": {
+    "xhrpost": true,
+    "useBody": true
+  },
+  "requests": {
+    "trackTest": "https://jssdkdata.debugbox.sensorsdata.cn/sa?project=liangshuang"
+  },
+  "vars": {
+    "distinctId": "${clientId(sensors_amp_id)}"
+  },
+  "extraUrlParams": {
+    "distinct_id": "${distinctId}",
+    "lib": {
+      "$lib": "amp",
+      "$lib_method": "code",
+      "$lib_version": "1.0.0"
+    },
+    "properties": {
+      "$lib": "amp",
+      "$lib_version": "1.0.0",
+      "$url": "${ampdocUrl}",
+      "$title": "${title}",
+      "$referrer": "${documentReferrer}",
+      "$screen_width": "${screenWidth}",
+      "$screen_height": "${screenHeight}",
+      "amp_properties": "${amp_properties}"
+    },
+    "type": "track",
+    "event": "${event}",
+    "time": "${timestamp}"
+  }
+}

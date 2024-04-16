@@ -1,0 +1,35 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>amp-lightbox</title>
+    <link rel="canonical" href="//example.com" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-latest.js"></script>
+    <style amp-custom>
+    amp-lightbox {
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+    </style>
+</head>
+
+<body>
+  <amp-lightbox id="lightbox" layout="nodisplay">
+
+    <button id="close" on="tap:lightbox.close">
+      Close Lightbox
+    </button>
+    <amp-img
+        id="image"
+        src="/examples/img/sample.jpg"
+        width="641" height="481"
+    ></amp-img>
+  </amp-lightbox>
+
+  <button id="open" on="tap:lightbox.open">
+    Open Lightbox
+  </button>
+</body>
+</html>

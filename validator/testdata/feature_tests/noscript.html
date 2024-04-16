@@ -1,0 +1,54 @@
+<!--
+  Test Description:
+  This tests the logic for <noscript> tags and it's child tags.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- Example of a valid noscript -->
+  <noscript>
+    <audio controls>
+      <source src="https://example.com/howl-of-the-lemur.mp3" type="audio/mpeg">
+    </audio>
+    <img alt="Iconic Lemurs" decoding="auto" height="200" src="https://example.com/lemurs.png" width="80">
+    <video controls height="480" width="640">
+      <source src="https://example.com/island-of-lemurs.mp4" type="video/mp4">
+    </video>
+  </noscript>
+  <!-- Valid: noscript with picture element -->
+  <noscript>
+    <picture>
+      <source type="image/webp" srcset="images/lemur.webp">
+      <source type="image/jpeg" srcset="images/lemur.jpg">
+      <img alt="Lemur sleeping" width=1200 height=800 src="images/lemur.jpg">
+    </picture>
+  </noscript>
+  <!-- Invalid: audio's source must have src and type; controls are optional -->
+  <noscript>
+    <audio>
+      <source>
+    </audio>
+  </noscript>
+  <!-- Invalid: img must have src; alt, height and width are optional -->
+  <noscript>
+    <img alt="Iconic Lemurs">
+  </noscript>
+  <!-- Invalid: audio must be in a noscript tag -->
+  <audio controls>
+    <source src="https://example.com/howl-of-the-lemur.mp3" type="audio/mpeg">
+  </audio>
+  <!-- Invalid: video must be in a noscript tag -->
+  <video controls height="480" width="640">
+    <source src="https://example.com/island-of-lemurs.mp4" type="video/mp4">
+  </video>
+  <!-- Invalid: nested noscript tags don't correctly parse. -->
+  <noscript> <noscript> </noscript> </noscript>
+</body>
+</html>

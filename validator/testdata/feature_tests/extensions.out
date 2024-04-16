@@ -1,0 +1,40 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This test demonstrates the error message for various extension-related errors.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|
+|    <!-- Extension is included, unused. Produces warning. -->
+|    <script async custom-element='amp-ad'
+|       src='https://cdn.ampproject.org/v0/amp-ad-0.1.js'></script>
+|    <!-- Extension is included, unused. Produces error. -->
+|    <script async custom-element='amp-timeago'
+|       src='https://cdn.ampproject.org/v0/amp-timeago-0.1.js'></script>
+|    <!-- Extension is included, unused. No error or warning -->
+|    <script async custom-element='amp-dynamic-css-classes'
+|       src='https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js'></script>
+|  </head>
+|  <body>
+|
+|    <!-- Extension missing. Produces error. -->
+|    <amp-analytics type="googleanalytics">
+>>   ^~~~~~~~~
+feature_tests/extensions.html:27:2 The tag 'amp-analytics' requires including the 'amp-analytics' extension JavaScript. (see https://amp.dev/documentation/components/amp-analytics/)
+|      <script type="application/json">{}</script>
+>>     ^~~~~~~~~
+feature_tests/extensions.html:28:4 The tag 'amp-analytics extension .json script' requires including the 'amp-analytics' extension JavaScript. (see https://amp.dev/documentation/components/amp-analytics/)
+|    </amp-analytics>
+|
+|  Hello, world.
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/extensions.html:33:6 The extension 'amp-timeago' was found on this page, but is unused. Please remove this extension.

@@ -1,0 +1,210 @@
+<!--
+  Test Description:
+  This tests a bunch of cases that might allow AMP pages to leak network
+  requests during a browser prefetch from a search result page. These are
+  cases that the validator considers not allowed.
+
+  All of these test cases should produce errors.
+-->
+<!doctype html SYSTEM "https://leaking.via/doctype">
+
+<html ⚡ manifest="https://leaking.via/html-manifest">
+
+
+<!-- AMP boilerplate which should not produce errors -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<script async src="https://cdn.ampproject.org/v0.js"></script>
+<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+<link rel=canonical href="self" />
+
+
+<base href="https://leaking.via/base-href/">
+
+<!--
+%CSS
+-->
+<style amp-custom>
+    @import 'https://leaking.via/css-import-string';
+    @import url(https://leaking.via/css-import-url);
+</style>
+
+<!--
+%Redirects
+-->
+<meta http-equiv="refresh" content="10; url=http://leaking.via/meta-refresh">
+
+<!--
+%CSP
+-->
+<meta http-equiv="Content-Security-Policy" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri">
+<meta http-equiv="Content-Security-Policy-Report-Only" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri-2">
+
+<!--
+%Links
+-->
+<link rel="stylesheet" href="https://leaking.via/link-stylesheet" />
+<link rel="alternate stylesheet" href="https://leaking.via/link-alternate-stylesheet" />
+<link rel="import" href="https://leaking.via/link-import" />
+<link rel="subresource" href="https://leaking.via/link-subresource">
+
+<!--
+%MSIE Imports
+-->
+<IMPORT namespace="myNS" implementation="https://leaking.via/import-implementation-2" /></IMPORT>
+
+</head>
+<body>
+
+<!--
+%Table Background
+-->
+<table background="https://leaking.via/table-background">
+    <tr>
+        <td background="https://leaking.via/td-background"></td>
+    </tr>
+</table>
+
+<!--
+%Images
+-->
+<img src="https://leaking.via/img-src">
+<img dynsrc="https://leaking.via/img-dynsrc">
+<img lowsrc="https://leaking.via/img-lowsrc">
+<img src="data:image/svg+xml,<svg%20xmlns='%68ttp:%2f/www.w3.org/2000/svg'%20xmlns:xlink='%68ttp:%2f/www.w3.org/1999/xlink'><image%20xlink:hr%65f='%68ttp:%2f/leaking.via/svg-via-data'></image></svg>">
+
+<image src="https://leaking.via/image-src"></image>
+<image href="https://leaking.via/image-href"></image>
+
+<picture>
+    <source srcset="https://leaking.via/picture-source-srcset">
+</picture>
+<picture>
+    <img srcset="https://leaking.via/picture-img-srcset">
+</picture>
+
+<!-- Warning: There are different results between JS and CPP validators for this -->
+<img srcset=",,,,,https://leaking.via/img-srcset">
+
+<img src="#" longdesc="https://leaking.via/img-longdesc">
+<!-- longdesc works on Firefox but requires right-click, "View Description" -->
+
+<!--
+%Forms
+-->
+<input type="image" src="https://leaking.via/input-src" name="test" value="test">
+<isindex src="https://leaking.via/isindex-src" type="image">
+<isindex action="https://leaking.via/isindex-action"></isindex>
+<form id="test2"></form><isindex type="submit" formaction="https://leaking.via/isindex-formaction" form="test2"></isindex>
+
+<!--
+%Media
+-->
+<bgsound src="https://leaking.via/bgsound-src"></bgsound>
+<video src="https://leaking.via/video-src">
+  <track kind="subtitles" label="English subtitles" src="https://leaking.via/track-src" srclang="en" default></track>
+</video>
+<video controls>
+  <source src="https://leaking.via/video-source-src" type="video/mp4">
+</video>
+<audio src="https://leaking.via/audio-src"></audio>
+<audio controls>
+  <source src="https://leaking.via/audio-source-src" type="video/mp4">
+</audio>
+<video poster="https://leaking.via/video-poster" src="https://leaking.via/video-poster-2"></video>
+
+<!--
+%Object & Embed
+-->
+<object data="https://leaking.via/object-data"></object>
+<object type="text/x-scriptlet" data="https://leaking.via/object-data-x-scriptlet"></object>
+<object movie="https://leaking.via/object-movie" type="application/x-shockwave-flash"></object>
+<object movie="https://leaking.via/object-movie">
+    <param name="type" value="application/x-shockwave-flash"></param>
+</object>
+<object codebase="https://leaking.via/object-codebase"></object>
+<embed src="https://leaking.via/embed-src"></embed>
+<embed code="https://leaking.via/embed-code"></embed>
+<object classid="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83">
+    <param name="DataURL" value="https://leaking.via/object-param-dataurl">
+</object>
+<object classid="clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6">
+    <param name="URL" value="https://leaking.via/object-param-url">
+</object>
+
+
+<!--
+%Script
+-->
+<script src="https://leaking.via/script-src"></script>
+<svg><script href="https://leaking.via/svg-script-href"></script></svg>
+<svg><script xlink:href="https://leaking.via/svg-script-xlink-href"></script></svg>
+<script>
+//# sourceMappingURL=https://leaking.via/javascript-source-map
+</script>
+
+<!--
+%Frames
+-->
+<iframe src="https://leaking.via/iframe-src"></iframe>
+<iframe src="data:image/svg+xml,<svg%20xmlns='%68ttp:%2f/www.w3.org/2000/svg'%20xmlns:xlink='%68ttp:%2f/www.w3.org/1999/xlink'><image%20xlink:hr%65f='%68ttps:%2f/leaking.via/svg-via-data'></image></svg>"></iframe>
+<iframe srcdoc="<img src=https://leaking.via/iframe-srcdoc-img-src>"></iframe>
+<iframe src="view-source:https://leaking.via/iframe-src-viewsource"></iframe>
+<iframe src="javascript:'&lt;img src=https://leaking.via/iframe-javascript-src&gt;'"></iframe>
+<iframe src="javascript:'&lt;iframe src=&quot;javascript:\&apos;&lt;img src=https://leaking.via/iframe-javascript-src-2&gt;\&apos;&quot;&gt;&lt;/iframe&gt;'"></iframe>
+<iframe src="javascript:atob('PGltZyBzcmM9Imh0dHBzOi8vbGVha2luZy52aWEvaWZyYW1lLWphdmFzY3JpcHQtc3JjLTMiPg==')"></iframe>
+
+<!--
+%Menu
+-->
+<p contextmenu="a">Right Click</p>
+<menu type="context" id="a">
+    <menuitem label="a" icon="https://leaking.via/menuitem-icon"></menuitem>
+</menu>
+
+
+<!--
+%Applet
+-->
+<applet code="Test" codebase="https://leaking.via/applet-codebase"></applet>
+<applet code="Test" archive="https://leaking.via/applet-archive"></applet>
+<applet code="Test" object="https://leaking.via/applet-object"></applet>
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <image xmlns:xlink="http://www.w3.org/1999/xlink">
+        <animate attributeName="xlink:href" begin="0s" from="#" to="https://leaking.via/svg-image-animate" />
+    </image>
+</svg>
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <feImage xlink:href="https://leaking.via/svg-feimage" />
+</svg>
+
+<!--
+%XSLT Stylesheets
+-->
+<?xml-stylesheet type="text/xsl" href="https://leaking.via/xslt-stylesheet" ?>
+
+<!--
+%Data Islands
+-->
+<xml src="https://leaking.via/xml-src" id="xml"></xml>
+<div datasrc="#xml" datafld="$text" dataformatas="html"></div>
+
+<!--
+%VML
+-->
+<line xmlns="urn:schemas-microsoft-com:vml">
+    <fill style="behavior:url(#default#vml)" src="https://leaking.via/vml-line-fill-src" />
+    <stroke style="behavior:url(#default#vml)" src="https://leaking.via/vml-line-stroke-src" />
+    <imageData style="behavior:url(#default#vml)" src="https://leaking.via/vml-line-imgdata-src" />
+</line>
+<vmlframe
+    xmlns="urn:schemas-microsoft-com:vml"
+    style="behavior:url(#default#vml);position:absolute;width:100%;height:100%"
+    src="https://leaking.via/vmlframe-src#xss">
+</vmlframe>
+
+</body>
+</html>

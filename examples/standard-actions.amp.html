@@ -1,0 +1,137 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Hide/Show/Toggle Examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style type="text/css">
+    /* Styles for example */
+    body {
+      font: 14px/1 sans-serif;
+    }
+    .button-set {
+      padding: 0 10px;
+      margin: 10px 0;
+    }
+    button {
+      background: transparent;
+      cursor: pointer;
+      border: 2px solid #000;
+      border-width: 0 0 2px;
+      padding: 4px 0;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+    h3 {
+      font-size: 14px;
+      display: inline-block;
+      margin: 0;
+      width: 140px;
+    }
+    #normal-element, #normal-element2 {
+      background: #f0f0f0;
+      padding: 10px;
+    }
+    .spacer {
+      height: 100vh;
+    }
+    .red-text {
+      color: red;
+    }
+    </style>
+</head>
+<body>
+
+<div class="button-set">
+  <h3>AMP.navigateTo()</h3>
+  <button on="tap:AMP.navigateTo(url='http://google.com')">google.com</button>
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_top')">google.com (_top)</button>
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_blank')">google.com (_blank, noopener)</button>
+  <!--
+    Note: this will allow the tab/window opened to navigate your page to a new
+    URL. If this is a same origin request, this allows access to the full
+    window object, which may be useful.
+  -->
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_blank', opener=true)">google.com (_blank, with opener)</button>
+
+  <select on="change:AMP.navigateTo(url=event.value)">
+    <option value="http://google.com">google.com</option>
+    <option value="http://yahoo.com">yahoo.com</option>
+    <option value="http://bing.com">bing.com</option>
+  </select>
+</div>
+
+<div class="button-set">
+  <h3>AMP.print()</h3>
+  <button on="tap:AMP.print">Print</button>
+</div>
+
+<div class="button-set">
+  <h3>AMP.scrollTo(el)</h3>
+  <button on="tap:AMP.scrollTo('id' = 'normal-element3')">Scroll to Element (Global)</button>
+  <button on="tap:AMP.scrollTo('id' = 'normal-element3', 'position' = 'bottom')">Scroll to Element Bottom (Global)</button>
+  <select id="elementScrollSelect" on="change:AMP.scrollTo('id' = event.value)">
+    <option value="normal-element2">Jump to elem 2</option>
+    <option value="normal-element3">Jump to elem 3</option>
+  </select>
+</div>
+
+<div class="button-set">
+  <h3>AMP.optoutOfCid()</h3>
+  <button on="tap:AMP.optoutOfCid">Opt out CID</button>
+</div>
+
+<div class="button-set">
+  <h3>amp-img:</h3>
+  <button on="tap:img-on-viewport.show">Show</button>
+  <button on="tap:img-on-viewport.hide">Hide</button>
+  <button on="tap:img-on-viewport.toggleVisibility">Toggle Visibility</button>
+</div>
+
+<div class="button-set">
+  <h3>Normal element:</h3>
+  <button on="tap:normal-element.show">Show</button>
+  <button on="tap:normal-element.hide">Hide</button>
+  <button on="tap:normal-element.toggleVisibility">Toggle Visibility</button>
+  <button on="tap:normal-element2.toggleClass('class' = 'red-text')">Toggle Class</button>
+  <button on="tap:normal-element2.toggleClass('class' = 'red-text', 'force' = true)">Toggle Class (force = true)</button>
+  <button on="tap:normal-element2.toggleClass('class' = 'red-text', 'force' = false)">Toggle Class (force = false)</button>
+  <button on="tap:normal-element2.toggleChecked()">Toggle Checked State</button>
+  <button on="tap:normal-element2.toggleChecked('force' = true)">Toggle Checked State (force = true)</button>
+  <button on="tap:normal-element2.toggleChecked('force' = false)">Toggle Checked State (force = false)</button>
+  <button on="tap:normal-element3.scrollTo">ScrollTo</button>
+  <button on="tap:normal-element3.scrollTo('position' = 'bottom')">ScrollTo Bottom</button>
+  <button on="tap:normal-element3.scrollTo('position' = 'center')">ScrollTo Center</button>
+  <button on="tap:normal-element3.scrollTo('duration' = 5000)">ScrollTo Slowly</button>
+  <button on="tap:input-element.focus">Focus</button>
+  <button on="tap:normal-element3.scrollTo('position' = 'top'), input-element.focus">ScrollTo and Focus</button>
+</div>
+
+<amp-img src="https://amp.dev/static/samples/img/amp.jpg" layout="responsive" width="1080" height="610" id="img-on-viewport"></amp-img>
+
+<div id="normal-element" hidden>
+  I was initially hidden.
+</div>
+
+<div id="normal-element2">
+  I toggles between black and red.
+</div>
+
+<div class="spacer">
+</div>
+
+<div id="normal-element3">
+  You have to scroll to see me.
+</div>
+
+
+<input type="text" id="input-element">
+
+<div class="spacer">
+</div>
+
+</body>
+</html>

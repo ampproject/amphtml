@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
+</head>
+<body style="margin: 0; padding: 0">
+  <!--
+    This video is blocked until consent.
+    Notice the lack of `src` or `sources`, which are added after consent data is
+    received.
+  -->
+  <video
+    playsinline
+    controls
+    style="width: 100vw; height: 100vh;"
+    data-src-after-consent="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4">
+  </video>
+
+  <!--
+    Integration script.
+    This example is written in ES2015+.
+    If you require ES5 support, transpile this code.
+    If you wish to write an integration script in ES5, see frame-consent.html
+  -->
+  <script>
+    // Wait for API to initialize
+    (window.AmpVideoIframe = window.AmpVideoIframe || [])
+      .push(integration => {
+        // `integration` is an object containing the tools required to
+        // integrate.
+        integration.getConsentData(({ consentPolicyState }) => {
+          const video = document.querySelector('video');
+
+          // Remove video and stop here when consent is not given.
+          if (
+            consentPolicyState !== /* SUFFICIENT */ 1 &&
+            consentPolicyState !== /* UNKNOWN_NOT_REQUIRED */ 3
+          ) {
+            video.parentElement.removeChild(video);
+            // Posting an error allows the host document to display a fallback
+            // element and/or dispose of the iframe.
+            integration.postEvent('error');
+            return;
+          }
+
+          // Otherwise set `src` once consent is available.
+          // This can also be accomplished by initializing the video element
+          // only at this point.
+          video.src = video.dataset.srcAfterConsent;
+
+          // And then "unblock" by defining implementation.
+          // If you're using `integration.listenTo()`, that would the only
+          // required call at this point.
+          let muted = false;
+
+          video.addEventListener('playing', () => {
+            integration.postEvent('playing');
+          });
+
+          video.addEventListener('pause', () => {
+            integration.postEvent('pause');
+          });
+
+          video.addEventListener('ended', () => {
+            integration.postEvent('ended');
+          });
+
+          video.addEventListener('canplay', () => {
+            integration.postEvent('canplay');
+          });
+
+          video.addEventListener('volumechange', () => {
+            if (video.volume < 0.01) {
+              muted = true;
+              integration.postEvent('muted');
+              return;
+            }
+            if (muted) {
+              muted = false;
+              integration.postEvent('unmuted');
+            }
+          });
+
+          integration.method('play', () => {
+            video.play();
+          });
+          integration.method('pause', () => {
+            video.pause();
+          });
+          integration.method('mute', () => {
+            video.muted = true;
+          });
+          integration.method('unmute', () => {
+            video.muted = false;
+          });
+          integration.method('showcontrols', () => {
+            video.controls = true;
+          });
+          integration.method('hidecontrols', () => {
+            video.controls = false;
+          });
+          integration.method('fullscreenenter', () => {
+            // Unsupported in example. This should be a call to `requestFullscreen`
+            // or browser equivalents.
+          });
+          integration.method('fullscreenexit', () => {
+            // Unsupported in example. This should be a call to `exitFullscreen`
+            // or browser equivalents.
+          });
+
+          setInterval(() => {
+            // Post a custom analytics event every 3 seconds.
+            integration.postAnalyticsEvent('video-custom-foo', /* optional */ {
+              'myVar': Math.random().toString(),
+            });
+          }, 3000);
+        });
+      });
+  </script>
+</body>
+</html>

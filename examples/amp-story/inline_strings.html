@@ -1,0 +1,70 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Interactive Story</title>
+    <link rel="canonical" href="interactives.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Rubik', sans-serif;
+        color: white;
+      }
+
+      h1 {
+        font-size: 1rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        text-shadow: 0px 2px 5px black;
+      }
+      pre {
+        text-align: center;
+      }
+      .center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+    <script>
+      window.AMP_CONFIG = {
+        v: '123',
+        test: true
+      };
+    </script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-page-attachment" src="https://cdn.ampproject.org/v0/amp-story-page-attachment-0.1.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <script amp-localization="amp-story" type=application/json i-amphtml-version="123">{"35":"INLINED-STRING"}</script>
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="Inline strings Story"
+        publisher="AMP Story testing"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+        <amp-story-page id="quiz-intl">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://images.unsplash.com/photo-1585206031773-d902d07d7480?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=925&q=80"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer class="center">
+            <div>
+              <h1 class="title">The attachment should say "INLINED-STRING"</h1>
+              <pre><b>inlined strings:</b><br>{"35": "INLINED-STRING"}</pre>
+            </div>
+          </amp-story-grid-layer>
+          <amp-story-page-attachment title="Lorem ipsum" layout="nodisplay">
+            <p>This is a page attachment</p>
+          </amp-story-page-attachment>
+        </amp-story-page>
+    </amp-story>
+  </body>
+</html>

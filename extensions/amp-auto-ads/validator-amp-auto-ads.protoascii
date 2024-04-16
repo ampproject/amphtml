@@ -1,0 +1,22 @@
+tags: {  # amp-auto-ads
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-auto-ads"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-auto-ads>
+  html_format: AMP
+  tag_name: "AMP-AUTO-ADS"
+  disallowed_ancestor: "AMP-AUTO-ADS"
+  requires_extension: "amp-auto-ads"
+  attrs: {
+    name: "type"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-auto-ads/"
+}

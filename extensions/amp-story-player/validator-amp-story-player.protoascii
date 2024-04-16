@@ -1,0 +1,102 @@
+tags: {  # amp-story-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-player"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+  spec_url: "https://amp.dev/documentation/components/amp-story-player/"
+}
+tags: {  # <amp-story-player>
+  html_format: AMP
+  tag_name: "AMP-STORY-PLAYER"
+  requires_extension: "amp-story-player"
+  descendant_tag_list: "amp-story-player-allowed-descendants"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-story-player/"
+}
+descendant_tag_list {
+  name: "amp-story-player-allowed-descendants"
+  tag: "A"
+  tag: "SPAN"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
+  tag: "IMG"  # Only allowed when document is transformed AMP
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "IMG"
+  spec_name: "img-i-amphtml-intrinsic-sizer-amp-story-player"
+  mandatory_parent: "I-AMPHTML-SIZER-INTRINSIC"
+  mandatory_ancestor: "AMP-STORY-PLAYER"
+  attrs: {
+    name: "alt"
+    value: ""
+    mandatory: true
+  }
+  attrs: {
+    name: "aria-hidden"
+    value: "true"
+    mandatory: true
+  }
+  attrs: {
+    name: "class"
+    value: "i-amphtml-intrinsic-sizer"
+    mandatory: true
+  }
+  attrs: {
+    name: "role"
+    value: "presentation"
+    mandatory: true
+  }
+  attrs: {
+    name: "src"
+    value_regex: "data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height=\"\\d+(\\.\\d+)?\" width=\"\\d+(\\.\\d+)?\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height='\\d+(\\.\\d+)?\' width='\\d+(\\.\\d+)?\' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>|data:image\\/svg\\+xml;base64,[a-zA-Z0-9+\\/=]+"
+    mandatory: true
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-story-player/"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  spec_name: "amp-story-player > img"
+  mandatory_parent: "A"
+  mandatory_ancestor: "AMP-STORY-PLAYER"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: {
+    name: "data-amp-story-player-poster-img"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+    attrs: {
+    name: "decoding"
+    value: "async"
+  }
+  attrs: {
+    name: "height"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "loading"
+    mandatory: true
+    value: "lazy"
+  }
+  attrs: { name: "sizes" }
+  attrs: {
+    name: "width"
+    value_regex: "[0-9]+"
+  }
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://amp.dev/documentation/components/amp-story-player/"
+}

@@ -1,0 +1,13 @@
+
+
+@import url("../../../third_party/subscriptions-project/swg-button.css");
+
+
+/**
+ * Disabled Action when  realtime config has not loaded yet
+ * Can be overridden by publisher CSS
+ */
+[subscriptions-action][subscriptions-google-rtc] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

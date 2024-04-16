@@ -1,0 +1,88 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <title>amp-story info dialog visual diff</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="./template-vertical.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-story-page {
+        background: black;
+        font-family: sans-serif;
+      }
+
+      .i-amphtml-story-spinner-container {
+        /* Hide the spinner for loading pages, since this causes flakes */
+        display: none;
+      }
+
+      h1#hello-world {
+        color: white;
+        text-align: center;
+        text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
+      }
+    </style>
+    <script>
+      // TODO(#17108): Remove this when getMode().test is set.
+      __AMP_TEST = true;
+
+      // The document must be within a viewer in order for the info dialog UI to
+      // be displayed; adding the webview parameter tricks the document into
+      // believing that it is in a viewer.
+      location.hash = "webview=1";
+    </script>
+  </head>
+
+  <body>
+    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+        publisher-logo-src="/examples/visual-tests/photos/120.png"
+        poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
+        poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+        poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg">
+        <amp-analytics id="analytics1">
+            <script type="application/json">
+              {
+                "requests": {
+                  "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/main/examples/img/ampicon.png",
+                  "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+                  "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
+                  "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}"
+                },
+                "triggers": {
+                  "trackInfoDialogOpen": {
+                    "on": "story-open",
+                    "tagName": "amp-story-info-dialog",
+                    "request": "base"
+                  },
+                  "trackInfoDialogExit": {
+                    "on": "story-close",
+                    "tagName": "amp-story-info-dialog",
+                    "request": "base"
+                  }
+                }
+              }
+            </script>
+          </amp-analytics>
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 id="hello-world">Hello world!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+    </amp-story>
+  </body>
+
+</html>

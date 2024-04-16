@@ -1,0 +1,28 @@
+# Overall settings for PR integration via codecov.io
+# See https://docs.codecov.io/docs/codecovyml-reference
+codecov:
+  bot: 'amp-coverage-bot'
+  max_report_age: 24
+  require_ci_to_pass: no
+  notify:
+    wait_for_ci: no
+
+# Pull request comments disabled because they were too noisy
+# See https://docs.codecov.io/docs/pull-request-comments
+comment: false
+
+# PR status for patch-level coverage
+# See https://docs.codecov.io/docs/commit-status
+coverage:
+  precision: 2
+  round: down
+  range: '75...100'
+  status:
+    project: off
+    patch:
+      default:
+        base: auto
+        if_not_found: success
+        only_pulls: true
+        target: 75%
+        threshold: 1%

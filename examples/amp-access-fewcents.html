@@ -1,0 +1,328 @@
+<!--
+  Copyright 2022 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <!-- prettier-ignore -->
+  <head>
+    <meta charset="utf-8">
+    <title>amp-access-fewcents</title>
+    <script id="amp-access" type="application/json">
+      {
+        "vendor": "fewcents",
+        "noPingback": true,
+        "fewcents": {
+          "environment": "development",
+          "publisherLogoUrl" : "https://www.jagranimages.com/images/jagran-logo-2021.png",
+          "contentSelector" : "amp-access-fewcents-dialog",
+          "primaryColor" : "#FF6363",
+          "accessKey" : "localhost",
+          "category": "paywall",
+          "articleIdentifier": "mockArticleIdentifier"
+        }
+      }
+    </script>
+    <link rel="canonical" href="/examples/amp-access-fewcents.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      .main-container {
+        height: auto;
+      }
+
+      .title {display: flex;align-items: center;justify-content: center;}
+
+      .title h1{
+        margin-bottom: 0px;
+      }
+
+      .navbar{
+        background-color: bisque;
+        border: black;
+        border-radius: 25px;
+        margin: 10px 10px;
+      }
+
+      .navbar-ul{
+        display: flex;
+        list-style-type: none;
+        margin-left: 10px;
+      }
+
+      .navbar-ul li{
+        background: burlywood;
+        padding: 10px;
+        margin-right: 10px;
+        font-size: 18px;
+        font-family: "Verdana, Geneva, Tahoma, sans-serif";
+      }
+
+      .content{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .content p{
+        padding: 0px 160px;
+        font-size: 1.1875rem;
+        font-family: 'Noticia Text', serif;
+        line-height: 1.6;
+        margin-bottom: 30px;
+      }
+
+      .entry-thumbnail {
+        display: flex;
+        justify-content: center;
+      }
+
+      .premium-content{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .premium-content p{
+        padding: 0px 160px;
+        font-size: 1.1875rem;
+        font-family: 'Noticia Text', serif;
+        line-height: 1.6;
+        margin-bottom: 30px;
+      }
+
+      .footer{
+        padding: 0px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        margin-top: 100px;
+        height: 30vh;
+        background: black;
+      }
+
+      .footer ul li {
+        color: blanchedalmond;
+      }
+
+      .footer ul h3 {
+        color: blanchedalmond;
+      }
+    </style>
+    <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+    <script async custom-element="amp-access-fewcents" src="https://cdn.ampproject.org/v0/amp-access-fewcents-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <amp-analytics type="segment">
+      <script type="application/json">
+        {
+          "vars": {
+            "writeKey": "gNo9b6N79CFIFJqFyOCELKS6Ex0JcfBY",
+            "name": "fewcents-paywall"
+          },
+          "triggers": {
+            "click": {
+              "on": "click",
+              "selector": ".aaf-purchase-button",
+              "request": "track",
+              "vars": {
+                "event": "Unlock button clicked"
+              }
+            },
+            "accessauthorizationReceived": {
+              "on": "access-authorization-received",
+              "request": "track",
+              "vars": {
+                "event": "access-authorization-received"
+              },
+              "extraUrlParams": {
+                "properties.access": "AUTHDATA(access)",
+                "properties.data": "AUTHDATA(data)"
+              }
+            },
+            "accessAuthorizationFailed": {
+              "on": "access-authorization-failed",
+              "request": "track",
+              "vars": {
+                "event": "access-authorization-failed"
+              },
+              "extraUrlParams": {
+                "properties.access": "AUTHDATA(access)",
+                "properties.data": "AUTHDATA(data)"
+              }
+            },
+            "accessLoginStarted": {
+              "on": "access-login-started",
+              "request": "track",
+              "vars": {
+                "event": "access-login-started"
+              },
+              "extraUrlParams": {
+                "properties.access": "AUTHDATA(access)",
+                "properties.data": "AUTHDATA(data)"
+              }
+            },
+            "accessLoginSuccess": {
+              "on": "access-login-success",
+              "request": "track",
+              "vars": {
+                "event": "access-login-success"
+              },
+              "extraUrlParams": {
+                "properties.access": "AUTHDATA(access)",
+                "properties.data": "AUTHDATA(data)"
+              }
+            },
+            "accessLoginRejected": {
+              "on": "access-login-rejected",
+              "request": "track",
+              "vars": {
+                "event": "access-login-rejected"
+              },
+              "extraUrlParams": {
+                "properties.access": "AUTHDATA(access)",
+                "properties.data": "AUTHDATA(data)"
+              }
+            },
+            "accessLoginFailed": {
+              "on": "access-login-failed",
+              "request": "track",
+              "vars": {
+                "event": "access-login-failed"
+              },
+              "extraUrlParams": {
+                "properties.access": "AUTHDATA(access)",
+                "properties.data": "AUTHDATA(data)"
+              }
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+    <div class="main-container">
+      <div class="title">
+        <h1>Weekly Digest: Kyiv Post Closure, Anti-Oligarch Law in Ukraine</h1>
+      </div>
+      <div class="navbar">
+        <ul class="navbar-ul">
+          <li>Industry News</li>
+          <li>Business Model</li>
+          <li>About Us</li>
+        </ul>
+      </div>
+      <div class="content">
+        <div class="entry-thumbnail">
+          <img
+            width="518"
+            height="291"
+            src="./Weekly Digest_ Kyiv Post Closure, Anti-Oligarch Law in Ukraine - The Fix_files/the-fix-digest-16.png"
+            class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
+            alt=""
+            loading="lazy"
+            srcset="
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16.png           5184w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-300x169.png    300w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-1024x576.png  1024w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-768x432.png    768w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-1536x864.png  1536w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-2048x1152.png 2048w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-1200x675.png  1200w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-1260x709.png  1260w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-800x450.png    800w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-588x331.png    588w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-107x60.png     107w,
+              http://wordpress.dev.fewcents.co/wp-content/uploads/2021/11/the-fix-digest-16-160x90.png     160w
+            "
+            sizes="(max-width: 5184px) 100vw, 5184px"
+          />
+        </div>
+        <p>
+          Welcome to The Fix’s weekly news digest! Every week, we bring you
+          important news stories from the world of media – and try to put them
+          in a wider context.
+        </p>
+        <p>
+          This week, we have two detailed stories on the recent media shakeup in
+          Ukraine and a roundup of other noteworthy media news.
+        </p>
+        <p>
+          The closure appears to be a continuation of the conflict between the
+          publisher and the editorial team, particularly over the plans to
+          launch a Ukrainian-language outlet under the paper’s brand. Analysts
+          also say the move might be the owner’s attempt to avoid angering the
+          authorities – whom Kivan’s construction business depends on – over
+          Kyiv Post’s coverage.
+        </p>
+      </div>
+      <section amp-access="NOT access" amp-access-hide>
+        <div id="amp-access-fewcents-dialog"></div>
+      </section>
+
+      <section amp-access="error" amp-access-hide class="error-section">
+        Oops... Something broke.
+      </section>
+
+      <div amp-access="access" amp-access-hide class="premium-content">
+        <p>
+          Perhaps the most notable media news story in the CEE region came from
+          Ukraine this week with the closure of Kyiv Post, the country’s leading
+          English-language publication.
+        </p>
+
+        <p>
+          Over the past several decades, it has been a trusted source of news
+          and a lodestar of independent journalism. However, on Monday the
+          paper’s owner, construction tycoon Adnan Kivan, announced the outlet
+          will close “for a short time,” saying he hopes to reopen it “bigger
+          and better” in the future.
+        </p>
+        <p>
+          Kyiv Post’s editorial team then released a statement clarifying that
+          all journalists were fired effective immediately. The journalists
+          called the actions “an act of vengeance” by the owner and an attempt
+          to “[get] rid of inconvenient, fair and honest journalists.”
+        </p>
+        <p>
+          The closure has attracted multiple concerned comments from Kyiv Post
+          readers, which include high-level foreign diplomats, expats, and
+          business leaders. In an interview with Columbia Journalism Review, the
+          paper’s now-former chief editor Brian Bonner said he is “talking to
+          deeply concerned ambassadors.”
+        </p>
+      </div>
+
+      <div class="footer">
+        <ul>
+          <h3 class="footer-widget-title">Follow Us</h3>
+          <li>Twitter</li>
+          <li>Facebook</li>
+          <li>Linkedin</li>
+          <li>Telegram</li>
+          <li>Deutsch</li>
+        </ul>
+        <ul>
+          <h3 class="footer-widget-title">Menu</h3>
+          <li>Industry News</li>
+          <li>Business models</li>
+          <li>Organization building</li>
+          <li>Research</li>
+          <li>Advertise on The Fix</li>
+          <li>About us</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

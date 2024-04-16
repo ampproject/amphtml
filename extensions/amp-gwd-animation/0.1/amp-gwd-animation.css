@@ -1,0 +1,9 @@
+
+
+/**
+ * Class used to disable GWD animations.
+ */
+.i-amphtml-gwd-animation-disabled [class*=gwdanimation],
+.i-amphtml-gwd-animation-disabled [class*=-animation] {
+  animation: none !important;
+}

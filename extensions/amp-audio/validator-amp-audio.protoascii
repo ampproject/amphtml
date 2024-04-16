@@ -1,0 +1,121 @@
+tags: {  # amp-audio 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-audio 1.0"
+  excludes_condition: "amp-audio 0.1"
+  extension_spec: {
+    name: "amp-audio"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-audio 0.1
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-audio 0.1"
+  excludes_condition: "amp-audio 1.0"
+  extension_spec: {
+    name: "amp-audio"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    deprecated_allow_duplicates: true
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}
+attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
+  name: "amp-audio-common"
+  attrs: { name: "album" }
+  attrs: { name: "artist" }
+  attrs: { name: "artwork" }
+  attrs: { name: "controls" }
+  attrs: { name: "controlslist" }
+  attrs: { name: "loop"  value: "" }
+  attrs: { name: "muted" value: "" }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  # <amp-bind>
+  attrs: { name: "[album]" }
+  attrs: { name: "[artist]" }
+  attrs: { name: "[artwork]" }
+  attrs: { name: "[controlslist]" }
+  attrs: { name: "[loop]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[title]" }
+}
+tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
+  html_format: AMP
+  tag_name: "AMP-AUDIO"
+  # There is an alternate spec for amp-video in amp-story.
+  disallowed_ancestor: "AMP-STORY"
+  requires_extension: "amp-audio"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
+    name: "preload"
+    value_casei: "auto"
+    value_casei: "metadata"
+    value_casei: "none"
+  }
+  attr_lists: "amp-audio-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
+  amp_layout {
+    defines_default_height: true
+    # TODO(johannes): in the longer run, defines_default_width should
+    # be false, to make it a fixed height layout per default, rather
+    # than a fixed one.
+    defines_default_width: true
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # <amp-audio> for AMP, amp-story (autoplay attribute mandatory)
+  html_format: AMP
+  tag_name: "AMP-AUDIO"
+  spec_name: "amp-story >> amp-audio"
+  mandatory_ancestor: "AMP-STORY"
+  requires_extension: "amp-audio"
+  attrs: {
+    name: "autoplay"
+    value: ""
+    mandatory: true
+  }
+  attr_lists: "amp-audio-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
+  amp_layout {
+    supported_layouts: NODISPLAY
+  }
+}
+
+tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
+  html_format: AMP4ADS
+  tag_name: "AMP-AUDIO"
+  spec_name: "amp-audio (A4A)"
+  requires_extension: "amp-audio"
+  attr_lists: "amp-audio-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
+  amp_layout {
+    defines_default_height: true
+    defines_default_width: true
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+  }
+}

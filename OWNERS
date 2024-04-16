@@ -1,0 +1,75 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+
+{
+  reviewerPool: ['ampproject/reviewers-amphtml', 'renovate-approve[bot]'],
+  rules: [
+    {
+      owners: [
+        {name: 'erwinmombay', requestReviews: true},
+        {name: 'danielrozenberg', requestReviews: true},
+        {name: 'powerivq', requestReviews: true},
+        {name: 'ychsieh', requestReviews: true},
+        {name: 'banaag', requestReviews: true},
+      ],
+    },
+    {
+      pattern: '**/validator-*.{protoascii,html,out,out.cpponly}',
+      owners: [{name: 'ampproject/wg-caching', required: true}],
+    },
+    {
+      pattern: '**/*.md',
+      owners: [{name: '*'}],
+    },
+    {
+      pattern: '{.*,amp.js}',
+      owners: [{name: 'ampproject/wg-infra'}],
+    },
+    {
+      pattern: '{babel.config.js,package-scripts.js}',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: '{package.json,package-lock.json}',
+      owners: [
+        {name: 'ampproject/wg-infra', requestReviews: false},
+        {name: 'ampproject/wg-performance', requestReviews: false},
+      ],
+    },
+    {
+      pattern: '**/package{,-lock}.json',
+      owners: [{name: 'renovate[bot]'}],
+    },
+    {
+      pattern: '**/OWNERS',
+      owners: [
+        {name: 'erwinmombay', requestReviews: false},
+        {name: 'mrjoro', requestReviews: false},
+        {name: 'newmuis', requestReviews: false},
+      ],
+    },
+    {
+      // Locked down to minimize new import aliases being added
+      pattern: 'tsconfig{,.base}.json',
+      owners: [{name: 'ampproject/wg-performance', required: true}],
+    },
+    {
+      pattern: '**/tsconfig.json',
+      owners: [{name: 'ampproject/wg-performance'}],
+    },
+    {
+      pattern: '**/*.d.ts',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: '**/build-dom.js',
+      owners: [{name: 'erwinmombay'}],
+    },
+  ],
+}

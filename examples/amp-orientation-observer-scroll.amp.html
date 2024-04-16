@@ -1,0 +1,68 @@
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>amp-orientation-observer</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js"></script>
+  <style amp-custom>
+    main {
+      font-family: Helvetica, sans-serif;
+      padding: 10px;
+      max-width: 412px;
+      margin: auto;
+    }
+
+    #ipsum {
+      background-image: linear-gradient(white, deeppink);
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+  <amp-animation id="clockAnim1" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#ipsum",
+          "keyframes": [
+            { "transform": "translateY(0)" },
+            { "transform": "translateY(-1170px)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <main>
+    <div>
+      <amp-orientation-observer
+        beta-range="0 180"
+        on="beta:clockAnim1.seekTo(percent=event.percent)"
+        layout="nodisplay" smoothing="5">
+      </amp-orientation-observer>
+    </div>
+    <div id="ipsum">
+      <h3>Move phone along y axis to scroll</h3>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam id est et dui maximus sagittis vel imperdiet nibh. Nam finibus nisl sit amet neque gravida pellentesque. Phasellus vulputate, tortor ut pretium ultricies, nibh massa vestibulum nisi, a vestibulum orci velit eget nisl. Maecenas dui nulla, consectetur sed porttitor ac, varius quis nibh. In pellentesque nisi quis ligula fringilla, non lobortis felis tincidunt. Nullam hendrerit sodales purus, nec rhoncus urna ultricies ac. Cras vestibulum pulvinar libero, quis faucibus nisi. Quisque ut lacus vitae justo faucibus mollis vel bibendum neque. Quisque pretium nunc in nunc vulputate, interdum ullamcorper nisl convallis. Cras vitae finibus urna. Sed enim turpis, consectetur eu velit nec, sodales mollis justo. Curabitur pretium luctus felis sagittis rhoncus. Donec vitae vehicula erat, non pellentesque odio. Vestibulum accumsan rhoncus placerat. Donec rutrum ullamcorper sodales. Vestibulum pretium ut diam faucibus tincidunt.
+
+      Aenean vestibulum nisl nec arcu eleifend posuere. Aliquam nec feugiat nibh. Cras pretium ut purus quis pharetra. Morbi urna augue, lobortis ac porttitor vitae, feugiat eget dui. Nam lacinia commodo tellus vel sagittis. Aliquam id pharetra metus. Nam tristique vulputate maximus. Donec consequat aliquam lacus, ac fermentum magna iaculis tristique. In urna dolor, rutrum non mattis at, luctus nec lectus. Maecenas consequat, massa at placerat convallis, arcu elit consequat nulla, vel egestas justo augue vitae mauris. Nullam est diam, aliquam sit amet posuere non, condimentum et ante. Ut at ullamcorper ipsum. Nullam non efficitur sapien. Praesent vitae odio diam. Nullam dignissim hendrerit neque non tempor.
+
+      Praesent non arcu volutpat, maximus risus in, rutrum tellus. Quisque nec porttitor purus. Quisque hendrerit erat consequat dignissim vehicula. Quisque tortor orci, bibendum et lacinia at, porttitor nec est. Nunc venenatis sollicitudin dui, et fermentum lectus euismod vitae. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus diam ante, sagittis non finibus sed, pulvinar id dolor. Maecenas ac facilisis lacus. Suspendisse potenti.
+
+      Curabitur dignissim consequat ante, quis facilisis ipsum faucibus nec. Suspendisse potenti. Mauris lorem eros, finibus id tincidunt quis, bibendum at urna. Aenean quis tortor ultricies, sodales ipsum id, imperdiet felis. Maecenas vestibulum cursus est convallis imperdiet. In convallis tempus lacus, suscipit tempus turpis mattis id. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Proin massa massa, molestie eu pretium in, eleifend vel erat. Pellentesque dictum turpis sit amet neque elementum aliquam a sed metus. Donec dignissim laoreet massa vel vehicula. Praesent pretium arcu consequat augue dignissim, at ultrices quam placerat. Proin justo odio, fermentum sed malesuada eu, facilisis non quam. In molestie enim nec ligula tempus, sed condimentum dui molestie. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec lobortis, lacus cursus varius malesuada, lacus enim blandit ipsum, non hendrerit est sapien et ex. Nullam quis pulvinar nulla, vitae venenatis massa.
+
+      In mattis at eros id ullamcorper. Aenean ac hendrerit magna. Sed volutpat sapien quis justo accumsan eleifend. Praesent lobortis, velit sed elementum molestie, urna nibh malesuada lacus, vitae efficitur tellus elit ac augue. Aliquam erat volutpat. Praesent ultricies felis erat, ut luctus nulla pellentesque in. Etiam lacinia neque id neque egestas tempor.
+      <h3>End of text</h3>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>autocomplete testing</title>
+    <link rel="canonical" href="autocomplete-testing.html" >
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
+    <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
+    <meta name="amp-script-src" content="sha384-lkZe5hu5T1z7PF2HQkxeneF_vgDxtjTso8jfxHdHe6obPTTZoYiBhm9tjU9Qsre1"></head>
+    <style amp-custom>
+      body {
+        margin: 0;
+        padding: 0.5em;
+        font-family: sans-serif;
+      }
+      p {
+        padding-top: 150px;
+      }
+      input[readonly],
+      output {
+        background-color: #eee;
+        border: none;
+        padding: 2px 6px;
+        display: inline-block;
+        width: 150px;
+        height: 20px;
+        line-height: 1;
+        box-sizing: border-box;
+        font-size: 16px;
+        font-family: monospace;
+        font-weight: 400;
+      }
+      span {
+        color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>amp-autocomplete + amp-bind + amp-script testing</h3>
+    <amp-autocomplete filter="substring">
+      <amp-script script="search-script" sandbox="allow-forms">
+        <div>
+          <span>Search <input type="text" name="search" id="search" on="input-debounced:AMP.setState({search: event.value});change:AMP.setState({search: event.value})"></span> <span>Value set by amp-script: <output id="asout"></output></span>
+        </div>
+      </amp-script>
+      <script type="application/json">
+        {
+          "items": ["apple", "orange", "banana"]
+        }
+      </script>
+    </amp-autocomplete>
+    <p>Value set by amp-bind: <input readonly type="text" value="" [value]="search"></p>
+
+    <script id="search-script" type="text/plain" target="amp-script">
+      const searchOutput = document.getElementById('asout');
+      const searchInput = document.getElementById('search');
+
+      searchInput.addEventListener('input', function (e) {
+        try {
+          console.log('input event; value: ' + searchInput.value);
+          searchOutput.setAttribute('data-value', searchInput.value);
+          searchOutput.textContent = searchInput.value;
+        } catch (ex) {
+          console.error('Unable to execute "input" event callback\n', ex);
+        }
+      });
+
+      searchInput.addEventListener('change', function (e) {
+        try {
+          console.log('change event; value: ' + searchInput.value);
+          searchOutput.setAttribute('data-value', searchInput.value);
+          searchOutput.textContent = searchInput.value;
+        } catch (ex) {
+          console.error('Unable to execute "change" event callback\n', ex);
+        }
+      });
+    </script>
+  </body>
+</html>

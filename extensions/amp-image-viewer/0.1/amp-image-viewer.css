@@ -1,0 +1,37 @@
+
+
+ .i-amphtml-image-viewer-image {
+  position: absolute;
+  /**
+   * The image viewer sizes the image using width/height using the natural
+   * width/height, but falls back to the image viewer size itself. This causes
+   * the image to get stretched, and can occur if the image has not laid out or
+   * loaded yet.
+   */
+  object-fit: contain;
+}
+
+.i-amphtml-image-viewer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* This is necessary due to crbug/248522 where touch events fail after
+    transform */
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+/**
+ * Make sure the amp-img inside the image viewer has some size in case it does
+ * not define a size itself. Otherwise, the `layoutCallback` Promise will never
+ * resolve and the image will never be given a proper size.
+ *
+ * Note: Not using .i-amphtml-image-viewer-image here, since the class is added
+ * later.
+ */
+.i-amphtml-image-viewer > amp-img {
+  min-width: 1px;
+  min-height: 1px;
+}

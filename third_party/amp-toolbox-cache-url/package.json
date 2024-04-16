@@ -1,0 +1,53 @@
+{
+  "name": "amp-toolbox-cache-url",
+  "version": "1.0.2",
+  "description": "Transform canonical URLs into AMP Cache URLs",
+  "main": "dist/amp-toolbox-cache-url.cjs.js",
+  "module": "dist/amp-toolbox-cache-url.esm.js",
+  "browser": "dist/amp-toolbox-cache-url.umd.js",
+  "scripts": {
+    "build": "npx rollup -c",
+    "prepublish": "npm run build",
+    "serve": "npx rollup -c -w",
+    "test": "npm-run-all build test-node test-browser lint",
+    "test-node": "npx jasmine --config=jasmine.json",
+    "test-browser": "npx karma start --single-run --browsers ChromeHeadless karma.conf.js",
+    "lint": "npx eslint .",
+    "lint-fix": "npx eslint . --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ampproject/amp-toolbox.git"
+  },
+  "keywords": ["amp", "amp-toolbox", "amp-url-api"],
+  "author": "AMPHTML Team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ampproject/amp-toolbox/issues"
+  },
+  "homepage": "https://github.com/ampproject/amp-toolbox#readme",
+  "files": ["dist", "package.json", "../LICENSE", "README.md"],
+  "dependencies": {
+    "punycode": "2.3.1",
+    "url-parse": "1.5.10"
+  },
+  "devDependencies": {
+    "@ampproject/rollup-plugin-closure-compiler": "0.27.0",
+    "eslint": "9.0.0",
+    "eslint-config-google": "0.14.0",
+    "jasmine": "5.1.0",
+    "karma": "6.4.3",
+    "karma-chrome-launcher": "3.2.0",
+    "karma-jasmine": "5.1.0",
+    "npm-run-all2": "6.1.2",
+    "rollup": "4.14.1",
+    "rollup-plugin-commonjs": "10.1.0",
+    "rollup-plugin-filesize": "10.0.0",
+    "rollup-plugin-ignore": "1.0.10",
+    "rollup-plugin-json": "4.0.0",
+    "rollup-plugin-node-builtins": "2.1.2",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "rollup-plugin-serve": "3.0.0",
+    "semver": "7.6.0"
+  }
+}

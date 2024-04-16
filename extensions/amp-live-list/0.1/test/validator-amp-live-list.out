@@ -1,0 +1,144 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests amp-live-list.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+|  </head>
+|  <body>
+|
+|    <!-- Minimal valid example of an amp-live-list. -->
+|    <amp-live-list id="my-live-list" data-max-items-per-page="20">
+|      <button update on="tap:my-live-list.update">You have updates!</button>
+|      <div items></div>
+|      <!-- pagination is optional -->
+|      <div pagination></div>
+|    </amp-live-list>
+|
+|    <!-- Example with items non-empty -->
+|    <amp-live-list id="my-live-list-1" data-poll-interval="15000" data-max-items-per-page="20">
+|      <button update>You have updates!</button>
+|      <ul items>
+|        <li id="1" data-sort-time="42" data-update-time="42">1</li>
+|        <li id="2" data-sort-time="43" data-update-time="44">2</li>
+|        <li id="3" data-sort-time="44" data-update-time="46">3</li>
+|      </ul>
+|      <div pagination></div>
+|    </amp-live-list>
+|
+|    <!-- Example triggering CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
+|         This example has the mandatory reference points, but also a couple
+|         extra child tags that don't have any reference point. -->
+|    <amp-live-list id="my-live-list-2" data-poll-interval="15000" data-max-items-per-page="20">
+|      <ul><li>a</li></ul>
+>>     ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:40:4 The tag 'ul', a child tag of 'amp-live-list', does not satisfy one of the acceptable reference points: AMP-LIVE-LIST [update], AMP-LIVE-LIST [items], AMP-LIVE-LIST [pagination]. (see https://amp.dev/documentation/components/amp-live-list)
+|      <button>Update</button>
+>>     ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:41:4 The tag 'button', a child tag of 'amp-live-list', does not satisfy one of the acceptable reference points: AMP-LIVE-LIST [update], AMP-LIVE-LIST [items], AMP-LIVE-LIST [pagination]. (see https://amp.dev/documentation/components/amp-live-list)
+|      <button update>You have updates!</button>
+|      <div items></div>
+|    </amp-live-list>
+|
+|    <!-- Example triggering MANDATORY_REFERENCE_POINT_MISSING. In this
+|         case, one of the mandatory reference points (items) isn't
+|         present. -->
+|    <amp-live-list id="my-live-list-2" data-poll-interval="15000" data-max-items-per-page="20">
+>>   ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:49:2 The mandatory reference point 'AMP-LIVE-LIST [items]' for 'amp-live-list' is missing. (see https://amp.dev/documentation/components/amp-live-list)
+|      <button update>You have updates!</button>
+|    </amp-live-list>
+|
+|    <!-- Example of DUPLICATE_REFERENCE_POINT: update and pagination are
+|         present twice. -->
+|    <amp-live-list id="my-live-list-3" data-poll-interval="15000" data-max-items-per-page="20">
+>>   ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:55:2 The reference point 'AMP-LIVE-LIST [update]' for 'amp-live-list' must be unique but a duplicate was encountered. (see https://amp.dev/documentation/components/amp-live-list)
+>>   ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:55:2 The reference point 'AMP-LIVE-LIST [pagination]' for 'amp-live-list' must be unique but a duplicate was encountered. (see https://amp.dev/documentation/components/amp-live-list)
+|      <button update on="tap:my-live-list.update">You have updates!</button>
+|      <button update on="tap:my-live-list.update">You have updates!</button>
+|      <div items></div>
+|      <div pagination></div>
+|      <div pagination></div>
+|    </amp-live-list>
+|
+|    <!-- Example showing disallowed tags. In this case the reference points are
+|         OK but the tags that attach to them are not: Reference point validation
+|         and regular tag validation are orthogonal. -->
+|    <amp-live-list id="my-live-list-4" data-poll-interval="15000" data-max-items-per-page="20">
+>>   ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:66:2 The mandatory reference point 'AMP-LIVE-LIST [items]' for 'amp-live-list' is missing. (see https://amp.dev/documentation/components/amp-live-list)
+|      <foo update src="button.gif" onclick="javascript:alert('u have updates!')">
+>>     ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:67:4 The tag 'foo' is disallowed.
+|      <script items>
+>>     ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:68:4 The parent tag of tag 'amphtml engine script' is 'foo', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+|        document.writeln('1, 2, 3');
+|      </script>
+|    </amp-live-list>
+|
+|    <!-- Example with individual items not matching the reference point
+|         "AMP-LIVE-LIST [items] item" -->
+|    <amp-live-list id="my-live-list-5" data-poll-interval="15000" data-max-items-per-page="20">
+|      <button update>You have updates!</button>
+|      <ul items>
+|        <li id="1" data-update-time="42">1</li>  <!-- data-sort-time missing -->
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The tag 'li', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+|        <li id="2" data-sort-time="43" data-update-time="44">2</li>
+|        <li data-update-time="44">3</li> <!-- id and data-sort-time missing -->
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The tag 'li', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+|        <p>junk</p> <!-- id, data-sort-time missing -->
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+>>       ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The tag 'p', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+|      </ul>
+|      <div pagination></div>
+|    </amp-live-list>
+|
+|    <!-- amp-live-list can't be used for a reference point that defines reference
+|         points since it also defines reference points -->
+|    <amp-live-list id="my-live-list-6" data-poll-interval="15000" data-max-items-per-page="20">
+|      <button update on="tap:my-live-list-6.update">You have updates!</button>
+|      <amp-live-list items id="my-live-list-7" data-poll-interval="15000" data-max-items-per-page="20">
+>>     ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:90:4 The tag 'amp-live-list' conflicts with reference point 'AMP-LIVE-LIST [items]' because both define reference points. (see https://amp.dev/documentation/components/amp-live-list/#items)
+|        <button update on="tap:my-live-list-7.update">You have updates!</button>
+|        <div items></div>
+|      </amp-live-list>
+|    </amp-live-list>
+|
+|    <!-- While the previous example showed how amp-live-list can't be used as the
+|         items reference point, it *can* be one of the items. -->
+|    <amp-live-list id="my-live-list-8" data-poll-interval="15000" data-max-items-per-page="20">
+|      <button update on="tap:my-live-list-8.update">You have updates!</button>
+|      <div items>
+|        <amp-live-list id="my-live-list-9" data-sort-time="43" data-update-time="44" data-poll-interval="15000" data-max-items-per-page="20">
+|          <button update on="tap:my-live-list-9.update">You have updates!</button>
+|          <div items></div>
+|        </amp-live-list>
+|      </div>
+|    </amp-live-list>
+|
+|  </body>
+|  </html>

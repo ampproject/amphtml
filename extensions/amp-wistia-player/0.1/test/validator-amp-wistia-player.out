@@ -1,0 +1,39 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-wistia-player tag. See the inline comments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-wistia-player" src="https://cdn.ampproject.org/v0/amp-wistia-player-latest.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <amp-wistia-player
+|      data-media-hashed-id="u8p9wq6mq8"
+|      width="512" height="360"></amp-wistia-player>
+|
+|    <!-- Invalid: data-media-hashed-id missing. -->
+|    <amp-wistia-player
+>>   ^~~~~~~~~
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:22:2 The mandatory attribute 'data-media-hashed-id' is missing in tag 'amp-wistia-player'. (see https://amp.dev/documentation/components/amp-wistia-player)
+|      width="512" height="360"></amp-wistia-player>
+|    <!-- Invalid: data-media-hashed-id illegal characters. -->
+|    <amp-wistia-player
+>>   ^~~~~~~~~
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:25:2 The attribute 'data-media-hashed-id' in tag 'amp-wistia-player' is set to the invalid value 'illegal value'. (see https://amp.dev/documentation/components/amp-wistia-player)
+|      data-media-hashed-id="illegal value"
+|      width="512" height="360"></amp-wistia-player>
+|    <!-- Invalid: missing layout attributes. -->
+|    <amp-wistia-player
+>>   ^~~~~~~~~
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:29:2 Incomplete layout attributes specified for tag 'amp-wistia-player'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-wistia-player)
+|      data-media-hashed-id="u8p9wq6mq8"></amp-wistia-player>
+|  </body>
+|  </html>

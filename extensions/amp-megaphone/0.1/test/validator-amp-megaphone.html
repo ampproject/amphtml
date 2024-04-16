@@ -1,0 +1,68 @@
+<!--
+  Test Description:
+  This tests validation for the amp-megaphone tag.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="amps.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-megaphone" src="https://cdn.ampproject.org/v0/amp-megaphone-0.1.js"></script>
+     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- valid: classic mode -->
+  <amp-megaphone height=166 data-episode="OSC7749686951"
+                  layout="fixed-height"></amp-megaphone>
+  <!-- valid: tile mode -->
+  <amp-megaphone height=166 data-episode="OSC7749686951" data-tile
+                  layout="fixed-height"></amp-megaphone>
+  <!-- valid: light mode -->
+  <amp-megaphone height=166 data-episode="OSC7749686951" data-light
+                  layout="fixed-height"></amp-megaphone>
+  <!-- valid: integer start time -->
+  <amp-megaphone height=166 data-episode="OSC7749686951" data-start="56"
+                  layout="fixed-height"></amp-megaphone>
+  <!-- valid: decimal start time -->
+  <amp-megaphone height=166 data-episode="OSC7749686951" data-start="300.32"
+                  layout="fixed-height"></amp-megaphone>
+  <!-- invalid: bad start time -->
+  <amp-megaphone height=166 data-episode="OSC7749686951" data-start="300s"
+                  layout="fixed-height"></amp-megaphone>
+  <!-- invalid: bad episode id-->
+  <amp-megaphone height=166 data-episode="mahler_number_6.ogg"
+                  layout="fixed-height"></amp-megaphone>
+  <!-- invalid: responsive layout -->
+  <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
+                  layout="responsive"></amp-megaphone>
+  <!-- invalid: intrinsic layout -->
+  <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
+                  layout="intrinsic"></amp-megaphone>
+  <!-- valid: fixed layout -->
+  <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
+                  layout="fixed"></amp-megaphone>
+  <!-- valid: playlist -->
+  <amp-megaphone height=166 data-playlist="DEM6640968282"
+                  layout="fixed-height"></amp-megaphone>
+  <!-- valid: playlist with sharing buttons -->
+  <amp-megaphone height=166 data-playlist="DEM6640968282" data-sharing
+                  layout="fixed-height"></amp-megaphone>
+
+  <!-- Broken tests (until validator supports dynamic exclusion of attributes) -->
+
+  <!-- invalid: both episode and playlist specified-->
+  <!-- <amp-megaphone height=166 data-episode="OSC7749686951" data-playlist="DEM6640968282"
+                  layout="fixed-height"></amp-megaphone> -->
+  <!-- invalid: limited episodes without a playlist -->
+  <!-- <amp-megaphone height=166 width=42 data-episode="OSC7749686951"
+                 data-episodes="3"></amp-megaphone> -->
+  <!-- invalid: playlist with tile mode -->
+  <!-- <amp-megaphone height=166 data-playlist="DEM6640968282" data-tile
+                  layout="fixed-height"></amp-megaphone> -->
+  <!-- invalid: playlist with start time -->
+  <!-- <amp-megaphone height=166 data-playlist="DEM6640968282" data-start="56.4"
+                  layout="fixed-height"></amp-megaphone> -->
+</body>
+</html>

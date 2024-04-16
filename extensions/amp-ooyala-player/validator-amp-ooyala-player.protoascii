@@ -1,0 +1,34 @@
+tags: {  # amp-ooyala-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-ooyala-player"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-ooyala-player>
+  html_format: AMP
+  tag_name: "AMP-OOYALA-PLAYER"
+  requires_extension: "amp-ooyala-player"
+  attrs: {
+    name: "data-embedcode"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-pcode"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-playerid"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

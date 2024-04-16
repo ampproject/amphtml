@@ -1,0 +1,41 @@
+tags: {  # amp-smartlinks
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-smartlinks"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+  satisfies_condition: "amp-smartlinks"
+  excludes_condition: "amp-link-rewriter"
+  excludes_condition: "amp-skimlinks"
+}
+
+tags: {  # <amp-smartlinks>
+  html_format: AMP
+  tag_name: "AMP-SMARTLINKS"
+  requires_extension: "amp-smartlinks"
+  attrs: {
+    name: "exclusive-links"
+    value: ""
+  }
+  attrs: {
+    name: "link-attribute"
+  }
+  attrs: {
+    name: "link-selector"
+  }
+  attrs: {
+    name: "linkmate"
+    value: ""
+  }
+  attrs: {
+    name: "nrtv-account-name"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

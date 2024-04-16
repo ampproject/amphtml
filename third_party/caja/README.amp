@@ -1,0 +1,12 @@
+URL: https://github.com/google/caja
+License: Apache License
+License File: https://github.com/google/caja/blob/master/LICENSE.txt
+
+Description:
+HTML Sanitizer.
+Run compile.sh to generate a new version.
+
+Local Modifications:
+* Export to ES6
+* Change html attribute regex to optionally accept bracketed attribute names for amp-bind
+* Add <template> to the list of allowed elements

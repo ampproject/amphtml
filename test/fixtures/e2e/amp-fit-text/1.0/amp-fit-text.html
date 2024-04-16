@@ -1,0 +1,65 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+ <meta charset="utf-8">
+ <title>AMP #0</title>
+ <link rel="canonical" href="amps.html" >
+ <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+ <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+ <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-1.0.js"></script>
+ <style amp-custom>
+  body {
+   font-family: 'Questrial', Arial;
+  }
+  article {
+   display: block;
+   margin: 8px;
+  }
+  .ft {
+   border: 1px solid black;
+   margin: 8px auto;
+   display: block;
+  }
+ </style>
+ <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+ <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+<article>
+ <h1>FitText</h1>
+
+ <h3>Scale up to cover</h3>
+ <amp-fit-text id="test1" width="300" height="200" class="ft">
+  Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+ </amp-fit-text>
+
+ <h3>Scale up + overflow + ellipsis</h3>
+ <amp-fit-text id="test2" width="300" height="200" class="ft" min-font-size=42>
+  Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+ </amp-fit-text>
+
+ <h3>Scale down</h3>
+ <amp-fit-text id="test3" width="300" height="200" class="ft">
+  Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+ </amp-fit-text>
+
+ <h3>Scale down</h3>
+ <amp-fit-text id="test4" width="108" height="78" class="ft">
+  Specialcase test
+ </amp-fit-text>
+
+ <p>
+  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+ </p>
+
+ <p>
+  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+ </p>
+
+ <p>
+  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+ </p>
+
+</article>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!--
+  Test Description:
+  Tests for the amp-story-auto-ads tags.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>STAMP examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-latest.js"></script>
+  <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+</head>
+<body>
+  <amp-story standalone poster-portrait-src="portrait.png" poster-landscape-src="landscape.png" poster-square-src="square.png"
+      title="Example" publisher="The AMP Project" publisher-logo-src="amp.png">
+    <amp-story-page id="1">
+      <amp-story-grid-layer template="horizontal">
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-auto-ads>
+      <script type="application/json">
+      {
+        "ad-attributes": {
+          "type": "custom",
+          "data-src": "https://adserver.com/getad?slot=abcd1234"
+        }
+      }
+      </script>
+
+      <template type="amp-mustache" id="template-1">
+        <amp-img src="{{imgSrc}}" width=100px height=100px></amp-img>
+        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+      </template>
+
+      <template type="amp-mustache" id="template-2">
+        <div class="creative-line-1">{{creativeLine1}}</div>
+        <div class="creative-line-2">{{creativeLine2}}</div>
+        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+      </template>
+    </amp-story-auto-ads>
+  </amp-story>
+</body>
+</html>

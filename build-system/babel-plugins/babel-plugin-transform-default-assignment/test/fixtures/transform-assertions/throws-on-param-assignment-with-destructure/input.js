@@ -1,0 +1,2 @@
+function test({x} = {}) {
+}

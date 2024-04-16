@@ -1,0 +1,18 @@
+<!--
+  Test Description:
+  This tests that the value of the transformed attribute catches malformed name. Only
+  `self` or AMP caches listed at https://cdn.ampproject.org/caches.json are valid.
+-->
+<!doctype html>
+<html ⚡ transformed="foobar;v=1">
+<head>
+  <meta charset="utf-8">
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name="viewport" content="width=device-width">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="./regular-html-version.html">
+</head>
+<body>
+  Hello, world.
+</body>
+</html>

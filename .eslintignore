@@ -1,0 +1,30 @@
+# Files and directories explicitly ignored by eslint
+**/node_modules/**
+build-system/babel-plugins/**/fixtures/**/*.js
+build-system/babel-plugins/**/fixtures/**/*.mjs
+build-system/tasks/make-extension/template/**/*
+examples/amp-script/todomvc.ssr.js
+examples/amp-script/vue-todomvc.js
+extensions/amp-a4a/0.1/test/testdata/**
+src/purifier/noop.js
+testing/local-amp-chrome-extension/**
+third_party/**
+validator/**
+
+# [GLOBALLY IGNORED]
+# (Don't edit or remove the above comment!)
+# The rules below are synced between .gitignore and .prettierignore, and are
+# removed by `amp clean`.
+
+.*cache
+.amp-dep-check
+build
+dist
+dist.3p
+dist.tools
+export
+examples/storybook
+/release
+result-reports
+test/coverage
+test/coverage-e2e

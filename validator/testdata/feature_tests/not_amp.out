@@ -1,0 +1,20 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This is a basic non-amp document.
+|  -->
+|  <!doctype html>
+|  <html>
+>> ^~~~~~~~~
+feature_tests/not_amp.html:6:0 The mandatory attribute '⚡' is missing in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|  <head>
+|    <meta charset="utf-8">
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/not_amp.html:13:6 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>       ^~~~~~~~~
+feature_tests/not_amp.html:13:6 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

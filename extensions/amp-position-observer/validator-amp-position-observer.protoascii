@@ -1,0 +1,38 @@
+tags: {  # amp-position-observer
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-position-observer"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-position-observer>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-POSITION-OBSERVER"
+  requires_extension: "amp-position-observer"
+  attrs: {
+    name: "intersection-ratios"
+    # Regex ^([0]*?\.\d*$|1$|0$)|([0]*?\.\d*|1|0)\s{1}([0]*?\.\d*$|1$|0$)
+    # Values such as: "0", "0.1" , "1", "0 1", "0 0.5", "0.5 1", "1 1", etc...
+    value_regex: "^([0]*?\\.\\d*$|1$|0$)|([0]*?\\.\\d*|1|0)\\s{1}([0]*?\\.\\d*$|1$|0$)"
+  }
+  attrs: {
+    name: "once"
+    value: ""
+  }
+  attrs: { name: "target" }
+  attrs: {
+    name: "viewport-margins"
+    # Regex: ^(\d+$|\d+px$|\d+vh$)|((\d+|\d+px|\d+vh)\s{1}(\d+$|\d+px$|\d+vh$))
+    # Values such as: "100", "100px", "100vh", "100 100px", "100vh 100", "100px 100vh", etc..
+    value_regex: "^(\\d+$|\\d+px$|\\d+vh$)|((\\d+|\\d+px|\\d+vh)\\s{1}(\\d+$|\\d+px$|\\d+vh$))"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout {
+    supported_layouts: NODISPLAY
+  }
+}

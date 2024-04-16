@@ -1,0 +1,537 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="description" content="This is an interactive story with quizzes.">
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-story-1.0.js">
+    <link rel="preconnect dns-prefetch" href="https://fonts.gstatic.com/" crossorigin>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+    <!-- Import other AMP Extensions here -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <style amp-custom>
+    /* Add your styles here */
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: white;
+    }
+
+    .cover-img {
+      filter: brightness(60%);
+    }
+
+    .quiz-img {
+      filter: brightness(80%);
+    }
+
+    .cover-content, .quiz-content {
+      padding: 6em 2em 2em 2em;
+    }
+
+    .cover-content {
+      text-shadow: 0px 4px 8px rgba(0, 0, 0, 0.253);
+    }
+
+    #cover-publisher {
+      font-size: small;
+      letter-spacing: 4px;
+    }
+
+    #cover-title {
+      font-size: 3rem;
+      line-height: 4rem;
+    }
+
+    #cover-description {
+      font-size: 1.85rem;
+      margin-top: 32px;
+    }
+
+    .quiz-btn.start {
+      padding: 10px 20px;
+    }
+
+    .quiz-btn.start svg {
+      margin-left: 10px;
+      animation: start-btn-anim 0.7s ease-in-out 0s infinite alternate;
+    }
+
+    .quiz-lower {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: absolute;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      padding: 2em 4em;
+      padding-top: 10em;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    }
+
+    .quiz-progress {
+      font-weight: bold;
+      font-size: 0.7em;
+    }
+
+    .quiz-btn {
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+      padding: 16px;
+      border-radius: 27px;
+      border: 2px solid white;
+      align-self: flex-end;
+      font-weight: bold;
+    }
+
+    .quiz-btn.prev {
+      transform: rotate(180deg);
+    }
+
+    amp-story-interactive-quiz, .quiz-fact, amp-story-interactive-results {
+      margin-bottom: 4em;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.274);
+      border-radius: 32px;
+    }
+
+    amp-story-interactive-quiz {
+      --gradient1: linear-gradient(150deg, #49a300, #1c6904);
+      --accent1: #0fda19;
+      --gradient2: linear-gradient(150deg, #da450b, #ffa600);
+      --accent2: #ff6600;
+      --gradient3: linear-gradient(150deg, #a26ef7, #1f1bf5);
+      --accent3: #a26ef7;
+      --gradient4: linear-gradient(150deg, #0084ff, #00c3ff);
+      --accent4: #00c3ff;
+    }
+
+    .quiz-fact {
+      text-align: center;
+      color: black;
+      max-width: 400px;
+      background-color: white;
+      padding: 1em;
+      border-radius: 32px;
+      font-size: 0.8em;
+    }
+
+    @keyframes start-btn-anim {
+      from {transform: translateX(0px)}
+      to {transform: translateX(4px)}
+    }
+
+    .space-vertical {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .space-center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .quiz-upper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      padding: 2em 4em;
+    }
+
+    .quiz-timer {
+      position: relative;
+      height: 54px;
+    }
+
+    .quiz-timer svg {
+      width: 54px;
+      height: 54px;
+      transform: rotateY(-180deg) rotateZ(-90deg);
+    }
+
+    amp-story-page[active] .quiz-timer circle {
+      animation: countdown 12s linear 1 forwards;
+    }
+
+    .quiz-timer circle {
+      stroke-dasharray: 169px;
+      stroke-dashoffset: 0px;
+      stroke-linecap: round;
+      stroke-width: 2px;
+      stroke: white;
+      fill: black;
+    }
+
+    .quiz-timer-nums {
+      height: 30px;
+      line-height: 30px;
+      overflow: hidden;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: black;
+      font-weight: bold;
+    }
+
+    amp-story-page[active] .quiz-timer-nums div {
+      animation: countdown-nums 11s cubic-bezier(1.000, 0.1, 0.000, 0.9) 1 forwards;
+      text-align: center;
+    }
+
+    amp-story-cta-layer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .docs-btn {
+      background-color: rgba(0, 0, 0, 0.8);
+      display: inline-block;
+      font-size: 20px;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 2px solid white;
+      align-self: center;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+    }
+
+    @keyframes bounce {
+      from {
+        transform: scale(1) rotate(30deg);
+      }
+      to {
+        transform: scale(1.1) rotate(32deg);
+      }
+    }
+
+    @keyframes countdown {
+      from {
+        stroke-dashoffset: 169px;
+      }
+      to {
+        stroke-dashoffset: 0px;
+      }
+    }
+
+    @keyframes countdown-nums {
+      0% {
+        transform: translateY(0px);
+      }
+      10% {
+        transform: translateY(-30px);
+      }
+      20% {
+        transform: translateY(-60px);
+      }
+      30% {
+        transform: translateY(-90px);
+      }
+      40% {
+        transform: translateY(-120px);
+      }
+      50% {
+        transform: translateY(-150px);
+      }
+      60% {
+        transform: translateY(-180px);
+      }
+      70% {
+        transform: translateY(-210px);
+      }
+      80% {
+        transform: translateY(-240px);
+      }
+      90% {
+        transform: translateY(-270px);
+      }
+      100% {
+        transform: translateY(-300px);
+      }
+    }
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <link rel="canonical" href=".">
+    <title>Name that artist</title>
+  </head>
+  <body>
+    <amp-story standalone
+      publisher="Stories Format"
+      title="Name that artist"
+      poster-portrait-src="./last_supper.jpg"
+      publisher-logo-src="https://amp.dev/static/img/icons/icon-512x512.png">
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            class="cover-img"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/flagged/photo-1572392640988-ba48d1a74457?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1080&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="cover-content space-vertical">
+            <div id="cover-top">
+              <h3 id="cover-publisher">WEB STORIES</h3>
+              <h1 id="cover-title">NAME THAT ARTIST</h1>
+              <p id="cover-description">What do you know about famous artists of the past and present?</p>
+            </div>
+            <div class="quiz-btn start">
+              <span>Start the quiz</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px" stroke="white">
+                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+              </svg>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-1">
+        <amp-story-grid-layer template="fill">
+          <amp-img class="quiz-img"
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="quiz-content space-center">
+            <div class="quiz-upper">
+              <div class="quiz-timer">
+                <svg><circle r="25" cx="27" cy="27"></circle></svg>
+                <div class="quiz-timer-nums">
+                  <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+                </div>
+              </div>
+            </div>
+            <div class="quiz-lower">
+              <div class="quiz-progress">1 / 4</div>
+              <div class="quiz-btn next">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px" stroke="white">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+              </div>
+            </div>
+            <amp-story-interactive-quiz
+              id="quiz-1"
+              style="--interactive-prompt-background: var(--gradient1); --interactive-accent-color: var(--accent1)"
+              prompt-text="Who was the artist that created the famous painting &quot;The Last Supper&quot;?"
+              theme="dark"
+              chip-style="shadow"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response2.json"
+              option-1-text="Michelangelo"
+              option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
+              option-3-text="Raphael"
+              option-4-text="Sandro Boticelli">
+            </amp-story-interactive-quiz>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-2">
+        <amp-story-grid-layer template="fill">
+          <amp-img class="quiz-img"
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="53% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1493841160601-33a4807cb6de?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2978&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="quiz-content space-center">
+            <div class="quiz-upper">
+              <div class="quiz-timer">
+                <svg><circle r="25" cx="27" cy="27"></circle></svg>
+                <div class="quiz-timer-nums">
+                  <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+                </div>
+              </div>
+            </div>
+            <div class="quiz-lower">
+              <div class="quiz-btn prev">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px" stroke="white">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+              </div>
+              <div class="quiz-progress">2 / 4</div>
+              <div class="quiz-btn next">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px" stroke="white">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+              </div>
+            </div>
+            <amp-story-interactive-quiz
+              id="quiz-2"
+              style="--interactive-prompt-background: var(--gradient2); --interactive-accent-color: var(--accent2)"
+              prompt-text="How many paintings did Vincent Van Gogh sell in his life?"
+              chip-style="shadow"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response1.json"
+              option-1-text="1 painting" option-1-correct option-1-confetti="💰"
+              option-2-text="7 paintings"
+              option-3-text="21 paintings"
+              option-4-text="78 paintings">
+            </amp-story-interactive-quiz>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-3">
+        <amp-story-grid-layer template="fill">
+          <amp-img class="quiz-img"
+          animate-in="zoom-in"
+          animate-in-duration="30s"
+          scale-start="1"
+          scale-end="1.3"
+          object-position="50% 50%"
+          layout="fixed" width="1600" height="1200"
+          src="https://images.unsplash.com/photo-1482775907821-a56ec43344fc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2552&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="quiz-content space-center">
+            <div class="quiz-upper">
+              <div class="quiz-timer">
+                <svg><circle r="25" cx="27" cy="27"></circle></svg>
+                <div class="quiz-timer-nums">
+                  <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+                </div>
+              </div>
+            </div>
+            <div class="quiz-lower">
+              <div class="quiz-btn prev">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px" stroke="white">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+              </div>
+              <div class="quiz-progress">3 / 4</div>
+              <div class="quiz-btn next">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px" stroke="white">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+              </div>
+            </div>
+            <amp-story-interactive-quiz
+              id="quiz-3"
+              style="--interactive-prompt-background: var(--gradient3); --interactive-accent-color: var(--accent3)"
+              theme="dark"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response4.json"
+              prompt-text="Who painted the surrealist artwork &quot;The Persistence of Memory&quot;?"
+              option-1-text="Pablo Picasso"
+              option-2-text="Rene Magritte"
+              option-3-text="Monet"
+              option-4-text="Salvador Dali" option-4-correct option-4-confetti="⏰">
+            </amp-story-interactive-quiz>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-4">
+        <amp-story-grid-layer template="fill">
+          <amp-img class="quiz-img"
+          animate-in="zoom-in"
+          animate-in-duration="30s"
+          scale-start="1"
+          scale-end="1.3"
+          object-position="50% 50%"
+          layout="fixed" width="1600" height="1200"
+          src="https://images.unsplash.com/photo-1580089056071-11f31b94fefe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2553&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="quiz-content space-center">
+            <div class="quiz-upper">
+              <div class="quiz-timer">
+                <svg><circle r="25" cx="27" cy="27"></circle></svg>
+                <div class="quiz-timer-nums">
+                  <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+                </div>
+              </div>
+            </div>
+            <div class="quiz-lower">
+              <div class="quiz-btn prev">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px" stroke="white">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+              </div>
+              <div class="quiz-progress">4 / 4</div>
+            </div>
+            <amp-story-interactive-quiz
+              id="quiz-4"
+              style="--interactive-prompt-background: var(--gradient4); --interactive-accent-color: var(--accent4)"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response3.json"
+              prompt-text="Who introduced pop art?"
+              option-1-text="David Hockney"
+              option-2-text="Keith Haring"
+              option-3-text="Andy Warhol" option-3-correct option-3-confetti="🖍️"
+              option-4-text="Richard Hamilton">
+            </amp-story-interactive-quiz>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-results-1">
+        <amp-story-grid-layer template="fill">
+          <amp-img style="filter:blur(4px)"
+            src="https://images.unsplash.com/photo-1515405295579-ba7b45403062?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1700&q=80"
+            layout="fixed"
+            height="1600"
+            width="900">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="quiz-content space-center">
+            <amp-story-interactive-results
+              style="--interactive-accent-color: #F34E4E"
+              prompt-text="You are"
+              option-1-results-category="Art Expert" option-1-text="You got it all! Your knowledge in art is impeccable, be proud of it" option-1-image="https://images.unsplash.com/photo-1441471349424-351990746ff4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-1-results-threshold="100" option-1-confetti="🎨"
+              option-2-results-category="Art Enthusiast" option-2-text="Keep going! Learning about art is fun and interesting" option-2-image="https://images.unsplash.com/photo-1500628550463-c8881a54d4d4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-2-results-threshold="75" option-2-confetti="🎨"
+              option-3-results-category="Art Beginner" option-3-text="Don't feel bad! You're on the right track, keep learning and you will ace this" option-3-image="https://images.unsplash.com/photo-1482245294234-b3f2f8d5f1a4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-3-results-threshold="50" option-3-confetti="🎨"
+              option-4-results-category="Art Ignorant" option-4-text="Not everyone was born for this, go find something else you like. Or start learning, your choice" option-4-image="https://images.unsplash.com/photo-1471666875520-c75081f42081?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-4-results-threshold="0" option-4-confetti="🎨">
+          </amp-story-interactive-results>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-results-2">
+        <amp-story-grid-layer template="fill">
+          <amp-img style="filter:blur(4px)"
+            src="https://images.unsplash.com/photo-1515405295579-ba7b45403062?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1700&q=80"
+            layout="fixed"
+            height="1600"
+            width="900">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="quiz-content space-center">
+            <amp-story-interactive-results
+              animate-in="fly-in-bottom"
+              style="--interactive-accent-color: #A34EFE"
+              prompt-text="You are"
+              option-1-results-category="Art Expert" option-1-text="You got it all! Your knowledge in art is impeccable, be proud of it" option-1-image="https://images.unsplash.com/photo-1441471349424-351990746ff4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-1-results-threshold="100"
+              option-2-results-category="Art Enthusiast" option-2-text="Keep going! Learning about art is fun and interesting" option-2-image="https://images.unsplash.com/photo-1500628550463-c8881a54d4d4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-2-results-threshold="75"
+              option-3-results-category="Art Beginner" option-3-text="Don't feel bad! You're on the right track, keep learning and you will ace this" option-3-image="https://images.unsplash.com/photo-1482245294234-b3f2f8d5f1a4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-3-results-threshold="50"
+              option-4-results-category="Art Ignorant" option-4-text="Not everyone was born for this, go find something else you like. Or start learning, your choice" option-4-image="https://images.unsplash.com/photo-1471666875520-c75081f42081?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-4-results-threshold="0">
+          </amp-story-interactive-results>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

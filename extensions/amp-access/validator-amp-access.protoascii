@@ -1,0 +1,38 @@
+tags: {  # amp-access
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-access"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-access (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-access extension .json script"
+  unique: true
+  mandatory_parent: "HEAD"
+  requires_extension: "amp-access"
+  attrs: {
+    name: "id"
+    mandatory: true
+    value: "amp-access"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}

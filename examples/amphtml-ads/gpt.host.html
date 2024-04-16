@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script async="async" src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+  <script>
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+  </script>
+  <title>AMP inabox for GPT demo</title>
+</head>
+<body>
+
+  <h1>AMP inabox for GPT demo</h1>
+  <h2>Standard GPT Ad</h2>
+  <h4><i>served in an iframe from /examples/amphtml-ads/adchoices-1.a4a.html</i></h4>
+  <div id="div-gpt-ad-1533830709700-0" style="height:300px; width:600px;" data-google-query-id="CMDAi-P-6N0CFUuJwAoddusOag">
+    <iframe id="google_ads_iframe_/49790152/scaledplacement/300x300_0"
+      title="3rd party ad content"
+      name="google_ads_iframe_/49790152/scaledplacement/300x300_0"
+      width="300"
+      height="300"
+      scrolling="no"
+      marginwidth="0"
+      marginheight="0"
+      frameborder="0"
+      src="/examples/amphtml-ads/adchoices-1.a4a.html"
+      style="border: 0px; vertical-align: bottom;"
+      data-load-complete="true">
+    </iframe>
+  </div>
+
+  <h4><i>served in an iframe from /examples/amphtml-ads/adchoices-2.a4a.html</i></h4>
+  <div id="div-gpt-ad-1533830709700-0" data-google-query-id="CMDAi-P-6N0CFUuJwAoddusOag">
+    <iframe id="google_ads_iframe_/49790152/scaledplacement/300x300_0"
+            title="3rd party ad content"
+            name="google_ads_iframe_/47947404/d-billboard_0"
+            width="970"
+            height="250"
+            scrolling="no"
+            marginwidth="0"
+            marginheight="0"
+            frameborder="0"
+            src="/examples/amphtml-ads/adchoices-2.a4a.html"
+            style="border: 0px; vertical-align: bottom;"
+            data-load-complete="true">
+    </iframe>
+  </div>
+
+
+<h2>Scroll down to see a GPT slot that tries to request that same AMP ad</h2>
+<script>
+  googletag.cmd.push(function() {
+    googletag
+        .defineSlot("/30497360/cfuertes/amp/inabox_300_200", [300, 200], "div-gpt-ad-12345")
+        .addService(googletag.pubads());
+    googletag.enableServices();
+  });
+</script>
+<div style="height: 120vh"></div>
+<div id="div-gpt-ad-12345" style="width:300px;height:200px">
+  <script>
+    googletag.cmd.push(function() {
+      googletag.display("div-gpt-ad-12345");
+    });
+  </script>
+</div>
+<div style="height: 120vh"></div>
+</body>
+</html>

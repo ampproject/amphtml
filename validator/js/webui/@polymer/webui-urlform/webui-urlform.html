@@ -1,0 +1,53 @@
+<!-- Form for entering a URL above the main editor window. -->
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<dom-module id="webui-urlform">
+  <style scope="webui-urlform">
+    .flex-horizontal {
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+      margin-bottom: 10px;
+    }
+    .flexchild {
+      @apply(--layout-flex);
+    }
+    #htmlFormatDropdown {
+      min-width: 120px;
+      max-width: 120px;
+    }
+  </style>
+  <template>
+    <div class="container flex-horizontal">
+      <paper-material elevation="0">
+        <paper-dropdown-menu label="HTML Format" id="htmlFormatDropdown">
+          <paper-listbox class="dropdown-content" selected="AMP"
+                         id="htmlFormatSelector" attr-for-selected="htmlFormat"
+                         on-iron-select="htmlFormatChange">
+            <paper-item htmlFormat="AMP">AMP</paper-item>
+            <paper-item htmlFormat="AMP4ADS">AMP4ADS</paper-item>
+            <paper-item htmlFormat="AMP4EMAIL">AMP4EMAIL</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </paper-material>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'webui-urlform',
+      htmlFormatChange: function() {
+        this.fire('webui-urlform-html-format-changes',
+                  {'htmlFormat': this.$.htmlFormatSelector.selected});
+      },
+      getHtmlFormat: function() {
+        return this.$.htmlFormatSelector.selected;
+      },
+      setHtmlFormat: function(htmlFormat) {
+        this.$.htmlFormatSelector.selected = htmlFormat;
+      }
+    });
+  </script>
+</dom-module>
