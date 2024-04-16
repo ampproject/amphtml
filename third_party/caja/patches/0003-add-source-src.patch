@@ -1,0 +1,10 @@
+--- a/third_party/caja/html-sanitizer.js
++++ b/third_party/caja/html-sanitizer.js
+@@ -990,6 +990,7 @@ html4.ATTRIBS = {
+   'select::onfocus': 2,
+   'select::required': 0,
+   'select::size': 0,
++  'source::src': 1,
+   'source::type': 0,
+   'table::align': 0,
+   'table::bgcolor': 0,

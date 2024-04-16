@@ -1,0 +1,29 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests support for the amp-mathml tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-mathml" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+|    <amp-mathml layout="container" inline data-formula="\(x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\)"></amp-mathml>
+|    <!-- Invalid: unsupported layout value -->
+|    <amp-mathml layout="responsive" width="10px" height="10px" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+>>   ^~~~~~~~~
+amp-mathml/0.1/test/validator-amp-mathml.html:20:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-mathml'. (see https://amp.dev/documentation/components/amp-mathml)
+|    <!-- Invalid: missing formula -->
+|    <amp-mathml layout="container"></amp-mathml>
+>>   ^~~~~~~~~
+amp-mathml/0.1/test/validator-amp-mathml.html:22:2 The mandatory attribute 'data-formula' is missing in tag 'amp-mathml'. (see https://amp.dev/documentation/components/amp-mathml)
+|  </body>
+|  </html>

@@ -1,0 +1,17 @@
+URL: https://github.com/que-etc/resize-observer-polyfill
+Fork URL: https://github.com/dvoytenko/resize-observer-polyfill
+License: MIT License
+License File: https://github.com/que-etc/resize-observer-polyfill/blob/master/LICENSE
+
+Description:
+A polyfill for the ResizeObserver API.
+
+The original [polyfill](https://github.com/que-etc/resize-observer-polyfill) has
+been [forked](https://github.com/dvoytenko/resize-observer-polyfill) to enable
+this polyfill to work across the boundary of Shadow DOM and same-origin
+iframes. See https://github.com/que-etc/resize-observer-polyfill/pull/79 for
+more details. As soon as this pull request has been merged, the AMP project
+will switch to [npm dependency](https://www.npmjs.com/package/resize-observer-polyfill).
+
+Local modifications:
+- The installer is wrapped into `installResizeObserver` function. See `ResizeObserver.install.js`.

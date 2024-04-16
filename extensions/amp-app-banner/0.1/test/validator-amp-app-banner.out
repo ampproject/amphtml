@@ -1,0 +1,36 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests support for the amp-app-banner tag and required <head> metatdata.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-app-banner" src="https://cdn.ampproject.org/v0/amp-app-banner-0.1.js"></script>
+|
+|    <!-- Valid -->
+|    <meta name="apple-itunes-app"
+|          content="app-id=123456789, app-argument=app-name://link/to/app-content">
+|    <link rel="manifest" href="https://link/to/manifest.json">
+|
+|  </head>
+|  <body>
+|
+|    <!-- Valid -->
+|    <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
+|      <amp-img src="https://example.com/icon.png" width="60" height="51">
+|      </amp-img>
+|      <h3>App Name</h3>
+|      <p>Experience a richer experience on our mobile app!</p>
+|      <div class="actions">
+|        <button open-button>Get the app</button>
+|      </div>
+|    </amp-app-banner>
+|
+|  </body>
+|  </html>

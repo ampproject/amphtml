@@ -1,0 +1,67 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP next page examples</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-0.1.js"></script>
+  <style amp-custom>
+    .amp-next-page-text {
+      font-family: serif;
+    }
+  </style>
+</head>
+<body>
+  <h2>Content discovery</h2>
+  <amp-next-page>
+    <div separator>
+      READ ANOTHER ARTICLE FROM OUR SITE!
+    </div>
+    <script type='application/json'>
+      {
+        "pages": [
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is one another article",
+            "ampUrl": "/examples/article-parallax.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This article has fixed position elements",
+            "ampUrl": "/examples/article-fixed-header.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is one another article with a very very very very long title",
+            "ampUrl": "/examples/amp-next-page.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is one article",
+            "ampUrl": "/examples/article.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is some article",
+            "ampUrl": "/examples/article.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is yet another article",
+            "ampUrl": "/examples/article.amp.html"
+          }
+        ],
+        "hideSelectors": [
+          ".title"
+        ]
+      }
+    </script>
+  </amp-next-page>
+  <footer>
+    Footer
+  </footer>
+</body>
+</html>

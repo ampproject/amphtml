@@ -1,0 +1,34 @@
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+amp-facebook,
+amp-facebook-comments,
+amp-facebook-like,
+amp-facebook-page {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pre-upgrade: size-defining element - hide text. */
+amp-facebook:not(.i-amphtml-built),
+amp-facebook-comments:not(.i-amphtml-built),
+amp-facebook-like:not(.i-amphtml-built),
+amp-facebook-page:not(.i-amphtml-built) {
+  color: transparent !important;
+}
+
+/* Pre-upgrade: size-defining element - hide children. */
+amp-facebook:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+amp-facebook-comments:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+amp-facebook-like:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+amp-facebook-pagee:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
+  display: none;
+  content-visibility: hidden;
+}

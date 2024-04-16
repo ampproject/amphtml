@@ -1,0 +1,288 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+  <title>amp-form initialization test</title>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <link rel="canonical" href="amp-form-initialization-test.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+  </style>
+  <noscript>
+    <style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style>
+  </noscript>
+  <style amp-custom>
+    body {
+      padding: 1em;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      width: 90%;
+    }
+    th {
+      text-align: left;
+      padding-top: 1em;
+    }
+    td {
+      padding: 0.25em;
+    }
+    td:first-child {
+      font-family: monospace;
+    }
+    .msg {
+      font-family: sans-serif;
+      border: 1px solid #ccc;
+      padding: 0.5em;
+    }
+
+    input[name="layout-checked"]~p:after {
+      content: " not checked";
+    }
+    input[name="layout-checked"]:checked~p:after {
+      content: " checked";
+    }
+    input[name="layout-checked"]:checked~p {
+      height: 4em;
+      background-color: lightgreen;
+      line-height: 4em;
+      text-align: center;
+    }
+
+    input[name="layout-invalid"]~p:after {
+      content: " valid";
+    }
+    input[name="layout-invalid"]:invalid~p:after {
+      content: " invalid";
+    }
+    input[name="layout-invalid"]:invalid~p {
+      height: 4em;
+      background-color: orange;
+      line-height: 4em;
+      text-align: center;
+    }
+
+    input[name="layout-hidden"][type="hidden"][value="0"]~p:after {
+      content: " 0";
+    }
+    input[name="layout-hidden"][type="hidden"]~p:after {
+      content: " ?";
+    }
+    input[name="layout-hidden"][type="hidden"][value="0"]~p {
+      height: 4em;
+      background-color: lightblue;
+      line-height: 4em;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <p><a href="amp-form-initialization-test.html?input-color=%23ffffff&input-datetime-local=2019-01-01T00%3A00&input-email=test%40test.com&input-month=2019-01&input-number=100&input-range=6&input-search=some+search&input-tel=%2B1-555-555-5555&input-text=some+text&input-time=01%3A00&input-url=https%3A%2F%2Famp.dev%2Fs%3Fq%3D3%23e&input-week=2019-W01&input-hidden=some+hidden&input-checkbox-1=1&input-checkbox-2=2&input-radio=2&select=2&textarea=some+textarea&nofill-input-text=other+text&nofill-input-checkbox-1=1&nofill-input-checkbox-2=2&nofill-input-radio=2&nofill-select=2&nofill-textarea=other+textarea&layout-checked=on&layout-invalid=.&layout-hidden=0">Test URL</a> (or populate form manually and submit with button below)</p>
+  <form id="form2" method="GET" action="amp-form-initialization-test.html" target="_top" data-initialize-from-url>
+    <table>
+      <tr>
+        <td colspan="3" class="msg">The following form fields have attribute <code>data-allow-initialization</code>, so their values should be set from the URL on page load.</td>
+      </tr>
+      <tr>
+        <th>Type</th>
+        <th>Field</th>
+        <th>Default value</th>
+      </tr>
+      <tr>
+        <td>&lt;input type="color"&gt;</td>
+        <td><input type="color" name="input-color" data-allow-initialization></td>
+        <td><input type="color"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="datetime-local"&gt;</td>
+        <td><input type="datetime-local" name="input-datetime-local" data-allow-initialization></td>
+        <td><input type="datetime-local"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="email"&gt;</td>
+        <td><input type="email" name="input-email" data-allow-initialization></td>
+        <td><input type="email"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="month"&gt;</td>
+        <td><input type="month" name="input-month" data-allow-initialization></td>
+        <td><input type="month"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="number"&gt;</td>
+        <td><input type="number" name="input-number" data-allow-initialization></td>
+        <td><input type="number"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="range"&gt;</td>
+        <td><input type="range" name="input-range" data-allow-initialization></td>
+        <td><input type="range"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="search"&gt;</td>
+        <td><input type="search" name="input-search" data-allow-initialization></td>
+        <td><input type="search"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="tel"&gt;</td>
+        <td><input type="tel" name="input-tel" data-allow-initialization></td>
+        <td><input type="tel"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="text"&gt;</td>
+        <td><input type="text" name="input-text" data-allow-initialization></td>
+        <td><input type="text"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="time"&gt;</td>
+        <td><input type="time" name="input-time" data-allow-initialization></td>
+        <td><input type="time"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="url"&gt;</td>
+        <td><input type="url" name="input-url" data-allow-initialization></td>
+        <td><input type="url"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="week"&gt;</td>
+        <td><input type="week" name="input-week" data-allow-initialization></td>
+        <td><input type="week"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="hidden"&gt;</td>
+        <td><input type="hidden" name="input-hidden" data-allow-initialization></td>
+        <td><input type="hidden"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="checkbox"&gt;</td>
+        <td>
+          <label><input type="checkbox" name="input-checkbox-1" value="1" data-allow-initialization> 1</label>
+          <label><input type="checkbox" name="input-checkbox-2" value="2" data-allow-initialization> 2</label>
+        </td>
+        <td>
+          <label><input type="checkbox" value="1"> 1</label>
+          <label><input type="checkbox" value="2"> 2</label>
+        </td>
+      </tr>
+      <tr>
+        <td>&lt;input type="radio"&gt;</td>
+        <td>
+          <label><input type="radio" name="input-radio" value="1" data-allow-initialization> 1</label>
+          <label><input type="radio" name="input-radio" value="2" data-allow-initialization> 2</label>
+        </td>
+        <td>
+          <label><input type="radio" name="default-input-radio" value="1"> 1</label>
+          <label><input type="radio" name="default-input-radio" value="2"> 2</label>
+        </td>
+      </tr>
+      <tr>
+        <td>&lt;select&gt;</td>
+        <td>
+          <select name="select" data-allow-initialization>
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </select>
+        </td>
+        <td>
+          <select>
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>&lt;textarea&gt;</td>
+        <td><textarea name="textarea" data-allow-initialization></textarea></td>
+        <td><textarea></textarea></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="msg">The following form fields <em>do not</em> have attribute <code>data-allow-initialization</code>, so their values should <em>not</em> be set from the URL on page load.</td>
+      </tr>
+      <tr>
+        <th>Type</th>
+        <th>Field</th>
+        <th>Default value</th>
+      </tr>
+      <tr>
+        <td>&lt;input type="text"&gt;</td>
+        <td><input type="text" name="nofill-input-text"></td>
+        <td><input type="text"></td>
+      </tr>
+      <tr>
+        <td>&lt;input type="checkbox"&gt;</td>
+        <td>
+          <label><input type="checkbox" name="nofill-input-checkbox-1" value="1"> 1</label>
+          <label><input type="checkbox" name="nofill-input-checkbox-2" value="2"> 2</label>
+        </td>
+        <td>
+          <label><input type="checkbox" value="1"> 1</label>
+          <label><input type="checkbox" value="2"> 2</label>
+        </td>
+      </tr>
+      <tr>
+        <td>&lt;input type="radio"&gt;</td>
+        <td>
+          <label><input type="radio" name="nofill-input-radio" value="1"> 1</label>
+          <label><input type="radio" name="nofill-input-radio" value="2"> 2</label>
+        </td>
+        <td>
+          <label><input type="radio" name="nofill-default-input-radio" value="1"> 1</label>
+          <label><input type="radio" name="nofill-default-input-radio" value="2"> 2</label>
+        </td>
+      </tr>
+      <tr>
+        <td>&lt;select&gt;</td>
+        <td>
+          <select name="nofill-select">
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </select>
+        </td>
+        <td>
+          <select>
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>&lt;textarea&gt;</td>
+        <td><textarea name="nofill-textarea"></textarea></td>
+        <td><textarea></textarea></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="msg">Sample layout hacking</td>
+      </tr>
+      <tr>
+        <td>:checked</td>
+        <td colspan="2">
+          <input type="checkbox" name="layout-checked" id="layout-checked" data-allow-initialization>
+          <label for="layout-checked">checkbox</label>
+          <p>This checkbox is </p>
+        </td>
+      </tr>
+      <tr>
+        <td>:invalid</td>
+        <td colspan="2">
+          <input type="email" name="layout-invalid" id="layout-invalid" placeholder="email" data-allow-initialization>
+          <p>This input is </p>
+        </td>
+      </tr>
+      <tr>
+        <td>[type="hidden"][value="0"]</td>
+        <td colspan="2">
+          <input type="hidden" name="layout-hidden" id="layout-hidden" data-allow-initialization>
+          <p>Input value is </p>
+        </td>
+      </tr>
+    </table>
+    <button>Submit</button>
+  </form>
+</body>
+
+</html>

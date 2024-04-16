@@ -1,0 +1,121 @@
+tags: {  # amp-twitter 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-twitter 1.0"
+  excludes_condition: "amp-twitter 0.1"
+  extension_spec: {
+    name: "amp-twitter"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-twitter 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-twitter 0.1"
+  excludes_condition: "amp-twitter 1.0"
+  extension_spec: {
+    name: "amp-twitter"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-twitter>
+  html_format: AMP
+  tag_name: "AMP-TWITTER"
+  requires_extension: "amp-twitter"
+  attrs: {
+    name: "data-cards"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-conversation"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-limit"
+    trigger: {
+      also_requires_attr: "data-momentid"
+    }
+  }
+  attrs: {
+    name: "data-momentid"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-timeline-id"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-timeline-owner-screen-name"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+  }
+  attrs: {
+    name: "data-timeline-slug"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+  }
+  attrs: {
+    name: "data-timeline-source-type"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  attrs: {
+    name: "data-timeline-screen-name"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+  }
+    attrs: {
+    name: "data-timeline-url"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "data-timeline-user-id"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-tweetid"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  # <amp-bind>
+  attrs: {
+    name: "[data-tweetid]"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

@@ -1,0 +1,34 @@
+tags: {  # amp-viqeo-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-viqeo-player"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # <amp-viqeo-player>
+  html_format: AMP
+  tag_name: "AMP-VIQEO-PLAYER"
+  requires_extension: "amp-viqeo-player"
+  attrs: { name: "autoplay" }
+  attrs: {
+    name: "data-profileid"
+    value_regex: "[0-9a-f]*"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-videoid"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

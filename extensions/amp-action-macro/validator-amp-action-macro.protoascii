@@ -1,0 +1,24 @@
+tags: {  # amp-action-macro
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-action-macro"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-action-macro>
+  html_format: AMP
+  tag_name: "AMP-ACTION-MACRO"
+  requires_extension: "amp-action-macro"
+  attrs: {
+    name: "arguments"
+  }
+  attrs: {
+    name: "execute"
+    mandatory: true
+  }
+  attr_lists: "mandatory-id-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-action-macro/"
+}

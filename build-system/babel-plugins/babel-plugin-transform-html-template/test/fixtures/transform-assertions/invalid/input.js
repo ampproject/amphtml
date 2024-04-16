@@ -1,0 +1,12 @@
+console.log(html`html ${foo}`);
+console.log(html`html ${foo} another`);
+console.log(html`html ${foo} another ${bar} thing`);
+console.log(htmlFor(element)`htmlFor ${foo}`);
+console.log(htmlFor(element)`html ${foo} another`);
+console.log(htmlFor(element)`html ${foo} another ${bar} thing`);
+console.log(svg`svg ${foo}`);
+console.log(svg`svg ${foo} another`);
+console.log(svg`svg ${foo} another ${bar} thing`);
+console.log(svgFor(element)`svgFor ${foo}`);
+console.log(svgFor(element)`svg ${foo} another`);
+console.log(svgFor(element)`svg ${foo} another ${bar} thing`);

@@ -1,0 +1,21 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Invalid usage test for amp-video-docking.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <!-- Invalid: extension without player extension -->
+|    <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-latest.js"></script>
+|  </head>
+|  <body>
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+amp-video-docking/0.1/test/validator-amp-video-docking-no-player.html:18:6 The extension 'amp-video-docking' was found on this page, but is unused. Please remove this extension.

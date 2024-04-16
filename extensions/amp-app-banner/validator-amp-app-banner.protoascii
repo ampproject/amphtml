@@ -1,0 +1,29 @@
+tags: {  # <script custom-element="amp-sticky-ad">
+  html_format: AMP  # Ads are not allowed inside ads.
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-app-banner"
+    version: "0.1"
+    version: "latest"
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-app-banner>
+  html_format: AMP
+  tag_name: "AMP-APP-BANNER"
+  mandatory_parent: "BODY"
+  requires_extension: "amp-app-banner"
+  requires_condition: "amp-app-banner data source"
+  # The "amp-app-banner button[open-button]" tag is in
+  # validator-main.protoascii and in turn has an "AMP-APP-BANNER"
+  # mandatory_parent.
+  requires_condition: "amp-app-banner button[open-button]"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-id-attr"
+  unique: true
+  spec_url: "https://amp.dev/documentation/components/amp-app-banner/"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

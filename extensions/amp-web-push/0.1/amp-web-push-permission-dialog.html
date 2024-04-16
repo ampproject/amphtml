@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<!-- AMP Web Push Permission Dialog -->
+
+<head>
+  <meta charset="utf-8">
+
+  <!-- Do not edit styles in this section -->
+  <style builtin>
+    /* Do not edit styles in this section. Add custom styles in the next
+       style section */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Default loading spinner */
+    .spinner,
+    .spinner:after {
+      border-radius: 50%;
+      width: 10em;
+      height: 10em;
+    }
+    .spinner {
+      margin: 60px auto;
+      font-size: 10px;
+      position: relative;
+      text-indent: -9999em;
+      border-top: 1.1em solid rgba(140, 140, 140, 0.2);
+      border-right: 1.1em solid rgba(140, 140, 140, 0.2);
+      border-bottom: 1.1em solid rgba(140, 140, 140, 0.2);
+      border-left: 1.1em solid rgb(140, 140, 140);
+      -webkit-transform: translateZ(0);
+      -ms-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-animation: spinner 1.1s infinite linear;
+      animation: spinner 1.1s infinite linear;
+    }
+    @-webkit-keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+    @keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Horizontally and vertically center items */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    /* Page message text styles */
+    .message {
+      font-size: 22px;
+      font-family: sans-serif;
+      text-align: center;
+    }
+
+    /* Close icon styles */
+    #close {
+      position: fixed;
+      right: 32px;
+      top: 32px;
+      width: 32px;
+      height: 32px;
+      opacity: 0.5;
+      cursor: pointer;
+    }
+    #close:before, #close:after {
+      position: fixed;
+      right: 48px;
+      content: ' ';
+      height: 33px;
+      width: 3px;
+      background-color: #333;
+    }
+    #close:before {
+      transform: rotate(45deg);
+    }
+    #close:after {
+      transform: rotate(-45deg);
+    }
+
+    /* Used to hide the preload and postload sections */
+    .invisible {
+      display: none;
+    }
+  </style>
+
+  <!-- Optional: Add custom styles here -->
+  <style custom>
+    /* Add custom styles here */
+  </style>
+</head>
+<body>
+  <div id="preload">
+    <!-- Anything in this section will be shown before the main script
+          runs, and will be hidden after -->
+    <div class="spinner"></div>
+  </div>
+  <div id="postload" class="invisible">
+    <span id="close"></span>
+    <div permission="default">
+      <p class="message">
+        <!--
+        Customize the subscribing message here
+            (e.g. "Click Allow to receive notifications")
+        -->
+        Click Allow to receive notifications.
+      </p>
+    </div>
+    <div permission="denied">
+      <!--
+        Customize the unblocking message here
+            (e.g. "Please unblock notifications in your browser settings
+                    to receive notifications from this website.")
+        -->
+      <p class="message">
+        Please unblock notifications in your browser settings to receive notifications from this website.
+      </p>
+    </div>
+  </div>
+  <!-- [REPLACE-SENTINEL amp-web-push-permission-dialog.js] -->
+</body>
+</html>

@@ -1,0 +1,15 @@
+tags: {  # amp-mraid
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-mraid"
+    version: "0.1"
+    version: "latest"
+    extension_type: HOST_SERVICE
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+  attrs: {
+    name: "no-fallback"
+  }
+}

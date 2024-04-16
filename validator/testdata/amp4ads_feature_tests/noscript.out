@@ -1,0 +1,42 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests that <noscript> tags are disallowed in A4A, which differs from AMP.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Invalid -->
+|    <noscript></noscript>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/noscript.html:15:2 The tag 'noscript' is disallowed.
+|    <!-- Invalid -->
+|    <img src="https://example.com/">
+>>   ^~~~~~~~~
+amp4ads_feature_tests/noscript.html:17:2 The tag 'img' is disallowed.
+|    <!-- Invalid -->
+|    <noscript>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/noscript.html:19:2 The tag 'noscript' is disallowed.
+|      <img src="https://example.com/">
+>>     ^~~~~~~~~
+amp4ads_feature_tests/noscript.html:20:4 The tag 'img' is disallowed.
+|    </noscript>
+|    <noscript>
+>>   ^~~~~~~~~
+amp4ads_feature_tests/noscript.html:22:2 The tag 'noscript' is disallowed.
+|      <video></video>
+>>     ^~~~~~~~~
+amp4ads_feature_tests/noscript.html:23:4 The tag 'video' is disallowed.
+|      <audio></audio>
+>>     ^~~~~~~~~
+amp4ads_feature_tests/noscript.html:24:4 The tag 'audio' is disallowed.
+|    </noscript>
+|  </body>
+|  </html>

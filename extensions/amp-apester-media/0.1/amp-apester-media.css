@@ -1,0 +1,106 @@
+
+
+/* amp-apester-iframe */
+
+.amp-apester-iframe {
+  transition: 0.4s opacity;
+  opacity: 0;
+}
+
+.i-amphtml-apester-iframe-ready {
+  transition: opacity 1s ease-out;
+  opacity: 1 !important;
+}
+
+.amp-apester-loader {
+  height: 100%;
+  width: 100%;
+  background-color: white;
+}
+
+.amp-apester-container {
+  max-width: 700px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  width: 100%;
+}
+
+.amp-apester-overflow {
+  position: absolute;
+  margin: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.amp-apester-overflow button {
+  border: none;
+  background: white;
+  cursor: pointer;
+  padding: 25px 80px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  outline: none;
+  position: relative;
+}
+
+.amp-apester-fullscreen {
+  background: rgba(34, 36, 38, 0.97) !important;
+  position: fixed !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483646 !important;
+  top: 0;
+  zoom: 1;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.i-amphtml-amp-apester-companion {
+  display: block;
+  margin: 10px auto;
+}
+
+.i-amphtml-amp-apester-bottom-ad {
+  display: block !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+}
+
+.i-amphtml-amp-apester-in-unit-wrap {
+  display: none !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background-color: #626262 !important;
+}
+
+.i-amphtml-amp-apester-in-unit-wrap.active {
+  display: block !important;
+}
+
+.i-amphtml-amp-apester-progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #ee9802;
+}
+
+@keyframes progress {
+  from {
+      width: 0;
+  }
+}
+
+.i-amphtml-amp-apester-in-unit {
+  display: block!important;
+  position: relative!important;
+  top: 50%!important;
+  transform: translateY(-50%)!important;
+  margin: 0!important;
+}

@@ -1,0 +1,37 @@
+tags: {  # amp-image-lightbox
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-image-lightbox"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-image-lightbox
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-image-lightbox] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-image-lightbox"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+  deprecation: "amp-image-lightbox cannot be properly positioned in emails and will soon be invalid in AMP4EMAIL."
+  deprecation_url: "https://github.com/ampproject/amphtml/issues/23170"
+}
+tags: {  # <amp-image-lightbox>
+  html_format: AMP
+  html_format: AMP4EMAIL
+  tag_name: "AMP-IMAGE-LIGHTBOX"
+  requires_extension: "amp-image-lightbox"
+  # Support dimensions / sizes / etc. like an amp-lightbox.
+  attrs: { name: "controls" }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

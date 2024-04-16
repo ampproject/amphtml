@@ -1,0 +1,21 @@
+PASS
+|  <!--
+|    Test Description:
+|    This testcase isn't run verbatim. The template string below is replaced by
+|    the test harnesses with various lengths of valid CSS stylesheets. We use
+|    this test to verify the max_byte_length rules for CSS author stylesheets.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|    <style amp-custom>.replace_amp_custom {}</style>
+|  </head>
+|  <body>
+|    Hello, world.
+|    replace_inline_style
+|  </body>
+|  </html>

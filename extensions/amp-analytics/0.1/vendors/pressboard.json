@@ -1,0 +1,36 @@
+{
+  "vars": {
+    "mediaId": "",
+    "geoNameId": "",
+    "country": "",
+    "region": "",
+    "city": "",
+    "clientId": "CLIENT_ID(_pbss)"
+  },
+  "requests": {
+    "host": "https://sr.studiostack.com",
+    "common_params": "&amp=1&url=${canonicalUrl}&referrer=${documentReferrer}&ts=${timestamp}&ua=${userAgent}&rand=${random}&uid=${clientId}&mid=${mediaId}&geoid=${geoNameId}&cn=${country}&rg=${region}&ct=${city}",
+    "conversion_params": "&hbt=${requestCount}&pvid=${pageViewId64}&asurl=${sourceUrl}&ash=${scrollHeight}&asnh=${screenHeight}&aasnh=${availableScreenHeight}&avh=${viewportHeight}&ast=${scrollTop}&atet=${totalEngagedTime}",
+    "conversion": "${host}/track/attention-amp?${common_params}${conversion_params}"
+  },
+  "triggers": {
+    "pageTimer": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 1,
+        "startSpec": {
+          "on": "visible"
+        },
+        "stopSpec": {
+          "on": "hidden"
+        }
+      },
+      "request": "conversion"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": true,
+    "image": true
+  }
+}

@@ -1,0 +1,50 @@
+<!--
+  Test Description:
+  Tests the example from the markdown file, autoplay enabled.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+</head>
+<body>
+  <amp-audio width="400" height="300" autoplay src="https://yourhost.com/audios/myaudio.mp3" preload="auto">
+    <div fallback>
+      <p>Your browser doesn’t support HTML5 audio</p>
+    </div>
+    <source type="audio/mpeg" src="foo.mp3">
+    <source type="audio/ogg" src="foo.ogg">
+  </amp-audio>
+
+  <!-- test controlslist attr, which is often provided in camelCase -->
+  <amp-audio width="400" height="300"
+             controlsList="nofullscreen nodownload noremoteplayback foobar">
+  </amp-audio>
+
+  <!-- Valid: Media Session attributes -->
+  <amp-audio width="400" height="300"
+             title="Hello" artist="World" artwork="example.jpg">
+  </amp-audio>
+
+  <!-- Valid: Most attributes are bindable -->
+  <amp-audio width="400" height="300"
+             [title]="Hello" [artist]="World" [artwork]="example.jpg">
+  </amp-audio>
+
+  <!-- Valid: empty sizes attribute is layout fixed -->
+  <amp-audio src=lemur.png sizes=""></amp-audio>
+
+  <!-- Valid: empty audio tag with container layout -->
+  <amp-audio autoplay src="https://yourhost.com/audios/myaudio.mp3" layout="container" preload="auto">
+    <div fallback>
+      <p>Your browser doesn’t support HTML5 audio</p>
+    </div>
+    <audio controls>
+  </amp-audio>
+</body>
+</html>

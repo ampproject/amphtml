@@ -1,0 +1,34 @@
+<!--
+  Test Description:
+  Tests the example from the markdown file with and without autoplay.
+  Format is set to A4A.
+-->
+<!doctype html>
+<html ⚡4ads>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+</head>
+<body>
+  <!-- Valid: autoplay not present. -->
+  <amp-audio width="400" height="300" src="https://yourhost.com/audios/myaudio.mp3">
+    <div fallback>
+      <p>Your browser doesn’t support HTML5 audio</p>
+    </div>
+    <source type="audio/mpeg" src="foo.mp3">
+      <source type="audio/ogg" src="foo.ogg">
+  </amp-audio>
+
+  <!-- Invalid: autoplay present. -->
+  <amp-audio width="400" height="300" autoplay src="https://yourhost.com/audios/myaudio.mp3">
+    <div fallback>
+      <p>Your browser doesn’t support HTML5 audio</p>
+    </div>
+    <source type="audio/mpeg" src="foo.mp3">
+      <source type="audio/ogg" src="foo.ogg">
+  </amp-audio>
+</body>
+</html>

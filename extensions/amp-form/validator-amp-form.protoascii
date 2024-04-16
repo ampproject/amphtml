@@ -1,0 +1,28 @@
+tags: {  # amp-form
+  # Accepted form elements can be found in validator-main.protoascii
+  # under section "4.10 Forms"
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-form"
+    version: "0.1"
+    version: "latest"
+    deprecated_allow_duplicates: true
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-form
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-form] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-form"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+    deprecated_allow_duplicates: true
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}

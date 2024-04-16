@@ -1,0 +1,121 @@
+tags: {  # amp-facebook 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  # The 1.0 amp-facebook script registers all amp-facebook-* components.
+  # See https://github.com/ampproject/amphtml/pull/35395 for context.
+  spec_name: "amp-facebook 1.0"
+  satisfies_condition: "amp-facebook 1.0"
+  excludes_condition: "amp-facebook 0.1"
+  excludes_condition: "amp-facebook-comments 0.1"
+  excludes_condition: "amp-facebook-like 0.1"
+  excludes_condition: "amp-facebook-page 0.1"
+  extension_spec: {
+    name: "amp-facebook"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-facebook 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-facebook 0.1"
+  excludes_condition: "amp-facebook 1.0"
+  extension_spec: {
+    name: "amp-facebook"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-facebook>
+  html_format: AMP
+  tag_name: "AMP-FACEBOOK"
+  requires_extension: "amp-facebook"
+  attr_lists: "amp-facebook"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-facebook-comments> via amp-facebook script
+  html_format: AMP
+  spec_name: "amp-facebook-comments 1.0"
+  tag_name: "AMP-FACEBOOK-COMMENTS"
+  requires_extension: "amp-facebook"
+  requires_condition: "amp-facebook 1.0"
+  attr_lists: "amp-facebook"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-facebook-like> via amp-facebook script
+  html_format: AMP
+  spec_name: "amp-facebook-like 1.0"
+  tag_name: "AMP-FACEBOOK-LIKE"
+  requires_extension: "amp-facebook"
+  requires_condition: "amp-facebook 1.0"
+  attr_lists: "amp-facebook-strict"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-facebook-page> via amp-facebook script
+  html_format: AMP
+  spec_name: "amp-facebook-page 1.0"
+  tag_name: "AMP-FACEBOOK-PAGE"
+  requires_extension: "amp-facebook"
+  requires_condition: "amp-facebook 1.0"
+  attr_lists: "amp-facebook-strict"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+attr_lists: {
+  name: "amp-facebook"
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: {
+    name: "data-href"
+    mandatory: true
+  }
+}
+attr_lists: {
+  name: "amp-facebook-strict"
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: {
+    name: "data-href"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+}

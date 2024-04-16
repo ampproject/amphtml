@@ -1,0 +1,303 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="ampconf.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>Key Highlights of AMP Conf 2018</title>
+
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    * {
+      box-sizing: border-box;
+    }
+    amp-story * {
+      font-family: 'Helvetica Neue', sans-serif;
+      color: white;
+    }
+    amp-story-page {
+      background: white;
+    }
+    amp-story h1 {
+      font-size: 2.875rem;
+    }
+    amp-story h2 {
+      font-size: 2.25rem;
+    }
+    amp-story p {
+      line-height: 1.5;
+    }
+    .bold {
+      font-weight: bold;
+    }
+    .bottom {
+      align-content: end;
+    }
+    .medium {
+      font-weight: 600;
+    }
+    .first {
+      padding-top: 8.83vh;
+    }
+    .last {
+      padding-bottom: 8.83vh;
+    }
+    .blue {
+      color: #4285F4;
+    }
+    .twenty-px {
+      font-size: 1.25rem;
+    }
+    .center {
+      text-align: center;
+    }
+    .icon {
+      background-image: url('./img/AMP-Brand-White-Icon.svg');
+      background-repeat: no-repeat;
+      background-size: 4.25rem 4.25rem;
+      height: 4.25rem;
+      object-fit: contain;
+      width: 4.25rem;
+    }
+    .byline {
+      letter-spacing: 1.28px;
+      padding-bottom: 7.88vh;
+    }
+    .introducing p {
+      line-height: 2.625em;
+    }
+    .introducing h2 {
+      line-height: 1.17em;
+    }
+    .subtitle-page {
+      padding-top: 10.87vh;
+    }
+    .button {
+      align-items: center;
+      border: 4px solid #FFFFFF;
+      color: #FFFFFF;
+      display: flex;
+      margin: 0 auto;
+      max-width: 240px;
+      text-decoration:none;
+    }
+    .button p {
+      width: 100%;
+    }
+    amp-ad[template="image-template"] img {
+      object-fit: cover;
+    }
+
+    ::cue {
+      background-color: rgba(0, 0, 0, 0.75);
+      font-size: 24px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+  <body>
+    <amp-story standalone id="cats"
+        title="Key Highlights of AMP Conf 2018" publisher="The AMP team"
+        publisher-logo-src="./img/amplogo.png"
+        poster-portrait-src="./img/overview.jpg">
+
+      <amp-story-auto-ads>
+        <script type="application/json">
+          {
+            "ad-attributes": {
+              "type": "custom",
+              "data-url": "https://ampbyexample.com/json/amp-story-auto-ads/"
+            }
+          }
+        </script>
+
+        <template type="amp-mustache" id="image-template">
+          <amp-img class="fill-img" layout="fill" src="{{imgSrc}}"></amp-img>
+        </template>
+
+        <template type="amp-mustache" id="video-template">
+          <amp-video autoplay loop
+            width="400"
+            height="750"
+            poster="{{poster}}"
+            layout="fill">
+            <source src="{{videoSource}}" type="video/mp4">
+          </amp-video>
+        </template>
+      </amp-story-auto-ads>
+
+      <amp-story-page id="page-1" title="Lorem ipsum dolor sit amet">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay loop
+            width="400"
+            height="750"
+            poster="./img/poster0.png"
+            layout="fill">
+            <source src="./video/p1.mp4" type="video/mp4">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <div class="icon"></div>
+          <h1 class="bold">Key Highlights of AMP Conf 2018</h1>
+          <p class="byline">By The AMP team</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+          <amp-img width="400" height="750" layout="fill" src="./img/overview.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <h2 class="bold">Overview</h2>
+          <p>We held the second AMP Conf to celebrate the breadth of the AMP
+            community and announce the latest AMP innovations. We engaged 400+
+            devs in-person over two days and thousands globally on live stream.</p>
+          <p class="last">Here are the key launches by the AMP team and others this year</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay loop noaudio
+            width="400"
+            height="750"
+            poster="./img/poster.jpg"
+            layout="fill">
+            <source src="./video/stamp-animation.mp4" type="video/mp4">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <div class="introducing">
+            <p class="bold blue twenty-px center">Introducing</p>
+            <h2 class="bold blue center last">AMP Stories</h2>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
+        <amp-story-grid-layer template="fill">
+          <amp-img width="400" height="750" layout="fill" src="./img/blue-stuff.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <h1 class="bold">A visual storytelling format for the open web</h1>
+          <p class="last">Providing content publishers with a mobile-focused
+            format for delivering news and information as visual, tap-through
+            stories on the open web.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-5" auto-advance-after="stamp-vid">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay
+            id="stamp-vid"
+            width="400"
+            height="750"
+            poster="./img/poster2.jpg"
+            layout="fill">
+            <source src="./video/stamp.mp4" type="video/mp4">
+            <track default src="./video/stamp.vtt" srclang="en">
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-6">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay loop noaudio
+            width="400"
+            height="750"
+            poster="./img/poster3.jpg"
+            layout="fill">
+            <source src="./video/gmail-animation.mp4" type="video/mp4">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="introducing">
+            <p class="bold twenty-px center first">Introducing</p>
+            <h2 class="bold center">AMP For Email</h2>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-7">
+        <amp-story-grid-layer template="fill">
+          <amp-img width="400" height="750" layout="fill" src="./img/blue-gmail.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <h1 class="bold">Bringing the power of AMP to Gmail</h1>
+          <p class="last">New spec allows developers to create more engaging,
+            interactive, and actionable email experiences with AMP content.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-8" auto-advance-after="gmail-vid">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay
+            id="gmail-vid"
+            width="400"
+            height="750"
+            poster="./img/poster4.jpg"
+            layout="fill">
+            <source src="./video/gmail.mp4" type="video/mp4">
+            <track default src="./video/gmail.vtt" srclang="en">
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-9">
+        <amp-story-grid-layer template="fill">
+          <amp-img width="400" height="750" layout="fill" src="./img/green-phone.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <div class="introducing">
+            <p class="bold twenty-px center">Discover</p>
+            <h2 class="bold center last">AMP for <br/> E-Commerce</h2>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-10">
+        <amp-story-grid-layer template="fill">
+          <amp-img width="400" height="750" layout="fill" src="./img/green-stuff.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <h1 class="bold">Improve conversions with fast, user-friendly experiences</h1>
+          <p class="last">With instant page load, your customers can find the products they want quickly and easily.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-11" auto-advance-after="ecomm-vid">
+        <amp-story-grid-layer template="fill">
+          <amp-video autoplay
+            id="ecomm-vid"
+            width="400"
+            height="750"
+            poster="./img/poster5.jpg"
+            layout="fill">
+            <source src="./video/ecommerce.mp4" type="video/mp4">
+            <track default src="./video/ecommerce.vtt" srclang="en">
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-12">
+        <amp-story-grid-layer template="fill">
+          <amp-img width="400" height="750" layout="fill" src="./img/roadshow.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="thirds" class="bottom">
+          <h1 grid-area="middle-third" class="bold">Join the worldwide AMP Roadshow</h1>
+        </amp-story-grid-layer>
+        <amp-story-page-outlink layout="nodisplay">
+          <a href="https://www.ampproject.org/amp-roadshow/" class="button medium center">
+            <p class="twenty-px">Sign up Now</p>
+          </a>
+        </amp-story-page-outlink>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

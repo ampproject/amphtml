@@ -1,0 +1,9 @@
+URL: https://github.com/janl/mustache.js/
+License: The MIT License
+License File: https://github.com/janl/mustache.js/blob/master/LICENSE
+
+Description:
+Fork of mustache.js library.
+
+Local Modifications:
+* Convert UMD to ESM by removing the UMD wrapper and adding export statements

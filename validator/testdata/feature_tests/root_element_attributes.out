@@ -1,0 +1,23 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This demonstrates that certain attributes are not allowed on the root <html> element.
+|  -->
+|  <!doctype html>
+|  <html ⚡ allow-xhr-interception allow-viewer-render-template report-errors-to-viewer>
+>> ^~~~~~~~~
+feature_tests/root_element_attributes.html:6:0 The attribute 'allow-viewer-render-template' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/root_element_attributes.html:6:0 The attribute 'allow-xhr-interception' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>> ^~~~~~~~~
+feature_tests/root_element_attributes.html:6:0 The attribute 'report-errors-to-viewer' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|  </body>
+|  </html>

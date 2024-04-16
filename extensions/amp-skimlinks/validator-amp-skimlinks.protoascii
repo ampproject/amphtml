@@ -1,0 +1,46 @@
+tags: {  # amp-skimlinks
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-skimlinks"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+  satisfies_condition: "amp-skimlinks"
+  excludes_condition: "amp-link-rewriter"
+  excludes_condition: "amp-smartlinks"
+}
+
+tags: {  # <amp-skimlinks>
+  html_format: AMP
+  tag_name: "AMP-SKIMLINKS"
+  requires_extension: "amp-skimlinks"
+  attrs: {
+    name: "custom-redirect-domain"
+  }
+  attrs: {
+    name: "custom-tracking-id"
+    value_regex_casei: "^.{0,50}$"
+  }
+  attrs: {
+    name: "excluded-domains"
+  }
+  attrs: {
+    name: "link-selector"
+  }
+  attrs: {
+    name: "publisher-code"
+    value_regex_casei: "^[0-9]+X[0-9]+$"
+    mandatory: true
+  }
+  attrs: {
+    name: "tracking"
+    value: "false"
+    value: "true"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

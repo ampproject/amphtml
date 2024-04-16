@@ -1,0 +1,147 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests CSS style rules specific to A4A which differ from AMP.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|    </style>
+|    <style amp-custom>
+|      /* Valid. */
+|      .amp-animate .box {
+|        transform: rotate(180deg);
+|        transition: transform 2s;
+|      }
+|
+|      /* Valid: non-animation property (color) valid in animation selector */
+|      .amp-animate .box {
+|        color: red;
+|        transform: rotate(180deg);
+|        transition: transform 2s;
+|      }
+|
+|      /* Invalid: Missing context class .amp-animate */
+|      .box {
+|        transform: rotate(180deg);
+|        transition: transform 2s;
+|      }
+|
+|      /* Valid. */
+|      .amp-animate .box {
+|        transition: transform 2s;
+|      }
+|
+|      /* Invalid: The only properties that may be transitioned are opacity
+|         and transform. */
+|      .amp-animate .box {
+|        transition: background-color 2s;
+>>       ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:41:6 CSS syntax error in tag 'style amp-custom' - the property 'transition' is set to the disallowed value 'background-color'. Allowed values: ['opacity', 'transform'].
+|      }
+|
+|      /* Valid. */
+|      @keyframes turn {
+|        from {
+|          transform: rotate(180deg);
+|        }
+|
+|        to {
+|          transform: rotate(90deg);
+|        }
+|      }
+|
+|      /* Invalid: only opacity and transform may be transitioned. */
+|      @keyframes slidein {
+|        from {
+|          margin-left:100%;
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:58:8 CSS syntax error in tag 'style amp-custom' - the property 'margin-left' is disallowed within @keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|          width:300%
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:59:8 CSS syntax error in tag 'style amp-custom' - the property 'width' is disallowed within @keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|        }
+|
+|        to {
+|          margin-left:0%;
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:63:8 CSS syntax error in tag 'style amp-custom' - the property 'margin-left' is disallowed within @keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|          width:100%;
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:64:8 CSS syntax error in tag 'style amp-custom' - the property 'width' is disallowed within @keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|        }
+|      }
+|
+|      /* Now with vendor prefixes */
+|
+|      /* Valid. */
+|      .amp-animate .box {
+|        -moz-transform: rotate(180deg);
+|        -webkit-transition: transform 2s;
+|      }
+|
+|      /* Valid: non-animation property (color) valid in animation selector */
+|      .amp-animate .box {
+|        color: red;
+|        -webkit-transform: rotate(180deg);
+|        -o-transition: -o-transform 2s;
+|      }
+|
+|      /* Invalid: Missing context class .amp-animate */
+|      .box {
+|        -webkit-transform: rotate(180deg);
+|        -o-transition: -o-transform 2s;
+|      }
+|
+|      /* Valid. */
+|      .amp-animate .box {
+|        -o-transition: -o-transform 2s;
+|      }
+|
+|      /* Invalid: The only properties that may be transitioned are opacity
+|         and transform. */
+|      .amp-animate .box {
+|        -moz-transition: background-color 2s;
+>>       ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:97:6 CSS syntax error in tag 'style amp-custom' - the property 'transition' is set to the disallowed value 'background-color'. Allowed values: ['opacity', 'transform'].
+|      }
+|
+|      /* Valid. */
+|      @-moz-keyframes turn {
+|        from {
+|          -webkit-transform: rotate(180deg);
+|        }
+|
+|        to {
+|          -webkit-transform: rotate(90deg);
+|        }
+|      }
+|
+|      /* Invalid: only opacity and transform may be transitioned. */
+|      @-o-keyframes slidein {
+|        from {
+|          margin-left:100%;
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:114:8 CSS syntax error in tag 'style amp-custom' - the property 'margin-left' is disallowed within @-o-keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|          width:300%
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:115:8 CSS syntax error in tag 'style amp-custom' - the property 'width' is disallowed within @-o-keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|        }
+|
+|        to {
+|          margin-left:0%;
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:119:8 CSS syntax error in tag 'style amp-custom' - the property 'margin-left' is disallowed within @-o-keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|          width:100%;
+>>         ^~~~~~~~~
+amp4ads_feature_tests/style-amp-custom.html:120:8 CSS syntax error in tag 'style amp-custom' - the property 'width' is disallowed within @-o-keyframes. Allowed properties: ['animation-timing-function', 'opacity', 'transform'].
+|        }
+|      }
+|    </style>
+|  </head>
+|  <body>Hello, world.</body>
+|  </html>

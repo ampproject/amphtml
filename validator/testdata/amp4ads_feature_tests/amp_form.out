@@ -1,0 +1,55 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests that forms are allowed in A4A, but that forbidden inputs are not
+|    allowed, like input[type=password].
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|    <script async custom-element="amp-form"
+|        src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|  </head>
+|  <body>
+|      <!-- Valid form -->
+|      <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+|      custom-validation-reporting="as-you-go">
+|      <fieldset>
+|        <label>
+|          <span>Your name</span>
+|          <input id="name" type="text" name="name" required>
+|          <span visible-when-invalid="valueMissing" validation-for="name"></span>
+|        </label>
+|        <label>
+|          <span>Your email</span>
+|          <input type="email" name="email" required>
+|        </label>
+|        <input type="button" name="button">
+|        <input type="submit" value="Subscribe">
+|      </fieldset>
+|    </form>
+|    <!-- Invalid: input can not be type="image". -->
+|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+|      <input type="image" name="image">
+>>     ^~~~~~~~~
+amp4ads_feature_tests/amp_form.html:36:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form/)
+|    </form>
+|    <!-- Invalid: input can not be type="file|password". -->
+|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+|      <input type="password" name="password">
+>>     ^~~~~~~~~
+amp4ads_feature_tests/amp_form.html:40:4 The attribute 'type' in tag 'input' is set to the invalid value 'password'. (see https://amp.dev/documentation/components/amp-form/)
+|      <input type="file" name="file">
+>>     ^~~~~~~~~
+amp4ads_feature_tests/amp_form.html:41:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://amp.dev/documentation/components/amp-form/)
+|      <input [type]="state.value" name="name">
+|      <div submitting>
+|        Submitting form...
+|      </div>
+|    </form>
+|  </body>
+|  </html>

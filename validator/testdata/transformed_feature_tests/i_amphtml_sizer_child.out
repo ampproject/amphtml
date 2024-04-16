@@ -1,0 +1,94 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests that <i-amphtml-sizer> is allowed as child tag for tags that
+|    restrict their children but still allow layout=responsive.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="google;v=1">
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name="viewport" content="width=device-width">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
+|    <script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: amp-image-slider > i-amphtml-sizer -->
+|    <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|      <i-amphtml-sizer style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+|      <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|      <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <!-- Valid: amp-video-iframe > i-amphtml-sizer -->
+|     <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|       <i-amphtml-sizer style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+|       <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|     </amp-video-iframe>
+|
+|    <!-- Valid: amp-image-slider > i-amphtml-sizer with aspect-ratio -->
+|     <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive" style="aspect-ratio:300/200;">
+|       <i-amphtml-sizer i-amphtml-disable-ar style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+|       <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|       <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|     </amp-image-slider>
+|
+|    <!-- Valid: amp-image-slider > i-amphtml-sizer intrinsic with aspect-ratio -->
+|     <amp-image-slider width="300" height="200" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic" style="aspect-ratio:300/200;">
+|       <i-amphtml-sizer i-amphtml-disable-ar style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+|       <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|       <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|     </amp-image-slider>
+|
+|    <!-- Valid: amp-image-slider > i-amphtml-sizer[slot="i-amphtml-svc"] -->
+|    <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|      <i-amphtml-sizer slot="i-amphtml-svc" style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+|      <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|      <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <!-- Valid: amp-video-iframe > i-amphtml-sizer[slot="i-amphtml-svc"] -->
+|    <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|      <i-amphtml-sizer slot="i-amphtml-svc" style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+|      <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|    </amp-video-iframe>
+|
+|    <!-- Invalid: amp-image-slider > i-amphtml-sizer[slot!="i-amphtml-svc"] -->
+|    <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|      <i-amphtml-sizer slot="foo" style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+>>     ^~~~~~~~~
+transformed_feature_tests/i_amphtml_sizer_child.html:60:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'foo'.
+|      <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|      <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <!-- Invalid: amp-video-iframe > i-amphtml-sizer[slot!="i-amphtml-svc"] -->
+|    <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|      <i-amphtml-sizer slot="foo" style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+>>     ^~~~~~~~~
+transformed_feature_tests/i_amphtml_sizer_child.html:67:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'foo'.
+|      <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|    </amp-video-iframe>
+|
+|
+|    <!-- Invalid: amp-image-slider > i-amphtml-sizer[slot] -->
+|    <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|      <i-amphtml-sizer slot style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
+>>     ^~~~~~~~~
+transformed_feature_tests/i_amphtml_sizer_child.html:74:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
+|      <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|      <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <!-- Invalid: amp-video-iframe > i-amphtml-sizer[slot] -->
+|    <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+|      <i-amphtml-sizer slot style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+>>     ^~~~~~~~~
+transformed_feature_tests/i_amphtml_sizer_child.html:81:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
+|      <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+|    </amp-video-iframe>
+|  </body>
+|  </html>

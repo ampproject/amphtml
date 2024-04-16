@@ -1,0 +1,67 @@
+<!--
+  Test Description:
+  Tests the validation rules of the `animate-in` attribute in amp-story animations.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-story</title>
+  <link rel="canonical" href="/stories/features/animations/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    amp-story-page {
+      font-family: 'Roboto', sans-serif;
+      background: #fff;
+    }
+    amp-story-grid-layer {
+      align-items: center;
+      justify-items: center;
+    }
+    .img-container {
+      position: absloute;
+    }
+    </style>
+</head>
+<body>
+  <amp-story standalone poster-portrait-src="portrait.png" poster-landscape-src="landscape.png" poster-square-src="square.png"
+      title="Example" publisher="The AMP Project" publisher-logo-src="amp.png">
+    <amp-story-page id="ken-burns-effect">
+      <amp-story-grid-layer template="vertical">
+        <h1>ken-burns-effect</h1>
+        <div animate-in="zoom-in" animate-in-duration="30s" class="img-container">
+            <amp-img id="ken-burns-img1"
+               src="https://picsum.photos/1024/768?image=1077"
+               animate-in="pan-left"
+               animate-in-duration="30s"
+               pan-scaling-factor=".9"
+               layout="fixed"
+               width="1024"
+               height="768">
+            </amp-img>
+        </div>
+        <div animate-in="fade-in" animate-in-after="ken-burns-img1" animate-in-delay="0.25s" animate-in-duration="1s">
+          <div
+            animate-in="zoom-out"
+            animate-in-duration="30s"
+            class="img-container"
+            animate-in-after="ken-burns-img1">
+            <amp-img id="ken-burns-img2"
+              src="https://picsum.photos/1024/768?image=1026"
+              layout="fixed"
+              width="1024"
+              height="768"
+              animate-in="pan-down"
+              animate-in-duration="30s"
+              animate-in-after="ken-burns-img1">
+            </amp-img>
+          </div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
+</body>
+</html>

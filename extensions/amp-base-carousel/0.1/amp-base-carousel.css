@@ -1,0 +1,193 @@
+
+
+@import 'carousel.css';
+
+amp-base-carousel {
+  display: block;
+  overflow: hidden;
+}
+
+/*
+ * This is a flex container containing the arrow slots. Since this uses flex,
+ * it will reverse the arrow positions when using RTL.
+ */
+.i-amphtml-base-carousel-arrows {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  /* Make this container not block swipe since it is stacked on top. */
+  pointer-events: none;
+}
+
+.i-amphtml-base-carousel-arrow-prev-slot,
+.i-amphtml-base-carousel-arrow-next-slot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+.i-amphtml-base-carousel-arrow-prev-slot > *,
+.i-amphtml-base-carousel-arrow-next-slot > * {
+  /* Reenable pointer events stopped at the parent container. */
+  pointer-events: all;
+}
+
+/* Rotate arrow slots for RTL. This applies to default / custom arrows. */
+amp-base-carousel[dir="rtl"] .i-amphtml-base-carousel-arrow-prev-slot,
+amp-base-carousel[dir="rtl"] .i-amphtml-base-carousel-arrow-next-slot {
+  transform: scaleX(-1);
+}
+
+amp-base-carousel .i-amphtml-carousel-scroll[loop="false"] + .i-amphtml-base-carousel-arrows > .i-amphtml-base-carousel-arrow-prev-slot > [disabled],
+amp-base-carousel .i-amphtml-carousel-scroll[loop="false"] + .i-amphtml-base-carousel-arrows > .i-amphtml-base-carousel-arrow-next-slot > [disabled],
+amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-prev-slot > *,
+amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-next-slot > * {
+  opacity: 0;
+  /**
+   * Note, screen readers can still activate the buttons when hide buttons is
+   * specified, even though we have `pointer-events: none`.
+   */
+  pointer-events: none;
+}
+
+.i-amphtml-base-carousel-arrow-backdrop,
+.i-amphtml-base-carousel-arrow-background,
+.i-amphtml-base-carousel-arrow-frosting {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+
+.i-amphtml-base-carousel-arrow-frosting {
+  /**
+   * Add a frosted glass effect to the pagination dots background. The backdrop
+   * and background elements will apply a darkening on top of the blurring.
+   */
+  backdrop-filter: blur(3px);
+}
+
+.i-amphtml-base-carousel-arrow-backdrop {
+  /**
+   * Instead of using a plain background color, we use a backdrop-filter to
+   * make the effective background partially dependent on the current
+   * backdrop (e.g. the image on a carousel slide). This allows the pagination
+   * backgroud to be distinguishable on very dark backgrounds, while still
+   * having it be semi-transparent.
+   *
+   * This can be harder to distinguish on middle greys. For this current
+   * current configuration, hsl(0, 0%, 31%) to hsl(0, 0%, 35%) can appear quite
+   * close to the background color.
+   *
+   * The blur here is used for averaging the backdrop color, so that sharp
+   * contrasts (e.g. edge of sky and landscape) do not cause immediate shifts
+   * in the container color.
+   *
+   * The greyscale is used to have the container slightly tinted by the inverse
+   * color, but also not be too tinted.
+   */
+   backdrop-filter: blur(12px) invert(1) grayscale(0.6) brightness(0.8);
+   /**
+    * Note: we use a opacity rather than a filter function due to a bug in
+    * Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=991656.
+    * Otherwise, we could use the opacity function and combine this with the
+    * i-amphtml-inline-gallery-pagination-background class as the background of the pagination container
+    * rather than needing two separate Elements for it.
+    */
+   opacity: 0.5;
+}
+
+.i-amphtml-base-carousel-arrow-background {
+  /**
+   * Note: we always add some darkening using background-color, since we do not
+   * change the dot color. Note that this applies on top of the backdrop based
+   * color, rather than affecting it.
+   */
+  background-color: rgba(0, 0, 0, 0.3);
+  box-shadow:
+      0 0 0px 1px rgba(0, 0, 0, 0.08) inset,
+      0 1px 4px 1px rgba(0, 0, 0, 0.2);
+  transition: 200ms background-color;
+}
+
+/**
+ * Only do hover state for devices that support it to workaround iOS showing
+ * the hover state after you click a button.
+ */
+@media (hover: hover) {
+  .i-amphtml-base-carousel-arrow:hover .i-amphtml-base-carousel-arrow-background {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.i-amphtml-base-carousel-arrow:active .i-amphtml-base-carousel-arrow-background {
+  background-color: rgba(255, 255, 255, 1.0);
+  transition-duration: 0ms;
+}
+
+.i-amphtml-base-carousel-arrow {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 12px;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  stroke: #fff;
+  transition: 200ms stroke;
+}
+
+/**
+ * Only do hover state for devices that support it to workaround iOS showing
+ * the hover state after you click a button.
+ */
+ @media (hover: hover) {
+  .i-amphtml-base-carousel-arrow:hover {
+    stroke: #222;
+  }
+}
+
+.i-amphtml-base-carousel-arrow:active {
+  stroke: #222;
+  transition-duration: 0ms;
+}
+
+.i-amphtml-base-carousel-arrow-icon {
+  position: relative;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+}
+
+.i-amphtml-base-carousel-arrow-background,
+.i-amphtml-base-carousel-arrow-icon {
+  /**
+   * Workaround for iOS not stacking things correctly, causing the arrow
+   * components to mix incorrectly. This may work by forcing a separate layer
+   * where z-index may not do so correctly. Note this issue does not occur on
+   * all pages.
+   */
+  transform: translateZ(1px);
+}
+
+
+amp-base-carousel .i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
+}

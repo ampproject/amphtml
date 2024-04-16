@@ -1,0 +1,212 @@
+tags: {  # amp-mega-menu
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-mega-menu"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-mega-menu>
+  html_format: AMP
+  tag_name: "AMP-MEGA-MENU"
+  requires_extension: "amp-mega-menu"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-mega-menu/"
+  descendant_tag_list: "amp-mega-menu-allowed-descendants"
+  # We want to support both of the cases below:
+  # <amp-mega-menu> > <nav> > ... and
+  # <amp-mega-menu> > <amp-list> > <template> > <nav> > ...
+  # The latter is needed for dynamic template rendering.
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "NAV"
+    child_tag_name_oneof: "AMP-LIST"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > AMP-LIST"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > NAV"
+  }
+  amp_layout: {
+    supported_layouts: FIXED_HEIGHT
+  }
+}
+tags: {  # <amp-mega-menu> <nav>
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU > NAV"
+  descriptive_name: "amp-mega-menu > nav"
+  siblings_disallowed: true
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "OL"
+    child_tag_name_oneof: "UL"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU NAV > UL/OL"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU > AMP-LIST"
+  descriptive_name: "amp-mega-menu > amp-list"
+  # Include mandatory amp-list attrs so that <amp-mega-menu> > <nav>
+  # does not match to this tag.
+  attrs: {
+    name: "src"
+    mandatory_anyof: "['src','[src]']"
+  }
+  attrs: {
+    name: "[src]"
+    mandatory_anyof: "['src','[src]']"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "TEMPLATE"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > AMP-LIST > TEMPLATE"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU > AMP-LIST > TEMPLATE"
+  descriptive_name: "amp-mega-menu > amp-list > template"
+  mandatory_parent: "AMP-LIST"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "NAV"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > NAV"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU NAV > UL/OL"
+  descriptive_name: "amp-mega-menu nav > ul/ol"
+  mandatory_parent: "NAV"
+  child_tags: {
+    mandatory_min_num_child_tags: 1
+    child_tag_name_oneof: "LI"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU NAV > UL/OL > LI"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU NAV > UL/OL > LI"
+  descriptive_name: "amp-mega-menu nav > ul/ol > li"
+  child_tags: {
+    mandatory_min_num_child_tags: 1
+    child_tag_name_oneof: "A"
+    child_tag_name_oneof: "BUTTON"
+    child_tag_name_oneof: "DIV"
+    child_tag_name_oneof: "H1"
+    child_tag_name_oneof: "H2"
+    child_tag_name_oneof: "H3"
+    child_tag_name_oneof: "H4"
+    child_tag_name_oneof: "H5"
+    child_tag_name_oneof: "H6"
+    child_tag_name_oneof: "SPAN"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU item-content"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU item-heading"
+    mandatory: true
+    unique: true
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU item-heading"
+  descriptive_name: "amp-mega-menu item-heading"
+  attrs: {
+    name: "role"
+    value: "button"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU item-content"
+  descriptive_name: "amp-mega-menu item-content"
+  # Disallow role=menu until supported by implementation.
+  attrs: {
+    name: "role"
+    value: "dialog"
+    mandatory: true
+  }
+}
+descendant_tag_list {
+  # Purposefully being restrictive when allowlisting child components;
+  # On demand, add more components to this list after manual testing.
+  name: "amp-mega-menu-allowed-descendants"
+  tag: "A"
+  tag: "AMP-AD"
+  tag: "AMP-CAROUSEL"
+  tag: "AMP-EMBED"
+  tag: "AMP-IMG"
+  tag: "AMP-LIGHTBOX"
+  tag: "AMP-LIST"
+  tag: "AMP-VIDEO"
+  tag: "B"
+  tag: "BR"
+  tag: "BUTTON"
+  tag: "COL"
+  tag: "COLGROUP"
+  tag: "DIV"
+  tag: "EM"
+  tag: "FIELDSET"
+  tag: "FORM"
+  tag: "H1"
+  tag: "H2"
+  tag: "H3"
+  tag: "H4"
+  tag: "H5"
+  tag: "H6"
+  tag: "I"
+  tag: "I-AMPHTML-SIZER" # For transformed documents.
+  tag: "IMG" # For SSR'ed hero images on transformed documents and native images.
+  tag: "INPUT"
+  tag: "LABEL"
+  tag: "LI"
+  tag: "MARK"
+  tag: "NAV"
+  tag: "NOSCRIPT" # For amp-img fallbacks.
+  tag: "OL"
+  tag: "OPTION"
+  tag: "P"
+  tag: "PATH"
+  tag: "SECTION"
+  tag: "SELECT"
+  tag: "SPAN"
+  tag: "STRIKE"
+  tag: "STRONG"
+  tag: "SUB"
+  tag: "SUP"
+  tag: "SVG"
+  tag: "TABLE"
+  tag: "TBODY"
+  tag: "TD"
+  tag: "TEMPLATE"
+  tag: "TH"
+  tag: "TIME"
+  tag: "TITLE"
+  tag: "TR"
+  tag: "U"
+  tag: "UL"
+  tag: "USE"
+}

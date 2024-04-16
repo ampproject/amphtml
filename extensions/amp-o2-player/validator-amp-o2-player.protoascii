@@ -1,0 +1,34 @@
+tags: {  # amp-o2-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-o2-player"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-o2-player>
+  html_format: AMP
+  tag_name: "AMP-O2-PLAYER"
+  requires_extension: "amp-o2-player"
+  attrs: {
+    name: "data-bcid"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-pid"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

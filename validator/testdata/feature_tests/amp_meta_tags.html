@@ -1,0 +1,30 @@
+<!--
+  Test Description:
+  This tests various meta tags related to AMP.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- Allowed -->
+  <meta name=amp-experiment-token content="...">
+  <meta name=amp-experiments-opt-in content="...">
+  <meta name=amp-3p-iframe-src content="https://example.com/">
+  <meta name=amp-link-variable-allowed-origin content="...">
+  <meta name=amp-google-client-id-api content="...">
+  <meta name=amp-script-src content="...">
+
+  <!-- Test that the rule is not amp-* so that these remain reserved in
+       AMP documents. This should produce an error. -->
+  <meta name=amp-tag-does-not-exist content="...">
+
+</head>
+<body>
+Hello, world.
+</body>
+</html>

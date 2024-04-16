@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>New Loaders</title>
+    <link rel="canonical" href="http://nonblocking.io/" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
+
+    <script>
+      // Hack to delay everything!
+      window.__AMP_MODE = {test: true, localDev: true};
+      const delay = parseInt(window.location.search.replace('?', '')) || 5000;
+      document.addEventListener(
+        'amp:attached',
+        e => {
+          if (e.srcElement.hasAttribute('placeholder')) {
+            return;
+          }
+
+          const lc = e.srcElement.implementation_.layoutCallback.bind(
+            e.srcElement.implementation_
+          );
+          e.srcElement.implementation_.layoutCallback = function() {
+            return new Promise(function(resolve) {
+              setTimeout(() => {
+                lc().then(resolve);
+              }, delay);
+            });
+          };
+        },
+        true
+      );
+    </script>
+    <script src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-iframe"
+      src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-ad"
+      src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-instagram"
+      src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-video-iframe"
+      src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-selector"
+      src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-twitter"
+      src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-youtube"
+      src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-jwplayer"
+      src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-ima-video"
+      src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-brightcove"
+      src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-facebook"
+      src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-facebook-comments"
+      src="https://cdn.ampproject.org/v0/amp-facebook-comments-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-facebook-page"
+      src="https://cdn.ampproject.org/v0/amp-facebook-page-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-pinterest"
+      src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-list"
+      src="https://cdn.ampproject.org/v0/amp-list-0.1.js"
+    ></script>
+    <script
+      async
+      custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-anim"
+      src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-google-document-embed"
+      src="https://cdn.ampproject.org/v0/amp-google-document-embed-0.1.js"
+    ></script>
+    <style amp-custom>
+      /* boring boiler place stuff */
+      button {
+        background: #5e35b1;
+        padding: 7px;
+        border: 1px solid #311b92;
+        color: #fafafa;
+        font-size: 12pt;
+        display: inline-block;
+      }
+
+      .toolbar {
+        text-align: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+      h1 {
+        border-top: 1px solid #f1f1f1;
+        border-bottom: 1px solid #f1f1f1;
+        padding: 10px;
+        color: #2196f3;
+        margin-bottom: 50px;
+        background: #eee;
+        margin-bottom: 10px !important;
+      }
+
+      h1 {
+        color: #e91e63;
+      }
+
+      .info {
+        padding: 5px;
+        font-size: 80%;
+        color: #444;
+        text-align: left;
+      }
+      amp-img img,
+      amp-anim img {
+        object-fit: cover;
+      }
+
+      :root {
+        --color-primary: #005af0;
+        --space-1: 0.5rem; /* 8px */
+        --space-4: 2rem; /* 32px */
+      }
+
+      /* Styles for the flex layout based tabs */
+      amp-selector[role='tablist'].tabs-with-flex {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      amp-selector[role='tablist'].tabs-with-flex [role='tab'] {
+        flex-grow: 1;
+        /* custom styling, feel free to change */
+        text-align: center;
+        padding: var(--space-1);
+      }
+      amp-selector[role='tablist'].tabs-with-flex [role='tab'][selected] {
+        outline: none;
+        /* custom styling, feel free to change */
+        border-bottom: 2px solid var(--color-primary);
+      }
+      amp-selector[role='tablist'].tabs-with-flex [role='tabpanel'] {
+        display: none;
+        width: 100%;
+        order: 1; /* must be greater than the order of the tab buttons to flex to the next line */
+        /* custom styling, feel free to change */
+        padding: var(--space-4);
+      }
+      amp-selector[role='tablist'].tabs-with-flex
+        [role='tab'][selected]
+        + [role='tabpanel'] {
+        display: block;
+      }
+
+      /* Styles for the selector based tabs */
+      amp-selector[role='tablist'].tabs-with-selector {
+        display: flex;
+      }
+      amp-selector[role='tablist'].tabs-with-selector [role='tab'][selected] {
+        outline: none;
+        /* custom styling, feel free to change */
+        border-bottom: 2px solid var(--color-primary);
+      }
+      amp-selector[role='tablist'].tabs-with-selector {
+        display: flex;
+      }
+      amp-selector[role='tablist'].tabs-with-selector [role='tab'] {
+        /* custom styling, feel free to change */
+        width: 100%;
+        text-align: center;
+        padding: var(--space-1);
+      }
+
+      [role='tabpanel'] section {
+        max-width: 600px;
+        margin: auto;
+        text-align: center;
+      }
+
+      /* END boring boiler place stuff */
+
+      /* Custom loader from ABE */
+      .custom-loader-1 .amp-active {
+        max-width: 10%;
+        max-height: 50%;
+        width: 2em;
+        height: 2em;
+        background-color: #333;
+
+        margin: -1em auto;
+        animation: sk-rotateplane 1.2s infinite ease-in-out;
+      }
+      @keyframes sk-rotateplane {
+        0% {
+          transform: perspective(120px);
+        }
+        50% {
+          transform: perspective(120px) rotateX(-180deg);
+        }
+        100% {
+          transform: perspective(120px) rotateX(-180deg) rotateY(-180deg);
+        }
+      }
+      /* Hide the three default dots */
+      .custom-loader-1 .amp-active > div {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="info">
+      <div>- Default delay is 5 seconds</div>
+      <div>
+        - You can change the delay by adding ?{number} (e.g. ?9000) to the Url
+      </div>
+    </div>
+
+    <amp-selector class="tabs-with-flex" role="tablist">
+      <div role="tab" option selected>
+        amp-img
+      </div>
+      <div role="tabpanel">
+        <section id="sectionAmpImg">
+          <h2>normal</h2>
+          <amp-img
+            src="https://picsum.photos/1600/900?image=110"
+            layout="responsive"
+            width="1600"
+            height="900"
+          ></amp-img>
+
+          <h2>small</h2>
+          <amp-img
+            src="https://picsum.photos/320/50?image=165"
+            layout="fixed"
+            width="320"
+            height="50"
+          ></amp-img>
+
+          <h2>tiny</h2>
+          <amp-img
+            src="https://picsum.photos/100/100?image=125"
+            layout="fixed"
+            width="40"
+            height="40"
+          ></amp-img>
+
+          <h2>with blurry placeholder</h2>
+          <amp-img
+            src="https://rawcdn.githack.com/ampproject/amp-toolbox/6e4d9e794cf7bd0e98ea80224516d7180096c867/optimizer/spec/transformers/bball.jpg"
+            layout="responsive"
+            width="1600"
+            height="900"
+          >
+            <img
+              placeholder
+              class="i-amphtml-blurry-placeholder"
+              src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' xmlns%3Axlink='http%3A//www.w3.org/1999/xlink' viewBox='0 0 9 7'%3E%3Cfilter id='b' color-interpolation-filters='sRGB'%3E%3CfeGaussianBlur stdDeviation='.5'%3E%3C/feGaussianBlur%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1 1'%3E%3C/feFuncA%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cimage filter='url(%23b)' x='0' y='0' height='100%25' width='100%25' xlink%3Ahref='data%3Aimage/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAHCAYAAADam2dgAAAA4klEQVR4ARXBO04CURSA4f/OnHkpA4TRWGhFMg3oFlyCjTuwYRsULMEtuAgTGzUhttpZkagREwhEhwvjvI7x+8z0aqAHXYj3wA/gfpZz82yZXCakPYf8u0LspmGbGTxXaUfK21fJ7atltGiRHvn4cYOYXIl8RRSkVj5+Sv5JXvD7qWQrg2QW3BqWlDzOtuycGhSe3nOSdkmaeIjdKXfzjMNQGA1asF9wMXQ4G1Z0ogqxipuZYNyVkH4YsVg7FGuh73qcnAvecczqwSBL49AJI6a1QSolLJTexnB6bRC/4WUe8AdyJ1gLZ2JPFwAAAABJRU5ErkJggg=='%3E%3C/image%3E%3C/svg%3E"
+              style="object-fit: cover"
+            />
+          </amp-img>
+
+          <h2>Customized</h2>
+          <amp-img
+            src="https://picsum.photos/1600/900?image=210"
+            class="custom-loader-1"
+            layout="responsive"
+            width="1600"
+            height="900"
+          ></amp-img>
+        </section>
+      </div>
+      <div role="tab" option>
+        amp-anim
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>amp-anim</h2>
+          <amp-anim
+            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
+            width="400"
+            height="300"
+          >
+          </amp-anim>
+
+          <h2>amp-anim with image placeholder</h2>
+          <amp-anim
+            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
+            width="400"
+            height="300"
+          >
+            <amp-img
+              placeholder
+              src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no-k"
+              width="400"
+              height="300"
+            >
+            </amp-img>
+          </amp-anim>
+
+          <h2>small amp-anim</h2>
+          <amp-anim
+            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
+            width="320"
+            height="100"
+          >
+          </amp-anim>
+        </section>
+      </div>
+      <div role="tab" option>
+        amp-iframe
+      </div>
+      <div role="tabpanel">
+        <section id="sectionAmpIframe">
+          <h2>amp-iframe with image placeholder</h2>
+          <amp-iframe
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
+            layout="responsive"
+            width="250"
+            height="150"
+          >
+            <amp-img
+              placeholder
+              src="https://picsum.photos/1600/900?image=314"
+              class="custom-loader-1"
+              layout="responsive"
+              width="200"
+              height="150"
+            ></amp-img>
+          </amp-iframe>
+
+          <h2>Small amp-iframe with image placeholder</h2>
+          <amp-iframe
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
+            layout="fixed"
+            width="320"
+            height="50"
+          >
+            <amp-img
+              placeholder
+              src="https://picsum.photos/1600/900?image=314"
+              class="custom-loader-1"
+              layout="fixed"
+              width="320"
+              height="50"
+            ></amp-img>
+          </amp-iframe>
+
+          <h2>Normal amp-iframe</h2>
+
+          <amp-iframe
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            src="https://maps.google.com/maps?width=100%&amp;height=600&amp;hl=en&amp;q=1%20Grafton%20Street%2C%20Dublin%2C%20Ireland+(My%20Business%20Name)&amp;ie=UTF8&amp;t=&amp;z=14&amp;iwloc=B&amp;output=embed"
+            layout="responsive"
+            width="1600"
+            height="900"
+          ></amp-iframe>
+        </section>
+      </div>
+      <div role="tab" option>
+        amp-twitter
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>normal amp-twitter</h2>
+          <amp-twitter
+            width="600"
+            height="579"
+            layout="responsive"
+            data-tweetID="585110598171631616"
+          ></amp-twitter>
+
+          <h2>amp-twitter with image placeholder</h2>
+          <amp-twitter
+            width="600"
+            height="579"
+            layout="responsive"
+            data-tweetID="585110598171631616"
+          >
+            <amp-img
+              placeholder
+              src="https://pbs.twimg.com/card_img/1144126403471953920/LFkZeFiW?format=jpg&name=600x314"
+              width="600"
+              height="579"
+              layout="responsive"
+            ></amp-img>
+          </amp-twitter>
+
+          <h2>amp-twitter with text placeholder</h2>
+          <amp-twitter
+            width="600"
+            height="579"
+            layout="responsive"
+            data-tweetID="585110598171631616"
+          >
+            <blockquote placeholder>
+              The story how I became what some people would call a frontend
+              engineer and an exploration into what that even means.
+            </blockquote>
+          </amp-twitter>
+        </section>
+      </div>
+      <div role="tab" option>
+        amp-youtube
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>amp-youtube</h2>
+          <amp-youtube
+            data-videoid="lBTCB7yLs8Y"
+            width="358"
+            height="204"
+            layout="responsive"
+          ></amp-youtube>
+
+          <h2>small amp-youtube</h2>
+          <amp-youtube
+            data-videoid="lBTCB7yLs8Y"
+            width="320"
+            height="50"
+            layout="fixed"
+          ></amp-youtube>
+
+          <h2>amp-youtube with non-image placeholder</h2>
+          <amp-youtube
+            data-videoid="lBTCB7yLs8Y"
+            width="358"
+            height="204"
+            layout="responsive"
+          >
+            <div placeholder>No poster for this one!</div>
+          </amp-youtube>
+        </section>
+      </div>
+      <div role="tab" option>
+        amp-*-video-player
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>amp-ima-video</h2>
+          <amp-ima-video
+            id="Video1"
+            width="640"
+            height="360"
+            layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpreonlybumper&cmsid=496&vid=short_onecue&correlator="
+            data-ad-label="Publicidad (%s de %s)"
+            data-poster="/examples/img/ima-poster.png"
+          >
+            <source
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              type="video/mp4"
+            />
+          </amp-ima-video>
+
+          <h2>amp-jwplayer</h2>
+          <amp-jwplayer
+            data-media-id="BZ6tc0gy"
+            data-player-id="uoIbMPm3"
+            layout="responsive"
+            width="16"
+            height="9"
+          >
+          </amp-jwplayer>
+
+          <h2>amp-brightcove</h2>
+          <amp-brightcove
+            width="480"
+            height="270"
+            data-account="1290862519001"
+            data-player-id="SyIOV8yWM"
+            data-video-id="ref:amp-docs-sample"
+          >
+          </amp-brightcove>
+        </section>
+      </div>
+      <div role="tab" option>
+        amp-facebook-*
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>amp-facebook</h2>
+          <amp-facebook
+            width="550"
+            height="273"
+            layout="responsive"
+            data-href="https://www.facebook.com/zuck/posts/10102593740125791"
+          >
+          </amp-facebook>
+
+          <h2>amp-facebook with with placeholder</h2>
+          <amp-facebook
+            width="550"
+            height="273"
+            layout="responsive"
+            data-href="https://www.facebook.com/zuck/posts/10102593740125791"
+          >
+            <amp-img
+              placeholder
+              src="https://wallpapercave.com/wp/wp2126142.jpg"
+              width="550"
+              height="273"
+              layout="responsive"
+            ></amp-img>
+          </amp-facebook>
+
+          <h2>amp-facebook-page</h2>
+          <amp-facebook-page
+            width="552"
+            height="310"
+            layout="responsive"
+            data-tabs="timeline"
+            data-href="https://www.facebook.com/barackobama/"
+          >
+          </amp-facebook-page>
+
+          <h2>amp-facebook-comments</h2>
+          <amp-facebook-comments
+            width="552"
+            height="310"
+            layout="responsive"
+            data-numposts="5"
+            data-order-by="time"
+            data-href="https://developers.facebook.com/docs/plugins/comments"
+          >
+          </amp-facebook-comments>
+        </section>
+      </div>
+
+      <div role="tab" option>
+        amp-pinterest
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>amp-pinterest</h2>
+          <amp-pinterest
+            width="355"
+            height="410"
+            data-do="embedPin"
+            data-width="medium"
+            data-url="https://www.pinterest.com/pin/99360735500167749/"
+          >
+          </amp-pinterest>
+
+          <h2>amp-pinterest with image placeholder</h2>
+          <amp-pinterest
+            width="355"
+            height="410"
+            data-do="embedPin"
+            data-width="medium"
+            data-url="https://www.pinterest.com/pin/99360735500167749/"
+          >
+            <amp-img
+              placeholder
+              src="https://i.pinimg.com/345x/a7/66/56/a76656e966b1958f568d63c3f1c05aec.jpg"
+              width="355"
+              height="410"
+              layout="responsive"
+            ></amp-img>
+          </amp-pinterest>
+
+          <h2>small amp-pinterest</h2>
+          <amp-pinterest
+            width="320"
+            height="50"
+            data-do="embedPin"
+            data-width="medium"
+            data-url="https://www.pinterest.com/pin/99360735500167749/"
+          >
+          </amp-pinterest>
+        </section>
+      </div>
+      <div role="tab" option>
+        amp-list
+      </div>
+      <div role="tabpanel">
+        <section>
+          <button on="tap:list1.refresh,list2.refresh,list3.refresh">
+            Refresh all lists!
+          </button>
+          <h2>amp-list</h2>
+          <amp-list
+            id="list1"
+            width="auto"
+            height="400"
+            layout="fixed-height"
+            src="/examples/list.example.json"
+            class="m1"
+            reset-on-refresh
+          >
+            <template type="amp-mustache" id="amp-template-id">
+              <div>
+                <a href="{{ url }}">{{ title }}</a>
+              </div>
+            </template>
+          </amp-list>
+
+          <h2>amp-list with image placeholder</h2>
+          <amp-list
+            id="list2"
+            width="auto"
+            height="400"
+            layout="fixed-height"
+            src="/examples/list.example.json"
+            class="m1"
+            reset-on-refresh
+          >
+            <template type="amp-mustache" id="amp-template-id">
+              <div>
+                <a href="{{ url }}">{{ title }}</a>
+              </div>
+            </template>
+            <amp-img
+              placeholder
+              src="https://picsum.photos/400/400?image=319"
+              width="auto"
+              height="400"
+              layout="fixed-height"
+            ></amp-img>
+          </amp-list>
+
+          <h2>small amp-list</h2>
+          <amp-list
+            id="list3"
+            width="auto"
+            height="100"
+            layout="fixed-height"
+            src="/examples/list.example.json"
+            class="m1"
+            reset-on-refresh
+          >
+            <template type="amp-mustache" id="amp-template-id">
+              <div>
+                <a href="{{ url }}">{{ title }}</a>
+              </div>
+            </template>
+          </amp-list>
+        </section>
+      </div>
+
+      <div role="tab" option>
+        amp-google-document-embed
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>amp-google-document-embed</h2>
+          <amp-google-document-embed
+            src="https://www.gpo.gov/fdsys/pkg/GPO-CONAN-1992/pdf/GPO-CONAN-1992-6.pdf"
+            width="1"
+            height="1"
+            layout="responsive"
+          ></amp-google-document-embed>
+        </section>
+      </div>
+
+      <div role="tab" option>
+        amp-instagram (partially implemented)
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h1>
+            PARTIAL IMPLEMENTED - branded loader to be implemented
+          </h1>
+          <h2>amp-instagram</h2>
+          <amp-instagram
+            data-shortcode="fBwFP"
+            width="320"
+            height="320"
+            layout="responsive"
+          >
+          </amp-instagram>
+
+          <h2>small amp-instagram</h2>
+          <amp-instagram
+            data-shortcode="fBwFP"
+            width="320"
+            height="100"
+            layout="fixed"
+          >
+          </amp-instagram>
+        </section>
+      </div>
+
+      <div role="tab" option>
+        amp-ad
+      </div>
+      <div role="tabpanel">
+        <section>
+          <h2>normal amp-ad</h2>
+          <amp-ad
+            width="300"
+            height="250"
+            type="a9"
+            data-aax_size="300x250"
+            data-aax_pubname="test123"
+            data-aax_src="302"
+          >
+          </amp-ad>
+
+          <h2>small amp-ad</h2>
+          <amp-ad
+            width="320"
+            height="50"
+            type="rubicon"
+            data-method="smartTag"
+            data-account="14062"
+            data-site="70608"
+            data-zone="335918"
+            data-size="43"
+            data-kw="amp-test, test"
+            json='{"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'
+          >
+          </amp-ad>
+
+          <h2>amp-embed</h2>
+          <amp-embed
+            width="100"
+            height="283"
+            type="taboola"
+            layout="responsive"
+            heights="(min-width:1907px) 39%, (min-width:1200px) 46%, (min-width:780px) 64%, (min-width:480px) 98%, (min-width:460px) 167%, 196%"
+            data-publisher="amp-demo"
+            data-mode="thumbnails-a"
+            data-placement="Ads Example"
+            data-article="auto"
+          >
+          </amp-embed>
+        </section>
+      </div>
+    </amp-selector>
+  </body>
+</html>

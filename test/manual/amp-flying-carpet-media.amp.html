@@ -1,0 +1,78 @@
+<html amp lang="en">
+<head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <title>AMP flying carpet with media images</title>
+    <link rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "headline": "Open-source framework for publishing content",
+        "datePublished": "2015-10-07T12:02:41Z",
+        "image": [
+          "logo.jpg"
+        ]
+      }
+    </script>
+    <script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+        .spacer {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            color: white;
+            height:100vh;
+            background-color: #0653b6;
+        }
+
+        .flying-carpet__media {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flying-carpet__media > div {
+            flex: none;
+            height: auto;
+            min-width: 100%;
+            min-height: 100%;
+        }
+        .flying-carpet__media amp-img:nth-child(1) {
+            min-height: 100vh;
+            min-width: 177.778vh;
+        }
+
+        .flying-carpet__media amp-img:nth-child(2) {
+            min-height: 100vh;
+            min-width: 56.25vh;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="spacer"> One viewport before flying carpet.<br>Scroll down to see demo.</div>
+    <h1>Alter window size to less than 768px and more than 768px to change image visibility with media attribute.</h1>
+    <amp-fx-flying-carpet
+        height="300">
+        <div class="flying-carpet__media">
+            <div>
+                <amp-img src="https://dummyimage.com/1920x1920/ff0000/3e3e42.png&text=image+large"
+                         layout="responsive" media="(min-width: 768px)" width="1920" height="1080"
+                         alt="a sample image"></amp-img>
+                <amp-img src="https://dummyimage.com/640x1140/00ff00/3e3e42.png&text=image+small"
+                         layout="responsive" media="(max-width: 767px)" width="640" height="1140"
+                         alt="a sample image"></amp-img>
+            </div>
+        </div>
+    </amp-fx-flying-carpet>
+    <div class="spacer"> One viewport after flying carpet</div>
+</body>
+</html>

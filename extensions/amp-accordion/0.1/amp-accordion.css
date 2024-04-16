@@ -1,0 +1,35 @@
+
+
+/*
+ * Restore the default layout from ampshared.css, which only used until
+ * the build is complete.
+ */
+amp-accordion > section > :last-child {
+  display: none !important;
+}
+amp-accordion > section[expanded] > :last-child {
+  display: block !important;
+}
+
+/* heading/content */
+.i-amphtml-accordion-header,
+.i-amphtml-accordion-content {
+  margin: 0;
+}
+
+/* heading
+ * TODO(dvoytenko): remove most of these styles, except maybe for `cursor`.
+ */
+.i-amphtml-accordion-header {
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: solid 1px #dfdfdf;
+}
+
+/* Media should never play when a section is collapsed */
+amp-accordion > section:not([expanded]) .i-amphtml-media-component,
+amp-accordion > section:not([expanded]) .i-amphtml-media-component * {
+  display: none !important;
+  visibility: hidden !important;
+}

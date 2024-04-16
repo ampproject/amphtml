@@ -1,0 +1,49 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Skimlinks Example</title>
+    <link rel="canonical" href="https://publisher.com/test">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="amp-ad-enable-refresh" content="doubleclick=30">
+    <meta name="amp-link-variable-allowed-origin" content="https://skimjs-e2e-resources.storage.googleapis.com http://test-merchant.skimlinks.com">
+    <meta name="amp-link-rewriter-priorities" content="amp-skimlinks amp-other-affiliate">
+    <script async custom-element="amp-skimlinks" src="/dist/v0/amp-skimlinks-0.1.max.js"></script>
+    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+    <amp-skimlinks
+        layout="nodisplay"
+        publisher-code="68019X1584676"
+        tracking="true"
+    >
+    </amp-skimlinks>
+    <h1> Simple affiliated link </h1>
+    <a id="merchant-link" href="http://test-merchant.skimlinks.com/merchant_test.html?abc=QUERY_PARAM(bar)&bar=test1" data-amp-replace="QUERY_PARAM">
+        Merchant
+    </a>
+
+    <h2> Non-merchant link </h2>
+    <a id="non-merchant-link" href="https://skimjs-e2e-resources.storage.googleapis.com/publisher_test.html?test=" >
+        Just a random non-merchant site.
+    </a>
+
+    <div>
+        <a href="http://localhost:8000/examples/amp-skimlinks.html?abc=QUERY_PARAM(bar, default)&bar=test1" data-amp-replace="QUERY_PARAM"> nonblocking </a>
+        <br />
+    </div>
+
+    <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="//www.mocky.io/v2/5b7af79d34000056008ed7b3" class="m1" reset-on-refresh>
+        <template type="amp-mustache" id="amp-template-id">
+            <div>
+                <a href="{{url}}" target="_blank">{{title}}</a>
+            </div>
+        </template>
+    </amp-list>
+
+</body>
+
+</html>

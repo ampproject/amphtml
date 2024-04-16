@@ -1,0 +1,31 @@
+
+
+/*
+ * Pre-upgrade:
+ * - display:block element
+ */
+amp-selector {
+  display: block;
+}
+
+amp-selector [option] {
+  cursor: pointer;
+}
+
+amp-selector[multiple] [option][selected] {
+  cursor: pointer;
+  outline: solid 1px rgba(0, 0, 0, 0.7);
+}
+
+amp-selector [disabled][option],
+amp-selector[disabled] [option],
+amp-selector [selected][disabled],
+amp-selector[disabled] [selected] {
+  cursor: auto;
+  opacity: 0.4;
+}
+
+amp-selector [option][selected] {
+  cursor: auto;
+  outline: solid 1px rgba(0, 0, 0, 0.7);
+}

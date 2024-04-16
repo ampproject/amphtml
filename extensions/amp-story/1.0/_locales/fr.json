@@ -1,0 +1,170 @@
+{
+  "2": {
+    "string": "Appuyez sur Suivant"
+  },
+  "3": {
+    "string": "Appuyez sur Retour"
+  },
+  "4": {
+    "string": "Impossible de copier le lien dans le presse-papiers :("
+  },
+  "5": {
+    "string": "Lien copié !"
+  },
+  "6": {
+    "string": "E-mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Obtenir le lien"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Nous sommes désolés, mais votre navigateur n'est pas compatible avec cette expérience"
+  },
+  "22": {
+    "string": "Accepter"
+  },
+  "23": {
+    "string": "Refuser"
+  },
+  "25": {
+    "string": "Afficher sur le domaine d'origine :"
+  },
+  "26": {
+    "string": "En savoir plus sur les résultats AMP"
+  },
+  "27": {
+    "string": "Continuer quand même"
+  },
+  "34": {
+    "string": "Regarder la vidéo"
+  },
+  "35": {
+    "string": "Balayer l'écran vers le haut"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Mis à jour"
+  },
+  "65": {
+    "string": "La lecture de la vidéo a échoué"
+  },
+  "66": {
+    "string": "Désactiver le son de l'histoire"
+  },
+  "67": {
+    "string": "Activer le son de l'histoire"
+  },
+  "68": {
+    "string": "Informations sur l'histoire"
+  },
+  "69": {
+    "string": "Partager l'histoire"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Astuce 1 sur 2"
+  },
+  "76": {
+    "string": "Appuyez pour accéder à l'écran suivant"
+  },
+  "77": {
+    "string": "Suivant"
+  },
+  "78": {
+    "string": "Astuce 2 sur 2"
+  },
+  "79": {
+    "string": "Balayez l'écran pour accéder à l'histoire suivante"
+  },
+  "80": {
+    "string": "Compris"
+  },
+  "81": {
+    "string": "Astuce"
+  },
+  "83": {
+    "string": "Activer"
+  },
+  "84": {
+    "string": "SCORE :"
+  },
+  "85": {
+    "string": "Mettre l'histoire en pause"
+  },
+  "86": {
+    "string": "Jouer l'histoire"
+  },
+  "87": {
+    "string": "Fermer"
+  },
+  "88": {
+    "string": "Passer au suivant"
+  },
+  "89": {
+    "string": "Votre réponse sera envoyée à"
+  },
+  "90": {
+    "string": "Histoire suivante"
+  },
+  "91": {
+    "string": "Page suivante"
+  },
+  "92": {
+    "string": "Rejouer"
+  },
+  "93": {
+    "string": "Page précédente"
+  },
+  "96": {
+    "string": "Déplacez l'appareil pour explorer"
+  },
+  "97": {
+    "string": "Ouverture"
+  },
+  "98": {
+    "string": "Formulaire non envoyé, réessayez"
+  },
+  "99": {
+    "string": "Formulaire envoyé avec succès"
+  },
+  "101": {
+    "string": "Acheter maintenant"
+  },
+  "110": {
+    "string": "S'abonner avec Google"
+  }
+}

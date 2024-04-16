@@ -1,0 +1,272 @@
+<!-- The main contents of the page, which instantiates the
+     custom elements defined in the other files. -->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../ampproject-toolbar/ampproject-toolbar.html">
+<link rel="import" href="../amphtml-editor/amphtml-editor.html">
+<link rel="import" href="../webui-statusbar/webui-statusbar.html">
+<link rel="import" href="../webui-errorlist/webui-errorlist.html">
+<link rel="import" href="../webui-urlform/webui-urlform.html">
+<dom-module id="webui-mainpage">
+  <template>
+    <ampproject-toolbar></ampproject-toolbar>
+    <webui-urlform id="urlForm"></webui-urlform>
+    <amphtml-editor id="amphtmlEditor"></amphtml-editor>
+    <webui-statusbar id="statusBar"></webui-statusbar>
+    <webui-errorlist id="errorListBox"></webui-errorlist>
+  </template>
+  <script>
+    var minimumValidAmp =
+      '\x3C!--\n' +
+      '     This is the minimum valid JavaScript AMP HTML document. Type away\n' +
+      '     here and the AMP Validator will re-check your document on the fly.\n' +
+      '-->\n' +
+      '\x3C!doctype html>\n' +
+      '\x3Chtml ⚡>\n' +
+      '\x3Chead>\n' +
+      '  \x3Cmeta charset="utf-8">\n' +
+      '  \x3Clink rel="canonical" href="self.html">\n' +
+      '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
+      '  \x3Cstyle amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}\x3C/style>\x3Cnoscript>\x3Cstyle amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\x3C/style>\x3C/noscript>\n' +
+      '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
+      '\x3C/head>\n' +
+      '\x3Cbody>Hello, AMP world.\x3C/body>\n' +
+      '\x3C/html>\n';
+
+    var minimumValidAmp4Ads =
+      '\x3C!--\n' +
+      '     This is the minimum valid JavaScript AMP Ads document. Type away\n' +
+      '     here and the AMP Validator will re-check your document on the fly.\n' +
+      '-->\n' +
+      '\x3C!doctype html>\n' +
+      '\x3Chtml ⚡4ads>\n' +
+      '\x3Chead>\n' +
+      '  \x3Cmeta charset="utf-8">\n' +
+      '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
+      '  \x3Cstyle amp4ads-boilerplate>body{visibility:hidden}\x3C/style>\n' +
+      '  \x3Cscript async src="https://cdn.ampproject.org/amp4ads-v0.js">\x3C/script>\n' +
+      '\x3C/head>\n' +
+      '\x3Cbody>Hello, AMP4ADS world.\x3C/body>\n' +
+      '\x3C/html>\n';
+
+    var minimumValidAmp4Email =
+      '\x3C!--\n' +
+      '     This is the minimum valid JavaScript AMP Email document. Type away\n' +
+      '     here and the AMP Validator will re-check your document on the fly.\n' +
+      '-->\n' +
+      '\x3C!doctype html>\n' +
+      '\x3Chtml ⚡4email data-css-strict>\n' +
+      '\x3Chead>\n' +
+      '  \x3Cmeta charset="utf-8">\n' +
+      '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
+      '  \x3Cstyle amp4email-boilerplate>body{visibility:hidden}\x3C/style>\n' +
+      '\x3C/head>\n' +
+      '\x3Cbody>\n' +
+      '  Hello, AMP4EMAIL world.\n' +
+      '\x3C/body>\n' +
+      '\x3C/html>\n';
+
+    Polymer({
+      is: 'webui-mainpage',
+      ready: function() {
+
+        // The URL form at the top of the screen.
+        var urlForm = this.$.urlForm;
+
+        // The editor control in the center of the screen.
+        var editor = this.$.amphtmlEditor;
+
+        // validationTimeout is used to implement a slight delay for
+        // validation to prevent jank.
+        var validationTimeout;
+
+        // The inline error messages are represented as CodeMirror line
+        // widgets. We keep track of them here so that we can clear them when
+        //  we revalidate.
+        var lineWidgets = [];
+
+        // The status bar below the editor.
+        var statusBar = this.$.statusBar;
+
+        // The listbox has the errors at the bottom of the screen.
+        var listbox = this.$.errorListBox;
+
+        var isValidatorReady = false;
+
+        if (amp.validator.init) {
+          // The AMP validator contains an initializer which loads some
+          // resources asynchronously.
+          amp.validator.init().then(function() {
+            isValidatorReady = true;
+            // In most times, the initialization of AMP validator is slower than
+            // the code that fills the minimal valid JavaScript AMP doc as the
+            // default value in the input box. The `refreshEditorAndErrors` call
+            // triggered by input box default value returns early because
+            // `isValidatorReady` is `false` at that time. We need to call
+            // `refreshEditorAndErrors` again here to ensure that the validator
+            // runs on the default value in the input box
+            refreshEditorAndErrors();
+          });
+        } else {
+          isValidatorReady = true;
+        }
+
+        // When the editor contents change, trigger validation (with a delay)
+        // and propagate the validation errors into the editor (as line
+        // widgets) and the listbox below the editor as clickable errors.
+        var refreshEditorAndErrors = function() {
+          if (!isValidatorReady) {
+            return ;
+          }
+
+          // Clear the list of errors below the editor, and the inline
+          // messages.
+          listbox.clearErrors();
+          while (lineWidgets.length > 0) {
+            lineWidgets.shift().clear();
+          }
+
+          // Validate - result is of type amp.validator.ValidationResult.
+          // See validator.proto for the provided fields.
+          var validationResult = amp.validator.validateString(
+              editor.getEditorValue(), urlForm.getHtmlFormat());
+
+          // Set the status property, which will cause the status bar below
+          // the editor to redisplay.
+          statusBar.status = validationResult.status;
+
+          for (var ii = 0; ii < validationResult.errors.length; ++ii) {
+
+            // Grab the error, and set message and icon as well. Conveniently
+            // the severity maps to 'error' / 'warning' icons in the
+            // Polymer icons (https://elements.polymer-project.org/elements/iron-icons?view=demo:demo/index.html&active=iron-icons).
+            var error = validationResult.errors[ii];
+            error.message = amp.validator.renderErrorMessage(error);
+            error.icon = error.severity.toLowerCase();
+            error.isError = error.severity === 'ERROR';
+            error.isWarning = error.severity === 'WARNING';
+            listbox.addError(error);
+
+            // Create a dom element for the inline display of errors
+            // inside the editor. TODO(powdercloud): Make this a Polymer
+            // custom element.
+            var div = document.createElement('div');
+            div.setAttribute('class', 'ampproject-message');
+            div.appendChild(document.createTextNode(
+                new Array(error.col).join('\u00A0')));
+            var span = document.createElement('span');
+            span.setAttribute(
+                'class', 'ampproject-' + error.severity.toLowerCase());
+            var icon = document.createElement('iron-icon');
+            icon.setAttribute('icon', error.icon);
+            span.appendChild(icon);
+            div.appendChild(span);
+            div.appendChild(document.createTextNode(' ' + error.message));
+            if (error.specUrl) {
+              div.appendChild(document.createTextNode(' '));
+              var a = document.createElement('a');
+              a.setAttribute('href', error.specUrl);
+              a.setAttribute('target', '_blank');
+              a.appendChild(document.createTextNode('Learn more'));
+              div.appendChild(a);
+              div.appendChild(document.createTextNode('.'));
+            }
+            lineWidgets.push(editor.addLineWidget(error.line - 1, div));
+          }
+          var params = getLocationHashParams();
+          if (params.hasOwnProperty('errno')) {
+            var errno = parseInt(params['errno']);
+            if (errno >= 0 && errno < validationResult.errors.length) {
+              listbox.selectAndFocusError(errno);
+            }
+
+            // We don't want this param to be sticky, e.g. if a user
+            // types into the editor we don't want to go back to this
+            // old error after revalidation.
+            removeParamFromLocationHashParams('errno');
+          }
+        };
+        var refreshEditorAndErrorsWithDelay = function(e) {
+          clearTimeout(validationTimeout);
+          validationTimeout = setTimeout(
+              refreshEditorAndErrors, e.detail.validationDelayMs);
+        };
+
+        editor.addEventListener('amphtml-editor-changes',
+                                refreshEditorAndErrorsWithDelay);
+        listbox.addEventListener('webui-errorlist-filter-changes',
+                                 refreshEditorAndErrors);
+
+        // Clicking in the error list at the bottom of the screen moves
+        // the editor cursor.
+        listbox.addEventListener('error-selected', function(e) {
+          var error = e.detail.error;
+          editor.setCursorAndFocus(error.line - 1, error.col);
+        });
+
+        urlForm.addEventListener('webui-urlform-html-format-changes', function(e) {
+          var editorValue = editor.getEditorValue();
+          if (e.detail.htmlFormat === 'AMP4ADS') {
+            var params = getLocationHashParams();
+            params['htmlFormat'] = 'AMP4ADS';
+            setLocationHashParams(params);
+            if (editorValue === minimumValidAmp ||
+                editorValue === minimumValidAmp4Email) {
+              editor.setEditorValue(minimumValidAmp4Ads);
+            } else {
+              refreshEditorAndErrors();
+            }
+          } else if (e.detail.htmlFormat === 'AMP4EMAIL') {
+            var params = getLocationHashParams();
+            params['htmlFormat'] = 'AMP4EMAIL';
+            setLocationHashParams(params);
+            if (editorValue === minimumValidAmp ||
+              editorValue === minimumValidAmp4Ads) {
+              editor.setEditorValue(minimumValidAmp4Email);
+            } else {
+              refreshEditorAndErrors();
+            }
+          } else {
+            removeParamFromLocationHashParams('htmlFormat');
+            if (editorValue === minimumValidAmp4Ads ||
+                editorValue === minimumValidAmp4Email) {
+              editor.setEditorValue(minimumValidAmp);
+            } else {
+              refreshEditorAndErrors();
+            }
+          }
+        });
+
+        // Interprets the parameters after the '#' in the URL.
+        var params = getLocationHashParams();
+        const incomingHtmlFormat = params.hasOwnProperty('htmlFormat') && params['htmlFormat'];
+
+        if (incomingHtmlFormat === 'AMP4ADS') {
+          urlForm.setHtmlFormat('AMP4ADS');
+        } else if (incomingHtmlFormat === 'AMP4EMAIL') {
+          urlForm.setHtmlFormat('AMP4EMAIL');
+        } else {
+          urlForm.setHtmlFormat('AMP');
+        }
+
+        const incomingDocStr = getIncomingDoc(params);
+        if (incomingDocStr) {
+          // Extract doc from query param
+          editor.setEditorValue(incomingDocStr);
+        } else if (params.hasOwnProperty('url') && params['url']) {
+          // Load doc from url
+          this.$.urlForm.setURLAndValidate(params['url']);
+        } else {
+          // Use minimal valid JavaScript AMP doc
+          if (incomingHtmlFormat === 'AMP4ADS') {
+            editor.setEditorValue(minimumValidAmp4Ads);
+          } else if (incomingHtmlFormat === 'AMP4EMAIL') {
+            editor.setEditorValue(minimumValidAmp4Email);
+          } else {
+            editor.setEditorValue(minimumValidAmp);
+          }
+        }
+
+      }
+    });
+  </script>
+</dom-module>

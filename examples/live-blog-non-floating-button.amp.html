@@ -1,0 +1,258 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lorem Ipsum | PublisherName</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Georgia', Serif;
+    }
+
+    .brand-logo {
+      font-family: 'Open Sans';
+    }
+
+    .ad-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .content-container p {
+      line-height: 24px;
+    }
+
+    body > header {
+      background-color: #ff4464;
+      width: 100%;
+    }
+
+    .headline a {
+      color: black;
+      text-decoration: none;
+    }
+
+    header,
+    .headline,
+    .article-body {
+      padding: 15px;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      color: #6f757a;
+      padding: 15px 0;
+      font-size: .9em;
+    }
+
+    .author {
+      display: flex;
+      align-items: center;
+
+      background: #f4f4f4;
+      padding: 0 15px;
+
+      font-size: .8em;
+
+      border: solid #dcdcdc;
+      border-width: 1px 0;
+    }
+
+    .header-time {
+      color: #a8a3ae;
+      font-family: 'Roboto';
+      font-size: 12px;
+    }
+
+    .author p {
+      margin: 5px;
+    }
+
+    .byline {
+      font-family: 'Roboto';
+      display: inline-block;
+    }
+
+    .byline p {
+      line-height: normal;
+    }
+
+    .byline .brand {
+      color: #6f757a;
+    }
+
+    .standfirst {
+      color: #6f757a;
+    }
+
+    .mailto {
+      text-decoration: none;
+    }
+
+    #author-avatar {
+      margin: 10px;
+      border: 5px solid #fff;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+
+    h1 {
+      margin: 5px 0;
+      font-weight: normal;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 226px;
+      background: #f4f4f4;
+    }
+
+    hr {
+      margin: 0;
+    }
+
+    amp-img {
+      background-color: #f4f4f4;
+    }
+
+    .slot-fallback {
+      padding: 16px;
+      background: yellow;
+    }
+
+    .amp-live-list-item {
+      border: 1px solid #dcdcdc;
+      border-width: 1px 0 0;
+    }
+
+    .social-box {
+      text-align: right;
+      margin: 10px 0;
+    }
+
+    .update-panel {
+      background-color: #f4f4f4;
+      border: 1px #dcdcdc solid;
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .update-panel:hover {
+      background-color: #dcdcdc;
+    }
+
+    #live-blog-1 > .update-panel.amp-active {
+      display: flex;
+      overflow-y: hidden;
+      height: 100px;
+      max-height: 150px;
+      transition-property: height;
+      transition-duration: .5s;
+      transition-timing-function: ease-in;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #live-blog-1 > .update-panel.amp-hidden {
+      max-height: 0;
+      overflow: hidden;
+      /*
+        We need this so that animation is triggered since by default the
+        update button is `display: none`
+       */
+      display: flex;
+      border-width: 0;
+    }
+
+    amp-live-list > [update] {
+      display: none;
+    }
+  </style>
+  <script custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js" async></script>
+  <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand-logo">
+      PublisherLogo
+    </div>
+  </header>
+
+  <main role="main">
+    <article>
+      <div class="content-container">
+        <header>
+          <h1 itemprop="headline">Lorem Ipsum</h1>
+          <time class="header-time" itemprop="datePublished"
+              datetime="2015-09-14 13:00">September 14, 2015</time>
+          <p class="standfirst">
+            Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+          </p>
+        </header>
+
+        <div class="article-body" itemprop="articleBody">
+          <amp-live-list
+            layout="container"
+            data-poll-interval="15000"
+            data-max-items-per-page="5"
+            id="live-blog-1">
+            <div id="live-list-update-button" update class="update-panel"
+                 on="tap:live-blog-1.update" tabindex=1 role=link>
+              <a href="#">You have updates</a>
+            </div>
+            <div items>
+              <div id="live-blog-item-1" data-sort-time="1466669033418">
+                <h3 class="headline">
+                  <a href="#live-blog-item-1">Bacon ipsum dolor amet</a>
+                </h3>
+                <div class="author">
+                  <div class="byline">
+                    <p>
+                      by <span itemscope itemtype="http://schema.org/Person"
+                      itemprop="author"><b>Lorem Ipsum</b>
+                      <a class="mailto" href="mailto:lorem.ipsum@">
+                      lorem.ipsum@</a></span>
+                    </p>
+                    <p class="brand">PublisherName News Reporter<p>
+                    <p><span itemscope itemtype="http://schema.org/Date"
+                        itemprop="Date">Thu Jun 23 2016 08:10:55<span></p>
+                  </div>
+                </div>
+                <div class="article-body">
+                  Bacon ipsum dolor amet nostrud adipisicing pancetta beef ribs commodo swine porchetta esse ad kielbasa. Culpa aute prosciutto esse turkey tempor. Sunt pastrami t-bone short ribs turkey in sint ground round elit pork chop venison andouille meatloaf turducken. Cillum pancetta do, shankle chuck pariatur sirloin spare ribs eu cupim kevin sausage filet mignon in. Bacon aliqua flank aute nostrud. Sausage shank tail meatball, culpa ut consequat tongue sunt tempor occaecat jerky velit mollit bacon. Elit meatball andouille tri-tip, in laboris corned beef shank adipisicing qui.
+                </div>
+              </div>
+            </div>
+            <amp-img src="https://baconmockup.com/200/200"
+                layout="responsive"
+                height="300" width="350">
+            </amp-img>
+            <div class="social-box">
+              <amp-social-share type="facebook"
+                  data-param-text="Hello world"
+                  data-param-href="https://example.com/?ref=URL"
+                  data-param-app_id="145634995501895"></amp-social-share>
+              <amp-social-share type="twitter"></amp-social-share>
+            </div>
+          </amp-live-list>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="brand-logo">PublisherLogo</div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP Analytics</title>
+  <link rel="canonical" href="analytics.amp.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    .box {
+      background: #ccc;
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin: 10px;
+    }
+    #container {
+      position: absolute;
+      top: 10000px;
+      height: 10px;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+</head>
+<body>
+
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "endpoint": "/analytics/no-referrer?trigger=${trigger}"
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "endpoint",
+          "vars": {
+            "trigger": "pageview"
+          }
+        },
+        "root": {
+          "on": "visible",
+          "request": "endpoint",
+          "selector": ":root",
+          "vars": {
+            "trigger": "root"
+          }
+        },
+        "img1": {
+          "on": "visible",
+          "request": "endpoint",
+          "selector": "#img1",
+          "vars": {
+            "trigger": "img1"
+          }
+        },
+        "img1_with_spec": {
+          "on": "visible",
+          "request": "endpoint",
+          "selector": "#img1",
+          "visibilitySpec": {
+            "visiblePercentageMin": 20,
+            "visiblePercentageMax": 80,
+            "totalTimeMin": 5000,
+            "continuousTimeMin": 2000,
+            "waitFor": "ini-load"
+          },
+          "vars": {
+            "trigger": "img1_with_spec"
+          }
+        },
+        "img2": {
+          "on": "visible",
+          "request": "endpoint",
+          "selector": "#img2",
+          "vars": {
+            "trigger": "img2"
+          }
+        }
+      },
+      "transport": {
+        "referrerPolicy": "no-referrer"
+      }
+    }
+  </script>
+</amp-analytics>
+
+<amp-img id="img1" src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
+
+<div style="height: 120vh;">
+  scroll to see more.
+</div>
+
+<amp-img id="img2" src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
+
+</body>
+</html>

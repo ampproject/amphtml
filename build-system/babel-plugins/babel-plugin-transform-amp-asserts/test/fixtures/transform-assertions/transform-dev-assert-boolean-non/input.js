@@ -1,0 +1,1 @@
+dev().assertBoolean(null);

@@ -1,0 +1,29 @@
+.i-amphtml-tiktok-centered {
+  height: 100%;
+  left: 50%;
+  width: 325px;
+  transform: translateX(-50%);
+  position: absolute;
+}
+
+.i-amphtml-tiktok-unresolved {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+  width: 325px;
+  /* This size is ok because the iframe is temporarily `position: fixed;`
+    1000px was chosen because TikTok requires a large height in order to send
+    the height messages to the iframe*/
+  height: 1000px;
+}
+
+.i-amphtml-tiktok-placeholder-image {
+  height: 578px;
+  top: 1px;
+  border-radius: 8px 8px 0px 0px;
+}
+
+.i-amphtml-tiktok-placeholder-image-container {
+  height: 100%;
+  background: rgba(220, 220, 220, 0.6);
+}

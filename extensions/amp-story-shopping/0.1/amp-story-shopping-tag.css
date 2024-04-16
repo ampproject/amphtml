@@ -1,0 +1,294 @@
+
+amp-story-shopping-tag {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  width: auto !important;
+  color: white !important;
+  position: absolute !important;
+  pointer-events: auto !important;
+  /* Height and width ensures layoutCallback is called. */
+  min-height: 1px !important;
+  min-width: 1px !important;
+  height: 36px !important;
+
+  --i-amphtml-shopping-tag-bg-color: rgba(125, 125, 125, .75) !important;
+  --i-amphtml-shopping-tag-animation-sequence-duration: 2s !important;
+  --i-amphtml-shopping-tag-animate-out-delay: 5s !important;
+  --i-amphtml-shopping-tag-dot-pulse-duration: 2.5s !important;
+  --i-amphtml-shopping-tag-dot-pulse-delay: 1.5s !important;
+ }
+
+.i-amphtml-amp-story-shopping-product-tag-text {
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  line-height: 15.4px !important;
+}
+
+/* Maintains the correct image and text order inside the tag in RTL mode. */
+[dir=rtl].i-amphtml-amp-story-shopping-tag-inner {
+  flex-flow: row-reverse !important;
+}
+
+[dir=rtl].i-amphtml-amp-story-shopping-tag-inner-flipped {
+  flex-direction: row !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner {
+  height: 36px !important;
+  max-width: 168px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* Opacity 0 initially to avoid showing tag flip on initialization. */
+  opacity: 0 !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-visible[active] {
+  opacity: 1 !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner-flipped {
+  flex-direction: row-reverse !important;
+  transform: translate(-80%)  !important;
+  margin-inline-start: 4px !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-dot {
+  --i-amphtml-tag-dot-size: 16px !important;
+  width: var(--i-amphtml-tag-dot-size) !important;
+  height: var(--i-amphtml-tag-dot-size) !important;
+  border-radius: 100% !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 4px !important;
+  flex-shrink: 0 !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-dot:before {
+  content: '' !important;
+  position: absolute !important;
+  border-radius: inherit !important;
+  width: var(--i-amphtml-tag-dot-size) !important;
+  height: var(--i-amphtml-tag-dot-size) !important;
+  background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-dot:before {
+  animation: i-amphtml-animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
+    i-amphtml-pulse-dot-before var(--i-amphtml-shopping-tag-dot-pulse-duration) var(--i-amphtml-shopping-tag-dot-pulse-delay) infinite !important;
+}
+
+@keyframes i-amphtml-animate-in-sequence-dot-before {
+  0% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes i-amphtml-pulse-dot-before {
+  0% {
+    animation-timing-function: cubic-bezier(.83,0,.71,.99);
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(.8);
+  }
+  90% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.i-amphtml-amp-story-shopping-tag-dot:after {
+  content: '' !important;
+  position: absolute !important;
+  border-radius: inherit !important;
+  width: calc(var(--i-amphtml-tag-dot-size) * .5) !important;
+  height: calc(var(--i-amphtml-tag-dot-size) * .5) !important;
+  box-shadow: 0 2px 8px var(--i-amphtml-shopping-tag-bg-color) !important;
+  background-color: white !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-dot:after {
+  animation: i-amphtml-animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
+    i-amphtml-pulse-dot-after var(--i-amphtml-shopping-tag-dot-pulse-duration) calc(var(--i-amphtml-shopping-tag-dot-pulse-delay) * 1.2) infinite !important;
+}
+
+@keyframes i-amphtml-animate-in-sequence-dot-after {
+  0% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes i-amphtml-pulse-dot-after {
+  0% {
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(.8);
+  }
+  90% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.i-amphtml-amp-story-shopping-tag-pill {
+  --i-amphtml-pill-icon-size: 24px !important;
+  --i-amphtml-pill-padding-inline-start: 6px !important;
+  --i-amphtml-pill-transform-origin: calc(var(--i-amphtml-pill-padding-inline-start) + var(--i-amphtml-pill-icon-size) * .5) !important;
+  display: flex !important;
+  align-items: center !important;
+  border-radius: 18px !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
+  padding-inline-start: var(--i-amphtml-pill-padding-inline-start) !important;
+  padding-inline-end: 12px !important;
+  transform-origin: var(--i-amphtml-pill-transform-origin) !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-pill {
+  animation: i-amphtml-animate-in-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
+    i-amphtml-animate-out-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
+
+  /* Values that need to change to support RTL. */
+  --clip-path-start-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5) at calc(var(--i-amphtml-pill-padding-inline-start) + var(--i-amphtml-pill-icon-size) * .5)) !important;
+  --clip-path-end-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5 + var(--i-amphtml-pill-padding-inline-start)) at calc(var(--i-amphtml-pill-padding-inline-start) + var(--i-amphtml-pill-icon-size) * .5)) !important;
+  --clip-path-inset-offset-supports-rtl: inset(0 calc(100% - 36px) 0 0 round 30px) !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner[active][dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
+  --clip-path-start-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5) at calc(100% - var(--i-amphtml-pill-padding-inline-start) - var(--i-amphtml-pill-icon-size) * .5)) !important;
+  --clip-path-end-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5 + var(--i-amphtml-pill-padding-inline-start)) at calc(100% - var(--i-amphtml-pill-padding-inline-start) - var(--i-amphtml-pill-icon-size) * .5)) !important;
+  --clip-path-inset-offset-supports-rtl: inset(0 0 0 calc(100% - 36px) round 30px) !important;
+
+  /* Transform origin from center of icon (right side) in RTL. */
+  transform-origin: calc(100% - var(--i-amphtml-pill-transform-origin)) !important;
+}
+
+@keyframes i-amphtml-animate-in-sequence-pill {
+  0% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    clip-path: var(--clip-path-start-circle-supports-rtl);
+    transform: scale(0);
+  }
+  20% {
+    clip-path: var(--clip-path-start-circle-supports-rtl);
+  }
+  40% {
+    transform: scale(1);
+  }
+  60% {
+    clip-path: var(--clip-path-end-circle-supports-rtl);
+  }
+  60.001% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    clip-path: var(--clip-path-inset-offset-supports-rtl);
+  }
+  100% {
+    clip-path: inset(0 0 0 0 round 30px);
+  }
+}
+
+@keyframes i-amphtml-animate-out-sequence-pill {
+  0% {
+    clip-path: inset(0 0 0 0 round 30px);
+  }
+  40% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    clip-path: var(--clip-path-inset-offset-supports-rtl);
+  }
+  60% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+    clip-path: var(--clip-path-inset-offset-supports-rtl);
+  }
+}
+
+.i-amphtml-amp-story-shopping-tag-pill-image {
+  width: var(--i-amphtml-pill-icon-size) !important;
+  height: var(--i-amphtml-pill-icon-size) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(0, 0, 0, .6) !important;
+  border-radius: 100% !important;
+  flex-shrink: 0 !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.49 5.755 6.24.505a1.16 1.16 0 0 0-.823-.338H1.334A1.17 1.17 0 0 0 .167 1.333v4.084c0 .32.128.612.344.828l5.25 5.25c.21.21.502.338.823.338.32 0 .612-.128.822-.344l4.083-4.083a1.14 1.14 0 0 0 .345-.823c0-.32-.134-.618-.345-.828ZM2.208 3.083a.874.874 0 1 1 0-1.75.874.874 0 1 1 0 1.75Z" fill="#fff"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  flex-shrink: 0 !important;
+  margin-inline-end: 4px !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-pill-image {
+  animation: i-amphtml-animate-out-sequence-pill-image var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
+}
+
+@keyframes i-amphtml-animate-out-sequence-pill-image {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+.i-amphtml-amp-story-shopping-tag-pill-text {
+  overflow: hidden !important;
+  font-size: 14px !important;
+  line-height: 14px !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  max-height: 32px !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-pill-text {
+  animation: i-amphtml-animate-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
+    i-amphtml-animate-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) reverse !important;
+}
+
+@keyframes i-amphtml-animate-sequence-text {
+  0% {
+    opacity: 0;
+  }
+  60% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    opacity: 0;
+  }
+  100% {
+    /* Applies timing function from begining when in reverse. */
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,94 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-autocomplete examples</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+      body {
+        padding: 15px;
+      }
+      .country-info {
+        font: 8pt 'Courier New', Courier, monospace;
+      }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+</head>
+<body>
+  <h2>Plain text, inline data</h2>
+  <form
+    id="form1"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocomplete1" filter="substring" min-characters="0">
+      <input type="text" id="input1">
+      <script type="application/json">
+        { "items" : ["apple", "banana", "orange"] }
+      </script>
+    </amp-autocomplete>
+
+    <amp-autocomplete id="autocomplete-rtl" filter="substring" min-characters="0">
+        <input type="text" id="input-rtl">
+        <script type="application/json">
+          { "items" : ["تفاحة", "موز", "برتقال"] }
+        </script>
+      </amp-autocomplete>
+    <input type="submit" value="Submit">
+  </form>
+
+  <h2>Rich content, remote data</h2>
+  <form
+    id="form2"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocomplete2" src="./amp-autocomplete-data.json" max-entries="5"
+      filter="prefix" filter-value="countryName" min-characters="0">
+      <input type="search" id="input2">
+      <template type="amp-mustache">
+        <div data-value="{{countryName}}">
+          <h3>{{countryName}} ({{countryCode}})</h3>
+          <div class="country-info">
+            The population is <b>{{population}}</b>, and the capital is <b>{{capital}}</b>. The local currency is <b>{{currencyCode}}</b>.
+          </div>
+        </div>
+      </template>
+    </amp-autocomplete>
+    <input type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success!
+      </template>
+    </div>
+  </form>
+
+  <h2>Inline autocomplete</h2>
+  <form
+    id="form2"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocompleteInline" inline="@" filter="prefix" min-characters="0">
+      <input type="search" id="inputInline">
+      <script type="application/json">
+        { "items" : ["apple", "banana", "orange"] }
+      </script>
+    </amp-autocomplete>
+    <input type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success!
+      </template>
+    </div>
+  </form>
+</body>
+</html>

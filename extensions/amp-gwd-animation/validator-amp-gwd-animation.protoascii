@@ -1,0 +1,20 @@
+tags: {  # amp-gwd-animation
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-gwd-animation"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-gwd-animation>
+  html_format: AMP4ADS
+  tag_name: "AMP-GWD-ANIMATION"
+  requires_extension: "amp-gwd-animation"
+  attrs: { name: "timeline-event-prefix" }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

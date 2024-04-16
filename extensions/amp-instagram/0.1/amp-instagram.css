@@ -1,0 +1,8 @@
+
+
+/* Non-overridable properties */
+
+/* Adjust default spacing to allow for frame style */
+amp-instagram.amp-instagram-default-framing {
+  border: 1px solid #dbdbdb !important;
+}

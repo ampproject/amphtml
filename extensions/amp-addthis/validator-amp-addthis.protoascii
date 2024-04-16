@@ -1,0 +1,52 @@
+tags: {  # amp-addthis
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    version: "0.1"
+    version: "latest"
+    name: "amp-addthis"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # <amp-addthis>
+  html_format: AMP
+  tag_name: "AMP-ADDTHIS"
+  requires_extension: "amp-addthis"
+  attrs: {
+    name: "data-product-code"
+    mandatory_oneof: "['data-product-code', 'data-widget-id']"
+  }
+  attrs: {
+    name: "data-share-media"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      allow_empty: true
+    }
+  }
+  attrs: {
+    name: "data-share-url"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      allow_empty: true
+    }
+  }
+  attrs: {
+    name: "data-widget-id"
+    trigger: {
+      also_requires_attr: "data-pub-id"
+    }
+    mandatory_oneof: "['data-product-code', 'data-widget-id']"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

@@ -1,0 +1,118 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="/components/amp-lightbox-gallery/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>amp-lightbox-gallery</title>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style>
+    .object-fit-cover img {
+      object-fit: cover;
+    }
+
+    .object-fit-contain img {
+      object-fit: contain;
+    }
+
+    .object-fit-none img {
+      object-fit: none;
+    }
+
+    .scale-2x img {
+      transform: scale(2);
+    }
+
+    img.custom-fill {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
+    footer {
+      position: fixed;
+      position: sticky;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 48px;
+      background-color: #fafafa;
+    }
+  </style>
+<body>
+  <h2>Test SSR with single src</h2>
+  <amp-img width=400 height=300
+    class="i-amphtml-layout-responsive i-amphtml-layout-size-defined"
+    i-amphtml-layout=responsive
+    layout=responsive
+    lightbox
+    src="https://unsplash.it/400/300?image=1037">
+    <i-amphtml-sizer style=display:block;padding-top:75.0000%;></i-amphtml-sizer>
+  </amp-img>
+
+  <img width=400 height=300 data-lightbox src="https://unsplash.it/400/300?image=1037" loading="lazy" class="custom-fill" />
+
+  <h2>Test SSR with srcset</h2>
+  <amp-img width=400 height=300
+    class="i-amphtml-layout-responsive i-amphtml-layout-size-defined"  i-amphtml-layout=responsive layout=responsive lightbox=hero
+    src="https://unsplash.it/400/300?image=1037"
+    srcset="https://unsplash.it/470/352?image=1037 470w, https://unsplash.it/820/615?image=1037 820w, https://unsplash.it/1200/900?image=1037 1200w" >
+    <i-amphtml-sizer style=display:block;padding-top:75.0000%;></i-amphtml-sizer>
+  </amp-img>
+
+  <h2>Test with single src, object-fit: cover</h2>
+  <h3>Test with a scale, causing a crop</h3>
+  <amp-img width=120 height=200
+    class="object-fit-cover scale-2x"
+    lightbox
+    src="https://unsplash.it/400/300?image=1037">
+  </amp-img>
+
+
+  <h3>Expand horizontally</h3>
+  <amp-img width=120 height=200
+    class="object-fit-cover"
+    lightbox
+    src="https://unsplash.it/400/300?image=1037">
+  </amp-img>
+
+  <h3>Expand vertically</h3>
+  <amp-img width=200 height=120
+    class="object-fit-cover"
+    lightbox
+    src="https://unsplash.it/400/300?image=1037">
+  </amp-img>
+
+  <h3>Same aspect ratio</h3>
+  <amp-img width=200 height=200
+    class="object-fit-cover"
+    lightbox
+    src="https://unsplash.it/400/300?image=1037">
+  </amp-img>
+
+  <h2>Test with single src, object-fit: contain</h2>
+  <amp-img width=200 height=120
+    class="object-fit-contain"
+    lightbox
+    src="https://unsplash.it/400/300?image=1037">
+  </amp-img>
+
+  <h2>Test with single src, object-fit: none</h2>
+  <amp-img width=200 height=120
+    class="object-fit-none"
+    layout=responsive
+    lightbox
+    src="https://unsplash.it/400/300?image=1037">
+  </amp-img>
+
+  <footer>
+    Sticky footer
+  </footer>
+</body>
+</html>

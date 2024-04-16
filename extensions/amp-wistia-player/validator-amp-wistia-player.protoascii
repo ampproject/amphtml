@@ -1,0 +1,35 @@
+tags: {  # amp-wistia-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-wistia-player"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-wistia-player>
+  html_format: AMP
+  tag_name: "AMP-WISTIA-PLAYER"
+  requires_extension: "amp-wistia-player"
+  attrs: {
+    name: "data-media-hashed-id"
+    mandatory: true
+    value_regex: "[0-9a-zA-Z]+"
+  }
+  attrs: {
+    # Does nothing, as the player iframe implements this feature internally
+    # regardless.
+    # Included for consistency with other players.
+    name: "rotate-to-fullscreen"
+    value: ""
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

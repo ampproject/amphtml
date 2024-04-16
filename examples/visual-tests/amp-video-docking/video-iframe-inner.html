@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
+</head>
+<body style="background: lightcoral">
+  <script>
+    // Mock video playback without actual video.
+    // https://go.amp.dev/c/amp-video-iframe#custom-integrations
+    (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(amp) {
+      amp.postEvent('canplay');
+
+      amp.method('play', function() {
+        amp.postEvent('playing');
+
+        setTimeout(function() {
+          amp.postEvent('ad_start');
+        }, 2000);
+      });
+
+      amp.method('pause', function() {
+        amp.postEvent('pause');
+      });
+
+      amp.method('mute', function() {
+        amp.postEvent('muted');
+      });
+
+      amp.method('unmute', function() {
+        amp.postEvent('unmuted');
+      });
+    });
+  </script>
+</body>
+</html>

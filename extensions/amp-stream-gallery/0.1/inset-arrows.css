@@ -1,0 +1,41 @@
+
+
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-prev-slot {
+  width: 0;
+  justify-content: flex-start;
+}
+
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-next-slot {
+  width: 0;
+  justify-content: flex-end;
+}
+
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-prev-slot > [disabled],
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-next-slot > [disabled],
+[i-amphtml-stream-gallery-hide-inset-buttons]:not([amp-stream-gallery-outset-arrows]) .i-amphtml-stream-gallery-arrow-prev-slot > *,
+[i-amphtml-stream-gallery-hide-inset-buttons]:not([amp-stream-gallery-outset-arrows]) .i-amphtml-stream-gallery-arrow-next-slot > * {
+  opacity: 0;
+  /**
+   * Note, screen readers can still activate the buttons when hide buttons is
+   * specified, even though we have `pointer-events: none`.
+   */
+  pointer-events: none !important;
+}
+
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-prev-slot > .i-amphtml-stream-gallery-prev,
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-next-slot > .i-amphtml-stream-gallery-next {
+  /* Make sure arrows do not collapse due to parent having no width. */
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-prev-slot > .i-amphtml-stream-gallery-prev {
+  border-radius: 0px 4px 4px 0px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+}
+
+:not([amp-stream-gallery-outset-arrows]) > .i-amphtml-stream-gallery-arrow-next-slot > .i-amphtml-stream-gallery-next {
+  border-radius: 4px 0px 0px 4px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+}

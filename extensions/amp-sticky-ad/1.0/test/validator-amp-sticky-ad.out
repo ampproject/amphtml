@@ -1,0 +1,28 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests amp-sticky-ad.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js"></script>
+|  </head>
+|  <body>
+|    <amp-sticky-ad layout=nodisplay>
+|      <amp-ad width=300 height=250
+|          type="a9"
+|          data-aax_size="300x250"
+|          data-aax_pubname="test123"
+|          data-aax_src="302">
+|      </amp-ad>
+|    </amp-sticky-ad>
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+amp-sticky-ad/1.0/test/validator-amp-sticky-ad.html:25:6 The tag 'amp-ad extension script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad/)

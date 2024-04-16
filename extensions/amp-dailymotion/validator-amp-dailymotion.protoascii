@@ -1,0 +1,85 @@
+tags: {  # amp-dailymotion 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-dailymotion 1.0"
+  excludes_condition: "amp-dailymotion 0.1"
+  extension_spec: {
+    name: "amp-dailymotion"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-dailymotion 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-dailymotion 0.1"
+  excludes_condition: "amp-dailymotion 1.0"
+  extension_spec: {
+    name: "amp-dailymotion"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-dailymotion>
+  html_format: AMP
+  tag_name: "AMP-DAILYMOTION"
+  requires_extension: "amp-dailymotion"
+  attrs: { name: "autoplay" }
+  attrs: {
+    name: "data-endscreen-enable"
+    value: "false"
+    value: "true"
+  }
+  attrs: {
+    name: "data-info"
+    value: "false"
+    value: "true"
+  }
+  attrs: {
+    name: "data-mute"
+    value: "false"
+    value: "true"
+  }
+  attrs: {
+    name: "data-sharing-enable"
+    value: "false"
+    value: "true"
+  }
+  attrs: {
+    name: "data-start"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-ui-highlight"
+    value_regex_casei: "([0-9a-f]{3}){1,2}"
+  }
+  attrs: {
+    name: "data-ui-logo"
+    value: "false"
+    value: "true"
+  }
+  attrs: {
+    name: "data-videoid"
+    mandatory: true
+    value_regex_casei: "[a-z0-9]+"
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-dailymotion/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

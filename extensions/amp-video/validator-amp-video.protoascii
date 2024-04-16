@@ -1,0 +1,202 @@
+tags: {  # amp-video 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-video 1.0"
+  excludes_condition: "amp-video 0.1"
+  extension_spec: {
+    name: "amp-video"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-video 0.1
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-video 0.1"
+  excludes_condition: "amp-video 1.0"
+  extension_spec: {
+    name: "amp-video"
+    version: "0.1"
+    version: "latest"
+    version_name: "v0.1"
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+attr_lists: {
+  name: "amp-video-common"
+  attrs: { name: "album" }
+  attrs: { name: "alt" }
+  attrs: { name: "artist" }
+  attrs: { name: "artwork" }
+  attrs: { name: "attribution" }
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
+    name: "controls"
+    value: ""
+  }
+  attrs: { name: "controlslist" }
+  attrs: { name: "crossorigin" }
+  attrs: {
+    name: "disableremoteplayback"
+    value: ""
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attrs: {
+    name: "loop"
+    value: ""
+  }
+  attrs: {
+    name: "muted"
+    value: ""
+  }
+  attrs: {
+    name: "noaudio"
+    value: ""
+  }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
+  attrs: { name: "placeholder" }
+  attrs: {
+    name: "preload"
+    value: "auto"
+    value: "metadata"
+    value: "none"
+    value: ""
+  }
+  attrs: {
+    name: "rotate-to-fullscreen"
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  # <amp-bind>
+  attrs: { name: "[album]" }
+  attrs: { name: "[alt]" }
+  attrs: { name: "[artist]" }
+  attrs: { name: "[artwork]" }
+  attrs: { name: "[attribution]" }
+  attrs: { name: "[controls]" }
+  attrs: { name: "[controlslist]" }
+  attrs: { name: "[loop]" }
+  attrs: { name: "[poster]" }
+  attrs: { name: "[preload]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[title]" }
+}
+
+tags: {  # <amp-video> not in amp-story.
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-VIDEO"
+  # There is an alternate spec for amp-video in amp-story.
+  disallowed_ancestor: "AMP-STORY"
+  requires_extension: "amp-video"
+  attrs: { name: "poster" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
+  attr_lists: "lightboxable-elements"
+  spec_url: "https://amp.dev/documentation/components/amp-video/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-video> in amp-story-page-attachment (same rules as regular AMPHTML).
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-VIDEO"
+  spec_name: "amp-story >> amp-story-page-attachment >> amp-video"
+  mandatory_ancestor: "AMP-STORY-PAGE-ATTACHMENT"
+  requires_extension: "amp-video"
+  attrs: { name: "poster" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
+  attr_lists: "lightboxable-elements"
+  spec_url: "https://amp.dev/documentation/components/amp-video/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-video> in amp-story
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-VIDEO"
+  spec_name: "amp-story >> amp-video"
+  mandatory_ancestor: "AMP-STORY"
+  requires_extension: "amp-video"
+  attrs: {
+    name: "autoplay"
+    value: ""
+    mandatory: true
+  }
+  attrs: {
+    name: "controls"
+    value: ""
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
+  }
+  attrs: {
+    name: "[controls]"
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
+  }
+  attrs: {
+    name: "poster"
+    mandatory: true
+  }
+  attrs: {
+    name: "cache"
+    value: "google"
+  }
+  attrs: {
+    name: "captions-id"
+    requires_extension: "amp-story-captions"
+  }
+  attrs: {
+    name: "volume"
+    # Volume must be in the range [0, 1].
+    value_regex: "^(0(\\.0*)?|(0?\\.[0-9]+)?|1(\\.0*)?)$"
+  }
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
+  spec_url: "https://amp.dev/documentation/components/amp-video/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

@@ -1,0 +1,63 @@
+<!--
+  Test Description:
+  Tests amp-position-observer.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+</head>
+<body>
+  <!-- Valid -->
+  <amp-position-observer layout="nodisplay"></amp-position-observer>
+  <amp-position-observer layout="nodisplay" on="enter:foo;exit:bar;scroll:baz(percent=event.percent)"></amp-position-observer>
+  <amp-position-observer layout="nodisplay" on="enter:foo;exit:bar;scroll:baz(percent=event.percent)" once></amp-position-observer>
+  <amp-position-observer target="#id" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer target="#id" layout="nodisplay" once></amp-position-observer>
+  <amp-position-observer intersection-ratios="0" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="1" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.5" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.5 0" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.5 0" layout="nodisplay" once></amp-position-observer>
+  <amp-position-observer intersection-ratios="1 0.5" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100" layout="nodisplay" once></amp-position-observer>
+  <amp-position-observer viewport-margins="100 200" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100vh" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100px" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100px 200" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100px 200vh" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100vh 200px" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100 200vh" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100 200vh" layout="nodisplay" once></amp-position-observer>
+  <!-- Invalid: missing required layout value -->
+  <amp-position-observer></amp-position-observer>
+  <!-- Invalid: interesection-ratios not valid entries -->
+  <amp-position-observer intersection-ratios="" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="1.1" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.b" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="foo" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="3" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.a 0.b" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.5 foo" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.5 1.1" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="0.5 4" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="foo 0.5" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="1.1 0.5" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer intersection-ratios="4 0.5" layout="nodisplay"></amp-position-observer>
+  <!-- Invalid: viewport-margins not valid entries -->
+  <amp-position-observer viewport-margins="" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="foo" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100fx" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100vx" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100 100vx" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100vh 100vx" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100fx 100vh" layout="nodisplay"></amp-position-observer>
+  <amp-position-observer viewport-margins="100vx 100px" layout="nodisplay"></amp-position-observer>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Scrollable lightbox</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+    article {
+      display: block;
+      max-width: 736px;
+      margin: 8px;
+    }
+    amp-lightbox {
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+    .lightbox-close-button {
+      background: white;
+    }
+    button:focus {
+      background: red;
+    }
+    a:focus {
+      color: red;
+    }
+    .lightbox-text {
+      color: white;
+    }
+    .fixed {
+      position: fixed;
+      z-index: 10;
+    }
+  </style>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-1.0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script>
+    (self.AMP = self.AMP || []).push(function (AMP) {
+      AMP.toggleExperiment('bento', true);
+    });
+  </script>
+</head>
+<body class="comic-amp-font-loading">
+
+<article>
+  <span class="fixed" style="background-color: red">Fixed header</span>
+
+  <h2>Scrollable Lightbox</h2>
+  <amp-lightbox id="lightbox-scrollable" layout="nodisplay" animate-in="fly-in-bottom">
+    <button on="tap:lightbox-scrollable.close" class="lightbox-close-button">
+      Close Scrollable Lightbox
+    </button>
+    <p class="fixed">
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <p>
+      <!-- native image element example, it's not valid yet, but supported. -->
+      <img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=300 height=200 loading="lazy" />
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      <a href="https://amp.dev/documentation/examples/components/amp-lightbox/">Some link</a>
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <p>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <div style="height: 100vh;"></div>
+  <amp-video id="video1"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    width="358"
+    height="204"
+    layout="responsive"
+    controls>
+  </amp-video>
+  </amp-lightbox>
+
+  <button on="tap:lightbox-scrollable">
+    Open Scrollable Lightbox
+  </button>
+
+  <h2> Other types of close buttons / focus lightbox</h2>
+
+  <amp-lightbox id="lightbox-without-close" layout="nodisplay" animate-in="fly-in-top">
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <p class="lightbox-text">
+      <a href="https://amp.dev/documentation/examples/components/amp-lightbox/">Some link</a>
+    </p>
+  </amp-lightbox>
+  <button on="tap:lightbox-without-close">
+    Open Lightbox without close button
+  </button>
+
+  <amp-lightbox id="lightbox-with-focus" on="lightboxOpen:lightbox-focus.focus;" layout="nodisplay" animate-in="fade-in">
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <p class="lightbox-text">
+      <a id="lightbox-focus" href="https://amp.dev/documentation/examples/components/amp-lightbox/">Some link</a>
+    </p>
+  </amp-lightbox>
+  <button on="tap:lightbox-with-focus">
+    Open Lightbox with a focus
+  </button>
+
+
+  <amp-lightbox id="lightbox-with-autofocus" layout="nodisplay" animate-in="fly-in-top">
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <input type="text" id="focusMe" name="focusMe" autofocus>
+  </amp-lightbox>
+  <button on="tap:lightbox-with-autofocus">
+    Open Lightbox with autofocus
+  </button>
+
+  <amp-lightbox id="my-bindable-lightbox"
+    [open]="showLightbox"
+    layout="nodisplay"
+    on="lightboxClose:AMP.setState({showLightbox: false})">
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <button on="tap:my-bindable-lightbox.close">Close modal</button>
+  </amp-lightbox>
+  <button on="tap:AMP.setState({showLightbox: true})">
+    Open lightbox with bind
+  </button>
+
+  <!-- Need last item to test focus going back to page-->
+  <p><a href="https://amp.dev/fr/documentation/components/amp-lightbox/">Lightbox doc</a></p>
+
+  <div id="lipsum">
+    <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam porta sodales lectus, a gravida lacus auctor et. Nullam id urna ut neque euismod vehicula. Mauris scelerisque ullamcorper neque in malesuada. In lobortis placerat leo, eu posuere lectus semper in. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque sed condimentum augue, sit amet porta justo. Integer nec lorem nisi. Phasellus ultrices libero tristique, aliquam neque eleifend, faucibus velit. Morbi vitae pretium augue.
+    </p>
+    <p>
+    Vivamus vel risus vulputate diam malesuada ornare. Nam a urna orci. Vivamus risus tellus, interdum eu turpis ac, tempus viverra sem. In sed leo scelerisque, blandit nibh a, lacinia diam. Maecenas metus arcu, accumsan porta elementum ac, euismod eu leo. Donec ornare risus dui, ut dictum libero imperdiet vitae. Nunc tincidunt velit eu ex dictum posuere. Aliquam interdum orci lectus, et finibus ex bibendum tempor. Phasellus dignissim nibh et maximus ornare. Aliquam ligula lorem, varius non enim ut, imperdiet bibendum magna. Nulla facilisi. Proin pellentesque tristique tellus in egestas. Curabitur laoreet viverra ligula, sit amet finibus arcu. Morbi sed neque sit amet arcu tempus molestie. Mauris aliquam eget nunc eget venenatis. Ut vel mi nec mi mattis ullamcorper vel a enim.
+    </p>
+    <p>
+    Donec ultrices eleifend tristique. Etiam convallis quam lectus, eget tristique elit blandit a. Mauris non tortor et lorem tristique euismod. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Suspendisse sit amet dui sed ipsum lobortis porttitor interdum nec magna. In et ornare urna, mattis sagittis ipsum. Proin vel felis at urna finibus malesuada eu sit amet mi. Quisque ultrices fringilla est vitae scelerisque. Ut condimentum dui ultrices, venenatis neque at, maximus metus.
+    </p>
+    <p>
+    Praesent elementum sollicitudin risus cursus viverra. In eget scelerisque arcu, tincidunt cursus magna. Cras turpis libero, facilisis sed turpis sed, hendrerit cursus libero. Donec ut sapien ut sem sollicitudin mattis ut ut dui. Phasellus sollicitudin eros vitae venenatis fringilla. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut molestie nibh semper turpis tempor finibus. Mauris eget sagittis tortor. Fusce interdum enim vitae urna iaculis auctor. Ut volutpat volutpat dignissim. Sed in felis ut nibh faucibus laoreet. Etiam a leo accumsan, efficitur erat non, luctus dui. Vivamus a semper enim, eget luctus dolor. Vestibulum aliquam ullamcorper neque quis bibendum.
+    </p>
+    <p>
+    Proin sit amet lacus nec mi eleifend feugiat tristique ac leo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce id luctus nisi. Vestibulum viverra auctor nisl, a placerat leo interdum ac. Nullam porttitor auctor ultrices. Etiam tempus lectus urna, sit amet accumsan ante pellentesque eget. Fusce hendrerit scelerisque massa ut venenatis. Vivamus in diam maximus mi ultrices aliquet. Donec lacinia porttitor augue, nec blandit mauris eleifend at. Mauris ante ligula, tincidunt id risus sit amet, laoreet pharetra orci. Aenean id dolor condimentum, mattis libero et, posuere erat. Pellentesque quis magna eu odio pellentesque congue. Sed fringilla massa ut laoreet suscipit.
+    </p>
+</div>
+
+</article>
+</body>
+</html>

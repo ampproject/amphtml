@@ -1,0 +1,392 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Variable Request Exmaples</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-boilerplate>
+        body {
+            -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+            animation: -amp-start 8s steps(1, end) 0s 1 normal both
+        }
+
+        @-webkit-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-moz-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-ms-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @-o-keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+
+        @keyframes -amp-start {
+            from {
+                visibility: hidden
+            }
+            to {
+                visibility: visible
+            }
+        }
+    </style>
+    <noscript>
+        <style amp-boilerplate>
+            body {
+                -webkit-animation: none;
+                -moz-animation: none;
+                -ms-animation: none;
+                animation: none
+            }
+        </style>
+    </noscript>
+</head>
+<style type="text/css">
+    .tg {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .tg td {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        padding: 10px 5px;
+        border-style: solid;
+        border-width: 1px;
+        overflow: hidden;
+        word-break: normal;
+        border-color: black;
+    }
+
+    .tg th {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        font-weight: normal;
+        padding: 10px 5px;
+        border-style: solid;
+        border-width: 1px;
+        overflow: hidden;
+        word-break: normal;
+        border-color: black;
+    }
+
+    .tg .tg-1wig {
+        font-weight: bold;
+        text-align: left;
+        vertical-align: top
+    }
+
+    .tg .tg-0lax {
+        text-align: left;
+        vertical-align: top
+    }
+</style>
+
+<body>
+    <h1>Variable Substituion Tester</h1>
+
+    <p><a href="/test/manual/amp-analytics/variable-request-tester.html">Click here for the tester</a></p>
+
+    <br>
+    <h2>Working Examples</h2>
+    <p>
+        Nested platform macros
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=QUERY_PARAM(TITLE,CANONICAL_URL)</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">/save-variable-request?q=http%3A%2F%2Fads.localhost%3A8000%2Fanalytics.amp.html</td>
+            </tr>
+        </table>
+    </p>
+    <p>
+        Analytics variable inside macro
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=QUERY_PARAM(${canonicalUrl},${title})</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">/save-variable-request?q=AMP%20Analytics</td>
+            </tr>
+        </table>
+    </p>
+    <p>
+        Analytics variable with macros within
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=${queryParam(TITLE,CANONICAL_URL)}</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">/save-variable-request?q=http%3A%2F%2Fads.localhost%3A8000%2Fanalytics.amp.html</td>
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        Analytics var substituted for analtyics var with macro args with no parenthesis
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{"t":"QUERY_PARAM"}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=${t(TITLE,CANONICAL_URL)}</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">/save-variable-request?q=http%3A%2F%2Fads.localhost%3A8000%2Fanalytics.amp.html</td>
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        Analytics var substituted for macro concatenated macro args
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{"t":"QUERY_PARAM"}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=${t}(TITLE,CANONICAL_URL)</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">/save-variable-request?q=http%3A%2F%2Fads.localhost%3A8000%2Fanalytics.amp.html</td>
+            </tr>
+        </table>
+    </p>
+    <p>
+        Analytics var substituted for macro with macro args
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{"t":"QUERY_PARAM"}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=${t(TITLE,CANONICAL_URL)}</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">/save-variable-request?q=http%3A%2F%2Fads.localhost%3A8000%2Fanalytics.amp.html</td>
+            </tr>
+        </table>
+    </p>
+    <p>
+        Analytics var substituion
+        <table class="tg">
+            <tr>
+              <th class="tg-1wig">vars:</th>
+              <th class="tg-0lax">{"t":"${f}","f":123,"z":"${title}"}</th>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+              <td class="tg-0lax">t=${t}&amp;z=${z}</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+              <td class="tg-0lax">/save-variable-request?t=123&amp;z=AMP%20Analytics</td>
+            </tr>
+          </table>
+    </p>
+    <p>
+        Analytics var substituion for macro
+        <table class="tg">
+            <tr>
+              <th class="tg-1wig">vars:</th>
+              <th class="tg-0lax">{"t":"${f}","f":123,"z":"TITLE"}</th>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+              <td class="tg-0lax">t=${t}&amp;z=${z}</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+              <td class="tg-0lax">/save-variable-request?t=123&amp;z=AMP%20Analytics</td>
+            </tr>
+          </table>
+    </p>
+
+    <br>
+    <h2>Known Caveats</h2>
+    <p>
+        Nested analytics variables
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=${queryParam(${canonicalUrl},${title})}</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">/save-variable-request?q=,AMP%20Analytics)}</td>
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        Analytics var substituted for analtyics var with macro args with parenthesis
+        <table class="tg">
+            <tr>
+                <th class="tg-1wig">vars:</th>
+                <th class="tg-0lax">{"t":"QUERY_PARAM"}</th>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+                <td class="tg-0lax">q=${t(TITLE,$TOLOWERCASE(ABC))}&p=QUERY_PARAM(a,$TOLOWERCASE(EFG))</td>
+            </tr>
+            <tr>
+                <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+                <td class="tg-0lax">q=&p=efg</td>
+            </tr>
+        </table>
+    </p>
+
+    <p>
+        Analytics var substitution for args of macro
+        <table class="tg">
+            <tr>
+              <th class="tg-1wig">vars:</th>
+              <th class="tg-0lax">{"t":"(foo,bar)"}</th>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+              <td class="tg-0lax">t=QUERY_PARAM${t}</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+
+              <td class="tg-0lax">/save-variable-request?t=(foo,bar)</td>
+            </tr>
+          </table>
+    </p>
+
+    <p>
+        Analytics var substitution for args of analytics var
+        <table class="tg">
+            <tr>
+              <th class="tg-1wig">vars:</th>
+              <th class="tg-0lax">{"t":"(foo,bar)"}</th>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+              <td class="tg-0lax">s=${queryParam}${t}</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+              <td class="tg-0lax">/save-variable-request?s=(foo,bar)</td>
+            </tr>
+          </table>
+    </p>
+
+    <p>
+        Analytics var substitution for args with macros/analytics var inside
+        <table class="tg">
+            <tr>
+              <th class="tg-1wig">vars:</th>
+              <th class="tg-0lax">{"t":"(${title},TITLE)"}</th>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+              <td class="tg-0lax">t=QUERY_PARAM${t}</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+
+              <td class="tg-0lax">/save-variable-request?t=(AMP%20Analytics,AMP%20Analytics)</td>
+            </tr>
+          </table>
+    </p>
+
+    <p>
+        Analytics var substitution for args with macros/analytics var inside
+        <table class="tg">
+            <tr>
+              <th class="tg-1wig">vars:</th>
+              <th class="tg-0lax">{"t":"${title},TITLE"}</th>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+              <td class="tg-0lax">t=QUERY_PARAM(${t})</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+
+              <td class="tg-0lax">/save-variable-request?t=</td>
+            </tr>
+          </table>
+    </p>
+
+    <p>
+        Nested arguments substitution with parenthesis
+        <table class="tg">
+            <tr>
+              <th class="tg-1wig">vars:</th>
+              <th class="tg-0lax">{"t":"QUERY_PARAM${vars}","vars":"(f,$TOLOWERCASE(ABC))","q":"QUERY_PARAM${v}","v":"(f,TIMEZONE_CODE)"}</th>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">request:</span></td>
+              <td class="tg-0lax">t=${t}&amp;q=${q}</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax"><span style="font-weight:bold">output:</span></td>
+              <td class="tg-0lax">/save-variable-request?t=)&amp;q=America%2FLos_Angeles</td>
+            </tr>
+          </table>
+    </p>
+</body>
+
+</html>

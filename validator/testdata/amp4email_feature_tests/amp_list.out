@@ -1,0 +1,230 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests the additional restrictions AMP4EMAIL sets on AMP-LIST.
+|  -->
+|  <!doctype html>
+|  <html ⚡4email data-css-strict>
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:13:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-mustache)
+|  </head>
+|  <body>
+|  <!--
+|    This example is fine.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+|    src="https://someserver.json">
+|    <template type="amp-mustache">
+|      <div class="url-entry">
+|        <a href="https://somelink.com">{{blah}}</a>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <!-- Valid container layout -->
+|  <amp-list layout="container" src="https://data.com/articles.json?ref=CANONICAL_URL">
+|    <div></div>
+|  </amp-list>
+|  <!-- Width/height missing allowed because it is container layout -->
+|  <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
+|    <div></div>
+|  </amp-list>
+|
+|  <!--
+|    Nested xhrs is not allowed. This example is even banned in general AMP but
+|    for a different reason. In general AMP a template cannot be a descendant of
+|    another template.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+|    src="https://someserver.json" >
+|    <template type="amp-mustache">
+|      <div>
+|        <amp-list width="auto" height="100" layout="fixed-height"
+>>       ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:46:6 The tag 'amp-list' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list)
+|          src="https://someserver.json">
+|          <template type="amp-mustache" id="1234">
+>>         ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:48:8 The tag 'template' may not appear as a descendant of tag 'template (amp4email)'. (see https://amp.dev/documentation/components/amp-mustache)
+|            <div>
+|              <a href="https://somelink.com">{{blah}}</a>
+|            </div>
+|          </template>
+|        </amp-list>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <amp-list width="auto" height="100" layout="fixed-height"
+|    src="https://someserver.json">
+|    <template type="amp-mustache">
+|      <div>
+|        <amp-state src="https://someserver.json">
+>>       ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:62:6 The tag 'amp-state' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-bind/)
+|          <script type="application/json">{}</script>
+|        </amp-state>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <!--
+|    Nested xhrs is not allowed.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+|    src="https://someserver.json">
+|    <template type="amp-mustache">
+|      <div>
+|        <amp-list width="auto" height="100" layout="fixed-height"
+>>       ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:76:6 The tag 'amp-list' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list)
+|          src="https://someserver.json" template="1234">
+|        </amp-list>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <amp-list width="auto" height="100" layout="fixed-height"
+|    src="https://someserver.json">
+|    <template type="amp-mustache">
+|      <div>
+|        <amp-state id="123"
+>>       ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:87:6 The tag 'amp-state' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-bind/)
+|          src="https://someserver.json" template="1234">
+|          <script type="application/json">{}</script>
+|        </amp-state>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <template type="amp-mustache">
+|    <div>
+|      <amp-list width="auto" height="100" layout="fixed-height"
+>>     ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:97:4 The tag 'amp-list' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-list)
+|        src="https://someserver.json" template="1234">
+|      </amp-list>
+|    </div>
+|  </template>
+|
+|  <template type="amp-mustache">
+|    <div>
+|      <amp-state id="123"
+>>     ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:105:4 The tag 'amp-state' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-bind/)
+|        src="https://someserver.json" template="1234">
+|        <script type="application/json">{}</script>
+|      </amp-state>
+|    </div>
+|  </template>
+|
+|  <!--
+|  URLs cannot be empty.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:115:0 Missing URL for attribute 'src' in tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list)
+|    src="">
+|    <template type="amp-mustache">
+|      <div>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <amp-state src="">
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:123:0 The attribute 'src' may not appear in tag 'amp-state'. (see https://amp.dev/documentation/components/amp-bind/)
+|    <template type="amp-mustache">
+|      <div>
+|      </div>
+|    </template>
+|  </amp-state>
+|
+|  <!--
+|    The protocol can only be https.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:133:0 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list)
+|    src="http://somelink.com">
+|    <template type="amp-mustache">
+|      <div>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <amp-state id="123"
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:141:0 The attribute 'src' may not appear in tag 'amp-state'. (see https://amp.dev/documentation/components/amp-bind/)
+|    src="http://somelink.com">
+|    <template type="amp-mustache">
+|      <div>
+|      </div>
+|    </template>
+|  </amp-state>
+|
+|
+|  <!--
+|    src of amp-list is not bindable.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:153:0 The attribute '[src]' may not appear in tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list)
+|    [src]="evil">
+|    <template type="amp-mustache">
+|      <div>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <amp-state id="123" [src]="evil">
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:161:0 The attribute '[src]' may not appear in tag 'amp-state'. (see https://amp.dev/documentation/components/amp-bind/)
+|    <script type="application/json">{}</script>
+|  </amp-state>
+|
+|  <!--
+|    Mustache delimiters are disallowed in src.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:168:0 The relative URL 'foo{{bar' for attribute 'src' in tag 'amp-list' is disallowed. (see https://amp.dev/documentation/components/amp-list)
+|    src="foo{{bar">
+|    <template type="amp-mustache">
+|      <div>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <amp-list width="auto" height="100" layout="fixed-height"
+>> ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:176:0 The relative URL 'foo}}bar' for attribute 'src' in tag 'amp-list' is disallowed. (see https://amp.dev/documentation/components/amp-list)
+|    src="foo}}bar">
+|    <template type="amp-mustache">
+|      <div>
+|      </div>
+|    </template>
+|  </amp-list>
+|
+|  <!--
+|    Mustache variables cannot be concatenated in href.
+|  -->
+|  <amp-list width="auto" height="100" layout="fixed-height"
+|    src="https://someserver.json">
+|    <template type="amp-mustache">
+|      <a href="{{bar}}{{foo}}">disallowed</a>
+>>     ^~~~~~~~~
+amp4email_feature_tests/amp_list.html:190:4 The attribute 'href' in tag 'a' is set to the invalid value '{{bar}}{{foo}}'.
+|    </template>
+|  </amp-list>
+|
+|  </body>
+|  </html>

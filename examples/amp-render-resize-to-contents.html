@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>amp-render resizeToContents example</title>
+    <link rel="canonical" href="self.html" />
+    <meta name="viewport" content="width=device-width" />
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+    <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+    <style amp-custom>
+      .product {
+        margin: 12px;
+      }
+      .product .image-placeholder {
+        width: 150px;
+        height: 100px;
+        background-color: #999;
+      }
+      button {
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>amp-render resizeToContents example</h1>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis harum vitae rem repudiandae! Veniam quia perferendis sequi tenetur! Id velit tenetur enim obcaecati voluptatum animi beatae quibusdam provident minus temporibus!</p>
+    <amp-render
+      id="my-amp-render"
+      layout="fixed-height" height="130"
+      src="https://amp.dev/documentation/examples/api/slow-json-with-items?delay=2000"
+      [src]="srcUrl"
+      style="border:1px red solid;"
+    >
+      <template type="amp-mustache">
+        {{#items}}
+        <div class="product" tabindex="0">
+          <div>
+            <div>{{name}}</div>
+            <div>{{{stars}}}</div>
+            <div>${{price}}</div>
+          </div>
+        </div>
+        {{/items}}
+      </template>
+      <div placeholder>
+        <div class="product">
+          <div class="image-placeholder"></div>
+          <div>Loading...</div>
+        </div>
+      </div>
+    </amp-render>
+  <button on="tap:my-amp-render.resizeToContents()">Resize To Fit Contents</button>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis harum vitae rem repudiandae! Veniam quia perferendis sequi tenetur! Id velit tenetur enim obcaecati voluptatum animi beatae quibusdam provident minus temporibus!</p>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis harum vitae rem repudiandae! Veniam quia perferendis sequi tenetur! Id velit tenetur enim obcaecati voluptatum animi beatae quibusdam provident minus temporibus!</p>
+  </body>
+</html>

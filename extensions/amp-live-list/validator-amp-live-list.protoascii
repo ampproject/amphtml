@@ -1,0 +1,104 @@
+tags: {  # amp-live-list
+  html_format: AMP
+  tag_name: "SCRIPT"
+  mandatory_parent: "HEAD"
+  unique_warning: true
+  extension_spec: {
+    name: "amp-live-list"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-live-list>
+  html_format: AMP
+  tag_name: "AMP-LIVE-LIST"
+  requires_extension: "amp-live-list"
+  attrs: {
+    name: "data-max-items-per-page"
+    mandatory: true
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-poll-interval"
+    value_regex: "\\d{5,}"
+  }
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "sort"
+    value: "ascending"
+  }
+  attr_lists: "mandatory-id-attr"
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [update]"
+    mandatory: true
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [items]"
+    mandatory: true
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [pagination]"
+    unique: true
+  }
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: FIXED_HEIGHT
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-LIVE-LIST [update]"
+  descriptive_name : "amp-live-list [update] child"
+  attrs: {
+    name: "update"
+    mandatory: true
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-live-list/#update"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-LIVE-LIST [items]"
+  descriptive_name : "amp-live-list [items] child"
+  attrs: {
+    name: "items"
+    mandatory: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [items] item"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-live-list/#items"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-LIVE-LIST [pagination]"
+  descriptive_name : "amp-live-list [pagination] child"
+  attrs: {
+    name: "pagination"
+    mandatory: true
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-live-list/#pagination"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-LIVE-LIST [items] item"
+  descriptive_name : "amp-live-list [data-sort-time] child"
+  attrs: {
+    name: "data-sort-time"
+    mandatory: true
+  }
+  attrs: { name: "data-tombstone" }
+  attrs: { name: "data-update-time" }
+  attr_lists: "mandatory-id-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-live-list/#items"
+}

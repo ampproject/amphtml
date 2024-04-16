@@ -1,0 +1,101 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sample document</title>
+<link rel="canonical" href="./index.html">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<style amp-custom></style>
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "NewsArticle",
+    "headline": "Article headline",
+    "image": [
+    "thumbnail1.jpg"
+    ],
+    "datePublished": "2015-02-05T08:00:00+08:00"
+}
+</script>
+<script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+<script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- Test for native image element, it's not valid yet, but supported. -->
+  <img on="tap:ampimagelightbox"
+    role="button"
+    src="img/bigbuckbunny.jpg"
+    width="500"
+    height="500"
+    loading="lazy" />
+  <!--
+    - Test layout: intrinsic, fill, fixed, fixed-height, responsive
+  -->
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://amp.dev/static/samples/img/Border_Collie.jpg"
+    layout="intrinsic"
+    width="600"
+    height="491"></amp-img>
+
+  <div style="width:600px;height:491px;position:relative ">
+    <amp-img on="tap:ampimagelightbox"
+      role="button"
+      src="https://amp.dev/static/samples/img/Border_Collie.jpg"
+      layout="fill"
+      width="600"
+      height="491"></amp-img>
+  </div>
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://amp.dev/static/samples/img/Border_Collie.jpg"
+    layout="fixed"
+    width="600"
+    height="491"></amp-img>
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://amp.dev/static/samples/img/Border_Collie.jpg"
+    layout="fixed-height"
+    width="auto"
+    height="491"></amp-img>
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://amp.dev/static/samples/img/Border_Collie.jpg"
+    layout="responsive"
+    width="600"
+    height="491"></amp-img>
+
+    <amp-img on="tap:ampimagelightbox"
+      role="button"
+      src="https://amp.dev/static/samples/img/Border_Collie.jpg"
+      layout="flex-item"
+      width="600"
+      height="491"></amp-img>
+
+  <!--
+    - if image have fallback
+  -->
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://amp.dev/static/samples/img/Border_Collie.gif"
+    layout="responsive"
+    width="600"
+    height="491">
+    <amp-img on="tap:ampimagelightbox"
+      fallback
+      role="button"
+      src="https://amp.dev/static/samples/img/Border_Collie.jpg"
+      layout="responsive"
+      width="600"
+      height="491"></amp-img>
+  </amp-img>
+
+  <amp-image-lightbox id="ampimagelightbox" layout="nodisplay"></amp-image-lightbox>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!--
+  This is a dynamic file. It can be run statically, or can be generated for
+  multiple extensions through the server task.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-size: 14px;
+    }
+
+    [fallback] {
+      display: block;
+      /* @alternative */ display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
+
+    .optional-attrs-container label,
+    .dropdown-container select {
+      display: block;
+      width: 100%;
+      margin: 0 0 10px;
+    }
+
+    .dropdown-container,
+    .dropdown-container option,
+    .dropdown-container select,
+    .optional-attrs-container,
+    #analytics-events td {
+      font-family: Inconsolata, Menlo, monospace;
+      font-size: 14px;
+    }
+
+    #analytics-events {
+      width: 100%;
+    }
+
+    .dropdown-container select {
+      margin: 0 0 20px;
+    }
+
+    .main {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .main, h1, .wrap {
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .video-container {
+      flex: 1;
+    }
+
+    h1 {
+      font-weight: bold;
+      margin: 40px auto 20px;
+      font-size: 24px;
+    }
+    h2 {
+      font-weight: bold;
+      margin: 40px 0 20px;
+      font-size: 14px;
+      display: block;
+      flex: 0 0 100%;
+    }
+
+    aside {
+      margin-left: 20px;
+      min-width: 240px;
+    }
+
+    .analytics-events-container {
+      padding: 10px 0 20px;
+      background: #fafafa;
+      overflow: auto;
+      flex: 1;
+    }
+
+    td {
+      padding: 6px 10px 0 0;
+    }
+
+    .empty > td {
+      padding-top: 0;
+    }
+
+    button {
+      margin-right: 10px;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+
+  <amp-pixel src="https://donot.worry/?ct=VIDEO_STATE(my-video,currentTime)&r=TOTAL_ENGAGED_TIME&b=BACKGROUND_STATE"></amp-pixel>
+
+  <div style="display: flex; flex-direction: column; height: 100vh">
+    <div>
+      <h1>AMP Video Players</h1>
+      <div class="main">
+        <div class="video-container">
+          <amp-video
+              data-substitutable
+              data-removable-attrs="src"
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+              width="358"
+              height="204"
+              layout="responsive"
+              id="my-video"
+              controls>
+            <div placeholder>
+              This is a placeholder
+            </div>
+            <div fallback>
+              This is a fallback
+            </div>
+          </amp-video>
+        </div>
+        <aside>
+          <div class="dropdown-container"></div>
+          <div class="optional-attrs-container"></div>
+        </aside>
+        <h2>Actions</h2>
+        <button on="tap:my-video.play">Play</button>
+        <button on="tap:my-video.pause">Pause</button>
+        <button on="tap:my-video.mute">Mute</button>
+        <button on="tap:my-video.unmute">Unmute</button>
+        <button on="tap:my-video.fullscreen">Fullscreen</button>
+        <h2>Analytics Events</h2>
+        <table style="margin-bottom: 10px; width: 100%;">
+          <thead>
+            <tr>
+              <td width="100px">Time of Day</td>
+              <td width="80px">Autoplay</td>
+              <td>Type</td>
+              <td width="100px">Current Time</td>
+              <td width="50px">%</td>
+              <td width="100px">Played Total</td>
+              <td width="100px">Duration</td>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+    <div class="analytics-events-container">
+      <div class="main">
+        <table id="analytics-events">
+          <!-- Empty row hack to force widths in disjointed tables. -->
+          <tr class="empty">
+            <td width="100px"></td>
+            <td width="80px"></td>
+            <td></td>
+            <td width="100px"></td>
+            <td width="50px"></td>
+            <td width="100px"></td>
+            <td width="100px"></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "event": "https://foo.com/event?autoplay=${autoplay}&type=${eventType}&time=${currentTime}&total=${playedTotal}&duration=${duration}&myVar=${custom_myVar}&normalizedPercentage=${normalizedPercentage}"
+        },
+        "transport": {
+          "beacon": false,
+          "image": false,
+          "xhrpost": true
+        },
+        "triggers": {
+          "myVideoPlay": {
+            "on": "video-play",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-play"
+            }
+          },
+          "myVideoPause": {
+            "on": "video-pause",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-pause"
+            }
+          },
+          "myVideoSecondsPlayed": {
+            "on": "video-seconds-played",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-seconds-played"
+            },
+            "videoSpec": {
+              "interval": 2
+            },
+            "extraUrlParams": {
+              "currentTime": "VIDEO_STATE(my-video,currentTime)"
+            }
+          },
+          "myVideoSession": {
+            "on": "video-session",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-session"
+            }
+          },
+          "myVideoEnded": {
+            "on": "video-ended",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-ended"
+            }
+          },
+          "myVideoPercentagePlayed": {
+            "on": "video-percentage-played",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-percentage-played"
+            },
+            "videoSpec": {
+              "percentages": [25, 50, 75, 100]
+            }
+          },
+          "myVideoCustom": {
+            "on": "video-custom-foo",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-custom-foo"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+</body>
+</html>

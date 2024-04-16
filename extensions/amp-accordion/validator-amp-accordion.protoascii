@@ -1,0 +1,102 @@
+tags: {  # amp-accordion for websites
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-accordion 1.0"
+  excludes_condition: "amp-accordion 0.1"
+  extension_spec: {
+    name: "amp-accordion"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-accordion for ads
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-accordion 0.1"
+  excludes_condition: "amp-accordion 1.0"
+  extension_spec: {
+    name: "amp-accordion"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-accordion
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-accordion] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-accordion"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-accordion>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  tag_name: "AMP-ACCORDION"
+  requires_extension: "amp-accordion"
+  attrs: { name: "animate" value: "" }
+  attrs: {
+    # session-states are always disabled in AMP4EMAIL
+    disabled_by: "amp4email"
+    name: "disable-session-states"
+    value: ""
+  }
+  attrs: { name: "expand-single-section" value: "" }
+  attr_lists: "extended-amp-global"
+  child_tags: {
+    child_tag_name_oneof: "SECTION"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-accordion/"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+tags: {  # <amp-accordion> > <section>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  tag_name: "SECTION"
+  spec_name: "amp-accordion > section"
+  descriptive_name: "amp-accordion > section"
+  mandatory_parent: "AMP-ACCORDION"
+  attrs: {
+    # amp-access is disabled in AMP4EMAIL
+    disabled_by: "amp4email"
+    name: "access-hide"
+    value: ""
+  }
+  attrs: { name: "expanded" value: "" }
+  # amp-bind
+  attrs: { # binding to this attribute in 1.0 performs no action (see #33493)
+    name: "[data-expand]"
+  }
+  # amp-bind
+  attrs: {
+    # this attribute is used in 1.0 only
+    # this is disabled in AMP4EMAIL which only uses 0.1
+    disabled_by: "amp4email"
+    name: "[expanded]"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 2
+    first_child_tag_name_oneof: "H1"
+    first_child_tag_name_oneof: "H2"
+    first_child_tag_name_oneof: "H3"
+    first_child_tag_name_oneof: "H4"
+    first_child_tag_name_oneof: "H5"
+    first_child_tag_name_oneof: "H6"
+    first_child_tag_name_oneof: "HEADER"
+  }
+}

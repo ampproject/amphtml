@@ -1,0 +1,100 @@
+tags: {  # amp-iframe 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-iframe 1.0"
+  excludes_condition: "amp-iframe 0.1"
+  extension_spec: {
+    name: "amp-iframe"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-iframe 0.1 and latest
+  html_format: AMP  # Iframes not allowed in ads.
+  tag_name: "SCRIPT"
+  satisfies_condition: "amp-iframe 0.1"
+  excludes_condition: "amp-iframe 1.0"
+  extension_spec: {
+    name: "amp-iframe"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # <amp-iframe>
+  html_format: AMP  # Iframes not allowed in ads.
+  tag_name: "AMP-IFRAME"
+  requires_extension: "amp-iframe"
+  attrs: { name: "allow" }
+  attrs: {
+    name: "allowfullscreen"
+    value: ""
+  }
+  attrs: {
+    name: "allowpaymentrequest"
+    value: ""
+  }
+  attrs: {
+    name: "allowtransparency"
+    value: ""
+  }
+  attrs: {
+    name: "frameborder"
+    value: "0"
+    value: "1"
+  }
+  attrs: { name: "referrerpolicy" }
+  attrs: {
+    name: "resizable"
+    value: ""
+  }
+  attrs: { name: "sandbox" }
+  attrs: {
+    name: "scrolling"
+    value: "auto"
+    value: "no"
+    value: "yes"
+  }
+  attrs: {
+    name: "tabindex"
+    value_regex: "-?\\d+"
+  }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['src', 'srcdoc']"
+    value_url: {
+      protocol: "data"
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "srcdoc"
+    mandatory_oneof: "['src', 'srcdoc']"
+  }
+  # <amp-bind>
+  attrs: {
+    name: "[src]"
+    trigger: {
+      also_requires_attr: "src"
+    }
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

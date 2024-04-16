@@ -1,0 +1,140 @@
+
+
+
+amp-story-360 canvas {
+  position: absolute; /* fixes Safari bug */
+  width: 100% !important;
+  height: 100% !important;
+}
+
+amp-story-360 amp-img {
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-360-activate-button {
+  position: absolute !important;
+  bottom: 12px !important;
+  right: 12px !important;
+  background: rgba(0, 0, 0, .8) !important;
+  color: white !important;
+  outline: none !important;
+  border: none !important;
+  padding: 6px !important;
+  padding-left: 10px !important;
+  border-radius: 18px !important;
+  font-size: 12px !important;
+  font-family: 'Roboto', sans-serif !important;
+  display: flex !important;
+  align-items: center !important;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
+}
+
+.i-amphtml-story-360-activate-button-icon {
+  box-sizing: border-box !important;
+  margin-left: 5px !important;
+  font-size: 6px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border: 1px solid white !important;
+  border-radius: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-360-activate-button-icon-svg {
+  position: absolute !important;
+  width: calc(100% + 2px) !important;
+  height: calc(100% + 2px) !important;
+  left: -1px !important;
+  top: -1px !important;
+}
+
+[active] .i-amphtml-story-360-activate-button-icon-svg {
+  animation: rotate 1s 1s !important;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.i-amphtml-story-360-discovery {
+  pointer-events: none !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 66% !important;
+  perspective: 550px !important;
+  perspective-origin: center calc(100% - 145px) !important;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .9)) !important;
+  animation: fadeOut 1s 4s forwards ease-in-out !important;
+  z-index: 100000 !important;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.i-amphtml-story-360-discovery-animation {
+  position: absolute !important;
+  bottom: 95px !important;
+  left: calc(50% - 30px) !important;
+  width:  55px !important;
+  height: 100px !important;
+  border: 1px solid white !important;
+  border-radius: 10px !important;
+  animation: lookAround 4s !important;
+}
+
+.i-amphtml-story-360-discovery-animation:before {
+  content: "" !important;
+  position: absolute !important;
+  border-top: 1px solid white !important;
+  width: 10px !important;
+  top: 5px !important;
+  left: calc(50% - 5px) !important;
+}
+
+@keyframes lookAround {
+  0% {
+    animation-timing-function: ease-in-out;
+    transform: rotate3d(0, 0, 0, 0) translate3d(0, 0, 0);
+  }
+  25% {
+    animation-timing-function: ease-in-out;
+    transform: rotateY(45deg) rotateX(20deg) translate3d(-100px, 10px, 0);
+  }
+  50% {
+    animation-timing-function: ease-in-out;
+    transform:  rotateX(-40deg) translate3d(0, -50px, 0);
+  }
+  75% {
+    animation-timing-function: ease-in-out;
+    transform: rotateY(-45deg) rotateX(20deg) translate3d(100px, 10px, 0);
+  }
+  100% {
+    animation-timing-function: ease-in-out;
+    transform: rotate3d(0, 0, 0, 0) translate3d(0, 0, 0);
+  }
+}
+
+.i-amphtml-story-360-discovery-text {
+  font-family: 'Roboto', sans-serif !important;
+  position: absolute !important;
+  bottom: 40px !important;
+  width: 100% !important;
+  font-size: 16px !important;
+  text-align: center !important;
+  color: white !important;
+}

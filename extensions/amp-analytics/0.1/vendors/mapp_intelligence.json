@@ -1,0 +1,53 @@
+{
+  "vars": {
+    "actionName": "webtrekk_ignore",
+    "contentId": "${title}",
+    "mediaName": "${id}",
+    "everId": "${clientId(amp-wt3-eid)}",
+    "mediaEventName": "customMediaEvent",
+    "emptyValue": "",
+    "clientHints": false,
+    "uachModel": "$IF(${clientHints}, ${uach(model)}, ${emptyValue})",
+    "uachPlatform": "$IF(${clientHints}, ${uach(platform)}, ${emptyValue})",
+    "uachPlatformVersion": "$IF(${clientHints}, ${uach(platformVersion)}, ${emptyValue})"
+  },
+  "requests": {
+    "trackURL": "https://${trackDomain}/${trackId}/wt",
+    "basePrefix": "?p=440,${contentId},1,${screenWidth}x${screenHeight},${screenColorDepth},1,",
+    "baseSuffix": ",${documentReferrer},${viewportWidth}x${viewportHeight},0&tz=${timezone}&eid=${everId}&la=${browserLanguage}",
+    "parameterPrefix": "${basePrefix}${timestamp}${baseSuffix}",
+    "parameterSuffix": "&pu=${sourceUrl}${clientHintParams}&eor=1",
+    "uachModelValue": "$IF(${uachModel}, \"${uachModel}\", ${emptyValue})",
+    "uachPlatformValue": "$IF(${uachPlatform}, \"${uachPlatform}\", ${emptyValue})",
+    "uachPlatformVersionValue": "$IF(${uachPlatformVersion}, \"${uachPlatformVersion}\", ${emptyValue})",
+    "uachModelParam": "$IF(${uachModel}, X-WT-SEC-CH-UA-MODEL, ${emptyValue})",
+    "uachPlatformParam": "$IF(${uachPlatform}, X-WT-SEC-CH-UA-PLATFORM, ${emptyValue})",
+    "uachPlatformVersionParam": "$IF(${uachPlatformVersion}, X-WT-SEC-CH-UA-PLATFORM-VERSION, ${emptyValue})",
+    "clientHintParams": "&${uachModelParam}=${uachModelValue}&${uachPlatformParam}=${uachPlatformValue}&${uachPlatformVersionParam}=${uachPlatformVersionValue}",
+    "pageview": "${trackURL}${parameterPrefix}&${extraUrlParams}&cp570=${pageLoadTime}${parameterSuffix}",
+    "event": "${trackURL}${parameterPrefix}&ct=${actionName}&${extraUrlParams}${parameterSuffix}",
+    "scroll": "${trackURL}${parameterPrefix}&ct=${actionName}&ck540=${verticalScrollBoundary}${parameterSuffix}",
+    "mediaPrefix": "${trackURL}${basePrefix}${baseSuffix}&mi=${mediaName}",
+    "mediaSuffix": "&mt1=${currentTime}&mt2=${duration}&${extraUrlParams}${parameterSuffix}&x=${playedTotal}",
+    "mediaPlay": "${mediaPrefix}&mk=play${mediaSuffix}",
+    "mediaPause": "${mediaPrefix}&mk=pause${mediaSuffix}",
+    "mediaPosition": "${mediaPrefix}&mk=pos${mediaSuffix}",
+    "mediaEnded": "${mediaPrefix}&mk=eof${mediaSuffix}",
+    "mediaCustomEvent": "${mediaPrefix}&mk=${mediaEventName}${mediaSuffix}"
+  },
+  "extraUrlParamsReplaceMap": {
+    "pageParameter": "cp",
+    "contentGroup": "cg",
+    "actionParameter": "ck",
+    "sessionParameter": "cs",
+    "ecommerceParameter": "cb",
+    "urmCategory": "uc",
+    "campaignParameter": "cc",
+    "mediaCategory": "mg"
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

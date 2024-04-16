@@ -1,0 +1,45 @@
+tags: {  # amp-reddit
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-reddit"
+    version: "0.1"
+    version: "latest"
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-reddit>
+  html_format: AMP
+  tag_name: "AMP-REDDIT"
+  requires_extension: "amp-reddit"
+  attrs: {
+    name: "data-embedlive"
+    value_casei: "false"
+    value_casei: "true"
+  }
+  attrs: {
+    name: "data-embedparent"
+    value_casei: "false"
+    value_casei: "true"
+  }
+  attrs: {
+    name: "data-embedtype"
+    mandatory: true
+    value_casei: "comment"
+    value_casei: "post"
+  }
+  attrs: {
+    name: "data-src"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

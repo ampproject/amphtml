@@ -1,0 +1,10 @@
+amp-story-cta-layer {
+  display: block !important;
+  position: absolute !important;
+  top: 80% !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  margin: 0 !important;
+  z-index: 2147483642 !important;
+}

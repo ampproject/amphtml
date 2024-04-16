@@ -1,0 +1,178 @@
+/**
+ * Force the layout box of the ad iframe to be exactly as big as the actual
+ * iframe. The `amp-ad` tag itself can be freely styled.
+ */
+amp-ad iframe,
+amp-embed iframe {
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative;
+}
+
+.i-amphtml-ad-default-holder {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(200, 200, 200, 0.05);
+}
+
+.i-amphtml-ad-default-holder:after {
+  content: 'Ad';
+  content: attr(data-ad-holder-text);
+  background-color: transparent;
+  border-radius: 2px;
+  color: #696969;
+  font-size: 10px;
+  line-height: 1;
+  font-family: Arial, sans-serif;
+  padding: 3px 4px 1px;
+  border: 1px, solid, #696969;
+}
+
+amp-ad[sticky] {
+  visibility: hidden;
+  align-items: center;
+}
+
+amp-ad[type='adsense'],
+amp-ad[type='doubleclick'] {
+  direction: ltr;
+}
+
+amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'] > iframe,
+amp-ad[data-a4a-upgrade-type='amp-ad-network-adsense-impl'] > iframe {
+  min-height: 0;
+  min-width: 0;
+}
+
+amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid']
+  > iframe {
+  height: 100% !important;
+  width: 100% !important;
+  position: relative;
+}
+
+amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid'] {
+  width: 100% !important;
+}
+
+amp-ad .amp-ad-close-button {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  right: 0;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="#4F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>');
+  background-size: 13px 13px;
+  background-position: 9px center;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  box-shadow: 0 -1px 1px 0 rgba(0, 0, 0, 0.2);
+  border: none;
+  border-radius: 12px 0 0 0;
+}
+
+/* Increase tapping area of the dismiss button */
+amp-ad .amp-ad-close-button:before {
+  position: absolute;
+  content: '';
+  top: -20px;
+  right: 0;
+  left: -20px;
+  bottom: 0;
+}
+
+amp-ad[sticky='bottom'] .amp-ad-close-button,
+amp-ad[sticky='bottom-right'] .amp-ad-close-button,
+amp-ad[sticky='left'] .amp-ad-close-button,
+amp-ad[sticky='right'] .amp-ad-close-button {
+  top: -28px;
+}
+
+amp-ad[sticky='top'] .amp-ad-close-button {
+  transform: rotate(270deg);
+  bottom: -28px;
+}
+
+amp-ad[sticky='left'] .amp-ad-close-button {
+  transform: rotate(90deg);
+  left: 0;
+}
+
+[dir='rtl'] amp-ad .amp-ad-close-button {
+  right: auto;
+  left: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 12px;
+  background-position: 6px center;
+}
+
+[dir='rtl'] amp-ad .amp-ad-close-button:before {
+  right: -20px;
+  left: 0;
+}
+
+amp-ad[sticky] {
+  z-index: 2147483647;
+  position: fixed;
+  overflow: visible !important;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
+  display: flex;
+  flex-direction: column;
+}
+
+amp-ad[sticky='top'] {
+  width: 100% !important;
+  max-height: 20% !important;
+  background: #fff;
+  padding-bottom: 5px;
+  top: 0;
+}
+
+amp-ad[sticky='bottom'] {
+  max-width: 100%;
+  width: 100% !important;
+  max-height: 20% !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #fff;
+  bottom: 0;
+  padding-top: 4px;
+}
+
+amp-ad[sticky='bottom-right'] {
+  bottom: 0;
+  right: 0;
+}
+
+amp-ad[sticky='left'],
+amp-ad[sticky='right'] {
+  background: #fff;
+}
+
+amp-ad[sticky='left'] iframe,
+amp-ad[sticky='right'] iframe {
+  max-width: 120px !important;
+}
+
+amp-ad[sticky='left'] {
+  left: 0;
+}
+
+amp-ad[sticky='right'] {
+  right: 0;
+}
+
+/**
+  * Enforce no left/right sticky ads if not on a wide screen
+  */
+@media (max-width: 1024px) {
+  amp-ad[sticky='left'],
+  amp-ad[sticky='right'] {
+    display: none !important;
+  }
+}

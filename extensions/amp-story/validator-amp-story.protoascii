@@ -1,0 +1,1256 @@
+tags: {  # amp-story
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story"
+    version: "1.0"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story>
+  html_format: AMP
+  tag_name: "AMP-STORY"
+  requires_extension: "amp-story"
+  mandatory_parent: "BODY"
+  # Mandate that at least one of the children is an amp-story-page.
+  # TODO(gregable): This global requires/satisfies approach only works because
+  # there is only one <amp-story standalone> in a document. We really want this
+  # requirement to be expressed on the <amp-story> children, however.
+  requires_condition: "amp-story-page"
+  attrs: {
+    name: "background-audio"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "entity"
+  }
+  attrs: {
+    name: "entity-logo-src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "entity-url"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "poster-landscape-src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "poster-portrait-src"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "poster-square-src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "publisher"
+    mandatory: true
+  }
+  attrs: {
+    name: "publisher-logo-src"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "standalone"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "supports-landscape"
+    value: ""
+  }
+  attrs: {
+    name: "title"
+    mandatory: true
+  }
+  attrs: {
+    name: "live-story"
+    value: ""
+  }
+  attrs: {
+    name: "live-story-disabled"
+    value: ""
+  }
+  attrs: {
+    name: "desktop-aspect-ratio"
+    value_regex: "\\d+:\\d+"
+  }
+  siblings_disallowed: true
+  child_tags: {
+    mandatory_min_num_child_tags: 1
+    child_tag_name_oneof: "AMP-ANALYTICS"
+    child_tag_name_oneof: "AMP-CONSENT"
+    child_tag_name_oneof: "AMP-GEO"
+    child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-SIDEBAR"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ANALYTICS"
+    child_tag_name_oneof: "AMP-STORY-BOOKEND"
+    child_tag_name_oneof: "AMP-STORY-PAGE"
+    child_tag_name_oneof: "AMP-STORY-SOCIAL-SHARE"
+    child_tag_name_oneof: "AMP-STORY-SUBSCRIPTIONS"
+  }
+}
+tags: {  # <amp-story-page>
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY"
+  satisfies_condition: "amp-story-page"
+  attrs: { name: "auto-advance-after" }
+  attrs: {
+    name: "background-audio"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: { name: "next-page-no-ad" }
+  attr_lists: "mandatory-id-attr"
+  child_tags: {
+    child_tag_name_oneof: "AMP-ANALYTICS"
+    child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-ANIMATION"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ANALYTICS"
+    child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
+    child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
+    child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
+    child_tag_name_oneof: "AMP-STORY-PAGE-OUTLINK"
+    child_tag_name_oneof: "AMP-STORY-SHOPPING-ATTACHMENT"
+    mandatory_min_num_child_tags: 1
+  }
+}
+tags: {  # <amp-story-grid-layer>
+  html_format: AMP
+  tag_name: "AMP-STORY-GRID-LAYER"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  attrs: {
+    name: "anchor"
+    value_regex: "top|bottom|left|right|(top|bottom)[ -](left|right)|(left|right)[ -](top|bottom)"
+  }
+  attrs: {
+    name: "aspect-ratio"
+    value_regex: "\\d+:\\d+"
+  }
+  attrs: {
+    name: "position"
+    value: "landscape-half-left"
+    value: "landscape-half-right"
+  }
+  attrs: {
+    name: "preset"
+    value: "2021-background"
+    value: "2021-foreground"
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
+    value: "fill"
+    value: "horizontal"
+    value: "thirds"
+    value: "vertical"
+  }
+  descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER default"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-STORY-GRID-LAYER default"
+  descriptive_name: "amp-story-grid-layer child"
+  attrs: {
+    name: "align-content"
+    value: "center"
+    value: "end"
+    value: "space-around"
+    value: "space-between"
+    value: "space-evenly"
+    value: "start"
+    value: "stretch"
+  }
+  attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      protocol: "data"
+    }
+  }
+  attrs: {
+    name: "align-items"
+    value: "center"
+    value: "end"
+    value: "start"
+    value: "stretch"
+  }
+  attrs: {
+    name: "align-self"
+    value: "center"
+    value: "end"
+    value: "start"
+    value: "stretch"
+  }
+  attrs: {
+    name: "animate-in"
+    value: "drop"
+    value: "fade-in"
+    value: "fly-in-bottom"
+    value: "fly-in-left"
+    value: "fly-in-right"
+    value: "fly-in-top"
+    value: "pan-down"
+    value: "pan-left"
+    value: "pan-right"
+    value: "pan-up"
+    value: "pulse"
+    value: "rotate-in-left"
+    value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
+    value: "twirl-in"
+    value: "whoosh-in-left"
+    value: "whoosh-in-right"
+    value: "zoom-in"
+    value: "zoom-out"
+  }
+  attrs: { name: "animate-in-after" }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-timing-function" }
+  attrs: { name: "grid-area" }
+  attrs: {
+    name: "interactive"
+    value: ""
+  }
+  attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
+  attrs: {
+    name: "justify-content"
+    value: "center"
+    value: "end"
+    value: "space-around"
+    value: "space-between"
+    value: "space-evenly"
+    value: "start"
+    value: "stretch"
+  }
+  attrs: {
+    name: "justify-items"
+    value: "center"
+    value: "end"
+    value: "start"
+    value: "stretch"
+  }
+  attrs: {
+    name: "justify-self"
+    value: "center"
+    value: "end"
+    value: "start"
+    value: "stretch"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  descriptive_name: "amp-story-grid-layer [animate-in] child"
+  # Attribute grid-area is not allowed in this tag. That's what makes this
+  # reference point different than the grid-area reference point.
+  attrs: {
+    name: "animate-in"
+    value: "drop"
+    value: "fade-in"
+    value: "fly-in-bottom"
+    value: "fly-in-left"
+    value: "fly-in-right"
+    value: "fly-in-top"
+    value: "pan-down"
+    value: "pan-left"
+    value: "pan-right"
+    value: "pan-up"
+    value: "pulse"
+    value: "rotate-in-left"
+    value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
+    value: "twirl-in"
+    value: "whoosh-in-left"
+    value: "whoosh-in-right"
+    value: "zoom-in"
+    value: "zoom-out"
+  }
+  attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      protocol: "data"
+    }
+  }
+  attrs: { name: "animate-in-after" }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-timing-function" }
+  attrs: {
+    name: "interactive"
+    value: ""
+  }
+  attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
+}
+tags: {  # <amp-story-bookend>
+  html_format: AMP
+  tag_name: "AMP-STORY-BOOKEND"
+  mandatory_ancestor: "AMP-STORY"
+  mandatory_last_child: true
+  descendant_tag_list: "amp-story-bookend-allowed-descendants"
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+}
+descendant_tag_list: {
+  name: "amp-story-bookend-allowed-descendants"
+  tag: "SCRIPT"
+}
+tags: {  # amp-story-bookend (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-bookend extension .json script"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-BOOKEND"
+  unique: true
+  mandatory_last_child: true
+  siblings_disallowed: true
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+}
+tags: {  # <amp-story-social-share>
+  html_format: AMP
+  tag_name: "AMP-STORY-SOCIAL-SHARE"
+  mandatory_ancestor: "AMP-STORY"
+  mandatory_last_child: true
+  descendant_tag_list: "amp-story-social-share-allowed-descendants"
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+}
+descendant_tag_list: {
+  name: "amp-story-social-share-allowed-descendants"
+  tag: "SCRIPT"
+}
+tags: {  # amp-story-social-share (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-social-share extension .json script"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-SOCIAL-SHARE"
+  unique: true
+  mandatory_last_child: true
+  siblings_disallowed: true
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+}
+tags: {  # amp-story-consent (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-consent extension .json script"
+  requires_extension: "amp-consent"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-CONSENT"
+  unique: true
+  satisfies_condition: "amp-story-consent extension .json script"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # <amp-story-consent>
+  html_format: AMP
+  tag_name: "AMP-STORY-CONSENT"
+  requires_extension: "amp-consent"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-CONSENT"
+  requires_condition: "amp-story-consent extension .json script"
+  attr_lists: "mandatory-id-attr"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "SCRIPT"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # <amp-story-cta-layer>
+  html_format: AMP
+  tag_name: "AMP-STORY-CTA-LAYER"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  descendant_tag_list: "amp-story-cta-layer-allowed-descendants"
+  mandatory_last_child: true
+  reference_points: {
+    tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  }
+}
+tags: {  # amp-experiment (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-experiment story extension .json script"
+  mandatory_parent: "AMP-EXPERIMENT"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    max_bytes: 15000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment/#configuration"
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  descriptive_name: "amp-story-cta-layer [animate-in] child"
+  attrs: {
+    name: "animate-in"
+    value: "drop"
+    value: "fade-in"
+    value: "fly-in-bottom"
+    value: "fly-in-left"
+    value: "fly-in-right"
+    value: "fly-in-top"
+    value: "pan-down"
+    value: "pan-left"
+    value: "pan-right"
+    value: "pan-up"
+    value: "pulse"
+    value: "rotate-in-left"
+    value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
+    value: "twirl-in"
+    value: "whoosh-in-left"
+    value: "whoosh-in-right"
+    value: "zoom-in"
+    value: "zoom-out"
+  }
+  attrs: { name: "animate-in-after" }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-timing-function" }
+  attrs: {
+    name: "scale-end"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "scale-start"
+    value_regex: "[0-9]+([.][0-9]+)?"
+  }
+  attrs: {
+    name: "translate-x"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "translate-y"
+    value_regex_casei: "[0-9]+px"
+  }
+  attrs: {
+    name: "pan-scaling-factor"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
+}
+descendant_tag_list: {
+  name: "amp-story-cta-layer-allowed-descendants"
+  tag: "A"
+  tag: "ABBR"
+  tag: "ADDRESS"
+  tag: "AMP-CALL-TRACKING"
+  tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
+  tag: "AMP-FIT-TEXT"
+  tag: "AMP-FONT"
+  tag: "AMP-IMG"
+  tag: "AMP-TIMEAGO"
+  tag: "B"
+  tag: "BDI"
+  tag: "BDO"
+  tag: "BLOCKQUOTE"
+  tag: "BR"
+  tag: "BUTTON"
+  tag: "CAPTION"
+  tag: "CITE"
+  tag: "CIRCLE"
+  tag: "CLIPPATH"
+  tag: "CODE"
+  tag: "DATA"
+  tag: "DEFS"
+  tag: "DEL"
+  tag: "DESC"
+  tag: "DFN"
+  tag: "DIV"
+  tag: "ELLIPSE"
+  tag: "EM"
+  tag: "FECOLORMATRIX"
+  tag: "FECOMPOSITE"
+  tag: "FEBLEND"
+  tag: "FEFLOOD"
+  tag: "FEGAUSSIANBLUR"
+  tag: "FEMERGE"
+  tag: "FEMERGENODE"
+  tag: "FEOFFSET"
+  tag: "FIGCAPTION"
+  tag: "FIGURE"
+  tag: "FILTER"
+  tag: "FOOTER"
+  tag: "G"
+  tag: "GLYPH"
+  tag: "GLYPHREF"
+  tag: "H1"
+  tag: "H2"
+  tag: "H3"
+  tag: "H4"
+  tag: "H5"
+  tag: "H6"
+  tag: "HEADER"
+  tag: "HGROUP"
+  tag: "HKERN"
+  tag: "HR"
+  tag: "I"
+  tag: "IMG"  # Only allowed when document is transformed AMP
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
+  tag: "IMAGE"
+  tag: "INS"
+  tag: "KBD"
+  tag: "LI"
+  tag: "LINE"
+  tag: "LINEARGRADIENT"
+  tag: "MAIN"
+  tag: "MARKER"
+  tag: "MARK"
+  tag: "MASK"
+  tag: "METADATA"
+  tag: "NAV"
+  tag: "NOSCRIPT"
+  tag: "OL"
+  tag: "P"
+  tag: "PATH"
+  tag: "PATTERN"
+  tag: "PRE"
+  tag: "POLYGON"
+  tag: "POLYLINE"
+  tag: "RADIALGRADIENT"
+  tag: "Q"
+  tag: "RECT"
+  tag: "RP"
+  tag: "RT"
+  tag: "RTC"
+  tag: "RUBY"
+  tag: "S"
+  tag: "SAMP"
+  tag: "SECTION"
+  tag: "SMALL"
+  tag: "SOLIDCOLOR"
+  tag: "SPAN"
+  tag: "STOP"
+  tag: "STRONG"
+  tag: "SUB"
+  tag: "SUP"
+  tag: "SVG"
+  tag: "SWITCH"
+  tag: "SYMBOL"
+  tag: "TEXT"
+  tag: "TEXTPATH"
+  tag: "TREF"
+  tag: "TSPAN"
+  tag: "TITLE"
+  tag: "TIME"
+  tag: "TR"
+  tag: "U"
+  tag: "UL"
+  tag: "USE"
+  tag: "VAR"
+  tag: "VIEW"
+  tag: "VKERN"
+  tag: "WBR"
+}
+descendant_tag_list: {
+  name: "amp-story-grid-layer-allowed-descendants"
+  tag: "A" # `show-tooltip` attribute is allowlisted in validator-main.protoascii.
+  tag: "ABBR"
+  tag: "ADDRESS"
+  tag: "AMP-ANALYTICS"
+  tag: "AMP-AUDIO"
+  tag: "AMP-BODYMOVIN-ANIMATION"
+  tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
+  tag: "AMP-EXPERIMENT"
+  tag: "AMP-FIT-TEXT"
+  tag: "AMP-FONT"
+  tag: "AMP-GIST"
+  tag: "AMP-IMG"
+  tag: "AMP-INSTALL-SERVICEWORKER"
+  tag: "AMP-LIST"
+  tag: "AMP-LIVE-LIST"
+  tag: "AMP-PIXEL"
+  tag: "AMP-RENDER"
+  tag: "AMP-STATE"
+  tag: "AMP-STORY-360"
+  tag: "AMP-STORY-AUDIO-STICKER"
+  tag: "AMP-STORY-AUDIO-STICKER-PRETAP"
+  tag: "AMP-STORY-AUDIO-STICKER-POSTTAP"
+  tag: "AMP-STORY-AUTO-ANALYTICS"
+  tag: "AMP-STORY-CAPTIONS"
+  tag: "AMP-STORY-INTERACTIVE-BINARY-POLL"
+  tag: "AMP-STORY-INTERACTIVE-IMG-POLL"
+  tag: "AMP-STORY-INTERACTIVE-IMG-QUIZ"
+  tag: "AMP-STORY-INTERACTIVE-POLL"
+  tag: "AMP-STORY-INTERACTIVE-QUIZ"
+  tag: "AMP-STORY-INTERACTIVE-RESULTS"
+  tag: "AMP-STORY-INTERACTIVE-SLIDER"
+  tag: "AMP-STORY-PANNING-MEDIA"
+  tag: "AMP-STORY-SHOPPING-TAG"
+  tag: "AMP-TIMEAGO"
+  tag: "AMP-TWITTER"
+  tag: "AMP-VIDEO"
+  tag: "ARTICLE"
+  tag: "ASIDE"
+  tag: "B"
+  tag: "BDI"
+  tag: "BDO"
+  tag: "BLOCKQUOTE"
+  tag: "BR"
+  tag: "CAPTION"
+  tag: "CIRCLE"
+  tag: "CITE"
+  tag: "CLIPPATH"
+  tag: "CODE"
+  tag: "COL"
+  tag: "COLGROUP"
+  tag: "DATA"
+  tag: "DD"
+  tag: "DEFS"
+  tag: "DEL"
+  tag: "DESC"
+  tag: "DFN"
+  tag: "DIV"
+  tag: "DL"
+  tag: "DT"
+  tag: "ELLIPSE"
+  tag: "EM"
+  tag: "FECOLORMATRIX"
+  tag: "FECOMPOSITE"
+  tag: "FEBLEND"
+  tag: "FEFLOOD"
+  tag: "FEGAUSSIANBLUR"
+  tag: "FEMERGE"
+  tag: "FEMERGENODE"
+  tag: "FEOFFSET"
+  tag: "FIGCAPTION"
+  tag: "FIGURE"
+  tag: "FILTER"
+  tag: "FOOTER"
+  tag: "G"
+  tag: "GLYPH"
+  tag: "GLYPHREF"
+  tag: "H1"
+  tag: "H2"
+  tag: "H3"
+  tag: "H4"
+  tag: "H5"
+  tag: "H6"
+  tag: "HEADER"
+  tag: "HGROUP"
+  tag: "HKERN"
+  tag: "HR"
+  tag: "I"
+  tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
+  tag: "INS"
+  tag: "KBD"
+  tag: "LI"
+  tag: "LINE"
+  tag: "LINEARGRADIENT"
+  tag: "MAIN"
+  tag: "MARK"
+  tag: "MARKER"
+  tag: "MASK"
+  tag: "METADATA"
+  tag: "NAV"
+  tag: "NOSCRIPT"
+  tag: "OL"
+  tag: "P"
+  tag: "PATH"
+  tag: "PATTERN"
+  tag: "POLYGON"
+  tag: "POLYLINE"
+  tag: "PRE"
+  tag: "Q"
+  tag: "RADIALGRADIENT"
+  tag: "RECT"
+  tag: "RP"
+  tag: "RT"
+  tag: "RTC"
+  tag: "RUBY"
+  tag: "S"
+  tag: "SAMP"
+  tag: "SCRIPT"
+  tag: "SECTION"
+  tag: "SMALL"
+  tag: "SOLIDCOLOR"
+  tag: "SOURCE"
+  tag: "SPAN"
+  tag: "STOP"
+  tag: "STRONG"
+  tag: "SUB"
+  tag: "SUP"
+  tag: "SVG"
+  tag: "SWITCH"
+  tag: "SYMBOL"
+  tag: "TABLE"
+  tag: "TBODY"
+  tag: "TD"
+  tag: "TEMPLATE"
+  tag: "TEXT"
+  tag: "TEXTPATH"
+  tag: "TFOOT"
+  tag: "TH"
+  tag: "THEAD"
+  tag: "TIME"
+  tag: "TITLE"
+  tag: "TR"
+  tag: "TRACK"
+  tag: "TREF"
+  tag: "TSPAN"
+  tag: "U"
+  tag: "UL"
+  tag: "USE"
+  tag: "VAR"
+  tag: "VIEW"
+  tag: "VKERN"
+  tag: "WBR"
+}
+# <amp-story-page-attachment> with href.
+# Legacy version of <amp-story-page-outlink>.
+tags: {
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE-ATTACHMENT"
+  spec_name: "amp-story-page-attachment[href]"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_last_child: true
+  attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "theme"
+    value: "dark"
+    value: "light"
+  }
+  attrs: {
+    name: "title"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 0
+  }
+}
+tags: {  # <amp-story-page-attachment> with no href
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE-ATTACHMENT"
+  spec_name: "amp-story-page-attachment"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
+  mandatory_last_child: true
+  attrs: {
+    name: "cta-text"
+  }
+  attrs: {
+    name: "title"
+  }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "cta-image-2"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "theme"
+    value: "dark"
+    value: "light"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE-OUTLINK"
+  spec_name: "amp-story-page-outlink"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_last_child: true
+  attrs: {
+    name: "cta-accent-color"
+  }
+  attrs: {
+    name: "cta-accent-element"
+    value: "background"
+    value: "text"
+  }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "theme"
+    value: "custom"
+    value: "dark"
+    value: "light"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "A"
+  }
+}
+tags: {  # <amp-story-animation> <script>
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-animation json script"
+  mandatory_parent: "AMP-STORY-ANIMATION"
+  satisfies_condition: "amp-story-animation json script"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # <amp-story-animation>
+  # No amp_layout since this doesn't have a custom element implementation.
+  html_format: AMP
+  tag_name: "AMP-STORY-ANIMATION"
+  requires_extension: "amp-story"
+  requires_condition: "amp-story-animation json script"
+  mandatory_parent: "AMP-STORY-PAGE"
+  attrs: { name: "animate-in-after" }
+  attrs: {
+    name: "trigger"
+    value: "visibility"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "SCRIPT"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+# AMP Story metadata, name=amp-story-generator-name
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-story-generator-name"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-story-generator-name"
+  }
+}
+# AMP Story metadata, name=amp-story-generator-version
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-story-generator-version"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-story-generator-version"
+  }
+}
+descendant_tag_list {
+  # Allowlisting as many components as possible, unless they could result in a
+  # bad UX (ie: modal in a modal with amp-lightbox).
+  name: "amp-story-page-attachment-allowed-descendants"
+  tag: "A"
+  tag: "ABBR"
+  tag: "ADDRESS"
+  tag: "AMP-3D-GLTF"
+  tag: "AMP-3Q-PLAYER"
+  tag: "AMP-ACCORDION"
+  tag: "AMP-AUDIO"
+  tag: "AMP-BEOPINION"
+  tag: "AMP-BODYMOVIN-ANIMATION"
+  tag: "AMP-BRID-PLAYER"
+  tag: "AMP-BRIGHTCOVE"
+  tag: "AMP-BYSIDE-CONTENT"
+  tag: "AMP-CALL-TRACKING"
+  tag: "AMP-CAROUSEL"
+  tag: "AMP-DAILYMOTION"
+  tag: "AMP-DATE-COUNTDOWN"
+  tag: "AMP-DATE-DISPLAY"
+  tag: "AMP-EMBEDLY-CARD"
+  tag: "AMP-FACEBOOK"
+  tag: "AMP-FACEBOOK-COMMENTS"
+  tag: "AMP-FACEBOOK-LIKE"
+  tag: "AMP-FACEBOOK-PAGE"
+  tag: "AMP-FIT-TEXT"
+  tag: "AMP-FX-COLLECTION"
+  tag: "AMP-FX-FLYING-CARPET"
+  tag: "AMP-GFYCAT"
+  tag: "AMP-GIST"
+  tag: "AMP-GOOGLE-DOCUMENT-EMBED"
+  tag: "AMP-HULU"
+  tag: "AMP-IMA-VIDEO"
+  tag: "AMP-IMAGE-SLIDER"
+  tag: "AMP-IMG"
+  tag: "AMP-IMGUR"
+  tag: "AMP-INSTAGRAM"
+  tag: "AMP-IZLESENE"
+  tag: "AMP-JWPLAYER"
+  tag: "AMP-KALTURA-PLAYER"
+  tag: "AMP-LIST"
+  tag: "AMP-LIVE-LIST"
+  tag: "AMP-MATHML"
+  tag: "AMP-MEGAPHONE"
+  tag: "AMP-MOWPLAYER"
+  tag: "AMP-NEXXTV-PLAYER"
+  tag: "AMP-O2-PLAYER"
+  tag: "AMP-OOYALA-PLAYER"
+  tag: "AMP-PAN-ZOOM"
+  tag: "AMP-PINTEREST"
+  tag: "AMP-PLAYBUZZ"
+  tag: "AMP-POWR-PLAYER"
+  tag: "AMP-REACH-PLAYER"
+  tag: "AMP-REDDIT"
+  tag: "AMP-RENDER"
+  tag: "AMP-RIDDLE-QUIZ"
+  tag: "AMP-SOUNDCLOUD"
+  tag: "AMP-SELECTOR"
+  tag: "AMP-SPRINGBOARD-PLAYER"
+  tag: "AMP-TIMEAGO"
+  tag: "AMP-TWITTER"
+  tag: "AMP-VIDEO"
+  tag: "AMP-VIDEO-IFRAME"
+  tag: "AMP-VIMEO"
+  tag: "AMP-VINE"
+  tag: "AMP-VIQEO-PLAYER"
+  tag: "AMP-VK"
+  tag: "AMP-WISTIA-PLAYER"
+  tag: "AMP-YOTPO"
+  tag: "AMP-YOUTUBE"
+  tag: "ARTICLE"
+  tag: "ASIDE"
+  tag: "B"
+  tag: "BDI"
+  tag: "BDO"
+  tag: "BLOCKQUOTE"
+  tag: "BR"
+  tag: "BUTTON"
+  tag: "CAPTION"
+  tag: "CIRCLE"
+  tag: "CITE"
+  tag: "CLIPPATH"
+  tag: "CODE"
+  tag: "COL"
+  tag: "COLGROUP"
+  tag: "DATA"
+  tag: "DATALIST"
+  tag: "DD"
+  tag: "DEFS"
+  tag: "DEL"
+  tag: "DESC"
+  tag: "DFN"
+  tag: "DIV"
+  tag: "DL"
+  tag: "DT"
+  tag: "ELLIPSE"
+  tag: "EM"
+  tag: "FECOLORMATRIX"
+  tag: "FECOMPOSITE"
+  tag: "FEBLEND"
+  tag: "FEFLOOD"
+  tag: "FEGAUSSIANBLUR"
+  tag: "FEMERGE"
+  tag: "FEMERGENODE"
+  tag: "FEOFFSET"
+  tag: "FIGCAPTION"
+  tag: "FIELDSET"
+  tag: "FIGURE"
+  tag: "FILTER"
+  tag: "FORM"
+  tag: "FOOTER"
+  tag: "G"
+  tag: "GLYPH"
+  tag: "GLYPHREF"
+  tag: "H1"
+  tag: "H2"
+  tag: "H3"
+  tag: "H4"
+  tag: "H5"
+  tag: "H6"
+  tag: "HEADER"
+  tag: "HGROUP"
+  tag: "HKERN"
+  tag: "HR"
+  tag: "I"
+  tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
+  tag: "INPUT"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
+  tag: "INS"
+  tag: "KBD"
+  tag: "LABEL"
+  tag: "LEGEND"
+  tag: "LI"
+  tag: "LINE"
+  tag: "LINEARGRADIENT"
+  tag: "MAIN"
+  tag: "MARK"
+  tag: "MARKER"
+  tag: "MASK"
+  tag: "METADATA"
+  tag: "METER"
+  tag: "NAV"
+  tag: "OL"
+  tag: "OPTGROUP"
+  tag: "OPTION"
+  tag: "OUTPUT"
+  tag: "P"
+  tag: "PATH"
+  tag: "PATTERN"
+  tag: "POLYGON"
+  tag: "POLYLINE"
+  tag: "PRE"
+  tag: "PROGRESS"
+  tag: "Q"
+  tag: "RADIALGRADIENT"
+  tag: "RECT"
+  tag: "RP"
+  tag: "RT"
+  tag: "RTC"
+  tag: "RUBY"
+  tag: "S"
+  tag: "SAMP"
+  tag: "SECTION"
+  tag: "SELECT"
+  tag: "SMALL"
+  tag: "SOLIDCOLOR"
+  tag: "SOURCE"
+  tag: "SPAN"
+  tag: "STOP"
+  tag: "STRONG"
+  tag: "SUB"
+  tag: "SUP"
+  tag: "SVG"
+  tag: "SWITCH"
+  tag: "SYMBOL"
+  tag: "TABLE"
+  tag: "TBODY"
+  tag: "TD"
+  tag: "TEMPLATE"
+  tag: "TEXT"
+  tag: "TEXTAREA"
+  tag: "TEXTPATH"
+  tag: "TFOOT"
+  tag: "TH"
+  tag: "THEAD"
+  tag: "TIME"
+  tag: "TITLE"
+  tag: "TR"
+  tag: "TRACK"
+  tag: "TREF"
+  tag: "TSPAN"
+  tag: "U"
+  tag: "UL"
+  tag: "USE"
+  tag: "VAR"
+  tag: "VIEW"
+  tag: "VKERN"
+  tag: "WBR"
+}

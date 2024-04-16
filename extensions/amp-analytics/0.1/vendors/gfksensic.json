@@ -1,0 +1,34 @@
+{
+  "requestOrigin": "https://pixel.${regionID}-config${environment}.sensic.net",
+  "requests": {
+    "base": "/tp?m=${mediaID}&v=${v}&t=s2s-amp",
+    "page_params": "r=${r}&ua=${ua}&l=${l}",
+    "user_params": "optin=${optin}&gdpr=1&gdpr_consent=${consentString}",
+    "streaming_params": "c=${contentID}&ut=${ut}&pr=${pr}&rn=${rn}&vt=${vt}&sp=${sp}&st=${st}",
+    "impression_params": "c=${contentID}&pr=RANDOM",
+    "custom_params": "",
+    "audio-play": "${base}&ty=PL&${streaming_params}&sn=COUNTER(play_${pr})&${custom_params}&${user_params}&${page_params}",
+    "audio-stop": "${base}&ty=ST&${streaming_params}&sn=COUNTER(stop_${pr})",
+    "impression": "${base}&ty=IM&${impression_params}&${custom_params}&${user_params}&${page_params}"
+  },
+  "vars": {
+    "contentID": "default",
+    "v": "1.0.0",
+    "r": "${ampdocHost}",
+    "ut": "${timestamp}",
+    "ua": "${userAgent}",
+    "l": "${browserLanguage}",
+    "pr": "${pageViewId}${streamID}",
+    "rn": "${requestCount}",
+    "vt": "1",
+    "sp": "-1",
+    "st": "${ut}",
+    "environment": "",
+    "optin": ""
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

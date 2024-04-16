@@ -1,0 +1,43 @@
+
+
+.i-amphtml-fit-text-content,
+.i-amphtml-fit-text-content.i-amphtml-fill-content {
+  display: block;
+  /* @alternative */
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.i-amphtml-fit-text-content {
+  z-index: 2 !important;
+  visibility: hidden !important; /* overridden to visible in layoutCallback */
+}
+
+.i-amphtml-fit-text-content-wrapper {
+  /* WARNING: when updating line-height ensure you also update its value in amp-fit-text.js */
+  line-height: 1.15em !important;
+}
+
+/* We have to use the old-style flex box with line clamping. It will only
+   work in WebKit, but unfortunately there's no alternative. */
+.i-amphtml-fit-text-content-overflown {
+  display: block;
+  /* @alternative */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Note: measurer cannot be styled with "bottom:0" */
+.i-amphtml-fit-text-measurer {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1 !important;
+  visibility: hidden !important;
+
+  /* WARNING: when updating line-height ensure you also update its value in amp-fit-text.js */
+  line-height: 1.15em !important;
+}

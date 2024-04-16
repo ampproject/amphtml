@@ -1,0 +1,303 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="description" content="This is an interactive story with quizzes.">
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-story-1.0.js">
+    <link rel="preconnect dns-prefetch" href="https://fonts.gstatic.com/" crossorigin>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+    <!-- Import other AMP Extensions here -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <style amp-custom>
+    /* Add your styles here */
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: white;
+    }
+
+    .best {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.8em;
+      width: 22em;
+    }
+
+    .best.red {
+      --interactive-accent-color: red;
+      font-size: 0.23em;
+    }
+
+    .center-quiz {
+      position: relative;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    amp-story-grid-layer[aspect-ratio] .announcement, amp-story-grid-layer[aspect-ratio] .announcement-2 {
+      font-size: 0.2em;
+    }
+
+    .announcement {
+      color: black;
+      background-color: white;
+      font-size: .6em;
+      position: absolute;
+      top: 15%;
+      left: 70%;
+      width: 30%;
+      height: 10%;
+      transform: translateX(-50%);
+      padding: 2%;
+      text-align: center;
+      z-index: -1;
+    }
+
+    .circle-bottom {
+      position: absolute;
+      top: 75%;
+      left: 20%;
+      transform: translate(-50%, -50%);
+      width: 13%;
+      height: 8%;
+      background: black;
+      border-radius: 50%;
+      z-index: -1;
+    }
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <link rel="canonical" href=".">
+    <title>Name that artist</title>
+  </head>
+  <body>
+    <amp-story standalone
+      publisher="Stories Format"
+      title="Name that artist"
+      poster-portrait-src="./last_supper.jpg"
+      publisher-logo-src="https://amp.dev/static/img/icons/icon-512x512.png">
+      <amp-story-page id="quiz-1">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="center-quiz">
+            <div class="circle-bottom"></div>
+            <amp-story-interactive-quiz
+              class="best"
+              id="quiz-1"
+              prompt-text="Who was the artist that created the famous painting &quot;The Last Supper&quot;?"
+              theme="dark"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response2.json"
+              option-1-text="Michelangelo"
+              option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
+              option-3-text="Raphael"
+              option-4-text="Sandro Boticelli">
+            </amp-story-interactive-quiz>
+            <div class="announcement">
+              This grid-layer doesn't have aspect-ratio
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-2">
+        <amp-story-grid-layer template="vertical">
+          <amp-img
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="412:618">
+            <div class="center-quiz">
+              <div class="circle-bottom"></div>
+              <amp-story-interactive-quiz
+              class="best red"
+              id="quiz-2"
+              prompt-text="Who was the artist that created the famous painting &quot;The Last Supper&quot;?"
+              theme="dark"
+              chip-style="shadow"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response2.json"
+              option-1-text="Michelangelo"
+              option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
+              option-3-text="Raphael"
+              option-4-text="Sandro Boticelli">
+            </amp-story-interactive-quiz>
+            <div class="announcement">
+              This grid-layer has aspect-ratio
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="poll-1">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="center-quiz">
+            <div class="circle-bottom"></div>
+            <amp-story-interactive-poll
+              class="best"
+              id="poll-1"
+              prompt-text="Who was the artist that created the famous painting &quot;The Last Supper&quot;?"
+              theme="dark"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response2.json"
+              option-1-text="Michelangelo"
+              option-2-text="Leonardo da Vinci" option-2-confetti="🎨"
+              option-3-text="Raphael"
+              option-4-text="Sandro Boticelli">
+            </amp-story-interactive-poll>
+            <div class="announcement">
+              This grid-layer doesn't have aspect-ratio
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="poll-2">
+        <amp-story-grid-layer template="vertical">
+          <amp-img
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="412:618">
+            <div class="center-quiz">
+              <div class="circle-bottom"></div>
+              <amp-story-interactive-poll
+              class="best red"
+              id="poll-2"
+              prompt-text="Who was the artist that created the famous painting &quot;The Last Supper&quot;?"
+              theme="dark"
+              chip-style="shadow"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response2.json"
+              option-1-text="Michelangelo"
+              option-2-text="Leonardo da Vinci" option-2-confetti="🎨"
+              option-3-text="Raphael"
+              option-4-text="Sandro Boticelli">
+            </amp-story-interactive-poll>
+            <div class="announcement">
+              This grid-layer has aspect-ratio
+            </div>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="binary-poll-1">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div class="center-quiz">
+            <div class="circle-bottom"></div>
+            <amp-story-interactive-binary-poll
+              class="best"
+              id="binary-poll-1"
+              prompt-text="Who was the artist that created the famous painting &quot;The Last Supper&quot;?"
+              theme="dark"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response2.json"
+              option-1-text="😁"
+              option-2-text="😒">
+            </amp-story-interactive-binary-poll>
+            <div class="announcement">
+              This grid-layer doesn't have aspect-ratio
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="binary-poll-2">
+        <amp-story-grid-layer template="vertical">
+          <amp-img
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="412:618">
+            <div class="center-quiz">
+              <div class="circle-bottom"></div>
+              <amp-story-interactive-binary-poll
+              class="best red"
+              id="binary-poll-2"
+              prompt-text="Who was the artist that created the famous painting &quot;The Last Supper&quot;?"
+              theme="dark"
+              chip-style="shadow"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/response2.json"
+              option-1-text="yes"
+              option-2-text="no" option-2-confetti="🎨">
+            </amp-story-interactive-binary-poll>
+            <div class="announcement">
+              This grid-layer has aspect-ratio
+            </div>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="results-1">
+        <amp-story-grid-layer template="vertical">
+          <amp-img
+            animate-in="zoom-in"
+            animate-in-duration="30s"
+            scale-start="1"
+            scale-end="1.3"
+            object-position="50% 50%"
+            layout="fixed" width="1600" height="1200"
+            src="https://images.unsplash.com/photo-1548940740-204726a19be3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1235&q=80"/>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" aspect-ratio="412:618">
+            <div class="center-quiz">
+              <div class="circle-bottom"></div>
+              <amp-story-interactive-results
+              class="best red"
+              style="--interactive-accent-color: #F34E4E"
+              prompt-text="You are"
+              option-1-results-category="Art Expert" option-1-text="You got it all! Your knowledge in art is impeccable, be proud of it" option-1-image="https://images.unsplash.com/photo-1441471349424-351990746ff4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=200&q=80"
+              option-1-results-threshold="0"
+              option-2-results-category="Art Enthusiast">
+            </amp-story-interactive-results>
+            <div class="announcement">
+              This grid-layer has aspect-ratio
+            </div>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

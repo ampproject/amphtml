@@ -1,0 +1,51 @@
+<!--
+  Test Description:
+  Tests support for the amp-nested-menu tag.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+</head>
+<body>
+  <!-- Invalid: nested menu must be inside sidebar -->
+  <amp-nested-menu layout="fill"></amp-nested-menu>
+  <amp-sidebar layout="nodisplay">
+    <!-- Invalid: incorrect side value -->
+    <amp-nested-menu layout="fill" side="center">
+      <!-- Invalid: no element can include more than one submenu attributes -->
+      <div>
+        <h4 amp-nested-submenu-open amp-nested-submenu-close></h4>
+        <div amp-nested-submenu amp-nested-submenu-close></div>
+        <div amp-nested-submenu amp-nested-submenu-open></div>
+      </div>
+      <!-- Invalid: only divs may include the amp-nested-submenu attribute -->
+      <div>
+        <span amp-nested-submenu></span>
+        <button amp-nested-submenu></button>
+      </div>
+      <!-- Invalid: only buttons, divs, spans and h2-h6 may have submenu open/close attribute -->
+      <div>
+        <a amp-nested-submenu-open></a>
+        <h1 amp-nested-submenu-close></h1>
+      </div>
+      <!-- Invalid: submenus cannot be inside an amp-accordion -->
+      <amp-accordion>
+        <section>
+          <h4>accordion header</h4>
+          <div>
+            <h4 amp-nested-submenu-open></h4>
+            <div amp-nested-submenu></div>
+          </div>
+        </section>
+      </amp-accordion>
+    </amp-nested-menu>
+  </amp-sidebar>
+</body>
+</html>

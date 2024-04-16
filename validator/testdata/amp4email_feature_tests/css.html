@@ -1,0 +1,33 @@
+<!--
+  Test Description:
+  Tests the CSS restrictions that exist for AMP4Email.
+-->
+<!doctype html>
+<html ⚡4email>
+<head>
+  <meta charset="utf-8">
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    /* media queries are allowed */
+    @media screen {}
+
+    /* all other @ rules are banned */
+    @supports (display: flex) {}
+    @font-face {}
+    @keyframes slidein {}
+    @invalid {}
+
+    /* Unless data-css-strict is specified, there are no rules specified on selelectors. */
+    .a[otherwisevalid] {}
+    .a:otherwiseinvalid {}
+    .a::otherwiseinvalid {}
+
+    /* And vendor-prefixes are automatically expanded and allowed */
+    .a { -webkit-margin: 1px; }
+  </style>
+</head>
+<body>
+Test body.
+</body>
+</html>

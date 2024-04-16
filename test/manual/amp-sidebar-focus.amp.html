@@ -1,0 +1,148 @@
+<!doctype html>
+<html amp lang="en">
+<head>
+	<!-- CHARSET -->
+	<meta charset="UTF-8">
+
+	<!-- JS AMP -->
+	<script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+	<script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+	<script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+	<script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+	<script async src="https://cdn.ampproject.org/v0.js"></script>
+
+	<title>Sidebar Focus Test Page</title>
+
+	<!-- VIEWPORT -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+	<!-- LINK -->
+	<link rel="canonical" href="https://codepen.io/cathyxz/pen/bMNXPO" />
+
+	<!-- STYLE -->
+	<style amp-custom>
+		*, *:before, *:after {
+			position: relative;
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+			font-family: "Verdana", Geneva, sans-serif;
+		}
+		html {
+			color: #4D4D4D;
+			font-size: 16px;
+			background-color: #FFF;
+		}
+		body {
+			padding-top: 70px;
+		}
+		a {
+			color: #4282A6;
+			text-decoration: none;
+			-webkit-transition: all ease .3s;
+			transition: all ease .3s;
+		}
+		a:hover {
+			color: #2C5770;
+		}
+		.slct label {
+			position: absolute;
+			top: 7px;
+			left: 17px;
+			font-size: 12px;
+			color: #949494;
+			z-index: 2;
+			pointer-events: none;
+		}
+		.slct select {
+			font-size: 14px;
+			outline: 0;
+			height: 40px;
+			color: #4D4D4D;
+			padding: 0 25px 0 10px;
+			border: 1px solid #CCC;
+			background-color: #FFF;
+			-webkit-border-radius: 5px;
+			border-radius: 5px;
+			-webkit-appearance: none;
+			appearance: none;
+		}
+		.slct-arrow {
+			position: absolute;
+			top: 50%;
+			right: 10px;
+			margin-top: -2px;
+			border-left: 5px solid transparent;
+			border-right: 5px solid transparent;
+			border-top: 6px solid #009def;
+			margin-left: 5px;
+			pointer-events: none;
+      -webkit-transition: all ease .5s;
+      transition: transform ease .5s;
+		}
+		.slct select:focus ~ .slct-arrow {
+			-webkit-transform: rotate( -180deg );
+			transform: rotate( -180deg );
+
+		}
+	</style>
+	<style amp-boilerplate>
+		body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+	</style>
+	<noscript>
+	<style amp-boilerplate>
+	body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}
+</style>
+</noscript>
+</head>
+<body>
+	<!-- AMP Sidebars -->
+	<amp-sidebar id="new-search" layout="nodisplay" side="left">
+		<div>
+			<div role="button" tabindex="0" on="tap:new-search.close"></div>
+			<div>
+				<div class="slct">
+					<label for="option"></label>
+					<select name="option" id="option">
+						<option disabled selected>Select an option</option>
+						<option value="1">Option 1</option>
+						<option value="2">Option 2</option>
+						<option value="3">Option 3</option>
+						<option value="5">Option 4</option>
+						<option value="6">Option 5</option>
+						<option value="7">Option 6</option>
+						<option value="8">Option 7</option>
+						<option value="9">Option 8</option>
+					</select>
+					<span class="slct-arrow"></span>
+				</div>
+			</div>
+			<br/>
+      <div class="slct">
+					<label for="option"></label>
+					<select name="option" id="option">
+						<option disabled selected>Select an option</option>
+						<option value="1">Option 1</option>
+						<option value="2">Option 2</option>
+						<option value="3">Option 3</option>
+						<option value="5">Option 4</option>
+						<option value="6">Option 5</option>
+						<option value="7">Option 6</option>
+						<option value="8">Option 7</option>
+						<option value="9">Option 8</option>
+					</select>
+					<span class="slct-arrow"></span>
+				</div>
+			</div>
+		</div>
+	</amp-sidebar>
+	<!-- END AMP Sidebars -->
+	<div>
+		<div>
+			<div>
+				<div>
+					<a role="button" tabindex="0" on="tap:new-search.open"><span>Open Sidebar</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

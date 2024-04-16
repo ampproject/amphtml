@@ -1,0 +1,160 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>amp-position-observer</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+  <style amp-custom>
+    main {
+      font-family: Helvetica, sans-serif;
+      padding: 10px;
+      max-width: 412px;
+      margin: auto;
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: normal;
+    }
+
+    amp-img img {
+      object-fit: cover;
+    }
+
+    .clock-hand {
+      position: absolute;
+      width: 2vw;
+      height: 20vw;
+      max-height: 90px;
+      max-width: 10px;
+      top: 50%;
+      left: 50%;
+      z-index: 2;
+      background: #FAFAFA;
+      transform-origin: 50% 0%;
+      border-radius: 10px;
+      transform: rotate(-180deg)
+    }
+
+    .spacer {
+      height: 70vh;
+      width: 100%;
+      background-image: -webkit-linear-gradient(#EEE 50%, white 50%);
+      background-image: linear-gradient(#EEE 50%, white 50%);
+      background-size: 100% 3em;
+    }
+
+    pre {
+      display: inline;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+  <amp-animation id="clockAnim1" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#clock-scene-1 .clock-hand",
+          "keyframes": [
+            { "transform": "rotate(-180deg)" },
+            { "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+
+  <amp-animation id="clockAnim2" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "6s",
+      "fill": "both",
+      "iterations": "infinity",
+      "animations": [
+        {
+          "selector": "#clock-scene-2 .clock-hand",
+          "keyframes": [
+            { "transform": "rotate(-180deg)" },
+            { "transform": "rotate(180deg)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <main>
+    <div class="spacer"></div>
+
+    <h2>Scrollbound animations with amp-position-observer and amp-animation</h2>
+    <h3>The following animation does one round (12pm-6pm) via scrolling when fully visible between the middle 80% of the viewport</h3>
+
+    <div id="clock-scene-1" class="clock-scene">
+      <amp-position-observer
+        intersection-ratios="1"
+        viewport-margins="10vh"
+        on="scroll:clockAnim1.seekTo(percent=event.percent)"
+        layout="nodisplay">
+      </amp-position-observer>
+
+      <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+        <div class="clock-hand"></div>
+      </amp-img>
+    </div>
+
+    <div class="spacer"></div>
+
+    <h2>Custom visibility start-end with amp-position-observer and amp-animation</h2>
+    <h3>The following animation will start when the scene is 50% visible and pauses when 50% invisible</h3>
+
+    <div id="clock-scene-2" class="clock-scene">
+      <amp-position-observer
+        intersection-ratios="0.5"
+        on="enter:clockAnim2.start;exit:clockAnim2.pause"
+        layout="nodisplay">
+      </amp-position-observer>
+
+      <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+        <div class="clock-hand"></div>
+      </amp-img>
+    </div>
+
+    <div class="spacer"></div>
+    <h2>Custom visibility end with amp-position-observer and amp-video</h2>
+    <h3>If played, the following video will pause when 20% invisible</h3>
+    <div>
+      <amp-position-observer
+        intersection-ratios="0.8"
+        on="exit:myVideo.pause"
+        layout="nodisplay">
+      </amp-position-observer>
+
+      <amp-video
+        id=myVideo
+        title="Big Buck Bunny"
+        artist="Blender Foundation"
+        poster="img/bigbuckbunny.jpg"
+        album="The Peach Open Movie Project"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        width="720"
+        height="405"
+        layout="responsive"
+        controls>
+    </amp-video>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,25 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This test contains the old, opacity-based boilerplate in the
+|    javascript-enabled version, but the new one inside noscript. This is
+|    not allowed.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style>body {opacity: 0}</style>
+>>   ^~~~~~~~~
+feature_tests/new_and_old_boilerplate_mixed2.html:13:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/new_and_old_boilerplate_mixed2.html:20:6 The tag 'style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

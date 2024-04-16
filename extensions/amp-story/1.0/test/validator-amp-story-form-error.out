@@ -1,0 +1,74 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the form tag within page attachments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <title>My Story</title>
+|    <meta name="description" content="Get started with amp-story">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link rel="canonical" href="grid-layer-templates.html">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|  </head>
+|  <body>
+|    <amp-story standalone title="Title" publisher="AMP" publisher-logo-src="http://example.com/foo.png" poster-portrait-src="http://example.com/foo.png">
+|      <amp-story-page id="story-page-id">
+|        <amp-story-grid-layer aspect-ratio="9:16" template="vertical">
+|          <!-- Form elements are only allowed within page attachments. -->
+|          <!-- The URL value for action-xhr is missing. -->
+|          <form
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:25:8 The tag 'form' may not appear as a descendant of tag 'amp-story-grid-layer'. (see https://amp.dev/documentation/components/amp-form)
+|            method="POST"
+|            target="_top"
+|            action-xhr="www.example.com"
+|          >
+|            <!-- Input elements cannot be included within invalid form elements. -->
+|            <input type="text">
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:31:10 The parent tag of tag 'input' is 'form', but it can only be 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:31:10 The tag 'input' requires including the 'amp-autocomplete' extension JavaScript. (see https://amp.dev/documentation/components/amp-autocomplete)
+|          </form>
+|        </amp-story-grid-layer>
+|        <amp-story-page-attachment layout="nodisplay" title="Page attachment title">
+|          <!-- oninput is not allowed as an AMP form attribute. -->
+|          <form
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:36:8 The attribute 'oninput' may not appear in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
+|            method="GET"
+|            target="_top"
+|            oninput="myFunction()"
+|          >
+|            <!-- Most of the form-related attributes on inputs, such as formaction, are not allowed. -->
+|            <input type="text" formaction="myFunction()">
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:42:10 The attribute 'formaction' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
+|
+|            <!-- Image input types are not allowed. -->
+|            <input type="image">
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:45:10 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
+|
+|            <!-- Password input types are only allowed when the form element's method is POST. -->
+|            <input type="password">
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:48:10 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
+|
+|            <!-- File input types are only allowed when the form element's method is POST. -->
+|            <input type="file">
+>>           ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-form-error.html:51:10 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
+|          </form>
+|        </amp-story-page-attachment>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>

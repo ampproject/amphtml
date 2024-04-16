@@ -1,0 +1,49 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Live-list</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+</head>
+<body>
+  <main role="main">
+    <article>
+      <div class="content-container">
+        <div class="article-body" itemprop="articleBody">
+          <h2> Select your favorite food </h2>
+          <button on="tap:AMP.setState({favoriteFood: 'pizza'})">Pizza</button>
+          <button on="tap:AMP.setState({favoriteFood: 'pasta'})">Pasta</button>
+          <button on="tap:AMP.setState({favoriteFood: 'cake'})">Cake</button>
+          <amp-live-list
+            layout="container"
+            data-poll-interval="15000"
+            data-max-items-per-page="5"
+            id="live-blog-1">
+            <button id="live-list-update-button" update class="button"
+                on="tap:live-blog-1.update">You have updates</button>
+            <div items>
+              <div id="live-blog-item-1" data-sort-time="1466669033418">
+                <h3 class="headline">
+                  <a href="#live-blog-item-1">Bacon ipsum dolor amet</a>
+                </h3>
+                <div class="article-body">
+                  As you can see, bacon is far superior to <b><span [text]='favoriteFood'>everything!</span></b>!
+                </div>
+              </div>
+            </div>
+          </amp-live-list>
+        </div>
+      </div>
+    </article>
+  </main>
+  <footer>
+    <div class="brand-logo">PublisherLogo</div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,23 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests what happens when the contents of the mandatory style tags
+|    are specified incorrectly - as in, wrong cdata content which
+|    doesn't match the spec.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+|    <style amp-boilerplate>incorrect cdata</style><noscript><style amp-boilerplate>incorrect cdata</style></noscript>
+>>   ^~~~~~~~~
+feature_tests/incorrect_mandatory_style.html:13:2 The mandatory text inside tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
+>>                                                           ^~~~~~~~~
+feature_tests/incorrect_mandatory_style.html:13:58 The mandatory text inside tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|  </body>
+|  </html>

@@ -1,0 +1,76 @@
+tags: {  # amp-megaphone
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-megaphone"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+attr_lists: {
+  name: "amp-megaphone-common"
+  attrs: {
+    name: "data-light"
+    value: ""
+  }
+  attrs: {
+    name: "data-sharing"
+    value: ""
+  }
+}
+
+tags: {  # <amp-megaphone> for playlists
+  html_format: AMP
+  tag_name: "AMP-MEGAPHONE"
+  requires_extension: "amp-megaphone"
+  spec_name: "amp-megaphone [data-playlist]"
+
+  attrs: {
+    name: "data-playlist"
+    mandatory: true
+    value_regex: "[A-Za-z0-9]+"
+    dispatch_key: NAME_DISPATCH
+  }
+
+  attrs: {
+    name: "data-episodes"
+    value_regex: "[0-9]+"
+  }
+
+  attr_lists: "amp-megaphone-common"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+  }
+}
+
+tags: {  # <amp-megaphone> for episodes
+  html_format: AMP
+  tag_name: "AMP-MEGAPHONE"
+  requires_extension: "amp-megaphone"
+  spec_name: "amp-megaphone [data-episode]"
+  attrs: {
+    name: "data-episode"
+    mandatory: true
+    value_regex: "[A-Za-z0-9]+"
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "data-start"
+    value_regex: "\\d+(\\.\\d+)?"
+  }
+  attrs: {
+    name: "data-tile"
+    value: ""
+  }
+
+  attr_lists: "amp-megaphone-common"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+  }
+}

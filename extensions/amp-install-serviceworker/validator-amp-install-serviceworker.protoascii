@@ -1,0 +1,37 @@
+tags: {  # amp-install-serviceworker
+  html_format: AMP  # Ads cannot install serviceworkers
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-install-serviceworker"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-install-serviceworker>
+  html_format: AMP  # Ads cannot install serviceworkers
+  tag_name: "AMP-INSTALL-SERVICEWORKER"
+  requires_extension: "amp-install-serviceworker"
+  attrs: {
+    name: "data-iframe-src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

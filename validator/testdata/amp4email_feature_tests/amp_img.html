@@ -1,0 +1,40 @@
+<!--
+  Test Description:
+  Tests the additional restrictions AMP4EMAIL sets on AMP-IMG and AMP-ANIM.
+-->
+<!doctype html>
+<html ⚡4email data-css-strict>
+<head>
+  <meta charset="utf-8">
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+</head>
+<body>
+  <!-- URLs must be absolute. -->
+  <amp-img src="somelink.com">disallowed</amp-img>
+
+  <!-- URLs must be absolute. -->
+  <amp-img srcset="somelink.com">disallowed</amp-img>
+
+  <!-- The protocol can only be https -->
+  <amp-img src="http://somelink.com">disallowed</amp-img>
+
+  <!-- href of anchor is not bindable. -->
+  <amp-anim [src]="evil">disallowed</amp-anim>
+
+
+  <!-- This is allowed. -->
+  <template type="amp-mustache">
+    <amp-anim width="1" height="1" src="{{allowed}}">allowed</amp-anim>
+  </template>
+
+  <!-- This is disallowed. -->
+  <template type="amp-mustache">
+    <amp-anim width="1" height="1" src="{{foo}}{{bar}}">disallowed</amp-anim>
+  </template>
+
+</body>
+</html>

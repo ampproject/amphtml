@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>amp-imgur example</title>
+    <link rel="canonical" href="amps.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async custom-element="amp-imgur" src="https://cdn.ampproject.org/v0/amp-imgur-0.1.js"></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <h2>Responsive</h2>
+    <amp-imgur
+      data-imgur-id="2CnX7"
+      layout="responsive"
+      width="1"
+      height="1"
+    ></amp-imgur>
+
+    <h2>Fixed Height</h2>
+    <amp-imgur
+      data-imgur-id="a/ZF7NS3V"
+      height="350"
+      layout="fixed-height"
+    ></amp-imgur>
+
+    <h2><code>a/</code> album id fallback</h2>
+    The following uses incorrect id <code>ZF7NS3V</code> but should retry as <code>a/ZF7NS3V</code>
+    <amp-imgur
+      data-imgur-id="ZF7NS3V"
+      height="350"
+      layout="fixed-height"
+    ></amp-imgur>
+  </body>
+</html>

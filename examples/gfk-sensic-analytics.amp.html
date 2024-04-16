@@ -1,0 +1,140 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GfK (Sensic) Media Analytics</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="gfk-analytics.amp.html">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <style amp-boilerplate>body {
+    -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    animation: -amp-start 8s steps(1, end) 0s 1 normal both
+  }
+
+  @-webkit-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-moz-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-ms-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-o-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+  @keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }</style>
+  <noscript>
+    <style amp-boilerplate>body {
+      -webkit-animation: none;
+      -moz-animation: none;
+      -ms-animation: none;
+      animation: none
+    }</style>
+  </noscript>
+
+  <style amp-custom>
+  </style>
+</head>
+
+<body>
+<h1>Audio player</h1>
+<p>Play/Pause to send event</p>
+<amp-audio id="my-player" layout="" src="av/audio.mp3"></amp-audio>
+
+<p>Play/Pause to send event</p>
+<amp-audio id="my-player2" layout="" src="av/audio.mp3"></amp-audio>
+
+<amp-analytics type="gfksensic">
+  <script type="application/json">
+  {
+    "vars": {
+      "environment": "-preproduction",
+      "regionID": "demo",
+      "mediaID": "demomedia",
+      "custom_params": "cp_cp1=example1&cp_cp2=example2"
+    },
+    "triggers": {
+      "trackConsent": {
+        "on": "visible",
+        "request": "impression"
+      },
+      "audioPlay": {
+        "on": "audio-play",
+        "request": "audio-play",
+        "selector": "#my-player",
+        "vars": {
+          "contentID": "myCategory",
+          "streamID": "my-player"
+        }
+      },
+      "audioPause": {
+        "on": "audio-pause",
+        "request": "audio-stop",
+        "selector": "#my-player",
+        "vars": {
+          "contentID": "myCategory",
+          "streamID": "my-player"
+        }
+      },
+      "audioPlay2": {
+        "on": "audio-play",
+        "request": "audio-play",
+        "selector": "#my-player2",
+        "vars": {
+          "contentID": "myCategory",
+          "streamID": "my-player2"
+        }
+      },
+      "audioPause2": {
+        "on": "audio-pause",
+        "request": "audio-stop",
+        "selector": "#my-player2",
+        "vars": {
+          "contentID": "myCategory",
+          "streamID": "my-player2"
+        }
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+<a href="another.html">Change page</a>
+</body>
+
+</html>

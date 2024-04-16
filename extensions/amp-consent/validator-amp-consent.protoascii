@@ -1,0 +1,63 @@
+tags: {  # amp-consent
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-consent"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-consent (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-consent extension .json script"
+  requires_extension: "amp-consent"
+  mandatory_parent: "AMP-CONSENT"
+  unique: true
+  satisfies_condition: "amp-consent extension .json script"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # <amp-consent>
+  html_format: AMP
+  tag_name: "AMP-CONSENT"
+  requires_extension: "amp-consent"
+  unique: true
+  requires_condition: "amp-consent extension .json script"
+  excludes_condition: "amp-consent [type]"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+
+tags: {  # <amp-consent> (type)
+  html_format: AMP
+  tag_name: "AMP-CONSENT"
+  spec_name: "amp-consent [type]"
+  requires_extension: "amp-consent"
+  unique: true
+  requires_condition: "meta name=amp-consent-blocking"
+  requires_condition: "amp-consent extension .json script"
+  satisfies_condition: "amp-consent [type]"
+  attrs: {
+    name: "type"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

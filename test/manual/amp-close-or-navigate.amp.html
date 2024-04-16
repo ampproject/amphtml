@@ -1,0 +1,23 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+      a {
+        display: block;
+        margin: 10px;
+      }
+  </style>
+</head>
+<body>
+  <h1>AMP.closeOrNavigateTo(url=)</h1>
+  <a href="#" on="tap:AMP.closeOrNavigateTo(url='https://example.com')">This can not close the window so it falls back and navigates to example.com</a>
+  <a href="amp-close-or-navigate-target.amp.html" target="_blank">This will open a new tab and AMP.closeOrNavigateTo() should close the window there</a>
+  <a href="amp-close-or-navigate-target.amp.html">This will navigate to another AMP page in the same window and AMP.closeOrNavigateTo() should fail there and navigate to example.com as fallback</a>
+</body>
+</html>

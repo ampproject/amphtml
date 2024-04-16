@@ -1,0 +1,49 @@
+tags: {  # amp-jwplayer
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-jwplayer"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-jwplayer>
+  html_format: AMP
+  tag_name: "AMP-JWPLAYER"
+  requires_extension: "amp-jwplayer"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
+    name: "data-media-id"
+    mandatory_oneof: "['data-media-id', 'data-playlist-id']"
+    value_regex_casei: "[0-9a-z]{8}|outstream"
+  }
+  attrs: {
+    name: "data-player-id"
+    mandatory: true
+    value_regex_casei: "[0-9a-z]{8}"
+  }
+  attrs: {
+    name: "data-playlist-id"
+    mandatory_oneof: "['data-media-id', 'data-playlist-id']"
+    value_regex_casei: "[0-9a-z]{8}"
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-jwplayer/"
+}

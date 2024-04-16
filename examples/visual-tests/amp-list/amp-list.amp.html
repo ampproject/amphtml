@@ -1,0 +1,60 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-list examples</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+      body {
+        padding: 15px;
+      }
+      amp-list {
+        border: 1px solid lightgray;
+      }
+      div[overflow] {
+        background: gray;
+        color: #fff;
+        padding: 16px;
+      }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+</head>
+<body>
+  <h3>Doesn't overflow</h3>
+  <amp-list id="list1" width="300" height="130" src="./amp-list-data.json">
+    <template type="amp-mustache" id="template1">
+      <div>
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>div[overflow]</div>
+  </amp-list>
+
+  <h3>Overflows (layout=fixed)</h3>
+  <amp-list id="list2" width="300" height="100" src="./amp-list-data.json" template="template1">
+    <div overflow>div[overflow]</div>
+  </amp-list>
+
+  <h3>Overflows (layout=responsive)</h3>
+  <amp-list id="list3" width="300" height="50" layout="responsive" src="./amp-list-data.json" template="template1">
+    <div overflow>div[overflow]</div>
+  </amp-list>
+
+  <h3>Diffable</h3>
+  <amp-list id="list4" diffable width="auto" height="130" layout="fixed-height" src="./amp-list-data.json" template="template1">
+    <div fetch-error>div[fetch-error]</div>
+    <div role="list" class="i-amphtml-fill-content i-amphtml-replaced-content"><div role="listitem" tabindex="0">
+      <amp-img height="60" width="80" src="http://localhost:8000/examples/visual-tests/amp-list/img1.jpg" i-amphtml-ignore="" class="i-amphtml-element i-amphtml-layout-fixed i-amphtml-layout-size-defined i-amphtml-layout" i-amphtml-layout="fixed" style="width: 80px; height: 60px;"><img decoding="async" src="http://localhost:8000/examples/visual-tests/amp-list/img1.jpg" class="i-amphtml-fill-content i-amphtml-replaced-content"></amp-img>
+      Video games
+    </div><div role="listitem" tabindex="0">
+      <amp-img height="60" width="80" src="http://localhost:8000/examples/visual-tests/amp-list/img1.jpg" i-amphtml-ignore="" class="i-amphtml-element i-amphtml-layout-fixed i-amphtml-layout-size-defined i-amphtml-layout" i-amphtml-layout="fixed" style="width: 80px; height: 60px;"><img decoding="async" src="http://localhost:8000/examples/visual-tests/amp-list/img2.jpg" class="i-amphtml-fill-content i-amphtml-replaced-content"></amp-img>
+      Video games
+    </div></div>
+  </amp-list>
+</body>
+</html>

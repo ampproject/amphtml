@@ -1,0 +1,68 @@
+
+
+amp-mega-menu {
+  z-index: 1000 !important;
+  white-space: nowrap !important;
+}
+
+amp-mega-menu.i-amphtml-layout-size-defined[open] {
+  overflow: visible !important;
+}
+
+amp-mega-menu nav {
+  background: white;
+}
+
+amp-mega-menu nav > * {
+  margin: 0;
+}
+
+amp-mega-menu .i-amphtml-mega-menu-item {
+  display: inline-block !important;
+}
+
+amp-mega-menu .i-amphtml-mega-menu-heading {
+  cursor: pointer !important;
+}
+
+amp-mega-menu .i-amphtml-mega-menu-content {
+  position: absolute !important;
+  left: 0;
+  width: 100vw;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background: white;
+}
+
+amp-mega-menu .i-amphtml-mega-menu-item[open] > .i-amphtml-mega-menu-content {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+amp-mega-menu .i-amphtml-mega-menu-item:not([open]) .i-amphtml-screen-reader {
+  display: none !important;
+}
+
+.i-amphtml-mega-menu-mask-parent {
+  z-index: 1000 !important;
+  position: relative;
+}
+
+.i-amphtml-mega-menu-mask {
+  position: fixed !important;
+  z-index: -1 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: rgba(0,0,0,0.5);
+  transition: opacity 200ms, visibility 0s 200ms;
+}
+
+.i-amphtml-mega-menu-mask[open] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: opacity 200ms;
+}

@@ -1,0 +1,242 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700');
+
+amp-story-subscriptions {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 1 !important; /** Above the desktop navigation UI. */
+  transform: translateY(100vh) !important;
+  transition-delay: 0.15s !important;
+  pointer-events: none !important;
+}
+
+amp-story-subscriptions.i-amphtml-story-subscriptions-visible {
+  transform: translateY(0) !important;
+  transition-delay: 0s !important;
+}
+
+/** Black opacity overlay. Only on blocking subscription dialog. */
+amp-story-subscriptions::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: #000000 !important;
+  opacity: 0 !important;
+  pointer-events: auto !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
+}
+
+amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
+  opacity: 0.55 !important;
+  transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
+}
+
+/** Override the dialog styles from amp-subscriptions. */
+amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
+  border-radius: 0.9em 0.9em 0 0 !important;
+  font-family: Poppins, sans-serif !important;
+  font-weight: 400 !important;
+  background: white !important;
+  color: black !important;
+  overflow: hidden !important;
+}
+
+amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper,
+iframe.swg-dialog {
+  width: 100% !important;
+  left: 0 !important;
+  margin-left: 0 !important;
+}
+
+@media(min-aspect-ratio: 31/40) {
+  amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper,
+  iframe.swg-dialog  {
+    width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+    left: 50% !important;
+    margin-left: calc(-0.5 * var(--i-amphtml-story-desktop-one-panel-width)) !important;
+  }
+}
+
+.i-amphtml-story-subscriptions-dialog-banner {
+  height: 2.54em !important;
+  background: #EDEDED !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  padding: 0 0.3em !important;
+}
+
+.i-amphtml-story-subscriptions-dialog-banner-button {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  letter-spacing: 0.015em !important;
+  font-size: 0.75em !important;
+  opacity: 0 !important;
+  transform: translateX(-0.2em) !important;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out !important;
+
+  /* Override default button styles. */
+  padding: 0 !important;
+  border: none !important;
+  font-family: Poppins, sans-serif !important;
+  font-weight: 400 !important;
+}
+
+[dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button {
+  transform: translateX(0.2em) !important;
+}
+
+.i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+.i-amphtml-story-subscriptions-dialog-banner-button:after {
+  content: '' !important;
+  width: 0.93em !important;
+  height: 0.93em !important;
+  margin: 0 0.6em !important;
+  transform: translateX(-0.1em) !important;
+  transition: transform 0.3s ease-out !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" stroke="black" fill="none" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.75,1.5 6,6 1.75,10.6"/></svg>') !important;
+}
+
+.i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible:after {
+  transform: translateX(0) !important;
+}
+
+[dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button:after {
+  transform: translateX(0.1em) scaleX(-1)  !important;
+}
+
+[dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible:after {
+  transform: translateX(0) scaleX(-1)  !important;
+}
+
+.i-amphtml-story-subscriptions-dialog-content {
+  margin: 2.1em 1.6em 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.i-amphtml-story-subscriptions-price {
+  display: block !important;
+  font-weight: 400 !important;
+  font-size: 1.4em !important;
+  letter-spacing: -0.02em !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  margin-bottom: 0.2em !important;
+}
+
+.i-amphtml-story-subscriptions-headline {
+  display: block !important;
+  font-weight: 700 !important;
+  font-size: 1.15em !important;
+  letter-spacing: -0.015em !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  margin: 0.4em 0 0.15em !important;
+}
+
+.i-amphtml-story-subscriptions-description, .i-amphtml-story-subscriptions-additional-description {
+  display: block !important;
+  font-size: 0.9em !important;
+  letter-spacing: -0.015em !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-subscriptions-publisher-button, .i-amphtml-story-subscriptions-google-button {
+  margin: 0 auto 0.8em !important;
+  padding: 0 !important;
+  border: none !important;
+  --i-amphtml-button-height: 2.3em;
+  height: var(--i-amphtml-button-height) !important;
+  border-radius: calc(var(--i-amphtml-button-height) / 2) !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+
+  /* Override default button styles. */
+  font-size: calc(var(--story-font-size)) !important;
+}
+
+.i-amphtml-story-subscriptions-publisher-button {
+  margin-top: 2em !important;
+  background: black !important;
+}
+
+.i-amphtml-story-subscriptions-google-button {
+  background: #F2F2F2 !important;
+}
+
+.i-amphtml-story-subscriptions-publisher-logo, .i-amphtml-story-subscriptions-google-logo {
+  width: 1.85em !important;
+  height: 1.85em !important;
+  border-radius: 50% !important;
+  margin-inline: 0.25em 0.65em !important;
+}
+
+.i-amphtml-story-subscriptions-google-logo {
+  background-size: contain !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" fill="none"><path fill="#fff" d="M16 32a16 16 0 1 0 0-32 16 16 0 0 0 0 32Z"/><path fill="#4285F4" d="M28.56 13.78H16v5h7.19a6.19 6.19 0 0 1-2.67 3.99v3.33h4.3c3.34-3.1 4.46-7.93 3.74-12.32Z"/><path fill="#34A853" d="M16 29.33c3.6 0 6.61-1.2 8.81-3.23l-4.29-3.33A8.04 8.04 0 0 1 16 24.06a7.96 7.96 0 0 1-7.48-5.52H4.1v3.44A13.31 13.31 0 0 0 16 29.33Z"/><path fill="#FBBC05" d="M8.52 18.54a7.93 7.93 0 0 1 0-5.08v-3.44H4.1a13.18 13.18 0 0 0 0 11.96l4.42-3.44Z"/><path fill="#EA4335" d="M16 7.94c1.97 0 3.72.68 5.11 2l3.8-3.8A12.75 12.75 0 0 0 16 2.67c-5.21 0-9.71 3-11.9 7.35l4.42 3.44A7.96 7.96 0 0 1 16 7.94Z"/></svg>') !important;
+}
+
+.i-amphtml-story-subscriptions-publisher-button-text, .i-amphtml-story-subscriptions-google-button-text {
+  display: block !important;
+  letter-spacing: 0.01em !important;
+  max-width: 12.6em !important;
+  text-align: initial !important;
+  white-space: normal !important;
+  margin-inline-end: 1.3em !important;
+  font-size: 0.75em !important;
+  font-weight: 400 !important;
+  font-family: Google Sans, sans-serif !important;
+
+  /* Line clamping and ellipses. */
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-subscriptions-publisher-button-text {
+  color: white !important;
+}
+
+.i-amphtml-story-subscriptions-google-button-text {
+  color: #5E5E5E !important;
+}
+
+.i-amphtml-story-subscriptions-signin {
+  display: block !important;
+  margin-top: 2.75em !important;
+  margin-bottom: 1.4em !important;
+  font-size: 0.7em !important;
+}
+
+.i-amphtml-story-subscriptions-signin button {
+  font-weight: 600 !important;
+  cursor: pointer !important;
+
+  /* Override default button styles. */
+  padding: 0 !important;
+  border: none !important;
+  font-size: 1em !important;
+  font-family: Poppins, sans-serif !important;
+  background-color: white !important;
+}

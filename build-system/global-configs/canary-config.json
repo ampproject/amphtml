@@ -1,0 +1,22 @@
+{
+  "allow-doc-opt-in": [
+    "amp-next-page"
+  ],
+  "allow-url-opt-in": [],
+  "canary": 1,
+  "a4aProfilingRate": 0.01,
+  "doubleclickSraExp": 0.01,
+  "doubleclickSraReportExcludedBlock": 0.1,
+  "dfp-render-on-idle-cwv-exp": 1,
+  "flexAdSlots": 0.05,
+  "ios-fixed-no-transfer": 1,
+  "ads-initialIntersection": 1,
+  "flexible-bitrate": 0.1,
+  "story-ad-placements": 1,
+  "story-load-inactive-outside-viewport": 1,
+  "story-disable-animations-first-page": 1,
+  "amp-sticky-ad-to-amp-ad-v4": 0,
+  "story-video-cache-apply-audio": 0,
+  "amp-story-subscriptions": 1,
+  "interaction-to-next-paint": 1
+}

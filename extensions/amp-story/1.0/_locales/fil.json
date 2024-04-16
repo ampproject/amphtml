@@ -1,0 +1,167 @@
+{
+  "2": {
+    "string": "I-tap ang Susunod"
+  },
+  "3": {
+    "string": "I-tap ang Bumalik"
+  },
+  "4": {
+    "string": "Hindi makopya ang link sa clipboard :("
+  },
+  "5": {
+    "string": "Nakopya na ang link!"
+  },
+  "6": {
+    "string": "Email"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Kunin ang Link"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Paumanhin, mukhang hindi sinusuportahan ng browser mo ang karanasang ito"
+  },
+  "22": {
+    "string": "Tanggapin"
+  },
+  "23": {
+    "string": "Tanggihan"
+  },
+  "25": {
+    "string": "Tingnan sa orihinal na domain:"
+  },
+  "26": {
+    "string": "Dagdag pa tungkol sa Mga AMP result"
+  },
+  "27": {
+    "string": "Magpatuloy Pa Rin"
+  },
+  "34": {
+    "string": "I-play ang video"
+  },
+  "35": {
+    "string": "Mag-swipe pataas"
+  },
+  "63": {
+    "string": "Line"
+  },
+  "64": {
+    "string": "Na-update na"
+  },
+  "65": {
+    "string": "Hindi nag-play ang video"
+  },
+  "66": {
+    "string": "I-mute ang kwento"
+  },
+  "67": {
+    "string": "I-unmute ang kwento"
+  },
+  "68": {
+    "string": "Impormasyon sa kwento"
+  },
+  "69": {
+    "string": "Ibahagi ang kwento"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Tip 1 ng 2"
+  },
+  "76": {
+    "string": "I-tap para pumunta sa susunod na screen"
+  },
+  "77": {
+    "string": "Susunod"
+  },
+  "78": {
+    "string": "Tip 2 ng 2"
+  },
+  "79": {
+    "string": "Mag-swipe upang pumunta sa susunod na kwento"
+  },
+  "80": {
+    "string": "Kuha ko na"
+  },
+  "81": {
+    "string": "Tip"
+  },
+  "83": {
+    "string": "I-activate"
+  },
+  "84": {
+    "string": "ISKOR:"
+  },
+  "85": {
+    "string": "I-pause ang kwento"
+  },
+  "86": {
+    "string": "I-play ang kwento"
+  },
+  "87": {
+    "string": "Isara"
+  },
+  "88": {
+    "string": "Laktawan ang susunod"
+  },
+  "89": {
+    "string": "Ipapadala ang sagot mo sa"
+  },
+  "90": {
+    "string": "Susunod na kwento"
+  },
+  "91": {
+    "string": "Susunod na page"
+  },
+  "92": {
+    "string": "I-replay"
+  },
+  "93": {
+    "string": "Nakaraang page"
+  },
+  "96": {
+    "string": "Igalaw ang device para tumuklas"
+  },
+  "97": {
+    "string": "Binubuksan"
+  },
+  "98": {
+    "string": "Hindi naisumite ang form, subukan ulit"
+  },
+  "99": {
+    "string": "Matagumpay na naisumite ang form"
+  },
+  "101": {
+    "string": "Mag-shop Ngayon"
+  }
+}

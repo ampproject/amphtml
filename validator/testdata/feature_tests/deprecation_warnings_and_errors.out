@@ -1,0 +1,32 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This test contains the old, opacity-based boilerplate and an invalid tag.
+|    It is used for testing deprecation warnings and errors.
+|    Please don't use the old boilerplate at this point - if you need
+|    a starting point use minimum_valid_amp.html, *NOT* this file.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style>body {opacity: 0}</style>
+>>   ^~~~~~~~~
+feature_tests/deprecation_warnings_and_errors.html:14:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|    <noscript><style>body {opacity: 1}</style></noscript>
+>>             ^~~~~~~~~
+feature_tests/deprecation_warnings_and_errors.html:15:12 The parent tag of tag 'style amp-custom' is 'noscript', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|  <disallowed-tag>This tag is disallowed.</disallowed-tag>
+>> ^~~~~~~~~
+feature_tests/deprecation_warnings_and_errors.html:19:0 The tag 'disallowed-tag' is disallowed.
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/deprecation_warnings_and_errors.html:21:6 The tag 'style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>       ^~~~~~~~~
+feature_tests/deprecation_warnings_and_errors.html:21:6 The tag 'noscript > style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

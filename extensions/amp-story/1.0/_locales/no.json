@@ -1,0 +1,170 @@
+{
+  "2": {
+    "string": "Trykk på «Neste»"
+  },
+  "3": {
+    "string": "Trykk på «Tilbake»"
+  },
+  "4": {
+    "string": "Kunne ikke kopiere til utklippstavlen :("
+  },
+  "5": {
+    "string": "Lenke kopiert!"
+  },
+  "6": {
+    "string": "E-post"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Hent lenke"
+  },
+  "10": {
+    "string": "LinkedIn"
+  },
+  "11": {
+    "string": "Pinterest"
+  },
+  "12": {
+    "string": "SMS"
+  },
+  "14": {
+    "string": "Tumblr"
+  },
+  "15": {
+    "string": "Twitter"
+  },
+  "16": {
+    "string": "WhatsApp"
+  },
+  "21": {
+    "string": "Vi beklager! Det virker som om nettleseren din ikke støtter denne opplevelsen"
+  },
+  "22": {
+    "string": "Godta"
+  },
+  "23": {
+    "string": "Avslå"
+  },
+  "25": {
+    "string": "Vis på opprinnelig domene:"
+  },
+  "26": {
+    "string": "Mer om AMP-resultater"
+  },
+  "27": {
+    "string": "Fortsett likevel"
+  },
+  "34": {
+    "string": "Spill av video"
+  },
+  "35": {
+    "string": "Sveip opp"
+  },
+  "63": {
+    "string": "Linje"
+  },
+  "64": {
+    "string": "Oppdatert"
+  },
+  "65": {
+    "string": "Kunne ikke avspille video"
+  },
+  "66": {
+    "string": "Slå av lyd i historie"
+  },
+  "67": {
+    "string": "Slå på lyd i historie"
+  },
+  "68": {
+    "string": "Historieinformasjon"
+  },
+  "69": {
+    "string": "Del historie"
+  },
+  "71": {
+    "string": "A"
+  },
+  "72": {
+    "string": "B"
+  },
+  "73": {
+    "string": "C"
+  },
+  "74": {
+    "string": "D"
+  },
+  "75": {
+    "string": "Tips én av to"
+  },
+  "76": {
+    "string": "Trykk for å gå til neste skjerm"
+  },
+  "77": {
+    "string": "Neste"
+  },
+  "78": {
+    "string": "Tips to av to"
+  },
+  "79": {
+    "string": "Sveip for å gå til neste historie"
+  },
+  "80": {
+    "string": "Jeg forstår"
+  },
+  "81": {
+    "string": "Tips"
+  },
+  "83": {
+    "string": "Aktiver"
+  },
+  "84": {
+    "string": "RESULTAT:"
+  },
+  "85": {
+    "string": "Sett historie på pause"
+  },
+  "86": {
+    "string": "Spill av historie"
+  },
+  "87": {
+    "string": "Lukk"
+  },
+  "88": {
+    "string": "Gå til neste"
+  },
+  "89": {
+    "string": "Svaret ditt sendes til"
+  },
+  "90": {
+    "string": "Neste historie"
+  },
+  "91": {
+    "string": "Neste side"
+  },
+  "92": {
+    "string": "Spill på nytt"
+  },
+  "93": {
+    "string": "Forrige side"
+  },
+  "96": {
+    "string": "Beveg på enheten for å utforske"
+  },
+  "97": {
+    "string": "Åpner"
+  },
+  "98": {
+    "string": "Skjema ikke sendt inn. Prøv igjen"
+  },
+  "99": {
+    "string": "Skjema sendt inn"
+  },
+  "101": {
+    "string": "Handle nå"
+  },
+  "110": {
+    "string": "Abonner med Google"
+  }
+}

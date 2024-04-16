@@ -1,0 +1,53 @@
+tags: {  # amp-ima-video
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-ima-video"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-ima-video>
+  html_format: AMP
+  tag_name: "AMP-IMA-VIDEO"
+  requires_extension: "amp-ima-video"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: {
+    name: "data-src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "data-tag"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attrs: {
+    name: "rotate-to-fullscreen"
+    value: ""
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-ima-video/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

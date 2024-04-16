@@ -1,0 +1,162 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This is the minimum valid JavaScript AMP document; it includes all of the
+|    required fields from the spec, but nothing else.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <img src="http://www.example.com/blah.jpg" width=92 height=10
+|         alt="blah" decoding=async loading=lazy border="5px solid black" align="top"
+|         hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="true"
+|         referrerpolicy="same-origin" usemap="#blah" name="name">
+|
+|    <!-- Valid with fetchpriority -->
+|    <img src="http://www.example.com/blah.jpg" width=92 height=10
+|         alt="blah" decoding=async loading=lazy border="5px solid black" align="top"
+|         hspace=10 vspace=20 fetchpriority="low" importance="high" crossorigin="use-credentials" ismap="true"
+|         referrerpolicy="same-origin" usemap="#blah" name="name">
+|
+|    <!-- Valid with https -->
+|    <img src="https://www.example.com/blah.jpg" width=92 height=10
+|         alt="blah" decoding=async loading=lazy border="5px solid black" align="bottom"
+|         hspace=10 vspace=20 importance="auto" crossorigin="anonymous" ismap="false"
+|         referrerpolicy="no-referrer" usemap="#blah" name="name">
+|
+|    <!-- Valid with data -->
+|    <img src=data:image/png:base64,foo width=100 height=10
+|         alt="blah" decoding=async loading=lazy border="5px solid black" align="middle"
+|         hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="true"
+|         referrerpolicy="same-origin" usemap="#blah" name="name">
+|
+|    <!-- Valid with data-hero -->
+|    <img src="http://www.example.com/blah.jpg" width=92 height=10
+|         data-hero alt="blah" decoding=async border="5px solid black" align="left"
+|         hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="false"
+|         referrerpolicy="unsafe-url" usemap="#blah" name="name">
+|
+|    <!-- Valid with data-hero using srcset -->
+|    <img src="http://www.example.com/blah.jpg" width=92 height=10
+|         data-hero alt="blah" decoding=async border="5px solid black" align="left"
+|         hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="false"
+|         referrerpolicy="unsafe-url" usemap="#blah" name="name"
+|         srcset="http://www.example.com/blah2.jpg 470w,
+|                 http://www.example.com/blah3.jpg 800w,
+|                 http://www.example.com/blah4.jpg 1200w"
+|         sizes="470w,800w,1200w">
+|
+|    <!-- Invalid with wrong importance -->
+|    <img src=data:image/png:base64,foo width=100 height=10
+>>   ^~~~~~~~~
+feature_tests/img.html:57:2 The attribute 'importance' in tag 'img' is set to the invalid value 'none'.
+|         alt="blah" importance=none>
+|
+|    <!-- Invalid with wrong fetchpriority -->
+|    <img src=data:image/png:base64,foo width=100 height=10
+>>   ^~~~~~~~~
+feature_tests/img.html:61:2 The attribute 'fetchpriority' in tag 'img' is set to the invalid value 'wrongpriority'.
+|         alt="blah" fetchpriority="wrongpriority">
+|
+|    <!-- Invalid with wrong crossorigin -->
+|    <img src=data:image/png:base64,foo width=100 height=10
+>>   ^~~~~~~~~
+feature_tests/img.html:65:2 The attribute 'crossorigin' in tag 'img' is set to the invalid value 'wrongcrossorigin'.
+|         alt="blah" crossorigin="wrongcrossorigin">
+|
+|    <!-- Invalid with wrong referrerpolicy -->
+|    <img src=data:image/png:base64,foo width=100 height=10
+>>   ^~~~~~~~~
+feature_tests/img.html:69:2 The attribute 'referrerpolicy' in tag 'img' is set to the invalid value 'wrongreferrerpolicy'.
+|         alt="blah" referrerpolicy="wrongreferrerpolicy">
+|
+|    <!-- Invalid with wrong decoding -->
+|    <img src=data:image/png:base64,foo width=100 height=10
+>>   ^~~~~~~~~
+feature_tests/img.html:73:2 The attribute 'decoding' in tag 'img' is set to the invalid value 'sync'.
+|         alt="blah" decoding=sync loading=lazy>
+|
+|    <!-- Invalid with wrong loading -->
+|    <img src="https://www.example.com/blah.jpg" width=92 height=10
+>>   ^~~~~~~~~
+feature_tests/img.html:77:2 The attribute 'loading' in tag 'img' is set to the invalid value 'smart'.
+|         alt="blah" decoding=async loading=smart>
+|
+|    <!-- Invalid with data-hero loading -->
+|    <img src="http://www.example.com/blah.jpg" width=92 height=10
+|         data-hero alt="blah" decoding=async loading=lazy>
+|
+|    <!-- Valid: width is specified with px. -->
+|    <img src="http://www.example.com/blah.jpg" width='92px      ' height=10  >
+|
+|    <!-- Valid: height is specified with auto -->
+|    <img src="http://www.example.com/blah.jpg" width='92px      ' height=auto >
+|
+|    <!-- Valid: width is specified with incorrect trailing pixel specifier. -->
+|    <img src="http://www.example.com/blah.jpg" width=92p height=10>
+|
+|    <!-- Valid: fragment -->
+|    <img src="http://www.example.com/blah.jpg#fragment" width=92 height=10>"
+|
+|    <!-- Valid: server rendered image -->
+|    <img src="http://www.example.com/blah.jpg" decoding=async loading=lazy>
+|
+|    <!-- Valid: no srcset -->
+|    <img width=700 height=1067 src="http://www.example.com/i/trail-in.png">
+|
+|    <!-- Valid srcset with http -->
+|    <img src="http://www.example.com/blah.jpg" width=400 height=10
+|         srcset="http://www.example.com/blah2.jpg 470w,
+|                 http://www.example.com/blah3.jpg 800w,
+|                 http://www.example.com/blah4.jpg 1200w"
+|         sizes="470w,800w,1200w">
+|
+|    <!-- Valid srcset with https -->
+|    <img src="http://www.example.com/blah.jpg" width=400 height=10
+|         srcset="https://www.example.com/blah2.jpg 470w,
+|                 https://www.example.com/blah3.jpg 800w,
+|                 https://www.example.com/blah4.jpg 1200w"
+|         sizes="470w,800w,1200w">
+|
+|    <!-- Valid srcset without src -->
+|    <img width=400 height=10
+|         srcset="https://www.example.com/blah2.jpg 470w,
+|                 https://www.example.com/blah3.jpg 800w,
+|                 https://www.example.com/blah4.jpg 1200w">
+|
+|    <!-- Valid srcset without sizes -->
+|    <img src="http://www.example.com/blah.jpg" width=400 height=10
+|         srcset="https://www.example.com/blah2.jpg 470w,
+|                 https://www.example.com/blah3.jpg 800w,
+|                 https://www.example.com/blah4.jpg 1200w">
+|
+|    <!-- Invalid inside amp-story -->
+|    <amp-story standalone
+>>   ^~~~~~~~~
+feature_tests/img.html:129:2 Tag 'amp-story' is not allowed to have any sibling tags ('body' should only have 1 child). (see https://amp.dev/documentation/components/amp-story)
+>>   ^~~~~~~~~
+feature_tests/img.html:129:2 The tag 'amp-story' requires including the 'amp-story' extension JavaScript. (see https://amp.dev/documentation/components/amp-story)
+|             title=""
+|             publisher=""
+|             publisher-logo-src="logo"
+|             poster-portrait-src="portrait">
+|      <amp-story-page id=page1>
+>>     ^~~~~~~~~
+feature_tests/img.html:134:4 The tag 'amp-story-page' requires including the 'amp-story' extension JavaScript. (see https://amp.dev/documentation/components/amp-story)
+|        <amp-story-grid-layer template="vertical">
+|          <img src="http://www.example.com/blah.jpg#fragment" width=92 height=10>"
+>>         ^~~~~~~~~
+feature_tests/img.html:136:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|  </html>

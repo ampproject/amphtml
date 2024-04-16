@@ -1,0 +1,133 @@
+
+
+/**
+  * We need a separate container for `position: absolute` for two reasons:
+  *
+  * 1. We do not want to make the scrolling area positioned, so that content
+  *    inside can position relative to the outer container.
+  * 2. Chrome causes the slides to flicker if the scrolling element is
+  *    position: absolute;
+  */
+.i-amphtml-carousel-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.i-amphtml-carousel-scroll {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  outline: none;
+
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch !important;
+
+  --visible-count: 1;
+}
+
+/*
+ * Hide scrollbars, with three different methods:
+ *
+ * 1. scrollbar-width
+ *  - Note: this is actually scrollbar *thickness* and applies to horizontal
+ *    scrollbars as well
+ * 2. ::-webkit-scrollbar
+ * 3. Using padding to push scrollbar outside of the overflow
+ *
+ * The last method has side-effect of having the bottom of the slides being
+ * cut-off, since the height (or width) of the scrollbar is included when
+ * calculating the 100% height (or width) of the slide.
+*/
+/* Firefox */
+.i-amphtml-carousel-scroll[hide-scrollbar='true'] {
+  scrollbar-width: none;
+}
+
+/* Chrome, Safari */
+.i-amphtml-carousel-scroll[hide-scrollbar='true']::-webkit-scrollbar {
+  display: none;
+  box-sizing: content-box !important;
+}
+
+.i-amphtml-carousel-scroll[horizontal='true'] {
+  flex-direction: row;
+  scroll-snap-type-x: mandatory; /* Firefox, IE */
+  scroll-snap-type: x mandatory;
+  /* Hide scrollbar */
+  padding-bottom: 20px !important;
+  overflow-y: hidden;
+}
+
+.i-amphtml-carousel-scroll[horizontal='false'] {
+  flex-direction: column;
+  scroll-snap-type-y: mandatory; /* Firefox, IE */
+  scroll-snap-type: y mandatory;
+  /* Hide scrollbar */
+  padding-right: 20px !important;
+  overflow-x: hidden;
+}
+
+.i-amphtml-carousel-scroll[snap='false'] {
+  scroll-snap-type: none;
+}
+
+.i-amphtml-carousel-scroll[user-scrollable='false'] {
+  overflow: hidden;
+}
+
+.i-amphtml-carousel-spacer {
+  visibility: hidden;
+  z-index: -1;
+}
+
+.i-amphtml-carousel-slotted,
+.i-amphtml-carousel-spacer {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  width: 100%;
+  height: 100%;
+  scroll-snap-stop: always;
+}
+
+.i-amphtml-carousel-scroll[horizontal='true'][mixed-length='false']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='true'][mixed-length='false']
+  > .i-amphtml-carousel-spacer {
+  /** TODO(sparhami) Do not use CSS custom property */
+  width: calc(100% / var(--visible-count)) !important;
+  min-width: auto !important;
+  max-width: none !important;
+}
+
+.i-amphtml-carousel-scroll[horizontal='false'][mixed-length='false']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='false'][mixed-length='false']
+  > .i-amphtml-carousel-spacer {
+  /** TODO(sparhami) Do not use CSS custom property */
+  height: calc(100% / var(--visible-count)) !important;
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+.i-amphtml-carousel-scroll[horizontal='true'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='true'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-spacer {
+  max-width: 100% !important;
+}
+
+.i-amphtml-carousel-scroll[horizontal='false'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-slotted,
+.i-amphtml-carousel-scroll[horizontal='false'][snap='true'][mixed-length='true']
+  > .i-amphtml-carousel-spacer {
+  max-height: 100% !important;
+}
+
+.i-amphtml-carousel-scroll > .i-amphtml-carousel-slotted {
+  will-change: transform;
+}

@@ -1,0 +1,54 @@
+tags: {  # amp-date-display
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-date-display"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-date-display>
+  html_format: AMP
+  tag_name: "AMP-DATE-DISPLAY"
+  requires_extension: "amp-date-display"
+  attrs: {
+    name: "datetime"
+    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "now|(\\d{4}-[01]\\d-[0-3]\\d(T[0-2]\\d:[0-5]\\d(:[0-6]\\d(\\.\\d\\d?\\d?)?)?(Z|[+-][0-1]\\d:[0-5]\\d)?)?)"
+  }
+  attrs: {
+    name: "display-in"
+    value_casei: "utc"
+  }
+  attrs: {
+    name: "offset-seconds"
+    value_regex: "-?\\d+"
+  }
+  attrs: { name: "locale" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
+  attrs: {
+    name: "timestamp-ms"
+    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "timestamp-seconds"
+    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d+"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

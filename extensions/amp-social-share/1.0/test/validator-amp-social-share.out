@@ -1,0 +1,111 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-social-share tag. See the inline comments.
+|  -->
+|  <!DOCTYPE html>
+|  <html ⚡ lang="en">
+|    <!-- prettier-ignore -->
+|    <head>
+|      <meta charset="utf-8" />
+|      <link rel="canonical" href="./regular-html-version.html" />
+|      <meta name="viewport" content="width=device-width,minimum-scale=1" />
+|      <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|      <script
+|        async
+|        custom-element="amp-sidebar"
+|        src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"
+|      ></script>
+|      <script
+|        async
+|        custom-element="amp-social-share"
+|        src="https://cdn.ampproject.org/v0/amp-social-share-1.0.js"
+|      ></script>
+|    </head>
+|    <body>
+|      <!-- Valid: simplest possible example -->
+|      <amp-social-share type="twitter"></amp-social-share>
+|
+|      <!-- Valid: a simple example with params -->
+|      <amp-social-share
+|        type="linkedin"
+|        width="60"
+|        height="44"
+|        data-param-text="Hello world"
+|        data-param-url="https://example.com/"
+|      >
+|      </amp-social-share>
+|
+|      <!-- Valid: A share endpoint that's a URL with allowlisted app protocol -->
+|      <amp-social-share
+|        type="whatsapp"
+|        layout="container"
+|        data-share-endpoint="whatsapp://send"
+|        data-param-text="Check this out: TITLE - CANONICAL_URL"
+|      >
+|        Share on Whatsapp
+|      </amp-social-share>
+|
+|      <!-- Valid: A share endpoint that's a URL with the allowlisted https protocol
+|      -->
+|      <amp-social-share
+|        type="vote-this-up"
+|        layout="container"
+|        data-share-endpoint="https://example.com/vote-this-up"
+|        data-param-text="Check this out: TITLE - CANONICAL_URL"
+|      >
+|        Share on Whatsapp
+|      </amp-social-share>
+|
+|      <!-- Valid: A share endpoint that's within an amp-sidebar -->
+|      <amp-sidebar layout="nodisplay">
+|        <amp-social-share
+|          type="vote-this-up"
+|          layout="container"
+|          data-share-endpoint="https://example.com/vote-this-up"
+|          data-param-text="Check this out: TITLE - CANONICAL_URL"
+|        >
+|          Share on Whatsapp
+|        </amp-social-share>
+|      </amp-sidebar>
+|
+|      <!-- Valid: unknown type, no endpoint given
+|         Note: It would be good to consider this invalid, but given the choices
+|         around required / optional parameters for this tag, we don't have a
+|         convenient way to do that. This will probablly yield a runtime error.
+|      -->
+|      <amp-social-share
+|        type="unknown"
+|        width="60"
+|        height="44"
+|        data-param-text="Hello world"
+|        data-param-url="https://example.com/"
+|      >
+|      </amp-social-share>
+|
+|      <!-- Invalid: Endpoint given with a protocol that doesn't fit the allowlist -->
+|      <amp-social-share
+>>     ^~~~~~~~~
+amp-social-share/1.0/test/validator-amp-social-share.html:87:4 Invalid URL protocol 'votethisup:' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://amp.dev/documentation/components/amp-social-share)
+|        type="vote-this-up"
+|        layout="container"
+|        data-share-endpoint="votethisup://vote"
+|        data-param-text="Check this out: TITLE - CANONICAL_URL"
+|      >
+|        Share on Whatsapp
+|      </amp-social-share>
+|
+|      <!-- Invalid: Endpoint given with a protocol that doesn't fit the allowlist -->
+|      <amp-social-share
+>>     ^~~~~~~~~
+amp-social-share/1.0/test/validator-amp-social-share.html:97:4 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://amp.dev/documentation/components/amp-social-share)
+|        type="uhm-no-hahaha"
+|        layout="container"
+|        data-share-endpoint="j a v a s c r i p t : alert('oh hi')"
+|        data-param-text="Check this out: TITLE - CANONICAL_URL"
+|      >
+|        Share on Whatsapp
+|      </amp-social-share>
+|    </body>
+|  </html>

@@ -1,0 +1,104 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests support for the amp-sidebar tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+|    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: Example of amp-sidebar usage -->
+|    <amp-sidebar side="left" layout="nodisplay">
+|      <amp-accordion>
+|        <section>
+|          <h2>Section 1</h2>
+|          <p>Content</p>
+|        </section>
+|        <section>
+|          <h2>Section 2</h2>
+|          <p>Content</p>
+|        </section>
+|      </amp-accordion>
+|      <amp-img layout="fill" src="img"></amp-img>
+|    </amp-sidebar>
+|    <!-- Valid: Example of amp-sidebar with toolbar usage and ul -->
+|    <amp-sidebar layout="nodisplay">
+|      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+|        <ul>
+|          <li>Nav item 1</li>
+|          <li>Nav item 2</li>
+|          <li>Nav item 3</li>
+|        </ul>
+|      </nav>
+|      <amp-img layout="fill" src="img"></amp-img>
+|    </amp-sidebar>
+|    <!-- Valid: Example of amp-sidebar with toolbar usage and ol-->
+|    <amp-sidebar layout="nodisplay">
+|      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+|        <ol>
+|          <li>Nav item 1</li>
+|          <li>Nav item 2</li>
+|          <li>Nav item 3</li>
+|        </ol>
+|      </nav>
+|      <amp-img layout="fill" src="img"></amp-img>
+|    </amp-sidebar>
+|    <!-- Invalid: more than one <ul> tag -->
+|    <amp-sidebar layout="nodisplay">
+|      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+>>     ^~~~~~~~~
+amp-sidebar/0.1/test/validator-amp-sidebar.html:55:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
+|        <ul>
+|          <li>Nav item 1</li>
+|        </ul>
+|        <ul>
+|          <li>Nav item 2</li>
+|          <li>Nav item 3</li>
+|        </ul>
+|      </nav>
+|      <amp-img layout="fill" src="img"></amp-img>
+|    </amp-sidebar>
+|    <!-- Invalid: more than one <ol> tag -->
+|    <amp-sidebar layout="nodisplay">
+|      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+>>     ^~~~~~~~~
+amp-sidebar/0.1/test/validator-amp-sidebar.html:68:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
+|        <ol>
+|          <li>Nav item 1</li>
+|        </ol>
+|        <ol>
+|          <li>Nav item 2</li>
+|          <li>Nav item 3</li>
+|        </ol>
+|      </nav>
+|      <amp-img layout="fill" src="img"></amp-img>
+|    </amp-sidebar>
+|    <!-- Invalid: both <ul> and <ol> tags -->
+|      <amp-sidebar layout="nodisplay">
+|        <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+>>       ^~~~~~~~~
+amp-sidebar/0.1/test/validator-amp-sidebar.html:81:6 Tag 'nav' must have 1 child tags - saw 2 child tags.
+|          <ul>
+|            <li>Nav item 1</li>
+|          </ul>
+|          <ol>
+|            <li>Nav item 2</li>
+|            <li>Nav item 3</li>
+|          </ol>
+|        </nav>
+|        <amp-img layout="fill" src="img"></amp-img>
+|      </amp-sidebar>
+|    <!-- Invalid: incorrect side value -->
+|    <amp-sidebar side="center" layout="nodisplay"></amp-sidebar>
+>>   ^~~~~~~~~
+amp-sidebar/0.1/test/validator-amp-sidebar.html:93:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-sidebar/)
+|  </body>
+|  </html>

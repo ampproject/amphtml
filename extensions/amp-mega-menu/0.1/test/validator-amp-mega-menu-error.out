@@ -1,0 +1,93 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-mega-menu tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-mega-menu" src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js"></script><script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+|  </head>
+|  <body>
+|    <!-- Invalid: amp-mega-menu with incorrect DOM -->
+|    <amp-mega-menu layout="fixed-height" height="80">
+|      <nav>
+>>     ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:18:4 Tag 'amp-mega-menu > nav' must have 1 child tags - saw 2 child tags.
+|        <!-- nav cannot contain more than one child, which must be ul/ol -->
+|        <div></div>
+>>       ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:20:6 Tag 'div' is disallowed as child of tag 'amp-mega-menu > nav'. Child tag must be one of ['ol', 'ul'].
+|        <ul>
+|          <!-- ul/ol cannot have elements other than li as children -->
+|          <div></div>
+>>         ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:23:8 Tag 'div' is disallowed as child of tag 'amp-mega-menu nav > ul/ol'. Child tag must be one of ['li'].
+|          <!-- menu items must have at least one child -->
+|          <li></li>
+>>         ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:25:8 Tag 'amp-mega-menu nav > ul/ol > li' must have a minimum of 1 child tags - saw 0 child tags.
+>>         ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:25:8 The mandatory reference point 'AMP-MEGA-MENU item-heading' for 'AMP-MEGA-MENU NAV > UL/OL > LI' is missing.
+|          <!-- menu item cannot have multiple children unless one has role="dialog" -->
+|          <li>
+>>         ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:27:8 The reference point 'AMP-MEGA-MENU item-heading' for 'AMP-MEGA-MENU NAV > UL/OL > LI' must be unique but a duplicate was encountered.
+|            <button></button>
+|            <button></button>
+|          </li>
+|          <!-- role="dialog" must be accompanied by a sibling that toggles it -->
+|          <li>
+>>         ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:32:8 The mandatory reference point 'AMP-MEGA-MENU item-heading' for 'AMP-MEGA-MENU NAV > UL/OL > LI' is missing.
+|            <div role="dialog"></div>
+|          </li>
+|          <!-- menu item cannot have multiple role="dialog" as children -->
+|          <li>
+>>         ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:36:8 The reference point 'AMP-MEGA-MENU item-content' for 'AMP-MEGA-MENU NAV > UL/OL > LI' must be unique but a duplicate was encountered.
+|            <button></button>
+|            <div role="dialog"></div>
+|            <div role="dialog"></div>
+|          </li>
+|          <!-- role=menu is disallowed as child of menu item -->
+|          <li>
+|            <button></button>
+|            <div role="menu"></div>
+>>           ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:44:10 The tag 'div', a child tag of 'AMP-MEGA-MENU NAV > UL/OL > LI', does not satisfy one of the acceptable reference points: AMP-MEGA-MENU item-content, AMP-MEGA-MENU item-heading.
+|          </li>
+|        </ul>
+|      </nav>
+|    </amp-mega-menu>
+|    <!-- component must have either nav or amp-list as the only child -->
+|    <amp-mega-menu layout="fixed-height" height="80">
+|      <div></div>
+>>     ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:51:4 Tag 'div' is disallowed as child of tag 'amp-mega-menu'. Child tag must be one of ['nav', 'amp-list']. (see https://amp.dev/documentation/components/amp-mega-menu/)
+|    </amp-mega-menu>
+|    <!-- amp-list under amp-mega-menu must contain a template -->
+|    <amp-mega-menu layout="fixed-height" height="80">
+|      <amp-list layout="fill" src=".">
+|        <div></div>
+>>       ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:56:6 Tag 'div' is disallowed as child of tag 'amp-mega-menu > amp-list'. Child tag must be one of ['template'].
+|      </amp-list>
+|    </amp-mega-menu>
+|    <!-- template must contain a nav element -->
+|    <amp-mega-menu layout="fixed-height" height="80">
+|      <amp-list layout="fill" src=".">
+|        <template type="amp-mustache">
+|          <div></div>
+>>         ^~~~~~~~~
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:63:8 Tag 'div' is disallowed as child of tag 'amp-mega-menu > amp-list > template'. Child tag must be one of ['nav'].
+|        </template>
+|      </amp-list>
+|    </amp-mega-menu>
+|  </body>
+|  </html>

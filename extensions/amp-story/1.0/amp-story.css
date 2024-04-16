@@ -1,0 +1,736 @@
+@import './amp-story-desktop-one-panel.css';
+@import './amp-story-templates.css';
+@import './amp-story-user-overridable.css';
+@import './amp-story-vertical.css';
+@import './pagination-buttons.css';
+
+/** Common */
+:root {
+  --story-page-vw: 1vw !important;
+  --story-page-vh: var(--story-dvh, 1vh) !important;
+  --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh)) !important;
+  --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
+  --story-100dvh: calc(var(--story-dvh, 1vh) * 100) !important;
+  --story-font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
+  font-size: var(--story-font-size);
+}
+
+@supports (height: 1dvh) {
+  :root {
+    --story-dvh: 1dvh !important;
+  }
+}
+
+body {
+  animation: none !important;
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -ms-animation: none !important;
+}
+
+amp-story,
+amp-story-page,
+amp-story-cta-layer {
+  contain: strict !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none !important;
+}
+
+amp-story-grid-layer {
+  contain: size layout !important;
+  -webkit-touch-callout: none !important;
+}
+
+amp-story amp-consent {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: none !important;
+  z-index: initial !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/**
+ * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
+ * because of amp-story-shadow-reset.css. Use display: none instead.
+ */
+amp-consent.amp-hidden {
+  display: none !important;
+}
+
+.i-amphtml-story-system-reset,
+.i-amphtml-story-system-reset * {
+  border: none !important;
+  box-sizing: initial !important;
+  color: initial !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: initial !important;
+  font-weight: initial !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: start !important;
+  text-shadow: none !important;
+  width: auto !important;
+}
+
+/** Story level */
+amp-story {
+  height: 100% !important;
+  position: relative !important;
+  text-rendering: geometricPrecision !important;
+  user-select: none !important;
+  width: 100% !important;
+  /* Disables double tap to zoom, and ensures fast-tap is enabled on iOS. */
+  touch-action: manipulation !important;
+}
+
+html:root,
+html:root body {
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  border: 0 !important;
+  /** Remove the cursor: pointer; style set by the runtime, to avoid wrong
+      touch feedback on mobile, like a flashing overlay on page transitions. */
+  cursor: auto !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+}
+
+p,
+h4 {
+  font-size: 1rem;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.17rem;
+}
+
+h5 {
+  font-size: 0.83rem;
+}
+
+h6 {
+  font-size: 0.67rem;
+}
+
+html:root #i-amphtml-wrapper body {
+  /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
+      1px bigger than the viewport. */
+  border-top: none !important;
+  overflow: hidden !important;
+}
+
+amp-story[standalone] {
+  align-self: center !important;
+  box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5) !important;
+  height: 100% !important;
+  justify-self: center !important;
+  max-height: initial !important;
+  max-width: initial !important;
+  min-height: initial !important;
+  min-width: initial !important;
+
+  /* Unblocks rendering when this CSS file is installed. Info on #37990. */
+  visibility: visible !important;
+}
+
+amp-story[standalone].amp-notbuilt {
+  /* Ensures amp-story has a height and is prerendered. */
+  min-height: 1px !important;
+}
+
+amp-story[standalone]:-webkit-full-screen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story[standalone]:-moz-full-screen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story[standalone]:-ms-fullscreen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story[standalone]:fullscreen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story[hide] {
+  display: none !important;
+}
+
+amp-story .amp-video-eq {
+  display: none !important;
+}
+
+/** Page level */
+amp-story-page {
+  bottom: 0 !important;
+  height: auto !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  opacity: 1 !important;
+  /** Required by Chrome to consider touch events on story-pages as user gestures. */
+  touch-action: none !important;
+  transition: none !important;
+  z-index: 0 !important;
+}
+
+amp-story-page[active] {
+  z-index: 1 !important;
+}
+
+/* Setting `translateY` distances as a trick so that the runtime schedules
+ * layout for the next N pages. The default value (1000%) means that pages are
+ * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
+ * we don't want to schedule any further pages. */
+
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+amp-story-page[distance]:not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
+ * Note: If updating the [active] or [distance] attributes names, please also
+ * update them in the ampdoc.css file.
+ */
+amp-story-page[active],
+amp-story-page[distance='0'][distance],
+amp-story-page[distance='1'][distance] {
+  transform: translateY(0) !important;
+}
+
+amp-story.i-amphtml-experiment-story-load-inactive-outside-viewport:not([desktop])
+  amp-story-page[distance='1']:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
+amp-story-page[distance='2'][distance] {
+  transform: translateY(var(--story-100dvh)) !important;
+}
+
+amp-story-page [data-text-background-color] {
+  border-radius: 3px !important;
+  line-height: 1.5em !important;
+  padding: 2px 4px !important;
+  text-indent: 0 !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
+}
+
+/** Call to action layer, positioned at the bottom 20% of the screen. */
+amp-story-cta-layer {
+  display: block !important;
+  position: absolute !important;
+  top: 80% !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  margin: 0 !important;
+  z-index: 3 !important;
+}
+
+/** Grid level */
+amp-story-grid-layer {
+  box-sizing: border-box !important;
+  display: grid !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  z-index: 2 !important;
+  /** Make sure grid layer does not act as a click shield on elements underneath */
+  pointer-events: none !important;
+}
+
+/* Make the story element fullpage. */
+:root:not(.i-amphtml-story-vertical) amp-story {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+}
+
+amp-story-grid-layer[anchor*='left'] {
+  margin-left: 0 !important;
+}
+
+amp-story-grid-layer[anchor*='top'] {
+  margin-top: 0 !important;
+}
+
+amp-story-grid-layer[anchor*='bottom'] {
+  margin-bottom: 0 !important;
+}
+
+amp-story-grid-layer[anchor*='right'] {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+amp-story-grid-layer amp-video::after {
+  content: '' !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/**
+ * Prevents preload placeholders from pushing content offscreen.
+ */
+[template='fill'] amp-img img,
+[template='fill'] amp-video video {
+  position: absolute !important;
+}
+
+/**
+ * Prevents long-press image preview on iOS 15 that breaks pause UX.
+ */
+amp-story-grid-layer amp-img img {
+  pointer-events: none !important;
+}
+
+/**
+ * Prevents amp-video to layout until its element has been swapped by the media
+ * pool. See #26718 for context.
+ */
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound:not(.i-amphtml-layout) {
+  display: none !important;
+}
+
+/** Make clickable elements in light dom accept pointer events */
+amp-story-grid-layer a, amp-story-grid-layer amp-twitter,
+amp-story-grid-layer amp-ad {
+  pointer-events: auto !important;
+}
+
+/** Ensure clicks inside anchor tags are handled by the tooltip. */
+amp-story-grid-layer a * {
+  pointer-events: none !important;
+}
+
+/** Apply click shield on embedded components on initial load. */
+amp-story-grid-layer .i-amphtml-embedded-component::after {
+  content: '' !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.i-amphtml-story-grid-template-with-full-bleed-animation {
+  position: absolute !important;
+  display: block !important;
+  padding: 0 !important;
+}
+
+[template='fill']:not(.i-amphtml-story-grid-template-with-full-bleed-animation)
+  > * {
+  bottom: 0 !important;
+  height: auto !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  width: auto !important;
+}
+
+[template='vertical'] {
+  grid-auto-flow: row !important;
+  grid-template-columns: 100% !important;
+}
+
+[template='horizontal'] {
+  grid-auto-flow: column !important;
+  grid-template-rows: 100% !important;
+}
+
+[template='thirds'] {
+  height: 100% !important;
+  grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
+  grid-template-areas:
+    'upper-third'
+    'middle-third'
+    'lower-third' !important;
+}
+
+[aspect-ratio],
+[preset] {
+  margin: auto;
+  width: var(--i-amphtml-story-layer-width, 100%);
+  height: var(--i-amphtml-story-layer-height, 100%);
+  font-size: calc(var(--i-amphtml-story-layer-height) / 10);
+  margin-left: calc(
+    (var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) *
+      0.5
+  ); /* Set margin to 1/2 of page-width - layer-width to center layer */
+
+  --i-amphtml-aspect-ratio-float: calc(
+    var(--aspect-ratio)
+  ) !important; /* Avoid fractions, which don't work with compilers that remove parenthesis */
+  --i-amphtml-story-page-width: calc(
+    100 * var(--story-page-vw, 1vw)
+  ) !important;
+  --i-amphtml-story-page-height: calc(
+    100 * var(--story-page-vh, 1vh)
+  ) !important;
+  --i-amphtml-story-unscaled-width: min(
+    var(--i-amphtml-story-page-width),
+    calc(
+      var(--i-amphtml-story-page-height) * var(--i-amphtml-aspect-ratio-float)
+    )
+  ) !important;
+  --i-amphtml-story-unscaled-height: min(
+    var(--i-amphtml-story-page-height),
+    calc(
+      var(--i-amphtml-story-page-width) / var(--i-amphtml-aspect-ratio-float)
+    )
+  ) !important;
+  --i-amphtml-story-layer-width: calc(
+    var(--i-amphtml-story-unscaled-width) * var(--scaling-factor, 1)
+  ) !important;
+  --i-amphtml-story-layer-height: calc(
+    var(--i-amphtml-story-unscaled-height) * var(--scaling-factor, 1)
+  ) !important;
+}
+
+[preset='2021-foreground'] {
+  --aspect-ratio: 69/116 !important;
+}
+
+[preset='2021-background'] {
+  --aspect-ratio: 69/116 !important;
+  --scaling-factor: 1.142 !important;
+}
+
+.i-amphtml-story-toast {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: inline-block !important;
+  padding: 1.16em 1.33em !important;
+  line-height: 1.33 !important;
+  color: #fff !important;
+  background: #212121 !important;
+  animation: toast 2.2s !important;
+  animation-fill-mode: both !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 12px !important;
+  max-width: 640px !important;
+  z-index: 100004 !important; /** share menu + 1 */
+}
+
+@media (min-width: 640px) {
+  .i-amphtml-story-toast {
+    right: auto !important;
+    font-size: 14px !important;
+    margin: 0 auto 1.16em 1.16em !important;
+    border-radius: 6px;
+  }
+}
+
+@keyframes toast {
+  0% {
+    transform: translateY(100px);
+    easing: cubic-bezier(0, 0, 0.2, 1);
+  }
+  8% {
+    transform: translateY(0);
+  }
+  92% {
+    transform: translateY(0);
+    easing: cubic-bezier(0.4, 0, 1, 1);
+  }
+  100% {
+    transform: translateY(100px);
+  }
+}
+
+.i-amphtml-story-copy-successful {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#fff"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-size: 16px 16px !important;
+  padding-left: 24px !important;
+  color: #fff !important;
+  display: flex !important;
+}
+
+.i-amphtml-story-copy-url {
+  flex: 1 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  margin-left: 40px !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+/* Default loading spinner */
+
+amp-story .amp-video-eq,
+.i-amphtml-story-spinner {
+  right: 12px !important;
+  bottom: 12px !important;
+}
+
+[dir='rtl'] amp-story .amp-video-eq,
+[dir='rtl'] .i-amphtml-story-spinner {
+  left: 12px !important;
+  right: auto !important;
+}
+
+.i-amphtml-story-spinner {
+  display: inline-block !important;
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  z-index: 10 !important;
+}
+
+.i-amphtml-story-spinner-container {
+  width: 100% !important;
+  height: 100% !important;
+  direction: ltr !important;
+}
+
+.i-amphtml-story-spinner[active] .i-amphtml-story-spinner-container {
+  animation: container-rotate 1294ms linear infinite !important;
+}
+
+@keyframes container-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.i-amphtml-story-spinner-layer {
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0 !important;
+  white-space: nowrap !important;
+  color: white !important;
+}
+
+.i-amphtml-story-spinner[active] .i-amphtml-story-spinner-layer {
+  animation-name: fill-unfill-rotate !important;
+  animation-duration: 4400ms !important;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation-iteration-count: infinite !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.25)) !important;
+}
+
+@keyframes fill-unfill-rotate {
+  12.5% {
+    transform: rotate(135deg);
+  }
+  25% {
+    transform: rotate(270deg);
+  }
+  37.5% {
+    transform: rotate(405deg);
+  }
+  50% {
+    transform: rotate(540deg);
+  }
+  62.5% {
+    transform: rotate(675deg);
+  }
+  75% {
+    transform: rotate(810deg);
+  }
+  87.5% {
+    transform: rotate(945deg);
+  }
+  to {
+    transform: rotate(1080deg);
+  }
+}
+
+.i-amphtml-story-spinner-circle-clipper {
+  display: inline-block !important;
+  position: relative !important;
+  width: 50% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-spinner-layer::after {
+  left: 45% !important;
+  width: 10% !important;
+  border-top-style: solid !important;
+}
+
+.i-amphtml-story-spinner-layer::after,
+.i-amphtml-story-spinner-circle-clipper::after {
+  content: '' !important;
+  box-sizing: border-box !important;
+  position: absolute !important;
+  top: 0 !important;
+  border-width: 3px !important;
+  border-radius: 50% !important;
+}
+
+.i-amphtml-story-spinner-circle-clipper::after {
+  bottom: 0 !important;
+  width: 200% !important;
+  border-style: solid !important;
+  border-bottom-color: transparent !important;
+}
+
+.i-amphtml-story-spinner-circle-clipper.left::after {
+  left: 0 !important;
+  border-right-color: transparent !important;
+  transform: rotate(129deg) !important;
+}
+
+.i-amphtml-story-spinner-circle-clipper.right::after {
+  left: -100% !important;
+  border-left-color: transparent !important;
+  transform: rotate(-129deg) !important;
+}
+
+.i-amphtml-story-spinner[active]
+  .i-amphtml-story-spinner-circle-clipper::after {
+  animation-duration: 1100ms !important;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation-iteration-count: infinite !important;
+}
+
+.i-amphtml-story-spinner[active]
+  .i-amphtml-story-spinner-circle-clipper.left::after {
+  animation-name: left-spin !important;
+}
+
+.i-amphtml-story-spinner[active]
+  .i-amphtml-story-spinner-circle-clipper.right::after {
+  animation-name: right-spin !important;
+}
+
+@keyframes left-spin {
+  0% {
+    transform: rotate(130deg);
+  }
+  50% {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(130deg);
+  }
+}
+
+@keyframes right-spin {
+  0% {
+    transform: rotate(-130deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  to {
+    transform: rotate(-130deg);
+  }
+}
+
+.i-amphtml-story-page-error,
+.i-amphtml-story-page-play-button {
+  display: flex !important;
+  align-items: center !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  height: 40px !important;
+  border: 0 !important;
+  margin: 8px 0 0 8px !important; /* Making the click target 48px.*/
+  padding: 0 !important;
+  animation: play-button-fly-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background-color: transparent !important;
+  z-index: 10000 !important;
+}
+
+@keyframes play-button-fly-in {
+  0% {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.i-amphtml-story-page-error[hidden],
+.i-amphtml-story-page-play-button[hidden] {
+  display: none !important;
+}
+
+.i-amphtml-story-page-error-label,
+.i-amphtml-story-page-play-label {
+  color: #fff !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 16px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+}
+
+.i-amphtml-story-page-error-icon,
+.i-amphtml-story-page-play-icon {
+  display: inline-block !important;
+  height: 24px !important;
+  width: 24px !important;
+  margin: 0 8px !important;
+  border-radius: 24px !important;
+  filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
+}
+
+.i-amphtml-story-page-error-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>') !important;
+}
+
+.i-amphtml-story-page-play-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4a20 20 0 1 0 0 40 20 20 0 0 0 0-40zm-4 29V15l12 9-12 9z"/></svg>') !important;
+}
+
+amp-bodymovin-animation, amp-bodymovin-animation * {
+  pointer-events: none !important;
+}

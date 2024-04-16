@@ -1,0 +1,71 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-video-docking visual test</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"></script>
+  <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+  <style amp-custom>
+    body {
+      padding-top: 40px;
+    }
+    [placeholder],
+    [fallback] {
+      font-size: 4em;
+      padding: 1em;
+    }
+    .fixed {
+      position: fixed;
+      width: 200px;
+      height: 150px;
+      right: 22px;
+      top: 22px;
+      border: 4px dotted tomato;
+      padding: 4px;
+    }
+  </style>
+</head>
+<!--
+  This contains an amp-layout#slot element that the video docks into (see at end
+  of document.)
+-->
+<body>
+  <amp-video-iframe
+    id="video"
+    src="./video-iframe-inner.html"
+    width="400"
+    height="300"
+    layout="responsive"
+    dock="#slot"
+  >
+    <div placeholder>🖼</div>
+    <div fallback>😵</div>
+  </amp-video-iframe>
+  <button on="tap: video.play" id="play-button">play</button>
+  <button
+    on="tap: bottom.scrollTo(pos='bottom')"
+    id="scroll-bottom-button"
+  >
+    scroll to bottom
+  </button>
+  <button
+    on="tap: video.scrollTo(pos='top')"
+    id="scroll-video-button"
+  >
+    scroll to video
+  </button>
+  <div id="bottom" style="height: 200vh"></div>
+  <div class="fixed">
+    <amp-layout
+      layout="responsive"
+      width="400"
+      height="300"
+      id="slot"
+    ></amp-layout>
+  </div>
+</body>
+</html>

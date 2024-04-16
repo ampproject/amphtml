@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS example</title>
+    <link rel="canonical" href="amps.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <script async custom-element="amp-fit-text" src="intentionally_wrong"></script>
+    <script async custom-element="amp-truncate-text" src="intentionally_wrong"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-custom>
+      /** Styled so its size is visible */
+      i-amphtml-sizer {
+        background-color: red;
+      }
+      /** No grey background should be seen behind the sizer. */
+      .background {
+        border: 1px solid black;
+        background-color: #bebebe;
+        max-width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>responsive amp-fit-text with text child</h1>
+    <div class="background">
+      <amp-fit-text width="200" height="100" layout="responsive">
+        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+        aeque inermis reprehendunt.
+      </amp-fit-text>
+    </div>
+
+    <h1>responsive amp-fit-text with element child</h1>
+    <div class="background">
+      <amp-fit-text width="200" height="100" layout="responsive">
+        <strong>Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+        aeque inermis reprehendunt.</strong>
+      </amp-fit-text>
+    </div>
+
+    <h1>responsive amp-truncate-text with text child</h1>
+    <div class="background">
+      <amp-truncate-text layout="responsive" height="3em" width="20em">
+        Some text that may get truncated.
+        <button slot="collapsed">See more</button>
+        <button slot="expanded">See less</button>
+      </amp-truncate-text>
+    </div>
+
+    <h1>responsive amp-truncate-text with element child</h1>
+    <div class="background">
+      <amp-truncate-text layout="responsive" height="3em" width="20em">
+        <strong>Some text that may get truncated.</strong>
+        <button slot="collapsed">See more</button>
+        <button slot="expanded">See less</button>
+      </amp-truncate-text>
+    </div>
+  </body>
+</html>

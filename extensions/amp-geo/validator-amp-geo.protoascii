@@ -1,0 +1,45 @@
+# Specific script tags for custom elements and runtime imports.
+tags: {  # amp-geo
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-geo"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-geo>
+  html_format: AMP
+  tag_name: "AMP-GEO"
+  requires_extension: "amp-geo"
+  attr_lists: "extended-amp-global"
+  unique: true
+  child_tags: {
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # amp-geo (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-geo extension .json script"
+  requires_extension: "amp-geo"
+  mandatory_parent: "AMP-GEO"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-geo/"
+}

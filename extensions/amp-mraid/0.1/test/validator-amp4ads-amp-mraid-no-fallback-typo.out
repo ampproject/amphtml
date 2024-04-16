@@ -1,0 +1,21 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests the presence of the amp-mraid script tag with no-fallback misspelled.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-mraid example</title>
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <!-- Invalid: no-falback is a typo for no-fallback. -->
+|    <script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js" no-falback></script>
+>>   ^~~~~~~~~
+amp-mraid/0.1/test/validator-amp4ads-amp-mraid-no-fallback-typo.html:13:2 The attribute 'no-falback' may not appear in tag 'amp-mraid extension script'. (see https://amp.dev/documentation/components/amp-mraid)
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|  </head>
+|  <body>
+|  </body>
+|  </html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<body style="background-color:red">
+<script>
+addEventListener("message", function(e) {
+  parent./*OK*/postMessage("content-iframe:" + e.data, "*");
+  parent./*OK*/postMessage("loaded-iframe", "*");
+});
+</script>
+</body>
+</html>

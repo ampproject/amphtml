@@ -1,0 +1,34 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-truncate-text link before truncation</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .text {
+      position: relative;
+      font-size: 1em;
+      line-height: 1.25;
+      height: 3.75em;
+      width: 150px;
+      overflow: hidden;
+    }
+
+    .see-more {
+      color: #1b61e0;
+    }
+  </style>
+  <script async custom-element="amp-truncate-text" src="https://cdn.ampproject.org/v0/amp-truncate-text-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Inline text, with a link before the truncation point</h1>
+
+  <amp-truncate-text layout="container" class="text">
+    Some text <a href="#">with a link</a> that should ellipsize and show a see more span afterwards.
+    <span slot="collapsed" class="see-more"> See more</span>
+  </amp-truncate-text>
+</body>
+</html>

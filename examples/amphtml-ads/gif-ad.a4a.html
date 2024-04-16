@@ -1,0 +1,44 @@
+<!doctype html>
+<html ⚡4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <meta name="amp4ads-id" content="vendor=doubleclick,type=impression-id,value=12345">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js"></script>
+</head>
+<body>
+
+<amp-anim
+    width="300"
+    height="250"
+    on="tap:exit-api.exit(target='target1')"
+    srcset="https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
+            https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w" >
+  <amp-img fallback src="/examples/img/sample.jpg" width=150 height=100 layout=responsive noloading></amp-img>
+  <div placeholder>This is a placeholder</div>
+</amp-anim>
+
+<amp-ad-exit id="exit-api" layout="nodisplay">
+  <script type="application/json">
+    {
+      "targets": {
+        "target1": {
+          "finalUrl": "http://localhost:8000/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&shouldNotBeReplaced=AMP_VERSION",
+          "vars": {
+            "_elem": {"defaultValue": "headline"}
+          }
+        }
+      },
+      "transport": {
+        "beacon": true,
+        "image": true
+      }
+    }
+  </script>
+</amp-ad-exit>
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+tags: {  # amp-minute-media-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-minute-media-player"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-minute-media-player>
+  html_format: AMP
+  tag_name: "AMP-MINUTE-MEDIA-PLAYER"
+  requires_extension: "amp-minute-media-player"
+  attrs: { name: "autoplay" }
+  attrs: { name: "data-content-id" }
+  attrs: {
+    name: "data-content-type"
+    mandatory: true
+    value: "curated"
+    value: "semantic"
+    value: "specific"
+  }
+  attrs: { name: "data-minimum-date-factor" }
+  attrs: { name: "data-scanned-element" }
+  attrs: {
+    name: "data-scanned-element-type"
+    value: "className"
+    value: "id"
+    value: "tag"
+  }
+  attrs: { name: "data-scoped-keywords" }
+  attrs: { name: "data-tags" }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-minute-media-player/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: RESPONSIVE
+  }
+}

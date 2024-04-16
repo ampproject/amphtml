@@ -1,0 +1,51 @@
+tags: {  # amp-timeago
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-timeago"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-timeago
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-timeago] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-timeago"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-timeago>
+  html_format: AMP
+  html_format: AMP4EMAIL
+  tag_name: "AMP-TIMEAGO"
+  requires_extension: "amp-timeago"
+  attrs: {
+    name: "cutoff"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "datetime"
+    mandatory: true
+    # Regex: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(:[0-5]\d(\.\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])
+    # Values such as: 2017-04-11T00:37:33.809Z
+    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])"
+  }
+  attrs: { name: "locale" }
+  # <amp-bind>
+  attrs: { name: "[datetime]" }
+  attrs: { name: "[title]" }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-timeago/"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+  }
+}

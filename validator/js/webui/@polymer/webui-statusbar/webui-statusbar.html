@@ -1,0 +1,53 @@
+<!-- Very simple status bar displaying PASS / FAIL
+     below the editor window. -->
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../polymer/polymer.html">
+<dom-module id="webui-statusbar">
+  <style>
+    p.ampproject-fail {
+      display: none;
+    }
+    p.ampproject-pass {
+      display: block;
+    }
+    span.ampproject-fail {
+      color: #F44336;
+    }
+    span.ampproject-pass {
+      color: #4CAF50;
+    }
+    .ampproject-result {
+      margin: 8px;
+      padding: 16px;
+    }
+  </style>
+  <template>
+    <paper-material elevation="3">
+      <div class="ampproject-result">Validation Status:
+        <span class$="{{getClass(status)}}">{{status}}</span>
+        <p class$="{{getClass(status)}}">
+          Review our '<a href="https://go.amp.dev/publishing-checklist">publishing checklist</a>' to ensure successful AMP document distribution.
+        </p>
+      </div>
+    </paper-material>
+  </template>
+  <script>
+    Polymer({
+      is: 'webui-statusbar',
+      properties: {
+        status: {
+          type: String,
+          notify: true,
+          value: ''
+        }
+      },
+      getClass: function(status) {
+        if (status === 'PASS') {
+          return 'ampproject-pass';
+        } else {
+          return 'ampproject-fail';
+        }
+      }
+    });
+  </script>
+</dom-module>

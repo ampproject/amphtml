@@ -1,0 +1,203 @@
+<!--
+  Test Description:
+  This tests looks at specific errors related to forms.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+</head>
+<body>
+  <!-- Valid form -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <fieldset>
+      <label>
+        <span>Your name</span>
+        <input id="name" type="text" name="name" required>
+        <span visible-when-invalid="valueMissing" validation-for="name"></span>
+      </label>
+      <label>
+        <span>Your email</span>
+        <input type="email" name="email" required>
+      </label>
+      <label>
+        <span>Profile photo</span>
+        <input capture type="file">
+      </label>
+      <input type="submit" value="Subscribe">
+    </fieldset>
+    <div submitting><template type="amp-mustache">Submitting</template></div>
+    <div submit-success><template type="amp-mustache">Success</template></div>
+    <div submit-error>Error</div>
+    <div verify-error>Error</div>
+  </form>
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <fieldset>
+      <label>
+        <span>Your name</span>
+        <input id="name" type="text" name="name" required>
+        <span visible-when-invalid="valueMissing" validation-for="name"></span>
+      </label>
+      <label>
+        <span>Your email</span>
+        <input type="email" name="email" required>
+      </label>
+      <input type="button" name="button">
+      <input type="submit" value="Subscribe">
+    </fieldset>
+    <div>
+      <div submit-success><template type="amp-mustache">Success</template></div>
+      <div submit-error>Error</div>
+      <div verify-error><template type="amp-mustache">Verify failed</template></div>
+    </div>
+  </form>
+  <!-- More valid tags (datalist and optgroup) -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <label>Choose a browser from this list:
+    <input list="browsers" name="myBrowser" /></label>
+    <datalist id="browsers">
+      <option value="Chrome">
+      <option value="Firefox">
+      <option value="Internet Explorer">
+      <option value="Opera">
+      <option value="Safari">
+      <option value="Microsoft Edge">
+    </datalist>
+    <select>
+      <optgroup label="Group 1">
+        <option>Option 1.1</option>
+      </optgroup>
+      <optgroup label="Group 2">
+        <option>Option 2.1</option>
+        <option>Option 2.2</option>
+      </optgroup>
+      <optgroup label="Group 3" disabled>
+        <option>Option 3.1</option>
+        <option>Option 3.2</option>
+        <option>Option 3.3</option>
+      </optgroup>
+    </select>
+  </form>
+  <!-- Invalid form action must not be a relative url -->
+  <form method="post" action-xhr="/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form action must be https. -->
+  <form method="post" action-xhr="http://example.com/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form action must be a non-cdn link. -->
+  <form method="post" action-xhr="https://cdn.ampproject.org/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form action must be a non-cdn link -->
+  <form method="post" action-xhr="https://example-com.cdn.ampproject.org/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form action must be a non-cdn link -->
+  <form method="post" action-xhr="https://example-com.amp.cloudflare.com/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Valid: disallowed domain checks subdomains, not suffix -->
+  <form method="post" action-xhr="https://example-cdn.ampproject.org/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form target must be _blank or _top -->
+  <form method="post" action-xhr="https://example/subscribe" target="_new">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: input, select, option and textarea must be children of form. -->
+  <input type="text" name="name">
+  <select name="language">
+    <option value="1">English</option>
+  </select>
+  <textarea name="comment"></textarea>
+  <!-- Valid: input can be type="image". -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input type="image" name="image" src="https://site.example/image.example">
+  </form>
+  <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input type="password" name="password">
+    <input type="file" name="file" accept="text/plain">
+  </form>
+  <!-- Invalid: password requires post and action-xhr -->
+  <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
+    <input type="password" name="password">
+  </form>
+  <!-- Invalid: if validation-for is set on an element, then -->
+  <!-- visible-when-invalid must also be set and vice versa. -->
+  <form action="/foo" target="_blank">
+    <div validation-for="bar"></div>
+    <div visibile-when-invalid="valueMissing"></div>
+  </form>
+  <!-- Invalid: submit-success must be a div -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <span submit-success><template type="amp-mustache">Success</template></span>
+  </form>
+  <!-- Invalid: post implies action-xhr -->
+  <form method="post" action="https://example.com/subscribe" target="_top">
+  </form>
+  <!-- Invalid: get implies action -->
+  <form method="get" action-xhr="https://example.com/subscribe" target="_top">
+  </form>
+  <!-- Invalid: get implies action, default method is get -->
+  <form action-xhr="https://example.com/subscribe" target="_top">
+  </form>
+  <!-- Valid: inlined template, referenced template -->
+  <template type="amp-mustache" id="submit_success_template">
+    Success in referenced template
+  </template>
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+    <div submitting template="submitting_template"></div>
+    <div submit-success template="submit_success_template"></div>
+    <div submit-error>
+      <template type="amp-mustache">Error in inlined template</template>
+    </div>
+    <div verify-error template="verify_error_template"></div>
+  </form>
+  <!-- Invalid: inlined and referenced template for the same div -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+    <div submitting template="submitting_template">
+      <template type="amp-mustache">Submitting in inlined template</template>
+    </div>
+    <div submit-success template="submit_success_template">
+      <template type="amp-mustache">Success in inlined template</template>
+    </div>
+    <div submit-error template="submit_error_template">
+      <template type="amp-mustache">Error in inlined template</template>
+    </div>
+    <div verify-error template="verify_error_template">
+      <template type="amp-mustache">Verify in inlined template</template>
+    </div>
+  </form>
+  <!-- Valid: form with verify-xhr and input with no-verify-->
+  <form method="post" action-xhr="https://example.com/subscribe" verify-xhr="https://example.com/verify" target="_blank">
+    <input name="do-not-verify" no-verify>
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: mask attr without the amp-inputmask extension -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input mask="L0L_0L0" type="tel">
+  </form>
+  <!-- Valid: textarea within form -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment"></textarea>
+  </form>
+  <!-- Valid: textarea with autoexpand attribute -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <textarea name="comment" autoexpand></textarea>
+  </form>
+</body>
+</html>

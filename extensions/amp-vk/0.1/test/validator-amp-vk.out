@@ -1,0 +1,36 @@
+PASS
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>VK examples</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <script async custom-element="amp-vk" src="https://cdn.ampproject.org/v0/amp-vk-0.1.js"></script>
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <h2>VK</h2>
+|    <!-- Valid: Example of amp-vk Post embed usage -->
+|    <amp-vk
+|        width="500"
+|        height="300"
+|        layout="responsive"
+|        data-embedtype="post"
+|        data-owner-id="1"
+|        data-post-id="45616"
+|        data-hash="Yc8_Z9pnpg8aKMZbVcD-jK45eAk">
+|    </amp-vk>
+|
+|    <!-- Valid: Example of amp-vk Poll embed usage -->
+|    <amp-vk
+|        width="400"
+|        height="300"
+|        layout="responsive"
+|        data-embedtype="poll"
+|        data-api-id="6183531"
+|        data-poll-id="274086843_1a2a465f60fff4699f">
+|    </amp-vk>
+|  </body>
+|  </html>

@@ -1,0 +1,130 @@
+
+
+@import '../../amp-base-carousel/0.1/carousel.css';
+
+amp-carousel .i-amphtml-carousel-scroll[horizontal="true"] {
+  padding-bottom: 0 !important;
+}
+
+amp-carousel:not([type="slides"]) .i-amphtml-carousel-scroll {
+  display: block !important;
+  white-space: nowrap !important;
+}
+
+amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
+  position: static;
+}
+
+.amp-scrollable-carousel-slide {
+  display: inline-block !important;
+  /*
+   * Puts a space between items, for browsers that do not support the
+   * properties below.
+   */
+   margin-left: 8px;
+  /*
+   * Makes sure padding between items is correct in RTL mode. The end padding
+   * is to override the padding-left above in RTL mode.
+   */
+  margin-inline-start: 8px;
+  margin-inline-end: 0;
+}
+
+.amp-scrollable-carousel-slide.i-amphtml-layout-responsive {
+  width: 100%
+}
+
+.amp-scrollable-carousel-slide:first-child {
+  margin-left: 0px;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+/*
+ * This is a flex container containing the arrow slots. Since this uses flex,
+ * it will reverse the arrow positions when using RTL.
+ */
+.i-amphtml-carousel-arrows {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  /* Make this container not block swipe since it is stacked on top. */
+  pointer-events: none;
+}
+
+/*
+ * Rotate arrow slots for RTL. This applies to default / custom arrows. Ideally
+ * this would use the `dir(rtl)` selector.
+ */
+.amp-carousel-button[dir="rtl"] {
+  transform: scaleX(-1);
+}
+
+.amp-carousel-button {
+  position: relative;
+  box-sizing: border-box;
+  height: 34px;
+  width: 34px;
+  margin: 16px;
+  border-style: none;
+  border-radius: 2px;
+  background-color: rgba(0, 0, 0, .5);
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  z-index: 10;
+  /* Reenable pointer events stopped at the parent container. */
+  pointer-events: all;
+}
+
+.amp-carousel-button:focus {
+  border: 1px black solid;
+  outline: 1px white solid;
+}
+
+.amp-carousel-button.amp-disabled {
+  animation: none;
+  pointer-events: none;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.amp-carousel-button-prev {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
+  background-size: 18px 18px;
+}
+
+.amp-carousel-button-next {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z"/></svg>');
+  background-size: 18px 18px;
+}
+
+.i-amphtml-carousel-slide-item {
+  position: relative !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.i-amphtml-carousel-slide-item > *{
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+}
+
+.amp-carousel-slide > .i-amphtml-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bento Selector</title>
+    <meta name="viewport" content="width=device-width" />
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-selector-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-selector-1.0.css"
+    />
+    <style>
+      :root {
+        --space-1: 0.5rem; /* 8px */
+        --space-4: 2rem; /* 32px */
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
+        margin: 2rem;
+        background: #ecf1f3;
+      }
+      .image-selector {
+        display: grid;
+        grid-template-columns: 160px 160px;
+        grid-gap: 10px;
+        margin: 2rem 0;
+      }
+      .image-selector [option][selected] {
+        outline: 4px solid #269da3;
+      }
+      input[type='submit'] {
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        color: #269da3;
+        background: white;
+        font-size: 18px;
+        font-weight: bold;
+        margin-right: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="https://example.com" method="get">
+      <bento-selector class="image-selector" name="example-selector">
+        <img
+          src="https://picsum.photos/160/107?1"
+          width="160"
+          height="107"
+          alt="example image 1"
+          option="1"
+        />
+        <img
+          src="https://picsum.photos/160/107?2"
+          width="160"
+          height="107"
+          alt="example image 2"
+          disabled
+          option="2"
+        />
+        <img
+          src="https://picsum.photos/160/107?3"
+          width="160"
+          height="107"
+          alt="example image 3"
+          option="3"
+        />
+        <img
+          src="https://picsum.photos/160/107?4"
+          width="160"
+          height="107"
+          alt="example image 4"
+          option="4"
+        />
+      </bento-selector>
+      <input type="submit" value="Submit" />
+    </form>
+  </body>
+</html>

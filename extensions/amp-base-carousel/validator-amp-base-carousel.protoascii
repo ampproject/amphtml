@@ -1,0 +1,180 @@
+tags: {  # amp-base-carousel
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-base-carousel"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+# Examples for media query / value pairs:
+# (min-width: 600px) and (min-height: 800px)  false, true
+# (min-width: 600px) false,(min-width: 600px) true,false
+# true
+attr_lists: {
+  name: "amp-base-carousel-common"
+  attrs: {
+    name: "advance-count"
+    # Media query / integer pairs
+    value_regex: "([^,]+\\s+(-?\\d+),\\s*)*(-?\\d+)"
+  }
+  attrs: {
+    name: "auto-advance"
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+  attrs: {
+    name: "auto-advance-count"
+    # Media query / integer pairs
+    value_regex: "([^,]+\\s+(-?\\d+),\\s*)*(-?\\d+)"
+  }
+  attrs: {
+    name: "auto-advance-interval"
+    # Media query / positive integer pairs
+    value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
+  }
+  attrs: {
+    name: "auto-advance-loops"
+    # Media query / positive integer pairs
+    value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
+  }
+  attrs: {
+    name: "controls"
+    # Media query / (always|auto|never)
+    value_regex: "([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)"
+  }
+  attrs: {
+    name: "horizontal" # 0.1 only
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+  attrs: {
+    name: "loop"
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false|^$)"
+  }
+  attrs: {
+    name: "mixed-length"
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+  attrs: {
+    name: "orientation" # 1.0 only
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(horizontal|vertical),\\s*)*(horizontal|vertical)"
+  }
+  attrs: {
+    name: "slide"
+    # Media query / positive integer pairs
+    value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
+  }
+  attrs: {
+    name: "snap"
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+  attrs: {
+    name: "snap-align"
+    # Media query / (start|center) pairs
+    value_regex: "([^,]+\\s+(start|center),\\s*)*(start|center)"
+  }
+  attrs: {
+    name: "snap-by"
+    # Media query / positive integer pairs
+    value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
+  }
+  attrs: {
+    name: "visible-count"
+    # Media query / positive float pairs
+    value_regex: "([^,]+\\s+(\\d+(\\.\\d+)?),\\s*)*(\\d+(\\.\\d+)?)"
+  }
+
+  # amp-bind
+  attrs: { name: "[advance-count]" }
+  attrs: { name: "[auto-advance]" }
+  attrs: { name: "[auto-advance-count]" }
+  attrs: { name: "[auto-advance-interval]" }
+  attrs: { name: "[auto-advance-loops]" }
+  attrs: { name: "[horizontal]" } # 0.1 only
+  attrs: { name: "[loop]" }
+  attrs: { name: "[mixed-length]" }
+  attrs: { name: "[orientation]" } # 1.0 only
+  attrs: { name: "[slide]" }
+  attrs: { name: "[snap]" }
+  attrs: { name: "[snap-align]" }
+  attrs: { name: "[snap-by]" }
+  attrs: { name: "[visible-count]" }
+}
+
+tags: {  # <amp-base-carousel>
+  html_format: AMP
+  tag_name: "AMP-BASE-CAROUSEL"
+  requires_extension: "amp-base-carousel"
+  attr_lists: "amp-base-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-base-carousel/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-base-carousel lightbox>
+  html_format: AMP
+  tag_name: "AMP-BASE-CAROUSEL"
+  spec_name: "AMP-BASE-CAROUSEL [lightbox]"
+  requires_extension: "amp-base-carousel"
+  requires_extension: "amp-lightbox-gallery"
+  attrs: {
+    name: "lightbox"
+    mandatory: true
+  }
+  attr_lists: "amp-base-carousel-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-base-carousel/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+  reference_points: {
+    tag_spec_name: "AMP-BASE-CAROUSEL lightbox [lightbox-exclude]"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-BASE-CAROUSEL lightbox [child]"
+  }
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-BASE-CAROUSEL lightbox [lightbox-exclude]"
+  descriptive_name: "amp-base-carousel [lightbox-exclude] child"
+  attrs: {
+    name: "lightbox-exclude"
+    mandatory: true
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-BASE-CAROUSEL lightbox [child]"
+  descriptive_name: "amp-base-carousel [lightbox-thumbnail-id] child"
+  attrs: {
+    name: "lightbox-thumbnail-id"
+    value_regex_casei: "^[a-z][a-z\\d_-]*"
+  }
+}

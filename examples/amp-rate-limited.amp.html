@@ -1,0 +1,72 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Rate Limited Input Examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+</head>
+<body>
+    <h4>On Change Slider</h4>
+    <p>This slider's value should update on mouse up, after the user finishes dragging the slider.</p>
+    <form method="post"
+      action-xhr="/form/echo-json/post"
+      id="change-slider"
+      target="_blank">
+        <fieldset>
+            <label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="0"
+                  on="change:AMP.setState({rangeValueOnChange: event.value})"
+                  id="range-change">
+                <p id="changeText" [text]="rangeValueOnChange || 0">0</p>
+            </label>
+        </fieldset>
+    </form>
+  <h4>Throttled Slider</h4>
+  <p>This slider's value should update at a throttled rate of once every 100ms, while the user is dragging the slider.</p>
+  <form method="post"
+    action-xhr="/form/echo-json/post"
+    id="throttled-slider"
+    target="_blank">
+      <fieldset>
+          <label>
+              <input
+                type="range"
+                required="required"
+                min="0" max="100"
+                value="0"
+                on="input-throttled:AMP.setState({rangeValueThrottled: event.value})"
+                id="range-throttled">
+              <p id="throttledText" [text]="rangeValueThrottled || 0">0</p>
+          </label>
+      </fieldset>
+  </form>
+  <h4>Debounced Slider</h4>
+  <p>This slider's value should update 300ms after the user stops moving the slider, but not necessarily after mouse up.</p>
+  <form method="post"
+    action-xhr="/form/echo-json/post"
+    id="debounced-slider"
+    target="_blank">
+      <fieldset>
+          <label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value="0"
+                on="input-debounced:AMP.setState({rangeValueDebounced: event.value})"
+                id="range-debounced">
+              <p id="debouncedText" [text]="rangeValueDebounced || 0">0</p>
+          </label>
+      </fieldset>
+  </form>
+</body>
+</html>

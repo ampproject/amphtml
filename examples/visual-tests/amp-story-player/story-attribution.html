@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Story Attribution</title>
+    <script>
+      // TODO(#17108): Remove this when getMode().test is set.
+      __AMP_TEST = true;
+    </script>
+    <script type="module" async src="../../../dist/amp-story-player-v0.mjs"></script>
+    <link href="../../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </head>
+  <body>
+    <h1>Story Attribution:</h1>
+    <amp-story-player style="width: 360px; height: 600px;">
+      <script type="application/json">
+        {
+          "display": {
+            "attribution": "auto"
+          }
+        }
+      </script>
+      <a href="/examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html"
+          class="story">
+        <span class="title">Test one</span>
+      </a>
+    </amp-story-player>
+  </body>
+</html>

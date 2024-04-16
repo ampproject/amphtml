@@ -1,0 +1,404 @@
+tags: {  # amp-story-interactive
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-interactive"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-interactive-quiz>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-QUIZ"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-options-text-attrs"
+  attr_lists: "interactive-options-confetti-attrs"
+  attr_lists: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "option-1-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+  }
+  attrs: {
+    name: "option-2-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+  }
+  attrs: {
+    name: "option-3-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+    trigger: {
+      also_requires_attr: "option-3-text"
+    }
+  }
+  attrs: {
+    name: "option-4-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+    trigger: {
+      also_requires_attr: "option-4-text"
+    }
+  }
+}
+tags: {  # <amp-story-interactive-poll>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-POLL"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-options-text-attrs"
+  attr_lists: "interactive-options-confetti-attrs"
+  attr_lists: "interactive-options-results-category-attrs"
+  attr_lists: "interactive-shared-configs-attrs"
+}
+tags: {  # <amp-story-interactive-binary-poll>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-BINARY-POLL"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "option-1-text"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-2-text"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-1-confetti"
+  }
+  attrs: {
+    name: "option-2-confetti"
+  }
+}
+tags: {  # <amp-story-interactive-results>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-RESULTS"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attrs: {
+    name: "option-1-results-category"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-2-results-category"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-3-results-category"
+  }
+  attrs: {
+    name: "option-4-results-category"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
+  }
+  attrs: {
+    name: "option-1-image"
+  }
+  attrs: {
+    name: "option-2-image"
+  }
+  attrs: {
+    name: "option-3-image"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
+  }
+  attrs: {
+    name: "option-4-image"
+    trigger: {
+      also_requires_attr: "option-4-results-category"
+    }
+  }
+  attrs: {
+    name: "option-1-text"
+  }
+  attrs: {
+    name: "option-2-text"
+  }
+  attrs: {
+    name: "option-3-text"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
+  }
+  attrs: {
+    name: "option-4-text"
+    trigger: {
+      also_requires_attr: "option-4-results-category"
+    }
+  }
+  attrs: {
+    name: "option-1-results-threshold"
+    value_regex: "\\d+(\\.\\d+)?"
+  }
+  attrs: {
+    name: "option-2-results-threshold"
+    value_regex: "\\d+(\\.\\d+)?"
+  }
+  attrs: {
+    name: "option-3-results-threshold"
+    value_regex: "\\d+(\\.\\d+)?"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+    }
+  }
+  attrs: {
+    name: "option-4-results-threshold"
+    value_regex: "\\d+(\\.\\d+)?"
+    trigger: {
+      also_requires_attr: "option-4-results-category"
+    }
+  }
+  attrs: {
+    name: "prompt-text"
+  }
+  attrs: {
+    name: "theme"
+    value: "light"
+    value: "dark"
+  }
+  attrs: {
+    name: "chip-style"
+    value: "flat"
+    value: "transparent"
+  }
+}
+tags: {  # <amp-story-interactive-img-quiz>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-IMG-QUIZ"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-options-img-attrs"
+  attr_lists: "interactive-options-confetti-attrs"
+  attr_lists: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "option-1-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+  }
+  attrs: {
+    name: "option-2-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+  }
+  attrs: {
+    name: "option-3-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+    trigger: {
+      also_requires_attr: "option-3-image"
+    }
+  }
+  attrs: {
+    name: "option-4-correct"
+    mandatory_oneof: "['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']"
+    trigger: {
+      also_requires_attr: "option-4-image"
+    }
+  }
+}
+tags: {  # <amp-story-interactive-img-poll>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-IMG-POLL"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-options-img-attrs"
+  attr_lists: "interactive-options-confetti-attrs"
+  attr_lists: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "option-1-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+    }
+  }
+  attrs: {
+    name: "option-2-results-category"
+    trigger: {
+      also_requires_attr: "option-1-results-category"
+    }
+  }
+  attrs: {
+    name: "option-3-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+      also_requires_attr: "option-3-image"
+    }
+  }
+  attrs: {
+    name: "option-4-results-category"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+      also_requires_attr: "option-4-image"
+    }
+  }
+}
+
+attr_lists: {
+  name: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  attrs: {
+    name: "prompt-text"
+  }
+  attrs: {
+    name: "endpoint"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+  attrs: {
+    name: "theme"
+    value: "light"
+    value: "dark"
+  }
+  attrs: {
+    name: "chip-style"
+    value: "shadow"
+    value: "flat"
+    value: "transparent"
+  }
+  attrs: {
+    name: "prompt-size"
+    value: "small"
+    value: "medium"
+    value: "large"
+  }
+}
+attr_lists: {
+  name: "interactive-options-text-attrs"
+  attrs: {
+    name: "option-1-text"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-2-text"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-3-text"
+  }
+  attrs: {
+    name: "option-4-text"
+    trigger: {
+      also_requires_attr: "option-3-text"
+    }
+  }
+}
+attr_lists: {
+  name: "interactive-options-confetti-attrs"
+  attrs: {
+    name: "option-1-confetti"
+  }
+  attrs: {
+    name: "option-2-confetti"
+  }
+  attrs: {
+    name: "option-3-confetti"
+  }
+  attrs: {
+    name: "option-4-confetti"
+  }
+}
+attr_lists: {
+  name: "interactive-options-results-category-attrs"
+  attrs: {
+    name: "option-1-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+    }
+  }
+  attrs: {
+    name: "option-2-results-category"
+    trigger: {
+      also_requires_attr: "option-1-results-category"
+    }
+  }
+  attrs: {
+    name: "option-3-results-category"
+    trigger: {
+      also_requires_attr: "option-2-results-category"
+      also_requires_attr: "option-3-text"
+    }
+  }
+  attrs: {
+    name: "option-4-results-category"
+    trigger: {
+      also_requires_attr: "option-3-results-category"
+      also_requires_attr: "option-4-text"
+    }
+  }
+}
+tags: {  # <amp-story-interactive-slider>
+  html_format: AMP
+  tag_name: "AMP-STORY-INTERACTIVE-SLIDER"
+  requires_extension: "amp-story-interactive"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "interactive-shared-configs-attrs"
+  attrs: {
+    name: "option-1-text"
+    mandatory: false
+  }
+}
+attr_lists: {
+  name: "interactive-options-img-attrs"
+  attrs: {
+    name: "option-1-image"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "option-2-image"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "option-3-image"
+    trigger: {
+      also_requires_attr: "option-3-image-alt"
+    }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "option-4-image"
+    trigger: {
+      also_requires_attr: "option-3-image"
+      also_requires_attr: "option-4-image-alt"
+    }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "option-1-image-alt"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-2-image-alt"
+    mandatory: true
+  }
+  attrs: {
+    name: "option-3-image-alt"
+    trigger: {
+      also_requires_attr: "option-3-image"
+    }
+  }
+  attrs: {
+    name: "option-4-image-alt"
+    trigger: {
+      also_requires_attr: "option-4-image"
+    }
+  }
+}

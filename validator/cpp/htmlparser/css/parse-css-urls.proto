@@ -1,0 +1,42 @@
+syntax = "proto2";
+
+package htmlparser.css.url;
+
+message TokenType {
+  enum Code {
+    UNKNOWN = 0;
+
+    // Tokens produced by the tokenize
+    // method.
+    AT_KEYWORD = 1;
+    CDC = 2;  // -->
+    CDO = 3;  // <!--
+    CLOSE_CURLY = 4;
+    CLOSE_PAREN = 5;
+    CLOSE_SQUARE = 6;
+    COLON = 7;
+    COLUMN = 8;  // ||
+    COMMA = 9;
+    DASH_MATCH = 10;  // |=
+    DELIM = 11;
+    DIMENSION = 12;
+    EOF_TOKEN = 13;  // Can't call this EOF due to symbol conflict in C.
+    ERROR = 14;
+    FUNCTION_TOKEN = 15;
+    HASH = 16;
+    IDENT = 17;
+    INCLUDE_MATCH = 18;  // ~=
+    NUMBER = 19;
+    OPEN_CURLY = 20;
+    OPEN_PAREN = 21;
+    OPEN_SQUARE = 22;
+    PERCENTAGE = 23;
+    PREFIX_MATCH = 24;  // ^=
+    SEMICOLON = 25;
+    STRING = 26;
+    SUBSTRING_MATCH = 27;  // *=
+    SUFFIX_MATCH = 28;     // $=
+    URL = 29;
+    WHITESPACE = 30;
+  }
+}

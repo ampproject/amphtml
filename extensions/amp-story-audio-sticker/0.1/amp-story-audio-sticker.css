@@ -1,0 +1,105 @@
+.i-amphtml-amp-story-audio-sticker-component {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  align-content: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-tap-hint {
+  width: 110px !important;
+  height: 38.33px !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="110" height="39" viewBox="0 0 110 39" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(#filter0_b_2402_31756)"><path fill-rule="evenodd" clip-rule="evenodd" d="M16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32H19.75L24.2 37.9333C24.6 38.4667 25.4 38.4667 25.8 37.9333L30.25 32H94C102.837 32 110 24.8366 110 16C110 7.16344 102.837 0 94 0H16Z" fill="#4D4D4D" fill-opacity="0.4"/></g><defs><filter id="filter0_b_2402_31756" x="-15" y="-15" width="140" height="68.3333" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feGaussianBlur in="BackgroundImageFix" stdDeviation="7.5"/><feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_2402_31756"/><feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_2402_31756" result="shape"/></filter></defs></svg>') !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-bottom: 4px !important;
+  transition: opacity 0.5s ease !important;
+}
+
+amp-story:not([muted]) .i-amphtml-amp-story-audio-sticker-tap-hint {
+  opacity: 0 !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-tap-hint span {
+  margin-bottom: 6px !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container {
+  position: relative !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container.large {
+  width: 180px !important;
+  height: 180px !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container.small {
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container * {
+  pointer-events: none !important;
+}
+
+amp-story-audio-sticker {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important; /* Set the maximum width of the image to 100% to ensure it fits within the container */
+  max-height: 100% !important; /* Set the maximum height of the image to 100% to ensure it fits within the container */
+  transition: transform 0.5s ease !important;
+}
+
+amp-story-audio-sticker:active {
+  transform: scale(0.8) !important;
+}
+
+amp-story[muted] amp-story-audio-sticker {
+  pointer-events: auto !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container.large amp-story-audio-sticker {
+  border-radius: 40px !important;
+}
+
+.i-amphtml-amp-story-audio-sticker-container.small amp-story-audio-sticker {
+  border-radius: 25px !important;
+}
+
+amp-story-audio-sticker[sticker-style="outline"] {
+  box-shadow: inset 0 0 0 4px var(--story-audio-sticker-outline-color, white) !important;
+}
+
+amp-story-audio-sticker[sticker-style="dropshadow"] {
+  filter: drop-shadow(4px 4px 20px var(--story-audio-sticker-dropshadow-color, white)) !important;
+}
+
+/*
+  Hide the sticker after the story gets unmuted:
+  1) if the sticker is on the active page, hide it after showing posttap sticker for 4 seconds.
+  2) if the sticker is not on the active page, hide it immediately since it is in the background.
+*/
+amp-story:not([muted]) amp-story-page[active] amp-story-audio-sticker {
+  transition: transform 0.5s ease, opacity 0.5s ease 4s !important;
+}
+amp-story:not([muted]) amp-story-audio-sticker {
+  opacity: 0 !important;
+}
+
+amp-story-audio-sticker > * {
+  position: absolute !important; /* Child divs should have absolute position to make them stacked */
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+amp-story:not([muted]) amp-story-audio-sticker-pretap, amp-story[muted] amp-story-audio-sticker-posttap {
+  opacity: 0 !important;
+}

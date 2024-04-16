@@ -1,0 +1,41 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <title>amp-story-grid-layer[template="fill"] visual diff</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="./template-vertical.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-story-page {
+        background: yellow;
+      }
+    </style>
+    <script>
+      // TODO(#17108): Remove this when getMode().test is set.
+      __AMP_TEST = true;
+    </script>
+  </head>
+
+  <body>
+    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+        publisher-logo-src="/examples/visual-tests/photos/120.png"
+        poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
+        poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+        poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg">
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg">
+          </amp-img>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+    </amp-story>
+  </body>
+
+</html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html amp4email>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+</head>
+<body>
+  <amp-state id="fruit">
+    <script type="application/json">{"items": ["apple"] }</script>
+  </amp-state>
+  <amp-list layout="fixed-height" src="amp-state:fruit" height="100px">
+    <template type="amp-mustache">
+      <span class="fruit">{{.}}</span>
+    </template>
+  </amp-list>
+</amp-img>
+</body>
+</html>

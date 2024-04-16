@@ -1,0 +1,30 @@
+<!--
+  Test Description:
+  This is the minimum valid AMP document; it includes all of the required
+  fields from the spec, but nothing else.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- These two duplicate a custom-element attribute used as a dispatch key -->
+  <script async custom-element="amp-image-lightbox" custom-element="duplicate" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+  <script async custom-element="duplicate" custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+
+</head>
+<body>
+
+   <!-- 600 width is legal given the implied layout, but 100% is not -->
+   <amp-img src="a.png" width='100%' width=600 height=800></amp-img>
+   <amp-img src="a.png" width=600 width='100%' height=800></amp-img>
+
+   <!-- Let's make sure the script type can't be overridden -->
+   <script type="application/ld+json" type="text/javascript">{}</script>
+   <script type="text/javascript" type="application/ld+json">{}</script>
+
+</body>
+</html>

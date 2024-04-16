@@ -1,0 +1,107 @@
+
+.i-amphtml-video-mask {
+  display: block;
+  z-index: 1;
+  appearance: none;
+  background: transparent;
+  border: none;
+}
+
+
+/**
+ * Animated equalizer icon for muted autoplaying videos.
+ *
+ * The equalizer icon is shown in the following scenarios:
+ *  1. when the `controls` attribute is set OR
+ *  2. the video is inside an `<amp-story>` element.
+ *
+ * Neither applies if the video is tagged with the `noaudio` attribute, in which
+ * case the icon is never displayed.
+ */
+
+.amp-video-eq {
+  display: none;
+}
+
+amp-video[controls] .amp-video-eq,
+.i-amphtml-video-interface:not(amp-video) .amp-video-eq,
+amp-story .amp-video-eq {
+  display: flex;
+}
+
+[noaudio] .amp-video-eq {
+  display: none !important;
+}
+
+.amp-video-eq {
+  /* Skip pointer events to catch click on parent. */
+  pointer-events: none !important;
+  align-items: flex-end;
+  bottom: 7px;
+  height: 12px;
+  opacity: 0.8;
+  overflow: hidden;
+  position: absolute;
+  right: 7px;
+  width: 20px;
+  z-index: 1;
+}
+.amp-video-eq-col {
+  flex: 1;
+  height: 100%;
+  margin-right: 1px;
+  position: relative;
+}
+.amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  background-color: #FAFAFA;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  will-change: transform;
+}
+.amp-video-eq-col div {
+  animation-play-state: paused;
+}
+.amp-video-eq-play .amp-video-eq-col div {
+  animation-play-state: running;
+}
+.amp-video-eq-1-1 {
+  animation-duration: 0.3s;
+  transform: translateY(60%);
+}
+.amp-video-eq-1-2 {
+  animation-duration: 0.45s;
+  transform: translateY(60%);
+}
+.amp-video-eq-2-1 {
+  animation-duration: 0.5s;
+  transform: translateY(30%);
+}
+.amp-video-eq-2-2 {
+  animation-duration: 0.4s;
+  transform: translateY(30%);
+}
+.amp-video-eq-3-1 {
+  animation-duration: 0.3s;
+  transform: translateY(70%);
+}
+.amp-video-eq-3-2 {
+  animation-duration: 0.35s;
+  transform: translateY(70%);
+}
+.amp-video-eq-4-1 {
+  animation-duration: 0.4s;
+  transform: translateY(50%);
+}
+.amp-video-eq-4-2 {
+  animation-duration: 0.25s;
+  transform: translateY(50%);
+}
+@keyframes amp-video-eq-animation {
+  0% {transform: translateY(100%);}
+  100% {transform: translateY(0);}
+}

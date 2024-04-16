@@ -1,0 +1,95 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-lightbox-gallery tag. See inline comments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+|    <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+|    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+|    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+|    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+|
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox="a"></amp-img>
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>
+|
+|    <!-- Invalid: missing value for lightbox-thumbnail-id -->
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
+>>   ^~~~~~~~~
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:27:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img/)
+|    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
+|
+|    <!-- Valid -->
+|    <amp-video
+|      lightbox
+|      src="../av/ForBiggerJoyrides-short.mp4"
+|      width="720"
+|      height="405"
+|      layout="responsive"
+|      controls></amp-video>
+|    <amp-youtube
+|      lightbox
+|      data-videoid="lBTCB7yLs8Y"
+|      width="358"
+|      height="204"
+|      layout="responsive"></amp-youtube>
+|
+|    <!-- Valid -->
+|    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox></amp-carousel>
+|    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
+|        <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
+|        <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
+|    </amp-carousel>
+|    <amp-carousel width=400 height=300 layout=responsive type=slides>
+|        <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
+|        <amp-img src="/awesome.png" width="300" height="300"></amp-img>
+|    </amp-carousel>
+|
+|   <!-- Valid: carousel with video, img, youtube, ad -->
+|    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
+|      <amp-video
+|        src="../av/ForBiggerJoyrides-short.mp4"
+|        width="720"
+|        height="405"
+|        layout="responsive"
+|        controls></amp-video>
+|      <amp-youtube
+|        lightbox-thumbnail-id="a"
+|        data-videoid="lBTCB7yLs8Y"
+|        width="358"
+|        height="204"
+|        layout="responsive"></amp-youtube>
+|      <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
+|      <amp-ad width="300"
+|        height="250"
+|        type="a9"
+|        data-aax_size="300x250"
+|        data-aax_pubname="test123"
+|        data-aax_src="302">
+|      </amp-ad>
+|    </amp-carousel>
+|
+|    <!-- Invalid: missing value for lightbox-thumbnail-id -->
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
+>>   ^~~~~~~~~
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:82:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img/)
+|    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
+|    <!-- Invalid: invalid use of lightbox-exclude -->
+|    <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
+>>   ^~~~~~~~~
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:86:2 The attribute 'lightbox-exclude' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img/)
+|  </body>
+|  </html>

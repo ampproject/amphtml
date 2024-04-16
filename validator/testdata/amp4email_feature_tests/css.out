@@ -1,0 +1,44 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests the CSS restrictions that exist for AMP4Email.
+|  -->
+|  <!doctype html>
+|  <html ⚡4email>
+>> ^~~~~~~~~
+amp4email_feature_tests/css.html:6:0 Tag 'html' marked with attribute 'amp4email' is missing the corresponding attribute 'data-css-strict' for enabling strict CSS validation. This may become an error in the future. (see https://github.com/ampproject/amphtml/issues/32587)
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <style amp-custom>
+|      /* media queries are allowed */
+|      @media screen {}
+|
+|      /* all other @ rules are banned */
+|      @supports (display: flex) {}
+>>     ^~~~~~~~~
+amp4email_feature_tests/css.html:16:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@supports'.
+|      @font-face {}
+>>     ^~~~~~~~~
+amp4email_feature_tests/css.html:17:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@font-face'.
+|      @keyframes slidein {}
+>>     ^~~~~~~~~
+amp4email_feature_tests/css.html:18:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@keyframes'.
+|      @invalid {}
+>>     ^~~~~~~~~
+amp4email_feature_tests/css.html:19:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@invalid'.
+|
+|      /* Unless data-css-strict is specified, there are no rules specified on selelectors. */
+|      .a[otherwisevalid] {}
+|      .a:otherwiseinvalid {}
+|      .a::otherwiseinvalid {}
+|
+|      /* And vendor-prefixes are automatically expanded and allowed */
+|      .a { -webkit-margin: 1px; }
+|    </style>
+|  </head>
+|  <body>
+|  Test body.
+|  </body>
+|  </html>

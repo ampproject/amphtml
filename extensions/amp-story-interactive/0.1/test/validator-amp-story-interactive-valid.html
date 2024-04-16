@@ -1,0 +1,131 @@
+<!--
+  Test Description:
+  One correct component of each type: binary-poll, poll, quiz, image poll, image quiz, results
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>STAMP examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+</head>
+<body>
+  <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/portrait.jpg" poster-square-src="http://me.com/square.jpg" poster-landscape-src="http://me.com/landscape.jpg" background-audio="http://me.com/path/to/my.mp3" entity="Someone else" entity-logo-src="http://someoneelse.com/logo.png" entity-url="http://someoneelse.com/profile">
+    <amp-story-page id="1">
+      <amp-story-grid-layer template="fill">
+        <!-- Valid: Example of amp-story-interactive-poll -->
+        <amp-story-interactive-poll
+          id="correct-poll"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          theme="dark"
+          chip-style="shadow"
+          class="nice-quiz"
+          prompt-text="What country do you like the most?"
+          option-1-text="France" option-1-confetti="🇺🇾" option-1-results-category="Dog"
+          option-2-text="Spain" option-2-confetti="🇺🇾" option-2-results-category="Cat"
+          option-3-text="Uruguay" option-3-confetti="🇺🇾" option-3-results-category="Bunny"
+          option-4-text="Brazil" option-4-confetti="🇺🇾" option-4-results-category="Mouse">
+        </amp-story-interactive-poll>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="2">
+      <amp-story-grid-layer template="fill">
+        <!-- Valid: Example of amp-story-interactive-binary-poll -->
+        <amp-story-interactive-binary-poll
+          id="correct-binary-poll"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          theme="dark"
+          class="cool-binary-poll"
+          option-1-text="France" option-1-confetti="🇺🇾"
+          option-2-text="Spain" option-2-confetti="🇺🇾">
+        </amp-story-interactive-binary-poll>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="3">
+      <amp-story-grid-layer template="fill">
+        <!-- Valid: Example of amp-story-interactive-quiz -->
+        <amp-story-interactive-quiz
+          id="correct-quiz"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          theme="dark"
+          class="cool-quiz"
+          prompt-text="What is the southest country in the list?"
+          option-1-text="Uruguay" option-1-confetti="🇺🇾" option-1-correct
+          option-2-text="Spain">
+        </amp-story-interactive-quiz>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="4">
+      <amp-story-grid-layer template="fill">
+        <!-- Valid: Example of amp-story-interactive-img-poll -->
+        <amp-story-interactive-img-poll
+          id="correct-img-poll"
+          prompt-text="Which of these places would you travel to first?"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          option-1-image="https://images.com/1"
+          option-1-image-alt="Lake Tahoe"
+          option-1-results-category="Lake lover"
+          option-2-image="https://images.com/2"
+          option-2-image-alt="Hong Kong"
+          option-2-results-category="City-goer"
+          option-3-image="https://images.com/3"
+          option-3-image-alt="Hawaii"
+          option-3-results-category="Tropical explorer"
+          option-4-image="https://images.com/4"
+          option-4-image-alt="Grand Canyon"
+          option-4-results-category="National Park lover">
+        </amp-story-interactive-img-poll>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="5">
+      <amp-story-grid-layer template="fill">
+        <!-- Valid: Example of amp-story-interactive-img-quiz -->
+        <amp-story-interactive-img-quiz
+          id="correct-img-quiz"
+          prompt-text="Which of these structures is oldest?"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          option-1-image="https://images.com/1"
+          option-1-image-alt="Statue of Liberty"
+          option-1-correct
+          option-2-image="https://images.com/2"
+          option-2-image-alt="Golden Gate Bridge"
+          option-3-image="https://images.com/3"
+          option-3-image-alt="Christ the Redeemer"
+          option-4-image="https://images.com/4"
+          option-4-image-alt="Eiffel Tower">
+        </amp-story-interactive-img-quiz>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="6">
+      <amp-story-grid-layer template="fill">
+      <!-- Valid: Example of amp-story-interactive-results -->
+        <amp-story-interactive-results
+          theme="dark"
+          class="cool-results"
+          prompt-text="You should go to"
+          option-1-results-category="Dog" option-1-text="Uruguay"
+          option-2-results-category="Cat" option-2-text="Spain">
+        </amp-story-interactive-results>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="7">
+      <amp-story-grid-layer template="fill">
+      <!-- Valid: Example of amp-story-interactive-slider -->
+        <amp-story-interactive-slider
+          id="slider"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          theme="dark"
+          class="cool-results"
+          prompt-text="You should go to"
+          option-1-text="👍">
+        </amp-story-interactive-results>
+      </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
+</body>
+</html>

@@ -1,0 +1,115 @@
+tags: {  # amp-bind
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-bind"
+    version: "0.1"
+    version: "latest"
+    # amp-bind has no associated tag which indicates usage of the extension.
+    # TODO(gregable): Implement a mechanism to associate attributes with
+    # extension usage and then set this to EXEMPTED or ERROR.
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-bind
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-bind] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-bind"
+    # AMP4EMAIL doesn't allow version: "latest"
+    version: "0.1"
+    # amp-bind has no associated tag which indicates usage of the extension.
+    # TODO(gregable): Implement a mechanism to associate attributes with
+    # extension usage and then set this to EXEMPTED or ERROR.
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-state> (json)
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "amp-bind extension .json script"
+  requires_extension: "amp-bind"
+  mandatory_parent: "AMP-STATE"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    max_bytes: 100000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-bind#state"
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-bind/"
+}
+tags: {  # <amp-state>
+  html_format: AMP
+  tag_name: "AMP-STATE"
+  spec_name: "amp-state"
+  requires_extension: "amp-bind"
+  attrs: {
+    name: "credentials"
+  }
+  attrs: {
+    name: "overridable"
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "mandatory-id-attr"
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  child_tags: {
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-bind/"
+}
+# AMP4ADS and AMP4EMAIL enforces the the same restrictions on the 'src'
+# attribute of AMP-IMG and AMP-LIST on the src attribute of AMP-STATE. Use of
+# 'credential' is disallowed.
+tags: {  # <amp-state>
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  tag_name: "AMP-STATE"
+  spec_name: "amp-state (AMP4EMAIL)"
+  requires_extension: "amp-bind"
+  disallowed_ancestor: "AMP-LIST"
+  disallowed_ancestor: "AMP-STATE"
+  disallowed_ancestor: "TEMPLATE"
+  attr_lists: "mandatory-id-attr"
+  child_tags: {
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-bind/"
+}
+tags: {  # <amp-bind-macro>
+  html_format: AMP
+  html_format: AMP4EMAIL
+  tag_name: "AMP-BIND-MACRO"
+  requires_extension: "amp-bind"
+  attrs: {
+    name: "arguments"
+  }
+  attrs: {
+    name: "expression"
+    mandatory: true
+  }
+  attr_lists: "mandatory-id-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-bind/"
+}

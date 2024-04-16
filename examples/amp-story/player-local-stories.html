@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Story Player (Non-AMP)</title>
+    <script async src="../../dist/amp-story-player.js"></script>
+    <link href="../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <style injected>
+      .story-player-iframe {
+        background-size: cover;
+        display: block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
+      }
+
+      .title {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 40px;
+        padding: 88px 32px 32px 32px;
+        line-height: 1.25;
+        text-shadow: 3px 3px #000;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </head>
+  <body>
+    <h1>This is a NON-AMP page that embeds story players!</h1>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+
+    <h1>Below demonstrates a fixed width(full screen mode) embedded player: </h1>
+    <amp-story-player style="width: 360px; height: 600px;">
+        <a href="./ampconf.html">
+          <img src="./img/overview.jpg" loading="lazy" data-amp-story-player-poster-img width="360" height="600"></img>
+          <span class="title">A local’s guide to what to eat and do in New York City</span>
+        </a>
+        <a href="./attachment.html">
+          <span class="title">A local’s guide to what to eat and do in Miami</span>
+        </a>
+        <a href="./videos.html">
+          <span class="title">A local’s guide to what to eat and do in Mexico City</span>
+        </a>
+        <a href="./amp-story-animation.html">
+          <span class="title">A local’s guide to what to eat and do in Rome</span>
+        </a>
+    </amp-story-player>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+
+    <h1>Below demonstrates a dynamic width(full screen or panel mode) embedded player: </h1>
+    <amp-story-player style="width: 100%; height: 600px;">
+      <a href="./amp-story-desktop-custom-aspect-ratio.html">
+        <img src="./img/overview.jpg" loading="lazy" data-amp-story-player-poster-img width="360" height="600"></img>
+        <span class="title">A local’s guide to what to eat and do in New York City</span>
+      </a>
+      <a href="./ampconf.html">
+        <img src="./img/overview.jpg" loading="lazy" data-amp-story-player-poster-img width="360" height="600"></img>
+        <span class="title">A local’s guide to what to eat and do in New York City</span>
+      </a>
+      <a href="./attachment.html">
+        <span class="title">A local’s guide to what to eat and do in Miami</span>
+      </a>
+      <a href="./videos.html">
+        <span class="title">A local’s guide to what to eat and do in Mexico City</span>
+      </a>
+      <a href="./amp-story-animation.html">
+        <span class="title">A local’s guide to what to eat and do in Rome</span>
+      </a>
+  </amp-story-player>
+  </body>
+</html>

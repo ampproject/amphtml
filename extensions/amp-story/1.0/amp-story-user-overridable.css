@@ -1,0 +1,51 @@
+
+
+amp-story {
+  font-display: optional;
+}
+
+amp-story-grid-layer:not([aspect-ratio]):not([preset]) {
+  overflow: hidden;
+}
+
+amp-story-grid-layer * {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+[template="fill"] amp-anim img,
+[template="fill"] amp-img img,
+[template="fill"] amp-video video,
+.i-amphtml-story-grid-template-with-full-bleed-animation amp-img img {
+  object-fit: cover;
+}
+
+[template="vertical"] {
+  align-content: start;
+  grid-gap: 16px;
+  justify-content: stretch;
+  justify-items: start;
+}
+
+[template="vertical"] > * {
+  width: 100%;
+}
+
+[template="horizontal"] {
+  align-content: stretch;
+  align-items: start;
+  grid-gap: 16px;
+  justify-content: start;
+}
+
+amp-story-grid-layer {
+  padding: 68px 32px 32px; /* 44 + 24 */
+}
+
+amp-story-grid-layer.i-amphtml-story-has-page-attachment.i-amphtml-story-has-interactive {
+  padding-bottom: 104px;
+}
+
+amp-story-grid-layer.i-amphtml-story-has-CTA-layer.i-amphtml-story-has-interactive {
+  padding-bottom: 20%;
+}

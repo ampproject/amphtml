@@ -1,0 +1,99 @@
+<!-- Use #load=first to enable the experiment. -->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="lcp.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>LCP test</title>
+
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    * {
+      box-sizing: border-box;
+    }
+    amp-story-page {
+      font-family: 'Source Sans Pro', sans-serif;
+      color: white;
+      background: black;
+    }
+    code {
+      font-family: 'Source Code Pro', monospace;
+      background: #fff2;
+    }
+    amp-story p {
+      line-height: 1.5;
+    }
+    .bold {
+      font-weight: bold;
+    }
+    .bottom {
+      align-content: end;
+    }
+    .last {
+      padding-bottom: 8.83vh;
+    }
+    .byline {
+      letter-spacing: 1.28px;
+    }
+    amp-img {
+      margin: 1em;
+      margin-bottom: 5em;
+    }
+  </style>
+</head>
+  <body>
+    <amp-story standalone id="cats"
+        title="LCP test" publisher="The AMP team"
+        publisher-logo-src="./img/amplogo.png"
+        poster-portrait-src="./img/overview.jpg">
+
+      <amp-story-page id="page-1" title="Lorem ipsum dolor sit amet">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=1750&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p class="bold">LCP for images (uncompressed)</p>
+          <p class="byline">Add <code>#load=first</code> to activate experiment</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img2"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1502318217862-aa4e294ba657?w=1080&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img3"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1513809491260-0e192158ae44?w=1080&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

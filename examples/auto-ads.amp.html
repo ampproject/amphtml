@@ -1,0 +1,102 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>AMP #0</title>
+    <link rel="canonical" href="http://amp.autoplaced.com" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script id="amp-access" type="application/json">
+      {
+        "authorization": "https://ampbyexample.com/components/amp-access/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+        "pingback": "https://ampbyexample.com/components/amp-access/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+        "login": "https://ampbyexample.com/components/amp-access/login?rid=READER_ID&url=CANONICAL_URL",
+        "authorizationFallbackResponse": {"error": true}
+      }
+    </script>
+    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
+    <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style>
+
+      body {
+        font-family: Arial;
+      }
+
+      header {
+        margin-bottom: 15px;
+      }
+
+      h1 {
+        width: 80%;
+        margin: 0px auto;
+        font-size: 40px;
+        color: #000;
+        text-align: center;
+        font-weight: normal;
+        margin-top: 60vh;
+      }
+
+      /* Shifting page content to the left to verify that the ad unit is still
+       * displayed correctly with no shift, occupying exactly the full width
+       * of the viewport.
+       */
+      .with-left-margin {
+        margin-left: 15px;
+      }
+
+      .main-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .main-content p {
+        float: left;
+        margin: 20px 30px;
+        font-size: 14px;
+      }
+
+      .main-content amp-img {
+         margin: 20px 0px;
+      }
+
+      #footer {
+        width: 100%;
+        height: 30px;
+        background-color: #ababab;
+        font-size: 12px;
+        color: #fff;
+        text-align: center;
+        line-height: 30px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <amp-auto-ads amp-access="FALSE" amp-access-hide type="adsense" data-ad-client="ca-pub-5439573510495356"></amp-auto-ads>
+    <header>
+      <amp-img layout="responsive" id="header-img" src="img/hero@2x.jpg" width="1200" height="900"></amp-img>
+    </header>
+    <h1>Title of Page</h1>
+    <div class="with-left-margin">
+      <div class="main-content">
+        <p>
+          Lorem ipsum dolor sit amet, has te dico epicuri, ad sumo constituam cum. Vix rebum partem graecis in, id legimus lobortis expetendis per. Zril tritani principes has in. Sea ei exerci ridens vituperatoribus. Id inermis invenire mei, ei iudico epicuri mea. Ad eos debet perfecto volutpat, suas error usu ut, est everti comprehensam no.
+        </p>
+        <p>
+          Dolor numquam consulatu ne cum, ei sed essent appellantur, eam et appetere partiendo. Vim mucius vituperatoribus ut. Consul virtute eum id, has no postulant dissentiet. Errem tibique copiosae ut has, ut labore nemore assentior per.
+        </p>
+        <p>
+          Essent signiferumque necessitatibus in mea. Sit minim petentium dissentiunt ei, ius inimicus mnesarchum ut. Errem maiestatis cu nec, dolor nusquam interesset ut qui. Mea in eripuit blandit complectitur. An eos recteque adversarium.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, has te dico epicuri, ad sumo constituam cum. Vix rebum partem graecis in, id legimus lobortis expetendis per. Zril tritani principes has in. Sea ei exerci ridens vituperatoribus. Id inermis invenire mei, ei iudico epicuri mea. Ad eos debet perfecto volutpat, suas error usu ut, est everti comprehensam no.
+        </p>
+        <p>
+          Dolor numquam consulatu ne cum, ei sed essent appellantur, eam et appetere partiendo. Vim mucius vituperatoribus ut. Consul virtute eum id, has no postulant dissentiet. Errem tibique copiosae ut has, ut labore nemore assentior per.
+        </p>
+      </div>
+    </div>
+    <div id="footer">Powered by AMP</div>
+  </body>
+</html>

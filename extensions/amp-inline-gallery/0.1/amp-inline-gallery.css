@@ -1,0 +1,14 @@
+
+
+amp-inline-gallery {
+  --i-amphtml-caption-height: 0px;
+}
+
+amp-inline-gallery > amp-base-carousel {
+  padding-bottom: var(--i-amphtml-caption-height);
+}
+
+amp-inline-gallery .i-amphtml-base-carousel-arrow-prev-slot,
+amp-inline-gallery .i-amphtml-base-carousel-arrow-next-slot {
+  margin-bottom: var(--i-amphtml-caption-height);
+}

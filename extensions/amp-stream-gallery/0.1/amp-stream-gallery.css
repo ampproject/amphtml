@@ -1,0 +1,25 @@
+
+
+@import "../../amp-base-carousel/0.1/carousel.css";
+@import "arrows.css";
+
+amp-stream-gallery .i-amphtml-carousel-content {
+  display: flex;
+}
+
+.i-amphtml-stream-gallery-slides {
+  order: 1;
+  flex-grow: 1;
+  min-width: 1px;
+}
+
+[i-amphtml-stream-gallery-extra-space="around"] {
+  justify-content: center;
+}
+
+amp-stream-gallery .i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
+}

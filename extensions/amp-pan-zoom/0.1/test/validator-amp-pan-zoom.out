@@ -1,0 +1,71 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests support for the amp-pan-zoom tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid basic examples with different layouts -->
+|    <amp-pan-zoom layout="responsive" width="1" height="1">
+|      <amp-img id="img0"
+|        src="/examples/img/sample.jpg"
+|        width="641" height="481" layout="fixed"></amp-img>
+|    </amp-pan-zoom>
+|
+|    <amp-pan-zoom layout="fixed" width="100" height="100">
+|      <div></div>
+|    </amp-pan-zoom>
+|
+|    <amp-pan-zoom layout="fixed-height" height="100">
+|      <svg></svg>
+|    </amp-pan-zoom>
+|
+|    <amp-pan-zoom layout="fill" disable-double-tap>
+|      <div></div>
+|    </amp-pan-zoom>
+|
+|    <!-- Valid configured example -->
+|    <amp-pan-zoom layout="responsive"
+|      width="1"
+|      height="1"
+|      reset-on-resize
+|      initial-x="10"
+|      initial-y="2"
+|      initial-scale="2"
+|      max-scale="3">
+|        <amp-img id="img0"
+|          src="/examples/img/sample.jpg"
+|          width="641" height="481" layout="fixed"></amp-img>
+|    </amp-pan-zoom>
+|
+|      <!-- Invalid configuration example -->
+|      <amp-pan-zoom layout="responsive"
+>>     ^~~~~~~~~
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:50:4 The attribute 'initial-scale' in tag 'amp-pan-zoom' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-pan-zoom)
+>>     ^~~~~~~~~
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:50:4 The attribute 'initial-x' in tag 'amp-pan-zoom' is set to the invalid value 'abc'. (see https://amp.dev/documentation/components/amp-pan-zoom)
+>>     ^~~~~~~~~
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:50:4 The attribute 'initial-y' in tag 'amp-pan-zoom' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-pan-zoom)
+>>     ^~~~~~~~~
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:50:4 The attribute 'max-scale' in tag 'amp-pan-zoom' is set to the invalid value '3ex3'. (see https://amp.dev/documentation/components/amp-pan-zoom)
+|        width="1"
+|        height="1"
+|        initial-x="abc"
+|        initial-y
+|        initial-scale=""
+|        max-scale="3ex3">
+|        <amp-img id="img0"
+|          src="/examples/img/sample.jpg"
+|          width="641" height="481" layout="fixed"></amp-img>
+|      </amp-pan-zoom>
+|  </body>
+|  </html>

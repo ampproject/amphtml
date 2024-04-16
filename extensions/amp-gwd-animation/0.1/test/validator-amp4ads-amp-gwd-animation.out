@@ -1,0 +1,14 @@
+PASS
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|    <script async custom-element="amp-gwd-animation" src="https://cdn.ampproject.org/v0/amp-gwd-animation-0.1.js"></script>
+|  </head>
+|  <body>
+|    <amp-gwd-animation layout="nodisplay" timeline-event-prefix="tl_"></amp-gwd-animation>
+|  </body>
+|  </html>

@@ -1,0 +1,78 @@
+# This is a configuration file for a Lando-based local dev environment for amphtml.
+# It is an alternative to the existing local development environment to what is described in the Getting Started
+# End-to-end guide <https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md>.
+#
+# This environment allows you to encapsulate the amphtml development environment inside of a Docker container.
+# Instead of accessing <http://localhost:8000>, this environment can be accessed via <https://amphtml.lando.site>.
+#
+# Getting started:
+# 1. Install the latest release of Lando per <https://docs.lando.dev/basics/installation.html>.
+# 2. You should also add this entry to your /etc/hosts file:
+#    127.0.0.1 amphtml.lndo.site
+# 3. Trust the default Lando CA on your machine so you can access amphtml.lando.site without any SSL warnings.
+#    See <https://docs.devwithlando.io/config/security.html#ssltls>.
+# 4. Run `lando start`.
+# 5. You should then be able to access <https://amphtml.lando.site> in your browser.
+# 6. If using the Local AMP Chrome Extension, open the popup and configure the Base URL to be https://amphtml.lando.site/
+#
+# Now instead of running `amp` commands directly, you instead run `lando amp`. Additionally, some of the common amp
+# commands have shortcuts, so you can run `lando watch` instead of `lando amp build --watch`. For a full list of the
+# shortcuts run `lando help`.
+#
+# For details on the file format, see <https://docs.lando.dev/config/lando.html>.
+# For more context on this Lando environment for amphtml, see <https://github.com/ampproject/amphtml/pull/23213>.
+
+name: amphtml
+
+services:
+  appserver:
+    type: node
+    install_dependencies_as_root:
+      - apt-get update && apt-get install -y openjdk-8-jdk && apt-get install -y ant && apt-get clean
+      - apt-get install -y openjdk-7-jre protobuf-compiler python2.7 python-protobuf
+    build:
+      - npm install
+    run_as_root:
+      - echo "127.0.0.1 amphtml.lndo.site" >> /etc/hosts
+    command: cd /app && amp serve --port=80 --host=0.0.0.0
+
+tooling:
+  amp:
+    service: appserver
+    cmd: 'amp'
+  watch:
+    service: appserver
+    cmd: 'amp build --watch'
+    description: 'Builds unminified code, watches for changes in files, re-builds when detected'
+  watch-minified:
+    service: appserver
+    cmd: 'amp dist --watch'
+    description: 'Builds minified code, watches for changes in files, re-builds when detected'
+  lint:
+    service: appserver
+    cmd: 'amp lint'
+    description: 'Validates against Google Closure Linter'
+  check-types:
+    service: appserver
+    cmd: 'amp check-types'
+    description: 'Check source code for JS type errors'
+  dist:
+    service: appserver
+    cmd: 'amp dist'
+    description: 'Build production binaries'
+  unit:
+    service: appserver
+    cmd: 'amp unit'
+    description: 'Run unit tests'
+  integration:
+    service: appserver
+    cmd: 'amp integration'
+    description: 'Run integration tests'
+  e2e:
+    service: appserver
+    cmd: 'amp e2e'
+    description: 'Runs e2e tests'
+
+proxy:
+  appserver:
+    - amphtml.lndo.site

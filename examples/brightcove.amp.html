@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Brightcove Player Example</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+    <script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+    <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-custom>
+      body {
+        max-width: 527px;
+        font-family: Arial;
+      }
+      .spacer {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Brightcove Player</h2>
+    <amp-brightcove
+      id="myPlayer"
+      data-referrer="EXTERNAL_REFERRER"
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player-id="SyIOV8yWM"
+      layout="responsive"
+      width="480"
+      height="270"
+    >
+    </amp-brightcove>
+    <h2>Actions</h2>
+    <button on="tap:myPlayer.play">Play</button>
+    <button on="tap:myPlayer.pause">Pause</button>
+    <button on="tap:myPlayer.mute">Mute</button>
+    <button on="tap:myPlayer.unmute">Unmute</button>
+    <button on="tap:myPlayer.fullscreen">Fullscreen</button>
+
+    <p>Autoplay</p>
+    <amp-brightcove
+      id="myPlayer"
+      autoplay
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player-id="SyIOV8yWM"
+      layout="responsive"
+      width="480"
+      height="270"
+    >
+    </amp-brightcove>
+
+    <p>Dock</p>
+    <p>
+      <amp-brightcove
+        id="myPlayer"
+        dock
+        data-account="1290862519001"
+        data-video-id="ref:amp-docs-sample"
+        data-player-id="SyIOV8yWM"
+        layout="responsive"
+        width="480"
+        height="270"
+      >
+      </amp-brightcove>
+    </p>
+
+    <div class="spacer"></div>
+  </body>
+</html>

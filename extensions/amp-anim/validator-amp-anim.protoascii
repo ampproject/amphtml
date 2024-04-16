@@ -1,0 +1,67 @@
+tags: {  # amp-anim
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-anim"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-anim
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "amp-anim extension script (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-anim"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-anim>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-ANIM"
+  requires_extension: "amp-anim"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://amp.dev/documentation/components/amp-anim/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+# See the restrictions on mandatory-src-amp4email, as well as the removal of
+# `object-fit` and `object-position`.
+tags: {  # <amp-anim>
+  html_format: AMP4EMAIL
+  tag_name: "AMP-ANIM"
+  spec_name: "AMP-ANIM (AMP4EMAIL)"
+  requires_extension: "amp-anim"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-amp4email"
+  spec_url: "https://amp.dev/documentation/components/amp-anim/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

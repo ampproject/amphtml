@@ -1,0 +1,137 @@
+PASS
+|  <!--
+|    Test Description:
+|    Test valid AMP ACCESS POOOL integration.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+|    <script async custom-element="amp-access-poool" src="https://cdn.ampproject.org/v0/amp-access-poool-0.1.js"></script>
+|    <script id="amp-access" type="application/json">
+|      {
+|        "vendor": "poool",
+|        "poool": {
+|          "bundleID": "Q9X1R-27SFS-MYC31-MCYQ1",
+|          "forceWidget": "gift",
+|          "cookiesEnabled": "true",
+|          "itemID": "amp-article-test",
+|          "customSegment": "amp-segment"
+|        }
+|      }
+|    </script>
+|  </head>
+|  <body>
+|    <div class="article-body">
+|      <section poool-access-preview amp-access="NOT access">
+|        <p>
+|          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+|          Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+|          luctus nunc ut elit cursus, et imperdiet diam vehicula.
+|          Duis et nisi sed urna blandit bibendum et sit amet erat.
+|          Suspendisse potenti. Curabitur consequat volutpat arcu nec
+|          elementum. Etiam a turpis ac libero varius condimentum.
+|          Maecenas sollicitudin felis aliquam tortor vulputate,
+|          ac posuere velit semper.
+|        </p>
+|        <p>
+|          Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+|          Aliquam iaculis tincidunt quam sed maximus. Suspendisse faucibus
+|          ornare sodales. Nullam id dolor vitae arcu consequat ornare a
+|          et lectus. Sed tempus eget enim eget lobortis.
+|          Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
+|          Nullam in libero nisi.
+|        </p>
+|      </section>
+|
+|      <section amp-access="error" amp-access-hide class="error-section">
+|        Oops... Something broke.
+|      </section>
+|
+|      <section poool-access-content amp-access="access" amp-access-hide>
+|        <p>
+|          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+|          Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+|          luctus nunc ut elit cursus, et imperdiet diam vehicula.
+|          Duis et nisi sed urna blandit bibendum et sit amet erat.
+|          Suspendisse potenti. Curabitur consequat volutpat arcu nec
+|          elementum. Etiam a turpis ac libero varius condimentum.
+|          Maecenas sollicitudin felis aliquam tortor vulputate,
+|          ac posuere velit semper.
+|        </p>
+|        <p>
+|          Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+|          Aliquam iaculis tincidunt quam sed maximus. Suspendisse faucibus
+|          ornare sodales. Nullam id dolor vitae arcu consequat ornare a
+|          et lectus. Sed tempus eget enim eget lobortis.
+|          Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
+|          Nullam in libero nisi.
+|        </p>
+|
+|        <p>
+|          Sed pharetra semper fringilla. Nulla fringilla, neque eget
+|          varius suscipit, mi turpis congue odio, quis dignissim nisi
+|          nulla at erat. Duis non nibh vel erat vehicula hendrerit eget
+|          vel velit. Donec congue augue magna, nec eleifend dui porttitor
+|          sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus.
+|          Ut elementum mi eget felis ultrices tempus. Maecenas nec sodales
+|          ex. Phasellus ultrices, purus non egestas ullamcorper, felis
+|          lorem ultrices nibh, in tristique mauris justo sed ante.
+|          Nunc commodo purus feugiat metus bibendum consequat. Duis
+|          finibus urna ut ligula auctor, sed vehicula ex aliquam.
+|          Sed sed augue auctor, porta turpis ultrices, cursus diam.
+|          In venenatis aliquet porta. Sed volutpat fermentum quam,
+|          ac molestie nulla porttitor ac. Donec porta risus ut enim
+|          pellentesque, id placerat elit ornare.
+|        </p>
+|        <p>
+|          Curabitur convallis, urna quis pulvinar feugiat, purus diam
+|          posuere turpis, sit amet tincidunt purus justo et mi. Donec
+|          sapien urna, aliquam ut lacinia quis, varius vitae ex.
+|          Maecenas efficitur iaculis lorem, at imperdiet orci viverra
+|          in. Nullam eu erat eu metus ultrices viverra a sit amet leo.
+|          Pellentesque est felis, pulvinar mollis sollicitudin et,
+|          suscipit eget massa. Nunc bibendum non nunc et consequat.
+|          Quisque auctor est vel leo faucibus, non faucibus magna ultricies.
+|          Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
+|          posuere cubilia Curae; Vestibulum tortor lacus, bibendum et
+|          enim eu, vehicula placerat erat. Nullam gravida rhoncus accumsan.
+|          Integer suscipit iaculis elit nec mollis. Vestibulum eget arcu
+|          nec lectus finibus rutrum vel sed orci.
+|        </p>
+|
+|        <p>
+|          Cum sociis natoque penatibus et magnis dis parturient montes,
+|          nascetur ridiculus mus. Nulla et viverra turpis. Fusce
+|          viverra enim eget elit blandit, in finibus enim blandit. Integer
+|          fermentum eleifend felis non posuere. In vulputate et metus at
+|          aliquam. Praesent a varius est. Quisque et tincidunt nisi.
+|          Nam porta urna at turpis lacinia, sit amet mattis eros elementum.
+|          Etiam vel mauris mattis, dignissim tortor in, pulvinar arcu.
+|          In molestie sem elit, tincidunt venenatis tortor aliquet sodales.
+|          Ut elementum velit fermentum felis volutpat sodales in non libero.
+|          Aliquam erat volutpat.
+|        </p>
+|
+|        <p>
+|          Morbi at velit vitae eros congue congue venenatis non dui.
+|          Sed lacus sem, feugiat sed elementum sed, maximus sed lacus.
+|          Integer accumsan magna in sagittis pharetra. Class aptent taciti
+|          sociosqu ad litora torquent per conubia nostra, per inceptos
+|          himenaeos. Suspendisse ac nisl efficitur ligula aliquam lacinia
+|          eu in magna. Vestibulum non felis odio. Ut consectetur venenatis
+|          felis aliquet maximus. Class aptent taciti sociosqu ad litora
+|          torquent per conubia nostra, per inceptos himenaeos.
+|        </p>
+|      </section>
+|
+|      <section amp-access="NOT error AND NOT access" id="poool"></section>
+|
+|    </div>
+|  </body>
+|  </html>

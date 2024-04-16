@@ -1,0 +1,36 @@
+tags: {  # amp-pinterest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-pinterest"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+# TODO: Enforce mandatory attributes depending on the value of another
+# attribute. In this case, depending on the value of data-do, data-media and
+# data-description may or may not be mandatory.
+tags: {  # <amp-pinterest>
+  html_format: AMP
+  tag_name: "AMP-PINTEREST"
+  requires_extension: "amp-pinterest"
+  attrs: { name: "alt" }
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: {
+    name: "data-do"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-pinterest/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

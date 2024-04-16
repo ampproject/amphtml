@@ -1,0 +1,29 @@
+tags: {  # amp-mowplayer
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-mowplayer"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-mowplayer>
+  html_format: AMP
+  tag_name: "AMP-MOWPLAYER"
+  requires_extension: "amp-mowplayer"
+  attrs: { name: "autoplay" }
+  attrs: {
+    name: "data-mediaid"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

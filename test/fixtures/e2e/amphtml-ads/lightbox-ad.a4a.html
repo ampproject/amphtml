@@ -1,0 +1,257 @@
+<!doctype html>
+<html amp4ads lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lightbox Ad</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <!-- ## Summary-->
+  <!--
+  Sample AMPHTML ad using [amp-lightbox]({{g.doc('/content/amp-dev/documentation/components/reference/amp-lightbox.md', locale=doc.locale).url.path}}).    -->
+  <!-- ## Styling -->
+  <!--
+  This is an advanced example that requires some styling to make it look and function properly.
+  The styling designed here is responsive and will work with various ad sizes.
+  -->
+  <style amp-custom>
+    /* Main element that contains the creative. */
+    .root-container {
+      background: #000;
+      color: #fff;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      overflow: hidden;
+      width: 340px;
+      height: 240px;
+      position: relative;
+      margin: 0 auto;
+      display: block;
+    }
+    .logo-img {
+      display: block;
+    }
+    .stretch {
+      flex: 1;
+    }
+    .button {
+      text-transform: uppercase;
+      padding: 8px;
+      color: #fff;
+      display: inline-block;
+      background-color: #2979ff;
+      text-decoration: none;
+    }
+    .button:active {
+      background-color: #92bbff;
+    }
+    /* Basic cards styling */
+    .cards-container {
+      position: absolute;
+      z-index: 1;
+      left: 0;
+      right: 0;
+    }
+    .card {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    /* Position expand button absolutely on top of the card */
+    .expand-button {
+      padding: 0;
+      width: 44px;
+      height: 44px;
+      line-height: 44px;
+      text-align: center;
+      position: absolute;
+      z-index: 1;
+      left: 40%;
+      top: 40%;
+      font-size: 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    }
+    /* Change position of the expand button for the middle card */
+    .card-gauges .expand-button {
+      left: 90px;
+      top: 50px;
+    }
+    /* Lightbox styling */
+    amp-lightbox {
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.8);
+    }
+    .lightbox {
+      height: 100%;
+      margin: 0 auto 0;
+      max-width: 600px;
+      background: #fff;
+      color: #888;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+    .lightbox-main {
+      flex: 1;
+      display: flex;
+      max-width: 340px;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 30px 20px;
+      line-height: 20px;
+      align-self: center;
+    }
+    .lightbox-main p {
+      margin: 5px 0;
+    }
+    .lightbox-main h3 {
+      text-transform: uppercase;
+      margin: 10px auto 0;
+      font-weight: normal;
+      letter-spacing: 2px;
+      font-size: 14px;
+      color: #000;
+      align-self: center;
+      max-width: 320px;
+    }
+    /* Creates decorative underline for h3 headers */
+    .lightbox-main h3:after {
+      display: block;
+      content: " ";
+      background-color: #2979ff;
+      width: 20px;
+      height: 3px;
+      margin: 12px auto 10px;
+    }
+    .lightbox-close-container {
+      text-align: center;
+      border-top: 1px solid #eee;
+      padding: 18px 0;
+    }
+    .lightbox-header {
+      background: #000;
+      text-align: center;
+      padding: 10px 0;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-header h1  {
+      display: inline;
+      color: #fff;
+      text-transform: uppercase;
+      font-weight: normal;
+      font-size: 14px;
+      border-left: 1px solid #fff;
+      margin: 0 0 0 12px;
+      padding-left: 12px;
+    }
+    .lightbox-hero {
+      position: relative;
+      overflow: hidden;
+    }
+    .learn-more a {
+      padding: 8px;
+      text-transform: uppercase;
+      display: inline-block;
+      color: #2979ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .learn-more a:active {
+      background-color: #f0f0f0;
+    }
+    /* Responsive styles so that the lightbox does not over-stretch */
+    @media (max-height: 500px) {
+      .lightbox {
+        max-width: 400px;
+      }
+      .lightbox-hero {
+        max-height: 160px;
+      }
+      .lightbox-hero-img {
+        margin-top: -30px;
+      }
+    }
+    @media (max-height: 360px) {
+      .lightbox-hero-img {
+        display: none;
+      }
+      .lightbox-header {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="root-container" layout="container">
+  <!-- ## Cards -->
+  <!--
+  AMP has a system in place for [events and actions](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md). It uses a domain-specific language to describe how actions are triggered. In this example, we set the `on` attribute so the lightbox will activate when a card button is tapped.
+
+  Each button opens the lightbox related to the card that triggers it.
+  -->
+  <div class="cards-container" id="cardsContainer">
+    <div class="card card-seats">
+      <div class="button expand-button"
+          role="button"
+          on="tap:lightbox-seats.activate">+</div>
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-seats.jpg"
+          width="340"
+          height="240"
+          layout="responsive"
+          alt="Ergonomic Leather Seats"></amp-img>
+    </div>
+  </div>
+</div>
+<!-- ## Lightboxes -->
+<!--
+The amp-lightbox component defines the child elements that will be displayed in a full-viewport overlay. We set a different id for each lightbox so they can be opened and closed by actions on other elements. Its content is normal AMP HTML.
+-->
+<amp-lightbox id="lightbox-seats" layout="nodisplay">
+  <div class="lightbox">
+    <div class="lightbox-hero">
+      <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/car-seats.jpg"
+          width="608"
+          height="342"
+          layout="responsive"
+          alt="Ergonomic Leather Seats"
+          class="lightbox-hero-img"></amp-img>
+      <div class="lightbox-header">
+        <amp-img src="/test/fixtures/e2e/amphtml-ads/resource/photos/car-logo.png"
+            width="72"
+            height="32"
+            layout="fixed"
+            alt="Howdy"
+            class="logo-img"></amp-img>
+        <h1>The all-new WX-S R5</h1>
+      </div>
+    </div>
+    <div class="lightbox-main">
+      <h3>Ergonomic Leather Seats</h3>
+      <p>
+        Available in Comfort Suede and leather. High-contrast stitching colors available.
+      </p>
+      <p class="learn-more">
+        <a href="https://amp.dev/documentation/examples/" target="_blank">Learn more</a>
+      </p>
+    </div>
+    <div class="lightbox-close-container">
+      <div class="button lightbox-close-button" role="button"
+          on="tap:lightbox-seats.close">
+        Close
+      </div>
+    </div>
+  </div>
+</amp-lightbox>
+</body>
+</html>

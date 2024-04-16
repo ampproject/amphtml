@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "checkJs": false,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  },
+
+  "include": ["src", "3p", "ads", "extensions", "test", "testing"],
+  "exclude": ["**/*shame.d.ts"]
+}

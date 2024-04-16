@@ -1,0 +1,463 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
+jobs:
+  say-hello:
+    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
+    docker:
+      # Specify the version you desire here
+      # See: https://circleci.com/developer/images/image/cimg/base
+      - image: cimg/base:current
+
+    # Add steps to the job
+    # See: https://circleci.com/docs/jobs-steps/#steps-overview & https://circleci.com/docs/configuration-reference/#steps
+    steps:
+      # Checkout the code as the first step.
+      - checkout
+      - when:
+          condition:
+            equal: ['main', << pipeline.git.branch >>]
+          steps:
+            - run:
+                name: '🗜️ Garbage Collection for Git'
+                command: git gc --auto
+            - save_cache:
+                name: '💾 Save Git Cache'
+                key: git-cache-{{ arch }}-v3-main-{{ .Revision }}
+                paths:
+                  - .git
+  setup_vm:
+    parameters:
+      is-initializing-job:
+        description: 'True when this is an initializing job, which would perform several caching and workspace setup steps'
+        type: boolean
+        default: false
+      node-version:
+        type: string
+        default: 'lts/*'
+    steps:
+      - unless:
+          condition: << parameters.is-initializing-job >>
+          steps:
+            - checkout_repo
+            - attach_workspace:
+                at: /tmp
+            - run:
+                name: '⚙️ Configure Temporary Workspace'
+                command: |
+                  mv /tmp/workspace /tmp/restored-workspace
+                  mkdir -p /tmp/workspace
+            - run:
+                name: '❓ Maybe Gracefully Halt'
+                command: /tmp/restored-workspace/maybe_gracefully_halt.sh
+            - run:
+                name: '⚙️ Configure Development Environment'
+                command: |
+                  ./.circleci/fetch_merge_commit.sh
+                  ./.circleci/restore_build_output.sh
+                  cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
+      - restore_cache:
+          name: '♻️ Restore nvm Cache'
+          keys:
+            - nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-
+      - run:
+          name: '♻️ Create .nvmrc file'
+          command: echo << parameters.node-version >> > .nvmrc
+      - node/install
+      - when:
+          condition: << parameters.is-initializing-job >>
+          steps:
+            - run:
+                name: '⚙️ Create nvm Cache Checksum File'
+                command: node -v > ~/.node-version
+            - save_cache:
+                name: '💾 Save nvm Cache'
+                key: nvm-cache-{{ arch }}-v2-<< parameters.node-version >>-{{ checksum "~/.node-version" }}
+                paths:
+                  - ~/.nvm/.cache
+      - restore_cache:
+          name: '♻️ Restore node_modules/ Cache'
+          keys:
+            - node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
+      - when:
+          condition: << parameters.is-initializing-job >>
+          steps:
+            - run:
+                name: '💿 Install npm Packages'
+                command: if [[ ! -d node_modules/ ]]; then npm ci; fi
+            - save_cache:
+                name: '💾 Save node_modules/ Cache'
+                key: node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
+                paths: node_modules/
+  teardown_vm:
+    steps:
+      - persist_to_workspace:
+          name: '📁 Persist Temporary Workspace'
+          root: /tmp
+          paths:
+            - workspace
+  install_chrome:
+    steps:
+      - run:
+          name: '⚙️ Get Pinned Chrome Version'
+          command: ./.circleci/get_pinned_chrome_version.sh
+      - run:
+          name: '💿 Update list of available apt packages'
+          command: sudo apt update
+      - browser-tools/install-chrome:
+          # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
+          replace-existing: true
+      - browser-tools/install-chromedriver
+  install_firefox:
+    steps:
+      - browser-tools/install-firefox
+  install_edge:
+    steps:
+      - run:
+          name: '💿 Install Microsoft Edge'
+          command: ./.circleci/install_microsoft_edge.sh
+  enable_safari_automation:
+    steps:
+      - run:
+          name: '⚙️ Enable Safari Automation'
+          command: sudo /usr/bin/safaridriver --enable
+  store_test_output:
+    steps:
+      - store_test_results:
+          name: '⬆️ Store Test Results'
+          path: result-reports
+  store_filelist:
+    steps:
+      - store_artifacts:
+          name: '⬆️ Store Artifact filelist.txt'
+          path: /tmp/filelist.txt
+  skip_on_push_builds:
+    steps:
+      - when:
+          condition:
+            matches:
+              pattern: ^master|amp-release-.*$
+              value: << pipeline.git.branch >>
+          steps:
+            - run:
+                name: '➡️ Skip Job on Push Builds'
+                command: circleci-agent step halt
+
+jobs:
+  initialize_repository:
+    executor:
+      name: node-docker-medium
+    steps:
+      - checkout_repo
+      - run:
+          name: '⚙️ Initialize Repository'
+          command: ./.circleci/initialize_repo.sh
+      - run:
+          name: '🔍 Check Config'
+          command: ./.circleci/check_config.sh
+      - run:
+          name: '⚙️ Initialize Temporary Workspace'
+          command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
+      - setup_vm:
+          is-initializing-job: true
+      - teardown_vm
+  initialize_mac_os:
+    executor:
+      name: macos-medium
+    steps:
+      - checkout_repo
+      - setup_vm:
+          is-initializing-job: true
+  checks:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Checks ⭐⭐⭐'
+          command: node build-system/pr-check/checks.js
+      - teardown_vm
+  unminified_build:
+    executor:
+      name: node-docker-xlarge
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐⭐⭐ Unminified Build ⭐⭐⭐'
+          command: node build-system/pr-check/unminified-build.js
+      - teardown_vm
+  dist:
+    executor:
+      name: node-docker-xlarge
+    <<: *dist_job
+    parallelism: 3
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐⭐⭐ << parameters.module >> Build (<< parameters.purpose >>) ⭐⭐⭐'
+          command: node build-system/pr-check/dist.js --type "<< parameters.module >> Build (<< parameters.purpose >>)"
+      - teardown_vm
+  dist_3p:
+    executor:
+      name: node-docker-xlarge
+    <<: *dist_job
+    steps:
+      - setup_vm
+      - when:
+          condition:
+            and:
+              - equal: ['Module', <<parameters.module >>]
+              - equal: ['Test', <<parameters.purpose >>]
+          steps:
+            # Required in the edge case where we need to run `amp visual-diff --empty` in this step. See build-system/pr-check/dist.js for details.
+            - install_chrome
+      - run:
+          name: '⭐⭐⭐ << parameters.module >> 3p Build (<< parameters.purpose >>) ⭐⭐⭐'
+          command: node build-system/pr-check/dist.js --type "<< parameters.module >> 3p Build (<< parameters.purpose >>)"
+      - teardown_vm
+  bundle_size:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐⭐⭐ Bundle Size ⭐⭐⭐'
+          command: node build-system/pr-check/bundle-size.js
+      - teardown_vm
+  validator_tests:
+    executor:
+      name: jdk-docker-2xlarge
+    steps:
+      - setup_vm
+      - run:
+          name: 'Install Validator Dependencies'
+          command: ./.circleci/install_validator_dependencies.sh
+      - run:
+          name: '⭐⭐⭐ Validator Tests ⭐⭐⭐'
+          command: node build-system/pr-check/validator-tests.js
+      - store_test_output
+      - teardown_vm
+  visual_diff_tests:
+    executor:
+      name: node-docker-large
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Visual Diff Tests ⭐⭐⭐'
+          command: node build-system/pr-check/visual-diff-tests.js
+      - store_test_output
+      - teardown_vm
+  local_unit_tests:
+    executor:
+      name: node-docker-large
+    steps:
+      - skip_on_push_builds
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Local Unit Tests ⭐⭐⭐'
+          command: node build-system/pr-check/unit-tests-local.js
+      - store_test_output
+      - teardown_vm
+  all_unit_tests:
+    executor:
+      name: node-docker-large
+    parallelism: 6
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ All Unit Tests ⭐⭐⭐'
+          command: node build-system/pr-check/unit-tests.js
+      - codecov/upload:
+          file: test/coverage/lcov-unit.info
+          flags: unit_tests
+      - store_test_output
+      - store_filelist
+      - teardown_vm
+  unminified_tests:
+    executor:
+      name: node-docker-large
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Unminified Tests ⭐⭐⭐'
+          command: node build-system/pr-check/unminified-tests.js
+      - codecov/upload:
+          file: test/coverage/lcov-integration.info
+          flags: integration_tests
+      - store_test_output
+      - teardown_vm
+  nomodule_tests:
+    executor:
+      name: node-docker-large
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Nomodule Tests (<< parameters.config >>) ⭐⭐⭐'
+          command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
+      - store_test_output
+      - teardown_vm
+  module_tests:
+    executor:
+      name: node-docker-large
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Module Tests (<< parameters.config >>) ⭐⭐⭐'
+          command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
+      - store_test_output
+      - teardown_vm
+  end_to_end_tests:
+    executor:
+      name: node-docker-large
+    parallelism: 6
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ End-to-End Tests ⭐⭐⭐'
+          command: node build-system/pr-check/e2e-tests.js
+      - store_test_output
+      - store_filelist
+      - teardown_vm
+  browser_tests_safari:
+    executor:
+      name: macos-medium
+    <<: *test_types_job
+    steps:
+      - setup_vm
+      - enable_safari_automation
+      - run:
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Safari) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=safari --type=<< parameters.test_type >>
+      - store_test_output
+      - teardown_vm
+  browser_tests_firefox:
+    executor:
+      name: node-docker-medium
+    <<: *test_types_job
+    steps:
+      - setup_vm
+      - install_firefox
+      - run:
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Firefox) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=firefox --type=<< parameters.test_type >>
+      - store_test_output
+      - teardown_vm
+  browser_tests_edge:
+    executor:
+      name: node-docker-medium
+    <<: *test_types_job
+    steps:
+      - setup_vm
+      - install_edge
+      - run:
+          name: '⭐⭐⭐ << parameters.test_type >> Tests (Edge) ⭐⭐⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=edge --type=<< parameters.test_type >>
+      - store_test_output
+      - teardown_vm
+  experiment_build:
+    executor:
+      name: node-docker-xlarge
+    <<: *experiment_job
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐⭐⭐ Experiment << parameters.exp >> Build ⭐⭐⭐'
+          command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
+      - teardown_vm
+  experiment_integration_tests:
+    executor:
+      name: node-docker-large
+    <<: *experiment_job
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Experiment << parameters.exp >> Integration Tests ⭐⭐⭐'
+          command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
+      - store_test_output
+      - teardown_vm
+  experiment_end_to_end_tests:
+    executor:
+      name: node-docker-large
+    <<: *experiment_job
+    parallelism: 6
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: '⭐⭐⭐ Experiment << parameters.exp >> End-to-End Tests ⭐⭐⭐'
+          command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
+      - store_test_output
+      - store_filelist
+      - teardown_vm
+  amp_release:
+    executor:
+      name: node-docker-xlarge
+    parameters:
+      flavor:
+        description: 'Which of the release flavors to build'
+        type: enum
+        enum: ['base', 'experimentA', 'experimentB', 'experimentC']
+      esm:
+        description: 'Whether to build module or nomodule release'
+        type: enum
+        enum: ['no-esm', 'esm']
+    environment:
+      FLAVOR: << parameters.flavor >>
+      ESM: << parameters.esm >>
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐⭐⭐ amp release ⭐⭐⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+      - teardown_vm
+  upload_release:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐⭐⭐ Upload Release Artifacts (to Cloudflare R2) ⭐⭐⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
+      - store_artifacts:
+          name: '⬆️ Upload Release Artifacts (to CircleCI)'
+          path: /tmp/release.tar.gz
+      - teardown_vm
+  trigger_promote:
+    executor:
+      name: base-docker-small
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐⭐⭐ Trigger Promote Workflow ⭐⭐⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
+      - teardown_vm
+
+workflows:
+  version: 2
+
+  'CircleCI':
+    jobs:
+      - say-hello

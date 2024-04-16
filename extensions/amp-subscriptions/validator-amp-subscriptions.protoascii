@@ -1,0 +1,131 @@
+tags: {  # amp-subscriptions
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-subscriptions"
+    version: "0.1"
+    version: "latest"
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-subscriptions (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-subscriptions extension .json script"
+  unique: true
+  mandatory_parent: "HEAD"
+  requires_extension: "amp-subscriptions"
+  attrs: {
+    name: "id"
+    mandatory: true
+    value: "amp-subscriptions"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # amp-subscriptions-google
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-subscriptions-google"
+    version: "0.1"
+    version: "latest"
+    requires_usage: NONE
+  }
+  requires_extension: "amp-subscriptions"
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <script cryptokeys sha-256-hash>
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "cryptokeys .json script"
+  unique: true
+  mandatory_parent: "HEAD"
+  requires_extension: "amp-subscriptions"
+  attrs: {
+    name: "cryptokeys"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "sha-256-hash"
+    mandatory: true
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+  }
+}
+tags: {  # <section subscriptions-section="content" swg_amp_cache_nonce="NONCE">
+  html_format: AMP
+  tag_name: "SECTION"
+  spec_name: "subscriptions-section content swg_amp_cache_nonce"
+  requires_condition: "span swg_amp_cache_nonce"
+  satisfies_condition: "subscriptions-section content swg_amp_cache_nonce"
+  mandatory_ancestor: "BODY"
+  attrs: {
+    name: "encrypted"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "subscriptions-section"
+    value_casei: "content"
+  }
+  attrs: {
+    name: "swg_amp_cache_nonce"
+    mandatory: true
+  }
+}
+tags: {  # <script type="application/octet-stream" ciphertext>
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "subscriptions script ciphertext"
+  mandatory_parent: "subscriptions-section content swg_amp_cache_nonce"
+  mandatory_ancestor: "BODY"
+  attrs: {
+    name: "ciphertext"
+    dispatch_key: NAME_DISPATCH
+    mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value_casei: "application/octet-stream"
+    mandatory: true
+  }
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # <span swg_amp_cache_nonce="NONCE">
+  html_format: AMP
+  tag_name: "SPAN"
+  spec_name: "span swg_amp_cache_nonce"
+  requires_condition: "subscriptions-section content swg_amp_cache_nonce"
+  satisfies_condition: "span swg_amp_cache_nonce"
+  mandatory_ancestor: "BODY"
+  requires_extension: "amp-subscriptions"
+  attrs: {
+    name: "swg_amp_cache_nonce"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+}
+# related attributes are listed in validator-main.protoascii

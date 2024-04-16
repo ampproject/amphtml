@@ -1,0 +1,21 @@
+URL: https://github.com/y-fujii/zuho
+License: MIT License
+License File: https://opensource.org/licenses/MIT
+
+Description:
+zuho.js - WebGL equirectangular image viewer
+
+The AMP 360 plugin uses some of the shaders and overall WebGL logic initially implemented in zuho.js.
+
+Files in this directory (copied from https://github.com/y-fujii/zuho):
+- zuho.js (from https://github.com/y-fujii/zuho/commit/083a0183c218e388690f48253474d95ab81ef28b)
+
+Local Modifications:
+- Removed all event handling, CSS, menu UI and unused projection mappings
+- Refactored into module, exporting Renderer and Matrix classes
+- Removed String.raw calls (breaks the build)
+- Swapped X-axis projection (original code was horizontally mirroring the source image)
+- Added setImageOrientation(heading, pitch, roll) method to correct the orientation of the texture (credits: Nicolas Barradeau - https://github.com/nicoptere).
+- Added init function for setting up resources.
+- Added properties defined on init to the constructor.
+- Added flag to enable preserveDrawingBuffer for visual tests.

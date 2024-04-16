@@ -1,0 +1,44 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-hulu tag. See the inline comments.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: Embeds a hulu video. -->
+|    <amp-hulu
+|      layout="responsive"
+|      width="412"
+|      height="213"
+|      data-eid="4Dk5F2PYTtrgciuvloH3UA">
+|    </amp-hulu>
+|
+|    <!-- Invalid: missing data-eid attribute. -->
+|    <amp-hulu
+>>   ^~~~~~~~~
+amp-hulu/0.1/test/validator-amp-hulu.html:25:2 The mandatory attribute 'data-eid' is missing in tag 'amp-hulu'. (see https://amp.dev/documentation/components/amp-hulu/)
+|      layout="responsive"
+|      width="312"
+|      height="213">
+|    </amp-hulu>
+|
+|    <!-- Invalid: illegal layout. -->
+|    <amp-hulu
+>>   ^~~~~~~~~
+amp-hulu/0.1/test/validator-amp-hulu.html:32:2 The specified layout 'INTRINSIC' is not supported by tag 'amp-hulu'. (see https://amp.dev/documentation/components/amp-hulu/)
+|      layout="intrinsic"
+|      width="412"
+|      height="213"
+|      data-eid="4Dk5F2PYTtrgciuvloH3UA">
+|    </amp-hulu>
+|  </body>
+|  </html>

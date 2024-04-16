@@ -1,0 +1,20 @@
+tags: {  # amp-story-auto-analytics
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-auto-analytics"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-auto-analytics>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUTO-ANALYTICS"
+  requires_extension: "amp-story-auto-analytics"
+  attrs: {
+    name: "gtag-id"
+    mandatory: true
+    value_regex: "[A-Z]{1,2}-[A-Z0-9-]+"
+  }
+}

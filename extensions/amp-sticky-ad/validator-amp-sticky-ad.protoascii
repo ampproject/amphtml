@@ -1,0 +1,28 @@
+tags: {  # <script custom-element="amp-sticky-ad">
+  html_format: AMP  # Ads are not allowed inside ads.
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-sticky-ad"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    deprecated_version: "0.1"
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-sticky-ad>
+  html_format: AMP
+  tag_name: "AMP-STICKY-AD"
+  disallowed_ancestor: "AMP-APP-BANNER"
+  requires_extension: "amp-sticky-ad"
+  attr_lists: "extended-amp-global"
+  unique: true
+  child_tags: {
+    mandatory_num_child_tags: 1
+    first_child_tag_name_oneof: "AMP-AD"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

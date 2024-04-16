@@ -1,0 +1,9 @@
+
+
+amp-script {
+  opacity: 0.7;
+}
+
+amp-script.i-amphtml-hydrated {
+  opacity: 1;
+}

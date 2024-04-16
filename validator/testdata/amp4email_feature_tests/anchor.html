@@ -1,0 +1,102 @@
+<!--
+  Test Description:
+  Tests the additional restrictions AMP4EMAIL sets on 'A' tag.
+-->
+<!doctype html>
+<html ⚡4email data-css-strict>
+<head>
+  <meta charset="utf-8">
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- URLs must be absolute. -->
+  <a href="somelink.com">disallowed</a>
+
+  <!-- The protocol can only be http, https, mailto or tel. -->
+  <a href="ftp://somelink.com">disallowed</a>
+
+  <!-- href of anchor is not bindable. -->
+  <a [href]="evil">disallowed</a>
+
+
+  <!-- This is allowed. -->
+  <a href="{{allowed}}">allowed</a>
+
+  <!--
+    Mustache sections are not allowed in attribute values. This is currently only disallowed
+    in anchors, amp-lists, and amp-forms. This should however be required of
+    all attribute values of all tags appearing inside template.
+  -->
+
+  <!-- These are disallowed -->
+  <a href="{{#foo}}"></a>
+  <a href="{{/foo}}"></a>
+  <a href="{{^foo}}"></a>
+
+  <!--
+    Mustache delimiters must be balanced. This is currently only disallowed
+    in anchors, amp-lists, and amp-forms. This should however be required of
+    all attribute values of all tags appearing inside template.
+  -->
+
+  <!-- These are disallowed -->
+  <a href="{{disallowed"></a>
+  <a href="disallowed}}"></a>
+  <a href="}}"></a>
+  <a href="{{"></a>
+
+  <a href="{{ "></a>
+  <a href=" {{"></a>
+  <a href=" }}"></a>
+  <a href="}} "></a>
+
+  <!-- A combination of mustache tags and text should not calculate href values. -->
+  <a href="{{bar}}{{foo}}">disallowed</a>
+  <p id="{{bar}}{{foo}}">allowed</p>
+
+  <a href="bar{{foo}}">disallowed</a>
+  <p id="bar{{foo}}">allowed</p>
+
+
+  <a href="{{foo}}bar">disallowed</a>
+  <p id="{{foo}}bar">allowed</p>
+
+  <a href="{{foo}} bar">disallowed</a>
+  <p id="{{foo}} bar">allowed</p>
+
+  <a href="bar {{foo}}">disallowed</a>
+
+  <a href="{{foo}} ">disallowed</a>
+  <p id="{{foo}} ">allowed</p>
+
+  <a href=" {{foo}}">disallowed</a>
+  <p id=" {{foo}}">allowed</p>
+
+  <!-- Mustache delimiters cannot appear in the middle of href's value. -->
+
+  <!-- These are disallowed. -->
+  <a href="foo}}bar"></a>
+  <a href="foo{{bar"></a>
+
+  <!--
+    All the requirements hold when quotation is
+    dropped when specifying attribute values as expected.
+  -->
+
+  <!-- These are disallowed. -->
+  <a href={{bar}}{{foo}}></a>
+  <a href=bar{{foo}}></a>
+  <a href={{foo}}bar></a>
+  <a href={{#foo}}></a>
+
+  <!-- These are allowed. -->
+  <a href="http://www.somelink.com">http allowed</a>
+  <a href="https://www.somelink.com">https allowed</a>
+  <a href="mailto:user@example.com">mailto allowed</a>
+  <a href="tel:4156667777">tel allowed</a>
+
+  <!-- 'name' attribute is deprecated. -->
+  <a name="protocol"></a>
+</body>
+</html>

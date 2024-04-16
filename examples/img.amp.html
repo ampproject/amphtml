@@ -1,0 +1,41 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lorem Ipsum | PublisherName</title>
+  <link rel="canonical" href="https://medium.com/p/cb7f223fad86" >
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Georgia', Serif;
+      background: white;
+    }
+    amp-img {
+      background-color: #f4f4f4;
+    }
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <link rel="manifest" href="medium-manifest.json">
+</head>
+<body>
+  <div class="button-set">
+    <button on="tap:hero-img.show">Show</button>
+    <button on="tap:hero-img.hide">Hide</button>
+  </div>
+
+  <amp-img id="hero-img"
+      _hidden
+      src="img/hero@1x.jpg"
+      srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
+      layout="responsive" width="360" placeholder
+      alt="Picture of two chairs on a lake shore with big pine trees"
+      title="Opens image in a lightbox"
+      role="button" on="tap:headline-image-lightbox"
+      height="216" tabindex="0">
+  </amp-img>
+</body>
+</html>

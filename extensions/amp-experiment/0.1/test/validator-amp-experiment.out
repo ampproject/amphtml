@@ -1,0 +1,40 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This tests validation for the amp-experiment tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|      <meta charset="utf-8">
+|      <title>Experiment examples</title>
+|      <link rel="canonical" href="amps.html">
+|      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|      <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
+|       <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|
+|  <amp-experiment>
+|      <script type="application/json">
+|          {
+|              "background-color-test": {
+|                  "variants": {
+|                      "yellow": 50,
+|                      "green": 50
+|                  }
+|              }
+|          }
+|      </script>
+|  </amp-experiment>
+|
+|  <amp-experiment>
+>> ^~~~~~~~~
+amp-experiment/0.1/test/validator-amp-experiment.html:31:0 The tag 'amp-experiment' appears more than once in the document. (see https://amp.dev/documentation/components/amp-experiment/)
+|      <script type="invalidtype"></script>
+>>     ^~~~~~~~~
+amp-experiment/0.1/test/validator-amp-experiment.html:32:4 The parent tag of tag 'amphtml engine script' is 'amp-experiment', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+|  </amp-experiment>
+|  </body>
+|  </html>

@@ -1,0 +1,7 @@
+{
+  "plugins": [
+    "../../../.."
+  ],
+  "sourceType": "module",
+  "throws": "too many import assertions, we only support `assert {\"type\": \"json\"}, assert {\"type\": \"json-schema\"}`"
+}

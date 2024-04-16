@@ -1,0 +1,30 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests support for the amp-reach-player tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-reach-player" src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Example of a valid amp-reach-player -->
+|    <amp-reach-player
+|            data-embed-id="a95a73fe-384b-4abc-beab-3ec719aacfcf"
+|            layout="responsive" width="560" height="315">
+|    </amp-reach-player>
+|    <!-- Invalid: data-embedId is required;
+|         missing value results in an error. -->
+|    <amp-reach-player
+>>   ^~~~~~~~~
+amp-reach-player/0.1/test/validator-amp-reach-player.html:23:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. (see https://amp.dev/documentation/components/amp-reach-player)
+|        layout="responsive" width="480" height="270">
+|    </amp-reach-player>
+|  </body>
+|  </html>

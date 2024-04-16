@@ -1,0 +1,89 @@
+diff --git a/third_party/inputmask/inputmask.date.extensions.js b/third_party/inputmask/inputmask.date.extensions.js
+index ae850260c..b6e823315 100755
+--- a/third_party/inputmask/inputmask.date.extensions.js
++++ b/third_party/inputmask/inputmask.date.extensions.js
+@@ -82,6 +82,11 @@ export function factory(Inputmask) {
+     }
+     function isDateInRange(dateParts, opts) {
+         var result = true;
++
++        if (!dateParts["rawyear"] || !dateParts["rawmonth"] || !dateParts["rawday"]) {
++            return false;
++        }
++
+         if (opts.min) {
+             if (dateParts["rawyear"]) {
+                 var rawYear = dateParts["rawyear"].replace(/[^0-9]/g, ""), minYear = opts.min.year.substr(0, rawYear.length);
+@@ -191,23 +196,42 @@ export function factory(Inputmask) {
+                 monthNames: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ],
+                 ordinalSuffix: [ "st", "nd", "rd", "th" ]
+             },
+-            postValidation: function(buffer, pos, currentResult, opts) {
+-                opts.min = analyseMask(opts.min, opts.inputFormat, opts);
+-                opts.max = analyseMask(opts.max, opts.inputFormat, opts);
+-                var result = currentResult, dateParts = analyseMask(buffer.join(""), opts.inputFormat, opts);
+-                if (result && dateParts.date.getTime() === dateParts.date.getTime()) {
+-                    result = isValidDate(dateParts, result);
+-                    result = result && isDateInRange(dateParts, opts);
+-                }
+-                if (pos && result && currentResult.pos !== pos) {
+-                    return {
+-                        buffer: parse(opts.inputFormat, dateParts, opts),
+-                        refreshFromBuffer: {
+-                            start: pos,
+-                            end: currentResult.pos
+-                        }
+-                    };
++            postValidation: function (buffer, pos, currentResult, opts, maskset) {
++                 opts.min = analyseMask(opts.min, opts.inputFormat, opts);
++                 opts.max = analyseMask(opts.max, opts.inputFormat, opts);
++
++                 var result = currentResult, dateParts = analyseMask(buffer.join(""), opts.inputFormat, opts);
++                 if (result && dateParts.date.getTime() === dateParts.date.getTime()) { //check for a valid date ~ an invalid date returns NaN which isn't equal
++                     result = isValidDate(dateParts, result);
++                    const inRange = result && isDateInRange(dateParts, opts);
++
++                    if (pos && inRange && currentResult.pos !== pos) {
++                        return {
++                            buffer: parse(opts.inputFormat, dateParts, opts),
++                            refreshFromBuffer: {start: pos, end: currentResult.pos}
++                        };
++                    }
+                 }
++
++                // Automatically add a separator to fix an issue where typing
++                // valid chars into the field does not move the mask forward.
++                // https://github.com/RobinHerbots/Inputmask/issues/1514
++                const testIndex = buffer.length;
++                const test = maskset.tests[testIndex];
++                if (!test) {
++                    return result;
++                 }
++
++                const maskDateSeparators = test.map(t => t.match)
++                    .filter(m => /^[-/]$/.test(m.def));
++                const isSeparatorOnly = (maskDateSeparators.length === 1);
++                if (isSeparatorOnly) {
++                    const c = maskDateSeparators[0].def;
++                     return {
++                        buffer: buffer.concat([c]),
++                        refreshFromBuffer: {start: pos, end: buffer.length + 1},
++                     };
++                 }
+                 return result;
+             },
+             onKeyDown: function(e, buffer, caretPos, opts) {
+
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index eb4fbf75a..6ab796f7e 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -1387,7 +1387,7 @@ export function factory($, window, document, undefined) {
+                 }
+             }
+             if ($.isFunction(opts.postValidation) && result !== false && !strict && fromSetValid !== true && validateOnly !== true) {
+-                var postResult = opts.postValidation(getBuffer(true), pos.begin !== undefined ? isRTL ? pos.end : pos.begin : pos, result, opts);
++                var postResult = opts.postValidation(getBuffer(true), pos.begin !== undefined ? isRTL ? pos.end : pos.begin : pos, result, opts, getMaskSet());
+                 if (postResult !== undefined) {
+                     if (postResult.refreshFromBuffer && postResult.buffer) {
+                         var refresh = postResult.refreshFromBuffer;

@@ -1,0 +1,38 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-3d-gltf tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-3d-gltf example</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-custom>
+|      amp-3d-gltf {
+|        color: red;
+|      }
+|    </style>
+|    <script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- valid: has src -->
+|    <amp-3d-gltf src="/example.glb" layout="responsive" width="150" height="80"></amp-3d-gltf>
+|    <amp-3d-gltf layout="fixed"
+|               width="320"
+|               height="240"
+|               antialiasing="true"
+|               autoRotate="true"
+|               enableZoom="false"
+|               src="https://webgears-3d.github.io/3d-gltf-static/m/DamagedHelmet.glb"></amp-3d-gltf>
+|
+|    <!-- invalid: no src -->
+|    <amp-3d-gltf layout="responsive" width="150" height="80"></amp-3d-gltf>
+>>   ^~~~~~~~~
+amp-3d-gltf/0.1/test/validator-amp-3d-gltf.html:33:2 The mandatory attribute 'src' is missing in tag 'amp-3d-gltf'. (see https://amp.dev/documentation/components/amp-3d-gltf)
+|  </body>
+|  </html>

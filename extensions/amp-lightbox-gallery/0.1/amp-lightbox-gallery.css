@@ -1,0 +1,167 @@
+
+
+@import './lightbox-caption.css';
+@import './lightbox-controls.css';
+
+[i-amphtml-lbg-fade] {
+  animation-fill-mode: forwards;
+  /* Keep in sync with FADE_DURATION */
+  animation-duration: 400ms;
+}
+
+[i-amphtml-lbg-fade="in"] {
+  animation-name: fadeIn;
+}
+
+[i-amphtml-lbg-fade="out"] {
+  animation-name: fadeOut;
+}
+
+amp-lightbox-gallery[i-amphtml-lbg-fade] {
+  position: relative;
+  /* The highest z-index supported by most browsers - 5. See: css/Z_INDEX.md */
+  z-index: 2147483642;
+  animation-timing-function: cubic-bezier(0.8, 0, 0.2, 1);
+}
+
+amp-lightbox-gallery .amp-carousel-button {
+  display: none;
+}
+
+amp-lightbox-gallery amp-carousel {
+  /* Override author-defined carousel background to let mask through. */
+  background: transparent !important;
+}
+
+.i-amphtml-lbg {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  /*
+   * The highest z-index supported by most browsers - 5. See: css/Z_INDEX.md
+   * Note: Since the lightbox gallery may not be the last thing in the DOM,
+   * this may fail to correctly stack on top of elements with the same z-index.
+   * It will also fail to stack on top of things with a higher z-index.
+   */
+  z-index: 2147483642;
+}
+
+.i-amphtml-lbg-mask,
+.i-amphtml-lbg-gallery {
+  background-color: rgba(0,0,0, 1) !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+.i-amphtml-lbg-gallery {
+  display: none;
+  top: 56px !important; /* Matches height of top-bar */
+  overflow: auto !important;
+}
+
+@media (min-width: 1024px) {
+  .i-amphtml-lbg-gallery {
+    top: 80px !important; /* Matches height of top-bar */
+  }
+}
+
+.i-amphtml-lbg-overlay:not([i-amphtml-lbg-fade]) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.i-amphtml-lbg-overlay[i-amphtml-lbg-fade="in"] {
+  animation-timing-function: ease-in;
+}
+
+.i-amphtml-lbg-overlay[i-amphtml-lbg-fade="out"] {
+  animation-timing-function: linear;
+}
+
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
+  display: grid !important;
+  justify-content: center !important;
+  grid-gap: 5px !important;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: min-content !important;
+  padding: 5px;
+}
+
+@media (min-width: 1024px) {
+  .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
+    grid-template-columns: repeat(4, calc(1024px/4 - 5px * 5 / 4));
+  }
+}
+
+.i-amphtml-lbg-gallery-thumbnail {
+  position: relative !important;
+  padding-top: 100% !important;
+}
+
+.i-amphtml-lbg-gallery-thumbnail-img {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  object-fit: cover !important;
+  cursor: pointer !important;
+}
+
+.i-amphtml-lbg-thumbnail-timestamp-container {
+  background-color: #292D33;
+  color: #ffffff;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  height: 20px;
+  border-radius: 2px;
+  opacity: 0.8;
+  width: 20px;
+}
+
+.i-amphtml-lbg-thumbnail-timestamp-container.i-amphtml-lbg-has-timestamp {
+  font-size: 12px;
+  padding: 0 5px 0 18px;
+  line-height: 1.3rem;
+  width: auto;
+}
+
+.i-amphtml-lbg-thumbnail-play-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff"><path d="M8 5v14l11-7z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  height: 16px;
+  width: 16px;
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+}
+
+/*
+ * This is necessary to fix responsive styling for video and ad
+ * elements inside the lightbox. More investigation is necessary
+ * to see if this should be more globally applied to carousel.
+ * TODO(#13677): set i-amphtml-slide-item to height: auto.
+ */
+amp-lightbox-gallery .i-amphtml-slide-item > * {
+  height: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to {
+    opacity: 1;
+    visibility: visible;
+   }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to {
+    opacity: 0;
+    visibility: hidden;
+   }
+}

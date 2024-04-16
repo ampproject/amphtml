@@ -1,0 +1,146 @@
+FAIL
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>Twitter examples</title>
+|    <link rel="canonical" href="amps.html" >
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|
+|
+|
+|    <h2>Twitter</h2>
+|
+|    <amp-twitter width=375 height=472
+|        layout="responsive"
+|        data-tweetid="638793490521001985">
+|        <blockquote placeholder class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">I only needed to change some CSS. <a href="http://t.co/LvjLbjgY9F">pic.twitter.com/LvjLbjgY9F</a></p>&mdash; Malte Ubl (@cramforce) <a href="https://twitter.com/cramforce/status/638793490521001985">September 1, 2015</a></blockquote>
+|    </amp-twitter>
+|
+|    <amp-twitter width=390 height=330
+|        data-tweetid="585110598171631616"
+|        data-cards="hidden">
+|    </amp-twitter>
+|
+|    <amp-twitter width=390 height=330
+|        layout="responsive"
+|        data-tweetid="585110598171631616"
+|        data-cards="hidden">
+|    </amp-twitter>
+|
+|    <amp-twitter width=390 height=330
+|        layout="responsive"
+|        data-tweetid="641653602164060160"
+|        data-conversation="none"
+|        data-cards="hidden">
+|    </amp-twitter>
+|
+|    <amp-twitter width=390 height=330
+|        layout="responsive"
+|        data-tweetid="641653602164060160"
+|        data-cards="hidden">
+|    </amp-twitter>
+|
+|    <h2>Moment</h2>
+|    <amp-twitter width=486 height=1312
+|        layout="responsive"
+|        data-momentid="1009149991452135424"
+|        data-limit="2">
+|    </amp-twitter>
+|
+|    <h2>Intentionally non-existing-tweet</h2>
+|    <amp-twitter width=390 height=330
+|        layout="responsive"
+|        data-tweetid="1111111111111641653602164060160"
+|        data-cards="hidden">
+|        <blockquote placeholder class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">A new approach to web performance.<br><br>Today we are starting the AMP Project to make mobile web content fast again.<a href="https://t.co/b091YOzo5s">https://t.co/b091YOzo5s</a></p>&mdash; Malte Ubl (@cramforce) <a href="https://twitter.com/cramforce/status/651762967147483136">October 7, 2015</a></blockquote>
+|    </amp-twitter>
+|
+|    <h2>Missing tweetid/momentid</h2>
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:64:2 The tag 'amp-twitter' is missing a mandatory attribute - pick one of ['data-momentid', 'data-timeline-source-type', 'data-tweetid']. (see https://amp.dev/documentation/components/amp-twitter)
+|        layout="responsive">
+|    </amp-twitter>
+|
+|    <h2>Non-number momentid</h2>
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:69:2 The attribute 'data-momentid' in tag 'amp-twitter' is set to the invalid value 'https://twitter.com/i/moments/1009149991452135424'. (see https://amp.dev/documentation/components/amp-twitter)
+|        layout="responsive"
+|        data-momentid="https://twitter.com/i/moments/1009149991452135424">
+|    </amp-twitter>
+|
+|    <h2>Using cards with momentid</h2>
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:75:2 The attribute 'data-tweetid' in tag 'amp-twitter' is missing or incorrect, but required by attribute 'data-cards'. (see https://amp.dev/documentation/components/amp-twitter)
+|        layout="responsive"
+|        data-momentid="1009149991452135424"
+|        data-cards="hidden">
+|    </amp-twitter>
+|
+|    <h2>Using limit</h2>
+|    <h3>with tweetid</h3>
+|    <amp-twitter width=486 height=1312
+>>   ^~~~~~~~~
+amp-twitter/0.1/test/validator-amp-twitter.html:83:2 The attribute 'data-momentid' in tag 'amp-twitter' is missing or incorrect, but required by attribute 'data-limit'. (see https://amp.dev/documentation/components/amp-twitter)
+|        layout="responsive"
+|        data-tweetid="585110598171631616"
+|        data-limit="42">
+|    </amp-twitter>
+|    <h3>with moment</h3>
+|    <amp-twitter width=886 height=256
+|        layout="responsive"
+|        data-momentid="650667182356082688"
+|        data-limit="3">
+|    </amp-twitter>
+|
+|    <h2>Timelines</h2>
+|    <h3>with data-theme</h3>
+|    <amp-twitter width="1" height="5"
+|      layout="responsive"
+|      data-timeline-source-type="profile"
+|      data-timeline-user-id="143531181"
+|      data-theme="dark">
+|    </amp-twitter>
+|
+|    <h3>with data-link-color</h3>
+|    <amp-twitter width="1" height="5"
+|      layout="responsive"
+|      data-timeline-source-type="profile"
+|      data-timeline-user-id="143531181"
+|      data-link-color="#55acee">
+|    </amp-twitter>
+|
+|    <h2>Moments</h2>
+|    <h3>with data-theme</h3>
+|    <amp-twitter width=886 height=256
+|      layout="responsive"
+|      data-momentid="650667182356082688"
+|      data-theme="dark">
+|    </amp-twitter>
+|    <h3>with data-link-color</h3>
+|    <amp-twitter width=886 height=256
+|      layout="responsive"
+|      data-momentid="650667182356082688"
+|      data-link-color="#55acee">
+|    </amp-twitter>
+|
+|    <h2>amp-bind</h2>
+|    <amp-twitter
+|      width=375
+|      height=472
+|      layout="responsive"
+|      data-tweetid="638793490521001985"
+|      [data-tweetid]="tweetid"
+|    >
+|    </amp-twitter>
+|
+|  </body>
+|  </html>

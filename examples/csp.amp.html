@@ -1,0 +1,62 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP CSP</title>
+  <link rel="canonical" href="analytics.amp.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: blob:; script-src blob: https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ https://cdn.ampproject.org/rtv/; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.fontawesome.com https://use.typekit.net https://cdnjs.cloudflare.com/ajax/libs/font-awesome/; report-uri https://csp-collector.appspot.com/csp/amp">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://use.typekit.net/oeg4hgb.css">
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <style amp-custom>
+    #data-svg {
+      width: 100px;
+      height: 100px;
+      background-color: red;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" /></svg>')
+    }
+    .font {
+      font-family: 'Questrial'
+    }
+  </style>
+</head>
+<body>
+
+To update, copy current Proxy CSP into meta tag. This file intentionally does not validate, because it uses an inline CSP. Note also, that one CSP error related to the "livereload" script injected by our test server is expected.
+
+<h2>Should show red with arrows</h2>
+<div id="data-svg"></div>
+
+<h2 id="iframe">Should say hello world</h2>
+<amp-iframe width="300" height="50" src="data:text/html;charset=utf-8;base64,PGgxPmhlbGxvIHdvcmxkPC9oMT4=">
+  <amp-img placeholder src="img/hero@1x.jpg" width="300" height="50">
+</amp-iframe>
+
+<h2>Should show ad<h2>
+<amp-ad width=300 height=250
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="test123"
+      data-aax_src="302">
+  </amp-ad>
+<h2>Should show YT video</h2>
+<amp-youtube
+      data-videoid="mGENRKrdoGY"
+      width="240" height="135"></amp-youtube>
+<h2>Should show image</h2>
+<amp-img src="https://cdn.ampproject.org/i/s/i.guim.co.uk/img/media/dc4d6f2e1198a804b9c9d4b70515a8f7915e1943/0_0_6144_3688/master/6144.jpg?w=700&q=85&auto=format&sharp=10&s=e13bbb3b723ce2d831869edc96ec4b96" width=50 height=50></amp-img>
+<h2>Should say "Hello World" when button is clicked</h2>
+<p [text]="foo"></p>
+<button on="tap:AMP.setState({foo: 'Hello World'})">Click me</button>
+
+<h2 class="font">Different font</h2>
+</body>
+</html>

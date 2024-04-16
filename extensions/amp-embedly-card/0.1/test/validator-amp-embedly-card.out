@@ -1,0 +1,108 @@
+FAIL
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-embedly-card example</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <style amp-custom>
+|      amp-embedly-card {
+|        color: red;
+|      }
+|    </style>
+|    <script async custom-element="amp-embedly-card" src="https://cdn.ampproject.org/v0/amp-embedly-card-0.1.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: amp-embedly-key value and layout -->
+|    <amp-embedly-key value="1d5c48f7edc34c54bdae4c37b681ea2b" layout="nodisplay"></amp-embedly-key>
+|
+|    <!-- Invalid: amp-embedly-key missing value -->
+|    <amp-embedly-key layout="nodisplay"></amp-embedly-key>
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:22:2 The mandatory attribute 'value' is missing in tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+|
+|    <!-- Invalid: amp-embedly-key invalid layout - responsive -->
+|    <amp-embedly-key layout="responsive"></amp-embedly-key>
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:25:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+|
+|    <!-- Invalid: amp-embedly-key invalid layout - fill -->
+|    <amp-embedly-key layout="fill"></amp-embedly-key>
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:28:2 The specified layout 'FILL' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+|
+|    <!-- Invalid: amp-embedly-key invalid layout - fixed -->
+|    <amp-embedly-key layout="fixed"></amp-embedly-key>
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:31:2 The specified layout 'FIXED' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+|
+|    <!-- Invalid: amp-embedly-key invalid layout - fixed-height -->
+|    <amp-embedly-key layout="fixed-height"></amp-embedly-key>
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:34:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+|
+|    <!-- Invalid: amp-embedly-key invalid layout - flex-item -->
+|    <amp-embedly-key layout="flex-item"></amp-embedly-key>
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:37:2 The specified layout 'FLEX_ITEM' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+|
+|    <!-- Invalid: amp-embedly-card missing width -->
+|    <amp-embedly-card
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:40:2 The mandatory attribute 'width' is missing in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
+|            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+|            layout="responsive"
+|            height="80"
+|    ></amp-embedly-card>
+|
+|    <!-- Invalid: amp-embedly-card missing height -->
+|    <amp-embedly-card
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:47:2 The mandatory attribute 'height' is missing in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
+|            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+|            layout="responsive"
+|            width="150"
+|    ></amp-embedly-card>
+|
+|    <!-- Invalid: amp-embedly-card forbidden protocol http -->
+|    <amp-embedly-card
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:54:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
+|            data-url="http://www.youtube.com/watch?v=lBTCB7yLs8Y"
+|            layout="responsive"
+|            width="150"
+|            height="80"
+|    ></amp-embedly-card>
+|
+|    <!-- Invalid: amp-embedly-card relative url -->
+|    <amp-embedly-card
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:62:2 The relative URL '/watch?v=lBTCB7yLs8Y' for attribute 'data-url' in tag 'amp-embedly-card' is disallowed. (see https://amp.dev/documentation/components/amp-embedly-card/)
+|            data-url="/watch?v=lBTCB7yLs8Y"
+|            layout="responsive"
+|            width="150"
+|            height="80"
+|    ></amp-embedly-card>
+|
+|    <!-- Valid: amp-embedly-card correct attributes -->
+|    <amp-embedly-card
+|            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+|            layout="responsive"
+|            width="100"
+|            height="50"
+|    ></amp-embedly-card>
+|
+|    <!-- Invalid: amp-embedly-card invalid layout -->
+|    <amp-embedly-card
+>>   ^~~~~~~~~
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:78:2 The specified layout 'NODISPLAY' is not supported by tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
+|            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+|            layout="nodisplay"
+|            width="100"
+|            height="50"
+|    ></amp-embedly-card>
+|  </body>
+|  </html>

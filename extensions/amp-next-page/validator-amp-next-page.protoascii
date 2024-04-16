@@ -1,0 +1,169 @@
+tags: {  # amp-next-page
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-next-page"
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-next-page: JSON Config
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
+  requires_extension: "amp-next-page"
+  mandatory_parent: "AMP-NEXT-PAGE"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-NEXT-PAGE > [separator]"
+  descriptive_name : "amp-next-page [separator] child"
+  mandatory_parent: "AMP-NEXT-PAGE"
+  attrs: {
+    name: "separator"
+    mandatory: true
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
+  descriptive_name : "amp-next-page [recommendation-box] child"
+  mandatory_parent: "AMP-NEXT-PAGE"
+  attrs: {
+    name: "recommendation-box"
+    mandatory: true
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-NEXT-PAGE > [footer]"
+  descriptive_name : "amp-next-page [footer] child"
+  mandatory_parent: "AMP-NEXT-PAGE"
+  attrs: {
+    name: "footer"
+    mandatory: true
+  }
+}
+tags: {  # <amp-next-page>
+  html_format: AMP
+  tag_name: "AMP-NEXT-PAGE"
+  spec_name: "amp-next-page with inline config"
+  unique: true
+  requires_extension: "amp-next-page"
+  ### TODO(wassgha) Uncomment after deprecating 0.1
+  # mandatory_parent: "BODY"
+  # mandatory_last_child: true
+  attrs: { name: "deep-parsing" }
+  attrs: { name: "max-pages" }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [footer]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
+    mandatory: true
+    unique: true
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
+}
+tags: {  # <amp-next-page src>
+  html_format: AMP
+  tag_name: "AMP-NEXT-PAGE"
+  spec_name: "amp-next-page with src attribute"
+  unique: true
+  requires_extension: "amp-next-page"
+  ### TODO(wassgha) Uncomment after deprecating 0.1
+  # mandatory_parent: "BODY"
+  # mandatory_last_child: true
+  attrs: { name: "deep-parsing" }
+  attrs: { name: "max-pages" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "xssi-prefix" }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [footer]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
+    unique: true
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
+}
+tags: {  # <amp-next-page type="adsense">
+  html_format: AMP
+  tag_name: "AMP-NEXT-PAGE"
+  spec_name: "amp-next-page [type=adsense]"
+  unique: true
+  requires_extension: "amp-next-page"
+  ### TODO(wassgha) Uncomment after deprecating 0.1
+  # mandatory_parent: "BODY"
+  # mandatory_last_child: true
+  attrs: {
+    name: "data-client"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-slot"
+    mandatory: true
+  }
+  attrs: { name: "deep-parsing" }
+  attrs: { name: "max-pages" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "adsense"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [footer]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
+    unique: true
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
+}

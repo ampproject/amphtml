@@ -1,0 +1,38 @@
+tags: {  # amp-font
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-font"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-font>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-FONT"
+  requires_extension: "amp-font"
+  attrs: {
+    name: "font-family"
+    mandatory: true
+  }
+  attrs: { name: "font-style" }
+  attrs: { name: "font-variant" }
+  attrs: { name: "font-weight" }
+  attrs: { name: "on-error-add-class" }
+  attrs: { name: "on-error-remove-class" }
+  attrs: { name: "on-load-add-class" }
+  attrs: { name: "on-load-remove-class" }
+  attrs: {
+    name: "timeout"
+    value_regex: "[0-9]+"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

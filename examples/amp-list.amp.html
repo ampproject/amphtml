@@ -1,0 +1,165 @@
+<!--
+  ## Introduction
+
+  The [`amp-list`](https://amp.dev/documentation/components/amp-list) component fetches dynamic content from a CORS JSON endpoint and renders it using a supplied template. This is good for embedding a dynamic list of related articles.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-list` component ... -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- ... and the `amp-mustache` component in the header -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-list/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+  amp-list {
+    margin-left: 16px;
+  }
+  .list-overflow {
+    width: 160px;
+    margin-left: auto;
+  }
+  </style>
+</head>
+<body>
+
+  <div on="tap:list1.refresh,list2.refresh,list3.refresh,list4.refresh,list5.refresh">
+    Refresh All Lists
+  </div>
+
+  <!-- ## Using a nested template -->
+  <!--
+  The `amp-list` content is provided by a JSON CORS endpoint, which is defined by the `src`
+  attribute. The URL's protocol must be HTTPS. The response must be a JSON object containing
+  an array property `items`, for example:
+  ```json
+  {
+    "items": [
+      {
+        "title": "amp-carousel",
+        "url": "https://amp.dev/documentation/examples/components/amp-carousel/"
+      },
+      ...
+    ]
+  }
+  ```
+  The list content is rendered via an [amp-mustache template](https://amp.dev/documentation/components/amp-mustache). The template can be specified either by id, or by using a nested element.
+  -->
+  <h3>amp-list > template[type=amp-mustache]</h3>
+  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+    <template type="amp-mustache" id="amp-template-id">
+      <div><a href="{{url}}">{{title}}</a></div>
+    </template>
+  </amp-list>
+
+  <!-- If the `amp-list` contains unescaped HTML (allow <h1> <h2> <h3> and <amp-img> tags) -->
+  <!-- See: https://github.com/ampproject/amphtml/issues/27344 -->
+  <h3>amp-list with unescaped HTML</h3>
+  <amp-list id="list1" width="auto" height="300" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+    <template type="amp-mustache" id="amp-template-id">
+      <div>{{{html}}}</div>
+    </template>
+  </amp-list>
+
+  <!-- [diffable] -->
+  <h3>amp-list[diffable]</h3>
+  <amp-list diffable id="list1" width="auto" height="300" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+    <template type="amp-mustache" id="amp-template-id">
+      <div>
+        <amp-img src="{{image}}" height="50" width="50" alt="{{title}}"></amp-img>
+        <a href="{{url}}">{{title}}</a>
+      </div>
+    </template>
+    <div fetch-error>FETCH-ERROR</div>
+
+    <div role="list"><div role="listitem">
+      <amp-img data-foo=1 alt="amp-carousel" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-carousel/">amp-carousel</a>
+    </div><div role="listitem">
+      <amp-img data-foo=2 alt="amp-img" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-img/">amp-img</a>
+    </div><div role="listitem">
+      <amp-img data-foo=3 alt="amp-ad" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-ad/">amp-ad</a>
+    </div><div role="listitem">
+      <amp-img data-foo=4 alt="amp-accordion" width="50" height="50" src="http://localhost:8000/examples/img/ampicon.png"></amp-img>
+      <a target="_top" href="http://localhost:8000/components/amp-accordion/">amp-accordion</a>
+    </div></div>
+  </amp-list>
+
+  <!-- ## Using a script to enclose the template. -->
+  <h3>amp-list > script[type=text/plain][template=amp-mustache]</h3>
+  <amp-list width="auto" height="100" layout="fixed-height" src="comments.example.json">
+    <script type="text/plain" template="amp-mustache">
+      <table>
+        <tr>
+          <td>Comment:</td>
+          <td>{{content}}</td>
+        </tr>
+        {{#replies}}
+          <tr>
+            <td>Reply:</td>
+            <td>{{content}}</td>
+          </tr>
+        {{/replies}}
+      </table>
+    </script>
+  </amp-list>
+
+  <!-- ## Using an existing template -->
+  <!--
+    The template can also be specified using an ID of an existing
+    `template` element. This example references the template from the
+    previous sample.
+  -->
+  <h3>amp-list[template]</h3>
+  <amp-list id="list2" width="auto" height="100" layout="fixed-height"  src="list.example.json"
+      template="amp-template-id" class="m1">
+  </amp-list>
+
+  <!-- ## Limiting List Length -->
+  <!--
+ Use the `max-items` attribute to limit the number of list elements displayed
+  -->
+  <h3>amp-list[max-items]</h3>
+  <amp-list id="list3" width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
+      template="amp-template-id" class="m1" reset-on-refresh>
+  </amp-list>
+
+   <!-- ## Single Entry list -->
+  <h3>amp-list[single-item]</h3>
+  <amp-list id="list4" width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
+  template="amp-template-id" class="m1">
+</amp-list>
+
+  <!-- ## Handling List Overflow -->
+  <!--
+ If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
+  -->
+  <h3>amp-list > [overflow]</h3>
+  <amp-list id="list5" width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" reset-on-refresh>
+    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+      Show more
+    </div>
+  </amp-list>
+
+  <!-- ## Handling Paging -->
+  <!--
+ If the `amp-list` multiple pages ... .
+  -->
+  <h3>amp-list[load-more=auto]</h3>
+  <amp-list width="auto" height="200" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
+    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+      Show more
+    </div>
+  </amp-list>
+
+
+</body>
+</html>

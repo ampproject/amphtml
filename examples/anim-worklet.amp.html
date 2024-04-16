@@ -1,0 +1,76 @@
+<!--
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="anim-worklet.amp.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+    <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+    <style amp-custom>
+      html, body {
+        margin: 0;
+        padding: 0;
+        position: relative;
+      }
+      div {
+        position: relative;
+        background-color: pink;
+        height: 100vh;
+        z-index: 9;
+      }
+      #target {
+        position: relative;
+        height: 60vh;
+        background-size: cover;
+        margin-top: -30vh;
+        z-index: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <amp-animation id="anim1" layout="nodisplay">
+        <script type="application/json">
+          {
+          "duration": "2s",
+          "fill": "both",
+          "direction": "alternate",
+          "animations": [
+            {
+              "selector": "#target",
+              "keyframes": [
+                { "transform": "translateY(0)" },
+                { "transform": "translateY(30vh)" }
+              ]
+            }
+          ]
+        }
+        </script>
+      </amp-animation>
+      <div></div>
+      <div id="target">
+        <amp-position-observer
+          intersection-ratios="1"
+          on="scroll:anim1.seekTo(percent=event.percent)"
+          layout="nodisplay">
+        </amp-position-observer>
+        <amp-img layout=responsive width=411 height=411 src="https://placekitten.com/g/4000/4000"></amp-img>
+      </div>
+      <div></div>
+  </body>
+</html>

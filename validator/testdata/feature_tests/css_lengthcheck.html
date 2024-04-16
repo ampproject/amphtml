@@ -1,0 +1,21 @@
+<!--
+  Test Description:
+    Demonstrates the use of <style amp-custom-length-check> which can be
+    used if you want to see how many bytes are present in your style tag
+    as the validator sees it. If present, this tag will always report an
+    error as it requires -1 or fewer bytes in the tag.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom-length-check>0123456789</style>
+  <link rel="canonical" href="./regular-html-version.html">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+  Hello, world.
+</body>
+</html>

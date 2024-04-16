@@ -1,0 +1,41 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "outDir": "dist",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "incremental": false,
+    "esModuleInterop": true,
+    "declaration": true
+  },
+  "files": [
+    "./global.d.ts"
+  ],
+  "include": [
+    "./**/*.js"
+  ],
+  "exclude": [
+    "./**/node_modules/**",
+    "./**/test/**/*.js",
+    "./**/*test*.js",
+    "./babel-plugins/**/(input|output).js",
+    "./eslint-rules/**/*.js",
+    "./externs/**/*.js",
+    "./tasks/make-extension/template/**/*.js"
+  ]
+}

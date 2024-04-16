@@ -1,0 +1,47 @@
+tags: {  # amp-bodymovin-animation
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-bodymovin-animation"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-bodymovin-animation>
+  html_format: AMP
+  tag_name: "AMP-BODYMOVIN-ANIMATION"
+  requires_extension: "amp-bodymovin-animation"
+
+  attrs: {
+    name: "loop"
+    value_regex_casei: "[1-9][0-9]*|false|true"
+  }
+  attrs: {
+    name: "noautoplay"
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "renderer"
+    value_casei: "canvas"
+    value_casei: "html"
+    value_casei: "svg"
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-bodymovin-animation/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

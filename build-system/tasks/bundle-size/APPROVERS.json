@@ -1,0 +1,36 @@
+{
+  "dist/v0.?(m)js": {
+    "approvers": [
+      "ampproject/wg-performance"
+    ],
+    "threshold": 0.1
+  },
+  "dist/amp4ads-v0.?(m)js": {
+    "approvers": [
+      "ampproject/wg-monetization",
+      "ampproject/wg-performance"
+    ],
+    "threshold": 0.1
+  },
+  "dist/v0/amp-analytics-?.?.?(m)js": {
+    "approvers": [
+      "ampproject/wg-components",
+      "ampproject/wg-performance"
+    ],
+    "threshold": 0.1
+  },
+  "dist/v0/amp-story-?.?.?(m)js": {
+    "approvers": [
+      "ampproject/wg-stories",
+      "ampproject/wg-performance"
+    ],
+    "threshold": 0.5
+  },
+  "dist.3p/current-min/vendor/*.?(m)js": {
+    "approvers": [
+      "ampproject/wg-components",
+      "ampproject/wg-monetization"
+    ],
+    "threshold": 0.1
+  }
+}

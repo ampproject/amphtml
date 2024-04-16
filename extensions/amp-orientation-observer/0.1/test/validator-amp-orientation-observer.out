@@ -1,0 +1,120 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests amp-orientation-observer.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <amp-orientation-observer layout="nodisplay"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" on="alpha:foo;beta:bar;gamma:baz(percent=event.percent)"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" on="alpha:foo;beta:bar;gamma:baz(angle=event.angle)"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" on="alpha:foo(percent=event.percent);beta:bar;gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" on="alpha:foo(angle=event.angle);beta:bar;gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" on="alpha:foo;beta:bar(percent=event.percent);gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" on="alpha:foo;beta:bar(angle=event.angle);gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" gamma-range="0 90" on="alpha:foo;beta:bar;gamma:baz(percent=event.percent)"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" gamma-range="0 90" on="alpha:foo;beta:bar;gamma:baz(angle=event.angle)"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" alpha-range="0 90" on="alpha:foo(percent=event.percent);beta:bar;gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" alpha-range="0 90" on="alpha:foo(angle=event.angle);beta:bar;gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" beta-range="0 90" on="alpha:foo;beta:bar(percent=event.percent);gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" beta-range="0 90" on="alpha:foo;beta:bar(angle=event.angle);gamma:baz"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" smoothing="5"></amp-orientation-observer>
+|    <amp-orientation-observer layout="nodisplay" smoothing></amp-orientation-observer>
+|
+|    <!-- Invalid: missing required layout value -->
+|    <amp-orientation-observer></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:34:2 The implied layout 'CONTAINER' is not supported by tag 'amp-orientation-observer'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|
+|    <!-- Invalid: alpha-range, beta-range & gamma-range not valid entries -->
+|    <amp-orientation-observer alpha-range="" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:37:2 The attribute 'alpha-range' in tag 'amp-orientation-observer' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer alpha-range="foo" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:38:2 The attribute 'alpha-range' in tag 'amp-orientation-observer' is set to the invalid value 'foo'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer alpha-range="100fx" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:39:2 The attribute 'alpha-range' in tag 'amp-orientation-observer' is set to the invalid value '100fx'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer alpha-range="100 a" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:40:2 The attribute 'alpha-range' in tag 'amp-orientation-observer' is set to the invalid value '100 a'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer alpha-range="100 100 100" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:41:2 The attribute 'alpha-range' in tag 'amp-orientation-observer' is set to the invalid value '100 100 100'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer alpha-range="a 100" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:42:2 The attribute 'alpha-range' in tag 'amp-orientation-observer' is set to the invalid value 'a 100'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer alpha-range="a b" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:43:2 The attribute 'alpha-range' in tag 'amp-orientation-observer' is set to the invalid value 'a b'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|
+|    <amp-orientation-observer beta-range="" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:45:2 The attribute 'beta-range' in tag 'amp-orientation-observer' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer beta-range="foo" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:46:2 The attribute 'beta-range' in tag 'amp-orientation-observer' is set to the invalid value 'foo'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer beta-range="100fx" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:47:2 The attribute 'beta-range' in tag 'amp-orientation-observer' is set to the invalid value '100fx'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer beta-range="100 a" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:48:2 The attribute 'beta-range' in tag 'amp-orientation-observer' is set to the invalid value '100 a'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer beta-range="100 100 100" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:49:2 The attribute 'beta-range' in tag 'amp-orientation-observer' is set to the invalid value '100 100 100'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer beta-range="a 100" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:50:2 The attribute 'beta-range' in tag 'amp-orientation-observer' is set to the invalid value 'a 100'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer beta-range="a b" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:51:2 The attribute 'beta-range' in tag 'amp-orientation-observer' is set to the invalid value 'a b'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|
+|    <amp-orientation-observer gamma-range="" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:53:2 The attribute 'gamma-range' in tag 'amp-orientation-observer' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer gamma-range="foo" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:54:2 The attribute 'gamma-range' in tag 'amp-orientation-observer' is set to the invalid value 'foo'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer gamma-range="100fx" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:55:2 The attribute 'gamma-range' in tag 'amp-orientation-observer' is set to the invalid value '100fx'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer gamma-range="100 a" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:56:2 The attribute 'gamma-range' in tag 'amp-orientation-observer' is set to the invalid value '100 a'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer gamma-range="100 100 100" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:57:2 The attribute 'gamma-range' in tag 'amp-orientation-observer' is set to the invalid value '100 100 100'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer gamma-range="a 100" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:58:2 The attribute 'gamma-range' in tag 'amp-orientation-observer' is set to the invalid value 'a 100'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer gamma-range="a b" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:59:2 The attribute 'gamma-range' in tag 'amp-orientation-observer' is set to the invalid value 'a b'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|
+|    <!-- Invalid: smoothing value not valid -->
+|    <amp-orientation-observer smoothing="b" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:62:2 The attribute 'smoothing' in tag 'amp-orientation-observer' is set to the invalid value 'b'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer smoothing="2.5" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:63:2 The attribute 'smoothing' in tag 'amp-orientation-observer' is set to the invalid value '2.5'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer smoothing="0.5" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:64:2 The attribute 'smoothing' in tag 'amp-orientation-observer' is set to the invalid value '0.5'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|    <amp-orientation-observer smoothing="-5" layout="nodisplay"></amp-orientation-observer>
+>>   ^~~~~~~~~
+amp-orientation-observer/0.1/test/validator-amp-orientation-observer.html:65:2 The attribute 'smoothing' in tag 'amp-orientation-observer' is set to the invalid value '-5'. (see https://amp.dev/documentation/components/amp-orientation-observer)
+|  </body>
+|  </html>

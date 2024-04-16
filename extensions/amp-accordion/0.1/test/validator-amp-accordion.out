@@ -1,0 +1,121 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests amp-accordion.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- a valid example -->
+|    <amp-accordion>
+|      <section>
+|        <h2>Section 1</h2>
+|        <p>Bunch of awesome content</p>
+|      </section>
+|      <section expanded>
+|        <h2>Section 2</h2>
+|        <div>Bunch of awesome content</div>
+|      </section>
+|      <section expanded>
+|        <h2>Section 3</h2>
+|        <amp-img src="/awesome.png" width="300" height="300"></amp-img>
+|      </section>
+|      <section>
+|        <h2>Properly nested amp-accordion</h2>
+|        <amp-accordion expand-single-section animate>
+|          <section>
+|            <h2>Nested section</h2>
+|            <p>It's possible to nest amp-accordions.</p>
+|          </section>
+|        </amp-accordion>
+|      </section>
+|      <section>
+|        <header>The header tag is supported as well.</header>
+|        <p>Even more awesome.</p>
+|      </section>
+|      <section [data-expand]="">
+|        <h2>Section with bound [data-expand] attribute</h2>
+|        <amp-img src="/awesome.png" width="300" height="300"></amp-img>
+|      </section>
+|    </amp-accordion>
+|
+|    <!-- invalid example -->
+|    <amp-accordion>
+|      <amp-accordion> <!-- can't nest amp-accordion -->
+>>     ^~~~~~~~~
+amp-accordion/0.1/test/validator-amp-accordion.html:52:4 Tag 'amp-accordion' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://amp.dev/documentation/components/amp-accordion/)
+|      </amp-accordion>
+|      <p>Some paragraph of text that doesn't belong here.</p>
+>>     ^~~~~~~~~
+amp-accordion/0.1/test/validator-amp-accordion.html:54:4 Tag 'p' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://amp.dev/documentation/components/amp-accordion/)
+|      <section>
+>>     ^~~~~~~~~
+amp-accordion/0.1/test/validator-amp-accordion.html:55:4 Tag 'amp-accordion > section' must have 2 child tags - saw 3 child tags.
+|        <div>header which isn't h1-h6.</div>
+>>       ^~~~~~~~~
+amp-accordion/0.1/test/validator-amp-accordion.html:56:6 Tag 'div' is disallowed as first child of tag 'amp-accordion > section'. First child tag must be one of ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header'].
+|        <div>a second child</div>
+|        <div>a third child</div>
+|      </section>
+|    </amp-accordion>
+|
+|    <!-- accordion should allow access-hide in section -->
+|    <!-- (part of amp-access) (see: #25807) -->
+|    <amp-accordion expand-single-section disable-session-states>
+|      <section amp-access="NOT nwPlus" access-hide>
+|          <h2 class="accordion-header">
+|            Web-Abo
+|            <span class="show-more">&#9207;</span>
+|            <span class="show-less">&#9206;</span>
+|          </h2>
+|          <div>***</div>
+|      </section>
+|      <!-- access-hide attribute should not have non-empty value -->
+|      <section amp-access="NOT nwPlus" access-hide="test">
+>>     ^~~~~~~~~
+amp-accordion/0.1/test/validator-amp-accordion.html:74:4 The attribute 'access-hide' in tag 'amp-accordion > section' is set to the invalid value 'test'.
+|          <h2 class="accordion-header">
+|            Tagespass
+|            <span class="show-more">&#9207;</span>
+|            <span class="show-less">&#9206;</span>
+|          </h2>
+|          <div>***</div>
+|      </section>
+|      <!-- LOGIN-Form -->
+|      <section amp-access="NOT loggedIn" amp-access-hide>
+|          <h2 class="accordion-header">
+|            Login
+|            <span class="show-more">&#9207;</span>
+|            <span class="show-less">&#9206;</span>
+|          </h2>
+|          <form
+|            id="loginform-overlay"
+|            class="text-center"
+|            method="post"
+|            action-xhr="test"
+|            target="_top"
+|            on="submit:loading-spinner.show;submit-success:loginform.hide,loading-spinner.hide,logoutform.show"
+|          >
+|            <input
+|              id="my_user"
+|              type="text"
+|              name="my_user"
+|              maxlength="50"
+|              size="20"
+|              placeholder="Benutzername o. E-Mail"
+|              required
+|            />
+|          </form>
+|      </section>
+|    </amp-accordion>
+|  </body>
+|  </html>

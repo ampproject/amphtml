@@ -1,0 +1,29 @@
+FAIL
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <title>Twitter examples</title>
+|    <link rel="canonical" href="amps.html" >
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+|    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+>>   ^~~~~~~~~
+feature_tests/old-boilerplate.html:9:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+>>                                             ^~~~~~~~~
+feature_tests/old-boilerplate.html:9:44 The parent tag of tag 'style amp-custom' is 'noscript', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <h1>AMP boilerplate</h1>
+|    <h2>Testing if the old validator is still accepted.</h2>
+|    <p>
+|      "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."
+|      "There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..."
+|    </p>
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/old-boilerplate.html:20:6 The tag 'style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>       ^~~~~~~~~
+feature_tests/old-boilerplate.html:20:6 The tag 'noscript > style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

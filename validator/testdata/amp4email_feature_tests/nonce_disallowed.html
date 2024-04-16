@@ -1,0 +1,16 @@
+<!--
+  Test Description:
+    This test demonstrates that the "nonce" attribute is not allowed in
+    amp4email.
+-->
+<!doctype html>
+<html ⚡4email data-css-strict>
+<head>
+  <meta charset="utf-8">
+  <style amp4email-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/v0.js" nonce="disallowed"></script>
+</head>
+<body>
+Hello, world.
+</body>
+</html>

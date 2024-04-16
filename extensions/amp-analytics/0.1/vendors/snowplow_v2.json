@@ -1,0 +1,63 @@
+{
+  "linkers": {
+    "sp_amp_linker": {
+      "ids": {
+        "_sp_duid": "${duid}",
+        "amp_id": "${ampVistorId}"
+      }
+    }
+  },
+  "cookies": {
+    "enabled": true,
+    "_sp_duid": {
+      "value": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(LINKER_PARAM(sp_amp_linker,_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid), COOKIE(_sp_duid)))"
+    },
+    "_sp_ampid": {
+      "value": "$IF(COOKIE(_sp_ampid), LINKER_PARAM(sp_amp_linker, amp_id), $IF(LINKER_PARAM(sp_amp_linker, amp_id), LINKER_PARAM(sp_amp_linker, amp_id), COOKIE(_sp_id)))"
+    }
+  },
+  "vars": {
+    "trackerVersion": "amp-1.1.0",
+    "ampVistorId": "CLIENT_ID(_sp_ampid)",
+    "duid": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(LINKER_PARAM(sp_amp_linker,_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid), COOKIE(_sp_duid)))",
+    "nullString": "null",
+    "customEventTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:${customEventSchemaVendor}/${customEventSchemaName}/jsonschema/${customEventSchemaVersion}\",\"data\":${customEventSchemaData}}}",
+    "sessionContext": "{\"schema\":\"iglu:dev.amp.snowplow/amp_session/jsonschema/1-0-0\",\"data\":{\"ampSessionId\":${sessionId},\"ampSessionIndex\":${sessionCount},\"sessionEngaged\":$IF(${sessionEngaged}, true, false),\"sessionCreationTimestamp\":${sessionTimestamp}$IF(${sessionEventTimestamp},`,\"lastSessionEventTimestamp\":${sessionEventTimestamp}`)}}",
+    "idContext": "{\"schema\":\"iglu:dev.amp.snowplow/amp_id/jsonschema/1-0-0\",\"data\":{\"ampClientId\":\"${ampVistorId}\",\"domainUserid\":\"${duid}\",\"userId\":\"${userId}\"}}",
+    "webPageContext": "{\"schema\":\"iglu:dev.amp.snowplow/amp_web_page/jsonschema/1-0-0\",\"data\":{\"ampPageViewId\":\"PAGE_VIEW_ID_64\"}}",
+    "contextsHead": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[${idContext},${sessionContext},$REPLACE(`${customContexts}`, `^,*(.+?),*$`, `$1,`)",
+    "contextsTail": "${webPageContext}]}",
+    "ampPagePingTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:dev.amp.snowplow/amp_page_ping/jsonschema/1-0-0\",\"data\":{\"scrollLeft\":${scrollLeft},\"scrollWidth\":${scrollWidth},\"viewportWidth\":${viewportWidth},\"scrollTop\":${scrollTop},\"scrollHeight\":${scrollHeight},\"viewportHeight\":${viewportHeight},\"totalEngagedTime\":${totalEngagedTime}}}}"
+  },
+  "requests": {
+    "basePrefix": "https://${collectorHost}/i?p=web&tv=${trackerVersion}",
+    "pageView": "${basePrefix}&e=pv",
+    "structEvent": "${basePrefix}&e=se&se_ca=${structEventCategory}&se_ac=${structEventAction}&se_la=${structEventLabel}&se_pr=${structEventProperty}&se_va=$IF(${structEventValue}, ${structEventValue}, ${nullString})",
+    "pagePing": "${basePrefix}&e=pp&pp_mix=${scrollLeft}&pp_miy=${scrollTop}",
+    "selfDescribingEvent": "${basePrefix}&e=ue&ue_pr=${customEventTemplate}",
+    "ampPagePing": "${basePrefix}&e=ue&ue_pr=${ampPagePingTemplate}"
+  },
+  "extraUrlParams": {
+    "url": "${ampdocUrl}",
+    "tna": "${nameTracker}",
+    "page": "${title}",
+    "res": "${screenWidth}x${screenHeight}",
+    "dtm": "${timestamp}",
+    "tz": "${timezoneCode}",
+    "aid": "${appId}",
+    "cd": "${screenColorDepth}",
+    "cs": "${documentCharset}",
+    "lang": "${browserLanguage}",
+    "refr": "${documentReferrer}",
+    "vp": "${viewportWidth}x${viewportHeight}",
+    "ua": "${userAgent}",
+    "ds": "${scrollWidth}x${scrollHeight}",
+    "uid": "${userId}",
+    "co": "${contextsHead}${contextsTail}"
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

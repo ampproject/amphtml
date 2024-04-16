@@ -1,0 +1,104 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lorem Ipsum | PublisherName</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    amp-user-notification {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+
+    .analytic-notification-demo-text{
+      padding:16px;
+    }
+
+    amp-user-notification .btn {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
+    @-webkit-keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @-moz-keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    amp-user-notification.amp-active {
+      opacity: 0;
+      -webkit-animation: fadeIn ease-in 1s 1 forwards;
+      -moz-animation: fadeIn ease-in 1s 1 forwards;
+      animation: fadeIn ease-in 1s 1 forwards;
+    }
+  </style>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <div  class="analytic-notification-demo-text">
+    <h3>AMP Analytics Notification Demo</h3>
+    <p>This page uses the <a href="https://amp.dev/documentation/components/amp-user-notification/">amp-user-notification</a> to display a cookie concent banner at the bottom of the page.</p>
+    <p>When user dismisses the notification, the <a href="https://amp.dev/documentation/components/amp-analytics/">amp-analytics</a> component is used to post a 'cookie-concent-ping' request to an analytics server.</p>
+    <p>The analytics server doesn't exist so you will see an error in developer console.</p>
+  </div>
+  <amp-user-notification
+      layout=nodisplay
+      id="amp-user-notification1"
+      data-persist-dismissal="false">
+      This notification should ALWAYS show on every page visit.
+    <a href="#learn-more">Learn more.</a>
+    <button on="tap:amp-user-notification1.dismiss">Dismiss</button>
+  </amp-user-notification>
+
+  <amp-analytics data-consent-notification-id="amp-user-notification1">
+    <script type="application/json">
+    {
+      "requests": {
+        "test-ping": "https://my-analytics.com/ping?title=${title}&acct=${account}"
+      },
+      "vars": {
+        "title": "A page that sends a ping",
+        "account": "12345"
+      },
+      "triggers": {
+        "page-view": {
+          "on": "visible",
+          "request": "test-ping"
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
+</body>
+</html>

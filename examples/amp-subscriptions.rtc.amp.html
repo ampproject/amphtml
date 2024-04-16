@@ -1,0 +1,286 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>subscriptions example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
+  <script async custom-element="amp-subscriptions-google" src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "NewsArticle",
+    "isAccessibleForFree": "False",
+    "isPartOf": {
+      "@type": ["CreativeWork", "Product"],
+      "name" : "Product A",
+      "productID": "scenic-2017.appspot.com:news"
+    }
+  }
+  </script>
+  <script type="application/json" id="amp-subscriptions">
+    {
+      "services": [
+        {
+          "authorizationUrl": "//localhost:8000/subscription/0/entitlements",
+          "pingbackUrl": "//localhost:8000/subscription/pingback",
+          "actions":{
+            "login": "//localhost:8000/subscription/login",
+            "subscribe": "//localhost:8000/subscription/subscribe"
+          }
+        },
+        {
+          "serviceId": "subscribe.google.com",
+          "skuMapUrl": "//localhost:8000/subscriptions/skumap"
+        }
+      ]
+    }
+  </script>
+
+
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Georgia', Serif;
+    }
+
+    .brand-logo {
+      font-family: 'Open Sans';
+    }
+
+    .ad-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .content-container p {
+      line-height: 24px;
+    }
+
+    header,
+    .article-body {
+      padding: 15px;
+    }
+
+    .full-bleed {
+      margin: 0 -15px;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      color: #6f757a;
+      padding: 15px 0;
+      font-size: .9em;
+    }
+
+    .author {
+      display: flex;
+      align-items: center;
+
+      background: #f4f4f4;
+      padding: 0 15px;
+
+      font-size: .8em;
+
+      border: solid #dcdcdc;
+      border-width: 1px 0;
+    }
+
+    .header-time {
+      color: #a8a3ae;
+      font-family: 'Roboto';
+      font-size: 12px;
+    }
+
+    .author p {
+      margin: 5px;
+    }
+
+    .byline {
+      font-family: 'Roboto';
+      display: inline-block;
+    }
+
+    .byline p {
+      line-height: normal;
+    }
+
+    .byline .brand {
+      color: #6f757a;
+    }
+
+    .standfirst {
+      color: #6f757a;
+    }
+
+    .mailto {
+      text-decoration: none;
+    }
+
+    #author-avatar {
+      margin: 10px;
+      border: 5px solid #fff;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+
+    h1 {
+      margin: 5px 0;
+      font-weight: normal;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 226px;
+      background: #f4f4f4;
+    }
+
+    hr {
+      margin: 0;
+    }
+
+    amp-img {
+      background-color: #f4f4f4;
+    }
+
+    .login-section {
+      margin: 16px;
+      margin-top: 24px;
+      padding: 16px;
+      background: #ffc;
+    }
+
+    amp-subscriptions-dialog { padding: 10px;}
+
+
+
+  </style>
+</head>
+<body>
+
+
+<amp-analytics type="googleanalytics" id="analytics2">
+<script type="application/json">
+{
+  "vars": {
+    "account": "UA-YYYY-Y"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "title": "Example Pageview"
+      }
+    },
+    "authorizationReceived": {
+      "on": "subscriptions-entitlement-resolved",
+      "request": "event",
+      "vars": {
+        "eventCategory": "amp-subscriptions",
+        "eventAction": "subscriptions-entitlement-resolved",
+        "eventValue": "ACCESS_READER_ID/AUTHDATA(granted)/${serviceId}"
+      }
+    },
+    "pingbackSent": {
+      "on": "subscriptions-action-subscribe-started",
+      "request": "event",
+      "vars": {
+        "eventCategory": "amp-subscriptions",
+        "eventAction": "action-subscribe-started"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
+
+  <main role="main">
+    <article>
+
+
+      <div class="content-container">
+        <header>
+          <h1 itemprop="headline">Lorem Ipsum</h1>
+          <time class="header-time" itemprop="datePublished"
+              datetime="2015-09-14 13:00">September 14, 2015</time>
+          <p class="standfirst">
+            Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+          </p>
+        </header>
+
+        <div class="author">
+          <amp-img src="img/sample.jpg" id="author-avatar" placeholder
+              height="50" width="50">
+          </amp-img>
+          <div class="byline">
+            <p>
+              by <span itemscope itemtype="http://schema.org/Person"
+              itemprop="author"><b>Lorem Ipsum</b>
+              <a class="mailto" href="mailto:lorem.ipsum@example.com">
+              lorem.ipsum@</a></span>
+            </p>
+            <p class="brand">PublisherName News Reporter<p>
+          </div>
+        </div>
+
+        <section subscriptions-section="content">
+          This sample page is for real time config of SwG buttons - it looks like you are subscribed so you won't see the buttons!  Try again in incognto mode,
+        </section>
+
+
+
+        <section subscriptions-section="content-not-granted">
+          Login or subscribe to read more.
+        </section>
+
+        <br/>
+
+
+
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="brand-logo">PublisherLogo</div>
+  </footer>
+
+
+  <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT Subscribed">
+    <div>Dialog for non subscribed users, the action of this button is configured by the RTC url<div>
+    <div>
+      Single SKU
+      <div id="subscribeButtonSimple" subscriptions-google-rtc="true"
+        subscriptions-display="NOT Subscribed"
+        subscriptions-action="subscribe"
+        subscriptions-service="subscribe.google.com"
+        subscriptions-decorate>Subscribe</div>
+      </div>
+    <div>
+      Carousel
+      <div id="subscribeButtonCarousel" subscriptions-google-rtc="true"
+        subscriptions-display="NOT Subscribed"
+        subscriptions-action="subscribe"
+        subscriptions-service="subscribe.google.com"
+        subscriptions-decorate>Subscribe</div>
+      </div>
+  </template>
+  <template type="amp-mustache" subscriptions-dialog subscriptions-display="Subscribed">
+    <div >You are already subscribed so you won't see buttons here.</div>
+  </template>
+</body>
+</html>

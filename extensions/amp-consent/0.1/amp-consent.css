@@ -1,0 +1,179 @@
+
+
+/**
+ * @fileoverview Styling for the amp-consent
+ * component. This also has a lot of specific
+ * styling for the CMP Modal. Note: this does
+ * specifc percentage vs. viewport based css
+ * for the heights and tranforms of the CMP modal,
+ * to handle URL and Safari Navigation bar transitions.
+ * Please refer to the following, before changing
+ * the viewport or percentage based heights,
+ * to avoid unintentionally breaking the intended
+ * behavior.
+ *
+ * https://developers.google.com/web/updates/2016/12/url-bar-resizing
+ *
+ */
+
+amp-consent {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  bottom: 0;
+  left: 0;
+  overflow: hidden !important;
+  background: rgba(255, 255, 255, .7);
+  width: 100%;
+  z-index: 2147483645;
+}
+
+amp-consent[i-amphtml-notbuilt] > * {
+  display: none !important;
+}
+
+amp-consent > * {
+  max-height: 100vh !important;
+}
+
+amp-consent.amp-active {
+  visibility: visible;
+}
+
+amp-consent.amp-hidden {
+  visibility: hidden;
+}
+
+@keyframes amp-consent-ui-placeholder-spin  {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.i-amphtml-consent-ui-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.i-amphtml-consent-ui-placeholder > svg {
+  width: 30px;
+  height: 30px;
+
+  fill: none;
+  stroke-width: 1.5px;
+  transform-origin: 50% 50%;
+  animation: 1000ms amp-consent-ui-placeholder-spin linear infinite;
+}
+
+.i-amphtml-consent-alertdialog {
+  overflow: hidden;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  top: auto;
+  left: auto;
+}
+
+.i-amphtml-consent-ui-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Initial height (Default 30vh) will be set through styles */
+  width: 100%;
+}
+
+iframe.i-amphtml-consent-ui-fill {
+  border: none;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0px !important;
+  margin: 0px !important;
+
+  /**Scrolling support/UX for iOS**/
+  overflow: auto !important;
+
+  transform: translate3d(0px, 100vh, 0px) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-modal {
+  box-sizing: border-box;
+  top: 0;
+  right: 0;
+  animation: 0.5s i-amphtml-modal-appear;
+  animation-fill-mode: forwards;
+  height: var(--i-amphtml-modal-height) !important;
+  width: 90vw !important;
+  margin: auto !important;
+  max-width: 760px;
+}
+
+amp-consent.i-amphtml-consent-ui-border-enabled {
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-modal.i-amphtml-consent-ui-border-enabled {
+  border-radius: 8px !important;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-iframe-transform {
+  transform: translate3d(0px, calc(100% - var(--i-amphtml-modal-height)), 0px) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
+  transition: transform 0.5s ease-out !important;
+  /* Initial height transform will be set through styles */
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
+  top: 0px !important;
+  transform: translate3d(0px, 0px, 0px) !important;
+
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
+}
+
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-amphtml-consent-ui-fill {
+  height: 100% !important;
+}
+
+@keyframes i-amphtml-consent-ui-mask {
+  0% {opacity: 0.0;}
+  100% {opacity: 0.2;}
+}
+
+@keyframes i-amphtml-modal-appear {
+  0% {
+    transform: translate(0, 100vh);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+.i-amphtml-consent-ui-mask {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  opacity: 0.2;
+  animation: i-amphtml-consent-ui-mask 0.25s ease-in;
+  /* Prevent someone from making this a full-sceen image */
+  background-image: none !important;
+  background-color: #000;
+  z-index: 2147483644;
+}

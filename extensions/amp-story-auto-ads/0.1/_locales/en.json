@@ -1,0 +1,94 @@
+{
+  "39": {
+    "string": "Apply Now",
+    "description": "Button label for an ad call to action button that asks users to apply for something."
+  },
+  "40": {
+    "string": "Book",
+    "description": "Button label for an ad call to action button that asks users to book transaction."
+  },
+  "41": {
+    "string": "Buy Tickets",
+    "description": "Button label for an ad call to action button that asks users to purchase tickets."
+  },
+  "42": {
+    "string": "Download",
+    "description": "Button label for an ad call to action button that asks users to download content."
+  },
+  "43": {
+    "string": "Explore",
+    "description": "Button label for an ad call to action button that asks users to explore content."
+  },
+  "44": {
+    "string": "Get Now",
+    "description": "Button label for an ad call to action button that asks users to obtain content."
+  },
+  "45": {
+    "string": "Install Now",
+    "description": "Button label for an ad call to action button that asks users to install content."
+  },
+  "46": {
+    "string": "Learn More",
+    "description": "Button label for an ad call to action button that asks users to learn more about some content."
+  },
+  "47": {
+    "string": "Listen",
+    "description": "Button label for an ad call to action button that asks users to listen to content."
+  },
+  "48": {
+    "string": "More",
+    "description": "Button label for an ad call to action button that asks users to see more content."
+  },
+  "49": {
+    "string": "Open App",
+    "description": "Button label for an ad call to action button that asks users to open an application."
+  },
+  "50": {
+    "string": "Order Now",
+    "description": "Button label for an ad call to action button that asks users to place an order."
+  },
+  "51": {
+    "string": "Play",
+    "description": "Button label for an ad call to action button that asks users to play content."
+  },
+  "52": {
+    "string": "Read",
+    "description": "Button label for an ad call to action button that asks users to read content."
+  },
+  "53": {
+    "string": "Shop Now",
+    "description": "Button label for an ad call to action button that asks users to shop for something."
+  },
+  "54": {
+    "string": "Show",
+    "description": "Button label for an ad call to action button that asks users to show content."
+  },
+  "55": {
+    "string": "Showtimes",
+    "description": "Button label for an ad call to action button that asks users to see showtimes."
+  },
+  "56": {
+    "string": "Sign Up",
+    "description": "Button label for an ad call to action button that asks users to sign up for something."
+  },
+  "57": {
+    "string": "Subscribe Now",
+    "description": "Button label for an ad call to action button that asks users to subscribe to something."
+  },
+  "58": {
+    "string": "Use App",
+    "description": "Button label for an ad call to action button that asks users to use an application."
+  },
+  "59": {
+    "string": "View",
+    "description": "Button label for an ad call to action button that asks users to view content."
+  },
+  "60": {
+    "string": "Watch",
+    "description": "Button label for an ad call to action button that asks users to watch content."
+  },
+  "61": {
+    "string": "Watch Episode",
+    "description": "Button label for an ad call to action button that asks users to watch an episode of something."
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "requests": {
+    "host": "https://hit-pool.upscore.com/amp?",
+    "basePrefix": "u_id=${clientId(cid)}&hit_id=${pageViewId}&scTop=${scrollTop}&scHeight=${scrollHeight}&vHeight=${viewportHeight}&domain=${domain}&load=${domInteractiveTime}&timespent=${totalEngagedTime}",
+    "initialHit": "author=${author}&o_id=${object_id}&o_type=${object_type}&pubdate=${pubdate}&ref=${documentReferrer}&section=${section}&taxonomy=${taxonomy}&url=${canonicalUrl}&agent=${userAgent}&location=${ampGeo(ISOCountry)}&c_keys=${custom_keys}&c_values=${custom_values}&content_type=${content_type}&user_status=${user_status}&content_blocked=${content_blocked}",
+    "finalbeat": "${host}${basePrefix}&type=final",
+    "heartbeat": "${host}${basePrefix}&type=pulse",
+    "pageview": "${host}${basePrefix}&${initialHit}&type=init",
+    "conversion": "${host}${basePrefix}&type=pulse&conversion=${conversion_value}",
+    "videoBase": "${host}url=${canonicalUrl}&video_id=${video_id}",
+    "videoTime": "ct=${currentTime}&d=${duration}",
+    "video-play": "${videoBase}&e=video_start&${videoTime}&video_name=${video_name}&video_thumb=${video_thumbnail}",
+    "video-pause": "${videoBase}&e=video_pause&${videoTime}",
+    "video-stop": "${videoBase}&e=video_stop&${videoTime}",
+    "video-info": "${videoBase}&e=video_position&${videoTime}"
+  },
+  "triggers": {
+    "initHit": {
+      "on": "visible",
+      "request": "pageview"
+    },
+    "pulse": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 10,
+        "immediate": false,
+        "stopSpec": {
+          "on": "hidden"
+        }
+      },
+      "request": "heartbeat"
+    },
+    "final": {
+      "on": "hidden",
+      "visibilitySpec": {
+        "totalTimeMin": 5000
+      },
+      "request": "finalbeat"
+    },
+    "lead": {
+      "on": "click",
+      "selector": "${lead_selector}",
+      "request": "conversion",
+      "vars": {
+        "conversion_value": 1
+      }
+    },
+    "subscription": {
+      "on": "click",
+      "selector": "${subscription_selector}",
+      "request": "conversion",
+      "vars": {
+        "conversion_value": 2
+      }
+    }
+  },
+  "transport": {
+    "beacon": true,
+    "xhrpost": true,
+    "image": false
+  }
+}

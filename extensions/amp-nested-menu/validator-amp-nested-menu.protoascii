@@ -1,0 +1,172 @@
+tags: {  # amp-nested-menu
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-nested-menu"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-nested-menu
+  html_format: AMP
+  tag_name: "AMP-NESTED-MENU"
+  # nested menu can be lazy loaded by sidebar.
+  requires_extension: "amp-sidebar"
+  mandatory_ancestor: "AMP-SIDEBAR"
+  attrs: {
+    name: "side"
+    value: "left"
+    value: "right"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+  }
+  descendant_tag_list: "amp-nested-menu-allowed-descendants"
+  spec_url: "https://amp.dev/documentation/components/amp-nested-menu/"
+}
+tags: {  # <amp-nested-menu> <div amp-nested-submenu(-open/-close)>
+  html_format: AMP
+  tag_name: "DIV"
+  spec_name: "div amp-nested-menu"
+  descriptive_name: "div amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  # submenus inside accordion do not display correctly due to styling of <amp-accordion>.
+  disallowed_ancestor: "AMP-ACCORDION"
+  attrs: {
+    name: "amp-nested-submenu"
+    dispatch_key: NAME_VALUE_DISPATCH
+    mandatory_oneof: "['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open']"
+  }
+  attrs: {
+    name: "amp-nested-submenu-close"
+    dispatch_key: NAME_VALUE_DISPATCH
+    mandatory_oneof: "['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open']"
+  }
+  attrs: {
+    name: "amp-nested-submenu-open"
+    dispatch_key: NAME_VALUE_DISPATCH
+    mandatory_oneof: "['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open']"
+  }
+}
+
+attr_lists {
+  name: "amp-nested-menu-actions"
+  attrs: {
+    name: "amp-nested-submenu-close"
+    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
+  }
+  attrs: {
+    name: "amp-nested-submenu-open"
+    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
+  }
+}
+tags: {  # <amp-nested-menu> <button amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "BUTTON"
+  spec_name: "button amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
+}
+tags: {  # <amp-nested-menu> <h2 amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "H2"
+  spec_name: "h2 amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
+}
+tags: {  # <amp-nested-menu> <h3 amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "H3"
+  spec_name: "h3 amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
+}
+tags: {  # <amp-nested-menu> <h4 amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "H4"
+  spec_name: "h4 amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
+}
+tags: {  # <amp-nested-menu> <h5 amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "H5"
+  spec_name: "h5 amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
+}
+tags: {  # <amp-nested-menu> <h6 amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "H6"
+  spec_name: "h6 amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
+}
+tags: {  # <amp-nested-menu> <span amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "SPAN"
+  spec_name: "span amp-nested-menu"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
+}
+descendant_tag_list {
+  # Purposefully being restrictive when allowlisting child components;
+  # On demand, add more components to this list after manual testing.
+  name: "amp-nested-menu-allowed-descendants"
+  tag: "A"
+  tag: "AMP-ACCORDION"
+  tag: "AMP-IMG"
+  tag: "AMP-LIST"
+  tag: "B"
+  tag: "BR"
+  tag: "BUTTON"
+  tag: "CIRCLE"
+  tag: "COL"
+  tag: "COLGROUP"
+  tag: "DIV"
+  tag: "ELLIPSE"
+  tag: "EM"
+  tag: "FIELDSET"
+  tag: "FORM"
+  tag: "H1"
+  tag: "H2"
+  tag: "H3"
+  tag: "H4"
+  tag: "H5"
+  tag: "H6"
+  tag: "I"
+  tag: "INPUT"
+  tag: "LABEL"
+  tag: "LI"
+  tag: "LINE"
+  tag: "MARK"
+  tag: "NAV"
+  tag: "OL"
+  tag: "OPTION"
+  tag: "P"
+  tag: "PATH"
+  tag: "POLYGON"
+  tag: "POLYLINE"
+  tag: "RECT"
+  tag: "SECTION"
+  tag: "SELECT"
+  tag: "SPAN"
+  tag: "STRIKE"
+  tag: "STRONG"
+  tag: "SUB"
+  tag: "SUP"
+  tag: "SVG"
+  tag: "TABLE"
+  tag: "TBODY"
+  tag: "TD"
+  tag: "TEMPLATE"
+  tag: "TH"
+  tag: "TIME"
+  tag: "TITLE"
+  tag: "TR"
+  tag: "U"
+  tag: "UL"
+  tag: "USE"
+}
