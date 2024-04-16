@@ -378,6 +378,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'bidgear': {
+    prefetch: 'https://platform.bidgear.com/bidgear-amp.js',
+    renderStartImplemented: true,
+  },
+
   'bidtellect': {},
 
   'blade': {
