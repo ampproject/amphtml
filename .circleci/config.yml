@@ -1,89 +1,26 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/configuration-reference
 version: 2.1
 
-orbs:
-  browser-tools: circleci/browser-tools@1.4.8
-  codecov: codecov/codecov@4.0.1
-  node: circleci/node@5.2.0
-
-push_and_pr_builds: &push_and_pr_builds
-  filters:
-    branches:
-      ignore:
-        - nightly
-
-release_builds_only: &release_builds_only
-  filters:
-    branches:
-      only:
-        - nightly
-        - /^amp-release-.*$/
-
-experiment_job: &experiment_job
-  parameters:
-    exp:
-      description: 'Which of the three (A/B/C) experiments to use'
-      type: enum
-      enum: ['A', 'B', 'C']
-  environment:
-    FLAVOR: experiment<< parameters.exp >>
-
-dist_job: &dist_job
-  parameters:
-    module:
-      description: 'Whether to build Module or Nomodule'
-      type: enum
-      enum: ['Module', 'Nomodule']
-    purpose:
-      description: 'What is the downstream purpose of this build'
-      type: enum
-      enum: ['Test', 'Bundle Size']
-
-test_types_job: &test_types_job
-  parameters:
-    test_type:
-      description: 'Which test type to run'
-      type: enum
-      enum: ['Unit', 'Integration', 'End-to-End']
-
-executors:
-  base-docker-small:
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
+jobs:
+  say-hello:
+    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
     docker:
+      # Specify the version you desire here
+      # See: https://circleci.com/developer/images/image/cimg/base
       - image: cimg/base:current
-    resource_class: small
-  node-docker-medium:
-    docker:
-      - image: cimg/node:lts-browsers
-    resource_class: medium
-  node-docker-large:
-    docker:
-      - image: cimg/node:lts-browsers
-    resource_class: large
-  node-docker-xlarge:
-    docker:
-      - image: cimg/node:lts-browsers
-    resource_class: xlarge
-  jdk-docker-2xlarge:
-    docker:
-      - image: cimg/openjdk:21.0.2-node
-    resource_class: 2xlarge
-  macos-medium:
-    macos:
-      xcode: 14.3.1
-    resource_class: macos.x86.medium.gen2
 
-commands:
-  checkout_repo:
+    # Add steps to the job
+    # See: https://circleci.com/docs/jobs-steps/#steps-overview & https://circleci.com/docs/configuration-reference/#steps
     steps:
-      - restore_cache:
-          name: '♻️ Restore Git Cache'
-          keys:
-            - git-cache-{{ arch }}-v3-main-{{ .Revision }}
-            - git-cache-{{ arch }}-v3-main-
-            - git-cache-{{ arch }}-v3-
+      # Checkout the code as the first step.
       - checkout
       - when:
           condition:
-            equal: ['master', << pipeline.git.branch >>]
+            equal: ['main', << pipeline.git.branch >>]
           steps:
             - run:
                 name: '🗜️ Garbage Collection for Git'
@@ -521,184 +458,6 @@ jobs:
 workflows:
   version: 2
 
-
   'CircleCI':
     jobs:
-      - initialize_repository:
-          name: 'Initialize Repository'
-          <<: *push_and_pr_builds
-      - initialize_mac_os:
-          name: 'Initialize for Mac OS'
-          <<: *push_and_pr_builds
-      - checks:
-          name: 'Checks'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - unminified_build:
-          name: 'Unminified Build (Test)'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - dist:
-          matrix:
-            parameters:
-              module: ['Module', 'Nomodule']
-              purpose: ['Test', 'Bundle Size']
-          name: '⛓️ << matrix.module >> Build (<< matrix.purpose >>)'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - dist_3p:
-          matrix:
-            parameters:
-              module: ['Module', 'Nomodule']
-              purpose: ['Test', 'Bundle Size']
-          name: '<< matrix.module >> 3p Build (<< matrix.purpose >>)'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - bundle_size:
-          name: 'Bundle Size'
-          <<: *push_and_pr_builds
-          requires:
-            - '⛓️ Nomodule Build (Bundle Size)'
-            - 'Nomodule 3p Build (Bundle Size)'
-            - '⛓️ Module Build (Bundle Size)'
-            - 'Module 3p Build (Bundle Size)'
-      - validator_tests:
-          name: 'Validator Tests'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - visual_diff_tests:
-          name: 'Visual Diff Tests'
-          <<: *push_and_pr_builds
-          requires:
-            - '⛓️ Module Build (Test)'
-            - 'Module 3p Build (Test)'
-            - '⛓️ Nomodule Build (Test)'
-            - 'Nomodule 3p Build (Test)'
-      - local_unit_tests:
-          name: 'Local Unit Tests'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - all_unit_tests:
-          name: '⛓️ All Unit Tests'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Local Unit Tests'
-      - unminified_tests:
-          name: 'Unminified Tests'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Unminified Build (Test)'
-      - nomodule_tests:
-          name: 'Nomodule Tests (<< matrix.config >>)'
-          matrix:
-            parameters:
-              config: ['prod', 'canary']
-          <<: *push_and_pr_builds
-          requires:
-            - '⛓️ Nomodule Build (Test)'
-            - 'Nomodule 3p Build (Test)'
-      - module_tests:
-          name: 'Module Tests (<< matrix.config >>)'
-          matrix:
-            parameters:
-              config: ['prod', 'canary']
-          <<: *push_and_pr_builds
-          requires:
-            - '⛓️ Module Build (Test)'
-            - 'Module 3p Build (Test)'
-            - '⛓️ Nomodule Build (Test)'
-            - 'Nomodule 3p Build (Test)'
-      - end_to_end_tests:
-          name: '⛓️ End-to-End Tests'
-          <<: *push_and_pr_builds
-          requires:
-            - '⛓️ Nomodule Build (Test)'
-            - 'Nomodule 3p Build (Test)'
-      - browser_tests_safari:
-          name: '<< matrix.test_type >> Tests (Safari)'
-          matrix:
-            parameters:
-              test_type: ['Unit', 'Integration', 'End-to-End']
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize for Mac OS'
-            - '⛓️ Nomodule Build (Test)'
-            - 'Nomodule 3p Build (Test)'
-      - browser_tests_firefox:
-          name: '<< matrix.test_type >> Tests (Firefox)'
-          matrix:
-            parameters:
-              test_type: ['Unit', 'Integration', 'End-to-End']
-          <<: *push_and_pr_builds
-          requires:
-            - '⛓️ Nomodule Build (Test)'
-            - 'Nomodule 3p Build (Test)'
-      - browser_tests_edge:
-          name: '<< matrix.test_type >> Tests (Edge)'
-          matrix:
-            parameters:
-              # Note: we can't run e2e tests on Edge.
-              test_type: ['Unit', 'Integration']
-          <<: *push_and_pr_builds
-          requires:
-            - '⛓️ Nomodule Build (Test)'
-            - 'Nomodule 3p Build (Test)'
-      - experiment_build:
-          name: 'Experiment << matrix.exp >> Build'
-          matrix:
-            parameters:
-              exp: ['A', 'B', 'C']
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
-      - experiment_integration_tests:
-          name: 'Exp. << matrix.exp >> Integration Tests'
-          matrix:
-            parameters:
-              exp: ['A', 'B', 'C']
-          <<: *push_and_pr_builds
-          requires:
-            - 'Experiment << matrix.exp >> Build'
-      - experiment_end_to_end_tests:
-          name: '⛓️ Exp. << matrix.exp >> End-to-End Tests'
-          matrix:
-            parameters:
-              exp: ['A', 'B', 'C']
-          <<: *push_and_pr_builds
-          requires:
-            - 'Experiment << matrix.exp >> Build'
-
-  'Release':
-    jobs:
-      - initialize_repository:
-          name: 'Initialize Repository'
-          <<: *release_builds_only
-      - amp_release:
-          name: '<< matrix.flavor >> << matrix.esm >>'
-          matrix:
-            parameters:
-              flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
-              esm: ['no-esm', 'esm']
-          <<: *release_builds_only
-          requires:
-            - 'Initialize Repository'
-      - upload_release:
-          name: 'Upload Release'
-          <<: *release_builds_only
-          requires:
-            - amp_release
-          context:
-            - release-build-uploader
-      - trigger_promote:
-          name: 'Trigger Promote'
-          <<: *release_builds_only
-          requires:
-            - 'Upload Release'
-          context:
-            - release-build-uploader
+      - say-hello
