@@ -877,6 +877,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://player1.mixpo.com', 'https://player2.mixpo.com'],
   },
 
+  'momagic': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: ['https://amp.truereach.co.in/'],
+  },
+
   'monetizer101': {
     renderStartImplemented: true,
   },
