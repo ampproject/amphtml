@@ -69,7 +69,7 @@ executors:
   macos-medium:
     macos:
       xcode: 14.3.1
-    resource_class: macos.x86.medium.gen2
+    resource_class: macos.m1.medium.gen1
 
 commands:
   checkout_repo:
