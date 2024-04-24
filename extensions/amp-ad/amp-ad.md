@@ -460,6 +460,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [SAS CI 360 Match](../../ads/vendors/sas.md)
 -   [Seeding Alliance](../../ads/vendors/seedingalliance.md)
 -   [Sekindo](../../ads/vendors/sekindo.md)
+-   [Sevio](../../ads/vendors/sevio.md)
 -   [Sharethrough](../../ads/vendors/sharethrough.md)
 -   [SHE Media](../../ads/vendors/shemedia.md)
 -   [Sklik](../../ads/vendors/sklik.md)
