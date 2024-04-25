@@ -1,10 +1,10 @@
 import {validateData} from '#3p/3p';
 
 /**
- * @param {!Window} unused_global
+ * @param {!Window} global
  * @param {!Object} data
  */
-export function momagic(unused_global, data) {
+export function momagic(global, data) {
   validateData(data, ['publisher', 'container'], ['format', 'url', 'extras']);
 
   const scriptRoot = document.createElement('div');
@@ -29,13 +29,13 @@ export function momagic(unused_global, data) {
   // Path to Script
   const pathtoscript = data.url ? data.url : url;
   loadScriptNew(pathtoscript, function () {
-    momagicAmpInit(data);
+    global.momagicAmpInit(data);
   });
 }
 
 /**
  * Load the script asynchronously
- * @param {!string} url
+ * @param {string} url
  * @param {!Function} callback
  */
 function loadScriptNew(url, callback) {

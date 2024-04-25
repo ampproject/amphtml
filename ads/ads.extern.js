@@ -551,6 +551,9 @@ data.local;
 data.enablemraid;
 data.jsplayer;
 
+// momagic
+window.momagicAmpInit;
+
 // nativo.js
 var PostRelease;
 PostRelease.Start;
