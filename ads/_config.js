@@ -1191,7 +1191,7 @@ const adConfig = jsonConfiguration({
   },
   'sevio': {
     preconnect: ['https://request.adx.ws'],
-    prefetch: ['https://adtech.org/wp-content/themes/adtech/assets/js/loader-amp.js'],
+    prefetch: ['https://adtech.org/wp-content/themes/adtech/assets/js/amp.js'],
     renderStartImplemented: true,
   },
   'sharethrough': {
