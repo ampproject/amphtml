@@ -54,10 +54,25 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 /**
- * Chance to post to the new error reporting endpoint.
+ * The threshold for reporting errors to the beta error reporting endpoint
+ * instead of the production endpoint.
  * @const {number}
  */
-const BETA_ERROR_REPORT_URL_FREQ = 0.1;
+const REPORT_ERROR_TO_BETA_ENDPOINT_THRESHOLD = 0.1;
+
+/**
+ * The threshold for errors on pages with non-AMP JS. These errors can almost
+ * never be acted upon, but spikes such as due to buggy browser extensions may
+ * be helpful to notify authors.
+ * @const {number}
+ */
+const NON_AMP_JS_ERROR_THRESHOLD = 0.1;
+
+/**
+ * Throttles reports for the Stable version.
+ * @const {number}
+ */
+const THROTTLE_STABLE_THRESHOLD = 0.9;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -319,10 +334,7 @@ function onError(message, filename, line, col, error) {
   } catch (ignore) {
     // Ignore errors during error report generation.
   }
-  if (hasNonAmpJs && Math.random() > 0.01) {
-    // Only report 1% of errors on pages with non-AMP JS.
-    // These errors can almost never be acted upon, but spikes such as
-    // due to buggy browser extensions may be helpful to notify authors.
+  if (hasNonAmpJs && Math.random() > NON_AMP_JS_ERROR_THRESHOLD) {
     return;
   }
   const data = getErrorReportData(
@@ -357,7 +369,7 @@ function onError(message, filename, line, col, error) {
  * @return {string} error reporting endpoint URL.
  */
 function chooseReportingUrl_() {
-  return Math.random() < BETA_ERROR_REPORT_URL_FREQ
+  return Math.random() < REPORT_ERROR_TO_BETA_ENDPOINT_THRESHOLD
     ? urls.betaErrorReporting
     : urls.errorReporting;
 }
