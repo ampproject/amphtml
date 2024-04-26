@@ -334,7 +334,7 @@ function onError(message, filename, line, col, error) {
   } catch (ignore) {
     // Ignore errors during error report generation.
   }
-  if (hasNonAmpJs && Math.random() > NON_AMP_JS_ERROR_THRESHOLD) {
+  if (hasNonAmpJs && Math.random() < NON_AMP_JS_ERROR_THRESHOLD) {
     return;
   }
   const data = getErrorReportData(
