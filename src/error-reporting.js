@@ -346,16 +346,14 @@ function onError(message, filename, line, col, error) {
     hasNonAmpJs
   );
   if (data) {
-    reportingBackoff(() => {
+    reportingBackoff(async () => {
       try {
-        return reportErrorToServerOrViewer(
+        await reportErrorToServerOrViewer(
           // eslint-disable-next-line local/no-invalid-this
           this,
           /** @type {!JsonObject} */
-          (data)
-        ).catch(() => {
-          // catch async errors to avoid recursive errors.
-        });
+          data
+        );
       } catch (e) {
         // catch async errors to avoid recursive errors.
       }
@@ -380,23 +378,21 @@ function chooseReportingUrl_() {
  * @param {!JsonObject} data Data from `getErrorReportData`.
  * @return {Promise<undefined>}
  */
-export function reportErrorToServerOrViewer(win, data) {
+export async function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
 
-  // Throttle reports from Stable by 90%.
-  if (data['pt'] && Math.random() < 0.9) {
-    return Promise.resolve();
+  if (data['pt'] && Math.random() < THROTTLE_STABLE_THRESHOLD) {
+    return;
   }
 
-  return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
-    if (!reportedErrorToViewer) {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', chooseReportingUrl_(), true);
-      xhr.send(JSON.stringify(data));
-    }
-  });
+  const reportedErrorToViewer = await maybeReportErrorToViewer(win, data);
+  if (!reportedErrorToViewer) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', chooseReportingUrl_(), true);
+    xhr.send(JSON.stringify(data));
+  }
 }
 
 /**
@@ -413,28 +409,27 @@ export function reportErrorToServerOrViewer(win, data) {
  *     viewer, `Promise<False>` otherwise.
  * @visibleForTesting
  */
-export function maybeReportErrorToViewer(win, data) {
+export async function maybeReportErrorToViewer(win, data) {
   const ampdocService = Services.ampdocServiceFor(win);
   if (!ampdocService.isSingleDoc()) {
-    return Promise.resolve(false);
+    return false;
   }
   const ampdocSingle = ampdocService.getSingleDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
   if (!docOptedIn) {
-    return Promise.resolve(false);
+    return false;
   }
   const viewer = Services.viewerForDoc(ampdocSingle);
   if (!viewer.hasCapability('errorReporter')) {
-    return Promise.resolve(false);
+    return false;
   }
-  return viewer.isTrustedViewer().then((viewerTrusted) => {
-    if (!viewerTrusted) {
-      return false;
-    }
-    viewer.sendMessage('error', errorReportingDataForViewer(data));
-    return true;
-  });
+  const viewerTrusted = await viewer.isTrustedViewer();
+  if (!viewerTrusted) {
+    return false;
+  }
+  viewer.sendMessage('error', errorReportingDataForViewer(data));
+  return true;
 }
 
 /**
