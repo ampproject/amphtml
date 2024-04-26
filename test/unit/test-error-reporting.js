@@ -533,7 +533,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should report throttled load errors at threshold', () => {
-    nextRandomNumber = 1e-3;
+    nextRandomNumber = 1e-4;
     const e = new Error('Failed to load:');
     const data = getErrorReportData(
       undefined,
@@ -560,7 +560,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should report throttled Script errors at threshold', () => {
-    nextRandomNumber = 1e-3;
+    nextRandomNumber = 1e-4;
     const e = new Error('Script error.');
     const data = getErrorReportData(
       undefined,
@@ -574,7 +574,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should report throttled load errors under threshold', () => {
-    nextRandomNumber = 1e-3 - 1e-4;
+    nextRandomNumber = 1e-4 - 1e-5;
     const e = new Error('Failed to load:');
     const data = getErrorReportData(
       undefined,
