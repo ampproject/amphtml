@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   browser-tools: circleci/browser-tools@1.4.8
   codecov: codecov/codecov@4.1.0
+  macos: circleci/macos@2.4.1
   node: circleci/node@5.2.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -183,11 +184,6 @@ commands:
       - run:
           name: '💿 Install Microsoft Edge'
           command: ./.circleci/install_microsoft_edge.sh
-  enable_safari_automation:
-    steps:
-      - run:
-          name: '⚙️ Enable Safari Automation'
-          command: sudo /usr/bin/safaridriver --enable
   store_test_output:
     steps:
       - store_test_results:
@@ -409,7 +405,8 @@ jobs:
     <<: *test_types_job
     steps:
       - setup_vm
-      - enable_safari_automation
+      - macos/install-rosetta
+      - macos/add-safari-permissions
       - run:
           name: '⭐⭐⭐ << parameters.test_type >> Tests (Safari) ⭐⭐⭐'
           command: node build-system/pr-check/browser-tests.js --browser=safari --type=<< parameters.test_type >>
