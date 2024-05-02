@@ -8,7 +8,7 @@
     "@types/selenium-webdriver": "4.1.22",
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "119.0.1",
-    "geckodriver": "4.3.3",
-    "selenium-webdriver": "4.19.0"
+    "geckodriver": "4.4.0",
+    "selenium-webdriver": "4.20.0"
   }
 }

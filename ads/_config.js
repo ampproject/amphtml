@@ -378,6 +378,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'bidgear': {
+    prefetch: 'https://platform.bidgear.com/bidgear-amp.js',
+    renderStartImplemented: true,
+  },
+
   'bidtellect': {},
 
   'blade': {
@@ -870,6 +875,11 @@ const adConfig = jsonConfiguration({
   'mixpo': {
     prefetch: 'https://cdn.mixpo.com/js/loader.js',
     preconnect: ['https://player1.mixpo.com', 'https://player2.mixpo.com'],
+  },
+
+  'momagic': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: ['https://amp.truereach.co.in/'],
   },
 
   'monetizer101': {
