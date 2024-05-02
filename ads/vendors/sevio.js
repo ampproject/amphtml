@@ -16,7 +16,7 @@ export function sevio(global, data) {
 
   loadScript(
     global,
-    'https://adtech.org/wp-content/themes/adtech/assets/js/amp.js?timestamp=' + Date.now(),
+    'https://cdn.adx.ws/scripts/amp.js',
     () => {
       window.sevioAmpLoader = window.sevioAmpLoader || [];
       window.sevioAmpLoader.push({
