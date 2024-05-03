@@ -1189,11 +1189,13 @@ const adConfig = jsonConfiguration({
   'sekindo': {
     renderStartImplemented: true,
   },
+
   'sevio': {
     preconnect: ['https://request.adx.ws'],
     prefetch: ['https://cdn.adx.ws/scripts/amp.js'],
     renderStartImplemented: true,
   },
+
   'sharethrough': {
     renderStartImplemented: true,
   },
