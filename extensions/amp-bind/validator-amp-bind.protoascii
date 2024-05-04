@@ -80,7 +80,7 @@ tags: {  # <amp-state>
   }
   spec_url: "https://amp.dev/documentation/components/amp-bind/"
 }
-# AMP4ADS and AMP4EMAIL enforces the the same restrictions on the 'src'
+# AMP4ADS and AMP4EMAIL enforces the same restrictions on the 'src'
 # attribute of AMP-IMG and AMP-LIST on the src attribute of AMP-STATE. Use of
 # 'credential' is disallowed.
 tags: {  # <amp-state>

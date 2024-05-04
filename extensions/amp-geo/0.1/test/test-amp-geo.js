@@ -890,7 +890,7 @@ describes.realWin(
     });
 
     /**
-     * pre-rendered geo is the the case where a publisher uses their own
+     * pre-rendered geo is the case where a publisher uses their own
      * infrastructure to add a country tag to the body.
      */
     it('should respect pre-rendered geo tags in the body', () => {
@@ -970,7 +970,7 @@ describes.realWin(
 
     it('should allow hash to override pre-rendered geo in test', () => {
       setGeoOverrideHash('nz');
-      // NOTE: notide that we cause the the body and html element classes
+      // NOTE: notide that we cause the body and html element classes
       // to go out of sync but we still clear `amp-iso-country-mx` AND
       // `amp-geo-group-nafta`.
       doc.documentElement.classList.add('amp-iso-country-mx');

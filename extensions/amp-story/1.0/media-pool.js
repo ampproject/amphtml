@@ -814,7 +814,7 @@ export class MediaPool {
           // A 0 delay isn't enough as we need to push the "seeking" event
           // to the next tick of the event loop.
           // NOTE: Please note that this is not an ideal solution and a bit hacky.
-          // The more ideal fix would be to fix the the navigations animation frames.
+          // The more ideal fix would be to fix the navigations animation frames.
           // See https://github.com/ampproject/amphtml/issues/38531
           this.timer_.delay(() => {
             this.enqueueMediaElementTask_(

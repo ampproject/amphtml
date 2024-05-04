@@ -290,7 +290,7 @@ function maybeEllipsizeNode(node, container, containerRect) {
     0,
     text.length,
     (offset) => {
-      // Treat whitespace as being the same as the the previous non-whitespace
+      // Treat whitespace as being the same as the previous non-whitespace
       // character in terms of truncation. This is necessary as we will strip
       // trailing whitespace, so we do not to include its width when considering
       // if we overflow. Note this includes non-breaking whitespace.
