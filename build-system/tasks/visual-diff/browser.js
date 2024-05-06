@@ -57,7 +57,7 @@ async function launchBrowser() {
       '--no-startup-window',
     ],
     dumpio: argv.chrome_debug,
-    headless: !!argv.dev,
+    headless: !argv.dev,
     executablePath: locateChromeExecutablePath(),
     waitForInitialPage: false,
   };
