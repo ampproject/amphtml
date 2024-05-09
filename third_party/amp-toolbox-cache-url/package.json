@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@ampproject/rollup-plugin-closure-compiler": "0.27.0",
-    "eslint": "9.1.1",
+    "eslint": "9.2.0",
     "eslint-config-google": "0.14.0",
     "jasmine": "5.1.0",
     "karma": "6.4.3",
@@ -48,6 +48,6 @@
     "rollup-plugin-node-builtins": "2.1.2",
     "@rollup/plugin-node-resolve": "15.2.3",
     "rollup-plugin-serve": "3.0.0",
-    "semver": "7.6.0"
+    "semver": "7.6.1"
   }
 }
