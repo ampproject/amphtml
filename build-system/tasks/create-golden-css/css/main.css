@@ -535,7 +535,7 @@ amp-pixel {
 
 /**
  * Instagram wraps the standard image into a fixed size container.
- * With these offsets, users can simply specify the the size of the
+ * With these offsets, users can simply specify the size of the
  * instagram images and things have the right size.
  * In particular the effect of adding padding to this container is
  * that with responsive layouts the responsiveness is based on the

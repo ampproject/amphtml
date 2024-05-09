@@ -102,7 +102,7 @@ class RuntimeTestConfig {
   }
 
   /**
-   * Picks a browser config based on the the test type and command line flags.
+   * Picks a browser config based on the test type and command line flags.
    * Defaults to Chrome.
    */
   updateBrowsers() {
