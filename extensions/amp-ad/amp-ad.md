@@ -506,7 +506,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [WPMedia](../../ads/vendors/wpmedia.md)
 -   [Wunderkind](../../ads/vendors/wunderkind.md)
 -   [Xlift](../../ads/vendors/xlift.md)
--   [Yahoo](../../ads/vendors/yahoo.md)
 -   [YahooJP](../../ads/vendors/yahoojp.md)
 -   [Yandex](../../ads/vendors/yandex.md)
 -   [Yektanet](../../ads/vendors/yektanet.md)
