@@ -526,7 +526,7 @@ export function getErrorReportData(
   ) {
     expected = true;
 
-    if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
+    if (throttleBase < NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
       return;
     }
   }
@@ -534,7 +534,7 @@ export function getErrorReportData(
   const isUserError = isUserErrorMessage(message);
 
   // Only report a subset of user errors.
-  if (isUserError && throttleBase > USER_ERROR_THROTTLE_THRESHOLD) {
+  if (isUserError && throttleBase < USER_ERROR_THROTTLE_THRESHOLD) {
     return;
   }
 
