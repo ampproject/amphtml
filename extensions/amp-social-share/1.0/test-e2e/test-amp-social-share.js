@@ -101,7 +101,7 @@ describes.endtoend(
         await controller.switchToWindow(windows[1]);
 
         await expect(controller.getCurrentUrl()).to.have.string(
-          'https://twitter.com/'
+          'https://x.com/'
         );
       });
 
