@@ -189,7 +189,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
 
   beforeEach(() => {
     onError = window.onerror;
-    nextRandomNumber = 0;
+    nextRandomNumber = 1;
     env.sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
     self.__AMP_MODE = undefined;
   });
@@ -500,7 +500,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should throttle user errors', () => {
-    nextRandomNumber = 0.2;
+    nextRandomNumber = 0.0099999;
     let e = '';
     allowConsoleError(() => {
       try {
@@ -520,7 +520,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should not report load errors', () => {
-    nextRandomNumber = 1e-3 + 1e-4;
+    nextRandomNumber = 0.000099999;
     const e = new Error('Failed to load:');
     const data = getErrorReportData(
       undefined,
@@ -533,7 +533,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should report throttled load errors at threshold', () => {
-    nextRandomNumber = 1e-4;
+    nextRandomNumber = 0.0001;
     const e = new Error('Failed to load:');
     const data = getErrorReportData(
       undefined,
@@ -547,7 +547,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should not report Script errors', () => {
-    nextRandomNumber = 1e-3 + 1e-4;
+    nextRandomNumber = 0.000099999;
     const e = new Error('Script error.');
     const data = getErrorReportData(
       undefined,
@@ -560,7 +560,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should report throttled Script errors at threshold', () => {
-    nextRandomNumber = 1e-4;
+    nextRandomNumber = 0.0001;
     const e = new Error('Script error.');
     const data = getErrorReportData(
       undefined,
@@ -574,7 +574,7 @@ describes.sandboxed('getErrorReportData', {}, (env) => {
   });
 
   it('should report throttled load errors under threshold', () => {
-    nextRandomNumber = 1e-4 - 1e-5;
+    nextRandomNumber = 0.0001;
     const e = new Error('Failed to load:');
     const data = getErrorReportData(
       undefined,
