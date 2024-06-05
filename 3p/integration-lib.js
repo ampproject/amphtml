@@ -48,7 +48,6 @@ const AMP_EMBED_ALLOWED = {
   myua: true,
   mywidget: true,
   nativery: true,
-  lentainform: true,
   opinary: true,
   outbrain: true,
   plista: true,
