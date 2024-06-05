@@ -31,7 +31,11 @@ export class PremiumadsNetworkConfig {
   getConfigUrl() {
     const data = this.autoAmpAdsElement_.dataset;
     const host = data.host || 'https://tags.premiumads.com.br';
-    return buildUrl(`${host}/autoads/${data.publisher}`, data.json ? { 'json': data.json } : {}, 4096);
+    return buildUrl(
+      `${host}/autoads/${data.publisher}`,
+      data.json ? {'json': data.json} : {},
+      4096
+    );
   }
 
   /** @override */
