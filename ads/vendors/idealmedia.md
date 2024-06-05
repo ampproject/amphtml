@@ -4,6 +4,19 @@
 
 ### Basic
 
+Latest version:
+```html
+<amp-embed
+  width="100"
+  height="283"
+  type="idealmedia"
+  data-website="98765"
+  data-widget="12345"
+>
+</amp-embed>
+```
+
+Legacy version:
 ```html
 <amp-embed
   width="100"
@@ -22,8 +35,13 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
--   `data-publisher`
+Latest version:
 -   `data-widget`
+-   `data-website`
+
+Legacy version:
+-   `data-widget`
+-   `data-publisher`
 -   `data-container`
 
 ### Optional parameters
