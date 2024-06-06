@@ -5,7 +5,11 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function mgid(global, data) {
-  validateData(data, [['publisher', 'website'], ['container', 'website'], 'widget'], ['url', 'options']);
+  validateData(
+    data,
+    [['publisher', 'website'], ['container', 'website'], 'widget'],
+    ['url', 'options']
+  );
 
   global.uniqId = (
     '00000' + Math.round(Math.random() * 100000).toString(16)
