@@ -471,6 +471,7 @@ export class ConsentUI {
    */
   createPromptIframe_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
+    iframe.setAttribute('title', this.element.title || 'Consent Banner');
     const sandbox = this.getSandboxAttribute_(promptUISrc);
     iframe.setAttribute('sandbox', sandbox);
     iframe.setAttribute('allow', IFRAME_ALLOWED_PERMISSIONS.join('; '));
