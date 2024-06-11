@@ -36,8 +36,7 @@ import {flush as flushPreactEffects} from './preact';
 import {TestConfig} from './test-config';
 import {installYieldIt} from './yield';
 
-import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type:
-  'json'}; // lgtm[js/syntax-error]
+import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {activateChunkingForTesting} from '../src/chunk';
 import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';

@@ -9,8 +9,7 @@ import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lg
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs419 from './_locales/es-419.json' assert {type:
-  'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEs419 from './_locales/es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsFr from './_locales/fr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsHi from './_locales/hi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
