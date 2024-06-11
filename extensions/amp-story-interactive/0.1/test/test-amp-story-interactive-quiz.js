@@ -13,8 +13,7 @@ import {
 } from './helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type:
-  'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
 

@@ -13,8 +13,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
 
-import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type:
-  'json'}; // lgtm[js/syntax-error]
+import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
 
