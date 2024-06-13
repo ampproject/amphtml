@@ -31,7 +31,7 @@ export class Metering {
      * This helps avoid redundant fetches.
      * @type {boolean}
      */
-    this.entitlementsWereFetchedWithCurrentMeteringState = false;
+    this.checkedForEntitlements = false;
 
     /**
      * Key for the subscription platform with metering enabled.
@@ -80,7 +80,7 @@ export class Metering {
       }
 
       this.meteringStateString_ = meteringStateString;
-      this.entitlementsWereFetchedWithCurrentMeteringState = false;
+      this.checkedForEntitlements = false;
     });
   }
 

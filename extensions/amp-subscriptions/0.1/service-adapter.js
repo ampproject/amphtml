@@ -141,16 +141,16 @@ export class ServiceAdapter {
   }
 
   /**
-   * Remembers metering entitlements were fetched
+   * Remembers metering entitlements were checked
    * with the current metering state.
    *
    * This helps avoid redundant fetches.
    */
-  rememberMeteringEntitlementsWereFetched() {
+  rememberMeteringEntitlementsWereChecked() {
     if (!this.subscriptionService_.metering_) {
       return;
     }
 
-    this.subscriptionService_.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+    this.subscriptionService_.metering_.checkedForEntitlements = true;
   }
 }

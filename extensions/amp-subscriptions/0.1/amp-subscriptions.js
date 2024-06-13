@@ -633,7 +633,7 @@ export class SubscriptionService {
         return;
       }
 
-      if (this.metering_.entitlementsWereFetchedWithCurrentMeteringState) {
+      if (this.metering_.checkedForEntitlements) {
         // Move along.
         // The current metering state isn't granting.
         continueAuthorizationFlow();
@@ -770,7 +770,7 @@ export class SubscriptionService {
     this.renderer_.toggleLoading(true);
 
     if (this.metering_) {
-      this.metering_.entitlementsWereFetchedWithCurrentMeteringState = false;
+      this.metering_.checkedForEntitlements = false;
     }
 
     this.platformStore_

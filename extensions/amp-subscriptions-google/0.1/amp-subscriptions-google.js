@@ -652,11 +652,11 @@ export class GoogleSubscriptionsPlatform {
           this.runtime_.clear();
 
           entitlementsParams.metering = {state: meteringState};
-
-          // Remember we requested metering entitlements.
-          // This helps avoid redundant fetches for metering entitlements.
-          this.serviceAdapter_.rememberMeteringEntitlementsWereFetched();
         }
+
+        // Remember we checked for metering entitlements.
+        // This helps avoid redundant fetches for metering entitlements.
+        this.serviceAdapter_.rememberMeteringEntitlementsWereChecked();
 
         return this.runtime_
           .getEntitlements(entitlementsParams)
