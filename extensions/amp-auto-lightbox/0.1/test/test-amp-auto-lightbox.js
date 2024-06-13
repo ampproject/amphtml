@@ -1,3 +1,5 @@
+import {Assertion} from 'chai';
+
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {tryResolve} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
@@ -6,8 +8,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {isArray} from '#core/types';
 
 import {Services} from '#service';
-
-import {Assertion} from 'chai';
 
 import {AutoLightboxEvents_Enum} from '../../../../src/auto-lightbox';
 import {
@@ -296,7 +296,7 @@ describes.realWin(
       const {vh, vw} = {vw: 1000, vh: 600};
 
       Assertion.addProperty('meetSizingCriteria', function () {
-        const {renderWidth, renderHeight, naturalWidth, naturalHeight} =
+        const {naturalHeight, naturalWidth, renderHeight, renderWidth} =
           this._obj;
         this.assert(
           meetsSizingCriteria(
