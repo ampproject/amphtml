@@ -45,7 +45,7 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 
 ### Player Configuration
 
-Make sure you configure players used with the AMP Support plugin to support AMP's video interface. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
+Make sure you configure players used with the AMP Support plugin to support AMP's video interface. See [Brightcove's support documentation](https://player.support.brightcove.com/amp/amp-using-video-cloud-video.html) for player configuration instructions.
 
 ## Component Attributes
 
