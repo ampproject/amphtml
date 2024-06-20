@@ -53,7 +53,7 @@ export class PremiumadsNetworkConfig {
       'layout': data.layout || Layout_Enum.FIXED,
       'style':
         data['style'] ||
-        'margin: 15px auto; position: relative !important; display: block !important;',
+        'margin: 0 auto; position: relative !important; display: block !important;',
     };
   }
 
