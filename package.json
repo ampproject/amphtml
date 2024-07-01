@@ -22,7 +22,7 @@
     "@ampproject/worker-dom": "0.35.0",
     "@use-gesture/react": "10.2.10",
     "@webcomponents/webcomponentsjs": "2.6.0",
-    "date-fns": "2.27.0",
+    "date-fns": "3.6.0",
     "dompurify": "3.0.2",
     "google-closure-library": "20230802.0.0",
     "intersection-observer": "0.12.0",
