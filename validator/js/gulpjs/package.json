@@ -21,7 +21,7 @@
     "through2": "4.0.2"
   },
   "devDependencies": {
-    "gulp": "4.0.2",
+    "gulp": "5.0.0",
     "mocha": "10.2.0"
   },
   "scripts": {
