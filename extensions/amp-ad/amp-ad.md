@@ -533,7 +533,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Idealmedia](../../ads/vendors/idealmedia.md)
 -   [Insticator](../../ads/vendors/insticator.md)
 -   [Jubna](../../ads/vendors/jubna.md)
--   [Lentainform](../../ads/vendors/lentainform.md)
 -   [Mgid](../../ads/vendors/mgid.md)
 -   [Myua](../../ads/vendors/myua.md)
 -   [Outbrain](../../ads/vendors/outbrain.md)
