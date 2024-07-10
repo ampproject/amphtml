@@ -6,5 +6,4 @@ class Foo {
      */
     this.hello_ = 'world';
   }
-
 }

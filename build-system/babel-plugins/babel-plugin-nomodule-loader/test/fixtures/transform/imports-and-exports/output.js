@@ -4,16 +4,13 @@
     defineCallback.apply(null, arguments);
     var name = "build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/imports-and-exports/input";
     var awaiting = callbacks[name] = callbacks[name] || [];
-
     while (awaiting.length) {
       awaiting.pop()(_exports);
     }
-
     awaiting.push = function (callback) {
       callback(_exports);
     };
   } : defineCallback;
-
   if (false) {
     exec({});
   } else if (null) {
@@ -24,7 +21,6 @@
       if (true && name === 0) {
         return {};
       }
-
       return new Promise(function (resolve) {
         (callbacks[name] = callbacks[name] || []).push(resolve);
       });
@@ -37,10 +33,9 @@
 
   _exports.__esModule = true;
   _exports.baz = void 0;
-  const baz = {
+  const baz = _exports.baz = {
     foo: _foo.foo,
     bar: _foo.bar,
     baz: 'baz'
   };
-  _exports.baz = baz;
 });

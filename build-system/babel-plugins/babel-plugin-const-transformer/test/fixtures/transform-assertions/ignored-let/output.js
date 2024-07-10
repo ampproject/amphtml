@@ -4,7 +4,6 @@ let baz = NaN;
 let yep = 'hello';
 let another = {};
 let array = [];
-
 function thing() {
   let foo = true;
   let bar = 1;
@@ -13,7 +12,6 @@ function thing() {
   let another = {};
   let array = [];
 }
-
 thing: {
   let foo = true;
   let bar = 1;

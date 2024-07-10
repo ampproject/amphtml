@@ -9,11 +9,9 @@ import { useStyles } from '../foo.jss';
 import { useStyles as useSomeOtherNameWithStyles } from './something.jss';
 console.log(_$b);
 console.log(_$x);
-
 function x() {
   return _$foo;
 }
-
 _$x2;
 const {
   one: _unused,

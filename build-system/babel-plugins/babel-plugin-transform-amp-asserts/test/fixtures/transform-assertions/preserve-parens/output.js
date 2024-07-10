@@ -1,9 +1,4 @@
-/** @type {!Element} */
-(dev());
-
+/** @type {!Element} */(dev());
 function hello() {
-  return (
-    /** @type {!Element} */
-    (dev())
-  );
+  return /** @type {!Element} */(dev());
 }

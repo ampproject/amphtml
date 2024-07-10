@@ -3,27 +3,31 @@ const x = {
   foo: 'bar',
   bar: 'qux',
   [x]: 'y'
-}; // not mangled:
+};
 
+// not mangled:
 const y = notMangled({
   foo: 'bar',
   bar: 'qux',
   [x]: 'y'
-}); // mangled:
+});
 
+// mangled:
 const z = {
   foo: 1,
   bar: 2,
   [x]: 3
-}; // dupes:
+};
 
+// dupes:
 const a = {
   foo: 1,
   baz: 2,
   // should be same as foo:
   bar: 1
-}; // 100 elements:
+};
 
+// 100 elements:
 const b = {
   k0: 1,
   k1: 2,

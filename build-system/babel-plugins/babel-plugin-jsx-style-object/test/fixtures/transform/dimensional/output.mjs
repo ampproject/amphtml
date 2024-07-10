@@ -43,9 +43,7 @@ import { jsxStylePropertyString as _jsxStylePropertyString3 } from "#core/dom/js
 import { jsxStylePropertyString as _jsxStylePropertyString2 } from "#core/dom/jsx/style-property-string";
 import { jsxStylePropertyString as _jsxStylePropertyString } from "#core/dom/jsx/style-property-string";
 import * as jsx from 'ANYWHERE_LEADING_TO/core/dom/jsx';
-
 const dimensional = () => <div style={"width:100px;" + _jsxStylePropertyString("height", height, true)} />;
-
 const nonDimensional = () => <div>
     <div style={_jsxStylePropertyString2("animation-iteration-count", animationIterationCount)} />
     <div style={"animation-iteration-count:5;"} />

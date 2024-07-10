@@ -1,2 +1,1 @@
-/** @type {number} */
-(null);
+/** @type {number} */(null);

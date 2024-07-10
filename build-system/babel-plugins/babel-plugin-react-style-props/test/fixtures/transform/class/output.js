@@ -1,5 +1,4 @@
-/*#__PURE__*/
-React.createElement("div", {
+/*#__PURE__*/React.createElement("div", {
   id: "foo",
   className: "foo",
   hidden: true,
