@@ -5,9 +5,9 @@
   "devDependencies": {
     "@babel/core": "7.24.7",
     "@babel/preset-react": "7.24.7",
-    "@storybook/addon-a11y": "8.1.11",
-    "@storybook/addon-controls": "8.1.11",
-    "@storybook/addon-viewport": "8.1.11",
+    "@storybook/addon-a11y": "8.2.1",
+    "@storybook/addon-controls": "8.2.1",
+    "@storybook/addon-viewport": "8.2.1",
     "babel-loader": "9.1.3"
   }
 }
