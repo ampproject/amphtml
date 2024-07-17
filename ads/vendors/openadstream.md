@@ -10,6 +10,7 @@
   height="250"
   type="openadstream"
   data-adhost="oasc-training7.247realmedia.com"
+  data-urlpath="/RealMedia/ads/ads_path"
   data-sitepage="dx_tag_pvt_site"
   data-pos="x04"
   data-query="keyword=keyvalue&key2=value2"
@@ -25,6 +26,7 @@
   height="90"
   type="openadstream"
   data-adhost="oasc-training7.247realmedia.com"
+  data-urlpath="/RealMedia/ads/ads_path"
   data-sitepage="dx_tag_pvt_site"
   data-pos="x50,x51!x50"
 >
@@ -34,6 +36,7 @@
   height="250"
   type="openadstream"
   data-adhost="oasc-training7.247realmedia.com"
+  data-urlpath="/RealMedia/ads/ads_path"
   data-sitepage="dx_tag_pvt_site"
   data-pos="x50,x51!x51"
 >
@@ -47,6 +50,7 @@ For details on the configuration semantics, please contact the ad network or ref
 ### Required parameters
 
 -   `adhost`: OAS cname. Must start with HTTPS.
+-   `urlpath`: path for ads tag.
 -   `sitepage`: Sitepage configured for this ad spot.
 -   `pos`: Position for the this ad spot.
 
