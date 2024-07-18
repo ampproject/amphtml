@@ -5,7 +5,7 @@ import {validateData, writeScript} from '#3p/3p';
  * @param {!Object} data
  */
 export function openadstream(global, data) {
-  validateData(data, ['adhost','urlpath', 'sitepage', 'pos'], ['query']);
+  validateData(data, ['adhost', 'urlpath', 'sitepage', 'pos'], ['query']);
 
   let url =
     'https://' +
