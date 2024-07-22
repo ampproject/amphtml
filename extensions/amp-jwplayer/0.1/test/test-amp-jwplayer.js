@@ -203,6 +203,18 @@ describes.realWin(
         expect(spy).to.be.calledWith('play', {reason: undefined});
       });
 
+      it('sets hasPlayed_ on play', () => {
+        expect(impl.hasPlayed_).to.equal(false);
+        mockMessage('play');
+        expect(impl.hasPlayed_).to.equal(true);
+      });
+
+      it('sets hasPlayed_ on adPlay', () => {
+        expect(impl.hasPlayed_).to.equal(false);
+        mockMessage('adPlay');
+        expect(impl.hasPlayed_).to.equal(true);
+      });
+
       it('autoplays', () => {
         const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.play(true);

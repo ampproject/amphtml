@@ -47,6 +47,8 @@ const JWPLAYER_EVENTS = {
   'visible': VideoEvents_Enum.VISIBILITY,
   'adImpression': VideoEvents_Enum.AD_START,
   'adComplete': VideoEvents_Enum.AD_END,
+  'adPlay': VideoEvents_Enum.PLAYING,
+  'adPause': VideoEvents_Enum.PAUSE,
 };
 
 /**
@@ -119,6 +121,9 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     /**@private {?object} */
     this.consentMetadata_ = null;
+
+    /**@private {boolean} */
+    this.hasPlayed_ = false;
   }
 
   /** @override */
@@ -481,18 +486,24 @@ class AmpJWPlayer extends AMP.BaseElement {
       return;
     }
 
+    const {element} = this;
+
     switch (event) {
       case 'play':
       case 'adPlay':
+        if (!this.hasPlayed_) {
+          this.hasPlayed_ = true;
+          dispatchCustomEvent(element, VideoEvents_Enum.PLAY, data);
+        }
         this.pauseHelper_.updatePlaying(true);
         break;
       case 'pause':
       case 'complete':
+      case 'adPause':
+      case 'adComplete':
         this.pauseHelper_.updatePlaying(false);
         break;
     }
-
-    const {element} = this;
 
     if (redispatch(element, event, JWPLAYER_EVENTS)) {
       return;
@@ -524,6 +535,7 @@ class AmpJWPlayer extends AMP.BaseElement {
         case 'playlistItem':
           const playlistItem = {...detail};
           this.playlistItem_ = playlistItem;
+          this.hasPlayed_ = false;
           this.sendCommand_('getPlayedRanges');
           break;
         case 'time':
