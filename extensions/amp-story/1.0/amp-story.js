@@ -431,7 +431,8 @@ export class AmpStory extends AMP.BaseElement {
     }
     const performanceService = Services.performanceFor(this.win);
     if (
-      isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      /* isExperimentOn(this.win, 'story-disable-animations-first-page') // launched: true */
+      true ||
       isPreviewMode(this.win) ||
       prefersReducedMotion(this.win) ||
       isTransformed(this.getAmpDoc())
@@ -458,7 +459,10 @@ export class AmpStory extends AMP.BaseElement {
       performanceService.addEnabledExperiment('story-link-css');
     }
 
-    if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
+    if (
+      /* isExperimentOn(this.win, 'story-load-inactive-outside-viewport') // launched: true */
+      true
+    ) {
       performanceService.addEnabledExperiment(
         'story-load-inactive-outside-viewport'
       );
