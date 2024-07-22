@@ -10,8 +10,6 @@ import {
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {map, omit} from '#core/types/object';
 
-import {isExperimentOn} from '#experiments';
-
 import {Services} from '#service';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
@@ -551,9 +549,8 @@ export class AnimationManager {
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
     const firstPageAnimationDisabled =
-      isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
-      isPreviewMode(ampdoc.win) ||
-      isTransformed(ampdoc);
+      /* isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') // launched: true */
+      true || isPreviewMode(ampdoc.win) || isTransformed(ampdoc);
 
     /** @private @const {bool} */
     this.skipAnimations_ =
