@@ -237,7 +237,7 @@ describes.realWin(
                 href: 'https://ampproject.org/',
               },
               {
-                href: 'https://ampbyexample.com/components/amp-accordion/',
+                href: 'https://amp.dev/documentation/components/amp-accordion',
               },
             ],
             createElement: () => {
@@ -261,7 +261,7 @@ describes.realWin(
                   type: 'AMP__LINK-PREFETCH',
                   payload: [
                     'https://ampproject.org/',
-                    'https://ampbyexample.com/components/amp-accordion/',
+                    'https://amp.dev/documentation/components/amp-accordion',
                   ],
                 })
               );
