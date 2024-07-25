@@ -1,4 +1,5 @@
 import {ContextNode} from './node';
+
 export interface IContextProp<T, DEP> {
   /**
    * A globally unique key. Extensions must use a fully qualified name such
@@ -92,5 +93,7 @@ declare global {
 
     // Used to map a Node to its assigned slot.
     __AMP_ASSIGNED_SLOT?: Node;
+
+    __AMPDOC: import('../../service/ampdoc-impl').AmpDoc;
   }
 }

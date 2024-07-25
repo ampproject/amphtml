@@ -161,6 +161,23 @@ describes.realWin('ContextNode', {}, (env) => {
       });
     });
 
+    it('should create a ampdoc holder shadow root', () => {
+      const frag = doc.createDocumentFragment();
+
+      frag.__AMPDOC = {};
+
+      const cn = ContextNode.get(frag);
+      expect(cn.node).to.equal(frag);
+      // Parent always starts as null.
+      expectContext(cn, {
+        parent: null,
+        isRoot: false,
+        root: frag,
+        children: [],
+        discoverable: true,
+      });
+    });
+
     it('should create a document node', () => {
       const cn = ContextNode.get(doc);
       expect(cn.node).to.equal(doc);
