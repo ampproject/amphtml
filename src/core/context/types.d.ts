@@ -94,6 +94,6 @@ declare global {
     // Used to map a Node to its assigned slot.
     __AMP_ASSIGNED_SLOT?: Node;
 
-    __AMPDOC: import('../../service/ampdoc-impl').AmpDoc;
+    __AMPDOC?: import('../../service/ampdoc-impl').AmpDoc;
   }
 }

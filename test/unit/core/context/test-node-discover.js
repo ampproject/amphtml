@@ -171,10 +171,10 @@ describes.realWin('ContextNode', {}, (env) => {
       // Parent always starts as null.
       expectContext(cn, {
         parent: null,
-        isRoot: false,
+        isRoot: true,
         root: frag,
         children: [],
-        discoverable: true,
+        discoverable: false,
       });
     });
 
