@@ -1,0 +1,120 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>My Story with social share</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+  <link rel="canonical" href="amp-story-social-share.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>
+    body {
+      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      animation: -amp-start 8s steps(1, end) 0s 1 normal both
+    }
+
+    @-webkit-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-moz-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-ms-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-o-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+  </style>
+   <style amp-custom>
+    :root {
+      --color-primary: #161616;
+      --color-text-light: #fff;
+    }
+    amp-social-share:before{
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="%23fff"><path fill="none" d="M0 0h24v24H0z"/><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.99 2.99 0 0 0 21 5a3 3 0 1 0-5.91.7L8.04 9.81A2.99 2.99 0 0 0 3 12a3 3 0 0 0 5.04 2.19l7.12 4.16A2.92 2.92 0 1 0 18 16.08"/></svg>');  
+      margin-right: 5px;
+    }
+
+    amp-social-share.flex{
+      z-index: 3;
+      padding: 5px 15px;
+      align-items: center;
+      display: flex;
+      width: max-content;
+      position: absolute;
+      bottom:15px;
+      right: 50%;
+      transform: translateX(50%);
+      font-family: system-ui;
+      text-align: center;
+    }
+    /* icons with rounded corners  */
+    amp-social-share.rounded {
+      border-radius: 50px;
+      background-size: 60%;
+      color: var(--color-text-light);
+      background: var(--color-primary);
+    }
+  </style>
+</head>
+
+<body>
+  <amp-story standalone>
+    <amp-story-page id="fill-template-title">
+      <amp-social-share
+        class="rounded flex i-amphtml-layout-size-defined amp-social-share-system i-amphtml-built i-amphtml-layout i-amphtml-element"
+        aria-label="Share" type="system" i-amphtml-layout="fixed"
+        role="button" tabindex="0">Share with my friends</amp-social-share>
+        <amp-story-grid-layer template="vertical">
+          <amp-img layout="fill" src="/examples/amp-story/img/poster.jpg"></amp-img>
+        </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
+</body>
+</html>
