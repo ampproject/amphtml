@@ -4,47 +4,47 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "com_google_absl",
-    sha256 = "050071396c0483035c9545daaaf953a47449b971978631db040cd31bcb2d3dde",
-    strip_prefix = "abseil-cpp-fc44fa053cc91193d2bb60fb9356bcecb301242e",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/fc44fa053cc91193d2bb60fb9356bcecb301242e.zip"],
+    sha256 = "2247c732ba0832c4e9fd594f5557ae251e4b57b2646aeb97d93135f3a4562059",
+    strip_prefix = "abseil-cpp-08850701d27544b4af6501154791d3d45e28b0f8",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/08850701d27544b4af6501154791d3d45e28b0f8.zip"],
 )
 
 http_archive(
     name = "com_google_googletest",
-    sha256 = "c83f69fa8cb7a503d3ae9f736cf679b0846772b1ae955c63133520b749491a7c",
-    strip_prefix = "googletest-8a6feabf04bec8fb125e0df0ad1195c42350725f",
-    urls = ["https://github.com/google/googletest/archive/8a6feabf04bec8fb125e0df0ad1195c42350725f.zip"],  # 2019-01-07
+    sha256 = "cc144a5bea428144bf2280881d6323a3d259713cc0bdc9ff7cbc04bda3f83e56",
+    strip_prefix = "googletest-ff233bdd4cac0a0bf6e5cd45bda3406814cb2796",
+    urls = ["https://github.com/google/googletest/archive/ff233bdd4cac0a0bf6e5cd45bda3406814cb2796.zip"],  # 2019-01-07
 )
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "750428a8c7f1a75a8e6027e30b46a1c2f0475205f44563589736e0f279b938c0",
-    strip_prefix = "protobuf-f0dc78d7e6e331b8c6bb2d5283e06aa26883ca7c",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/f0dc78d7e6e331b8c6bb2d5283e06aa26883ca7c.zip"],
+    sha256 = "85551558577d3fec4ebf9c1919c34845dc467a71da78d734d862b1f32e8099a4",
+    strip_prefix = "protobuf-d794139f09230bed72ec765426854723deac012d",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/d794139f09230bed72ec765426854723deac012d.zip"],
 )
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 http_archive(
     name = "com_github_gflags_gflags",
-    sha256 = "017e0a91531bfc45be9eaf07e4d8fed33c488b90b58509dbd2e33a33b2648ae6",
-    strip_prefix = "gflags-a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd",
-    urls = ["https://github.com/gflags/gflags/archive/a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd.zip"],
+    sha256 = "4753cbb1e1460d54d03cc1413960a63a46b42c0d691dad45c3f0ce71741d97d6",
+    strip_prefix = "gflags-03a4842c9c6aaef438d7bf0c84e8a62c8064992b",
+    urls = ["https://github.com/gflags/gflags/archive/03a4842c9c6aaef438d7bf0c84e8a62c8064992b.zip"],
 )
 
 http_archive(
     name = "com_googlesource_code_re2",
-    sha256 = "e9e9cd5902c711131825f7dd45dfdb063555171d8d26300b336aace5f97215ef",
-    strip_prefix = "re2-87d09ef4f0307e53f1d3796843f4b90d41cfccaa",
-    urls = ["https://github.com/google/re2/archive/87d09ef4f0307e53f1d3796843f4b90d41cfccaa.zip"],
+    sha256 = "566f95b2427efc0ef8926d2df167cc77ccba55c06f206abc02e8c17081fa5ffd",
+    strip_prefix = "re2-6dcd83d60f7944926bfd308cc13979fc53dd69ca",
+    urls = ["https://github.com/google/re2/archive/6dcd83d60f7944926bfd308cc13979fc53dd69ca.zip"],
 )
 
 # rules_cc defines rules for generating C++ code from Protocol Buffers.
 http_archive(
     name = "rules_cc",
-    sha256 = "97a7c3f2f601a0d0cc9d26a4173d65e4b7028776a66e2e4fc736e49a5300a483",
-    strip_prefix = "rules_cc-b039a551a7b41b70e426e4a3cd60346c89db9b6c",
-    urls = ["https://github.com/bazelbuild/rules_cc/archive/b039a551a7b41b70e426e4a3cd60346c89db9b6c.zip"],
+    sha256 = "ba1b87ba6853b5edc4e6a4088bb4115a73e1e3f24a51ca330776d558c1982555",
+    strip_prefix = "rules_cc-84fceed8876865dc3419e9646a03091e44e90699",
+    urls = ["https://github.com/bazelbuild/rules_cc/archive/84fceed8876865dc3419e9646a03091e44e90699.zip"],
 )
 load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies")
 rules_cc_dependencies()
@@ -52,11 +52,11 @@ rules_cc_dependencies()
 # rules_proto defines abstract rules for building Protocol Buffers.
 http_archive(
     name = "rules_proto",
-    sha256 = "36e4de702036d31b649f96519676509c4027dc10cc3c97f0335c199b305d45b7",
-    strip_prefix = "rules_proto-8aa1e67c09bc8df20df33886909d44129cfb7e63",
+    sha256 = "2b0f9c9314edcf7e0937f6b68124494c58643df763fd59e37fb5dc742e0202d4",
+    strip_prefix = "rules_proto-557db790e7a71993ff85bf523099dfd25060ae2f",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/8aa1e67c09bc8df20df33886909d44129cfb7e63.tar.gz",
-        "https://github.com/bazelbuild/rules_proto/archive/8aa1e67c09bc8df20df33886909d44129cfb7e63.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/557db790e7a71993ff85bf523099dfd25060ae2f.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/557db790e7a71993ff85bf523099dfd25060ae2f.tar.gz",
     ],
 )
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
@@ -65,9 +65,9 @@ rules_proto_toolchains()
 
 http_archive(
     name = "emsdk",
-    sha256 = "836e9dc2ea0df6e9369f58fcb884df0447304a089cdbef2cd06a28cf2d06b53d",
-    strip_prefix = "emsdk-fc645b7626ebf86530dbd82fbece74d457e7ae07/bazel",
-    url = "https://github.com/emscripten-core/emsdk/archive/fc645b7626ebf86530dbd82fbece74d457e7ae07.tar.gz",
+    sha256 = "d0108e8e3b944b0e42484a0b8b60f34ab203a834e7dc08bda80a11f99048ba83",
+    strip_prefix = "emsdk-476dc4e01fce997b540d9a507241f136256344e3/bazel",
+    url = "https://github.com/emscripten-core/emsdk/archive/476dc4e01fce997b540d9a507241f136256344e3.tar.gz",
 )
 
 load("@emsdk//:deps.bzl", emsdk_deps = "deps")
@@ -78,18 +78,18 @@ emsdk_emscripten_deps(emscripten_version = "2.0.31")
 
 http_archive(
     name = "com_google_javascript_closure_library",
-    sha256 = "d0935e88b306fcaa37ac99031ce8a19b18e27396603eeb8f984233203768a406",
-    strip_prefix = "closure-library-e896a74c48695b2bfe0f586f13870c0bc50ce99e",
-    urls = ["https://github.com/google/closure-library/archive/e896a74c48695b2bfe0f586f13870c0bc50ce99e.tar.gz"],
+    sha256 = "303f99eb72c47a23a28b8bda1b2c5c14fae4f81788667fb36513a8ab5aaa02a7",
+    strip_prefix = "closure-library-b312823ec5f84239ff1db7526f4a75cba0420a33",
+    urls = ["https://github.com/google/closure-library/archive/b312823ec5f84239ff1db7526f4a75cba0420a33.tar.gz"],
 )
 
 http_archive(
     name = "io_bazel_rules_closure",
-    sha256 = "9498e57368efb82b985db1ed426a767cbf1ba0398fd7aed632fc3908654e1b1e",
-    strip_prefix = "rules_closure-0.12.0",
+    sha256 = "70ef2b4da987bf0d266e663d7c251eac509ff70dd65bba02d41d1e86e840a569",
+    strip_prefix = "rules_closure-0.13.0",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_closure/archive/0.12.0.tar.gz",
-        "https://github.com/bazelbuild/rules_closure/archive/0.12.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_closure/archive/0.13.0.tar.gz",
+        "https://github.com/bazelbuild/rules_closure/archive/0.13.0.tar.gz",
     ],
 )
 
