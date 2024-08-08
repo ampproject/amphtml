@@ -7,7 +7,7 @@ AMP.extension('amp-access-poool', '0.1', function (AMP) {
     'poool',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-     * @return {*} TODO(#23582): Specify return type
+     * @return {../../amp-access/0.1/access-vendor.AccessVendor}
      */
     function (ampdoc) {
       const element = ampdoc.getHeadNode();
