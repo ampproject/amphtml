@@ -6,7 +6,6 @@ import {Services} from '#service';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
- * WIP
  */
 export class PremiumadsNetworkConfig {
   /**
