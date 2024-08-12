@@ -44,14 +44,14 @@ const ABORTED = 'AbortError';
  * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.0001;
+const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.9999;
 
 /**
  * The threshold for errors throttled because nothing can be done about
  * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const USER_ERROR_THROTTLE_THRESHOLD = 0.01;
+const USER_ERROR_THROTTLE_THRESHOLD = 0.99;
 
 /**
  * The threshold for reporting errors to the beta error reporting endpoint
@@ -66,7 +66,7 @@ const REPORT_ERROR_TO_BETA_ENDPOINT_THRESHOLD = 0.1;
  * be helpful to notify authors.
  * @const {number}
  */
-const NON_AMP_JS_ERROR_THRESHOLD = 0.01;
+const NON_AMP_JS_ERROR_THRESHOLD = 0.99;
 
 /**
  * Throttles reports for the Stable version.

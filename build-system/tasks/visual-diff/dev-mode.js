@@ -81,7 +81,6 @@ async function devMode(browser, webpages) {
           type: 'input',
           name: 'cssSelector',
           message: '>',
-          prefix: '',
         })
       ).cssSelector.trim();
 
