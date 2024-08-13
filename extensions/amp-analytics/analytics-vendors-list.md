@@ -21,7 +21,7 @@ Type attribute value: `_fake_`
 
 Type attribute value: `acquialift`
 
-Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
+Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://app.lift.acquia.com/](https://app.lift.acquia.com/).
 
 ### Adobe Analytics
 
@@ -338,7 +338,7 @@ Adds support for Lotame. More information and configuration details can be found
 
 Type attribute value: `mapp_intelligence`
 
-Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/pages/viewpage.action?pageId=10027966).
+Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/v1/docs/en/accelerated-mobile-pages-amp).
 
 ### Marin Software
 
@@ -374,7 +374,7 @@ Adds support for Yandex Metrica. Configuration details can be found at [Yandex S
 
 Type attribute value: `moat`
 
-Adds support for Moat. Please contact your Moat representative for configuration details. More information on Moat can be found at [moat.com/analytics](https://moat.com/analytics).
+Adds support for Moat. Please contact your Moat representative for configuration details. More information on Moat can be found at [https://docs.oracle.com/en/cloud/saas/data-cloud-moat/about_moat/moat_analytics_how_it_works.html](https://docs.oracle.com/en/cloud/saas/data-cloud-moat/about_moat/moat_analytics_how_it_works.html).
 
 ### Mobify
 
