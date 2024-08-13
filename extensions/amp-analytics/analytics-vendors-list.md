@@ -173,12 +173,6 @@ Adds support for Cxense Insight analytics. Requires defining _var_ `siteId` with
 
 Type attribute value: `deepbi`
 
-### Dynatrace
-
-Type attribute value: `dynatrace`
-
-Adds support for Dynatrace real user monitoring. Requires defining _var_ `app` with a Dynatrace provided _application id_ and _var_ `tenant` with a Dynatrace provided _environment identifier_. More details for adding Dynatrace real user monitoring can be found at [dynatrace.com](https://www.dynatrace.com/technologies/web/amp-monitoring/).
-
 ### EPICA
 
 Type attribute value: `epica`
