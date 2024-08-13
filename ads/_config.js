@@ -350,6 +350,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'appmonsta': {
+    preconnect: 'https://ssp.appmonsta.ai',
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
@@ -742,15 +746,6 @@ const adConfig = jsonConfiguration({
   },
 
   'kuadio': {},
-
-  'lentainform': {
-    renderStartImplemented: true,
-    preconnect: [
-      'https://jsc.lentainform.com',
-      'https://servicer.lentainform.com',
-      'https://s-img.lentainform.com',
-    ],
-  },
 
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
