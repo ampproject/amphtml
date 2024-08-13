@@ -307,6 +307,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Andbeyond](../../ads/vendors/andbeyond.md)
 -   [Aniview](../../ads/vendors/aniview.md)
 -   [AnyClip](../../ads/vendors/anyclip.md)
+-   [AppMonsta](../../ads/vendors/appmonsta.md)
 -   [AppNexus](../../ads/vendors/appnexus.md)
 -   [AppVador](../../ads/vendors/appvador.md)
 -   [Atomx](../../ads/vendors/atomx.md)
