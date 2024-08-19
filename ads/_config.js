@@ -350,6 +350,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'appmonsta': {
+    preconnect: 'https://ssp.appmonsta.ai',
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',

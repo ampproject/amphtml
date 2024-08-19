@@ -1,12 +1,15 @@
 'use strict';
 
 const path = require('path');
+
+const {cyan, yellow} = require('kleur/colors');
+const inquirer = require('@inquirer/prompts');
+
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
   waitForPageLoad,
 } = require('./verifiers');
-const {cyan, yellow} = require('kleur/colors');
 const {HOST, PORT} = require('./consts');
 const {log} = require('./log');
 const {newPage} = require('./browser');
@@ -27,11 +30,9 @@ const ROOT_DIR = path.resolve(__dirname, '../../../');
  * @return {Promise<void>}
  */
 async function devMode(browser, webpages) {
-  const {default: inquirer} = await import('inquirer');
-
   /** @type {WebpageDef} */
-  const webpage = await inquireForWebpage_(inquirer, webpages);
-  const testName = await inquireForTestFunction_(inquirer, webpage);
+  const webpage = await inquireForWebpage_(webpages);
+  const testName = await inquireForTestFunction_(webpage);
 
   log('info', 'The test will now run in a browser window...');
   const page = await newPage(browser, webpage.viewport);
@@ -75,15 +76,7 @@ async function devMode(browser, webpages) {
     log('info', '- Press enter on', cyan('empty prompt'), 'to reload the page');
     log('info', '-', cyan('Ctrl + C'), 'to quit.');
     while (true) {
-      /** @type {string} */
-      let cssSelector = (
-        await inquirer.prompt({
-          type: 'input',
-          name: 'cssSelector',
-          message: '>',
-        })
-      ).cssSelector.trim();
-
+      let cssSelector = (await inquirer.input({message: '>'})).trim();
       if (!cssSelector) {
         break;
       }
@@ -128,33 +121,26 @@ async function devMode(browser, webpages) {
 /**
  * Queries the user for a webpage, or selects one if only one matched --grep.
  *
- * @param {import('inquirer').default} inquirer
  * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
  *     details about the webpages to snapshot.
  * @return {Promise<!WebpageDef>}
  */
-async function inquireForWebpage_(inquirer, webpages) {
+async function inquireForWebpage_(webpages) {
   if (webpages.length > 1) {
-    return (
-      await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'webpage',
-          message:
-            'Select test name from ' +
-            cyan('visual-diff.jsonc') +
-            ' (use ' +
-            cyan('--grep') +
-            ' to filter this list):',
-          choices: webpages
-            .map((webpage) => ({
-              name: webpage.name,
-              value: webpage,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name)),
-        },
-      ])
-    ).webpage;
+    return await inquirer.select({
+      message:
+        'Select test name from ' +
+        cyan('visual-diff.jsonc') +
+        ' (use ' +
+        cyan('--grep') +
+        ' to filter this list):',
+      choices: webpages
+        .map((webpage) => ({
+          name: webpage.name,
+          value: webpage,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    });
   } else {
     const webpage = webpages[0];
     log(
@@ -172,29 +158,22 @@ async function inquireForWebpage_(inquirer, webpages) {
 /**
  * Queries the user for an interactive test, or selects the base case if none.
  *
- * @param {import('inquirer').default} inquirer
  * @param {!WebpageDef} webpage a JSON object containing details about the
  *     webpage to snapshot.
  * @return {Promise<string>}
  */
-async function inquireForTestFunction_(inquirer, webpage) {
+async function inquireForTestFunction_(webpage) {
   if (Object.keys(webpage.tests_).length > 1) {
-    return (
-      await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'testName',
-          message:
-            'Select which interactive test from ' +
-            cyan(webpage.interactive_tests) +
-            ' to run:',
-          choices: Object.keys(webpage.tests_).map((testName) => ({
-            name: testName || '(base test)',
-            value: testName,
-          })),
-        },
-      ])
-    ).testName;
+    return await inquirer.select({
+      message:
+        'Select which interactive test from ' +
+        cyan(webpage.interactive_tests) +
+        ' to run:',
+      choices: Object.keys(webpage.tests_).map((testName) => ({
+        name: testName || '(base test)',
+        value: testName,
+      })),
+    });
   }
   return '';
 }
