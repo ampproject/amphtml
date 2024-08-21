@@ -1161,6 +1161,11 @@
     }
   },
   {
+    "name": "amp-target-video-player",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-tiktok",
     "version": "0.1",
     "latestVersion": "0.1",

@@ -47,6 +47,11 @@ const requiredAttrs = {
     'data-playerid': '26e2e3c1049c4e70ae08a242638b5c40',
     'data-playerversion': 'v4',
   },
+  'amp-target-video-player': {
+    'data-partner': '264',
+    'data-player': '4144',
+    'data-video': '13663',
+  },
   'amp-video-iframe': {
     'src': '/examples/amp-video-iframe/frame.html',
     'poster': 'https://placekitten.com/g/1600/900',
