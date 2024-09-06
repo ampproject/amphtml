@@ -996,6 +996,11 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'piberica': {
+    preconnect: ['https://trafico.prensaiberica.es'],
+    renderStartImplemented: true,
+  },
+
   'pixad': {},
 
   'pixels': {
