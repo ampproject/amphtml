@@ -4,8 +4,7 @@ import {user} from '#utils/log';
 
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 
-import validateProduct from '../../../examples/amp-story/shopping/product.schema.json' assert {type:
-  'json-schema'}; // lgtm[js/syntax-error]
+import validateProduct from '../../../examples/amp-story/shopping/product.schema.json' assert {type: 'json-schema'}; // lgtm[js/syntax-error]
 import {
   Action,
   ShoppingConfigDataDef,

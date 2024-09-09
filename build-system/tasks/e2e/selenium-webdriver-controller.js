@@ -65,11 +65,13 @@ async function waitFor(driver, valueFn, condition, opt_mutate) {
     return Boolean(condition(value));
   };
 
+  /* TODO: fix incorrect typing. */
+  /** @type {any} */
   const result = await driver.wait(
     expectCondition(valueFn, conditionValue, opt_mutate)
   );
 
-  return result.value; // Unbox the value.
+  return result;
 }
 
 class SeleniumWebDriverController {
@@ -156,7 +158,11 @@ class SeleniumWebDriverController {
         throw e;
       }
     });
-    const webElements = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
+    /* TODO: fix incorrect typing. */
+    /** @type {WebElement[]} */
+    const webElements = /** @type {?} */ (
+      await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT)
+    );
     return webElements.map((webElement) => new ElementHandle(webElement));
   }
 
@@ -192,19 +198,23 @@ class SeleniumWebDriverController {
   async findElementsXPath(xpath) {
     await this.maybeInstallXpath_();
     const label = 'for at least one element to be located ' + xpath;
-    const webElements = await this.driver.wait(
-      new Condition(label, async () => {
-        const root = await this.getRoot_();
-        const results = await this.evaluate(
-          (xpath, root) => {
-            return window.queryXpath(xpath, root);
-          },
-          xpath,
-          root
-        );
-        return results;
-      }),
-      ELEMENT_WAIT_TIMEOUT
+    /* TODO: fix incorrect typing. */
+    /** @type {WebElement[]} */
+    const webElements = /** @type {?} */ (
+      await this.driver.wait(
+        new Condition(label, async () => {
+          const root = await this.getRoot_();
+          const results = await this.evaluate(
+            (xpath, root) => {
+              return window.queryXpath(xpath, root);
+            },
+            xpath,
+            root
+          );
+          return results;
+        }),
+        ELEMENT_WAIT_TIMEOUT
+      )
     );
     return webElements.map((webElement) => new ElementHandle(webElement));
   }
@@ -295,7 +305,7 @@ class SeleniumWebDriverController {
    */
   pasteFromClipboard() {
     return this.driver
-      .actions()
+      .actions({async: false, bridge: undefined})
       .keyDown(SeleniumKey.SHIFT)
       .keyDown(SeleniumKey.INSERT)
       .keyUp(SeleniumKey.SHIFT)

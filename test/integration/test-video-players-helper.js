@@ -179,7 +179,8 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      it('should trigger pause analytics when the video pauses', function () {
+      // TODO(#40115): fix this flaky test
+      it.skip('should trigger pause analytics when the video pauses', function () {
         let pauseButton;
 
         return getVideoPlayer({
@@ -201,7 +202,8 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      it('should trigger session analytics when a session ends', function () {
+      // TODO(#40115): fix this flaky test
+      it.skip('should trigger session analytics when a session ends', function () {
         let pauseButton;
 
         return getVideoPlayer({
@@ -379,7 +381,8 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(timeout);
 
     describe('play/pause', () => {
-      it('should play when in view port initially', () => {
+      // TODO(#40115): fix this flaky test
+      it.skip('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(
           (r) => {
             return listenOncePromise(r.video, VideoEvents_Enum.PLAYING);

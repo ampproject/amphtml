@@ -7,8 +7,7 @@ import {afterRenderPromise, macroTask} from '#testing/helpers';
 import {getLocalizationService} from 'extensions/amp-story/1.0/amp-story-localization-service';
 import {AdvancementMode} from 'extensions/amp-story/1.0/story-analytics';
 
-import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type:
-  'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   Action,
   AmpStoryStoreService,
