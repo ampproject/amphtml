@@ -85,7 +85,7 @@
     "babel-plugin-optimize-objstr": "1.0.0",
     "baconipsum": "0.1.2",
     "base62": "2.0.2",
-    "body-parser": "1.20.2",
+    "body-parser": "1.20.3",
     "chai": "4.4.1",
     "chai-as-promised": "7.1.2",
     "check-dependencies": "2.0.0",
