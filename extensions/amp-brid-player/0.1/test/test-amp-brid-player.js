@@ -22,8 +22,8 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getBridPlayer(attributes, opt_responsive, config) {
-      const bc = doc.createElement('amp-brid-player');
+    function getBridPlayer(attributes, opt_responsive, config, alias = false) {
+      const bc = alias ? doc.createElement('amp-target-video-player') : doc.createElement('amp-brid-player');
 
       for (const key in attributes) {
         bc.setAttribute(key, attributes[key]);
@@ -74,6 +74,21 @@ describes.realWin(
         'data-player': '4144',
         'data-video': '13663',
       }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://services.brid.tv/services/iframe/video/13663/264/4144/0/1/?amp=1'
+        );
+      });
+    });
+
+    it('renders alias', () => {
+      return getBridPlayer({
+        'data-partner': '264',
+        'data-player': '4144',
+        'data-video': '13663',
+      }, null, null, true).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');

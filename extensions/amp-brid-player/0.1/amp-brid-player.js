@@ -35,6 +35,7 @@ import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-brid-player';
+const ALIAS = 'amp-target-video-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -495,4 +496,5 @@ class AmpBridPlayer extends AMP.BaseElement {
 
 AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBridPlayer);
+  AMP.registerElement(ALIAS, AmpBridPlayer);
 });
