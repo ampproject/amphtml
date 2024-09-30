@@ -185,17 +185,12 @@ describes.realWin(
 
     describe('rememberMeteringEntitlementsWereFetched', () => {
       it('should update flag', async () => {
-        expect(
-          subscriptionService.metering_
-            .entitlementsWereFetchedWithCurrentMeteringState
-        ).to.be.false;
+        expect(subscriptionService.metering_.checkedForEntitlements).to.be
+          .false;
 
         serviceAdapter.rememberMeteringEntitlementsWereFetched();
 
-        expect(
-          subscriptionService.metering_
-            .entitlementsWereFetchedWithCurrentMeteringState
-        ).to.be.true;
+        expect(subscriptionService.metering_.checkedForEntitlements).to.be.true;
       });
 
       it('should handle metering being disabled', async () => {
