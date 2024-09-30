@@ -6,6 +6,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
 import {handleAds} from '../monetization';
+import {AD_TYPES, PLACAMENT_POSITIONS} from '../monetization/consent-util';
 
 describes.realWin(
   'amp-apester-media-monetization',
@@ -173,14 +174,79 @@ describes.realWin(
     it('Should show Aniview video for in-unit video', async () => {
       const media = createCampaignData({inUnitVideo: true});
       await handleAds(media, baseElement);
-      const inUnitVidoe = queryAmpAdAniviewSelector(doc);
-      expect(inUnitVidoe).to.exist;
+      const inUnitVideo = queryAmpAdAniviewSelector(doc);
+      expect(inUnitVideo).to.exist;
     });
     it('Should not show Aniview video for in-unit video', async () => {
       const media = createCampaignData({inUnitVideo: false});
       await handleAds(media, baseElement);
-      const inUnitVidoe = queryAmpAdAniviewSelector(doc);
-      expect(inUnitVidoe).to.not.exist;
+      const inUnitVideo = queryAmpAdAniviewSelector(doc);
+      expect(inUnitVideo).to.not.exist;
+    });
+
+    // ADSET flow
+    describe('Adset flow', async () => {
+      it('Should show Aniview video for in-unit video', async () => {
+        const videoAd = getVideoAd(PLACAMENT_POSITIONS.in_unit);
+        const media = createAdsetData([videoAd]);
+        await handleAds(media, baseElement);
+        const inUnitVideo = queryAmpAdAniviewSelector(doc);
+        expect(inUnitVideo).to.exist;
+      });
+      it('Should show Aniview video below', async () => {
+        const videoAd = getVideoAd(PLACAMENT_POSITIONS.below);
+        const media = createAdsetData([videoAd]);
+        await handleAds(media, baseElement);
+        const avAdBelow = queryAmpAdAniviewSelector(doc);
+        expect(avAdBelow).to.exist;
+        expect(baseElement.nextSibling).to.be.equal(avAdBelow);
+      });
+      it('Should show display ad in unit', async () => {
+        const displayAd = getDisplayAd(PLACAMENT_POSITIONS.in_unit);
+        const media = createAdsetData([displayAd]);
+        await handleAds(media, baseElement);
+        const aboveAd = queryAmpAdDisplaySelector(doc);
+        expect(aboveAd).to.exist;
+      });
+      it('Should show display ad above', async () => {
+        const displayAd = getDisplayAd(PLACAMENT_POSITIONS.above);
+        const media = createAdsetData([displayAd]);
+        await handleAds(media, baseElement);
+        const aboveAd = queryAmpAdDisplaySelector(doc);
+        expect(aboveAd).to.exist;
+        expect(baseElement.previousSibling).to.be.equal(aboveAd);
+      });
+      it('Should show Aniview video below and display above', async () => {
+        const videoAd = getVideoAd(PLACAMENT_POSITIONS.below);
+        const displayAd = getDisplayAd(PLACAMENT_POSITIONS.above);
+        const media = createAdsetData([videoAd, displayAd]);
+        await handleAds(media, baseElement);
+        const avAdBelow = queryAmpAdAniviewSelector(doc);
+        expect(avAdBelow).to.exist;
+        expect(baseElement.nextSibling).to.be.equal(avAdBelow);
+        const aboveAd = queryAmpAdDisplaySelector(doc);
+        expect(aboveAd).to.exist;
+        expect(baseElement.previousSibling).to.be.equal(aboveAd);
+      });
+      it('Should not have rtc-config attribute if not set in bottom ad', async () => {
+        const displayAd = getDisplayAd(PLACAMENT_POSITIONS.bottom);
+        const media = createAdsetData([displayAd]);
+        await handleAds(media, baseElement);
+        const bottomAd = queryAmpAdDisplaySelector(doc);
+        expect(bottomAd.getAttribute('rtc-config')).to.not.exist;
+        expect(bottomAd).to.exist;
+      });
+      it('Should have rtc-config attribute if set in bottom ad', async () => {
+        const displayAd = getDisplayAd(
+          PLACAMENT_POSITIONS.bottom,
+          testRtcConfig
+        );
+        const media = createAdsetData([displayAd]);
+        await handleAds(media, baseElement);
+        const bottomAd = queryAmpAdDisplaySelector(doc);
+        expect(bottomAd.getAttribute('rtc-config')).to.exist;
+        expect(bottomAd).to.exist;
+      });
     });
   }
 );
@@ -211,6 +277,7 @@ function createCampaignData({
       'video': {
         'playerOptions': {
           'aniviewChannelId': '5fad4ac42cd6d91dcb6e50e9',
+          'aniviewPlayerId': '5d14c0ded1fb9900016a3118',
         },
         'videoTag': '5d14c0ded1fb9900016a3118',
         'enabled': false,
@@ -298,5 +365,65 @@ function createCampaignData({
     ];
   }
   media.campaignData = campaignData;
+  return media;
+}
+
+function getVideoAd(placementPosition) {
+  return {
+    'active': true,
+    'type': placementPosition,
+    'ads': [
+      {
+        'mediaType': AD_TYPES.video,
+        'provider': {
+          'providerName': 'aniview',
+          'playerId': '5d14c0ded1fb9900016a3118',
+        },
+      },
+    ],
+  };
+}
+
+function getDisplayAd(placementPosition, rtcConfig) {
+  const provider = {
+    'providerName': 'gpt',
+    'adUnit': '/57806026/Dev_DT_300x250',
+  };
+  if (rtcConfig) {
+    provider.rtcConfig = rtcConfig;
+  }
+  return {
+    'active': true,
+    'type': placementPosition,
+    'ads': [
+      {
+        'mediaType': AD_TYPES.display,
+        'provider': provider,
+      },
+    ],
+  };
+}
+
+function createAdsetData(ads) {
+  const media = {};
+  const adsetData = {
+    '_id': 'testAdsetId',
+    'settings': {
+      'inUnit': {
+        'skipTimer': 5,
+        'timeBetweenAds': 20,
+        'timeInView': 10,
+      },
+      'staticAds': {
+        'refresh': {
+          'option': 'timer',
+          'refreshTime': 30,
+        },
+      },
+    },
+    'placements': ads || [],
+  };
+
+  media.adsetData = adsetData;
   return media;
 }
