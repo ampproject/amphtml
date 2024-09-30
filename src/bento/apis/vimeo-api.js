@@ -36,13 +36,22 @@ export const VIMEO_EVENTS = {
  * @return {string}
  */
 export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
-  return addParamsToUrl(
-    `https://player.vimeo.com/video/${encodeURIComponent(videoid)}`,
-    {
-      'dnt': doNotTrack ? '1' : undefined,
-      'muted': autoplay ? '1' : undefined,
-    }
-  );
+  let identifier = encodeURIComponent(videoid);
+
+  const paramParts = videoid?.split('?h=') || [];
+
+  if (paramParts.length > 1) {
+    const encoded = paramParts.map((part) => {
+      return encodeURIComponent(part);
+    });
+
+    identifier = encoded.join('?h=');
+  }
+
+  return addParamsToUrl(`https://player.vimeo.com/video/${identifier}`, {
+    'dnt': doNotTrack ? '1' : undefined,
+    'muted': autoplay ? '1' : undefined,
+  });
 }
 
 /**
