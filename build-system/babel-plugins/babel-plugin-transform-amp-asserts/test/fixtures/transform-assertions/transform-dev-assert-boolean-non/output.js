@@ -1,2 +1,1 @@
-/** @type {boolean} */
-(null);
+/** @type {boolean} */(null);

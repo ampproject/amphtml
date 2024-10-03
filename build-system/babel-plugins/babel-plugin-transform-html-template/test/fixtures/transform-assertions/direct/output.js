@@ -1,10 +1,10 @@
 const _template = ["html usage"],
-      _template2 = ["svg usage"],
-      _template3 = ["<div>html usage</div>"],
-      _template4 = ["<div>fourth sibling</div>"],
-      _template5 = ["<div>fifth sibling</div>"],
-      _template6 = ["<svg>sixth sibling</svg>"],
-      _template7 = ["<svg>seventh sibling</svg>"];
+  _template2 = ["svg usage"],
+  _template3 = ["<div>html usage</div>"],
+  _template4 = ["<div>fourth sibling</div>"],
+  _template5 = ["<div>fifth sibling</div>"],
+  _template6 = ["<svg>sixth sibling</svg>"],
+  _template7 = ["<svg>seventh sibling</svg>"];
 console.log(html(["html usage"]));
 console.log(html(["html usage multiline"]));
 console.log(html(["<p active=true>Attribute Quote Removal</p>"]));
@@ -31,14 +31,12 @@ console.log(svg(["<svg xmlns=http://www.w3.org/2000/svg xmlns:xlink=http://www.w
 console.log(svg(["<svg width=190 height=160 xmlns=http://www.w3.org/2000/svg><path d=\"M 10 80 Q 95 10 180 80\" stroke=black fill=transparent /></svg>"]));
 console.log(svgFor(element)(["<svg></svg>"]));
 console.log(svgFor(element)(["<svg><path foo/></svg>"]));
-
 function pleaseHoistInternalUsage() {
   console.log(html(_template));
   console.log(htmlFor(element)(_template));
   console.log(svg(_template2));
   console.log(svgFor(element)(_template2));
 }
-
 function pleaseHoistDifferentTemplates() {
   console.log(html(_template));
   console.log(htmlFor(element)(_template));
