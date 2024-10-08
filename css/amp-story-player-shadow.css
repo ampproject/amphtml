@@ -128,8 +128,8 @@
 
 .i-amphtml-story-player-full-bleed-story .i-amphtml-story-player-panel-prev,
 .i-amphtml-story-player-full-bleed-story .i-amphtml-story-player-panel-next,
-:not(.i-amphtml-story-player-panel) .i-amphtml-story-player-panel-prev,
-:not(.i-amphtml-story-player-panel) .i-amphtml-story-player-panel-next {
+:not(.i-amphtml-story-player-panel) > .i-amphtml-story-player-panel-prev,
+:not(.i-amphtml-story-player-panel) > .i-amphtml-story-player-panel-next {
   opacity: 0;
   pointer-events: none;
 }
