@@ -5,10 +5,10 @@
   "description": "amp visual diff",
   "devDependencies": {
     "@inquirer/prompts": "7.0.0",
-    "@percy/core": "1.30.0",
+    "@percy/core": "1.30.1",
     "@percy/puppeteer": "2.0.2",
-    "@percy/sdk-utils": "1.30.0",
+    "@percy/sdk-utils": "1.30.1",
     "@puppeteer/browsers": "2.4.0",
-    "puppeteer-core": "23.5.1"
+    "puppeteer-core": "23.5.3"
   }
 }
