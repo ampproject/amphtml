@@ -2,7 +2,6 @@
 
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;
-
 class PositionObserver {
   /**
    * @param {!Window} win
@@ -10,13 +9,12 @@ class PositionObserver {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
+
     /**/
   }
-
 }
+
 /**/
-
-
 /**
  * @typedef {{
  *   viewportRect: !LayoutRectDef,
@@ -24,7 +22,6 @@ class PositionObserver {
  * }}
  */
 let PositionEntryDef;
-
 /**
      * @typedef {{
      *   viewportRect: !LayoutRectDef,
@@ -32,7 +29,6 @@ let PositionEntryDef;
      * }}
      */
 let PositionEntryDef2;
-
 /**
  * @typedef {{
  *   viewportRect: !LayoutRectDef,

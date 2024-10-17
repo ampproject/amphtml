@@ -5,7 +5,6 @@ const localDev = false;
 const minified = true;
 const development = false;
 const namespaceVersion = "$internalRuntimeVersion$";
-
 function foo() {
   if (false == false) {
     return false;
