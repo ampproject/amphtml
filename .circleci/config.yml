@@ -335,7 +335,8 @@ jobs:
           name: '⭐⭐⭐ All Unit Tests ⭐⭐⭐'
           command: node build-system/pr-check/unit-tests.js
       - codecov/upload:
-          file: test/coverage/lcov-unit.info
+          disable_search: true
+          files: test/coverage/lcov-unit.info
           flags: unit_tests
       - store_test_output
       - store_filelist
@@ -350,7 +351,8 @@ jobs:
           name: '⭐⭐⭐ Unminified Tests ⭐⭐⭐'
           command: node build-system/pr-check/unminified-tests.js
       - codecov/upload:
-          file: test/coverage/lcov-integration.info
+          disable_search: true
+          files: test/coverage/lcov-integration.info
           flags: integration_tests
       - store_test_output
       - teardown_vm
