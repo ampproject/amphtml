@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.4.8
-  codecov: codecov/codecov@4.2.0
+  codecov: codecov/codecov@5.0.0
   macos: circleci/macos@2.5.2
   node: circleci/node@6.3.0
 
@@ -156,7 +156,8 @@ commands:
             - save_cache:
                 name: '💾 Save node_modules/ Cache'
                 key: node-modules-cache-{{ arch }}-v3-{{ checksum "package-lock.json" }}
-                paths: node_modules/
+                paths:
+                  - node_modules/
   teardown_vm:
     steps:
       - persist_to_workspace:
@@ -335,7 +336,8 @@ jobs:
           name: '⭐⭐⭐ All Unit Tests ⭐⭐⭐'
           command: node build-system/pr-check/unit-tests.js
       - codecov/upload:
-          file: test/coverage/lcov-unit.info
+          disable_search: true
+          files: test/coverage/lcov-unit.info
           flags: unit_tests
       - store_test_output
       - store_filelist
@@ -350,7 +352,8 @@ jobs:
           name: '⭐⭐⭐ Unminified Tests ⭐⭐⭐'
           command: node build-system/pr-check/unminified-tests.js
       - codecov/upload:
-          file: test/coverage/lcov-integration.info
+          disable_search: true
+          files: test/coverage/lcov-integration.info
           flags: integration_tests
       - store_test_output
       - teardown_vm
