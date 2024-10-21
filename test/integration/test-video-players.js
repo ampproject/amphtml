@@ -34,7 +34,8 @@ describes.sandboxed('amp-video-iframe', {}, (env) => {
   );
 });
 
-describes.sandboxed('amp-youtube', {}, (env) => {
+// TODO(#40181): Youtube tests not working on Circle.
+describes.sandboxed.skip('amp-youtube', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
@@ -60,8 +61,7 @@ describes.sandboxed('amp-dailymotion', {}, (env) => {
   );
 });
 
-// TODO(#39857): Unskip when integration is fixed.
-describes.sandboxed.skip('amp-3q-player', {}, (env) => {
+describes.sandboxed('amp-3q-player', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
