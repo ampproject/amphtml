@@ -15,7 +15,6 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 const TAG = 'amp-ad-network-mgid-impl';
 
 const BASE_URL_ = 'https://servicer.mgid.com/';
-const PV_URL_ = 'https://c.mgid.com/pv/';
 
 export class AmpAdNetworkMgidImpl extends AmpA4A {
   /**
@@ -74,19 +73,6 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       params.forEach((result) => data.push(result.value));
       const joinedParams = '?' + data.join('&');
       servicerUrl += joinedParams;
-
-      if (!hasOwn(this.win, '_mgAmpStoryPV')) {
-        this.getAmpDoc()
-          .getBody()
-          .appendChild(
-            createElementWithAttributes(this.win.document, 'amp-pixel', {
-              'src': PV_URL_ + joinedParams,
-            })
-          );
-
-        this.win['_mgAmpStoryPV'] = 1;
-      }
-
       return servicerUrl;
     });
   }
