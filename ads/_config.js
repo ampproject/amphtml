@@ -996,6 +996,11 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'piberica': {
+    preconnect: ['https://trafico.prensaiberica.es'],
+    renderStartImplemented: true,
+  },
+
   'pixad': {},
 
   'pixels': {
@@ -1485,11 +1490,6 @@ const adConfig = jsonConfiguration({
   'xlift': {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
-  },
-
-  'yahoo': {
-    prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
-    preconnect: 'https://us.adserver.yahoo.com',
   },
 
   'yahoofedads': {
