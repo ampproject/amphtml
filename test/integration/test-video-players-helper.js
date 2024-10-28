@@ -179,8 +179,7 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      // TODO(#40115): fix this flaky test
-      it.skip('should trigger pause analytics when the video pauses', function () {
+      it('should trigger pause analytics when the video pauses', function () {
         let pauseButton;
 
         return getVideoPlayer({
@@ -202,8 +201,7 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      // TODO(#40115): fix this flaky test
-      it.skip('should trigger session analytics when a session ends', function () {
+      it('should trigger session analytics when a session ends', function () {
         let pauseButton;
 
         return getVideoPlayer({
@@ -381,8 +379,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(timeout);
 
     describe('play/pause', () => {
-      // TODO(#40115): fix this flaky test
-      it.skip('should play when in view port initially', () => {
+      it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(
           (r) => {
             return listenOncePromise(r.video, VideoEvents_Enum.PLAYING);
@@ -593,8 +590,8 @@ export function runVideoPlayerIntegrationTests(
         video.setAttribute('id', 'myVideo');
         video.setAttribute('controls', '');
         video.setAttribute('layout', 'fixed');
-        video.setAttribute('width', '300px');
-        video.setAttribute('height', '50vh');
+        video.setAttribute('width', '300');
+        video.setAttribute('height', '300');
 
         video.style.position = 'absolute';
         video.style.top = top;
