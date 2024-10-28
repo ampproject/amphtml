@@ -21,9 +21,9 @@ export function navegg(global, data) {
   loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
     nvg = global[`nvg${acc}`] = new global['AMPNavegg']({
       acc,
-      wst: data.wst || '0',
-      wct: data.wct || '0',
-      wla: data.wla || '0',
+      wst: data.wst ? '1' : '0',
+      wct: data.wct ? '1' : '0',
+      wla: data.wla ? '1' : '0',
     });
     nvg.getProfile((nvgTargeting) => {
       for (seg in nvgTargeting) {
