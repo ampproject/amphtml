@@ -147,8 +147,8 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   navegg: {
-    url: 'https://usr.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
-    macros: ['NVG_ACC'],
+    url: 'https://usr.navdmp.com/usr?acc=NVG_ACC&wst=WST&wct=WCT&wla=WLA&v=10',
+    macros: ['NVG_ACC', 'WST', 'WCT', 'WLA'],
     disableKeyAppend: true,
   },
   newspassid: {
