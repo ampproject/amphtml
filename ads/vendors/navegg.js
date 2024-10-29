@@ -7,8 +7,8 @@ import {doubleclick} from '#ads/google/doubleclick';
  * @param {!Object} data
  */
 export function navegg(global, data) {
-  const requiredParams = ['acc'];
-  const optionalParams = ['wst', 'wct', 'wla'];
+  const requiredParams = ['acc', 'wst', 'wct', 'wla'];
+  const optionalParams = [];
 
   validateData(data, requiredParams, optionalParams);
 
