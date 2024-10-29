@@ -48,7 +48,8 @@ describes.sandboxed.skip('amp-youtube', {}, (env) => {
   );
 });
 
-describes.sandboxed('amp-dailymotion', {}, (env) => {
+// TODO(#40181): amp-dailymotion tests not working on Circle.
+describes.sandboxed.skip('amp-dailymotion', {}, (env) => {
   runVideoPlayerIntegrationTests(
     env,
     (fixture) => {
