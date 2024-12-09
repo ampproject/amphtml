@@ -115,7 +115,10 @@ void Tokenizer::ReadRawOrRCDATA() {
     if (c != '<') continue;
     c = ReadByte();
     if (eof_) break;
-    if (c != '/') continue;
+    if (c != '/') {
+      UnreadByte();
+      continue;
+    }
     if (ReadRawEndTag() || eof_) break;
   }
 

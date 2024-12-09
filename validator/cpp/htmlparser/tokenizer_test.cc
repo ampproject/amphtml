@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "cpp/htmlparser/atom.h"
 #include "cpp/htmlparser/token.h"
 
 // TODO: Add more complex html not-well-formed documents to cover
@@ -231,6 +232,48 @@ TEST(TokenizerTest, BasicTokenizationOfADocument) {
 
   // TODO: DO NOT ADD MORE TESTS HERE. Split all above tests in
   // their respective test cases.
+}
+
+// Regression test for b/382439116.
+TEST(TokenizerTest, TestEndTagInRawTextTag) {
+  // The tokenizer should create five tokens for the HTML:
+  // 1. Start tag: STYLE
+  // 2. Text: "inside<"
+  // 3. End tag: STYLE
+  // 4. Text: "after"
+  // 5. End tag: STYLE
+  //
+  // Before fixing b/382439116, the tokenizer instead created:
+  // 1. Start tag: STYLE
+  // 2. Text: "inside<</style>after"
+  // 3. End tag: STYLE
+  // which was incorrect and had security implications.
+
+  htmlparser::Tokenizer t("<style>inside<</style>after</style>");
+  std::vector<htmlparser::Token> tokens;
+  while (!t.IsEOF()) {
+    htmlparser::TokenType tt = t.Next();
+    if (tt == htmlparser::TokenType::ERROR_TOKEN) break;
+    htmlparser::Token token = t.token();
+    tokens.push_back(token);
+  }
+
+  ASSERT_EQ(tokens.size(), 5);
+
+  EXPECT_EQ(tokens[0].token_type, htmlparser::TokenType::START_TAG_TOKEN);
+  EXPECT_EQ(tokens[0].atom, htmlparser::Atom::STYLE);
+
+  EXPECT_EQ(tokens[1].token_type, htmlparser::TokenType::TEXT_TOKEN);
+  EXPECT_EQ(tokens[1].data, "inside<");
+
+  EXPECT_EQ(tokens[2].token_type, htmlparser::TokenType::END_TAG_TOKEN);
+  EXPECT_EQ(tokens[2].atom, htmlparser::Atom::STYLE);
+
+  EXPECT_EQ(tokens[3].token_type, htmlparser::TokenType::TEXT_TOKEN);
+  EXPECT_EQ(tokens[3].data, "after");
+
+  EXPECT_EQ(tokens[4].token_type, htmlparser::TokenType::END_TAG_TOKEN);
+  EXPECT_EQ(tokens[4].atom, htmlparser::Atom::STYLE);
 }
 
 // Tests that an unexpected equals sign ("="") at the start of an attribute name

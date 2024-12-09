@@ -10,7 +10,8 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 package(
     default_compatible_with = ["//buildenv/target:non_prod"],
-    default_visibility = ["//visibility:public"])
+    default_visibility = ["//visibility:public"],
+)
 
 licenses(["notice"])
 
@@ -465,6 +466,7 @@ cc_test(
         "tokenizer_test.cc",
     ],
     deps = [
+        ":atom",
         ":token",
         ":tokenizer",
         "@com_google_googletest//:gtest_main",
