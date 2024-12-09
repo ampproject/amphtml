@@ -143,6 +143,7 @@ bool Tokenizer::ReadRawEndTag() {
   switch (c) {
     case ' ':
     case '\n':
+    case '\r':
     case '\t':
     case '\f':
     case '/':

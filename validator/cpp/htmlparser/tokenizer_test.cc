@@ -446,3 +446,53 @@ TEST(TokenizerTest, TestMustangTemplateCase) {
   }
   EXPECT_EQ(tokens.size(), 11);
 }
+
+class EndTagTokenTest : public ::testing::TestWithParam<std::string> {};
+
+// Regression test for b/382678018. It checks various various characters that
+// can occur in an end tag.
+TEST_P(EndTagTokenTest, ParsesCorrectly) {
+  // This test is called with several HTML strings, each of which should return
+  // exactly the same tokens.
+  htmlparser::Tokenizer t(GetParam());
+  std::vector<htmlparser::Token> tokens;
+  while (!t.IsEOF()) {
+    htmlparser::TokenType tt = t.Next();
+    if (tt == htmlparser::TokenType::ERROR_TOKEN) break;
+    htmlparser::Token token = t.token();
+    tokens.push_back(token);
+  }
+
+  ASSERT_EQ(tokens.size(), 4);
+
+  EXPECT_EQ(tokens[0].token_type, htmlparser::TokenType::START_TAG_TOKEN);
+  EXPECT_EQ(tokens[0].atom, htmlparser::Atom::STYLE);
+
+  EXPECT_EQ(tokens[1].token_type, htmlparser::TokenType::TEXT_TOKEN);
+  EXPECT_EQ(tokens[1].data, "inside");
+
+  EXPECT_EQ(tokens[2].token_type, htmlparser::TokenType::END_TAG_TOKEN);
+  EXPECT_EQ(tokens[2].atom, htmlparser::Atom::STYLE);
+
+  EXPECT_EQ(tokens[3].token_type, htmlparser::TokenType::TEXT_TOKEN);
+  EXPECT_EQ(tokens[3].data, "after");
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TestEndTagTokens, EndTagTokenTest,
+    ::testing::Values(
+        "<style>inside</style>after", "<style>inside</style abc>after",
+        "<style>inside</style abcx=77>after", "<style>inside</style/>after",
+        "<style>inside</sTYlE/>after", "<style>inside</style/abc>after",
+        "<style>inside</style\rabc>after", "<style>inside</style\fabc>after",
+        "<style>inside</style\tabc>after",
+        "<style>inside</style/abc\n\rqwe>after",
+        "<style>inside</style/a\r\n\f\t////abc>after",
+        "<style>inside</style x='abc'>after",
+        "<style>inside</style x=\"abc\">after",
+        "<style>inside</style x=\"abc\"y=123>after",
+        "<style>inside</style x=\"abc\"z='333'>after",
+        "<style>inside</style/x=34>after",
+        "<style>inside</style/abc='x&gt;y'qwe>after",
+        "<style>inside</style abc='x>y'>after",
+        ));
