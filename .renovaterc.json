@@ -32,10 +32,10 @@
     {
       "groupName": "build-system devDependencies",
       "matchFileNames": ["build-system/**"],
-      "excludePackageNames": ["chromedriver"],
       "labels": ["WG: infra"],
       "rebaseWhen": "never",
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": ["!chromedriver"]
     },
     {
       "groupName": "validator devDependencies",
@@ -59,55 +59,58 @@
     {
       "groupName": "linting devDependencies",
       "matchFileNames": ["package.json"],
-      "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
       "labels": ["WG: infra"],
       "rebaseWhen": "never",
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": ["/\\b(prettier|eslint)\\b/"]
     },
     {
       "groupName": "babel devDependencies",
       "matchFileNames": ["package.json"],
-      "matchPackagePatterns": ["\\bbabel"],
-      "major": {"automerge": false, "assignAutomerge": false},
+      "major": {
+        "automerge": false,
+        "assignAutomerge": false
+      },
       "labels": ["WG: infra", "WG: performance"],
       "rebaseWhen": "never",
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": ["/\\bbabel/"]
     },
     {
       "groupName": "esbuild devDependencies",
       "matchFileNames": ["package.json"],
-      "matchPackagePatterns": ["\\besbuild\\b"],
       "labels": ["WG: infra", "WG: performance"],
       "rebaseWhen": "never",
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": ["/\\besbuild\\b/"]
     },
     {
       "groupName": "ampproject devDependencies",
       "matchFileNames": ["package.json"],
-      "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
       "labels": ["WG: components", "WG: performance"],
       "rebaseWhen": "never",
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": ["/^@ampproject//"]
     },
     {
       "groupName": "ampproject dependencies",
       "matchFileNames": ["package.json"],
-      "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: components", "WG: performance"],
       "rebaseWhen": "never",
       "automerge": false,
-      "schedule": null
+      "schedule": null,
+      "matchPackageNames": ["/^@ampproject//"]
     },
     {
       "groupName": "core dependencies",
       "matchFileNames": ["package.json"],
-      "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: components", "WG: performance"],
       "rebaseWhen": "never",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": ["!/^@ampproject//"]
     }
   ]
 }
