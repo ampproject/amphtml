@@ -1,4 +1,4 @@
-daysUntilStale: 540 # 1.5Y - 7d
+daysUntilStale: 358 # 1Y - 7d
 daysUntilClose: 7
 staleLabel: Stale
 markComment: >

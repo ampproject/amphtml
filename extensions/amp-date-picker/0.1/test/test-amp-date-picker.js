@@ -80,7 +80,7 @@ describes.realWin(
     /**
      * Create a template from a body and attributes
      * @param {string} body
-     * @param {!Object<string, string>=} opt_attrs
+     * @param {!{[key: string]: string}=} opt_attrs
      */
     function createDateTemplate(body, opt_attrs) {
       const template = createTemplate(body);

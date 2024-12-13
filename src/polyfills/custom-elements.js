@@ -100,7 +100,7 @@ class CustomElementRegistry {
     /** @const @private */
     this.registry_ = registry;
 
-    /** @private @const @type {!Object<string, !Deferred>} */
+    /** @private @const @type {!{[key: string]: !Deferred}} */
     this.pendingDefines_ = map();
   }
 
@@ -185,7 +185,7 @@ class Registry {
     /** @private @const */
     this.win_ = win;
 
-    /** @private @const @type {!Object<string, !CustomElementDef>} */
+    /** @private @const @type {!{[key: string]: !CustomElementDef}} */
     this.definitions_ = map();
 
     /**

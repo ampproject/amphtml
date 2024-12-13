@@ -1,5 +1,8 @@
-import * as IniLoad from '../../../../src/ini-load';
 import {AmpDocShadow} from '#service/ampdoc-impl';
+
+import {user} from '#utils/log';
+
+import * as IniLoad from '../../../../src/ini-load';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {ScrollManager} from '../scroll-manager';
@@ -7,7 +10,6 @@ import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
-import {user} from '#utils/log';
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
   let win;

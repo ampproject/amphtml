@@ -4,6 +4,7 @@ import {
   hasOwn,
   map,
   memo,
+  objectsEqualDeep,
   ownProperty,
   recreateNonProtoObject,
 } from '#core/types/object';
@@ -186,6 +187,80 @@ describes.sandboxed('type helpers - objects', {}, () => {
         },
       };
       expect(() => deepMerge(destObject, destObject)).to.not.throw();
+    });
+  });
+
+  describe('objectsEqualDeep', () => {
+    const getDeepObject = () => ({
+      a: 'A',
+      b: 13,
+      c: ['C', 'c', 'see', 'si'],
+      d: {e: 'E'},
+      f: {g: {h: [{i: ['J']}]}},
+    });
+    const deepObject = getDeepObject();
+
+    it('should compare deep objects', () => {
+      expect(objectsEqualDeep(deepObject, getDeepObject())).to.be.true;
+    });
+    it('should compare shallow objects', () => {
+      expect(objectsEqualDeep(deepObject, deepObject)).to.be.true;
+      expect(objectsEqualDeep(deepObject, {...deepObject})).to.be.true;
+      expect(objectsEqualDeep({...deepObject}, {...deepObject})).to.be.true;
+    });
+    it('should not matter what order the keys are in', () => {
+      expect(
+        objectsEqualDeep(deepObject, {
+          c: deepObject.c,
+          f: deepObject.f,
+          d: deepObject.d,
+          a: deepObject.a,
+          b: deepObject.b,
+        })
+      ).to.be.true;
+    });
+    it('should fail if there are extra keys', () => {
+      expect(objectsEqualDeep(deepObject, {...deepObject, foo: 'foo'})).to.be
+        .false;
+    });
+    it('should fail if there are too-few keys', () => {
+      const missingKeys = {...deepObject};
+      delete missingKeys['a'];
+      expect(objectsEqualDeep(deepObject, missingKeys)).to.be.false;
+    });
+    it('should fail if values are different', () => {
+      expect(objectsEqualDeep(deepObject, {...deepObject, a: 'AAA'})).to.be
+        .false;
+      expect(objectsEqualDeep(deepObject, {...deepObject, b: ['B']})).to.be
+        .false;
+      expect(objectsEqualDeep(deepObject, {...deepObject, c: 'C,c,see,si'})).to
+        .be.false;
+    });
+    it('should fail if a deep value is different', () => {
+      const o2 = getDeepObject();
+      o2.f.g.h[0].i[0] = 'JJJ';
+      expect(objectsEqualDeep(deepObject, o2)).to.be.false;
+    });
+
+    const getDeepArray = () => ['A', 'B', {c: 'C'}, ['D', 'E', 'F']];
+    const deepArray = getDeepArray();
+    it('should compare arrays', () => {
+      expect(objectsEqualDeep(deepArray, getDeepArray())).to.be.true;
+      expect(objectsEqualDeep(deepArray, [...getDeepArray()])).to.be.true;
+    });
+    it('should fail if the arrays are different', () => {
+      const o2 = getDeepArray();
+      expect(objectsEqualDeep(deepArray, o2.slice(1))).to.be.false;
+      expect(objectsEqualDeep(deepArray, o2.slice(0, 2))).to.be.false;
+      expect(objectsEqualDeep(deepArray, [...o2, 'extra'])).to.be.false;
+      expect(objectsEqualDeep(deepArray, ['extra', ...o2])).to.be.false;
+      expect(objectsEqualDeep(deepArray, [...o2, ...o2])).to.be.false;
+      o2[1] = 'BB';
+      expect(objectsEqualDeep(deepArray, o2)).to.be.false;
+
+      // Just to make sure nothing funky happened:
+      o2[1] = 'B';
+      expect(objectsEqualDeep(deepArray, o2)).to.be.true;
     });
   });
 

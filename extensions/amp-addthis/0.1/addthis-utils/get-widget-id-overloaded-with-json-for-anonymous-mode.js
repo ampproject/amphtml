@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 const overrideKeys = [
   'backgroundColor',
   'borderRadius',
@@ -42,7 +40,7 @@ const overrideKeys = [
  * @return {string} empty string means there is no override object
  */
 export function getWidgetOverload(self) {
-  const override = dict({});
+  const override = {};
   overrideKeys.forEach((item) => {
     const data = self.element.getAttribute(`data-attr-${item}`);
     if (

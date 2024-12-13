@@ -30,6 +30,28 @@ export const Default = (args) => {
   );
 };
 
+function TestDemo({formulas, withScroll, ...args}) {
+  const {cauchy, doubleAngle, quadratic} = formulas;
+  return (
+    <>
+      <h2>The Quadratic Formula</h2>
+      <amp-mathml data-formula={quadratic} {...args}></amp-mathml>
+
+      <h2>Cauchy's Integral Formula</h2>
+      <amp-mathml data-formula={cauchy} {...args}></amp-mathml>
+
+      {withScroll ? (
+        <div style={{height: 1000, border: '1px solid black'}}>
+          long stuff to create scroll
+        </div>
+      ) : null}
+
+      <h2>Double angle formula for Cosines</h2>
+      <amp-mathml data-formula={doubleAngle} {...args}></amp-mathml>
+    </>
+  );
+}
+
 function TestDemoInline({formulas, ...args}) {
   const {quadratic} = formulas;
   return (

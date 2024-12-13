@@ -28,26 +28,26 @@
   "homepage": "https://github.com/ampproject/amp-toolbox#readme",
   "files": ["dist", "package.json", "../LICENSE", "README.md"],
   "dependencies": {
-    "punycode": "2.1.1",
-    "url-parse": "1.5.3"
+    "punycode": "2.3.1",
+    "url-parse": "1.5.10"
   },
   "devDependencies": {
     "@ampproject/rollup-plugin-closure-compiler": "0.27.0",
-    "eslint": "8.1.0",
+    "eslint": "9.13.0",
     "eslint-config-google": "0.14.0",
-    "jasmine": "3.10.0",
-    "karma": "6.3.6",
-    "karma-chrome-launcher": "3.1.0",
-    "karma-jasmine": "4.0.1",
-    "npm-run-all": "4.1.5",
-    "rollup": "2.58.3",
+    "jasmine": "5.4.0",
+    "karma": "6.4.4",
+    "karma-chrome-launcher": "3.2.0",
+    "karma-jasmine": "5.1.0",
+    "npm-run-all2": "6.2.4",
+    "rollup": "4.24.0",
     "rollup-plugin-commonjs": "10.1.0",
-    "rollup-plugin-filesize": "9.1.1",
+    "rollup-plugin-filesize": "10.0.0",
     "rollup-plugin-ignore": "1.0.10",
     "rollup-plugin-json": "4.0.0",
     "rollup-plugin-node-builtins": "2.1.2",
-    "rollup-plugin-node-resolve": "5.2.0",
-    "rollup-plugin-serve": "1.1.0",
-    "semver": "7.3.5"
+    "@rollup/plugin-node-resolve": "15.3.0",
+    "rollup-plugin-serve": "3.0.0",
+    "semver": "7.6.3"
   }
 }

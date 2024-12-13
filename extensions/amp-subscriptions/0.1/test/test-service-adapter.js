@@ -1,6 +1,7 @@
 import {PageConfig} from '#third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../service-adapter';
+
 import {SubscriptionService} from '../amp-subscriptions';
+import {ServiceAdapter} from '../service-adapter';
 
 describes.realWin(
   'service adapter',

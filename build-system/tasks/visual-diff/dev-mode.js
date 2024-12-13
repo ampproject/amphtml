@@ -1,14 +1,15 @@
 'use strict';
 
-const inquirer = require('inquirer');
 const path = require('path');
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+
+const {cyan, yellow} = require('kleur/colors');
+const inquirer = require('@inquirer/prompts');
+
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
   waitForPageLoad,
 } = require('./verifiers');
-const {cyan, yellow} = require('kleur/colors');
 const {HOST, PORT} = require('./consts');
 const {log} = require('./log');
 const {newPage} = require('./browser');
@@ -16,6 +17,9 @@ const {sleep} = require('./helpers');
 const {WebpageDef} = require('./types');
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
+
+/** @typedef {import('puppeteer-core')} puppeteer */
+/** @typedef {import('puppeteer-core').Browser} puppeteer.Browser */
 
 /**
  * Runs a development mode.
@@ -72,16 +76,7 @@ async function devMode(browser, webpages) {
     log('info', '- Press enter on', cyan('empty prompt'), 'to reload the page');
     log('info', '-', cyan('Ctrl + C'), 'to quit.');
     while (true) {
-      /** @type {string} */
-      let cssSelector = (
-        await inquirer.prompt({
-          type: 'input',
-          name: 'cssSelector',
-          message: '>',
-          prefix: '',
-        })
-      ).cssSelector.trim();
-
+      let cssSelector = (await inquirer.input({message: '>'})).trim();
       if (!cssSelector) {
         break;
       }
@@ -132,26 +127,20 @@ async function devMode(browser, webpages) {
  */
 async function inquireForWebpage_(webpages) {
   if (webpages.length > 1) {
-    return (
-      await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'webpage',
-          message:
-            'Select test name from ' +
-            cyan('visual-diff.jsonc') +
-            ' (use ' +
-            cyan('--grep') +
-            ' to filter this list):',
-          choices: webpages
-            .map((webpage) => ({
-              name: webpage.name,
-              value: webpage,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name)),
-        },
-      ])
-    ).webpage;
+    return await inquirer.select({
+      message:
+        'Select test name from ' +
+        cyan('visual-diff.jsonc') +
+        ' (use ' +
+        cyan('--grep') +
+        ' to filter this list):',
+      choices: webpages
+        .map((webpage) => ({
+          name: webpage.name,
+          value: webpage,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    });
   } else {
     const webpage = webpages[0];
     log(
@@ -175,22 +164,16 @@ async function inquireForWebpage_(webpages) {
  */
 async function inquireForTestFunction_(webpage) {
   if (Object.keys(webpage.tests_).length > 1) {
-    return (
-      await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'testName',
-          message:
-            'Select which interactive test from ' +
-            cyan(webpage.interactive_tests) +
-            ' to run:',
-          choices: Object.keys(webpage.tests_).map((testName) => ({
-            name: testName || '(base test)',
-            value: testName,
-          })),
-        },
-      ])
-    ).testName;
+    return await inquirer.select({
+      message:
+        'Select which interactive test from ' +
+        cyan(webpage.interactive_tests) +
+        ' to run:',
+      choices: Object.keys(webpage.tests_).map((testName) => ({
+        name: testName || '(base test)',
+        value: testName,
+      })),
+    });
   }
   return '';
 }

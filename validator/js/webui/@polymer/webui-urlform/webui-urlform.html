@@ -15,27 +15,13 @@
     .flexchild {
       @apply(--layout-flex);
     }
-    #urlToast {
-      left: auto;
-      min-height: auto;
-      min-width: auto;
-      right: 0;
-    }
     #htmlFormatDropdown {
       min-width: 120px;
       max-width: 120px;
     }
   </style>
   <template>
-    <paper-toast id="urlToast" text="Could not fetch the given URL."></paper-toast>
     <div class="container flex-horizontal">
-      <paper-material elevation="0" class="flexchild">
-        <paper-input
-           auto-validate required pattern="[^ \s]+(://.*|\.[a-z]+($|(/.*)))"
-           error-message="Please enter a valid URL" on-focus="checkURL"
-           on-input="checkURL" on-keypress="keyPress" label="URL" id="urlToFetch">
-        </paper-input>
-      </paper-material>
       <paper-material elevation="0">
         <paper-dropdown-menu label="HTML Format" id="htmlFormatDropdown">
           <paper-listbox class="dropdown-content" selected="AMP"
@@ -47,42 +33,14 @@
           </paper-listbox>
         </paper-dropdown-menu>
       </paper-material>
-      <paper-material elevation="0">
-        <paper-button disabled$="{{!validURL}}" raised
-            id="validateButton">Validate</paper-button>
-      </paper-material>
     </div>
   </template>
   <script>
     Polymer({
       is: 'webui-urlform',
-      properties: {
-        validURL: {
-          type: Boolean,
-          value: false
-        }
-      },
       htmlFormatChange: function() {
         this.fire('webui-urlform-html-format-changes',
                   {'htmlFormat': this.$.htmlFormatSelector.selected});
-      },
-      checkURL: function(e) {
-        this.validURL = !this.$.urlToFetch.invalid;
-      },
-      displayToast: function() {
-        this.$.urlToast.open();
-      },
-      keyPress: function(e) {
-        if (this.validURL && 13 === e.charCode) {
-          this.$.validateButton.click();
-          this.$.validateButton.getRipple().simulatedRipple();
-        }
-      },
-      setURLAndValidate: function(url) {
-        this.$.urlToFetch.value = url;
-        this.checkURL();
-        this.$.urlToFetch.validate();
-        this.$.validateButton.click();
       },
       getHtmlFormat: function() {
         return this.$.htmlFormatSelector.selected;

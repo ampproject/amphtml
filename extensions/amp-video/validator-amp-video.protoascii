@@ -1,8 +1,8 @@
 tags: {  # amp-video 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-video 1.0"
-  excludes: "amp-video 0.1"
+  satisfies_condition: "amp-video 1.0"
+  excludes_condition: "amp-video 0.1"
   extension_spec: {
     name: "amp-video"
     version_name: "v1.0"
@@ -16,8 +16,8 @@ tags: {  # amp-video 0.1
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  satisfies: "amp-video 0.1"
-  excludes: "amp-video 1.0"
+  satisfies_condition: "amp-video 0.1"
+  excludes_condition: "amp-video 1.0"
   extension_spec: {
     name: "amp-video"
     version: "0.1"
@@ -185,9 +185,8 @@ tags: {  # <amp-video> in amp-story
   }
   attrs: {
     name: "volume"
-    # Disallow 0 to prevent shipping unnecessary audio track when the video is muted.
-    # Volume must be in the range [0.1, 1].
-    value_regex: "^((0?\\.[1-9]+)?|1(\\.0*)?)$"
+    # Volume must be in the range [0, 1].
+    value_regex: "^(0(\\.0*)?|(0?\\.[0-9]+)?|1(\\.0*)?)$"
   }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"

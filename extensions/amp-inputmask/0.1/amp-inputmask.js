@@ -1,5 +1,4 @@
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {iterateCursor} from '#core/dom';
 
 import {listen} from '#utils/event-helper';
 
@@ -33,7 +32,7 @@ export class AmpInputmaskService {
     const maskElements = this.ampdoc
       .getRootNode()
       .querySelectorAll('input[mask]');
-    iterateCursor(maskElements, (element) => {
+    maskElements.forEach((element) => {
       if (TextMask.isMasked(element)) {
         return;
       }

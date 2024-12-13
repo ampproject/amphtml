@@ -1,5 +1,4 @@
 import {getDate} from '#core/types/date';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useEffect, useMemo, useRef, useState} from '#preact';
@@ -28,7 +27,7 @@ const MILLISECONDS_IN_SECOND = 1000;
 /** @const {number} */
 const DELAY = 1000;
 
-/** @const {Object<string, number>} */
+/** @const {{[key: string]: number}} */
 const TimeUnit = {
   DAYS: 1,
   HOURS: 2,
@@ -59,12 +58,12 @@ const DEFAULT_RENDER = (data) =>
  * @return {PreactDef.Renderable}
  */
 export function BentoDateCountdown({
-  datetime,
-  whenEnded = DEFAULT_WHEN_ENDED,
-  locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
   countUp = DEFAULT_COUNT_UP,
+  datetime,
+  locale = DEFAULT_LOCALE,
   render = DEFAULT_RENDER,
+  whenEnded = DEFAULT_WHEN_ENDED,
   ...rest
 }) {
   useResourcesNotify();
@@ -148,14 +147,14 @@ function getLocaleWord(locale) {
     locale = DEFAULT_LOCALE;
   }
   const localeWordList = getLocaleStrings(locale);
-  return dict({
+  return {
     'years': localeWordList[0],
     'months': localeWordList[1],
     'days': localeWordList[2],
     'hours': localeWordList[3],
     'minutes': localeWordList[4],
     'seconds': localeWordList[5],
-  });
+  };
 }
 
 /**
@@ -183,18 +182,18 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
     TimeUnit[biggestUnit] == TimeUnit.HOURS
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_HOUR))
       : TimeUnit[biggestUnit] < TimeUnit.HOURS
-      ? supportBackDate(
-          Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
-        )
-      : 0;
+        ? supportBackDate(
+            Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
+          )
+        : 0;
   const m =
     TimeUnit[biggestUnit] == TimeUnit.MINUTES
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_MINUTE))
       : TimeUnit[biggestUnit] < TimeUnit.MINUTES
-      ? supportBackDate(
-          Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
-        )
-      : 0;
+        ? supportBackDate(
+            Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
+          )
+        : 0;
   const s =
     TimeUnit[biggestUnit] == TimeUnit.SECONDS
       ? supportBackDate(Math.floor(ms / MILLISECONDS_IN_SECOND))
@@ -202,7 +201,7 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
           Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND)
         );
 
-  return dict({
+  return {
     'd': d,
     'dd': padStart(d),
     'h': h,
@@ -211,7 +210,7 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
     'mm': padStart(m),
     's': s,
     'ss': padStart(s),
-  });
+  };
 }
 
 /**

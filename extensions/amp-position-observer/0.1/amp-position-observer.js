@@ -10,7 +10,6 @@ import {
   layoutRectLtwh,
   layoutRectsRelativePos,
 } from '#core/dom/layout/rect';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
@@ -131,7 +130,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerEnter_() {
     const name = 'enter';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, ActionTrust_Enum.LOW);
   }
 
@@ -141,7 +140,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerExit_() {
     const name = 'exit';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, ActionTrust_Enum.LOW);
   }
 
@@ -155,20 +154,16 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerScroll_() {
     const scrolltop = this.viewport_.getScrollTop();
-    const positionObserverData = dict({
+    const positionObserverData = {
       'start-scroll-offset': scrolltop,
       'end-scroll-offset': scrolltop + this.remainingScrollToExit_,
       'initial-inview-percent': this.scrollProgress_,
-    });
+    };
     const name = 'scroll';
-    const event = createCustomEvent(
-      this.win,
-      `${TAG}.${name}`,
-      dict({
-        'percent': this.scrollProgress_,
-        'positionObserverData': positionObserverData,
-      })
-    );
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {
+      'percent': this.scrollProgress_,
+      'positionObserverData': positionObserverData,
+    });
     this.action_.trigger(this.element, name, event, ActionTrust_Enum.LOW);
     // TODO(nainar): We want to remove the position observer if the scroll
     // event is only used by the AnimationWorklet codepath of amp-animation.

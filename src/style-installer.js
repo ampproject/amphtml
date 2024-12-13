@@ -89,8 +89,8 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   const key = isRuntimeCss
     ? 'amp-runtime'
     : isExtCss
-    ? `amp-extension=${ext}`
-    : null;
+      ? `amp-extension=${ext}`
+      : null;
 
   // Check if it has already been created or discovered.
   if (key) {
@@ -137,7 +137,7 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
 
 /**
  * @param {!Element|!ShadowRoot} cssRoot
- * @param {!Object<string, !Element>} styleMap
+ * @param {!{[key: string]: !Element}} styleMap
  * @param {string} key
  * @return {?Element}
  */

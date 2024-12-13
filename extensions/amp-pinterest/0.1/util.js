@@ -39,7 +39,7 @@ function filter(str) {
 /**
  * Create a DOM element with attributes
  * @param {Document} doc
- * @param {Object} data - the string to filter
+ * @param {object} data - the string to filter
  * @return {Element}
  */
 function make(doc, data) {

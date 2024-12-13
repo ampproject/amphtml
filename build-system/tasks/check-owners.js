@@ -6,7 +6,6 @@
 
 'use strict';
 
-const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
 const {cyan, green, red} = require('kleur/colors');

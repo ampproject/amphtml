@@ -54,7 +54,7 @@ import {CSS} from '../../../build/amp-pinterest-0.1.css';
  *    - buttonFollow: User follow button
  */
 class AmpPinterest extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const type = element.getAttribute('data-do');
     if (type != 'embedPin') {

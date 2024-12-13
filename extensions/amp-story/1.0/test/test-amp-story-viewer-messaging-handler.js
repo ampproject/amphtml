@@ -92,7 +92,7 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
     });
 
     it('should return the STORY_PROGRESS', async () => {
-      storeService.dispatch(Action.SET_PAGE_IDS, [1, 2, 3, 4, 5]);
+      storeService.dispatch(Action.SET_PAGE_IDS, ['1', '2', '3', '4', '5']);
       storeService.dispatch(Action.CHANGE_PAGE, {id: 3, index: 2});
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
@@ -101,6 +101,17 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
       expect(response).to.deep.equal({
         state: 'STORY_PROGRESS',
         value: 0.5,
+      });
+    });
+
+    it('should return the CAPTIONS_STATE', async () => {
+      const response = await fakeViewerService.receiveMessage(
+        'getDocumentState',
+        {state: 'CAPTIONS_STATE'}
+      );
+      expect(response).to.deep.equal({
+        state: 'CAPTIONS_STATE',
+        value: storeService.get(StateProperty.CAPTIONS_STATE),
       });
     });
   });
@@ -202,10 +213,19 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
       }
     });
 
-    it('should set a state', async () => {
+    it('should set MUTED_STATE', async () => {
       storeService.dispatch(Action.TOGGLE_MUTED, false);
       await fakeViewerService.receiveMessage('setDocumentState', {
         state: 'MUTED_STATE',
+        value: true,
+      });
+      expect(storeService.get(StateProperty.MUTED_STATE)).to.be.true;
+    });
+
+    it('should set CAPTIONS_STATE', async () => {
+      storeService.dispatch(Action.TOGGLE_CAPTIONS, false);
+      await fakeViewerService.receiveMessage('setDocumentState', {
+        state: 'CAPTIONS_STATE',
         value: true,
       });
       expect(storeService.get(StateProperty.MUTED_STATE)).to.be.true;

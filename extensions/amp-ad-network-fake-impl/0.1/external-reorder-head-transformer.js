@@ -1,6 +1,6 @@
 import {endsWith} from '#core/types/string';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 
 export class ExternalReorderHeadTransformer {
   /** constructor */

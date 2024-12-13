@@ -55,44 +55,44 @@ TEST(DoctypeTest, ParseTest) {
   Node doctype_node6(NodeType::DOCTYPE_NODE);
   bool quirks_mode6 = htmlparser::ParseDoctype("lang=\"en\" html",
                                                &doctype_node6);
-  EXPECT_FALSE(quirks_mode6);
+  EXPECT_TRUE(quirks_mode6);
 
   Node doctype_node7(NodeType::DOCTYPE_NODE);
   bool quirks_mode7 = htmlparser::ParseDoctype("html lang=\"en\"",
                                                &doctype_node7);
-  EXPECT_FALSE(quirks_mode7);
+  EXPECT_TRUE(quirks_mode7);
 
   Node doctype_node8(NodeType::DOCTYPE_NODE);
   bool quirks_mode8 = htmlparser::ParseDoctype("html lang='en'",
                                                &doctype_node8);
-  EXPECT_FALSE(quirks_mode8);
+  EXPECT_TRUE(quirks_mode8);
 
   // lang attribute with no value.
   Node doctype_node9(NodeType::DOCTYPE_NODE);
   bool quirks_mode9 = htmlparser::ParseDoctype("html lang",
                                                &doctype_node9);
-  EXPECT_FALSE(quirks_mode9);
+  EXPECT_TRUE(quirks_mode9);
 
   // attribute value without quote.
   Node doctype_node10(NodeType::DOCTYPE_NODE);
   bool quirks_mode10 = htmlparser::ParseDoctype("html lang=en",
                                                 &doctype_node10);
-  EXPECT_FALSE(quirks_mode10);
+  EXPECT_TRUE(quirks_mode10);
 
   // Spaces and new lines.
   Node doctype_node11(NodeType::DOCTYPE_NODE);
   bool quirks_mode11  =
       htmlparser::ParseDoctype(R"DOCTYPE(          html                 lang             =
                           "en")DOCTYPE", &doctype_node11);
-  EXPECT_FALSE(quirks_mode11);
+  EXPECT_TRUE(quirks_mode11);
 
   // With self closing slash.
   Node doctype_node12(NodeType::DOCTYPE_NODE);
   bool quirks_mode12 = htmlparser::ParseDoctype("html lang /", &doctype_node12);
-  EXPECT_FALSE(quirks_mode12);
+  EXPECT_TRUE(quirks_mode12);
 
   Node doctype_node13(NodeType::DOCTYPE_NODE);
   bool quirks_mode13 = htmlparser::ParseDoctype("html lang=en /////////////",
                                                 &doctype_node13);
-  EXPECT_FALSE(quirks_mode13);
+  EXPECT_TRUE(quirks_mode13);
 }

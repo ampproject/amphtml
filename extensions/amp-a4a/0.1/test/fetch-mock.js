@@ -9,7 +9,7 @@
  * @typedef {(?string|{
  *     body: ?string,
  *     status: (number|undefined),
- *     headers: (!Object<string, string>|undefined),
+ *     headers: (!{[key: string]: string}|undefined),
  * })}
  */
 export let MockResponseData;
@@ -31,9 +31,9 @@ export class FetchMock {
     this.win_ = win;
     /** @private {function(!RequestInfo, !RequestInit=): !Promise<!Response>} */
     this.realFetch_ = win.fetch;
-    /** @private {!Object<string, {response: !MockResponse, called: boolean}>} */
+    /** @private {!{[key: string]: {response: !MockResponse, called: boolean}}} */
     this.routes_ = {};
-    /** @private {!Object<string, {response: !MockResponse, called: boolean}>} */
+    /** @private {!{[key: string]: {response: !MockResponse, called: boolean}}} */
     this.names_ = {};
 
     win.fetch = (input, init = undefined) => this.fetch_(input, init);

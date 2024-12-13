@@ -1,5 +1,5 @@
 /**
- * @protected {?Object<string, !ChildDef>}
+ * @protected {?{[key: string]: !ChildDef}}
  */
 foo().bar;
 

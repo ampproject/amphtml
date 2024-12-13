@@ -42,10 +42,10 @@ amp4ads_feature_tests/script_release_versions.html:23:2 The attribute 'nomodule'
 >>   ^~~~~~~~~
 amp4ads_feature_tests/script_release_versions.html:26:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the module/nomodule version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 >>   ^~~~~~~~~
-amp4ads_feature_tests/script_release_versions.html:26:2 The attribute 'type' in tag 'amp-audio extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-audio)
+amp4ads_feature_tests/script_release_versions.html:26:2 The attribute 'type' in tag 'amp-audio v0.1 extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-audio)
 |    <script async custom-element=amp-audio nomodule src=https://cdn.ampproject.org/lts/v0/amp-audio-0.1.js></script>
 >>   ^~~~~~~~~
-amp4ads_feature_tests/script_release_versions.html:27:2 The attribute 'nomodule' may not appear in tag 'amp-audio extension script'. (see https://amp.dev/documentation/components/amp-audio)
+amp4ads_feature_tests/script_release_versions.html:27:2 The attribute 'nomodule' may not appear in tag 'amp-audio v0.1 extension script'. (see https://amp.dev/documentation/components/amp-audio)
 >>   ^~~~~~~~~
 amp4ads_feature_tests/script_release_versions.html:27:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the module/nomodule version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |  </head>

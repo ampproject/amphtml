@@ -5,7 +5,7 @@
  * Only `UNLOAD` is not defined by the "Lazy loading" spec at this time. It's
  * added here because it supersedes all other loading instructions in AMP.
  *
- * @enum {string}
+ * @enum {"auto" | "lazy" | "eager" | "unload"}
  */
 export const Loading_Enum = {
   /**
@@ -13,22 +13,22 @@ export const Loading_Enum = {
    * whether the document is visible or not).
    * If parent is not available, proceed with loading at your own discretion.
    */
-  AUTO: 'auto',
+  AUTO: /** @type {"auto"} */ ('auto'),
 
   /**
    * Do not load independently. Wait for the caller to start loading manually.
    */
-  LAZY: 'lazy',
+  LAZY: /** @type {"lazy"} */ ('lazy'),
 
   /**
    * Proceed with loading at the earliest convenience.
    */
-  EAGER: 'eager',
+  EAGER: /** @type {"eager"} */ ('eager'),
 
   /**
    * Force unload if possible.
    */
-  UNLOAD: 'unload',
+  UNLOAD: /** @type {"unload"} */ ('unload'),
 };
 
 /**
@@ -43,7 +43,7 @@ const ORDER = [
 ];
 
 /**
- * @type {Object<string, number>}
+ * @type {{[key: string]: number}}
  * @const
  */
 const MAP = {
@@ -57,13 +57,13 @@ const MAP = {
  * Returns the loading instruction with a higher priority. The priority
  * order is auto -> lazy -> eager -> unload.
  *
- * @param {Loading_Enum|string} v1
- * @param {Loading_Enum|string} v2
+ * @param {Loading_Enum|string|undefined} v1
+ * @param {Loading_Enum|string|undefined} v2
  * @return {Loading_Enum}
  */
 export function reducer(v1, v2) {
-  const ordinal1 = MAP[v1] || 0;
-  const ordinal2 = MAP[v2] || 0;
+  const ordinal1 = MAP[v1 ?? Loading_Enum.AUTO] || 0;
+  const ordinal2 = MAP[v2 ?? Loading_Enum.AUTO] || 0;
   const ordinal = Math.max(ordinal1, ordinal2);
   return ORDER[ordinal];
 }

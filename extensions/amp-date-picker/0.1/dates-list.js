@@ -1,7 +1,6 @@
-import * as rrule from '../../../node_modules/rrule/dist/es5/rrule';
-import {requireExternal} from '../../../src/module';
+import {rrulestr} from 'rrule';
 
-const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // closure imports into .default, esbuild flattens a layer.
+import {requireExternal} from '../../../src/module';
 
 /** @enum {string} */
 const DateType = {

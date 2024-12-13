@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {BentoLightbox} from '../component';
 import {mount} from 'enzyme';
+
+import {BentoLightbox} from '#bento/components/bento-lightbox/1.0/component';
+
+import * as Preact from '#preact';
 
 describes.sandboxed('Lightbox preact component v1.0', {}, () => {
   it('renders', () => {

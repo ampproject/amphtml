@@ -19,15 +19,11 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="250" type="seedtag" data-adunit-id="0" data-publisher-id="0000-0000-01"
-    data-placement="inArticle">
 <amp-ad
   width="300"
   height="250"
   type="seedtag"
   data-adunit-id="0"
-  data-publisher-id="0000-0000-01"
-  data-placement="inArticle"
 >
 </amp-ad>
 ```
@@ -39,41 +35,9 @@ For configuration semantics, please contact [Seedtag](https://www.seedtag.com/co
 Supported parameters:
 
 -   `data-adunit-id` mandatory
--   `data-publisher-id` mandatory
--   `data-placement` mandatory
 
-## Testing
-
-You can force a creative for test using this parameters
-
--   `data-force-creative` optional
-
-Currently you can test those format :
-| Format | value |
-| ------ | ----- |
-| display 300x250 | https://creatives.seedtag.com/vast/ssp-responses/display-OM300x250.json |
-| display 300x50 | https://creatives.seedtag.com/vast/ssp-responses/display-OM300x50.json |
-| display 320x480 | https://creatives.seedtag.com/vast/ssp-responses/display-OM320x480.json |
-| display 970x90 | https://creatives.seedtag.com/vast/ssp-responses/display-OM970x90.json |
-| display 970x250 | https://creatives.seedtag.com/vast/ssp-responses/display-OM970x250.json |
-| video outstream | https://creatives.seedtag.com/vast/ssp-responses/video-cov.json |
-
-this way :
-
-```html
-  <amp-ad
-    width="320"
-    height="250"
-    type="seedtag"
-    data-adunit-id="0"
-    data-publisher-id="0000-0000-01"
-    data-placement="inArticle"
-    data-force-creative="https://creatives.seedtag.com/vast/ssp-responses/display-OM300x250.json">
-  </amp-ad>
-```
 
 ## User Consent Integration
-
 When [user consent](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required, Seedtag ad approaches user consent in the following ways:
 
 -   `CONSENT_POLICY_STATE.SUFFICIENT`: Serve a personalized ad to the user.

@@ -91,7 +91,7 @@ function getFullWidthSignalVisitor(setSignal) {
  *    fwSignal: number,
  *    slotWidth: number,
  *    parentWidth: number,
- *    parentStyle: ?Object<string, string>,
+ *    parentStyle: ?{[key: string]: string},
  * }}
  */
 export let FlexibleAdSlotDataTypeDef;

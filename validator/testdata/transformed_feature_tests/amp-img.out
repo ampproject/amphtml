@@ -72,11 +72,17 @@ transformed_feature_tests/amp-img.html:45:4 The mandatory attribute 'class' is m
 |      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
 |    </amp-img>
 |
+|    <!-- Valid: amp-img[layout=responsive] > i-amphtml-sizer[slot="i-amphtml-svc"] fetchpriority="high" -->
+|    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
+|      <i-amphtml-sizer slot="i-amphtml-svc" style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
+|      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" fetchpriority="high">
+|    </amp-img>
+|
 |    <!-- Invalid: amp-img[layout=intrinsic] > i-amphtml-sizer[slot!="i-amphtml-svc"] -->
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="intrinsic" width="900" height="600" i-amphtml-layout="intrinsic" i-amphtml-ssr>
 |      <i-amphtml-sizer slot="asd" class="i-amphtml-sizer">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:70:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
+transformed_feature_tests/amp-img.html:76:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
 |        <img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;600&quot; width=&quot;900&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>">
 |      </i-amphtml-sizer>
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
@@ -86,7 +92,7 @@ transformed_feature_tests/amp-img.html:70:4 The attribute 'slot' in tag 'i-ampht
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
 |      <i-amphtml-sizer slot="asd" style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:78:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
+transformed_feature_tests/amp-img.html:84:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value 'asd'.
 |      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
 |    </amp-img>
 |
@@ -94,7 +100,7 @@ transformed_feature_tests/amp-img.html:78:4 The attribute 'slot' in tag 'i-ampht
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="intrinsic" width="900" height="600" i-amphtml-layout="intrinsic" i-amphtml-ssr>
 |      <i-amphtml-sizer slot class="i-amphtml-sizer">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:84:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
+transformed_feature_tests/amp-img.html:90:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
 |        <img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;600&quot; width=&quot;900&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>">
 |      </i-amphtml-sizer>
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
@@ -104,7 +110,15 @@ transformed_feature_tests/amp-img.html:84:4 The attribute 'slot' in tag 'i-ampht
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
 |      <i-amphtml-sizer slot style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:92:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
+transformed_feature_tests/amp-img.html:98:4 The attribute 'slot' in tag 'i-amphtml-sizer' is set to the invalid value ''.
+|      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
+|    </amp-img>
+|
+|    <!-- Invalid: amp-img[layout=responsive] > i-amphtml-sizer[slot="i-amphtml-svc"] fetchpriority="bad" -->
+|    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" fetchpriority="bad" i-amphtml-ssr>
+>>   ^~~~~~~~~
+transformed_feature_tests/amp-img.html:103:2 The attribute 'fetchpriority' in tag 'amp-img' is set to the invalid value 'bad'. (see https://amp.dev/documentation/components/amp-img/)
+|      <i-amphtml-sizer slot="i-amphtml-svc" style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
 |      <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
 |    </amp-img>
 |  </body>

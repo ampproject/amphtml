@@ -1,5 +1,4 @@
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -182,23 +181,20 @@ export class PooolVendor {
   renderPoool_() {
     const pooolContainer = this.getContainer_();
     const urlPromise = this.accessSource_.buildUrl(
-      addParamsToUrl(
-        this.iframeUrl_,
-        dict({
-          'bi': this.pooolConfig_['bundleID'],
-          'iid': this.pooolConfig_['itemID'],
-          'ce': this.pooolConfig_['cookiesEnabled'],
-          'd':
-            typeof this.pooolConfig_['debug'] !== 'undefined' &&
-            this.pooolConfig_['debug'] !== null
-              ? this.pooolConfig_['debug']
-              : getMode().development || getMode().localDev,
-          'fw': this.pooolConfig_['forceWidget'],
-          'cs': this.pooolConfig_['customSegment'],
-          'lo': this.pooolConfig_['locale'],
-          'co': this.pooolConfig_['context'],
-        })
-      ),
+      addParamsToUrl(this.iframeUrl_, {
+        'bi': this.pooolConfig_['bundleID'],
+        'iid': this.pooolConfig_['itemID'],
+        'ce': this.pooolConfig_['cookiesEnabled'],
+        'd':
+          typeof this.pooolConfig_['debug'] !== 'undefined' &&
+          this.pooolConfig_['debug'] !== null
+            ? this.pooolConfig_['debug']
+            : getMode().development || getMode().localDev,
+        'fw': this.pooolConfig_['forceWidget'],
+        'cs': this.pooolConfig_['customSegment'],
+        'lo': this.pooolConfig_['locale'],
+        'co': this.pooolConfig_['context'],
+      }),
       false
     );
 

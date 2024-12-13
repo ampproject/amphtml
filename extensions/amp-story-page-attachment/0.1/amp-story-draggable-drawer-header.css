@@ -15,7 +15,7 @@
   z-index: 1 !important;
   --i-amphtml-draggable-drawer-background-color: #fff !important;
   --i-amphtml-draggable-drawer-text-color: #202125 !important;
-  --i-amphtml-draggable-drawer-handle-color: rgba(0, 0, 0, .2) !important;
+  --i-amphtml-draggable-drawer-header-twenty-percent-gray: rgba(0, 0, 0, .2) !important;
   --i-amphtml-draggable-drawer-header-font-family: 'Roboto', sans-serif !important;
   --i-amphtml-draggable-drawer-header-font-size: 18px !important;
   --i-amphtml-draggable-drawer-header-title-height: 44px !important;
@@ -34,14 +34,14 @@
   top: 8px !important;
   width: 40px !important;
   height: 3px !important;
-  background-color: var(--i-amphtml-draggable-drawer-handle-color) !important;
+  background-color: var(--i-amphtml-draggable-drawer-header-twenty-percent-gray) !important;
   border-radius: 3px !important;
 }
 
 [theme="dark"].i-amphtml-story-draggable-drawer-header {
   --i-amphtml-draggable-drawer-background-color: #202125 !important;
   --i-amphtml-draggable-drawer-text-color: #fff !important;
-  --i-amphtml-draggable-drawer-handle-color: rgba(255, 255, 255, .2) !important;
+  --i-amphtml-draggable-drawer-header-twenty-percent-gray: rgba(255, 255, 255, .2) !important;
 }
 
 :not([desktop]).i-amphtml-story-draggable-drawer-header {
@@ -93,6 +93,7 @@
   justify-content: center !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
   border-radius: inherit !important;
+  box-shadow: 0px 0px 1px var(--i-amphtml-draggable-drawer-header-twenty-percent-gray) !important;
 }
 
 :not([desktop]).i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {

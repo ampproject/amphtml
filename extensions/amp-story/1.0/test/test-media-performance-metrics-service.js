@@ -1,7 +1,10 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
-import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
+
 import {Services} from '#service';
+
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
+
+import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
 
 describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   let clock;

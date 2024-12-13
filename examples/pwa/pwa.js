@@ -1,6 +1,6 @@
 'use strict';
 
-function log(args) {
+function log() {
   var var_args = Array.prototype.slice.call(arguments, 0);
   var_args.unshift('[SHELL]');
   console /*OK*/.log
@@ -206,7 +206,7 @@ class AmpViewer {
 
     const isShadowDomSupported =
       Element.prototype.attachShadow || Element.prototype.createShadowRoot;
-    const shadowDomReadyPromise = new Promise((resolve, reject) => {
+    const shadowDomReadyPromise = new Promise((resolve) => {
       if (isShadowDomSupported) {
         resolve();
       } else if (
@@ -355,7 +355,7 @@ class AmpViewer {
     return new URL(relativeUrlString, this.baseUrl_).origin;
   }
 
-  onMessage_(type, data, rsvp) {}
+  onMessage_() {}
 }
 
 /**
@@ -506,4 +506,4 @@ function parseQueryString(queryString) {
   return params;
 }
 
-var shell = new Shell(window, /* useStreaming */ true);
+var shell = new Shell(window, /* useStreaming */ true); // eslint-disable-line @typescript-eslint/no-unused-vars

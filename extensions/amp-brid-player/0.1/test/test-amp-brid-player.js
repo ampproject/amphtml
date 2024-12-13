@@ -22,8 +22,10 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getBridPlayer(attributes, opt_responsive) {
-      const bc = doc.createElement('amp-brid-player');
+    function getBridPlayer(attributes, opt_responsive, config, alias = false) {
+      const bc = alias
+        ? doc.createElement('amp-target-video-player')
+        : doc.createElement('amp-brid-player');
 
       for (const key in attributes) {
         bc.setAttribute(key, attributes[key]);
@@ -32,6 +34,18 @@ describes.realWin(
       bc.setAttribute('height', '360');
       if (opt_responsive) {
         bc.setAttribute('layout', 'responsive');
+      }
+
+      // create config element if provided
+      if (config) {
+        const configElement = doc.createElement('script');
+        configElement.setAttribute('type', 'application/json');
+        if (typeof config == 'string') {
+          configElement.textContent = config;
+        } else {
+          configElement.textContent = JSON.stringify(config);
+        }
+        bc.appendChild(configElement);
       }
 
       // see yt test implementation
@@ -62,6 +76,26 @@ describes.realWin(
         'data-player': '4144',
         'data-video': '13663',
       }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://services.brid.tv/services/iframe/video/13663/264/4144/0/1/?amp=1'
+        );
+      });
+    });
+
+    it('renders alias', () => {
+      return getBridPlayer(
+        {
+          'data-partner': '264',
+          'data-player': '4144',
+          'data-video': '13663',
+        },
+        null,
+        null,
+        true
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -148,6 +182,27 @@ describes.realWin(
           'data-carousel': '459',
         }).should.eventually.be.rejectedWith(
           /The data-player attribute is required for/
+        );
+      });
+    });
+
+    it('config is passed', () => {
+      return getBridPlayer(
+        {
+          'data-partner': '264',
+          'data-player': '4144',
+          'data-video': '13663',
+        },
+        null,
+        {
+          'debug': 1,
+        }
+      ).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://services.brid.tv/services/iframe/video/13663/264/4144/0/1/?amp=1&cust_config={%22debug%22:1}'
         );
       });
     });

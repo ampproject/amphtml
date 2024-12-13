@@ -17,6 +17,8 @@ import {dev, user, userAssert} from '#utils/log';
 
 import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {
   Action,
@@ -40,18 +42,16 @@ const HAVE_CURRENT_DATA = 2;
 const CENTER_OFFSET = 90;
 
 /**
- * Minimum distance from active page to activate WebGL context.
- * @const {number}
- */
-const MIN_WEBGL_DISTANCE = 2;
-
-/**
  * Renders the template for the permission button.
  * @return {!Element}
  */
 const renderActivateButtonTemplate = () => (
   <button class="i-amphtml-story-360-activate-button" role="button">
-    <span class="i-amphtml-story-360-activate-text"></span>
+    <span
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
+      }
+    ></span>
     <span class="i-amphtml-story-360-activate-button-icon">
       360°
       <svg
@@ -97,7 +97,12 @@ const renderActivateButtonTemplate = () => (
 const renderDiscoveryTemplate = () => (
   <div class="i-amphtml-story-360-discovery" aria-live="polite">
     <div class="i-amphtml-story-360-discovery-animation"></div>
-    <span class="i-amphtml-story-360-discovery-text"></span>
+    <span
+      class="i-amphtml-story-360-discovery-text"
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
+      }
+    ></span>
   </div>
 );
 
@@ -223,12 +228,19 @@ class CameraAnimation {
 }
 
 export class AmpStory360 extends AMP.BaseElement {
+  /** @override  */
+  static previewAllowed(element) {
+    // We can assume that images are cached, but the same is not necessarily
+    // true for videos. We only allow preview mode for `AmpStory360` when it
+    // uses cached sources, because requests for origin sources cannot be made
+    // due to privacy concerns.
+    const usesVideo = element.querySelector('amp-video');
+    return !usesVideo;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
 
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
@@ -266,9 +278,6 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {boolean} */
     this.isOnActivePage_ = false;
 
-    /** @private {?number} */
-    this.distance_ = null;
-
     /** @private {number} */
     this.sceneHeading_ = 0;
 
@@ -286,9 +295,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {number} */
     this.headingOffset_ = 0;
-
-    /** @private WebGL extension for lost context. */
-    this.lostGlContext_ = null;
 
     /** @private {!Array<number>} */
     this.rot_ = null;
@@ -340,18 +346,6 @@ export class AmpStory360 extends AMP.BaseElement {
     this.element.appendChild(container);
     container.appendChild(this.canvas_);
     applyFillContent(container, /* replacedContent */ true);
-
-    // Mutation observer for distance attribute
-    const config = {attributes: true, attributeFilter: ['distance']};
-    const callback = (mutationsList) => {
-      this.distance_ = parseInt(
-        mutationsList[0].target.getAttribute('distance'),
-        10
-      );
-      this.restoreOrLoseGlContext_();
-    };
-    const observer = new MutationObserver(callback);
-    this.getPage_() && observer.observe(this.getPage_(), config);
 
     // Initialize all services before proceeding
     return Promise.all([
@@ -423,20 +417,6 @@ export class AmpStory360 extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  restoreOrLoseGlContext_() {
-    if (!this.renderer_) {
-      return;
-    }
-    if (this.distance_ < MIN_WEBGL_DISTANCE) {
-      if (this.renderer_.gl.isContextLost()) {
-        this.lostGlContext_.restoreContext();
-      }
-    } else if (!this.renderer_.gl.isContextLost()) {
-      this.lostGlContext_.loseContext();
-    }
-  }
-
   /**
    * @param {string} permissionState
    * @private
@@ -502,7 +482,7 @@ export class AmpStory360 extends AMP.BaseElement {
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
-        if (this.isReady_ && this.distance_ < MIN_WEBGL_DISTANCE) {
+        if (this.isReady_) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
           rafTimeout = this.win.requestAnimationFrame(() => {
             if (!this.isOnActivePage_) {
@@ -547,14 +527,9 @@ export class AmpStory360 extends AMP.BaseElement {
       const page = this.getPage_();
       const discoveryTemplate = page && renderDiscoveryTemplate();
       // Support translation of discovery dialogue text.
-      this.mutateElement(() => {
-        discoveryTemplate.querySelector(
-          '.i-amphtml-story-360-discovery-text'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
-        );
-      });
-      this.mutateElement(() => page.appendChild(discoveryTemplate));
+      localizeTemplate(discoveryTemplate, page).then(() =>
+        this.mutateElement(() => page.appendChild(discoveryTemplate))
+      );
     }
   }
 
@@ -587,11 +562,7 @@ export class AmpStory360 extends AMP.BaseElement {
     const ampStoryPage = this.getPage_();
     this.activateButton_ = ampStoryPage && renderActivateButtonTemplate();
 
-    this.activateButton_.querySelector(
-      '.i-amphtml-story-360-activate-text'
-    ).textContent = this.localizationService_.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
-    );
+    localizeTemplate(this.activateButton_, ampStoryPage);
 
     this.activateButton_.addEventListener('click', () =>
       this.requestGyroscopePermissions_()
@@ -712,7 +683,6 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.setupGlContextListeners_();
           this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
@@ -743,24 +713,10 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.setupGlContextListeners_();
           this.initRenderer_();
         },
         () => user().error(TAG, 'Failed to load the amp-video.')
       );
-  }
-
-  /** @private */
-  setupGlContextListeners_() {
-    this.lostGlContext_ = this.renderer_.gl.getExtension('WEBGL_lose_context');
-    this.renderer_.canvas.addEventListener('webglcontextlost', (e) => {
-      // Calling preventDefault is necessary for restoring context.
-      e.preventDefault();
-      this.isReady_ = false;
-    });
-    this.renderer_.canvas.addEventListener('webglcontextrestored', () =>
-      this.initRenderer_()
-    );
   }
 
   /** @private */

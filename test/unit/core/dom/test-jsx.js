@@ -148,6 +148,8 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
   });
 
   it('renders with SVG namespace with props.xmlns', () => {
+    // Using `createElement` directly since `xmlns` is added during
+    // transformation by babel-plugin-dom-jsx-svg-namespace
     const xmlns = 'http://www.w3.org/2000/svg';
     const withProp = createElement('svg', {xmlns});
     expect(withProp.namespaceURI).to.equal(xmlns);
@@ -156,6 +158,8 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
   });
 
   it('renders with SVG namespace with props.xmlns (compiled)', () => {
+    // This works because <svg> is transformed by
+    // babel-plugin-dom-jsx-svg-namespace
     const xmlns = 'http://www.w3.org/2000/svg';
     const withProp = <svg />;
     expect(withProp.namespaceURI).to.equal(xmlns);
@@ -171,12 +175,21 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     });
 
     it('does not support objects as attribute values', () => {
-      const element = (
-        <div style={{width: 400}} class={{foo: true, bar: false}} />
-      );
+      // Using `createElement` directly since objects in `style` JSXAttributes
+      // are otherwise transformed by babel-plugin-jsx-style-object
+      const element = createElement('div', {
+        style: {width: 400},
+        class: {foo: true, bar: false},
+      });
       expect(element.outerHTML).to.equal(
         '<div style="[object Object]" class="[object Object]"></div>'
       );
+    });
+
+    it('supports object as style attribute value (compiled)', () => {
+      // This works because it's transformed by babel-plugin-jsx-style-object
+      const element = <div style={{width: 400, background: null}} />;
+      expect(element.outerHTML).to.equal('<div style="width:400px;"></div>');
     });
 
     it('does not support dangerouslySetInnerHTML', () => {

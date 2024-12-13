@@ -120,9 +120,9 @@
     <option value="1">English</option>
   </select>
   <textarea name="comment"></textarea>
-  <!-- Invalid: input can not be type="image". -->
+  <!-- Valid: input can be type="image". -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-    <input type="image" name="image">
+    <input type="image" name="image" src="https://site.example/image.example">
   </form>
   <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">

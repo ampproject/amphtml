@@ -1,6 +1,5 @@
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -26,8 +25,10 @@ const TAG = 'amp-access-server-jwt';
 /** @const {number} */
 const AUTHORIZATION_TIMEOUT = 3000;
 
+/* eslint-disable local/no-forbidden-terms */
 /** @const {string} */
 const AMP_AUD = 'ampproject.org';
+/* eslint-enable local/no-forbidden-terms */
 
 /**
  * This class implements server-side authorization protocol with JWT. In this
@@ -304,13 +305,11 @@ export class AccessServerJwtAdapter {
     return this.fetchJwt_().then((resp) => {
       const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
-      const request = serializeQueryString(
-        dict({
-          'url': removeFragment(this.ampdoc.win.location.href),
-          'state': this.serverState_,
-          'jwt': encoded,
-        })
-      );
+      const request = serializeQueryString({
+        'url': removeFragment(this.ampdoc.win.location.href),
+        'state': this.serverState_,
+        'jwt': encoded,
+      });
       dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       dev().fine(TAG, '- access data: ', accessData);
       // Note that `application/x-www-form-urlencoded` is used to avoid
@@ -321,9 +320,9 @@ export class AccessServerJwtAdapter {
           fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: request,
-            headers: dict({
+            headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
-            }),
+            },
           })
         )
         .then((response) => {

@@ -431,7 +431,7 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>changeToLayoutContainer</code></td>
-    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
+    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINER"</code> to allow <a href="../../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
   </tr>
   <tr>
     <td><code>refresh</code></td>

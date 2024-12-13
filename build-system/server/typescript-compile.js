@@ -4,7 +4,6 @@ const path = require('path');
 const {accessSync} = require('fs-extra');
 const {cyan, green} = require('kleur/colors');
 const {endBuildStep} = require('../tasks/helpers');
-const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
@@ -41,18 +40,6 @@ async function buildNewServer() {
 }
 
 /**
- * Checks all types in the generated output after running server transforms.
- */
-function typecheckNewServer() {
-  const cmd = `npx -p typescript tsc --noEmit -p ${CONFIG_PATH}`;
-  const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-
-  if (result.status != 0) {
-    throw new Error(`Typechecking AMP Server failed.`);
-  }
-}
-
-/**
  * Requires a module output from `./new-server/transforms`.
  * If all of `new-server` was built, this simply imports an existing module.
  * Otherwise, it builds the required module only, then imports it
@@ -79,7 +66,6 @@ function requireNewServerModule(modulePath) {
 
 module.exports = {
   buildNewServer,
-  typecheckNewServer,
   requireNewServerModule,
   SERVER_TRANSFORM_PATH,
 };

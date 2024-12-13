@@ -13,7 +13,6 @@
 
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -130,7 +129,7 @@ class AmpSoundcloud extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(dict({'method': 'pause'})),
+        JSON.stringify({'method': 'pause'}),
         'https://w.soundcloud.com'
       );
     }

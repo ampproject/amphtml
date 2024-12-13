@@ -1,7 +1,5 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 /**
@@ -40,10 +38,15 @@ export class PingNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
-    return dict({
+    return {
       'type': '_ping_',
-    });
+    };
   }
 
   /** @override */

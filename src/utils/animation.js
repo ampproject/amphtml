@@ -168,7 +168,7 @@ class AnimationPlayer {
     /** @private {boolean} */
     this.running_ = true;
 
-    /** @private {!Object<string, *>} */
+    /** @private {!{[key: string]: *}} */
     this.state_ = {};
 
     const deferred = new Deferred();
@@ -275,7 +275,7 @@ class AnimationPlayer {
   }
 
   /**
-   * @param {!Object<string, *>} unusedState
+   * @param {!{[key: string]: *}} unusedState
    * @private
    */
   stepMutate_(unusedState) {

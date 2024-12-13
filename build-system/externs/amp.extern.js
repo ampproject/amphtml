@@ -241,6 +241,8 @@ window.AMP_DEV_MODE;
 
 window.AMP;
 window.AMP._ = {};
+window.AMP.addGlobalConsentListener;
+window.AMP.addGranularConsentListener;
 window.AMP.push;
 window.AMP.title;
 window.AMP.canonicalUrl;
@@ -261,7 +263,6 @@ window.AMP.viewport;
 window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
-
 /**
  * This symbol is exposed by bundles transformed by `scoped-require.js` to avoid
  * polluting the global namespace with `require`.
@@ -884,7 +885,7 @@ let BindExpressionResultDef;
 
 /**
  * Structured cloneable return value for 'bind.evaluateBindings' API.
- * @typedef {{results: !Object<string, BindExpressionResultDef>, errors: !Object<string, !BindEvaluatorErrorDef>}}
+ * @typedef {{results: !{[key: string]: BindExpressionResultDef}, errors: !{[key: string]: !BindEvaluatorErrorDef}}}
  */
 let BindEvaluateBindingsResultDef;
 
@@ -968,7 +969,7 @@ let WebCompAnimationDef;
 let WebKeyframeAnimationDef;
 
 /**
- * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
+ * @typedef {!{[key: string]: *}|!Array<!{[key: string]: *}>}
  */
 let WebKeyframesDef;
 
@@ -994,7 +995,7 @@ let WebAnimationTimingDef;
  * specified as properties with the name in the format of `--varName`.
  *
  * @mixin
- * @typedef {Object}
+ * @typedef {object}
  */
 let WebAnimationVarsDef;
 

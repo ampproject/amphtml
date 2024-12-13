@@ -31,7 +31,6 @@ import {removeElement} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 import {px, setStyle, toggle} from '#core/dom/style';
 import {isObject} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -47,7 +46,7 @@ const TAG = 'amp-onetap-google';
 /** @const {string} */
 export const SENTINEL = 'onetap_google';
 
-/** @const {Object} */
+/** @const {object} */
 export const ACTIONS = {
   READY: 'intermediate_iframe_ready',
   RESIZE: 'intermediate_iframe_resize',
@@ -122,11 +121,11 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         }
         this.postMessage_(
           event.source,
-          dict({
+          {
             'sentinel': SENTINEL,
             'command': 'parent_frame_ready',
             'nonce': nonce,
-          }),
+          },
           event.origin
         );
         break;

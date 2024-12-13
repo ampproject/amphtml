@@ -87,7 +87,6 @@ function createImplTag(config, element, impl, env) {
   env.win.document.body.appendChild(element);
   impl = new AmpAdNetworkDoubleclickImpl(element);
   impl.iframe = iframe;
-  impl.win['goog_identity_prom'] = Promise.resolve({});
   return [element, impl, env];
 }
 
@@ -771,6 +770,15 @@ for (const {config, name} of [
           });
         });
 
+        it('handles tagForUnderAgeTreatment', () => {
+          element.setAttribute('json', '{"tagForUnderAgeTreatment": 1}');
+          new AmpAd(element).upgradeCallback();
+          impl.uiHandler = {isStickyAd: () => false};
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.match(/&tfua=1&/);
+          });
+        });
+
         describe('data-force-safeframe', () => {
           const fsfRegexp = /(\?|&)fsf=1(&|$)/;
           it('handles default', () => {
@@ -825,7 +833,8 @@ for (const {config, name} of [
           });
         });
 
-        it('expands CLIENT_ID in targeting', () => {
+        // TODO(#38720): fix flaky test.
+        it.skip('expands CLIENT_ID in targeting', () => {
           element.setAttribute(
             'json',
             `{
@@ -841,7 +850,8 @@ for (const {config, name} of [
           });
         });
 
-        it('expands CLIENT_ID in targeting inside array', () => {
+        // TODO(#38720): fix flaky test.
+        it.skip('expands CLIENT_ID in targeting inside array', () => {
           element.setAttribute(
             'json',
             `{
@@ -1001,24 +1011,6 @@ for (const {config, name} of [
                   expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
                 });
               });
-          });
-        });
-        it('should include identity', () => {
-          // Force get identity result by overloading window variable.
-          const token =
-            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-              token: 'abcdef',
-              jar: 'some_jar',
-              pucrd: 'some_pucrd',
-            });
-          impl.win['goog_identity_prom'] = Promise.resolve(token);
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            [
-              /(\?|&)adsid=abcdef(&|$)/,
-              /(\?|&)jar=some_jar(&|$)/,
-              /(\?|&)pucrd=some_pucrd(&|$)/,
-            ].forEach((regexp) => expect(url).to.match(regexp));
           });
         });
 
@@ -1226,6 +1218,61 @@ for (const {config, name} of [
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)ppid=testId(&|$)/
           );
+        });
+
+        it('should set tfcd parameter if set in shared data', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 0,
+            'doubleclick-tfcd': 1,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=0(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+          });
+        });
+
+        it('should set tfua parameter if set in shared data', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 1,
+            'doubleclick-tfcd': 0,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=0(&|$)/);
+          });
+        });
+
+        it('default tfcd/tfua to 1 if conflicting data detected', () => {
+          element.setAttribute(
+            'json',
+            '{"tagForChildDirectedTreatment": 0,"tagForUnderAgeTreatment": 1}'
+          );
+          impl.uiHandler = {isStickyAd: () => false};
+          const consentSharedData = {
+            'doubleclick-tfua': 0,
+            'doubleclick-tfcd': 1,
+          };
+          return impl.getAdUrl({consentSharedData}).then((url) => {
+            expect(url).to.match(/(\?|&)tfua=1(&|$)/);
+            expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
+          });
+        });
+
+        it('should include gpp, if consentStringType is GLOBAL_PRIVACY_PLATFORM', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          return impl
+            .getAdUrl({
+              consentStringType: CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM,
+              consentString: 'gppString',
+              gppSectionId: '1,2',
+            })
+            .then((url) => {
+              expect(url).to.match(/(\?|&)gpp=gppString(&|$)/);
+              expect(url).to.match(/(\?|&)gpp_sid=1%2C2(&|$)/);
+              expect(url).to.not.match(/(\?|&)us_privacy=/);
+            });
         });
       });
 

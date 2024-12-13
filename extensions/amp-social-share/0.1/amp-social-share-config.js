@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 /**
  * Get social share configurations by supported type.
  * @param  {string} type
@@ -12,7 +10,7 @@ export function getSocialConfig(type) {
 /**
  * @type {!JsonObject}
  */
-const BUILTINS = dict({
+const BUILTINS = {
   'twitter': {
     'shareEndpoint': 'https://twitter.com/intent/tweet',
     'defaultParams': {
@@ -85,4 +83,4 @@ const BUILTINS = dict({
       'url': 'CANONICAL_URL',
     },
   },
-});
+};

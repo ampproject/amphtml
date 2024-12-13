@@ -63,7 +63,7 @@ export const GWD_PAGEDECK_ID = 'pagedeck';
  * Each action name currently corresponds to an identically-named method in the
  * GWD runtime service, which is invoked with the evaluated arguments
  * (@see getActionImplArgs and createAction_).
- * @const {!Object<string, !Array<string>>}
+ * @const {!{[key: string]: !Array<string>}}
  */
 const ACTION_IMPL_ARGS = {
   'play': ['args.id'],

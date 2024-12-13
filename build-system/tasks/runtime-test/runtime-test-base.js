@@ -4,7 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const karmaConfig = require('../../test-configs/karma.conf');
 const {
   commonIntegrationTestPaths,
-  commonUnitTestPaths,
+  getCommonUnitTestPaths,
   integrationTestPaths,
   karmaHtmlFixturesPath,
   karmaJsPaths,
@@ -102,17 +102,17 @@ class RuntimeTestConfig {
   }
 
   /**
-   * Picks a browser config based on the the test type and command line flags.
+   * Picks a browser config based on the test type and command line flags.
    * Defaults to Chrome.
    */
   updateBrowsers() {
     const browser = argv.edge
       ? 'EdgeCustom'
       : argv.firefox
-      ? 'FirefoxCustom'
-      : argv.safari
-      ? 'SafariCustom'
-      : 'ChromeCustom';
+        ? 'FirefoxCustom'
+        : argv.safari
+          ? 'SafariCustom'
+          : 'ChromeCustom';
     Object.assign(this, {browsers: [browser], customLaunchers});
   }
 
@@ -133,18 +133,20 @@ class RuntimeTestConfig {
       this.junitReporter = {
         outputFile: `result-reports/${this.testType}.xml`,
         useBrowserName: false,
+        nameFormatter(_, result) {
+          return result.description.trim();
+        },
+        classNameFormatter(_, result) {
+          return result.suite
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .join(' » ');
+        },
       };
     }
 
     if (argv.coverage) {
       this.reporters.push('coverage-istanbul');
-    }
-
-    if (argv.report) {
-      this.reporters.push('json-result');
-      this.jsonResultReporter = {
-        outputFile: `result-reports/${this.testType}.json`,
-      };
     }
   }
 
@@ -155,6 +157,7 @@ class RuntimeTestConfig {
   updateFiles() {
     switch (this.testType) {
       case 'unit':
+        const commonUnitTestPaths = getCommonUnitTestPaths();
         if (argv.files || argv.filelist) {
           this.files = commonUnitTestPaths
             .concat(getFilesFromArgv())
@@ -232,7 +235,7 @@ class RuntimeTestConfig {
       }
     );
     this.esbuild = {
-      target: 'es5',
+      target: 'esnext', // We use babel for transpilation.
       define: {
         'process.env.NODE_DEBUG': 'false',
         'process.env.NODE_ENV': '"test"',

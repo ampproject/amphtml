@@ -16,7 +16,7 @@ export class Signals {
     /**
      * A mapping from a signal name to the signal response: either time or
      * an error.
-     * @private @const {Object<string, (TimestampDef|Error)>}
+     * @private @const {{[key: string]: (TimestampDef|Error)}}
      */
     this.map_ = map();
 

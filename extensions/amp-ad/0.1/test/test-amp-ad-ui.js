@@ -1,10 +1,12 @@
-import * as adHelper from '../../../../src/ad-helper';
-import * as domQuery from '#core/dom/query';
-import {AmpAdUIHandler} from '../amp-ad-ui';
-import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/helpers';
+import * as domQuery from '#core/dom/query';
 import {setStyles} from '#core/dom/style';
+
+import {macroTask} from '#testing/helpers';
+
+import * as adHelper from '../../../../src/ad-helper';
+import {BaseElement} from '../../../../src/base-element';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 
 describes.realWin(
   'amp-ad-ui handler',

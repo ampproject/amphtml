@@ -1,3 +1,4 @@
+import {sleep} from '#testing/helpers';
 import '../amp-timeago';
 
 describes.realWin(
@@ -10,8 +11,6 @@ describes.realWin(
   (env) => {
     let win;
     let element;
-
-    const timeout = (ms) => new Promise((res) => setTimeout(res, ms));
 
     beforeEach(() => {
       win = env.win;
@@ -48,7 +47,7 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       await element.buildInternal();
-      await timeout(1000);
+      await sleep(1000);
       (await element.getImpl(true)).viewportCallback_(true);
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('11 seconds ago');
@@ -75,7 +74,7 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       await element.buildInternal();
-      await timeout(1000);
+      await sleep(1000);
       expect(element.getAttribute('role')).to.equal('text');
     });
 
@@ -86,7 +85,7 @@ describes.realWin(
       element.textContent = date.toString();
       element.setAttribute('role', 'button');
       await element.buildInternal();
-      await timeout(1000);
+      await sleep(1000);
       expect(element.getAttribute('role')).to.equal('button');
     });
 
@@ -96,7 +95,7 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       await element.buildInternal();
-      await timeout(1000);
+      await sleep(1000);
       expect(element.hasAttribute('title')).to.be.false;
     });
   }

@@ -6,12 +6,16 @@
  * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
  */
 
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
-import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
 import {addAttributesToElement} from '#core/dom';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
+
+import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+
+import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
 
 /**
  * Creates a disclaimer icon and dialog.
@@ -77,9 +81,11 @@ export function buildInteractiveDisclaimer(interactive, attrs = {}) {
     urlEl.textContent = backendUrl;
     linkEl.remove();
   }
-  noteEl.textContent = interactive.localizationService.getLocalizedString(
-    LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
-  );
+  interactive.localizationService
+    .getLocalizedStringAsync(
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+    )
+    .then((str) => (noteEl.textContent = str));
 
   // Set the described-by for a11y.
   const disclaimerDescriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;
@@ -110,8 +116,8 @@ export function buildInteractiveDisclaimerIcon(interactive) {
 /**
  * Returns the corresponding backend specs (as an array of url and specs), or undefined.
  * @param {string} backendUrl
- * @param {!Object<string, !Object<string, string>>} backendsList
- * @return {?Array<string|Object<string, string>>} array that contains: base url of backend, {learnMoreUrl, entity}.
+ * @param {!{[key: string]: !{[key: string]: string}}} backendsList
+ * @return {?Array<string|{[key: string]: string}>} array that contains: base url of backend, {learnMoreUrl, entity}.
  */
 export function getBackendSpecs(backendUrl, backendsList) {
   return Object.entries(backendsList).find((element) => {

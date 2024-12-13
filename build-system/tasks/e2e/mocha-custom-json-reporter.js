@@ -14,7 +14,7 @@ const {
   EVENT_TEST_PENDING,
 } = mocha.Runner.constants;
 /**
- * @param {Object} output
+ * @param {object} output
  * @param {string} filename
  * @return {Promise<void>}
  */

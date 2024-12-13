@@ -187,9 +187,7 @@ describes.realWin(
       expect(impl.maxItems_).to.equal(10);
     });
     it('should error with invalid JSON script', () => {
-      expectAsyncConsoleError(
-        'Unexpected token o in JSON at position 32 [object HTMLElement]'
-      );
+      expectAsyncConsoleError(/Unexpected token/);
       return expect(
         getAutocomplete(
           {
@@ -197,7 +195,7 @@ describes.realWin(
           },
           '{ "items" : ["apple", "banana", orange] }'
         )
-      ).to.be.rejectedWith('Unexpected token o in JSON at position 32');
+      ).to.be.rejectedWith(/Unexpected token/);
     });
 
     it('should accept empty JSON script', async () => {

@@ -365,9 +365,9 @@ SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.CssDeclaration.value_regex_casei',
     'amp.validator.TagSpec.attrs',
     'amp.validator.TagSpec.mandatory_alternatives',
-    'amp.validator.TagSpec.requires',
-    'amp.validator.TagSpec.satisfies',
-    'amp.validator.TagSpec.excludes',
+    'amp.validator.TagSpec.requires_condition',
+    'amp.validator.TagSpec.satisfies_condition',
+    'amp.validator.TagSpec.excludes_condition',
 ]
 
 
@@ -781,7 +781,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     for t in rules.tags:
       if t.extension_spec and t.extension_spec.name:
         # This is satisfied by any of the `v0.js` variants:
-        t.requires.extend(['amphtml javascript runtime (v0.js)'])
+        t.requires_condition.extend(['amphtml javascript runtime (v0.js)'])
         if validator_pb2.HtmlFormat.Code.Value('AMP') in t.html_format:
           tagspec = copy.deepcopy(t)
           # Reset html_format to AMP
@@ -822,15 +822,16 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
           # Module extension specifics
           # Add requires/satisfies pair for module/nomodule
-          module_tagspec.requires.extend([nomodule_tagspec.spec_name])
-          module_tagspec.satisfies.extend([module_tagspec.spec_name])
+          module_tagspec.requires_condition.extend([nomodule_tagspec.spec_name])
+          module_tagspec.satisfies_condition.extend([module_tagspec.spec_name])
           # Add attr specs
           module_tagspec.attrs.extend([crossorigin_attrspec, type_attrspec])
 
           # Nomodule extension specifics
           # Add requires/satisfies pair for module/nomodule
-          nomodule_tagspec.requires.extend([module_tagspec.spec_name])
-          nomodule_tagspec.satisfies.extend([nomodule_tagspec.spec_name])
+          nomodule_tagspec.requires_condition.extend([module_tagspec.spec_name])
+          nomodule_tagspec.satisfies_condition.extend(
+              [nomodule_tagspec.spec_name])
           # Add attr specs
           nomodule_tagspec.attrs.extend([nomodule_attrspec])
 
@@ -883,7 +884,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
     # We emit the attr lists as arrays of arrays of numbers (which are
     # the attr ids), and treat the globalAttrs and the ampLayoutAttrs
-    # seperately for fast access.
+    # separately for fast access.
     direct_attr_lists = []
     global_attrs = []
     amp_layout_attrs = []

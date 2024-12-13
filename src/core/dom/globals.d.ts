@@ -1,6 +1,10 @@
 import './amp-globals.d';
 
 declare global {
+  interface Window {
+    CSSStyleSheet: typeof CSSStyleSheet;
+  }
+
   interface HTMLElement {
     nonce?: string;
 
@@ -13,10 +17,12 @@ declare global {
     createShadowRoot: () => ShadowRoot;
   }
 
-  interface Event {
-    // We assign an `Object` at times, though Typescript's dom lib supports
-    // string or null, so here we allow all three (plus unedfined).
-    data?: Object | string | null;
+  interface ShadowRoot {
+    adoptedStyleSheets: CSSStyleSheet[];
+  }
+
+  interface CSSStyleSheet {
+    replaceSync: (text: string) => void;
   }
 
   // Fullscreen proprties
@@ -36,13 +42,13 @@ declare global {
   }
 
   interface Document {
-    cancelFullScreen:any;
-    webkitCancelFullScreen:any;
-    webkitExitFullscreen:any;
-    webkitFullscreenElement:any;
-    webkitCurrentFullScreenElement:any;
-    msExitFullscreen:any;
-    mozFullScreenElement:any;
-    mozCancelFullScreen:any;
+    cancelFullScreen: any;
+    webkitCancelFullScreen: any;
+    webkitExitFullscreen: any;
+    webkitFullscreenElement: any;
+    webkitCurrentFullScreenElement: any;
+    msExitFullscreen: any;
+    mozFullScreenElement: any;
+    mozCancelFullScreen: any;
   }
 }

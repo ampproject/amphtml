@@ -6,7 +6,7 @@ import {parseDate} from '#core/types/date';
 
 /**
  * Map from attribute names to their parsers.
- * @type {Object<string, DateParserDef>}
+ * @type {{[key: string]: DateParserDef}}
  */
 const dateAttrParsers = {
   'datetime': (datetime) => {

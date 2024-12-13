@@ -1,3 +1,6 @@
+import {toggleExperiment} from '#experiments';
+
+import {AnalyticsGroup} from '../analytics-group';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEventType,
@@ -9,8 +12,6 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
-import {AnalyticsGroup} from '../analytics-group';
-import {toggleExperiment} from '#experiments';
 
 describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {
   let win;

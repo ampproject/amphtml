@@ -34,14 +34,14 @@ export class Templates {
 
     /**
      * A map from template type to template's class promise.
-     * @private @const {!Object<string, !Promise<typeof ../base-template.BaseTemplate>>}
+     * @private @const {!{[key: string]: !Promise<typeof ../base-template.BaseTemplate>}}
      */
     this.templateClassMap_ = {};
 
     /**
      * A map from template type to template's class promise. This is a transient
      * storage. As soon as the template class loaded, the entry is removed.
-     * @private @const {!Object<string, function(typeof ../base-template.BaseTemplate)>}
+     * @private @const {!{[key: string]: function(typeof ../base-template.BaseTemplate)}}
      */
     this.templateClassResolvers_ = {};
   }
@@ -88,6 +88,23 @@ export class Templates {
   renderTemplateAsString(templateElement, data) {
     return this.getImplementation_(templateElement).then((impl) => {
       return impl.renderAsString(data);
+    });
+  }
+
+  /**
+   * Resolves to a reusable template renderer.
+   *
+   * @param {!Element} templateElement
+   * @return {Promise<{
+   *   renderAsString: function(*=): string
+   * }>}
+   */
+  getTemplateRenderer(templateElement) {
+    return this.getImplementation_(templateElement).then((impl) => {
+      const renderer = {
+        renderAsString: (data) => impl.renderAsString(data),
+      };
+      return renderer;
     });
   }
 

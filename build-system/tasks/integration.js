@@ -64,7 +64,6 @@ integration.flags = {
   'headless': 'Run tests in a headless Chrome window',
   'nobuild': 'Skip build step',
   'nohelp': 'Silence help messages that are printed prior to test run',
-  'report': 'Write test result report to a local file',
   'safari': 'Run tests on Safari',
   'testnames': 'List the name of each test being run',
   'verbose': 'With logging enabled',

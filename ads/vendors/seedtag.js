@@ -24,7 +24,7 @@ export function seedtag(global, data) {
   /*eslint "local/camelcase": 0*/
   global._seedtag_amp = {
     allowed_data: ['adunitId', 'placement', 'publisherId', 'forceCreative'],
-    mandatory_data: ['adunitId', 'placement', 'publisherId'],
+    mandatory_data: ['adunitId'],
     data,
   };
 
@@ -34,5 +34,5 @@ export function seedtag(global, data) {
     global._seedtag_amp.allowed_data
   );
 
-  loadScript(global, 'https://config.seedtag.com/omid/bridge/bridge.js');
+  loadScript(global, `https://t.seedtag.com/a/${data.adunitId}.js`);
 }

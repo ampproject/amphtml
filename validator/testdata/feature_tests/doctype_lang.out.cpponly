@@ -1,10 +1,12 @@
-PASS
+FAIL
 |  <!--
 |    Test Description:
 |    This tests what the validator outputs if the doctype uses a lang attribute.
 |    https://github.com/ampproject/amphtml/issues/25926
 |  -->
 |  <!doctype html lang=en>
+>>           ^~~~~~~~~
+feature_tests/doctype_lang.html:6:10 Invalid or missing doctype declaration. Should be '!doctype html'. (see https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/)
 |  <html ⚡>
 |  <head>
 |    <meta charset="utf-8">

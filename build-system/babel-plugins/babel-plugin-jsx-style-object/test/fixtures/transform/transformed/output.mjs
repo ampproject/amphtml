@@ -1,5 +1,5 @@
-import { jsxStylePropertyString as _jsxStylePropertyString2 } from "#core/dom/jsx-style-property-string";
-import { jsxStylePropertyString as _jsxStylePropertyString } from "#core/dom/jsx-style-property-string";
+import { jsxStylePropertyString as _jsxStylePropertyString2 } from "#core/dom/jsx/style-property-string";
+import { jsxStylePropertyString as _jsxStylePropertyString } from "#core/dom/jsx/style-property-string";
 import * as jsx from 'ANYWHERE_LEADING_TO/core/dom/jsx';
 
 const randomObjectExpressionsAreUnmodified = () => ({

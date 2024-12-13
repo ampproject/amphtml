@@ -160,5 +160,11 @@
   },
   "99": {
     "string": "Formulario enviado correctamente"
+  },
+  "101": {
+    "string": "Comprar ahora"
+  },
+  "110": {
+    "string": "Suscríbete con Google"
   }
 }

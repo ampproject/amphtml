@@ -5,12 +5,12 @@ const imports = [
   {
     import: 'preact',
     message:
-      "Please import preact from 'src/preact'. This gives us type safety.",
+      "Please import preact from '#preact'. This allows us to support React too.",
   },
   {
     import: 'preact/hooks',
     message:
-      "Please import preact/hooks from 'src/preact'. This gives us type safety.",
+      "Please import preact/hooks from '#preact'. This allows us to support React too.",
   },
 ];
 
@@ -20,6 +20,11 @@ module.exports = function (context) {
       const comments = context.getCommentsBefore(node.source);
       const ok = comments.some((comment) => comment.value === 'OK');
       if (ok) {
+        return;
+      }
+
+      // "import type" is always fine.
+      if (node.importKind === 'type') {
         return;
       }
 

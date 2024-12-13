@@ -2,15 +2,19 @@ import '../../../amp-bind/0.1/amp-bind';
 import '../../../amp-mustache/0.2/amp-mustache';
 import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
-import * as BatchedJsonModule from '../../../../src/batched-json';
-import * as Style from '#core/dom/style';
-import * as log from '#utils/log';
-import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Services} from '#service';
-import {htmlFor} from '#core/dom/static-template';
-import {waitFor} from '#testing/helpers/service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {htmlFor} from '#core/dom/static-template';
+import * as Style from '#core/dom/style';
+
+import {Services} from '#service';
+import {ActionInvocation} from '#service/action-impl';
+
+import * as log from '#utils/log';
+
+import {waitFor} from '#testing/helpers/service';
+
+import * as BatchedJsonModule from '../../../../src/batched-json';
 
 describes.realWin(
   'amp-render-v1.0',

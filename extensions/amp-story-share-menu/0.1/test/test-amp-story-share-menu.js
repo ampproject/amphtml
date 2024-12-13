@@ -43,8 +43,8 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     const localizationService = new LocalizationService(win.document.body);
     env.sandbox
-      .stub(Services, 'localizationServiceForOrNull')
-      .returns(Promise.resolve(localizationService));
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
 
     hostEl = win.document.createElement('div');
     ampStory = win.document.createElement('amp-story');
@@ -100,5 +100,26 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     win.dispatchEvent(keyupEvent);
 
     expect(clickCallbackSpy).to.have.been.calledOnce;
+  });
+
+  it('should send message to viewer to execute copy url if embedded', async () => {
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+    await shareMenu.buildCallback();
+
+    const onMessageSpy = env.sandbox.spy(
+      shareMenu.viewerMessagingHandler_,
+      'onMessage'
+    );
+    const sendSpy = env.sandbox.spy(shareMenu.viewerMessagingHandler_, 'send');
+
+    const shareLinkEl = win.document.querySelector(
+      '.i-amphtml-story-share-icon-link'
+    );
+    shareLinkEl.click();
+    expect(onMessageSpy).to.have.been.calledOnce;
+    expect(sendSpy).to.have.been.calledOnce;
   });
 });

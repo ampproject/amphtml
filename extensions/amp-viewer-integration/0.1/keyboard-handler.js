@@ -1,5 +1,4 @@
 import {Keys_Enum} from '#core/constants/key-codes';
-import {dict} from '#core/types/object';
 
 import {listen} from '#utils/event-helper';
 
@@ -129,7 +128,7 @@ function isHandledByEventTarget(e) {
  * @return {!JsonObject}
  */
 function getKeyboardEventInit(e) {
-  const copiedEvent = dict();
+  const copiedEvent = {};
   eventProperties.forEach((eventProperty) => {
     if (e[eventProperty] !== undefined) {
       copiedEvent[eventProperty] = e[eventProperty];

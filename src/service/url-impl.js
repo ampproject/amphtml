@@ -1,7 +1,7 @@
 import {LruCache} from '#core/data-structures/lru-cache';
 import * as mode from '#core/mode';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   assertAbsoluteHttpOrHttpsUrl,

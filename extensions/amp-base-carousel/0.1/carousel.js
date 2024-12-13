@@ -1,4 +1,21 @@
+import {iterateCursor} from '#core/dom';
+import {
+  getStyle,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from '#core/dom/style';
+import {clamp, mod} from '#core/math';
+import {debounce} from '#core/types/function';
+
+import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {ActionSource} from './action-source';
+import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
+import {AutoAdvance} from './auto-advance';
+import {CarouselAccessibility} from './carousel-accessibility';
+import {CarouselEvents} from './carousel-events';
 import {
   Alignment,
   Axis,
@@ -10,22 +27,6 @@ import {
   updateLengthStyle,
   updateScrollPosition,
 } from './dimensions';
-import {AutoAdvance} from './auto-advance';
-import {CarouselAccessibility} from './carousel-accessibility';
-import {CarouselEvents} from './carousel-events';
-import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {clamp, mod} from '#core/math';
-import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
-import {debounce} from '#core/types/function';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {
-  getStyle,
-  setImportantStyles,
-  setStyle,
-  setStyles,
-} from '#core/dom/style';
-import {iterateCursor} from '#core/dom';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -237,7 +238,7 @@ export class Carousel {
     this.requestedIndex_ = null;
 
     /**
-     * The reference index where the the scrollable area last stopped
+     * The reference index where the scrollable area last stopped
      * scrolling. This slide is not translated and other slides are translated
      * to move before or after as needed. This is also used when looping to
      * prevent a single swipe from wrapping past the starting point.
@@ -364,7 +365,7 @@ export class Carousel {
    * slide at a time. If you are on slide 'c', advancing will move back to 'a'
    * instead of moving to 'd', which would cause no scrolling since 'd' is
    * already visible and cannot start align itself.
-   * 2. The delta would go past the start or the end and the the current index
+   * 2. The delta would go past the start or the end and the current index
    * is not at the start or end, then the advancement is capped to the start
    * or end respectively.
    * 3. The delta would go past the start or the end and the current index is
@@ -709,12 +710,12 @@ export class Carousel {
       createCustomEvent(
         this.win_,
         CarouselEvents.INDEX_CHANGE,
-        dict({
+        {
           'index': restingIndex,
           'total': this.slides_.length,
           'actionSource': actionSource,
           'slides': this.slides_,
-        }),
+        },
         {
           bubbles: true,
         }
@@ -735,12 +736,12 @@ export class Carousel {
       createCustomEvent(
         this.win_,
         CarouselEvents.OFFSET_CHANGE,
-        dict({
+        {
           'index': index,
           'total': this.slides_.length,
           'offset': this.forwards_ ? -offset : offset,
           'slides': this.slides_,
-        }),
+        },
         {
           bubbles: true,
         }
@@ -806,7 +807,7 @@ export class Carousel {
   }
 
   /**
-   * Handles a scroll event, updating the the current index as well as moving
+   * Handles a scroll event, updating the current index as well as moving
    * slides around as needed.
    * @private
    */

@@ -1,6 +1,6 @@
 import {doesOriginDomainMatchIframeSrc, initRecaptcha} from '#3p/recaptcha';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {parseUrlDeprecated} from '../../../src/url';
 
 describes.sandboxed('3p recaptcha.js', {}, () => {

@@ -32,8 +32,8 @@ export class NetworkLogger {
 
     return entries.filter((entry) => {
       const json = JSON.parse(entry.message);
-      entry.message = json.message;
-      return entry.message.method == networkMethod;
+      entry.message = json?.message;
+      return json.message?.method == networkMethod;
     });
   }
 

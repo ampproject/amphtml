@@ -8,10 +8,7 @@
     },
     {
       pattern: 'check-types.js',
-      owners: [
-        {name: 'ampproject/wg-performance'},
-        {name: 'rcebulko', required: true},
-      ],
+      owners: [{name: 'ampproject/wg-performance'}, {name: 'rcebulko'}],
     },
   ],
 }

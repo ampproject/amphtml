@@ -3,9 +3,11 @@
  * its embed AMP content (such as an ad created in AMP).
  */
 
-import {InaboxMessagingHost} from './inabox-messaging-host';
-import {dev, initLogConstructor, setReportError, user} from '#utils/log';
 import {getData} from '#utils/event-helper';
+import {dev, initLogConstructor, setReportError, user} from '#utils/log';
+
+import {InaboxMessagingHost} from './inabox-messaging-host';
+
 import {reportError} from '../../src/error-reporting';
 
 /** @const {string} */

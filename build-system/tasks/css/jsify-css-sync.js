@@ -11,7 +11,7 @@ let syncTransformer;
  * @param {string} cssStr the css text to transform
  * @param {!Object=} opt_cssnano cssnano options
  * @param {!Object=} opt_filename the filename of the file being transformed. Used for sourcemaps generation.
- * @return {Object} The transformation result
+ * @return {object} The transformation result
  */
 function transformCssSync(cssStr, opt_cssnano, opt_filename) {
   if (!syncTransformer) {

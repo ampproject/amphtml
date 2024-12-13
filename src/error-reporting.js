@@ -8,7 +8,6 @@ import {
 import * as mode from '#core/mode';
 import {findIndex} from '#core/types/array';
 import {exponentialBackoff} from '#core/types/function/exponential-backoff';
-import {dict} from '#core/types/object';
 
 import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
 
@@ -18,7 +17,7 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {isLoadErrorMessage} from '#utils/event-helper';
 import {dev, setReportError} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {getMode} from './mode';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';
@@ -45,20 +44,35 @@ const ABORTED = 'AbortError';
  * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
+const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.9999;
 
 /**
  * The threshold for errors throttled because nothing can be done about
  * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
+const USER_ERROR_THROTTLE_THRESHOLD = 0.99;
 
 /**
- * Chance to post to the new error reporting endpoint.
+ * The threshold for reporting errors to the beta error reporting endpoint
+ * instead of the production endpoint.
  * @const {number}
  */
-const BETA_ERROR_REPORT_URL_FREQ = 0.1;
+const REPORT_ERROR_TO_BETA_ENDPOINT_THRESHOLD = 0.1;
+
+/**
+ * The threshold for errors on pages with non-AMP JS. These errors can almost
+ * never be acted upon, but spikes such as due to buggy browser extensions may
+ * be helpful to notify authors.
+ * @const {number}
+ */
+const NON_AMP_JS_ERROR_THRESHOLD = 0.99;
+
+/**
+ * Throttles reports for the Stable version.
+ * @const {number}
+ */
+const THROTTLE_STABLE_THRESHOLD = 0.9;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -320,10 +334,7 @@ function onError(message, filename, line, col, error) {
   } catch (ignore) {
     // Ignore errors during error report generation.
   }
-  if (hasNonAmpJs && Math.random() > 0.01) {
-    // Only report 1% of errors on pages with non-AMP JS.
-    // These errors can almost never be acted upon, but spikes such as
-    // due to buggy browser extensions may be helpful to notify authors.
+  if (hasNonAmpJs && Math.random() < NON_AMP_JS_ERROR_THRESHOLD) {
     return;
   }
   const data = getErrorReportData(
@@ -358,7 +369,7 @@ function onError(message, filename, line, col, error) {
  * @return {string} error reporting endpoint URL.
  */
 function chooseReportingUrl_() {
-  return Math.random() < BETA_ERROR_REPORT_URL_FREQ
+  return Math.random() < REPORT_ERROR_TO_BETA_ENDPOINT_THRESHOLD
     ? urls.betaErrorReporting
     : urls.errorReporting;
 }
@@ -374,8 +385,7 @@ export function reportErrorToServerOrViewer(win, data) {
   // to the viewer is exactly the same as the data passed to the server
   // below.
 
-  // Throttle reports from Stable by 90%.
-  if (data['pt'] && Math.random() < 0.9) {
+  if (data['pt'] && Math.random() < THROTTLE_STABLE_THRESHOLD) {
     return Promise.resolve();
   }
 
@@ -434,7 +444,7 @@ export function maybeReportErrorToViewer(win, data) {
  * @visibleForTesting
  */
 export function errorReportingDataForViewer(errorReportData) {
-  return dict({
+  return {
     'm': errorReportData['m'], // message
     'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
@@ -442,7 +452,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'pt': errorReportData['pt'], // is pre-throttled
-  });
+  };
 }
 
 /**
@@ -516,7 +526,7 @@ export function getErrorReportData(
   ) {
     expected = true;
 
-    if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
+    if (throttleBase < NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
       return;
     }
   }
@@ -524,7 +534,7 @@ export function getErrorReportData(
   const isUserError = isUserErrorMessage(message);
 
   // Only report a subset of user errors.
-  if (isUserError && throttleBase > USER_ERROR_THROTTLE_THRESHOLD) {
+  if (isUserError && throttleBase < USER_ERROR_THROTTLE_THRESHOLD) {
     return;
   }
 
@@ -551,13 +561,16 @@ export function getErrorReportData(
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {
-    data['3p'] = '1';
     runtime = '3p';
+    data['3p'] = '1';
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
 
   data['rt'] = runtime;
+
+  // The value of urls.cdn.
+  data['cdn'] = urls.cdn;
 
   // Add our a4a id if we are inabox
   if (runtime === 'inabox') {
@@ -674,10 +687,10 @@ export function reportErrorToAnalytics(error, win) {
   // Currently this can only be executed in a single-doc mode. Otherwise,
   // it's not clear which ampdoc the event would belong too.
   if (Services.ampdocServiceFor(win).isSingleDoc()) {
-    const vars = dict({
+    const vars = {
       'errorName': error.name,
       'errorMessage': error.message,
-    });
+    };
     triggerAnalyticsEvent(
       getRootElement_(win),
       'user-error',

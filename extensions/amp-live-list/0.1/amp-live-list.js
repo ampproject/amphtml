@@ -138,7 +138,7 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private {boolean} */
     this.isReverseOrder_ = false;
 
-    /** @private @const {!Object<string, time>} */
+    /** @private @const {!{[key: string]: time}} */
     this.knownItems_ = Object.create(null);
 
     /** @private @const {!Array<!Element>} */

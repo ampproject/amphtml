@@ -44,7 +44,6 @@ module.exports = {
   'overrides': [
     {
       'files': [
-        './preact/base-element.js',
         './polyfills/fetch.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
@@ -55,6 +54,7 @@ module.exports = {
       'files': [
         './polyfills/custom-elements.extern.js',
         './experiments/shame.extern.js',
+        './bento/components/**/*.js',
       ],
       'rules': {'local/no-global': 0},
     },

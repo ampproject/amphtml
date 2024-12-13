@@ -15,7 +15,7 @@ tags: {  # amp-consent (json)
   requires_extension: "amp-consent"
   mandatory_parent: "AMP-CONSENT"
   unique: true
-  satisfies: "amp-consent extension .json script"
+  satisfies_condition: "amp-consent extension .json script"
   attrs: {
     name: "type"
     mandatory: true
@@ -35,8 +35,8 @@ tags: {  # <amp-consent>
   tag_name: "AMP-CONSENT"
   requires_extension: "amp-consent"
   unique: true
-  requires: "amp-consent extension .json script"
-  excludes: "amp-consent [type]"
+  requires_condition: "amp-consent extension .json script"
+  excludes_condition: "amp-consent [type]"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY
@@ -49,9 +49,9 @@ tags: {  # <amp-consent> (type)
   spec_name: "amp-consent [type]"
   requires_extension: "amp-consent"
   unique: true
-  requires: "meta name=amp-consent-blocking"
-  requires: "amp-consent extension .json script"
-  satisfies: "amp-consent [type]"
+  requires_condition: "meta name=amp-consent-blocking"
+  requires_condition: "amp-consent extension .json script"
+  satisfies_condition: "amp-consent [type]"
   attrs: {
     name: "type"
     mandatory: true

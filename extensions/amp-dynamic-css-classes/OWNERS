@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'dvoytenko'}, {name: 'jridgewell'}],
+      owners: [{name: 'dvoytenko'}],
     },
   ],
 }

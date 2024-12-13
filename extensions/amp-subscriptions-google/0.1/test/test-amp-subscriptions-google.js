@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import {WindowInterface} from '#core/window/interface';
 
 import {toggleExperiment} from '#experiments';
@@ -245,6 +247,38 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
           serviceAdapter
         )
     ).to.throw(/enableLAA and enableMetering are mutually exclusive/);
+  });
+
+  it('should check the fragment for GAA params first', () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    ampdoc.win.location.hash = 'gaa_at=la&gaa_sig=fromhash&gaa_n=123456';
+
+    const parsedParams = platform.getUrlParams_();
+
+    expect(parsedParams).to.eql({
+      'gaa_at': 'la',
+      'gaa_sig': 'fromhash',
+      'gaa_n': '123456',
+    });
+  });
+
+  it('should ignore the fragment if does not have have gaa_n', () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    ampdoc.win.location.hash = 'somthing=not_from_ga';
+
+    const parsedParams = platform.getUrlParams_();
+
+    expect(parsedParams).to.not.eql({
+      'something': 'not_from_gaa',
+    });
   });
 
   it('should ignore enableLAA and fallback if url params are missing', async () => {

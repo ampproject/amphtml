@@ -28,15 +28,12 @@ describes.sandboxed('amp-viewer-integration', {}, () => {
     document.body.removeChild(viewerEl);
   });
 
-  // TODO: investigate why this fails on Safari on MacOS
-  it.configure()
-    .skipSafari()
-    .run('should confirm the handshake', async () => {
-      await viewer.waitForHandshakeRequest();
-      viewer.confirmHandshake();
-      await viewer.waitForDocumentLoaded();
-      expect(viewer.hasDocumentLoaded_).to.be.true;
-    });
+  it('should confirm the handshake', async () => {
+    await viewer.waitForHandshakeRequest();
+    viewer.confirmHandshake();
+    await viewer.waitForDocumentLoaded();
+    expect(viewer.hasDocumentLoaded_).to.be.true;
+  });
 });
 
 describes.realWin(

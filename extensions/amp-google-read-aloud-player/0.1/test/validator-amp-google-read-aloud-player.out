@@ -1,0 +1,208 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for amp-google-read-aloud-player tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-google-read-aloud-player example</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>
+|      body {
+|        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|        animation: -amp-start 8s steps(1, end) 0s 1 normal both
+|      }
+|
+|      @-webkit-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @-moz-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @-ms-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @-o-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|    </style><noscript>
+|      <style amp-boilerplate>
+|        body {
+|          -webkit-animation: none;
+|          -moz-animation: none;
+|          -ms-animation: none;
+|          animation: none
+|        }
+|      </style>
+|    </noscript>
+|    <script async custom-element="amp-google-read-aloud-player" src="https://cdn.ampproject.org/v0/amp-google-read-aloud-player-0.1.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|
+|  <body>
+|    <!-- Valid: No data-url -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1" data-voice="en.some-voice">
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Valid: Has data-url -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1"
+|      data-url="https://blog.google/products/assistant/easier-access-web-pages-let-assistant-read-it-aloud/"
+|      data-voice="en.some-voice">
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Valid: Multiple values for data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1,UA-168915890-2" data-voice="en.some-voice">
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Valid: Opposite digits sections for data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-1-168915890"
+|      data-voice="en.some-voice">
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Valid: Few digits data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-1-1" data-voice="en.some-voice">
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Valid: English locale for data-locale -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1" data-voice="en.some-voice" data-locale="en">
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Valid: Spanish locale for data-locale -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1" data-voice="en.some-voice" data-locale="es">
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: No data-api-key -->
+|    <amp-google-read-aloud-player height="66" data-tracking-ids="UA-168915890-1" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:117:2 The mandatory attribute 'data-api-key' is missing in tag 'amp-google-read-aloud-player'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Missing UA prefix data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="123" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:121:2 The attribute 'data-tracking-ids' in tag 'amp-google-read-aloud-player' is set to the invalid value '123'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: No UA prefix for data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="168915890-1" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:125:2 The attribute 'data-tracking-ids' in tag 'amp-google-read-aloud-player' is set to the invalid value '168915890-1'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Missing second number data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="ua-1" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:129:2 The attribute 'data-tracking-ids' in tag 'amp-google-read-aloud-player' is set to the invalid value 'ua-1'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Surplus digit data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-1-1.2" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:133:2 The attribute 'data-tracking-ids' in tag 'amp-google-read-aloud-player' is set to the invalid value 'UA-1-1.2'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Emptry data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:137:2 The attribute 'data-tracking-ids' in tag 'amp-google-read-aloud-player' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Surplus letters data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-1-1 XYZ" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:141:2 The attribute 'data-tracking-ids' in tag 'amp-google-read-aloud-player' is set to the invalid value 'UA-1-1 XYZ'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: No data-tracking-ids -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:145:2 The mandatory attribute 'data-tracking-ids' is missing in tag 'amp-google-read-aloud-player'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: No data-voice -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:149:2 The mandatory attribute 'data-voice' is missing in tag 'amp-google-read-aloud-player'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Local address value for data-url -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-url="index.html" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:153:2 The relative URL 'index.html' for attribute 'data-url' in tag 'amp-google-read-aloud-player' is disallowed. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: http protocol for data-url -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-url="http://www.example.com/index.html" data-voice="en.some-voice">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:157:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-google-read-aloud-player'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Valid: Four letters locale for data-locale -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-tracking-ids="UA-168915890-1" data-voice="en.some-voice" data-locale="en-US">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:161:2 The attribute 'data-locale' in tag 'amp-google-read-aloud-player' is set to the invalid value 'en-US'. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Local address value for data-intro -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-voice="en.some-voice" data-intro="file.mp3">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:165:2 The relative URL 'file.mp3' for attribute 'data-intro' in tag 'amp-google-read-aloud-player' is disallowed. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Local address value for data-outro -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-voice="en.some-voice" data-outro="file.mp3">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:169:2 The relative URL 'file.mp3' for attribute 'data-outro' in tag 'amp-google-read-aloud-player' is disallowed. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|
+|    <!-- Invalid: Local address value for data-ad-tag-url -->
+|    <amp-google-read-aloud-player height="66" data-api-key="YOUR_API_KEY" data-voice="en.some-voice" data-ad-tag-url="index.html">
+>>   ^~~~~~~~~
+amp-google-read-aloud-player/0.1/test/validator-amp-google-read-aloud-player.html:173:2 The relative URL 'index.html' for attribute 'data-ad-tag-url' in tag 'amp-google-read-aloud-player' is disallowed. (see https://amp.dev/documentation/components/amp-google-read-aloud-player)
+|    </amp-google-read-aloud-player>
+|  </body>
+|
+|  </html>

@@ -1,5 +1,6 @@
-import {parseQueryString} from '#core/types/string/url';
 import {validateData, writeScript} from '#3p/3p';
+
+import {parseQueryString} from '#core/types/string/url';
 
 /**
  * @param {!Window} global

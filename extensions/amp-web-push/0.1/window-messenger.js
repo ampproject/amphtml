@@ -72,7 +72,7 @@ export class WindowMessenger {
      * A map of string topic names to callbacks listeners interested in replies
      * to the topic.
      *
-     * @type {(Object<string,Array>|null)}
+     * @type {({[key: string]: Array}|null)}
      */
     this.listeners_ = {};
     this.debug_ = options.debug;

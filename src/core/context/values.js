@@ -576,8 +576,8 @@ export class Values {
     const parentValue = isDefined(used.parentValue)
       ? used.parentValue
       : recursive && !used.parentContextNode
-      ? defaultValue
-      : undefined;
+        ? defaultValue
+        : undefined;
 
     // Calculate the "used" value.
     let newValue = undefined;

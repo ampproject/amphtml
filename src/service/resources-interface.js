@@ -24,7 +24,7 @@ export let MarginChangeDef;
  */
 export let ChangeSizeRequestDef;
 
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -160,4 +160,3 @@ export class ResourcesInterface {
    */
   updateLayoutPriority(element, newLayoutPriority) {}
 }
-/* eslint-enable no-unused-vars */

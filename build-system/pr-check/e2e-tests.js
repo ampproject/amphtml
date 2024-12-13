@@ -24,15 +24,13 @@ function pushBuildWorkflow() {
   try {
     generateCircleCiShardTestFileList(e2eTestPaths);
     timedExecOrThrow(
-      `amp e2e --nobuild --headless --minified --report --filelist ${FILELIST_PATH}`,
+      `amp e2e --nobuild --headless --minified --filelist ${FILELIST_PATH}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
     }
-  } finally {
-    timedExecOrDie('amp test-report-upload');
   }
 }
 

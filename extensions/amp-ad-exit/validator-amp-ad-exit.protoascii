@@ -12,7 +12,7 @@ tags: {  # <amp-ad-exit>
   html_format: AMP4ADS
   tag_name: "AMP-AD-EXIT"
   requires_extension: "amp-ad-exit"
-  requires: "amp-ad-exit configuration JSON"
+  requires_condition: "amp-ad-exit configuration JSON"
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-id-attr"
   child_tags: {
@@ -29,7 +29,7 @@ tags: {  # amp-ad-exit config JSON
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-ad-exit configuration JSON"
-  satisfies: "amp-ad-exit configuration JSON"
+  satisfies_condition: "amp-ad-exit configuration JSON"
   requires_extension: "amp-ad-exit"
   mandatory_parent: "AMP-AD-EXIT"
   attrs: {

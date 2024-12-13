@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
@@ -66,7 +66,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.videoId_ = '';
 
-    /** @private {Object<string, (number|Array)>} */
+    /** @private {{[key: string]: (number|Array)}} */
     this.meta_ = {};
   }
 

@@ -70,12 +70,12 @@ export class PreconnectService {
     /**
      * Origin we've preconnected to and when that connection
      * expires as a timestamp in MS.
-     * @private @const {!Object<string, number>}
+     * @private @const {!{[key: string]: number}}
      */
     this.origins_ = {};
     /**
      * Urls we've prefetched.
-     * @private @const {!Object<string, boolean>}
+     * @private @const {!{[key: string]: boolean}}
      */
     this.urls_ = {};
     /** @private @const {!./service/platform-impl.Platform}  */

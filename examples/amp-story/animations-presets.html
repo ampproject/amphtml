@@ -105,6 +105,10 @@
           <h1 animate-in="fly-in-right">fly-in-right</h1>
         </div>
       </amp-story-grid-layer>
+      <amp-story-page-outlink
+          layout="nodisplay">
+          <a href="http://localhost:8000/examples/amp-story/animations-presets.html#page=fly-in-left-page" title="Link Description"></a>
+        </amp-story-page-outlink>
     </amp-story-page>
 
     <amp-story-page id="fly-in-top-page">
@@ -121,6 +125,14 @@
           <h1 animate-in="fly-in-bottom">fly-in-bottom</h1>
         </div>
       </amp-story-grid-layer>
+      <amp-story-page-attachment
+          title="Link Description"
+          data-title="Data-Title"
+          href="http://localhost:8000/examples/amp-story/animations-presets.html#page=fly-in-top-page"
+          cta-text="Shop at Forbes"
+          data-cta-text="Data-CTA-Text"
+          layout="nodisplay">
+        </amp-story-page-attachment>
     </amp-story-page>
 
     <amp-story-page id="rotate-in-left-page">
@@ -190,8 +202,8 @@
     <!-- ## Pan-Left -->
     <amp-story-page id="pan-left">
       <amp-story-grid-layer template="fill">
-        <amp-img animate-in="pan-left" id="img-pan-left" translate-x="600px" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026"
-          width="720" height="320">
+        <amp-img animate-in="pan-left" id="img-pan-left" translate-x="200px" animate-in-duration="4s" layout="fixed"  src="https://images.unsplash.com/photo-1648098470019-c103e39aa32b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
+        width="192" height="288">
         </amp-img>
       </amp-story-grid-layer>
       <amp-story-grid-layer template="fill">
@@ -202,8 +214,8 @@
     <!-- ## Pan-Right -->
     <amp-story-page id="pan-right">
       <amp-story-grid-layer template="fill">
-        <amp-img animate-in="pan-right" animate-in-duration="4s" translate-x="200px" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720"
-          height="320">
+        <amp-img animate-in="pan-right" animate-in-duration="4s" translate-x="200px" layout="fixed" src="https://images.unsplash.com/photo-1644308251427-cd809dc65e4c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80"
+        width="1920" height="1280">
         </amp-img>
       </amp-story-grid-layer>
       <amp-story-grid-layer template="fill">
@@ -214,8 +226,8 @@
     <!-- ## Pan-Up -->
     <amp-story-page id="pan-up">
       <amp-story-grid-layer template="fill">
-        <amp-img animate-in="pan-up" animate-in-duration="4s" translate-y="100px" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720"
-          height="320">
+        <amp-img animate-in="pan-up" animate-in-duration="4s" translate-y="100px" layout="fixed" src="https://images.unsplash.com/photo-1648098470019-c103e39aa32b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
+        width="192" height="288">
         </amp-img>
       </amp-story-grid-layer>
       <amp-story-grid-layer template="fill">
@@ -226,12 +238,46 @@
     <!-- ## Pan-Down -->
     <amp-story-page id="pan-down">
       <amp-story-grid-layer template="fill">
-        <amp-img animate-in="pan-down" animate-in-duration="4s" translate-y="100px" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720"
-          height="320">
+        <amp-img animate-in="pan-down" animate-in-duration="4s" translate-y="100px" layout="fixed" src="https://images.unsplash.com/photo-1644308251427-cd809dc65e4c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80"
+        width="1920" height="1280">
         </amp-img>
       </amp-story-grid-layer>
       <amp-story-grid-layer template="fill">
         <h1>pan-down</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <!-- ## Pan-Right with pan-scaling-factor attr -->
+    <amp-story-page id="pan-right-with-static-scale">
+      <amp-story-grid-layer template="vertical">
+        <h1>pan-right</h1>
+        <p>with pan-scaling-factor attr</p>
+        <div class="img-container" style="width: 120%">
+          <amp-img
+            animate-in="pan-right" animate-in-timing-function="ease-out"
+            pan-scaling-factor=".9"
+            translate-x="35px" animate-in-duration="3.5s"
+            id="img-pan-right" layout="responsive" src="https://images.unsplash.com/photo-1644308251427-cd809dc65e4c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80"
+            width="1920" height="1280">
+          </amp-img>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <!-- ## Pan-Down with pan-scaling-factor attr -->
+    <amp-story-page id="pan-down-with-static-scale">
+      <amp-story-grid-layer template="vertical">
+        <h1>pan-down</h1>
+        <p>with pan-scaling-factor attr</p>
+        <div class="img-container" style="height: 120%">
+          <amp-img
+            animate-in="pan-down" animate-in-timing-function="ease-out"
+            pan-scaling-factor="0.9"
+            translate-y="35px" animate-in-duration="3.5s"
+            id="img-pan-down" layout="responsive" src="https://images.unsplash.com/photo-1644308251427-cd809dc65e4c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80"
+            width="1920" height="1280">
+          </amp-img>
+        </div>
       </amp-story-grid-layer>
     </amp-story-page>
   </amp-story>

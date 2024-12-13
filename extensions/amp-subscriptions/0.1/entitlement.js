@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 /** @enum {string} */
 export const GrantReason = {
   'SUBSCRIBER': 'SUBSCRIBER',
@@ -73,13 +71,13 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   json() {
-    const entitlementJson = dict({
+    const entitlementJson = {
       'source': this.source,
       'service': this.service,
       'granted': this.granted,
       'grantReason': this.grantReason,
       'data': this.data,
-    });
+    };
     return entitlementJson;
   }
 
@@ -99,7 +97,7 @@ export class Entitlement {
    */
   static parseFromJson(json, rawData = null) {
     if (!json) {
-      json = dict();
+      json = {};
     }
     const raw = rawData || JSON.stringify(json);
     const source = json['source'] || '';

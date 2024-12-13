@@ -137,7 +137,8 @@ async function compileCss(options = {}) {
   for (const {append, outCss, outJs, path} of cssEntryPoints) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }
-  await buildExtensions({compileOnlyCss: true});
+  const buildOptions = {compileOnlyCss: true};
+  await buildExtensions(buildOptions);
   endBuildStep('Recompiled all CSS files into', 'build/', startTime);
 }
 

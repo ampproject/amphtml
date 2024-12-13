@@ -70,10 +70,10 @@ export class AmpNextPage extends AMP.BaseElement {
       const prohibitedAttribute = element.hasAttribute('deep-parsing')
         ? 'deep-parsing'
         : element.hasAttribute('xssi-prefix')
-        ? 'xssi-prefix'
-        : element.hasAttribute('max-pages')
-        ? 'max-pages'
-        : null;
+          ? 'xssi-prefix'
+          : element.hasAttribute('max-pages')
+            ? 'max-pages'
+            : null;
       if (prohibitedAttribute) {
         this.unsupportedFeatureWarn_(prohibitedAttribute);
       }

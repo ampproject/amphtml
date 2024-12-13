@@ -1,4 +1,4 @@
-import {dict, omit} from '#core/types/object';
+import {omit} from '#core/types/object';
 
 import {requireExternal} from '../../../src/module';
 
@@ -78,14 +78,14 @@ export function withDatePickerCommon(WrappedComponent) {
     return list.contains(day);
   }
 
-  const defaultProps = dict({
+  const defaultProps = {
     'allowBlockedEndDate': false,
     'blocked': null,
     'highlighted': null,
     'initialVisibleMonth': '',
     'max': '',
     'min': '',
-  });
+  };
 
   /**
    * Detect if a date is a blocked date. This is aware of the
@@ -202,12 +202,10 @@ export function withDatePickerCommon(WrappedComponent) {
 
     return react.createElement(WrappedComponent, {
       ...props,
-      ...dict({
-        'daySize': Number(daySize),
-        'isDayBlocked': this.isDayBlocked,
-        'isDayHighlighted': this.isDayHighlighted,
-        'isOutsideRange': this.isOutsideRange,
-      }),
+      'daySize': Number(daySize),
+      'isDayBlocked': this.isDayBlocked,
+      'isDayHighlighted': this.isDayHighlighted,
+      'isOutsideRange': this.isOutsideRange,
     });
   };
 

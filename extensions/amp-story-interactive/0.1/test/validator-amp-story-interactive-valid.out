@@ -114,6 +114,19 @@ PASS
 |          </amp-story-interactive-results>
 |        </amp-story-grid-layer>
 |      </amp-story-page>
+|      <amp-story-page id="7">
+|        <amp-story-grid-layer template="fill">
+|        <!-- Valid: Example of amp-story-interactive-slider -->
+|          <amp-story-interactive-slider
+|            id="slider"
+|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|            theme="dark"
+|            class="cool-results"
+|            prompt-text="You should go to"
+|            option-1-text="👍">
+|          </amp-story-interactive-results>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
 |    </amp-story>
 |  </body>
 |  </html>

@@ -48,6 +48,21 @@ describes.realWin(
       expect(element.style.height).to.be.equal('30px');
     });
 
+    it('should load audio with container layout', async () => {
+      const element = await attachAndRun(
+        html`<amp-audio src="audio.mp3" loop muted layout="container"><audio controls></amp-audio>`
+      );
+      const audio = element.querySelector('audio');
+      expect(audio.tagName).to.equal('AUDIO');
+      expect(audio.getAttribute('src')).to.equal('audio.mp3');
+      expect(audio.hasAttribute('controls')).to.be.true;
+      expect(audio).to.have.attribute('controls');
+      expect(audio).to.have.attribute('muted');
+      expect(audio).to.have.attribute('loop');
+      expect(element.style.width).to.be.equal('');
+      expect(element.style.height).to.be.equal('');
+    });
+
     it('should not preload audio', async () => {
       const element = await attachAndRun(
         html`<amp-audio src="audio.mp3" preload="none"></amp-audio>`
@@ -65,15 +80,13 @@ describes.realWin(
     });
 
     it('should attach `<audio>` element and execute relevant actions for layout="nodisplay"', async () => {
-      const element = await attachAndRun(
-        html`
-          <amp-audio
-            src="audio.mp3"
-            preload="none"
-            layout="nodisplay"
-          ></amp-audio>
-        `
-      );
+      const element = await attachAndRun(html`
+        <amp-audio
+          src="audio.mp3"
+          preload="none"
+          layout="nodisplay"
+        ></amp-audio>
+      `);
       const impl = await element.getImpl();
 
       const audio = element.querySelector('audio');
@@ -133,9 +146,9 @@ describes.realWin(
     });
 
     it('should set its natural dimension only if not specified', async () => {
-      const element = await attachAndRun(
-        html` <amp-audio width="500" src="audio.mp3"></amp-audio> `
-      );
+      const element = await attachAndRun(html`
+        <amp-audio width="500" src="audio.mp3"></amp-audio>
+      `);
       expect(element.style.width).to.be.equal('500px');
       expect(element.style.height).to.be.equal('30px');
     });

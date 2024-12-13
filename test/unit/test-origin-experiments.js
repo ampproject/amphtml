@@ -69,33 +69,25 @@ describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
     expect(error).calledWithMatch(TAG, 'Failed to verify experiment token');
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-  it.configure().skipSafari(
-    'should return true for valid token with matching origin',
-    function* () {
-      setupMetaTagWith(token);
-      win.location.href = 'https://origin.com';
+  it('should return true for valid token with matching origin', function* () {
+    setupMetaTagWith(token);
+    win.location.href = 'https://origin.com';
 
-      const experiments = originExperiments.getExperiments();
-      expect(experiments).to.eventually.deep.equal(['foo']);
-      yield experiments;
-      expect(error).to.not.be.called;
-    }
-  );
+    const experiments = originExperiments.getExperiments();
+    expect(experiments).to.eventually.deep.equal(['foo']);
+    yield experiments;
+    expect(error).to.not.be.called;
+  });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-  it.configure().skipSafari(
-    'should return false if experiment is not in config',
-    function* () {
-      setupMetaTagWith(token);
-      win.location.href = 'https://origin.com';
+  it('should return false if experiment is not in config', function* () {
+    setupMetaTagWith(token);
+    win.location.href = 'https://origin.com';
 
-      const experiments = originExperiments.getExperiments();
-      expect(experiments).to.eventually.deep.equal([]);
-      yield experiments;
-      expect(error).to.not.be.called;
-    }
-  );
+    const experiments = originExperiments.getExperiments();
+    expect(experiments).to.eventually.deep.equal([]);
+    yield experiments;
+    expect(error).to.not.be.called;
+  });
 });
 
 describes.fakeWin('TokenMaster', {amp: true}, (env) => {
@@ -110,122 +102,118 @@ describes.fakeWin('TokenMaster', {amp: true}, (env) => {
   let tokenWithBadConfigLength;
   let tokenWithBadSignature;
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-  describe
-    .configure()
-    .skipSafari()
-    .run('TokenMaster', () => {
-      // Generate test tokens once since generating keys is slow.
-      beforeEach(() => {
-        const crypto = Services.cryptoFor(env.win);
-        const url = Services.urlForDoc(env.ampdoc.getHeadNode());
-        tokenMaster = new TokenMaster(crypto, url);
+  describe('TokenMaster', () => {
+    // Generate test tokens once since generating keys is slow.
+    beforeEach(() => {
+      const crypto = Services.cryptoFor(env.win);
+      const url = Services.urlForDoc(env.ampdoc.getHeadNode());
+      tokenMaster = new TokenMaster(crypto, url);
 
-        return tokenMaster.generateKeys().then((keyPair) => {
-          ({privateKey, publicKey} = keyPair);
+      return tokenMaster.generateKeys().then((keyPair) => {
+        ({privateKey, publicKey} = keyPair);
 
-          const config = {
-            origin: 'https://origin.com',
-            experiment: 'origin',
-            expiration: Date.now() + 1000 * 1000, // 1000s in the future.
-          };
-          const expired = {
-            origin: 'https://origin.com',
-            experiment: 'expired',
-            expiration: Date.now() - 1000, // 1s in the past.
-          };
+        const config = {
+          origin: 'https://origin.com',
+          experiment: 'origin',
+          expiration: Date.now() + 1000 * 1000, // 1000s in the future.
+        };
+        const expired = {
+          origin: 'https://origin.com',
+          experiment: 'expired',
+          expiration: Date.now() - 1000, // 1s in the past.
+        };
 
-          return Promise.all([
-            tokenMaster.generateToken(0, config, privateKey),
-            tokenMaster.generateToken(42, config, privateKey),
-            tokenMaster.generateToken(0, expired, privateKey),
-          ]).then((results) => {
-            token = results[0];
-            tokenWithBadVersion = results[1];
-            tokenWithExpiredExperiment = results[2];
+        return Promise.all([
+          tokenMaster.generateToken(0, config, privateKey),
+          tokenMaster.generateToken(42, config, privateKey),
+          tokenMaster.generateToken(0, expired, privateKey),
+        ]).then((results) => {
+          token = results[0];
+          tokenWithBadVersion = results[1];
+          tokenWithExpiredExperiment = results[2];
 
-            // Generate token with bad signature by truncating.
-            tokenWithBadSignature = token.slice(0, token.length - 5);
+          // Generate token with bad signature by truncating.
+          tokenWithBadSignature = token.slice(0, token.length - 5);
 
-            // Generate token with bad config length by hand.
-            const data = new Uint8Array(5);
-            new DataView(data.buffer).setUint32(1, 999, false); // 999 length.
-            tokenWithBadConfigLength = btoa(bytesToString(data));
-          });
+          // Generate token with bad config length by hand.
+          const data = new Uint8Array(5);
+          new DataView(data.buffer).setUint32(1, 999, false); // 999 length.
+          tokenWithBadConfigLength = btoa(bytesToString(data));
         });
       });
-
-      it('should throw for an unknown token version number', () => {
-        const verify = tokenMaster.verifyToken(
-          tokenWithBadVersion,
-          'https://origin.com',
-          publicKey
-        );
-        return expect(verify).to.eventually.be.rejectedWith(
-          'Unrecognized token version: 42'
-        );
-      });
-
-      it('should throw if config length exceeds byte length', () => {
-        const verify = tokenMaster.verifyToken(
-          tokenWithBadConfigLength,
-          'https://origin.com',
-          publicKey
-        );
-        return expect(verify).to.eventually.be.rejectedWith(
-          'Unexpected config length: 999'
-        );
-      });
-
-      it('should throw if signature cannot be verified', () => {
-        const verify = tokenMaster.verifyToken(
-          tokenWithBadSignature,
-          'https://origin.com',
-          publicKey
-        );
-        return expect(verify).to.eventually.be.rejectedWith(
-          'Failed to verify token signature.'
-        );
-      });
-
-      it('should throw if approved origin is not current origin', () => {
-        const verify = tokenMaster.verifyToken(
-          token,
-          'https://not-origin.com',
-          publicKey
-        );
-        return expect(verify).to.eventually.be.rejectedWith(
-          /does not match window/
-        );
-      });
-
-      it('should return false if trial has expired', () => {
-        const verify = tokenMaster.verifyToken(
-          tokenWithExpiredExperiment,
-          'https://origin.com',
-          publicKey
-        );
-        return expect(verify).to.eventually.be.rejectedWith(
-          'Experiment "expired" has expired.'
-        );
-      });
-
-      it('should return true for a well-formed, unexpired token', () => {
-        const verify = tokenMaster.verifyToken(
-          token,
-          'https://origin.com',
-          publicKey
-        );
-        return expect(verify).to.eventually.be.fulfilled;
-      });
-
-      it('should ignore trailing slash on location', () => {
-        const verify = tokenMaster.verifyToken(
-          token,
-          'https://origin.com/',
-          publicKey
-        );
-        return expect(verify).to.eventually.be.fulfilled;
-      });
     });
+
+    it('should throw for an unknown token version number', () => {
+      const verify = tokenMaster.verifyToken(
+        tokenWithBadVersion,
+        'https://origin.com',
+        publicKey
+      );
+      return expect(verify).to.eventually.be.rejectedWith(
+        'Unrecognized token version: 42'
+      );
+    });
+
+    it('should throw if config length exceeds byte length', () => {
+      const verify = tokenMaster.verifyToken(
+        tokenWithBadConfigLength,
+        'https://origin.com',
+        publicKey
+      );
+      return expect(verify).to.eventually.be.rejectedWith(
+        'Unexpected config length: 999'
+      );
+    });
+
+    it('should throw if signature cannot be verified', () => {
+      const verify = tokenMaster.verifyToken(
+        tokenWithBadSignature,
+        'https://origin.com',
+        publicKey
+      );
+      return expect(verify).to.eventually.be.rejectedWith(
+        'Failed to verify token signature.'
+      );
+    });
+
+    it('should throw if approved origin is not current origin', () => {
+      const verify = tokenMaster.verifyToken(
+        token,
+        'https://not-origin.com',
+        publicKey
+      );
+      return expect(verify).to.eventually.be.rejectedWith(
+        /does not match window/
+      );
+    });
+
+    it('should return false if trial has expired', () => {
+      const verify = tokenMaster.verifyToken(
+        tokenWithExpiredExperiment,
+        'https://origin.com',
+        publicKey
+      );
+      return expect(verify).to.eventually.be.rejectedWith(
+        'Experiment "expired" has expired.'
+      );
+    });
+
+    it('should return true for a well-formed, unexpired token', () => {
+      const verify = tokenMaster.verifyToken(
+        token,
+        'https://origin.com',
+        publicKey
+      );
+      return expect(verify).to.eventually.be.fulfilled;
+    });
+
+    it('should ignore trailing slash on location', () => {
+      const verify = tokenMaster.verifyToken(
+        token,
+        'https://origin.com/',
+        publicKey
+      );
+      return expect(verify).to.eventually.be.fulfilled;
+    });
+  });
 });

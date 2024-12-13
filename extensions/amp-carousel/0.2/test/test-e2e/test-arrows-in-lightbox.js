@@ -25,8 +25,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    // TODO(#35241): flaky test disabled in #35176
-    it.skip('should open with both arrows', async () => {
+    it('should open with both arrows', async () => {
       // Click on image 2
       const secondImage = await controller.findElement('#second');
       await controller.click(secondImage);
@@ -47,8 +46,7 @@ describes.endtoend(
       ).to.equal('false');
     });
 
-    // TODO(#35241): flaky test disabled in #35176
-    it.skip('should open with one arrow', async () => {
+    it('should open with one arrow', async () => {
       // Click on last image
       const lastImage = await controller.findElement('#fourth');
       await controller.click(lastImage);

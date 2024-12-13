@@ -240,7 +240,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     ]);
   });
 
-  it('should preconnect to the the first srcset url if src is not set', () => {
+  it('should preconnect to the first srcset url if src is not set', () => {
     const element = createImg({srcset: SRCSET_STRING});
     expect(AmpImg.getPreconnects(element)).to.deep.equal([
       '/examples/img/hero@1x.jpg',
@@ -250,6 +250,11 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
   it('should allow prerender by default', () => {
     const el = createImg({src: '/examples/img/sample.jpg'});
     expect(AmpImg.prerenderAllowed(el)).to.equal(true);
+  });
+
+  it('should allow preview by default', () => {
+    const el = createImg({src: '/examples/img/sample.jpg'});
+    expect(AmpImg.previewAllowed(el)).to.equal(true);
   });
 
   it('should load an img with srcset', async () => {

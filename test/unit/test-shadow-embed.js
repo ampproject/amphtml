@@ -1,4 +1,8 @@
 import {
+  installShadowStyle,
+  resetShadowStyleCacheForTesting,
+} from '#core/dom/shadow-embed';
+import {
   ShadowDomVersion_Enum,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
@@ -13,8 +17,6 @@ import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
-  installShadowStyle,
-  resetShadowStyleCacheForTesting,
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';

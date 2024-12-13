@@ -4,6 +4,7 @@
     "noImplicitAny": false,
     "strictNullChecks": false,
     "paths": {
+      "#builtins/*": ["../../../src/builtins/*"],
       "#compiler": ["../../../src/compiler"],
       "#compiler/*": ["../../../src/compiler/*"],
       "#core": ["../../../src/core"],

@@ -3,7 +3,7 @@ import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {userAssert} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from './url';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
@@ -186,6 +186,7 @@ function trySetCookie(
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
   // Note: we need to allow cdn.ampproject.org in order to optin to experiments
+  // eslint-disable-next-line local/no-forbidden-terms
   if (domain == 'ampproject.org') {
     // Actively delete them.
     value = 'delete';

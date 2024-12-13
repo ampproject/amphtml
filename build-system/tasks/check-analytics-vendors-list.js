@@ -71,7 +71,10 @@ async function checkAnalyticsVendorsList() {
     const name = nameMatch
       .split(/[,\s]+/)
       .shift()
-      .replace(/[`"']/g, '');
+      ?.replace(/[`"']/g, '');
+    if (!name) {
+      throw new Error(`Could not locate vendor name in: "${nameMatch}"`);
+    }
     if (!vendors.includes(name)) {
       tentative = tentative.replace(fullMatch, '');
     }

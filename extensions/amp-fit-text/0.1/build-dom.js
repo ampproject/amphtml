@@ -1,7 +1,7 @@
-import {realChildNodes} from '#core/dom/query';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {copyChildren, isServerRendered, removeChildren} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {applyFillContent} from '#core/dom/layout';
+import {realChildNodes} from '#core/dom/query';
 
 const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
 const CONTENT_CLASS = 'i-amphtml-fit-text-content';
@@ -64,8 +64,8 @@ export function queryDom(element) {
 /**
  * Make a destination node a clone of the source.
  *
- * @param {!Node} from
- * @param {!Node} to
+ * @param {Node} from
+ * @param {Node} to
  */
 export function mirrorNode(from, to) {
   // First clear out the destination node.

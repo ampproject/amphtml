@@ -178,11 +178,14 @@ descendant_tag_list {
   tag: "H5"
   tag: "H6"
   tag: "I"
+  tag: "I-AMPHTML-SIZER" # For transformed documents.
+  tag: "IMG" # For SSR'ed hero images on transformed documents and native images.
   tag: "INPUT"
   tag: "LABEL"
   tag: "LI"
   tag: "MARK"
   tag: "NAV"
+  tag: "NOSCRIPT" # For amp-img fallbacks.
   tag: "OL"
   tag: "OPTION"
   tag: "P"

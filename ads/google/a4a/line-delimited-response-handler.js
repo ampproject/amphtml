@@ -55,14 +55,14 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
 /**
  * Given each line, groups such that the first is JSON parsed and second
  * html unescaped.
- * @param {function(string, !Object<string, *>, boolean)} callback
+ * @param {function(string, !{[key: string]: *}, boolean)} callback
  * @return {function(string, boolean)}
  */
 export function metaJsonCreativeGrouper(callback) {
   let first;
   return function (line, done) {
     if (first) {
-      const metadata = /** @type {!Object<string, *>} */ (
+      const metadata = /** @type {!{[key: string]: *}} */ (
         tryParseJson(first) || {}
       );
       const lowerCasedMetadata = Object.keys(metadata).reduce((newObj, key) => {

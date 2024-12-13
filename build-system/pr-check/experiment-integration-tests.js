@@ -4,14 +4,9 @@
  * @fileoverview Script that runs the experiment A/B/C integration tests during CI.
  */
 
-const {
-  skipDependentJobs,
-  timedExecOrDie,
-  timedExecOrThrow,
-} = require('./utils');
+const {skipDependentJobs, timedExecOrThrow} = require('./utils');
 const {experiment} = require('minimist')(process.argv.slice(2));
 const {getExperimentConfig} = require('../common/utils');
-const {isPushBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
@@ -25,17 +20,12 @@ function runExperimentTests(config) {
   try {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
     const experimentFlag = `--experiment ${experiment}`;
-    const reportFlag = isPushBuild() ? '--report' : '';
     timedExecOrThrow(
-      `amp integration --nobuild --minified --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
+      `amp integration --nobuild --minified --headless ${experimentFlag} ${defineFlag}`
     );
   } catch (e) {
     if (e.status) {
       process.exitCode = e.status;
-    }
-  } finally {
-    if (isPushBuild()) {
-      timedExecOrDie('amp test-report-upload');
     }
   }
 }

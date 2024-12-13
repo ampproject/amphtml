@@ -1,11 +1,10 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {select, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-selector-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-selector', version: '1.0'}],
@@ -55,8 +54,6 @@ export const WithAmpImg = () => {
   );
 };
 
-WithAmpImg.storyName = 'with <amp-img>';
-
 export const WithUl = () => {
   return (
     <amp-selector class="sample-selector" layout="container">
@@ -70,22 +67,15 @@ export const WithUl = () => {
   );
 };
 
-WithUl.storyName = 'with <ul>';
-
-export const Actions = () => {
-  const keyboardSelectMode = select(
-    'keyboard select mode',
-    ['none', 'focus', 'select'],
-    'focus'
-  );
+export const Actions = (args) => {
   return (
     <>
       <amp-selector
         id="actionsSample"
         layout="container"
         class="sample-selector"
-        keyboard-select-mode={keyboardSelectMode}
         multiple
+        {...args}
       >
         <ul>
           <li option="1" selected>
@@ -115,7 +105,14 @@ export const Actions = () => {
   );
 };
 
-Actions.storyName = 'actions';
+Actions.argTypes = {
+  'keyboard-select-mode': {
+    name: 'keyboard-select-mode',
+    defaultValue: 'select',
+    options: ['none', 'focus', 'select'],
+    control: {type: 'select'},
+  },
+};
 
 export const Responsive = () => {
   return (
@@ -129,5 +126,3 @@ export const Responsive = () => {
     </amp-selector>
   );
 };
-
-Responsive.storyName = 'responsive';

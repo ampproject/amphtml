@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <!-- prettier-ignore -->
+  <head>
+    <meta charset="utf-8">
+    <title>amp-story-subscriptions example</title>
+    <link rel="canonical" href="/examples/amp-story-subscriptions.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      /* TODO: refactor and clean up */
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: white;
+      }
+      h1 {
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+        color: #FFFFFF;
+      }
+      p {
+        font-family: Poppins;
+        color: #FFFFFF;
+      }
+      .cover-title {
+        position: absolute;
+        width: 80%;
+        height: 117px;
+        left: 10%;
+        right: 10%;
+        top: 450px;
+        align-items: center;
+        text-align: center;
+        letter-spacing: 0.5px;
+        color: #FFFFFF;
+      }
+      .cover-title p {
+        display: block;
+        font-family: Playfair Display;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 50px;
+        line-height: 54px;
+      }
+      .cover-subtitle {
+        position: absolute;
+        width: 80%;
+        left: 10%;
+        right: 10%;
+        height: 44px;
+        top: 565px;
+      }
+      .cover-subtitle p {
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 20px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        letter-spacing: 1px;
+        color: #FFFFFF;
+      }
+      #page-1 .text-section {
+        background: linear-gradient(0deg, #483614, #483614);
+        height: 384px;
+      }
+      #page-2 .text-section {
+        background: #8B2B30;
+        height: 292px;
+      }
+      #page-3 .text-section {
+        background: #324B3C;
+        height: 332px;
+      }
+      .text-section {
+        position: absolute;
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        bottom: 5%;
+        margin: auto;
+      }
+      .text-section h3 {
+        margin-top: 28px;
+        margin-left: 28px;
+        margin-right: 28px;
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 12px;
+        line-height: 16px;
+        align-items: center;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #FFFFFF;
+      }
+      .text-section p {
+        margin-top: 14px;
+        margin-left: 14px;
+        margin-right: 14px;
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 12px;
+        line-height: 20px;
+        letter-spacing: 0.5px;
+        color: #FFFFFF;
+      }
+      .text {
+        font-size: 1em;
+      }
+    </style>
+
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
+    <script
+      async
+      custom-element="amp-subscriptions-google"
+      src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"
+    ></script>
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "isAccessibleForFree": "False",
+        "isPartOf": {
+          "@type": ["CreativeWork", "Product"],
+          "name" : "Product A",
+          "productID": "scenic-2017.appspot.com:news"
+        }
+      }
+    </script>
+    <script type="application/json" id="amp-subscriptions">
+      {
+        "services": [
+          {
+            "authorizationUrl": "https://scenic-2017.appspot.com/amp-entitlements?pubid=scenic-2017.appspot.com&meter=1&rid=READER_ID",
+            "pingbackUrl": "https://scenic-2017.appspot.com/amp-pingback?pubid=scenic-2017.appspot.com",
+            "actions":{
+              "login": "https://scenic-2017.appspot.com/signin?rid=READER_ID",
+              "subscribe": "https://scenic-2017.appspot.com/subscribe"
+            }
+          },
+          {
+            "serviceId": "subscribe.google.com"
+          }
+        ]
+      }
+    </script>
+
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-subscriptions" src="https://cdn.ampproject.org/v0/amp-story-subscriptions-0.1.js"></script>
+  </head>
+  <body>
+    <amp-story standalone title="My story" publisher="Monocle" publisher-logo-src="https://res.cloudinary.com/crunchbase-production/image/upload/c_lpad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/tbvbvipimh2camf5nb2q" poster-portrait-src="POSTER-IMAGE-URL">
+      <amp-story-page id="cover" auto-advance-after="5s">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1552650904-54d0c54b278f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer class="box" aspect-ratio="9:16">
+          <div class="cover-title"><p>Amazing</p><p>Kyoto</p></div>
+          <div class="cover-subtitle"><p>Modern culture meets ancient traditions and beauty</p></div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-1" auto-advance-after="5s">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1544965563-bb8d8bce9791?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1011&q=80"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>Amazing Kyoto</h3>
+            <p>Kyoto is a true embodiment of Old Japan awash with beautiful vestiges of its past glory. Beyond the futuristic Kyoto Station, modern shopping complexes, and sleek luxury hotels, lies a city with celebrated centuries-old wonders, breathtaking temples, serene Zen gardens, narrow cobbled alleyways, bustling markets and a vibrant nightlife.</p>
+            <p>By effortlessly blending the past and present, Kyoto is poised to be an alluring destination for history buffs and art lovers, gourmands, and outdoor enthusiasts. —Nano Betts</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2" auto-advance-after="5s">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1599849913403-f45ef2181b49?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3024&q=80"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>arashiyama</h3>
+            <p>The rolling foothills of Arashiyama are home to the iconic Sagano Bamboo Forest. The verdant grove is accessed via the 14th-century Buddhist temple Tenryu-ji. A unique serenity is experienced from the wind rustling through the soaring trees making a zawa zawa sound and the filtered sunlight filling the space with a tranquil green glow.</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3" auto-advance-after="5s">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1599849913403-f45ef2181b49?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3024&q=80"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>arashiyama</h3>
+            <p>The rolling foothills of Arashiyama are home to the iconic Sagano Bamboo Forest. The verdant grove is accessed via the 14th-century Buddhist temple Tenryu-ji. A unique serenity is experienced from the wind rustling through the soaring trees making a zawa zawa sound and the filtered sunlight filling the space with a tranquil green glow.</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1574236170880-fbbca132d83d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=926&q=80"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>Cultral Experiences</h3>
+            <p>As a birthplace of Sado, or Japanese tea ceremony, the historic neighborhoods of Gion and Higashiyama are perfect places to visit machiyas and learn about the ancient art of tea-making. During the ritual performed on a tatami floor by a professional tea master, you'll have a chance to learn about the philosophy and etiquette of drinking tea, as well as master the basics of making matcha.</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-subscriptions layout='container'
+        subscriptions-page-index='3'
+        price='$0.50/week'
+        headline='Information at your fingertips'
+        description='Subscribe for unlimited access.'
+        additional-description='Cancel anytime.'>
+      </amp-story-subscriptions>
+    </amp-story>
+  </body>
+</html>

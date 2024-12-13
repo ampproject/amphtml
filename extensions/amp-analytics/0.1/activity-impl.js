@@ -3,9 +3,12 @@
  * has performed on the page.
  */
 
-import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {listen} from '#utils/event-helper';
+
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
 /**
@@ -162,7 +165,7 @@ export class Activity {
 
     /**
      * Contains the incrementalEngagedTime timestamps for named triggers.
-     * @private {Object<string, number>}
+     * @private {{[key: string]: number}}
      */
     this.totalEngagedTimeByTrigger_ = {
       /*

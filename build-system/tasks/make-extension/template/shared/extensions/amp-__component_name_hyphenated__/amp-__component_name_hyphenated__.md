@@ -59,12 +59,6 @@ Below is an example for ads.
 
 [/example][/filter]
 
-### Standalone use outside valid AMP documents (optional)
-
-<!-- TODO: Remove backticks from link when guide is live -->
-
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
-
 #### Example
 
 The example below demonstrates `amp-__component_name_hyphenated__` component in standalone use.
@@ -91,8 +85,6 @@ The example below demonstrates `amp-__component_name_hyphenated__` component in 
 [/example]
 
 #### Interactivity and API usage
-
-Bento components are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
 The `amp-__component_name_hyphenated__` component API is accessible by including the following script tag in your document:
 
@@ -126,13 +118,7 @@ example
 
 #### Layout and style
 
-Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
-
-```
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-__component_name_hyphenated__-__component_version__.css">
-```
-
-Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible. 
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources.
 
 **Container type**
 
@@ -217,14 +203,6 @@ Syntax and argument details for use in fully valid AMP pages.
 ```
 
 [/example]
-
-#### Bento mode
-
-Syntax and argument details for use in Bento mode.
-
-```
-Bento example
-```
 
 ## Styling (optional)
 

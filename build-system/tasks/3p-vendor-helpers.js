@@ -7,7 +7,20 @@ const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
+const argv = require('minimist')(process.argv.slice(2));
+
 const SRCPATH = ['3p/vendors/*.js'];
+
+/**
+ * Returns true when the CLI flags indicate that vendor configs should be built.
+ * @return {boolean}
+ */
+function shouldBuildVendorConfigs() {
+  return (
+    argv.vendor_configs ||
+    (!argv.core_runtime_only && !argv.extensions && !argv.extensions_from)
+  );
+}
 
 /**
  * Entry point for 'amp ad-vendor-configs'
@@ -77,7 +90,7 @@ async function doBuild3pVendor(jsBundles, name, options) {
 
 /**
  * Generate bundles for all 3p vendors to be built.
- * @return {Object}
+ * @return {object}
  */
 function generateBundles() {
   const bundles = {};
@@ -123,6 +136,7 @@ function listVendors() {
 }
 
 module.exports = {
+  shouldBuildVendorConfigs,
   buildVendorConfigs,
   doBuild3pVendor,
   generateBundles,

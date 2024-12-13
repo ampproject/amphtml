@@ -1,5 +1,4 @@
 import {isArray, isObject} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {user} from '#utils/log';
 
@@ -7,7 +6,7 @@ import {user} from '#utils/log';
 const TAG = 'amp-auto-ads';
 
 /**
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'type': true,
@@ -16,6 +15,7 @@ const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'height': true,
   'width': true,
   'sticky': true,
+  'json': true,
 };
 
 /**
@@ -36,11 +36,11 @@ export const Attributes = {
  */
 export function getAttributesFromConfigObj(configObj, attributes) {
   if (!configObj[attributes]) {
-    return dict();
+    return {};
   }
   if (!isObject(configObj[attributes]) || isArray(configObj[attributes])) {
     user().warn(TAG, attributes + ' property not an object');
-    return dict();
+    return {};
   }
   return parseAttributes(configObj[attributes]);
 }
@@ -50,7 +50,7 @@ export function getAttributesFromConfigObj(configObj, attributes) {
  * @return {!JsonObject<string, string>}
  */
 function parseAttributes(attributeObject) {
-  const attributes = dict();
+  const attributes = {};
   for (const key in attributeObject) {
     if (!NON_DATA_ATTRIBUTE_ALLOWLIST[key] && !key.startsWith('data-')) {
       user().warn(TAG, 'Attribute not whitlisted: ' + key);

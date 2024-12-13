@@ -1,5 +1,6 @@
-import {IframeTransportMessageQueue} from '../iframe-transport-message-queue';
 import {createElementWithAttributes} from '#core/dom';
+
+import {IframeTransportMessageQueue} from '../iframe-transport-message-queue';
 
 describes.realWin(
   'amp-analytics.iframe-transport-message-queue',

@@ -33,7 +33,7 @@ const WAITFOR_EVENTS_ENUM = {
 
 /**
  * A list of events on which event they should wait
- * @const {!Object<string, WAITFOR_EVENTS_ENUM>}
+ * @const {!{[key: string]: WAITFOR_EVENTS_ENUM}}
  */
 const NAV_TIMING_WAITFOR_EVENTS = {
   // ready on viewer first visible
@@ -165,7 +165,7 @@ export class VariableSource {
     /** @protected @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private @const {!Object<string, !ReplacementDef>} */
+    /** @private @const {!{[key: string]: !ReplacementDef}} */
     this.replacements_ = Object.create(null);
 
     /** @private {boolean} */
@@ -257,8 +257,8 @@ export class VariableSource {
   /**
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
-   * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
+   * @param {!{[key: string]: *}=} opt_bindings
+   * @param {!{[key: string]: boolean}=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    */
@@ -272,7 +272,7 @@ export class VariableSource {
 
   /**
    * @param {!Array<string>} keys
-   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
+   * @param {!{[key: string]: boolean}=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private

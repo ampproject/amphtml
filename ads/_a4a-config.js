@@ -11,13 +11,13 @@ import {map} from '#core/types/object';
  * Otherwise, it will attempt to render the ad via the existing "3p iframe"
  * pathway (delay load into a cross-domain iframe).
  *
- * @type {!Object<string, function(!Window, !Element): boolean>}
+ * @type {!{[key: string]: function(!Window, !Element): boolean}}
  */
 let a4aRegistry;
 
 /**
  * Returns the a4a registry map
- * @return {Object}
+ * @return {object}
  */
 export function getA4ARegistry() {
   if (!a4aRegistry) {
@@ -27,6 +27,9 @@ export function getA4ARegistry() {
       'dianomi': () => true,
       'doubleclick': () => true,
       'fake': () => true,
+      'mgid': (win, adTag) =>
+        !adTag.hasAttribute('data-container') &&
+        !adTag.hasAttribute('data-website'),
       'nws': () => true,
       'smartadserver': () => true,
       'valueimpression': () => true,
@@ -43,9 +46,11 @@ export function getA4ARegistry() {
 
 /**
  * An object mapping signing server names to their corresponding URLs.
- * @type {!Object<string, string>}
+ * @type {!{[key: string]: string}}
  */
 export const signingServerURLs = {
+  /* eslint-disable local/no-forbidden-terms */
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+  /* eslint-enable local/no-forbidden-terms */
 };

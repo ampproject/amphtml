@@ -1,6 +1,8 @@
 import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {SubscriptionApi} from '../../../src/iframe-helper';
+
 import {dev, devAssert} from '#utils/log';
+
+import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport-message-queue';

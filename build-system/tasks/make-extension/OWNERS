@@ -8,10 +8,9 @@
         // Outreach group maintains extension boilerplate/template.
         {name: 'ampproject/wg-outreach'},
 
-        // Most new extensions are reviewed by these groups. It's in their
+        // Most new extensions are reviewed by this group. It's in their
         // interest to maintain the extension generator.
         {name: 'ampproject/wg-components'},
-        {name: 'ampproject/wg-bento'},
       ],
     },
   ],

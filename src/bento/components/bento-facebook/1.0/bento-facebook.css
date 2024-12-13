@@ -1,0 +1,34 @@
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+bento-facebook,
+bento-facebook-comments,
+bento-facebook-like,
+bento-facebook-page {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pre-upgrade: size-defining element - hide text. */
+bento-facebook:not(.i-amphtml-built),
+bento-facebook-comments:not(.i-amphtml-built),
+bento-facebook-like:not(.i-amphtml-built),
+bento-facebook-page:not(.i-amphtml-built) {
+  color: transparent !important;
+}
+
+/* Pre-upgrade: size-defining element - hide children. */
+bento-facebook:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+bento-facebook-comments:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+bento-facebook-like:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']),
+bento-facebook-pagee:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
+  display: none;
+  content-visibility: hidden;
+}

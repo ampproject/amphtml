@@ -1,8 +1,10 @@
 'use strict';
 
+const {sleep} = require('../../../build-system/tasks/visual-diff/helpers');
+
 module.exports = {
   'player ready': async (page) => {
-    await page.waitForTimeout(1000);
+    await sleep(1000);
     await page.$eval('iframe', (iframe) => {
       iframe.src = '';
       iframe.srcdoc =

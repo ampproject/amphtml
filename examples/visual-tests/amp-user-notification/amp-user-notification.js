@@ -1,8 +1,14 @@
 'use strict';
 
+const {sleep} = require('../../../build-system/tasks/visual-diff/helpers');
+const {
+  verifySelectorsVisible,
+} = require('../../../build-system/tasks/visual-diff/verifiers');
+
 module.exports = {
-  'dismiss user notification': async (page, unusedName) => {
+  'dismiss user notification': async (page, name) => {
     await page.tap('amp-user-notification>button');
-    await page.waitForTimeout(500);
+    await sleep(500);
+    await verifySelectorsVisible(page, name, ['.i-amphtml-ad-default-holder']);
   },
 };

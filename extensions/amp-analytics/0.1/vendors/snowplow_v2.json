@@ -17,13 +17,16 @@
     }
   },
   "vars": {
-    "trackerVersion": "amp-1.0.3",
+    "trackerVersion": "amp-1.1.0",
     "ampVistorId": "CLIENT_ID(_sp_ampid)",
     "duid": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(LINKER_PARAM(sp_amp_linker,_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid), COOKIE(_sp_duid)))",
     "nullString": "null",
     "customEventTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:${customEventSchemaVendor}/${customEventSchemaName}/jsonschema/${customEventSchemaVersion}\",\"data\":${customEventSchemaData}}}",
-    "contextsHead": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[{\"schema\":\"iglu:dev.amp.snowplow/amp_id/jsonschema/1-0-0\",\"data\":{\"ampClientId\":\"${ampVistorId}\", \"domainUserid\": \"${duid}\", \"userId\": \"${userId}\"}},$REPLACE(`${customContexts}`, `^,*(.+?),*$`, `$1,`)",
-    "contextsTail": "{\"schema\":\"iglu:dev.amp.snowplow/amp_web_page/jsonschema/1-0-0\",\"data\":{\"ampPageViewId\":\"PAGE_VIEW_ID_64\"}}]}",
+    "sessionContext": "{\"schema\":\"iglu:dev.amp.snowplow/amp_session/jsonschema/1-0-0\",\"data\":{\"ampSessionId\":${sessionId},\"ampSessionIndex\":${sessionCount},\"sessionEngaged\":$IF(${sessionEngaged}, true, false),\"sessionCreationTimestamp\":${sessionTimestamp}$IF(${sessionEventTimestamp},`,\"lastSessionEventTimestamp\":${sessionEventTimestamp}`)}}",
+    "idContext": "{\"schema\":\"iglu:dev.amp.snowplow/amp_id/jsonschema/1-0-0\",\"data\":{\"ampClientId\":\"${ampVistorId}\",\"domainUserid\":\"${duid}\",\"userId\":\"${userId}\"}}",
+    "webPageContext": "{\"schema\":\"iglu:dev.amp.snowplow/amp_web_page/jsonschema/1-0-0\",\"data\":{\"ampPageViewId\":\"PAGE_VIEW_ID_64\"}}",
+    "contextsHead": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[${idContext},${sessionContext},$REPLACE(`${customContexts}`, `^,*(.+?),*$`, `$1,`)",
+    "contextsTail": "${webPageContext}]}",
     "ampPagePingTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:dev.amp.snowplow/amp_page_ping/jsonschema/1-0-0\",\"data\":{\"scrollLeft\":${scrollLeft},\"scrollWidth\":${scrollWidth},\"viewportWidth\":${viewportWidth},\"scrollTop\":${scrollTop},\"scrollHeight\":${scrollHeight},\"viewportHeight\":${viewportHeight},\"totalEngagedTime\":${totalEngagedTime}}}}"
   },
   "requests": {

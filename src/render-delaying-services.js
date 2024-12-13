@@ -20,12 +20,11 @@ import {getServicePromise} from './service-helpers';
  * changes made to it must be made in coordination with caches that implement
  * SSR. For more information on SSR see bit.ly/amp-ssr.
  *
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
 const SERVICES = {
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
-  'amp-story-render': 'amp-story[standalone]',
 };
 
 /**

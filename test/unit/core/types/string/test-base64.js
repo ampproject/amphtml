@@ -9,9 +9,7 @@ import {
 import {stringToBytes, utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 describes.sandboxed('type helpers - strings - base64', {}, () => {
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
-  const config = describe.configure().skipSafari();
-  config.run('base64', () => {
+  describe('base64', () => {
     describe('base64 <> utf-8 encode/decode', () => {
       const testCases = [
         'SimplyFoo',

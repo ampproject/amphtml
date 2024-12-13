@@ -84,7 +84,6 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-
             <amp-story-interactive-quiz
                 id="first-cup-dark"
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
@@ -97,6 +96,10 @@
                 option-3-confetti="🇺🇾"
                 option-4-text="Brazil">
             </amp-story-interactive-quiz>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <!-- Add div in front, should not be clickable (but the quiz behind should) -->
+            <div style="display: flex; align-items: center; justify-content: center"><p>🇺🇾</p></div>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-1b">

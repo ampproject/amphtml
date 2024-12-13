@@ -24,7 +24,7 @@ const TAG = 'purifier';
 
 /**
  * Tags that are only allowlisted for specific values of given attributes.
- * @private @const {!Object<string, {attribute: string, values: !Array<string>}>}
+ * @private @const {!{[key: string]: {attribute: string, values: !Array<string}}>}
  */
 const ALLOWLISTED_TAGS_BY_ATTRS = {
   'script': {
@@ -119,7 +119,7 @@ export class Purifier {
 
   /**
    * Gets a copy of the map of allowed tag names (standard DOMPurify config).
-   * @return {!Object<string, boolean>}
+   * @return {!{[key: string]: boolean}}
    */
   getAllowedTags() {
     const allowedTags = {};
@@ -222,7 +222,7 @@ export class Purifier {
 
     /**
      * @param {!Node} node
-     * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
+     * @param {{tagName: string, allowedTags: !{[key: string]: boolean}}} data
      */
     const uponSanitizeElement = (node, data) => {
       const {tagName} = data;
@@ -270,7 +270,7 @@ export class Purifier {
 
     /**
      * @param {!Element} element
-     * @param {{attrName: string, attrValue: string, allowedAttributes: !Object<string, boolean>}} data
+     * @param {{attrName: string, attrValue: string, allowedAttributes: !{[key: string]: boolean}}} data
      */
     const uponSanitizeAttribute = (element, data) => {
       // Beware of DOM Clobbering when using properties or functions on `element`.

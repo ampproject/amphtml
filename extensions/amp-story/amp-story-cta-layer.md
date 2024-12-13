@@ -8,6 +8,8 @@ teaser:
 
 # amp-story-cta-layer
 
+> ## Notice: amp-story-cta-layer is depreciated see [I2D issue](https://github.com/ampproject/amphtml/issues/34450) for details. Use [amp-story-page-outlink](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story-page-attachment/amp-story-page-outlink.md) instead.
+
 ## Usage
 
 The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` elements inside an `<amp-story-page>`.

@@ -1,5 +1,4 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
@@ -7,7 +6,7 @@ import {rgba2hex} from './converter';
 
 export default {
   title: 'amp-soundcloud-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-soundcloud', version: '1.0'}],
@@ -15,13 +14,7 @@ export default {
   },
 };
 
-export const TrackId = () => {
-  // Knobs
-  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
-  const height = text('Height', '180');
-  const trackid = text('Track ID', '864765493');
-  const visual = boolean('Visual', true);
-
+export const TrackId = ({componentColor, trackId, visual, ...args}) => {
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
@@ -29,22 +22,30 @@ export const TrackId = () => {
   return (
     <amp-soundcloud
       data-color={hex}
-      data-trackid={trackid}
+      data-trackid={trackId}
       data-visual={visual}
-      height={height}
       layout="fixed-height"
       width="auto"
+      {...args}
     />
   );
 };
 
-export const PlaylistId = () => {
-  // Knobs
-  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
-  const height = text('Height', '180');
-  const playlistId = text('Playlist ID', '151584683');
-  const visual = boolean('Visual', true);
+TrackId.args = {
+  trackId: '864765493',
+  height: 180,
+  visual: true,
+};
 
+TrackId.argTypes = {
+  componentColor: {
+    name: 'componentColor',
+    control: {type: 'color'},
+    defaultValue: 'RGBA(255, 85, 0, 1)',
+  },
+};
+
+export const PlaylistId = ({componentColor, playlistId, visual, ...args}) => {
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
@@ -54,22 +55,36 @@ export const PlaylistId = () => {
       data-color={hex}
       data-playlistid={playlistId}
       data-visual={visual}
-      height={height}
       layout="fixed-height"
       width="auto"
+      {...args}
     />
   );
 };
 
-export const MediaQuery = () => {
-  // Knobs
-  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
-  const trackid1 = text('Track ID 1', '864765493');
-  const trackid2 = text('Track ID 2', '582363801');
-  const media1 = text('Media Query 1', '(min-width: 650px)');
-  const media2 = text('Media Query 2', '(max-width: 649px)');
-  const visual = boolean('Visual', true);
+PlaylistId.args = {
+  playlistId: '151584683',
+  height: 180,
+  visual: true,
+};
 
+PlaylistId.argTypes = {
+  componentColor: {
+    name: 'componentColor',
+    control: {type: 'color'},
+    defaultValue: 'RGBA(255, 85, 0, 1)',
+  },
+};
+
+export const MediaQuery = ({
+  componentColor,
+  media1,
+  media2,
+  trackId1,
+  trackId2,
+  visual,
+  ...args
+}) => {
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
@@ -78,33 +93,50 @@ export const MediaQuery = () => {
     <>
       <amp-soundcloud
         data-color={hex}
-        data-trackid={trackid1}
+        data-trackid={trackId1}
         data-visual={visual}
         height="240"
         layout="fixed"
         media={media1}
         width="240"
+        {...args}
       />
       <amp-soundcloud
         data-color={hex}
-        data-trackid={trackid2}
+        data-trackid={trackId2}
         data-visual={visual}
         height="180"
         layout="responsive"
         media={media2}
         width="180"
+        {...args}
       />
     </>
   );
 };
 
-export const ResponsiveLayout = () => {
-  // Knobs
-  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
-  const trackid = text('Track ID', '864765493');
-  const sizes = text('Sizes', '(min-width: 720px) 520px, 100vw');
-  const visual = boolean('Visual', true);
+MediaQuery.args = {
+  trackId1: '864765493',
+  trackId2: '582363801',
+  media1: '(min-width: 650px)',
+  media2: '(max-width: 649px)',
+  visual: true,
+};
 
+MediaQuery.argTypes = {
+  componentColor: {
+    name: 'componentColor',
+    control: {type: 'color'},
+    defaultValue: 'RGBA(255, 85, 0, 1)',
+  },
+};
+
+export const ResponsiveLayout = ({
+  componentColor,
+  trackId,
+  visual,
+  ...args
+}) => {
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
@@ -112,23 +144,36 @@ export const ResponsiveLayout = () => {
   return (
     <amp-soundcloud
       data-color={hex}
-      data-trackid={trackid}
+      data-trackid={trackId}
       data-visual={visual}
       height="340"
       layout="responsive"
-      sizes={sizes}
       width="520"
+      {...args}
     />
   );
 };
 
-export const WithPlaceholderAndFallback = () => {
-  // Knobs
-  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
-  const height = text('Height', '180');
-  const trackid = text('Track ID', '864765493');
-  const visual = boolean('Visual', true);
+ResponsiveLayout.args = {
+  trackId: '864765493',
+  sizes: '(min-width: 720px) 520px, 100vw',
+  visual: true,
+};
 
+ResponsiveLayout.argTypes = {
+  componentColor: {
+    name: 'componentColor',
+    control: {type: 'color'},
+    defaultValue: 'RGBA(255, 85, 0, 1)',
+  },
+};
+
+export const WithPlaceholderAndFallback = ({
+  componentColor,
+  trackId,
+  visual,
+  ...args
+}) => {
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
@@ -136,11 +181,11 @@ export const WithPlaceholderAndFallback = () => {
   return (
     <amp-soundcloud
       data-color={hex}
-      data-trackid={trackid}
+      data-trackid={trackId}
       data-visual={visual}
-      height={height}
       layout="fixed-height"
       width="auto"
+      {...args}
     >
       <div placeholder style="background:red">
         Placeholder. Loading content...
@@ -151,4 +196,18 @@ export const WithPlaceholderAndFallback = () => {
       </div>
     </amp-soundcloud>
   );
+};
+
+WithPlaceholderAndFallback.args = {
+  trackId: '864765493',
+  height: 180,
+  visual: true,
+};
+
+WithPlaceholderAndFallback.argTypes = {
+  componentColor: {
+    name: 'componentColor',
+    control: {type: 'color'},
+    defaultValue: 'RGBA(255, 85, 0, 1)',
+  },
 };

@@ -41,4 +41,4 @@ To use it, add a `<amp-story-animation layout="nodisplay" trigger="visibility">`
 ## Related resources
 
 -   [`<amp-animation> docs`](https://amp.dev/documentation/components/amp-animation/?format=websites)
--   [animatoin configuration examples](https://amp.dev/documentation/guides-and-tutorials/start/visual_story/animating_elements/?format=stories)
+-   [animation configuration examples](https://amp.dev/documentation/guides-and-tutorials/start/visual_story/animating_elements/?format=stories)

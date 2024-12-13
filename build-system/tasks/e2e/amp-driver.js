@@ -119,7 +119,7 @@ const EnvironmentBehaviorMap = {
 
 /**
  * @param {string} url
- * @param {{isEmail: boolean}=} opts
+ * @param {{isEmail: boolean}} opts
  * @return {string}
  */
 function getViewerUrl(url, {isEmail} = {isEmail: false}) {

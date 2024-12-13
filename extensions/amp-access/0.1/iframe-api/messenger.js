@@ -40,7 +40,7 @@ export class Messenger {
 
     /**
      * @private
-     * {!Object<string, {resolve: function(*), promise: !Promise<*>}>}
+     * {!{[key: string]: {resolve: function(*), promise: !Promise<*}}>}
      */
     this.waiting_ = {};
   }

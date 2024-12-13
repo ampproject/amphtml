@@ -5,7 +5,6 @@ import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -370,17 +369,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /**
    * @param {string} eventType The eventType must be prefixed with video-custom- to prevent naming collisions with other analytics event types.
-   * @param {!Object<string, string>=} vars
+   * @param {!{[key: string]: string}=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
-    dispatchCustomEvent(
-      this.element,
-      VideoEvents_Enum.CUSTOM_TICK,
-      dict({
-        'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
-        'vars': vars,
-      })
-    );
+    dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {
+      'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
+      'vars': vars,
+    });
   }
 
   /**

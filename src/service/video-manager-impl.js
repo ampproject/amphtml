@@ -11,7 +11,7 @@ import {
 import {clamp} from '#core/math';
 import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -23,9 +23,9 @@ import {
 } from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {VideoSessionManager} from './video-session-manager';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
+import {VideoSessionManager} from './video-session-manager';
 
 import {
   EMPTY_METADATA,
@@ -164,11 +164,10 @@ export class VideoManager {
       duration > 0
     ) {
       const perc = currentTime / duration;
-      const event = createCustomEvent(
-        this.ampdoc.win,
-        `${TAG}.${name}`,
-        dict({'time': currentTime, 'percent': perc})
-      );
+      const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`, {
+        'time': currentTime,
+        'percent': perc,
+      });
       this.actions_.trigger(
         entry.video.element,
         name,
@@ -556,11 +555,7 @@ class VideoEntry {
     this.firstPlayEventOrNoop_ = once(() => {
       const firstPlay = 'firstPlay';
       const trust = ActionTrust_Enum.LOW;
-      const event = createCustomEvent(
-        this.ampdoc_.win,
-        firstPlay,
-        /* detail */ dict({})
-      );
+      const event = createCustomEvent(this.ampdoc_.win, firstPlay, {});
       const {element} = this.video;
       const actions = Services.actionServiceForDoc(element);
       actions.trigger(element, firstPlay, event, trust);
@@ -576,7 +571,7 @@ class VideoEntry {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars
+   * @param {!{[key: string]: string}} vars
    */
   logCustomAnalytics_(eventType, vars) {
     const prefixedVars = {[videoAnalyticsCustomEventTypeKey]: eventType};
@@ -1259,8 +1254,8 @@ export class AutoFullscreenManager {
         const pos = optPos
           ? dev().assertString(optPos)
           : bottom > vh
-          ? 'bottom'
-          : 'top';
+            ? 'bottom'
+            : 'top';
         return viewport.animateScrollIntoView(element, pos);
       });
   }
@@ -1604,7 +1599,7 @@ export class AnalyticsPercentageTracker {
 /**
  * @param {!VideoEntry} entry
  * @param {!VideoAnalyticsEvents_Enum} eventType
- * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ * @param {!{[key: string]: string}=} opt_vars A map of vars and their values.
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {

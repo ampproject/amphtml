@@ -1,11 +1,5 @@
 {
   "experimentA": {},
-  "experimentB": {
-    "name": "amp-img in the deferred mount mode",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/31915",
-    "expiration_date_utc": "2021-06-30",
-    "define_experiment_constant": "R1_IMG_DEFERRED_BUILD"
-  },
+  "experimentB": {},
   "experimentC": {}
 }

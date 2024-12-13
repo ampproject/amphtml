@@ -7,7 +7,6 @@ import {
 } from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -186,13 +185,11 @@ class AmpMowplayer extends AMP.BaseElement {
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'event': 'command',
-            'func': command,
-            'args': opt_args || '',
-          })
-        );
+        const message = JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        });
         this.iframe_.contentWindow./*OK*/ postMessage(
           message,
           'https://mowplayer.com'

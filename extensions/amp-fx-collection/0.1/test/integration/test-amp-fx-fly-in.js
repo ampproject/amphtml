@@ -44,14 +44,12 @@ describes.sandboxed.skip('amp-fx-collection', {}, function () {
         win = env.win;
         toggleExperiment(win, 'amp-fx-fly-in', true, false);
       });
-      //TODO(esth, #19392): Fails on Firefox 63.0.0
-      it.skip('runs fly-in-left animation with default parameters', () => {
+      it('runs fly-in-left animation with default parameters', async () => {
         expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
         const initialLeft = getComputedLeft(win);
         win.scrollTo(0, 0.5 * getViewportHeight(win));
-        return timeout(2000).then(() => {
-          expect(getComputedLeft(win)).to.be.above(initialLeft);
-        });
+        await timeout(2000);
+        expect(getComputedLeft(win)).to.be.above(initialLeft);
       });
     }
   );
@@ -82,14 +80,12 @@ describes.sandboxed.skip('amp-fx-collection', {}, function () {
         win = env.win;
         toggleExperiment(win, 'amp-fx-fly-in', true, false);
       });
-      //TODO(esth, #19392): Fails on Firefox 63.0.0
-      it.skip('runs fly-in-right animation with default parameters', () => {
+      it.skip('runs fly-in-right animation with default parameters', async () => {
         expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
         const initialLeft = getComputedLeft(win);
         win.scrollTo(0, 0.5 * getViewportHeight(win));
-        return timeout(2000).then(() => {
-          expect(getComputedLeft(win)).to.be.below(initialLeft);
-        });
+        await timeout(2000);
+        expect(getComputedLeft(win)).to.be.below(initialLeft);
       });
     }
   );

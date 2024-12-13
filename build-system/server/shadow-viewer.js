@@ -128,21 +128,20 @@ const SCRIPT = `
 };
 `;
 
-const renderShadowViewer = ({baseHref, src}) =>
-  html`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <base href="${baseHref}" />
-        <title>Shadow Viewer</title>
-        <script>
-          ${SCRIPT};
-        </script>
-      </head>
-      <body style="padding: 0; margin: 0">
-        <amp-viewer src="${src}"></amp-viewer>
-      </body>
-    </html>
-  `;
+const renderShadowViewer = ({baseHref, src}) => html`
+  <!doctype html>
+  <html>
+    <head>
+      <base href="${baseHref}" />
+      <title>Shadow Viewer</title>
+      <script>
+        ${SCRIPT};
+      </script>
+    </head>
+    <body style="padding: 0; margin: 0">
+      <amp-viewer src="${src}"></amp-viewer>
+    </body>
+  </html>
+`;
 
 module.exports = {renderShadowViewer};

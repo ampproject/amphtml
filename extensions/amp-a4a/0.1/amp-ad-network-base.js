@@ -22,13 +22,13 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {?Promise<!Response>} */
     this.adResponsePromise_ = null;
 
-    /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
+    /** @private {{[key: string]: !./amp-ad-type-defs.Validator}} */
     this.validators_ = map();
 
-    /** @private {Object<string, !./amp-ad-type-defs.Renderer>} */
+    /** @private {{[key: string]: !./amp-ad-type-defs.Renderer}} */
     this.renderers_ = map();
 
-    /** @private {Object<string, string>} */
+    /** @private {{[key: string]: string}} */
     this.recoveryModes_ = map();
 
     /** @const @private {!Object} */

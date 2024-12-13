@@ -1,8 +1,8 @@
 tags: {  # amp-video-iframe
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "SCRIPT"
-  satisfies: "amp-video-iframe 1.0"
-  excludes: "amp-video-iframe 0.1"
+  satisfies_condition: "amp-video-iframe 1.0"
+  excludes_condition: "amp-video-iframe 0.1"
   extension_spec: {
     name: "amp-video-iframe"
     version_name: "v1.0"
@@ -15,8 +15,8 @@ tags: {  # amp-video-iframe
 tags: {  # amp-video-iframe
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "SCRIPT"
-  satisfies: "amp-video-iframe 0.1"
-  excludes: "amp-video-iframe 1.0"
+  satisfies_condition: "amp-video-iframe 0.1"
+  excludes_condition: "amp-video-iframe 1.0"
   extension_spec: {
     name: "amp-video-iframe"
     version_name: "v0.1"

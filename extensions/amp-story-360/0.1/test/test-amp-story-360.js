@@ -3,6 +3,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {LocalizationService} from '#service/localization';
 
+import {macroTask} from '#testing/helpers';
+
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
@@ -26,8 +28,6 @@ describes.realWin(
     let threesixty;
     let storeService;
     let pageEl;
-
-    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     function appendAmpImg(parent, path) {
       const ampImg = createElementWithAttributes(win.document, 'amp-img', {
@@ -101,7 +101,7 @@ describes.realWin(
         '.i-amphtml-story-360-activate-button'
       );
 
-      await nextTick();
+      await macroTask();
 
       expect(activationEl.getAttribute('role')).to.eql('button');
     });

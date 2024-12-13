@@ -1,6 +1,9 @@
 import * as imaVideoObj from '#ads/google/ima/ima-video';
 
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
 
 describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';
@@ -14,6 +17,9 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     win.context = {};
     doc = win.document;
     clock = env.sandbox.useFakeTimers();
+    win.document.body
+      .appendChild(document.createElement('div'))
+      .setAttribute('id', 'c');
   });
 
   function getVideoPlayerMock() {
@@ -44,10 +50,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   }
 
   it('adds ad container', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -59,10 +61,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('adds video element', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -74,10 +72,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('handles click', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -113,10 +107,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('updates ad countdown timer', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     const videoDefaults = {
       width: 640,
       height: 360,
@@ -189,10 +179,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('plays ads with ads manager', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -220,10 +206,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('plays ads with ads manager ad request failed', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -241,10 +223,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('handles content ended', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -262,10 +240,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('handles ads manager loaded', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -316,10 +290,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('handles ads manager loaded and muted', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -376,10 +346,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('handles ads loader error', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -396,10 +362,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('handles ad error', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -419,10 +381,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('pauses content', () => {
-    // set up test
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -457,10 +415,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('pauses content and resizes ads manager', () => {
-    // set up test
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -509,9 +463,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('shows modified controls when content is paused', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -551,10 +502,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('resumes content', () => {
-    // set up test
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -582,10 +529,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('changes controls when ad pauses and resumes', () => {
-    // set up test
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -614,10 +557,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('resumes content with content complete', () => {
-    // set up test
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -645,9 +584,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('controls are restored after content resumes', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -673,10 +609,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('ad controls are smaller when skippable on mobile', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     const videoDefaults = {
       width: 640,
       height: 360,
@@ -714,10 +646,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     'shows bigPlayDiv with content complete, ' +
       'when content resume is called',
     () => {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
-
       imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
@@ -746,10 +674,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   );
 
   it('shows bigPlayDiv with allAdsCompleted, and content ended', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -769,10 +693,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     'does not show bigPlayDiv when content is resumed, ' +
       'and not content complete',
     () => {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
-
       imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
@@ -801,10 +721,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   );
 
   it('updates playing time', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -874,10 +790,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('zero pads', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -893,10 +805,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
 
   // TODO - FIX ONCE I FIGURE OUT HOW TO SPY ON INTERNAL METHODS
   it('plays on click', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -916,10 +824,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
 
   // TODO - FIX ONCE I FIGURE OUT HOW TO SPY ON INTERNAL METHODS
   it('pauses on click', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -938,10 +842,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('plays video', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -966,10 +866,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('pauses video', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -994,10 +890,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('mutes on click', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1020,10 +912,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('unmutes on click', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1046,10 +934,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('pauses video after webkit end fullscreen', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1079,10 +963,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('shows controls when paused', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1103,10 +983,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('shows controls when playing', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1127,10 +1003,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('hides controls', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1147,10 +1019,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
 
   // Case when autoplay signal is sent before play signal is sent.
   it('hides controls before visible', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1173,10 +1041,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('always shows ads controls', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1201,10 +1065,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   const hoverEventsToTest = ['click', 'mousemove'];
   hoverEventsToTest.forEach((hoverEvent) => {
     it(`shows controls on ${hoverEvent} (hover) while playing after hidden`, () => {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
-
       imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
@@ -1241,10 +1101,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     it(`throttles ${hoverEvent} (hover) for showing controls`, async function () {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
-
       imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
@@ -1301,10 +1157,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('suppresses IMA load with unknown consent', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
     imaVideoObj.imaVideo(win, {
       width: 640,
@@ -1319,10 +1171,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   });
 
   it('handles unknown consent with request ads call', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1330,17 +1178,15 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
-    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.UNKNOWN);
+    imaVideoObj.setContextForTesting({
+      initialConsentState: CONSENT_POLICY_STATE.UNKNOWN,
+    });
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
   });
 
   it('handles insufficient consent', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1349,22 +1195,20 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
-    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.INSUFFICIENT);
+    imaVideoObj.setContextForTesting({
+      initialConsentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+    });
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl&npa=1'
+      'vast.xml?npa=1'
     );
   });
 
   it('handles sufficient consent', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1373,22 +1217,20 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
-    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.SUFFICIENT);
+    imaVideoObj.setContextForTesting({
+      initialConsentState: CONSENT_POLICY_STATE.SUFFICIENT,
+    });
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl'
+      'vast.xml'
     );
   });
 
   it('handles unknown_not_required consent', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1397,16 +1239,66 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
-    imaVideoObj.setConsentStateForTesting(
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
-    );
+    imaVideoObj.setContextForTesting({
+      initialConsentState: CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+    });
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl'
+      'vast.xml'
+    );
+  });
+
+  it('passes gdpr_consent', () => {
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setContextForTesting({
+      initialConsentState: CONSENT_POLICY_STATE.SUFFICIENT,
+      initialConsentMetadata: {consentStringType: CONSENT_STRING_TYPE.TCF_V2},
+      initialConsentValue: 'myConsentValue',
+    });
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
+      'vast.xml?gdpr=1&gdpr_consent=myConsentValue'
+    );
+  });
+
+  it('does not pass gdpr_consent with CONSENT_STRING_TYPE == US_PRIVACY_STRING', () => {
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setContextForTesting({
+      initialConsentState: CONSENT_POLICY_STATE.SUFFICIENT,
+      initialConsentMetadata: {
+        consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+      },
+      initialConsentValue: 'myConsentValue',
+    });
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
+      'vast.xml'
     );
   });
 });

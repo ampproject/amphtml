@@ -5,7 +5,7 @@ import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {loadScript} from '../../../src/validator-integration';
 
 /**
@@ -68,7 +68,7 @@ const buildLogMessageTemplate = (element) => {
 };
 
 export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return false;
   }

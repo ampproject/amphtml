@@ -2,11 +2,10 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {BrowserController, RequestBank} from '#testing/helpers/service';
 
-// TODO(wg-components): These tests time out on Firefox and Safari.
+// TODO(wg-components): These tests time out on Safari.
 describes.sandboxed
   .configure()
   .skipSafari()
-  .skipFirefox()
   .run('amp-analytics', {}, function () {
     describes.integration(
       'basic pageview',
@@ -913,17 +912,13 @@ describes.sandboxed
       }
     );
 
-    // TODO: Find source of test failure on edge.
-    describe
-      .configure()
-      .skipEdge()
-      .run('amp-analytics:shadow mode', function () {
-        describes.integration(
-          'basic pageview',
-          {
-            // TODO(ccordry): Figure out how to write cookie in shadow case, so that
-            // we can verify CLIENT_ID() is reading the right value.
-            body: `
+    describe('amp-analytics:shadow mode', function () {
+      describes.integration(
+        'basic pageview',
+        {
+          // TODO(ccordry): Figure out how to write cookie in shadow case, so that
+          // we can verify CLIENT_ID() is reading the right value.
+          body: `
         <!-- put amp-analytics > 3 viewports away from viewport -->
         <div style="height: 400vh"></div>
         <amp-analytics>
@@ -949,20 +944,20 @@ describes.sandboxed
           }
           </script>
         </amp-analytics>`,
-            extensions: ['amp-analytics'],
-            ampdoc: 'shadow',
-          },
-          () => {
-            it('should send request', () => {
-              return RequestBank.withdraw().then((req) => {
-                expect(req.url).to.match(/\/?a=2&b=Shadow%20Viewer&cid=amp-.*/);
-                expect(
-                  req.headers.referer,
-                  'should keep referrer if no referrerpolicy specified'
-                ).to.be.ok;
-              });
+          extensions: ['amp-analytics'],
+          ampdoc: 'shadow',
+        },
+        () => {
+          it('should send request', () => {
+            return RequestBank.withdraw().then((req) => {
+              expect(req.url).to.match(/\/?a=2&b=Shadow%20Viewer&cid=amp-.*/);
+              expect(
+                req.headers.referer,
+                'should keep referrer if no referrerpolicy specified'
+              ).to.be.ok;
             });
-          }
-        );
-      });
+          });
+        }
+      );
+    });
   });

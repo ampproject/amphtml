@@ -1,6 +1,6 @@
 import {createCustomEvent} from '#utils/event-helper';
 
-/** @const {!Object<string, string>} */
+/** @const {!{[key: string]: string}} */
 export const EventType = {
   // Triggered when the user mutes the story
   MUTE: 'ampstory:mute',

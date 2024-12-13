@@ -66,8 +66,8 @@ function isPullRequestBuild() {
   return isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'pull_request'
     : isCircleci
-    ? !isCircleciPushBranch(env('CIRCLE_BRANCH'))
-    : false;
+      ? !isCircleciPushBranch(env('CIRCLE_BRANCH'))
+      : false;
 }
 
 /**
@@ -78,8 +78,8 @@ function isPushBuild() {
   return isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'push'
     : isCircleci
-    ? isCircleciPushBranch(env('CIRCLE_BRANCH'))
-    : false;
+      ? isCircleciPushBranch(env('CIRCLE_BRANCH'))
+      : false;
 }
 
 /**
@@ -90,8 +90,8 @@ function ciPullRequestBranch() {
   return isGithubActions
     ? env('GITHUB_HEAD_REF')
     : isCircleci
-    ? env('CIRCLE_BRANCH')
-    : '';
+      ? env('CIRCLE_BRANCH')
+      : '';
 }
 
 /**
@@ -102,8 +102,8 @@ function ciPullRequestSha() {
   return isGithubActions
     ? require(env('GITHUB_EVENT_PATH')).pull_request.head.sha
     : isCircleci
-    ? env('CIRCLE_SHA1')
-    : '';
+      ? env('CIRCLE_SHA1')
+      : '';
 }
 
 /**
@@ -114,8 +114,8 @@ function ciPushBranch() {
   return isGithubActions
     ? env('GITHUB_REF')
     : isCircleci
-    ? env('CIRCLE_BRANCH')
-    : '';
+      ? env('CIRCLE_BRANCH')
+      : '';
 }
 
 /**
@@ -126,8 +126,8 @@ function ciCommitSha() {
   return isGithubActions
     ? env('GITHUB_SHA')
     : isCircleci
-    ? env('CIRCLE_SHA1')
-    : '';
+      ? env('CIRCLE_SHA1')
+      : '';
 }
 
 /**
@@ -138,8 +138,8 @@ function ciBuildId() {
   return isGithubActions
     ? env('GITHUB_RUN_ID')
     : isCircleci
-    ? env('CIRCLE_WORKFLOW_ID')
-    : '';
+      ? env('CIRCLE_WORKFLOW_ID')
+      : '';
 }
 
 /**
@@ -150,8 +150,8 @@ function ciBuildUrl() {
   return isGithubActions
     ? `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
-    ? `https://app.circleci.com/pipelines/workflows/${env('CIRCLE_WORKFLOW_ID')}` // prettier-ignore
-    : '';
+      ? `https://app.circleci.com/pipelines/workflows/${env('CIRCLE_WORKFLOW_ID')}` // prettier-ignore
+      : '';
 }
 
 /**
@@ -162,21 +162,16 @@ function ciJobId() {
   return isGithubActions
     ? env('GITHUB_RUN_NUMBER')
     : isCircleci
-    ? env('CIRCLE_JOB')
-    : '';
+      ? env('CIRCLE_JOB')
+      : '';
 }
 
 /**
  * Returns the URL of the current job.
  * @return {string}
  */
-function ciJobUrl() {
-  return isGithubActions
-    ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
-      `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
-    : isCircleci
-    ? env('CIRCLE_BUILD_URL')
-    : '';
+function circleciJobUrl() {
+  return isCircleci ? env('CIRCLE_BUILD_URL') : '';
 }
 
 /**
@@ -189,12 +184,34 @@ function circleciPrMergeCommit() {
 }
 
 /**
- * Returns an identifier that is unique to each CircleCI job. This is different
- * from the workflow ID, which is common across all jobs in a workflow.
+ * Returns an identifier that is unique to each CircleCI build, discerning for
+ * parallelized builds
+ *
+ * Note that this is different from the workflow ID, which is common across all,
+ * and also different from the build number, which is common across parallelized
+ * builds.
  * @return {string}
  */
-function circleciBuildNumber() {
-  return isCircleci ? env('CIRCLE_BUILD_NUM') : '';
+function circleciUniqueBuildNumber() {
+  return isCircleci
+    ? `${env('CIRCLE_BUILD_NUM')}.${env('CIRCLE_NODE_INDEX')}`
+    : '';
+}
+
+/**
+ * Returns true for parallelized CircleCI builds.
+ * @return {boolean}
+ */
+function circleciIsParallelized() {
+  return isCircleci && env('CIRCLE_NODE_TOTAL') != '1';
+}
+
+/**
+ * Returns the parallelized build's shard number.
+ * @return {number}
+ */
+function circleciNodeIndex() {
+  return isCircleci ? Number(env('CIRCLE_NODE_INDEX')) : 0;
 }
 
 /**
@@ -205,8 +222,8 @@ function ciRepoSlug() {
   return isGithubActions
     ? env('GITHUB_REPOSITORY')
     : isCircleci
-    ? `${env('CIRCLE_PROJECT_USERNAME')}/${env('CIRCLE_PROJECT_REPONAME')}`
-    : '';
+      ? `${env('CIRCLE_PROJECT_USERNAME')}/${env('CIRCLE_PROJECT_REPONAME')}`
+      : '';
 }
 
 /**
@@ -223,11 +240,13 @@ module.exports = {
   ciBuildUrl,
   ciCommitSha,
   ciJobId,
-  ciJobUrl,
+  circleciJobUrl,
   ciPullRequestBranch,
   ciPullRequestSha,
   ciPushBranch,
-  circleciBuildNumber,
+  circleciUniqueBuildNumber,
+  circleciIsParallelized,
+  circleciNodeIndex,
   circleciPrMergeCommit,
   ciRepoSlug,
   isCiBuild,

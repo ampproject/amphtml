@@ -1,9 +1,11 @@
-import {Action} from './analytics';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+
+import {dev, userAssert} from '#utils/log';
+
 import {Actions} from './actions';
+import {Action} from './analytics';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dev, userAssert} from '#utils/log';
 
 /**
  * Surrogate property added to click events marking them as handled by the

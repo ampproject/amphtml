@@ -1,12 +1,17 @@
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-fit-text-1.0.css';
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-fit-text-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends BaseElement {
+class AmpFitText extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

@@ -24,9 +24,17 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
   });
 
   it('setStyle with vendor prefix', () => {
-    const element = {style: {WebkitTransitionDuration: ''}};
+    const element = {
+      style: {
+        WebkitTransitionDuration: '',
+        setProperty: (name, value) => {
+          element.style[name] = value;
+        },
+      },
+    };
+
     st.setStyle(element, 'transitionDuration', '1s', undefined, true);
-    expect(element.style.WebkitTransitionDuration).to.equal('1s');
+    expect(element.style['-webkit-transition-duration']).to.equal('1s');
   });
 
   it('setStyle with custom var', () => {
@@ -67,7 +75,7 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
       transitionDurationImportant: '1s',
     });
     expect(spy).to.have.been.calledWith(
-      'WebkitTransitionDurationImportant',
+      '-webkit-transition-duration-important',
       '1s',
       'important'
     );
@@ -93,6 +101,17 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
   it('camelCaseToTitleCase', () => {
     const str = 'theQuickBrownFox';
     expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
+  });
+
+  it('camelCaseToHyphenCase', () => {
+    expect(st.camelCaseToHyphenCase('paddingTop')).to.equal('padding-top');
+    expect(st.camelCaseToHyphenCase('WebkitTransition')).to.equal(
+      '-webkit-transition'
+    );
+    expect(st.camelCaseToHyphenCase('webkitTransition')).to.equal(
+      '-webkit-transition'
+    );
+    expect(st.camelCaseToHyphenCase('oTransition')).to.equal('-o-transition');
   });
 
   it('removeAlphaFromColor', () => {

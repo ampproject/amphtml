@@ -462,7 +462,7 @@ export class SwipeYRecognizer extends SwipeRecognizer {
  *   velocityY: number
  * }}
  */
-let TapzoomDef;
+export let TapzoomDef;
 
 /**
  * Recognizes a "tapzoom" gesture. This gesture will block other gestures
@@ -647,6 +647,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
  *   centerClientX: number,
  *   centerClientY: number,
  *   dir: number,
+ *   distance: number,
  *   deltaX: number,
  *   deltaY: number,
  *   velocityX: number,
@@ -875,18 +876,19 @@ export class PinchRecognizer extends GestureRecognizer {
       this.prevTime_ = this.lastTime_;
     }
 
-    const startSq = this.sqDist_(
+    const startDist = this.dist_(
       this.startX1_,
       this.startX2_,
       this.startY1_,
       this.startY2_
     );
-    const lastSq = this.sqDist_(
+    const lastDist = this.dist_(
       this.lastX1_,
       this.lastX2_,
       this.lastY1_,
       this.lastY2_
     );
+    const distance = lastDist - startDist;
     this.signalEmit(
       {
         first,
@@ -894,7 +896,8 @@ export class PinchRecognizer extends GestureRecognizer {
         time: this.lastTime_,
         centerClientX: this.centerClientX_,
         centerClientY: this.centerClientY_,
-        dir: Math.sign(lastSq - startSq),
+        dir: Math.sign(distance),
+        distance,
         deltaX: deltaX * 0.5,
         deltaY: deltaY * 0.5,
         velocityX: this.velocityX_ * 0.5,
@@ -924,8 +927,10 @@ export class PinchRecognizer extends GestureRecognizer {
    * @return {number}
    * @private
    */
-  sqDist_(x1, x2, y1, y2) {
-    return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+  dist_(x1, x2, y1, y2) {
+    const dx = x1 - x2;
+    const dy = y1 - y2;
+    return Math.sqrt(dx * dx + dy * dy);
   }
 
   /**

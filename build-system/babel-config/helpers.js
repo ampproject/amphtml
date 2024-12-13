@@ -27,9 +27,10 @@ function getExperimentConstant() {
 /**
  * Computes options for minify-replace and returns the plugin object.
  *
+ * @param {!Object=} opt_overrides overrides for BUILD_CONSTANTS
  * @return {Array<string|Object>}
  */
-function getReplacePlugin() {
+function getReplacePlugin(opt_overrides) {
   /**
    * @param {string} identifierName the identifier name to replace
    * @param {boolean|string} value the value to replace with
@@ -43,7 +44,8 @@ function getReplacePlugin() {
     return {identifierName, replacement};
   }
 
-  const replacements = Object.entries(BUILD_CONSTANTS).map(([ident, val]) =>
+  const constants = Object.assign({}, BUILD_CONSTANTS, opt_overrides);
+  const replacements = Object.entries(constants).map(([ident, val]) =>
     createReplacement(ident, val)
   );
 

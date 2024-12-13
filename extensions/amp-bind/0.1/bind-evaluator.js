@@ -18,14 +18,14 @@ export class BindEvaluator {
 
     /**
      * Maps `id` to parsed BindMacro objects for all <amp-bind-macro> on page.
-     * @private @const {!Object<string, !./bind-macro.BindMacro>}
+     * @private @const {!{[key: string]: !./bind-macro.BindMacro}}
      */
     this.macros_ = Object.create(null);
 
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator(allowUrlProperties);
 
-    /** @const @private {!Object<string, !BindExpression>} */
+    /** @const @private {!{[key: string]: !BindExpression}} */
     this.expressions_ = Object.create(null);
   }
 
@@ -33,7 +33,7 @@ export class BindEvaluator {
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
    * @param {!Array<!BindBindingDef>} bindings
-   * @return {!Object<string, !BindEvaluatorErrorDef>},
+   * @return {!{[key: string]: !BindEvaluatorErrorDef}},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
@@ -71,7 +71,7 @@ export class BindEvaluator {
    * Parses and stores the given macros and returns map of macro `id` to
    * parse errors.
    * @param {!Array<!BindMacroDef>} macros
-   * @return {!Object<string, !BindEvaluatorErrorDef>}
+   * @return {!{[key: string]: !BindEvaluatorErrorDef}}
    */
   addMacros(macros) {
     const errors = [];
@@ -98,9 +98,9 @@ export class BindEvaluator {
    * @return {!BindEvaluateBindingsResultDef}
    */
   evaluateBindings(scope) {
-    /** @type {!Object<string, BindExpressionResultDef>} */
+    /** @type {!{[key: string]: BindExpressionResultDef}} */
     const cache = Object.create(null);
-    /** @type {!Object<string, !BindEvaluatorErrorDef>} */
+    /** @type {!{[key: string]: !BindEvaluatorErrorDef}} */
     const errors = Object.create(null);
 
     this.setGlobals_(scope);
@@ -235,7 +235,7 @@ export class BindEvaluator {
 
   /**
    * Returns the expression cache for testing.
-   * @return {!Object<string, !BindExpression>}
+   * @return {!{[key: string]: !BindExpression}}
    * @visibleForTesting
    */
   expressionsForTesting() {

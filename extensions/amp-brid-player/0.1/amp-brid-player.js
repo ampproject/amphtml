@@ -1,6 +1,10 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {
+  dispatchCustomEvent,
+  getChildJsonConfig,
+  removeElement,
+} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -124,8 +128,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       feedType = 'outstream';
     }
 
-    //Create iframe
-    const src =
+    // Create iframe
+    let src =
       'https://services.brid.tv/services/iframe/' +
       encodeURIComponent(feedType) +
       '/' +
@@ -137,6 +141,12 @@ class AmpBridPlayer extends AMP.BaseElement {
       '/0/' +
       itemsNum +
       '/?amp=1';
+
+    // Append child JSON config if supplied
+    try {
+      const customConfig = getChildJsonConfig(this.element);
+      src += '&cust_config=' + JSON.stringify(customConfig);
+    } catch (e) {}
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
@@ -483,6 +493,7 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', (AMP) => {
-  AMP.registerElement(TAG, AmpBridPlayer);
+AMP.extension('amp-brid-player', '0.1', (AMP) => {
+  AMP.registerElement('amp-brid-player', AmpBridPlayer);
+  AMP.registerElement('amp-target-video-player', AmpBridPlayer);
 });

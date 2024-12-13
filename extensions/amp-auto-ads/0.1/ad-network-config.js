@@ -37,6 +37,14 @@ export class AdNetworkConfigDef {
   getConfigUrl() {}
 
   /**
+   * After fetching the config, this method is called to allow rewriting the
+   * config on the client side.
+   * @param {!JsonObject} unusedConfig
+   * @return {!JsonObject}
+   */
+  filterConfig(unusedConfig) {}
+
+  /**
    * Any attributes derived from either the page or the auto-amp-ads tag that
    * should be applied to any ads inserted.
    * @return {!JsonObject<string, string>}

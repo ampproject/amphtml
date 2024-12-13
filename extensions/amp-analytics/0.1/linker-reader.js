@@ -1,10 +1,12 @@
-import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {hasOwn} from '#core/types/object';
-import {parseLinker} from './linker';
 import {parseQueryString} from '#core/types/string/url';
-import {removeParamsFromSearch} from '../../../src/url';
 
 import {user} from '#utils/log';
+
+import {parseLinker} from './linker';
+
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
+import {removeParamsFromSearch} from '../../../src/url';
 
 const TAG = 'amp-analytics/linker-reader';
 
@@ -16,7 +18,7 @@ export class LinkerReader {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {!Object<string, ?Object<string, string>>} */
+    /** @private {!{[key: string]: ?{[key: string]: string}}} */
     this.linkerParams_ = {};
   }
 
@@ -47,7 +49,7 @@ export class LinkerReader {
    * Parse the url get the key value pair for the linker name
    * and remove the LINKER_PARAM from window location
    * @param {string} name
-   * @return {?Object<string, string>}
+   * @return {?{[key: string]: string}}
    */
   parseAndCleanQueryString_(name) {
     const params = parseQueryString(this.win_.location.search);

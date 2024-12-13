@@ -2247,7 +2247,7 @@ type CssSpec struct {
 	ValidateKeyframes *bool `protobuf:"varint,6,opt,name=validate_keyframes,json=validateKeyframes" json:"validate_keyframes,omitempty"`
 	// Any declaration listed here are allowed.
 	Declaration []string `protobuf:"bytes,7,rep,name=declaration" json:"declaration,omitempty"`
-	// If fase, declarations tagged with `!important` are considered errors.
+	// If false, declarations tagged with `!important` are considered errors.
 	// Most AMP stylesheets disallow `!important` to reserve this override
 	// for AMP's own styles.
 	AllowImportant *bool         `protobuf:"varint,8,opt,name=allow_important,json=allowImportant,def=0" json:"allow_important,omitempty"`
@@ -3028,14 +3028,14 @@ type TagSpec struct {
 	AlsoRequiresTagWarning []string `protobuf:"bytes,22,rep,name=also_requires_tag_warning,json=alsoRequiresTagWarning" json:"also_requires_tag_warning,omitempty"`
 	// Expresses a generic condition which is satisfied if this tag is found. Used
 	// in combination with the `requires` attribute on a different tag.
-	Satisfies []string `protobuf:"bytes,23,rep,name=satisfies" json:"satisfies,omitempty"`
+	SatisfiesCondition []string `protobuf:"bytes,23,rep,name=satisfies_condition" json:"satisfies_condition,omitempty"`
 	// Expresses a generic condition which must be satisfied if this tag is found.
 	// Used in combination with the `satisfies` attributes on a different tag.
-	Requires []string `protobuf:"bytes,24,rep,name=requires" json:"requires,omitempty"`
+	RequiresCondition []string `protobuf:"bytes,24,rep,name=requires_condition" json:"requires_condition,omitempty"`
 	// The excludes field is a generic condition, which must not be satisfied if
 	// this tag is found. Otherwise a TAG_EXCLUDED_BY_TAG error will be generated.
 	// Used in combination with the `satisfies` attributes on a different tag.
-	Excludes []string `protobuf:"bytes,32,rep,name=excludes" json:"excludes,omitempty"`
+	ExcludesCondition []string `protobuf:"bytes,32,rep,name=excludes_condition" json:"excludes_condition,omitempty"`
 	// If set, generates a DEPRECATED_TAG error with severity WARNING.
 	// The value of the deprecation field indicates what to use instead,
 	// e.g. the name of a tag.
@@ -3252,23 +3252,23 @@ func (x *TagSpec) GetAlsoRequiresTagWarning() []string {
 	return nil
 }
 
-func (x *TagSpec) GetSatisfies() []string {
+func (x *TagSpec) GetSatisfiesCondition() []string {
 	if x != nil {
-		return x.Satisfies
+		return x.SatisfiesCondition
 	}
 	return nil
 }
 
-func (x *TagSpec) GetRequires() []string {
+func (x *TagSpec) GetRequiresCondition() []string {
 	if x != nil {
-		return x.Requires
+		return x.RequiresCondition
 	}
 	return nil
 }
 
-func (x *TagSpec) GetExcludes() []string {
+func (x *TagSpec) GetExcludesCondition() []string {
 	if x != nil {
-		return x.Excludes
+		return x.ExcludesCondition
 	}
 	return nil
 }

@@ -49,3 +49,24 @@ export async function getNextArrow(styles, controller) {
     ELEMENT_WAIT_TIMEOUT
   );
 }
+
+export async function isElementInViewport(element, controller) {
+  const rect = await controller.getElementRect(element);
+  const [width, height] = await controller.getWindowRect();
+
+  await expect(rect.top).to.be.above(0);
+  await expect(rect.bottom).to.be.below(Number(height));
+  await expect(rect.left).to.be.above(0);
+  await expect(rect.right).to.be.below(Number(width));
+}
+
+export async function isElementOutOfViewport(element, controller) {
+  const winRect = await controller.getWindowRect();
+  const width = Number(winRect[0]);
+  const height = Number(winRect[1]);
+
+  await expect(controller.getElementRect(element)).to.satisfy(
+    ({bottom, left, right, top}) =>
+      top < 0 || bottom > height || left < 0 || right > width
+  );
+}

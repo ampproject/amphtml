@@ -28,6 +28,9 @@ class URL {
   std::string hostname() const { return host_; }
   std::string login() const { return login_; }
   int port() const { return port_; }
+  std::string_view path_params_fragment() const {
+    return path_params_fragment_;
+  }
 
  private:
   static bool IsAlphaNum(uint8_t c) {
@@ -79,6 +82,7 @@ class URL {
   std::string login_;
   std::string host_;
   int port_;
+  std::string_view path_params_fragment_;
 };
 
 }  // namespace htmlparser

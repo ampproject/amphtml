@@ -1,13 +1,12 @@
 import {LruCache} from '#core/data-structures/lru-cache';
 import {createElementWithAttributes} from '#core/dom';
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -15,7 +14,7 @@ import {
 } from '../../../src/service-helpers';
 import {parseUrlDeprecated} from '../../../src/url';
 
-/** @private {!Object<string, string|boolean>} */
+/** @private {!{[key: string]: string|boolean}} */
 const TEMPLATE_CORS_CONFIG = {
   mode: 'cors',
   method: 'GET',
@@ -96,9 +95,9 @@ export class AmpAdTemplateHelper {
         const scriptElem = createElementWithAttributes(
           element.ownerDocument,
           'script',
-          dict({
+          {
             'type': 'application/json',
-          })
+          }
         );
         scriptElem.textContent = JSON.stringify(config['inline']);
         analyticsEle.appendChild(scriptElem);

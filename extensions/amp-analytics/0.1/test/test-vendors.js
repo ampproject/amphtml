@@ -1,15 +1,19 @@
-import {AmpAnalytics} from '../amp-analytics';
-import {AnalyticsConfig} from '../config';
-import {ExpansionOptions, variableServiceForDoc} from '../variables';
-import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '#testing/helpers/service';
-import {Services} from '#service';
-import {hasOwn} from '#core/types/object';
-import {macroTask} from '#testing/helpers';
+
 import VENDOR_REQUESTS from './vendor-requests.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+
+import {AmpAnalytics} from '../amp-analytics';
+import {AnalyticsConfig} from '../config';
+import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
+import {ExpansionOptions, variableServiceForDoc} from '../variables';
 
 describes.realWin(
   'amp-analytics',

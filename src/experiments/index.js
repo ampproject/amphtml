@@ -350,7 +350,7 @@ export function getExperimentBranch(win, experimentName) {
  * top Window.
  *
  * @param {Window} win Window context to check for experiment state.
- * @return {Object} contains all experiment branches and their ids.
+ * @return {object} contains all experiment branches and their ids.
  */
 export function getActiveExperimentBranches(win) {
   const topWin = getTopWindow(win);

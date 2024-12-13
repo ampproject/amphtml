@@ -77,6 +77,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       getBoundingClientRect: () => rect,
       layoutCallback: () => Promise.resolve(),
       prerenderAllowed: () => true,
+      previewAllowed: () => true,
       renderOutsideViewport: () => false,
       unlayoutCallback: () => true,
       pause: () => {},
@@ -436,28 +437,44 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
-    // TODO (#16156): duplicate stub for getVisibilityState on Safari
-    it.configure()
-      .skipSafari()
-      .run('should change size when document is invisible', () => {
-        resources.visible_ = false;
-        env.sandbox
-          .stub(resources.ampdoc, 'getVisibilityState')
-          .returns(VisibilityState_Enum.PRERENDER);
-        mutator.scheduleChangeSize_(
-          resource1,
-          111,
-          222,
-          undefined,
-          NO_EVENT,
-          false
-        );
-        resources.mutateWork_();
-        expect(resources.requestsChangeSize_).to.be.empty;
-        expect(resource1.changeSize).to.be.calledOnce;
-        expect(overflowCallbackSpy).to.be.calledOnce;
-        expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
-      });
+    it('should change size when document is invisible', () => {
+      resources.visible_ = false;
+      env.sandbox
+        .stub(resources.ampdoc, 'getVisibilityState')
+        .returns(VisibilityState_Enum.PRERENDER);
+      mutator.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
+
+    it('should change size when document is in preview mode', () => {
+      env.sandbox
+        .stub(resources.ampdoc, 'getVisibilityState')
+        .returns(VisibilityState_Enum.PREVIEW);
+      mutator.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        NO_EVENT,
+        false
+      );
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
 
     it('should change size when active', () => {
       resource1.element.contains = () => true;
@@ -956,40 +973,35 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       expect(overflowCallbackSpy).to.not.been.called;
     });
 
-    // TODO(#25518): investigate failure on Safari
-    it.configure().skipSafari(
-      'in viewport should change size if in the last 15% and ' +
-        'in the last 1000px',
-      () => {
-        viewportRect.top = 9600;
-        viewportRect.bottom = 9800;
-        resource1.layoutBox_ = {
-          top: 9650,
-          left: 0,
-          right: 100,
-          bottom: 9700,
-          height: 50,
-        };
-        mutator.scheduleChangeSize_(
-          resource1,
-          111,
-          222,
-          {top: 1, right: 2, bottom: 3, left: 4},
-          NO_EVENT,
-          false
-        );
+    it('in viewport should change size if in the last 15% and in the last 1000px', () => {
+      viewportRect.top = 9600;
+      viewportRect.bottom = 9800;
+      resource1.layoutBox_ = {
+        top: 9650,
+        left: 0,
+        right: 100,
+        bottom: 9700,
+        height: 50,
+      };
+      mutator.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        {top: 1, right: 2, bottom: 3, left: 4},
+        NO_EVENT,
+        false
+      );
 
-        expect(vsyncSpy).to.be.calledOnce;
-        const marginsTask = vsyncSpy.lastCall.args[0];
-        marginsTask.measure({});
+      expect(vsyncSpy).to.be.calledOnce;
+      const marginsTask = vsyncSpy.lastCall.args[0];
+      marginsTask.measure({});
 
-        resources.mutateWork_();
-        expect(resources.requestsChangeSize_).to.be.empty;
-        expect(resource1.changeSize).to.be.calledOnce;
-        expect(overflowCallbackSpy).to.be.calledOnce;
-        expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
-      }
-    );
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
 
     it(
       'in viewport should NOT change size if in the last 15% but NOT ' +
@@ -1383,6 +1395,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.getBoundingClientRect = () => rect;
     element.layoutCallback = () => Promise.resolve();
     element.prerenderAllowed = () => true;
+    element.previewAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;
     element.pause = () => {};

@@ -114,8 +114,7 @@ describes.sandboxed('parseUrlDeprecated', {}, () => {
     expect(a1).to.equal(a2);
   });
 
-  // TODO(#14349): unskip flaky test
-  it.skip('caches up to 100 results', () => {
+  it('caches up to 100 results', () => {
     const url = 'https://foo.com:123/abc?123#foo';
     const a1 = parseUrlDeprecated(url);
 
@@ -226,9 +225,9 @@ describes.sandboxed('parseUrlDeprecated', {}, () => {
       origin: 'http://foo.com:123',
     });
   });
-  it('should parse origin https://twitter.com/path#abc', () => {
-    expect(parseUrlDeprecated('https://twitter.com/path#abc').origin).to.equal(
-      'https://twitter.com'
+  it('should parse origin https://x.com/path#abc', () => {
+    expect(parseUrlDeprecated('https://x.com/path#abc').origin).to.equal(
+      'https://x.com'
     );
   });
 
@@ -286,13 +285,13 @@ describes.sandboxed('assertHttpsUrl/isSecureUrl', {}, () => {
     assertHttpsUrl('', referenceElement);
   });
   it('should allow https', () => {
-    assertHttpsUrl('https://twitter.com', referenceElement);
-    expect(isSecureUrlDeprecated('https://twitter.com')).to.be.true;
+    assertHttpsUrl('https://x.com', referenceElement);
+    expect(isSecureUrlDeprecated('https://x.com')).to.be.true;
   });
   it('should allow protocol relative', () => {
-    assertHttpsUrl('//twitter.com', referenceElement);
+    assertHttpsUrl('//x.com', referenceElement);
     // `isSecureUrl` always resolves relative URLs.
-    expect(isSecureUrlDeprecated('//twitter.com')).to.be.equal(
+    expect(isSecureUrlDeprecated('//x.com')).to.be.equal(
       window.location.protocol == 'https:'
     );
   });
@@ -309,10 +308,10 @@ describes.sandboxed('assertHttpsUrl/isSecureUrl', {}, () => {
   it('should fail on http', () => {
     allowConsoleError(() => {
       expect(() => {
-        assertHttpsUrl('http://twitter.com', referenceElement);
+        assertHttpsUrl('http://x.com', referenceElement);
       }).to.throw(/source must start with/);
     });
-    expect(isSecureUrlDeprecated('http://twitter.com')).to.be.false;
+    expect(isSecureUrlDeprecated('http://x.com')).to.be.false;
   });
   it('should fail on http with localhost in the name', () => {
     allowConsoleError(() => {
@@ -326,25 +325,25 @@ describes.sandboxed('assertHttpsUrl/isSecureUrl', {}, () => {
 
 describes.sandboxed('assertAbsoluteHttpOrHttpsUrl', {}, () => {
   it('should allow http', () => {
-    expect(assertAbsoluteHttpOrHttpsUrl('http://twitter.com/')).to.equal(
-      'http://twitter.com/'
+    expect(assertAbsoluteHttpOrHttpsUrl('http://x.com/')).to.equal(
+      'http://x.com/'
     );
-    expect(assertAbsoluteHttpOrHttpsUrl('HTTP://twitter.com/')).to.equal(
-      'http://twitter.com/'
+    expect(assertAbsoluteHttpOrHttpsUrl('HTTP://x.com/')).to.equal(
+      'http://x.com/'
     );
   });
   it('should allow https', () => {
-    expect(assertAbsoluteHttpOrHttpsUrl('https://twitter.com/')).to.equal(
-      'https://twitter.com/'
+    expect(assertAbsoluteHttpOrHttpsUrl('https://x.com/')).to.equal(
+      'https://x.com/'
     );
-    expect(assertAbsoluteHttpOrHttpsUrl('HTTPS://twitter.com/')).to.equal(
-      'https://twitter.com/'
+    expect(assertAbsoluteHttpOrHttpsUrl('HTTPS://x.com/')).to.equal(
+      'https://x.com/'
     );
   });
   it('should fail on relative protocol', () => {
     allowConsoleError(() => {
       expect(() => {
-        assertAbsoluteHttpOrHttpsUrl('//twitter.com/');
+        assertAbsoluteHttpOrHttpsUrl('//x.com/');
       }).to.throw(/URL must start with/);
     });
   });
@@ -368,69 +367,61 @@ describes.sandboxed('assertAbsoluteHttpOrHttpsUrl', {}, () => {
 
 describes.sandboxed('removeFragment', {}, () => {
   it('should remove fragment', () => {
-    expect(removeFragment('https://twitter.com/path#abc')).to.equal(
-      'https://twitter.com/path'
+    expect(removeFragment('https://x.com/path#abc')).to.equal(
+      'https://x.com/path'
     );
   });
   it('should remove empty fragment', () => {
-    expect(removeFragment('https://twitter.com/path#')).to.equal(
-      'https://twitter.com/path'
+    expect(removeFragment('https://x.com/path#')).to.equal(
+      'https://x.com/path'
     );
   });
   it('should ignore when no fragment', () => {
-    expect(removeFragment('https://twitter.com/path')).to.equal(
-      'https://twitter.com/path'
-    );
+    expect(removeFragment('https://x.com/path')).to.equal('https://x.com/path');
   });
 });
 
 describes.sandboxed('removeSearch', {}, () => {
   it('should remove search', () => {
-    expect(removeSearch('https://twitter.com/path?abc')).to.equal(
-      'https://twitter.com/path'
+    expect(removeSearch('https://x.com/path?abc')).to.equal(
+      'https://x.com/path'
     );
   });
   it('should remove search with value', () => {
-    expect(removeSearch('https://twitter.com/path?abc=123')).to.equal(
-      'https://twitter.com/path'
+    expect(removeSearch('https://x.com/path?abc=123')).to.equal(
+      'https://x.com/path'
     );
   });
   it('should remove multiple params', () => {
-    expect(removeSearch('https://twitter.com/path?abc=123&d&e=4')).to.equal(
-      'https://twitter.com/path'
+    expect(removeSearch('https://x.com/path?abc=123&d&e=4')).to.equal(
+      'https://x.com/path'
     );
   });
   it('should remove empty search', () => {
-    expect(removeSearch('https://twitter.com/path?')).to.equal(
-      'https://twitter.com/path'
-    );
+    expect(removeSearch('https://x.com/path?')).to.equal('https://x.com/path');
   });
   it('should ignore when no search', () => {
-    expect(removeSearch('https://twitter.com/path')).to.equal(
-      'https://twitter.com/path'
-    );
+    expect(removeSearch('https://x.com/path')).to.equal('https://x.com/path');
   });
   it('should preserve fragment', () => {
-    expect(removeSearch('https://twitter.com/path?abc#f')).to.equal(
-      'https://twitter.com/path#f'
+    expect(removeSearch('https://x.com/path?abc#f')).to.equal(
+      'https://x.com/path#f'
     );
   });
   it('should preserve fragment with multiple params', () => {
-    expect(removeSearch('https://twitter.com/path?a&d=1&e=5#f=x')).to.equal(
-      'https://twitter.com/path#f=x'
+    expect(removeSearch('https://x.com/path?a&d=1&e=5#f=x')).to.equal(
+      'https://x.com/path#f=x'
     );
   });
   it('should preserve fragment when no search', () => {
-    expect(removeSearch('https://twitter.com/path#f')).to.equal(
-      'https://twitter.com/path#f'
+    expect(removeSearch('https://x.com/path#f')).to.equal(
+      'https://x.com/path#f'
     );
   });
   it('should handle empty fragment', () => {
-    expect(removeSearch('https://twitter.com/path#')).to.equal(
-      'https://twitter.com/path#'
-    );
-    expect(removeSearch('https://twitter.com/path?#')).to.equal(
-      'https://twitter.com/path#'
+    expect(removeSearch('https://x.com/path#')).to.equal('https://x.com/path#');
+    expect(removeSearch('https://x.com/path?#')).to.equal(
+      'https://x.com/path#'
     );
   });
 });
@@ -632,17 +623,15 @@ describes.sandboxed('isLocalhostOrigin', {}, () => {
 
 describes.sandboxed('isProtocolValid', {}, () => {
   function testProtocolValid(href, bool) {
-    it.configure()
-      .skipFirefox()
-      .run(
-        'should return that ' +
-          href +
-          (bool ? ' is' : ' is not') +
-          ' a valid protocol',
-        () => {
-          expect(isProtocolValid(href)).to.equal(bool);
-        }
-      );
+    it(
+      'should return that ' +
+        href +
+        (bool ? ' is' : ' is not') +
+        ' a valid protocol',
+      () => {
+        expect(isProtocolValid(href)).to.equal(bool);
+      }
+    );
   }
 
   testProtocolValid('http://foo.com', true);
@@ -822,24 +811,22 @@ describes.sandboxed('getSourceOrigin/Url', {}, () => {
 
 describes.sandboxed('resolveRelativeUrl', {}, () => {
   function testRelUrl(href, baseHref, resolvedHref) {
-    it.configure()
-      .skipFirefox()
-      .run(
-        'should return the resolved rel url from ' +
-          href +
-          ' with base ' +
-          baseHref,
-        () => {
-          expect(resolveRelativeUrl(href, baseHref)).to.equal(
-            resolvedHref,
-            'native or fallback'
-          );
-          expect(resolveRelativeUrlFallback_(href, baseHref)).to.equal(
-            resolvedHref,
-            'fallback'
-          );
-        }
-      );
+    it(
+      'should return the resolved rel url from ' +
+        href +
+        ' with base ' +
+        baseHref,
+      () => {
+        expect(resolveRelativeUrl(href, baseHref)).to.equal(
+          resolvedHref,
+          'native or fallback'
+        );
+        expect(resolveRelativeUrlFallback_(href, baseHref)).to.equal(
+          resolvedHref,
+          'fallback'
+        );
+      }
+    );
   }
 
   // Absolute URL.

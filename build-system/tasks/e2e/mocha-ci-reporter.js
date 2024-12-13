@@ -1,22 +1,18 @@
+const {reporters} = require('mocha');
 const JsonReporter = require('./mocha-custom-json-reporter');
-const mocha = require('mocha');
-const MochaDotsReporter = require('./mocha-dots-reporter');
 const MochaJUnitReporter = require('mocha-junit-reporter');
-const {Base} = mocha.reporters;
 
-/**
- * @param {*} runner
- * @param {*} options
- * @return {MochaDotsReporter}
- */
-function ciReporter(runner, options) {
-  Base.call(this, runner, options);
-  this._mochaDotsReporter = new MochaDotsReporter(runner);
-  this._jsonReporter = new JsonReporter(runner);
-  this._mochaJunitReporter = new MochaJUnitReporter(runner, options);
-  // TODO(#28387) clean up this typing.
-  return /** @type {*} */ (this);
+class CiReporter extends reporters.Base {
+  /**
+   * @param {import('mocha').Runner} runner
+   * @param {import('mocha').MochaOptions} options
+   */
+  constructor(runner, options) {
+    super(runner, options);
+    this._mochaSpecReporter = new reporters.Spec(runner);
+    this._jsonReporter = new JsonReporter(runner);
+    this._mochaJunitReporter = new MochaJUnitReporter(runner, options);
+  }
 }
-ciReporter.prototype.__proto__ = Base.prototype;
 
-module.exports = ciReporter;
+module.exports = CiReporter;

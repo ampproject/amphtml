@@ -1,5 +1,6 @@
-import {tryParseJson} from '#core/types/object/json';
 import {validateData, writeScript} from '#3p/3p';
+
+import {tryParseJson} from '#core/types/object/json';
 
 /**
  * @param {!Window} global
@@ -8,7 +9,7 @@ import {validateData, writeScript} from '#3p/3p';
 export function admixer(global, data) {
   validateData(data, ['zone'], ['sizes']);
   /**
-   * @type {Object}
+   * @type {object}
    */
   const payload = {
     imps: [],

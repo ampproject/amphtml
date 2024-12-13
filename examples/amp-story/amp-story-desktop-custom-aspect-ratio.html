@@ -1,0 +1,112 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>amp-story-desktop-one-panel example</title>
+    <link rel="canonical" href="example.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async="" custom-element="amp-animation" src="/dist/v0/amp-animation-0.1.max.js"></script>
+    <script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,700;1,500&amp;display=swap" rel="stylesheet">
+    <style amp-custom>
+      amp-story {
+        font-family: 'Poppins', sans-serif;
+        color: white;
+        text-align: center;
+      }
+      amp-story-grid-layer h1 {
+        font-size: 2em;
+      }
+      amp-story-grid-layer h1, amp-story-grid-layer h2 {
+        font-weight: 700;
+        text-shadow: 0px 4px 4px #00000055;
+      }
+    </style>
+  </head>
+  <body>
+    <amp-story
+      standalone
+      title="Demo Story"
+      publisher="AMP Story"
+      publisher-logo-src="example.com/logo.png"
+      poster-portrait-src="example.com/poster.jpg"
+      desktop-aspect-ratio="1:1"
+    >
+      <amp-story-page id="page-1">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-media layout="fill" data-x="50%" data-y="0%" lock-bounds>
+            <amp-img
+              layout="fill"
+              width="1600"
+              height="900"
+              src="/examples/visual-tests/picsum.photos/image980_1600x900.jpg"
+            ></amp-img>
+          </amp-story-panning-media>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="thirds">
+          <span>
+            <span><h1 animate-in="scale-fade-up">Page 1</h1></span>
+            <span><h2 animate-in="scale-fade-up" animate-in-delay=".1s">Animate in example</h2></span>
+          </span>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment data-title="lorem ipsum" layout="nodisplay">
+          <h2>Lorem ipsum</h2>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate enim fuga maxime, laborum nobis porro quos officiis voluptates magnam distinctio blanditiis quae odit doloribus dolorem cum debitis temporibus molestias facere.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate enim fuga maxime, laborum nobis porro quos officiis voluptates magnam distinctio blanditiis quae odit doloribus dolorem cum debitis temporibus molestias facere.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate enim fuga maxime, laborum nobis porro quos officiis voluptates magnam distinctio blanditiis quae odit doloribus dolorem cum debitis temporibus molestias facere.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate enim fuga maxime, laborum nobis porro quos officiis voluptates magnam distinctio blanditiis quae odit doloribus dolorem cum debitis temporibus molestias facere.
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-media layout="fill" data-x="-20%" data-y="0%" lock-bounds>
+            <amp-img
+            layout="fill"
+            width="1600"
+            height="900"
+            src="/examples/visual-tests/picsum.photos/image980_1600x900.jpg"
+            ></amp-img>
+          </amp-story-panning-media>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="thirds">
+          <span>
+            <span><h1 animate-in="scale-fade-up">Page 2</h1></span>
+            <span><h2 animate-in="scale-fade-up" animate-in-delay=".1s">Animate in example</h2></span>
+          </span>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+          <amp-story-panning-media layout="fill" data-x="-20%" data-y="10%" zoom='1.5' lock-bounds>
+            <amp-img
+            layout="fill"
+            width="1600"
+            height="900"
+            src="/examples/visual-tests/picsum.photos/image980_1600x900.jpg"
+            ></amp-img>
+          </amp-story-panning-media>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="thirds">
+          <span>
+            <span><h1 animate-in="scale-fade-up">Page 3</h1></span>
+            <span><h2 animate-in="scale-fade-up" animate-in-delay=".1s">Animate in example</h2></span>
+          </span>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+    </amp-story>
+  </body>
+</html>

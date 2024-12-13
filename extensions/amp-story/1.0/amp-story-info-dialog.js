@@ -1,22 +1,25 @@
 import * as Preact from '#core/dom/jsx';
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+import {closest, matches} from '#core/dom/query';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
+
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest, matches} from '#core/dom/query';
+import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
-import {dev} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+
+import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -70,12 +73,13 @@ export class InfoDialog {
     const {canonicalUrl} = Services.documentInfoForDoc(this.parentEl_);
 
     const linkElement = (
-      <a class="i-amphtml-story-info-moreinfo" target="_blank">
-        {localize(
-          this.parentEl_,
+      <a
+        class="i-amphtml-story-info-moreinfo"
+        target="_blank"
+        i-amphtml-i18n-text-content={
           LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
-        )}
-      </a>
+        }
+      ></a>
     );
 
     this.element_ = (
@@ -94,12 +98,12 @@ export class InfoDialog {
             this.onClick_(event);
           }}
         >
-          <h1 class="i-amphtml-story-info-heading">
-            {localize(
-              this.parentEl_,
+          <h1
+            class="i-amphtml-story-info-heading"
+            i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
-            )}
-          </h1>
+            }
+          ></h1>
           <a class="i-amphtml-story-info-link" href={canonicalUrl}>
             {
               // Add zero-width space character (\u200B) after "." and "/"
@@ -115,6 +119,7 @@ export class InfoDialog {
     this.initializeListeners_();
 
     return Promise.all([
+      localizeTemplate(this.element_, this.parentEl_),
       this.mutator_.mutateElement(this.parentEl_, () => {
         const root = createShadowRootWithStyle(<div />, this.element_, CSS);
         this.parentEl_.appendChild(root);
@@ -191,7 +196,9 @@ export class InfoDialog {
         if (!moreInfoUrl) {
           return null;
         }
-        return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
+        return Services.urlForDoc(this.parentEl_).assertAbsoluteHttpOrHttpsUrl(
+          dev().assertString(moreInfoUrl)
+        );
       });
   }
 }

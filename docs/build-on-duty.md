@@ -20,7 +20,9 @@ Make sure you are a member of the [#contributing](https://amphtml.slack.com/mess
                 - For an integration test failing on a specific browser, add the corresponding `skip` function (e.g. `skipEdge()`). See the `skipXXX` functions in [testing/test-config.js](https://github.com/ampproject/amphtml/blob/main/testing/test-config.js) for details.
             - Restart the failing parts of the build build on CircleCI by clicking the `Rerun workflow from failed` button on the build page (you must be signed into GitHub).
         - If the issue is due to a real breakage, work with the appropriate owner to rollback the offending PR. Rollbacks are preferable to fixes because fixes can often cause their own breakages.
-2. Keep an eye on incoming [Renovate PRs](https://github.com/ampproject/amphtml/pulls/renovate-bot), which result from an automated process to update our dependencies.
+2. [Triage new issues](https://github.com/ampproject/amphtml/issues), especially [unassigned ones](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee)
+    - You are not expected to fix all of these issues, just make sure they are assigned to an individual or a relevant working group.
+3. Keep an eye on incoming [Renovate PRs](https://github.com/ampproject/amphtml/pulls/renovate-bot), which result from an automated process to update our dependencies.
     1. Make sure that the PR updates both package.json and package-lock.json
     2. Check the CircleCI logs for the PR for any new failures or unexpected results
         - If there’s a failure due to a flaky test, try restarting the job that failed

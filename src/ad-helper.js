@@ -8,7 +8,7 @@ const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
 
 /**
  * Tags that are allowed to have fixed positioning
- * @const {!Object<string, boolean>}
+ * @const {!{[key: string]: boolean}}
  */
 const CONTAINERS = {
   'AMP-FX-FLYING-CARPET': true,

@@ -1,5 +1,4 @@
 import {closestAncestorElementBySelector} from '#core/dom/query';
-import {iterateCursor} from '#core/dom';
 
 /**
  *
@@ -18,7 +17,7 @@ export function getScopeElements(ampDoc, configOpts) {
     selection = doc.querySelectorAll(cssSelector);
   }
 
-  iterateCursor(selection, (element) => {
+  selection.forEach((element) => {
     if (hasAttributeValues(element, configOpts)) {
       filteredSelection.push(element);
     }

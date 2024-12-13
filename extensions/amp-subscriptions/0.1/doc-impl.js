@@ -1,6 +1,8 @@
-import {Doc} from '#third_party/subscriptions-project/config';
 import {Services} from '#service';
+
 import {dev} from '#utils/log';
+
+import {Doc} from '#third_party/subscriptions-project/config';
 
 /**
  * Adopts config document to ampdoc.

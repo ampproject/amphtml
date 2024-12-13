@@ -4,6 +4,8 @@ import {LayoutPriority_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {getSchedulerForDoc} from '#service/scheduler';
 
+import {sleep} from '#testing/helpers';
+
 import {BaseElement} from '../../src/base-element';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
@@ -625,6 +627,14 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       await element.buildInternal();
       await promise;
     });
+
+    it('should build if amp-bind mutation', async () => {
+      const element = new ElementClass();
+      builderMock.expects('scheduleAsap').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      element.mutatedAttributesCallback({});
+    });
   });
 
   describe('mount/unmount', () => {
@@ -1118,7 +1128,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
       doc.body.appendChild(element);
       await element.buildInternal();
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await sleep(10);
 
       expect(getActionQueueForTesting(element)).to.not.exist;
       expect(handler)

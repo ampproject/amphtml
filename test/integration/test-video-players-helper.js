@@ -590,8 +590,8 @@ export function runVideoPlayerIntegrationTests(
         video.setAttribute('id', 'myVideo');
         video.setAttribute('controls', '');
         video.setAttribute('layout', 'fixed');
-        video.setAttribute('width', '300px');
-        video.setAttribute('height', '50vh');
+        video.setAttribute('width', '300');
+        video.setAttribute('height', '300');
 
         video.style.position = 'absolute';
         video.style.top = top;

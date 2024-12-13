@@ -1,7 +1,7 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "1.2.0",
+  "version": "1.3.1",
   "default_locale": "en",
   "description": "__MSG_extensionDescription__",
   "icons": {
@@ -9,28 +9,35 @@
     "48": "icon-48.png",
     "128": "icon-128.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "19": "no-amp-128.png",
       "38": "no-amp-38.png"
     }
   },
   "background": {
-    "page": "background.html"
+    "service_worker": "worker.js"
   },
   "content_scripts": [
     {
-      "js": ["content_script.js"],
-      "matches": ["<all_urls>"],
+      "js": [
+        "content_script.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
       "run_at": "document_start"
     }
   ],
-  "content_security_policy": "script-src 'self' https://cdn.ampproject.org 'wasm-eval'; object-src 'self'",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
   "homepage_url": "https://amp.dev",
   "permissions": [
     "tabs",
-    "webRequest",
-    "webRequestBlocking",
+    "storage"
+  ],
+  "host_permissions": [
     "*://*/",
     "<all_urls>"
   ]

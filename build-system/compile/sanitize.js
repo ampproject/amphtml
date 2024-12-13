@@ -28,7 +28,7 @@ async function sanitize(file) {
       replaced[match] ||
       (replaced[match] = `___${String(count++).padStart(6, '0')}___`)
   );
-  const formatted = prettier.format(presanitize, options);
+  const formatted = await prettier.format(presanitize, options);
   const sanitized = formatted.replace(/___\d+___/g, '______');
   await fs.outputFile(file, sanitized);
 }

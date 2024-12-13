@@ -1,13 +1,17 @@
-import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
-import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {SameSite_Enum, setCookie} from '../../../src/cookies';
-import {Services} from '#service';
-import {hasOwn} from '#core/types/object';
-import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '#core/types';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
+
 import {user} from '#utils/log';
+
+import {isCookieAllowed} from './cookie-reader';
 import {variableServiceForDoc} from './variables';
+
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
+import {SameSite_Enum, setCookie} from '../../../src/cookies';
 
 const TAG = 'amp-analytics/cookie-writer';
 

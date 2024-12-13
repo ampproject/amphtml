@@ -7,12 +7,19 @@
 
     // Enable JSON auto-formatting for these files.
     ".prettierrc": "json",
-    ".renovaterc.json": "json"
+    ".renovaterc.json": "json",
+
+    // Allow comments in JSON schema files.
+    "*.schema.json": "jsonc"
   },
+
+  "files.insertFinalNewline": true,
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
   // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
-  "editor.codeActionsOnSave": {"source.fixAll.eslint": true},
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
   "[js]": {"editor.formatOnSave": false},
 
   // Auto-fix non-JS files with Prettier using amphtml's custom settings. Needs

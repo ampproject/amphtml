@@ -17,6 +17,14 @@
     "_pageUrl": "${sourceUrl}",
     "_goalUrl": "goal://${sourceHost}/${goalId}"
   },
+  "cookies": {
+    "enabled": true,
+    "_ym_uid": {
+      "value": "$IF($MATCH(COOKIE(_ym_uid),^\\d{17}\\d?\\d?$),COOKIE(_ym_uid),TIMESTAMP()$SUBSTR(RANDOM(),2,6))",
+      "cookieMaxAge": 525600,
+      "sameSite": "None"
+    }
+  },
   "requests": {
     "pageview": "${_prefix}${_pageViewBrInfo}${_brInfo}&${_siteInfo}&${_suffix}",
     "notBounce": "${_prefix}${_notBounceBrInfo}${_brInfo}&${_suffix}",

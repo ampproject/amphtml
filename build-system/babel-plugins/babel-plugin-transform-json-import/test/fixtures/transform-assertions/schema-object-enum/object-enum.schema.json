@@ -1,0 +1,94 @@
+{
+  "description": "This description should NOT be included in the schema object",
+  "type": "array",
+  "items": {
+    "properties": {
+      "prop_a": {
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "description": "This description should NOT be included in the schema object",
+            "enum": [
+              123,
+              345,
+              {
+                "foo": "This object should be included in the schema object",
+                "bar": {
+                  "all keys are included": true
+                }
+              },
+              "this string should NOT be included in the schema object",
+              "this string should also NOT be included in the schema object",
+              {
+                "bar": "This object should also be included in the schema object"
+              }
+            ]
+          }
+        ]
+      },
+      "prop_b": {},
+      "prop_c": {
+        "description": "This description should NOT be included in the schema object",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "prop_x": {},
+          "prop_y": {},
+          "prop_z": {
+            "properties": {
+              "objectWithoutAditionalPropertiesA": {
+                "additionalProperties": false,
+                "properties": {
+                  "prop_a": {},
+                  "prop_b": {},
+                  "prop_c": {},
+                  "prop_d": {},
+                  "prop_e": {},
+                  "prop_f": {},
+                  "prop_g": {},
+                  "prop_h": {},
+                  "prop_i": {}
+                }
+              },
+              "objectWithoutAditionalPropertiesB": {
+                "additionalProperties": false,
+                "properties": {
+                  "prop_z": {},
+                  "prop_y": {},
+                  "prop_x": {},
+                  "prop_w": {
+                    "properties": {
+                      "prop_xyz": {
+                        "properties": {
+                          "prop_abc": {
+                            "enum": [
+                              "this string should NOT be included in the schema object",
+                              123,
+                              {
+                                "object": true,
+                                "bar": {
+                                  "all keys are included": true
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "prop_v": {},
+                  "prop_u": {},
+                  "prop_t": {},
+                  "prop_s": {},
+                  "prop_r": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

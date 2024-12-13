@@ -35,6 +35,6 @@ function buildDom(element) {
 }
 ```
 
-Check out [<amp-layout>](../builtins/amp-layout/amp-layout.js) to see a simple example.
+Check out [`<amp-layout>`](../builtins/amp-layout/amp-layout.js) to see a simple example.
 
 <!-- TODO(samouri): Create Bento section when the details finalize. -->

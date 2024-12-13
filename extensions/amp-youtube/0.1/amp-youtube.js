@@ -14,7 +14,6 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -116,8 +115,6 @@ class AmpYoutube extends AMP.BaseElement {
     const preconnect = Services.preconnectFor(this.win);
     const ampdoc = this.getAmpDoc();
     preconnect.url(ampdoc, this.getVideoIframeSrc_());
-    // Host that YT uses to serve JS needed by player.
-    preconnect.url(ampdoc, 'https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
     preconnect.url(ampdoc, 'https://i.ytimg.com', opt_onLayout);
   }
@@ -374,13 +371,11 @@ class AmpYoutube extends AMP.BaseElement {
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'event': 'command',
-            'func': command,
-            'args': opt_args || '',
-          })
-        );
+        const message = JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        });
         this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
@@ -461,11 +456,9 @@ class AmpYoutube extends AMP.BaseElement {
       return;
     }
     this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(
-        dict({
-          'event': 'listening',
-        })
-      ),
+      JSON.stringify({
+        'event': 'listening',
+      }),
       '*'
     );
   }

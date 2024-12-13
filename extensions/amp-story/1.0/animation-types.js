@@ -16,7 +16,7 @@ export {
   WebAnimationTimingDef,
 };
 
-/** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!WebKeyframesDef} */
+/** @typedef {function(StoryAnimationDimsDef, {[key: string]: *}):!WebKeyframesDef} */
 export let WebKeyframesCreateFnDef;
 
 /**
@@ -45,7 +45,7 @@ export let StoryAnimationPresetDef;
  *   source: !Element,
  *   startAfterId: (?string),
  *   preset: (!StoryAnimationPresetDef|undefined),
- *   keyframeOptions: (!Object<string, *>|undefined),
+ *   keyframeOptions: (!{[key: string]: *}|undefined),
  *   spec: !WebAnimationDef,
  * }}
  *

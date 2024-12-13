@@ -1,3 +1,5 @@
+import {resetPassiveSupportedForTesting} from '#core/dom/event-helper-listen';
+
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 
 describes.sandboxed('Gestures', {}, (env) => {
@@ -13,6 +15,16 @@ describes.sandboxed('Gestures', {}, (env) => {
     }
   }
 
+  function setPassiveSupported(passiveSupported) {
+    resetPassiveSupportedForTesting();
+    env.sandbox
+      .stub(window, 'addEventListener')
+      .callsFake((name, listener, option) => {
+        passiveSupported ? option.passive : false;
+      });
+    env.sandbox.stub(window, 'removeEventListener');
+  }
+
   let element;
   let clock;
   let recognizer;
@@ -23,6 +35,7 @@ describes.sandboxed('Gestures', {}, (env) => {
 
   beforeEach(() => {
     clock = env.sandbox.useFakeTimers();
+    setPassiveSupported(false); // so we can test preventDefault()
 
     eventListeners = {};
     element = {

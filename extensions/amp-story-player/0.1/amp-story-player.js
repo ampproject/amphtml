@@ -4,7 +4,7 @@ import {cssText} from '../../../build/amp-story-player.css';
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 
 class AmpStoryPlayerWrapper extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }

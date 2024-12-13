@@ -266,6 +266,13 @@ with custom variables and a limited set of platform variables.
     <td><code>CLICK_Y</code></td>
     <td>The <code>y</code> coordinate of the click in the viewport.</td>
   </tr>
+  <tr>
+    <td><code>UACH</code></td>
+    <td>Provides [user agent client hint](https://github.com/WICG/ua-client-hints) information.
+    <b>WARNING<b>: Because the UACH API is asynchronous and amp-ad-exit is synchronous
+    only, to retrieve UACH signals the values must be retrieved and cached beforehand by
+    another AMP component that also uses variables substitution, otherwise they will be empty.</td>
+  </tr>
 </table>
 
 ### Custom variables

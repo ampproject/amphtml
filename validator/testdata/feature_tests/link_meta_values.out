@@ -18,7 +18,9 @@ FAIL
 feature_tests/link_meta_values.html:15:2 The attribute 'rel' in tag 'link' is set to the invalid value 'manifest foo'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">
 |    <link rel="shortcut icon" type="a" href="b" sizes="c">
-|    <link rel="author" href="me">
+|    <link rel="author" href="me" fetchpriority="blah">
+>>   ^~~~~~~~~
+feature_tests/link_meta_values.html:18:2 The attribute 'fetchpriority' in tag 'link' is set to the invalid value 'blah'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |    <link rel="DCTERMS.any" href="foo">
 |
 |    <meta name="content-disposition" content="any">

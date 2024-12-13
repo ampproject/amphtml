@@ -26,6 +26,8 @@ A remote endpoint is expected to tell the AMP runtime whether the user consent i
 
 The AMP runtime will embed the CMP's prompt in an iframe. `amp-consent` will create the iframe when it is necessary. A default placeholder will be displayed, and the prompt iframe will remain hidden until it has finished loading.
 
+In case you need to enable additional sandbox restrictions to be removeed for the generated iframe, specify them in the `sandbox` configuration variable. It takes a string with space-seperated sandbox restrictions. The restrictions `allow-scripts` and `allow-popups` are removed by default. Right now, the only allowed additional sandbox restrictions are `allow-popups-to-escape-sandbox` and `allow-top-navigation-by-user-activation`.
+
 The prompt iframe and the parent AMP page will communicate through `postMessages` and the iframe `name` attribute. In the case of using postMessage, messages from nested iframes will be ignored. The lists of support APIs are:
 
 #### Requesting UI state change
@@ -93,6 +95,7 @@ window.parent.postMessage(
     action: 'accept',
     info: /string/ /* optional */,
     consentMetadata: /object/ /* optional */,
+    tcfPolicyVersion: /number/ /* optional (integer) - if not provided 2 is default */,
   },
   '*'
 );
@@ -109,6 +112,7 @@ window.parent.postMessage(
     action: 'reject',
     info: /string/ /* optional */,
     consentMetadata: /object/ /* optional */,
+    tcfPolicyVersion: /number/ /* optional (integer) - if not provided 2 is default */,
   },
   '*'
 );
@@ -160,7 +164,8 @@ info = JSON.parse(window.name);
   "consentStringType": {enum} [1: TCF V1, 2: TCF V2, 3: US Privacy String] (optional),
   "gdprApplies": {boolean} (optional),
   "additionalConsent": {string} (optional),
-  "purposeOne": {boolean} (optional)
+  "purposeOne": {boolean} (optional),
+  "gppSectionId": {string} (optional)
 }
 ```
 

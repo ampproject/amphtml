@@ -3,13 +3,7 @@
  * Update labels on pull requests for the release tagger.
  */
 
-const {
-  getLabel,
-  getPullRequestsBetweenCommits,
-  getRelease,
-  labelPullRequests,
-  unlabelPullRequests,
-} = require('./utils');
+const {GitHubApi} = require('./utils');
 
 const labelConfig = {
   'beta-percent': 'PR Use: In Beta / Experimental',
@@ -22,15 +16,16 @@ const labelConfig = {
  * @param {string} head
  * @param {string} base
  * @param {string} channel
+ * @param {object} api
  * @return {Promise<Object>}
  */
-async function _setup(head, base, channel) {
+async function _setup(head, base, channel, api) {
   const [label, headRelease, baseRelease] = await Promise.all([
-    await getLabel(labelConfig[channel]),
-    await getRelease(head),
-    await getRelease(base),
+    await api.getLabel(labelConfig[channel]),
+    await api.getRelease(head),
+    await api.getRelease(base),
   ]);
-  const prs = await getPullRequestsBetweenCommits(
+  const prs = await api.getPullRequestsBetweenCommits(
     headRelease['target_commitish'],
     baseRelease['target_commitish']
   );
@@ -42,11 +37,20 @@ async function _setup(head, base, channel) {
  * @param {string} head
  * @param {string} base
  * @param {string} channel
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<void>}
  */
-async function addLabels(head, base, channel) {
-  const {labelId, prs} = await _setup(head, base, channel);
-  await labelPullRequests(prs, labelId);
+async function addLabels(
+  head,
+  base,
+  channel,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
+  const api = new GitHubApi(octokitRest, octokitGraphQl);
+  const {labelId, prs} = await _setup(head, base, channel, api);
+  await api.labelPullRequests(prs, labelId);
 }
 
 /**
@@ -54,11 +58,20 @@ async function addLabels(head, base, channel) {
  * @param {string} head
  * @param {string} base
  * @param {string} channel
+ * @param {Object|undefined} octokitRest
+ * @param {Object|undefined} octokitGraphQl
  * @return {Promise<void>}
  */
-async function removeLabels(head, base, channel) {
-  const {labelId, prs} = await _setup(head, base, channel);
-  await unlabelPullRequests(prs, labelId);
+async function removeLabels(
+  head,
+  base,
+  channel,
+  octokitRest = undefined,
+  octokitGraphQl = undefined
+) {
+  const api = new GitHubApi(octokitRest, octokitGraphQl);
+  const {labelId, prs} = await _setup(head, base, channel, api);
+  await api.unlabelPullRequests(prs, labelId);
 }
 
 module.exports = {addLabels, removeLabels};

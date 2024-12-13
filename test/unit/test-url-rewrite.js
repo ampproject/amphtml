@@ -117,18 +117,16 @@ describes.sandboxed('resolveUrlAttr', {}, () => {
     ).to.equal('http://acme.org/image1');
   });
 
-  it.configure()
-    .skipFirefox()
-    .run('should NOT rewrite image data src', () => {
-      expect(
-        resolveUrlAttr(
-          'amp-img',
-          'src',
-          'data:12345',
-          'https://cdn.ampproject.org/c/acme.org/doc1'
-        )
-      ).to.equal('data:12345');
-    });
+  it('should NOT rewrite image data src', () => {
+    expect(
+      resolveUrlAttr(
+        'amp-img',
+        'src',
+        'data:12345',
+        'https://cdn.ampproject.org/c/acme.org/doc1'
+      )
+    ).to.equal('data:12345');
+  });
 });
 
 describes.sandboxed('rewriteAttributesForElement', {}, () => {

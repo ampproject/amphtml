@@ -16,7 +16,7 @@ tags: {  # <amp-animation> (json)
   spec_name: "amp-animation extension .json script"
   mandatory_parent: "AMP-ANIMATION"
   requires_extension: "amp-animation"
-  satisfies: "amp-animation extension .json script"
+  satisfies_condition: "amp-animation extension .json script"
   attrs: {
     name: "type"
     mandatory: true
@@ -36,7 +36,7 @@ tags: {  # <amp-animation>
   html_format: AMP4ADS
   tag_name: "AMP-ANIMATION"
   requires_extension: "amp-animation"
-  requires: "amp-animation extension .json script"
+  requires_condition: "amp-animation extension .json script"
   attrs: {
     name: "trigger"
     value: "visibility"

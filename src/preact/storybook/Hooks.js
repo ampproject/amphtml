@@ -7,9 +7,14 @@ export default {
   title: '0/Hooks',
 };
 
+/**
+ * @param {{prop: *}} param0
+ * @return {import('preact').VNode}
+ */
 function Component({prop}) {
   const [text, setText] = useState('initial render');
   const ioCallback = useCallback(
+    /** @param {{isIntersecting: boolean}} param0 */
     ({isIntersecting}) => {
       setText(`is intersecting for ${prop}: ${isIntersecting}`);
     },
@@ -17,6 +22,7 @@ function Component({prop}) {
   );
 
   const anotherIoCallback = useCallback(
+    /** @param {{isIntersecting: boolean}} param0 */
     ({isIntersecting}) => {
       // TODO(dmanek): Look into using Storybook actions instead of console.log below
       // eslint-disable-next-line local/no-forbidden-terms

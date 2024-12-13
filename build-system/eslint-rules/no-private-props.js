@@ -23,9 +23,10 @@ module.exports = {
           message:
             'Unquoted private properties are not allowed in BaseElement. Please use quotes',
           fix(fixer) {
-            const {object} = node;
+            const [, objectEnd] = node.object.range;
+            const [, nodeEnd] = node.range;
             return fixer.replaceTextRange(
-              [object.end, node.end],
+              [objectEnd, nodeEnd],
               `['${node.property.name}']`
             );
           },

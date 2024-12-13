@@ -6,7 +6,7 @@
 
 const {
   skipDependentJobs,
-  storeUnminifiedBuildToWorkspace,
+  storeBuildOutputToWorkspace,
   timedExecOrDie,
 } = require('./utils');
 const {runCiJob} = require('./ci-job');
@@ -19,7 +19,7 @@ const jobName = 'unminified-build.js';
  */
 function pushBuildWorkflow() {
   timedExecOrDie('amp build --fortesting');
-  storeUnminifiedBuildToWorkspace();
+  storeBuildOutputToWorkspace();
 }
 
 /**
@@ -28,7 +28,7 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('amp build --fortesting');
-    storeUnminifiedBuildToWorkspace();
+    storeBuildOutputToWorkspace();
   } else {
     skipDependentJobs(
       jobName,

@@ -71,10 +71,11 @@
 //
 // See types_test.cc for detailed usage of generating nested json objects.
 //
-#ifndef CPP_HTMLPARSER_JSON_JSON_H_
-#define CPP_HTMLPARSER_JSON_JSON_H_
+#ifndef CPP_HTMLPARSER_JSON_TYPES_H_
+#define CPP_HTMLPARSER_JSON_TYPES_H_
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -86,25 +87,30 @@ namespace htmlparser::json {
 
 class JsonArray;
 class JsonDict;
-class NullValue;
+class JsonNull;
 class JsonObject;
 
 class JsonDict {
  public:
   template <typename V>
-  void Insert(std::string key, V value) {
-    values_.emplace_back(std::pair<std::string, V>{key, value});
+  void Insert(std::string_view key, V&& value) {
+    items_.emplace_back(std::make_pair(key, std::forward<V>(value)));
   }
 
-  std::size_t size() const { return values_.size(); }
+  template <typename V>
+  void Insert(std::string_view key, const V& value) {
+    items_.emplace_back(std::make_pair(key, value));
+  }
 
-  bool empty() const { return values_.empty(); }
+  std::size_t size() const;
+  bool empty() const { return items_.empty(); }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf*, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 
   template <typename T>
-  T* Get(const std::string& key);
+  T* Get(std::string_view key);
+  JsonObject* Get(std::string_view key);
 
   // Facilitates range based iterator directly on JsonDict object.
   // for (auto& [k, v] : my_json_dict) {
@@ -112,20 +118,25 @@ class JsonDict {
   // }
   // This only works with auto syntax. Following wont' compile:
   // JsonDict::const_iterator = mydict.begin();
-  auto begin() { return values_.begin(); }
-  auto end() { return values_.end(); }
+  auto begin() { return items_.begin(); }
+  auto end() { return items_.end(); }
   // const_iterator.
-  auto begin() const { return values_.begin(); }
-  auto end() const { return values_.end(); }
+  auto begin() const { return items_.begin(); }
+  auto end() const { return items_.end(); }
 
  private:
-  std::vector<std::pair<std::string, JsonObject>> values_;
+  std::vector<std::pair<std::string, JsonObject>> items_;
 };
 
 class JsonArray {
  public:
   template <typename T>
-  void Append(T i) {
+  void Append(T&& i) {
+    items_.emplace_back(i);
+  }
+
+  template <typename T>
+  void Append(T& i) {
     items_.emplace_back(i);
   }
 
@@ -135,14 +146,19 @@ class JsonArray {
   // [1, 2, 3, 4, "hello", "world", true, true, false];
   template <typename... Ts>
   void Append(Ts&&... items) {
-    int unused[] = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
+    auto unused = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
   }
 
-  std::size_t size() const { return items_.size(); }
+  template <typename... Ts>
+  void Append(const Ts&... items) {
+    auto unused = {0, (items_.emplace_back(items), 0)...};
+  }
+
+  std::size_t size() const;
   bool empty() const { return items_.empty(); }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf*, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf*) const;
 
   // Facilitates range based for loop.
   // for (const auto& item : my_json_array) {
@@ -154,14 +170,17 @@ class JsonArray {
   auto begin() const { return items_.begin(); }
   auto end() const { return items_.end(); }
 
+  JsonObject& at(std::size_t i);
+  JsonObject* Last();
+
  private:
   std::vector<JsonObject> items_;
 };
 
-class NullValue {
+class JsonNull {
  public:
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
-  std::string ToString(int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 };
 
 template <typename JsonType>
@@ -176,16 +195,18 @@ class Any {
   Any(Any&& from) { wrapper_ = std::move(from.wrapper_); }
 
   Any& operator=(const Any& from) {
-    wrapper_ = from.wrapper_->Clone();
+    if (&from != this) {
+      wrapper_ = from.wrapper_->Clone();
+    }
     return *this;
   }
 
-  std::string ToString(int indent_columns = 0) const {
-    return wrapper_->ToJson().ToString(indent_columns);
+  std::string ToString() const {
+    return wrapper_->ToJson().ToString();
   }
 
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const {
-    wrapper_->ToJson().ToString(buf, indent_columns);
+  void ToString(std::stringbuf* buf) const {
+    wrapper_->ToJson().ToString(buf);
   }
 
  private:
@@ -224,12 +245,13 @@ class JsonObject {
   explicit JsonObject(float f) : v_(f) {}
   explicit JsonObject(const char* s) { v_.emplace<std::string>(s); }
   explicit JsonObject(const std::string& s) : v_(s) {}
+  explicit JsonObject(const std::string_view& sv) : v_(sv) {}
   explicit JsonObject(bool b) : v_(b) {}
-  explicit JsonObject(std::nullptr_t n) : v_(NullValue()) {}
-  explicit JsonObject(JsonArray l) : v_(l) {}
-  explicit JsonObject(JsonDict o) : v_(o) {}
-  explicit JsonObject(JsonArray&& l) : v_(std::move(l)) {}
-  explicit JsonObject(JsonDict&& o) : v_(std::move(o)) {}
+  explicit JsonObject(std::nullptr_t n) : v_(JsonNull()) {}
+  explicit JsonObject(JsonArray& a) : v_(a) {}
+  explicit JsonObject(JsonDict& d) : v_(d) {}
+  explicit JsonObject(JsonArray&& a) : v_(std::move(a)) {}
+  explicit JsonObject(JsonDict&& d) : v_(std::move(d)) {}
   explicit JsonObject(Any<JsonArray> a) : v_(a) {}
   explicit JsonObject(Any<JsonDict> a) : v_(a) {}
   explicit JsonObject(Any<JsonObject> j) : v_(j) {}
@@ -242,7 +264,14 @@ class JsonObject {
   JsonObject(const JsonObject& from) { v_ = from.v_; }
 
   JsonObject& operator=(const JsonObject& from) {
-    v_ = from.v_;
+    if (&from != this) {
+      v_ = from.v_;
+    }
+    return *this;
+  }
+
+  JsonObject& operator=(const char* s) {
+    v_ = std::string(s);
     return *this;
   }
 
@@ -262,26 +291,46 @@ class JsonObject {
     return &std::get<T>(v_);
   }
 
+  std::string String() const { return std::get<std::string>(v_); }
+  std::string_view StringView() const { return std::get<std::string_view>(v_); }
+  int64_t Number() const { return std::get<int64_t>(v_); }
+  double Double() const { return std::get<double>(v_); }
+  bool Bool() const { return std::get<bool>(v_); }
+  bool IsNull() const { return std::holds_alternative<JsonNull>(v_); }
+  const JsonArray& Array() const { return std::get<JsonArray>(v_); }
+  const JsonDict& Dict() const { return std::get<JsonDict>(v_); }
+
   template <typename... Types>
-  constexpr bool Has() const {
+  constexpr bool Is() const {
     return (std::holds_alternative<Types>(v_) || ...);
   }
 
-  std::string ToString(int indent_columns = 0) const;
-  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
+  std::string ToString() const;
+  void ToString(std::stringbuf* buf) const;
 
  private:
-  std::variant<bool, int32_t, int64_t, double, float, std::string, NullValue,
-               JsonArray, JsonDict, Any<JsonArray>, Any<JsonDict>,
-               Any<JsonObject>>
+  std::variant<bool, int32_t, int64_t, double, float, std::string,
+               std::string_view, JsonNull, JsonArray, JsonDict, Any<JsonArray>,
+               Any<JsonDict>, Any<JsonObject>>
       v_;
 };
 
+inline std::size_t JsonDict::size() const { return items_.size(); }
+
+inline std::size_t JsonArray::size() const { return items_.size(); }
+
+inline JsonObject& JsonArray::at(std::size_t i) { return items_[i]; }
+
+inline JsonObject* JsonArray::Last() {
+  if (items_.empty()) return nullptr;
+  return &items_.back();
+}
+
 template <typename T>
-T* JsonDict::Get(const std::string& key) {
-  for (auto& [k, v] : values_) {
-    if (k == key) {
-      return v.Get<T>();
+T* JsonDict::Get(std::string_view key) {
+  for (auto iter = items_.rbegin(); iter != items_.rend(); ++iter) {
+    if (iter->first == key) {
+      return iter->second.Get<T>();
     }
   }
   return nullptr;
@@ -289,4 +338,4 @@ T* JsonDict::Get(const std::string& key) {
 
 }  // namespace htmlparser::json
 
-#endif  // CPP_HTMLPARSER_JSON_JSON_H_
+#endif  // CPP_HTMLPARSER_JSON_TYPES_H_

@@ -73,9 +73,10 @@ describes.realWin(
         expect(adNetwork.getAttributes()).to.deep.equal({
           'type': 'doubleclick',
           'data-ad': 'premiumads',
+          'json': '',
           'layout': Layout_Enum.FIXED,
           'style':
-            'margin: 15px auto; position: relative !important; display: block !important;',
+            'margin: 0 auto; position: relative !important; display: block !important;',
         });
       });
 

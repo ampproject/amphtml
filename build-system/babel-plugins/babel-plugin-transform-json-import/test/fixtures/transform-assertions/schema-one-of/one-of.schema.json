@@ -1,0 +1,10 @@
+{
+  "oneOf": [
+    {
+      "const": 0
+    },
+    {
+      "type": "string"
+    }
+  ]
+}

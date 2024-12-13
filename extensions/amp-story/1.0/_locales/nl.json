@@ -160,5 +160,11 @@
   },
   "99": {
     "string": "Formulier verzonden"
+  },
+  "101": {
+    "string": "Nu kopen"
+  },
+  "110": {
+    "string": "Abonneren via Google"
   }
 }

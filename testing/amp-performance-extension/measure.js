@@ -1,5 +1,5 @@
 let cumulativeLayoutShift, largestContentfulPaint, longTasks;
-let measureStarted; // eslint-disable-line no-unused-vars
+let measureStarted; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 function renderMeasurement(container, label, count) {
   container./*OK*/ innerHTML += `<div class='i-amphtml-performance-line'>

@@ -1,0 +1,11 @@
+bento-autocomplete,
+bento-autocomplete > input,
+bento-autocomplete > textarea {
+  font-family: sans-serif; /* default-ui-font-stack */
+}
+
+bento-autocomplete > input,
+bento-autocomplete > textarea {
+  border-radius: 4px; /* default-ui-border-radius */
+  box-sizing: border-box;
+}

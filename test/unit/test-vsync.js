@@ -429,7 +429,7 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -446,7 +446,7 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -709,7 +709,7 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -726,7 +726,7 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = ''; // eslint-disable-line @typescript-eslint/no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
           result += 'mu1';

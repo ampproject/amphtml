@@ -1,20 +1,23 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Animation} from '#utils/animation';
-import {CarouselControls} from './carousel-controls';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {dev} from '#utils/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
-import {listen} from '#utils/event-helper';
-import {numeric} from '#core/dom/transition';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {numeric} from '#core/dom/transition';
+
+import {Services} from '#service';
+
+import {Animation} from '#utils/animation';
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {buildDom} from './build-dom';
+import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
 
 export class AmpScrollableCarousel extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
+  /** @param {AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -24,7 +27,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     /** @private {number} */
     this.oldPos_ = 0;
 
-    /** @private {?Array<!Element>} */
+    /** @private {?Array<Element>} */
     this.cells_ = null;
 
     /** @private {?Element} */
@@ -153,7 +156,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       this.commitSwitch_(newPos);
       this.container_./*OK*/ scrollLeft = newPos;
     } else {
-      /** @const {!TransitionDef<number>} */
+      /** @const {TransitionDef<number>} */
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
@@ -194,7 +197,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       if (newPos == oldPos) {
         return;
       }
-      /** @const {!TransitionDef<number>} */
+      /** @const {TransitionDef<number>} */
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
@@ -242,7 +245,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!KeyboardEvent} event
+   * @param {KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {
@@ -321,7 +324,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
   /**
    * @param {number} pos
-   * @param {function(!Element):void} callback
+   * @param {function(Element):void} callback
    * @private
    */
   withinWindow_(pos, callback) {

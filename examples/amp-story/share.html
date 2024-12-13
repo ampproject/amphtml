@@ -5,6 +5,10 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-share-menu"
+        src="https://cdn.ampproject.org/v0/amp-story-share-menu-0.1.js"></script>
+    <script async custom-element="amp-analytics"
+        src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <title>My Story</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -29,6 +33,26 @@
       poster-square-src="https://example.com/my-story/poster/1x1.jpg"
       poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
       standalone>
+
+      <amp-analytics id="analytics1">
+        <script type="application/json">
+          {
+            "requests": {
+              "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/main/examples/img/ampicon.png",
+              "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+              "share": "${base}?&index=${storyPageIndex}&id=${storyPageId}",
+              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}"
+            },
+            "triggers": {
+              "trackShare": {
+                "on": "story-open",
+                "tagName": "amp-story-share-menu",
+                "request": "share"
+              }
+            }
+          }
+        </script>
+      </amp-analytics>
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">

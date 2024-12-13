@@ -1,0 +1,9 @@
+{
+  "properties": {
+    "foo": {
+      "const": {
+        "bar": 123
+      }
+    }
+  }
+}

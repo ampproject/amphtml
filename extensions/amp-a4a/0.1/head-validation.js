@@ -5,7 +5,7 @@ import {includes} from '#core/types/string';
 import {Services} from '#service';
 import {parseExtensionUrl} from '#service/extension-script';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {getMode} from '../../../src/mode';
 

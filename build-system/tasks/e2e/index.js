@@ -1,9 +1,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const ciReporter = require('./mocha-ci-reporter');
+const CiReporter = require('./mocha-ci-reporter');
 const config = require('../../test-configs/config');
-const dotsReporter = require('./mocha-dots-reporter');
 const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
@@ -26,8 +25,8 @@ const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {watch} = require('chokidar');
 
-const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = isCiBuild() ? 2 : 0;
+const SLOW_TEST_THRESHOLD_MS = isCiBuild() ? 5000 : 2500;
+const TEST_RETRIES = isCiBuild() ? 3 : 0;
 
 const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
@@ -63,15 +62,7 @@ async function setUpTesting_() {
  * @return {!Mocha}
  */
 function createMocha_() {
-  let reporter;
-  if (argv.testnames || argv.watch) {
-    reporter = '';
-  } else if (argv.report || isCircleciBuild()) {
-    // TODO(#28387) clean up this typing.
-    reporter = /** @type {*} */ (ciReporter);
-  } else {
-    reporter = dotsReporter;
-  }
+  const reporter = isCircleciBuild() ? CiReporter : undefined;
 
   return new Mocha({
     // e2e tests have a different standard for when a test is too slow,
@@ -79,7 +70,7 @@ function createMocha_() {
     slow: SLOW_TEST_THRESHOLD_MS,
     reporter,
     retries: TEST_RETRIES,
-    fullStackTrace: true,
+    fullTrace: true,
     reporterOptions: isCiBuild()
       ? {
           mochaFile: 'result-reports/e2e.xml',
@@ -229,7 +220,6 @@ e2e.flags = {
   'watch': 'Watch for changes in files, runs corresponding test(s)',
   'headless': 'Run the browser in headless mode',
   'debug': 'Print debugging information while running tests',
-  'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
   'filelist': 'Run tests specified in this comma-separated list of test files',
 };

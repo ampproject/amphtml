@@ -17,7 +17,7 @@ const assertAliases = singletonFunctions.map((prefix) => `${prefix}Assert`);
 
 /**
  * Known transformable logging methods.
- * @type {!Object<string, LogMethodMetadataDef>}
+ * @type {!{[key: string]: LogMethodMetadataDef}}
  */
 const transformableMethods = {
   assert: {variadic: true, extractMessages: true, messageArgPos: 1},

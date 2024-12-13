@@ -107,7 +107,7 @@ export class BaseElement {
    * independently handle each of these states internally.
    *
    * @return {boolean}
-   * @nocollapse
+   *
    */
   static R1() {
     return false;
@@ -122,7 +122,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
-   * @nocollapse
+   *
    */
   static deferredMount(unusedElement) {
     return true;
@@ -138,10 +138,27 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
-   * @nocollapse
+   *
    */
   static prerenderAllowed(unusedElement) {
     return false;
+  }
+
+  /**
+   * Subclasses can override this method to opt-in into being called to
+   * render when document itself is in preview mode.
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during preview mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
+   *
+   * Defaults to prerender behavior for most elements.
+   *
+   * @param {!AmpElement} element
+   * @return {boolean}
+   */
+  static previewAllowed(element) {
+    return this.prerenderAllowed(element);
   }
 
   /**
@@ -152,7 +169,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
-   * @nocollapse
+   *
    */
   static usesLoading(unusedElement) {
     return false;
@@ -167,7 +184,7 @@ export class BaseElement {
    *  content: (!Element|undefined),
    *  color: (string|undefined),
    * }}
-   * @nocollapse
+   *
    */
   static createLoaderLogoCallback(unusedElement) {
     return {};
@@ -182,7 +199,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {number}
-   * @nocollapse
+   *
    */
   static getBuildPriority(unusedElement) {
     return LayoutPriority_Enum.CONTENT;
@@ -197,7 +214,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {?Array<string>}
-   * @nocollapse
+   *
    */
   static getPreconnects(unusedElement) {
     return null;
@@ -209,7 +226,7 @@ export class BaseElement {
    * installed before upgrading and building this class.
    *
    * @return {boolean}
-   * @nocollapse
+   *
    */
   static requiresShadowDom() {
     return false;

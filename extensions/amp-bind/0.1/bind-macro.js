@@ -6,7 +6,7 @@ import {BindExpression} from './bind-expression';
 export class BindMacro {
   /**
    * @param {!BindMacroDef} data
-   * @param {!Object<string, !BindMacro>} referableMacros
+   * @param {!{[key: string]: !BindMacro}} referableMacros
    */
   constructor(data, referableMacros) {
     /** @const @private {!Array<string>} */

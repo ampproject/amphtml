@@ -8,13 +8,16 @@
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noImplicitAny": true,
+    "isolatedModules": true,
     "lib": ["dom", "esnext", "es6"],
+    "jsx": "preserve",
 
     "paths": {
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
       "#build/*": ["./build/*"],
 
+      "#bento/*": ["./src/bento/*"],
       "#builtins/*": ["./src/builtins/*"],
       "#compiler": ["./src/compiler"],
       "#compiler/*": ["./src/compiler/*"],
@@ -36,7 +39,9 @@
       "#test/*": ["./test/*"],
       "#testing/*": ["./testing/*"],
 
-      "#third_party/*": ["./third_party/*"]
+      "#third_party/*": ["./third_party/*"],
+
+      "preact/dom": ["./src/preact/preact-dom.ts"]
     }
   },
 

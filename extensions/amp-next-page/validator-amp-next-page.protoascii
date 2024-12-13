@@ -27,6 +27,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-NEXT-PAGE > [separator]"
+  descriptive_name : "amp-next-page [separator] child"
   mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
     name: "separator"
@@ -37,6 +38,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
+  descriptive_name : "amp-next-page [recommendation-box] child"
   mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
     name: "recommendation-box"
@@ -47,6 +49,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-NEXT-PAGE > [footer]"
+  descriptive_name : "amp-next-page [footer] child"
   mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
     name: "footer"

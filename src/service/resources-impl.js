@@ -6,7 +6,6 @@ import {expandLayoutRect} from '#core/dom/layout/rect';
 import * as mode from '#core/mode';
 import {remove} from '#core/types/array';
 import {throttle} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -333,7 +332,12 @@ export class ResourcesImpl {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_ < 20 || this.ampdoc.hasBeenVisible();
+    return (
+      this.buildAttemptsCount_ < 20 ||
+      // Ignore build quota for previews.
+      this.ampdoc.getVisibilityState() == VisibilityState_Enum.PREVIEW ||
+      this.ampdoc.hasBeenVisible()
+    );
   }
 
   /**
@@ -354,13 +358,17 @@ export class ResourcesImpl {
       return;
     }
 
-    // During prerender mode, don't build elements that aren't allowed to be
-    // prerendered. This avoids wasting our prerender build quota.
+    // During prerender/preview mode, don't build elements that aren't allowed
+    // to be prerendered. This avoids wasting our prerender build quota.
     // See isUnderBuildQuota_() for more details.
-    const shouldBuildResource =
-      this.ampdoc.getVisibilityState() != VisibilityState_Enum.PRERENDER ||
-      resource.prerenderAllowed();
-    if (!shouldBuildResource) {
+    const visibilityState = this.ampdoc.getVisibilityState();
+    const shouldSkipForPrerender =
+      visibilityState == VisibilityState_Enum.PRERENDER &&
+      !resource.prerenderAllowed();
+    const shouldSkipForPreview =
+      visibilityState == VisibilityState_Enum.PREVIEW &&
+      !resource.previewAllowed();
+    if (shouldSkipForPrerender || shouldSkipForPreview) {
       return;
     }
 
@@ -591,7 +599,7 @@ export class ResourcesImpl {
       // data.metaTags.viewport from 'documentLoaded' message.
       this.viewer_.sendMessage(
         'documentLoaded',
-        dict({
+        {
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
           'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
@@ -599,14 +607,14 @@ export class ResourcesImpl {
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
           'viewport': documentInfo.viewport,
-        }),
+        },
         /* cancelUnsent */ true
       );
 
       this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage(
         'documentHeight',
-        dict({'height': this.contentHeight_}),
+        {'height': this.contentHeight_},
         /* cancelUnsent */ true
       );
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
@@ -651,7 +659,7 @@ export class ResourcesImpl {
         if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage(
             'documentHeight',
-            dict({'height': measuredContentHeight}),
+            {'height': measuredContentHeight},
             /* cancelUnsent */ true
           );
           this.contentHeight_ = measuredContentHeight;
@@ -1500,13 +1508,16 @@ export class ResourcesImpl {
 
     // Don't schedule elements when we're not visible, or in prerender mode
     // (and they can't prerender).
-    if (!this.visible_) {
-      if (
-        this.ampdoc.getVisibilityState() != VisibilityState_Enum.PRERENDER ||
-        !resource.prerenderAllowed()
-      ) {
-        return false;
-      }
+    const visibilityState = this.ampdoc.getVisibilityState();
+    const shouldPrerender =
+      visibilityState == VisibilityState_Enum.PRERENDER &&
+      resource.prerenderAllowed();
+    const shouldPreview =
+      visibilityState == VisibilityState_Enum.PREVIEW &&
+      resource.previewAllowed();
+    const shouldBuild = this.visible_ || shouldPrerender || shouldPreview;
+    if (!shouldBuild) {
+      return false;
     }
 
     // The element has to be in its rendering corridor.
@@ -1631,6 +1642,7 @@ export class ResourcesImpl {
       INACTIVE: inactive,
       PAUSED: paused,
       PRERENDER: prerender,
+      PREVIEW: preview,
       VISIBLE: visible,
     } = VisibilityState_Enum;
     const doWork = () => {
@@ -1679,10 +1691,17 @@ export class ResourcesImpl {
     };
 
     vsm.addTransition(prerender, prerender, doWork);
+    vsm.addTransition(prerender, preview, doWork);
     vsm.addTransition(prerender, visible, doWork);
     vsm.addTransition(prerender, hidden, doWork);
     vsm.addTransition(prerender, inactive, doWork);
     vsm.addTransition(prerender, paused, doWork);
+
+    vsm.addTransition(preview, preview, doWork);
+    vsm.addTransition(preview, visible, doWork);
+    vsm.addTransition(preview, hidden, doWork);
+    vsm.addTransition(preview, inactive, doWork);
+    vsm.addTransition(preview, paused, doWork);
 
     vsm.addTransition(visible, visible, doWork);
     vsm.addTransition(visible, hidden, doWork);

@@ -8,7 +8,7 @@ var BentoDateDisplayDef = {};
  *   datetime: (!Date|number|string),
  *   displayIn: (string|undefined),
  *   locale: (string|undefined),
- *   localeOptions: (Object<string, *>),
+ *   localeOptions: ({[key: string]: *}),
  *   render: (?RendererFunctionType|undefined),
  * }}
  */

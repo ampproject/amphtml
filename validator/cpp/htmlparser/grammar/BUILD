@@ -13,6 +13,7 @@ cc_library(
         "tablebuilder.h",
     ],
     deps = [
+        "@com_google_absl//absl/strings",
         "//cpp/htmlparser:defer",
         "//cpp/htmlparser:fileutil",
         "//cpp/htmlparser:strings",

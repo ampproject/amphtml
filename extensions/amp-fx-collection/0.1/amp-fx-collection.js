@@ -1,5 +1,4 @@
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {iterateCursor} from '#core/dom';
 import {tryCallback} from '#core/error';
 
 import {listen} from '#utils/event-helper';
@@ -8,7 +7,7 @@ import {devAssert} from '#utils/log';
 import {
   FxBindings,
   FxObservesSignal,
-  FxType, // eslint-disable-line no-unused-vars
+  FxType, // eslint-disable-line @typescript-eslint/no-unused-vars
   getFxTypes,
 } from './fx-type';
 import {
@@ -49,7 +48,7 @@ export class AmpFxCollection {
    */
   scan_() {
     const elements = this.ampdoc_.getRootNode().querySelectorAll('[amp-fx]');
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       if (this.seen_.includes(element)) {
         return;
       }

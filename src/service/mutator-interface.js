@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -104,4 +104,3 @@ export class MutatorInterface {
    */
   measureMutateElement(element, measurer, mutator) {}
 }
-/* eslint-enable no-unused-vars */

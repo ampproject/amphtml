@@ -7,7 +7,7 @@
 // function foo({'class': className}) {}
 // const {'class': className} = props;
 //
-// <div tabIndex="0" />
+// <div tabindex="0" />
 // <path stroke-linecap />
 //
 // Bad
@@ -16,7 +16,7 @@
 // const {'className': className'} = props;
 // const {className} = props;
 //
-// <div tabindex="0" />
+// <div tabIndex="0" />
 // <path strokeLinecap />
 
 const {ATTRIBUTES_REACT_TO_PREACT} = require('../common/preact-prop-names');
@@ -50,6 +50,18 @@ module.exports = {
           return;
         }
         const property = prop.key.name || prop.key.value;
+
+        if (property?.toLowerCase?.() === 'tabindex') {
+          context.report({
+            node: prop,
+            message:
+              '`tabindex` and `tabIndex` should be supported equally.' +
+              ' Instead of destructuring, use:' +
+              `\n\timport {tabindexFromProps} from '#preact/utils';` +
+              `\n\t<... tabindex={tabindexFromProps(rest)}>`,
+          });
+          return;
+        }
 
         let preferred = ATTRIBUTES_REACT_TO_PREACT[property];
         let message = `Prefer \`${preferred}\` property access to \`${property}\`.`;
@@ -103,6 +115,21 @@ module.exports = {
         }
       },
 
+      MemberExpression(node) {
+        const property = node.property.name || node.property.value;
+
+        if (property?.toLowerCase?.() === 'tabindex') {
+          context.report({
+            node: node.property,
+            message:
+              '`tabindex` and `tabIndex` should be supported equally.' +
+              ' Instead of property access, use:' +
+              `\n\timport {tabindexFromProps} from '#preact/utils';` +
+              `\n\t<... tabindex={tabindexFromProps(rest)}>`,
+          });
+        }
+      },
+
       [`CallExpression[callee.name="${propNameFn}"]`]: function (node) {
         if (
           node.arguments.length !== 1 ||
@@ -116,6 +143,17 @@ module.exports = {
           return;
         }
         const name = node.arguments[0].value;
+        if (name.toLowerCase() === 'tabindex') {
+          context.report({
+            node,
+            message:
+              '`tabindex` and `tabIndex` should be supported equally.' +
+              ` Instead of ${propNameFn}('tabindex'), use:` +
+              `\n\timport {tabindexFromProps} from '#preact/utils';` +
+              `\n\t<... tabindex={tabindexFromProps(rest)}>`,
+          });
+          return;
+        }
         if (ATTRIBUTES_REACT_TO_PREACT[name]) {
           context.report({
             node,
@@ -136,8 +174,9 @@ module.exports = {
               const replacement = `'${name}'`;
               if (node.parent.type === 'Property') {
                 // Remove brackets around ['computed'] prop keys
+                const [start, end] = node.parent.key.range;
                 return fixer.replaceTextRange(
-                  [node.parent.key.start - 1, node.parent.key.end + 1],
+                  [start - 1, end + 1],
                   replacement
                 );
               }

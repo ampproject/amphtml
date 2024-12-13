@@ -1,16 +1,13 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {number, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: '0/amp-layout',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 };
 
-export const responsive = () => {
-  const width = number('width', 400);
-  const height = number('height', 300);
+export const responsive = ({height, width}) => {
   return (
     <main>
       <style jsx global>
@@ -34,10 +31,12 @@ export const responsive = () => {
   );
 };
 
-export const intrinsic = () => {
-  const width = number('width', 800);
-  const height = number('height', 600);
-  const maxWidth = number('maxWidth', 400);
+responsive.args = {
+  width: 400,
+  height: 300,
+};
+
+export const intrinsic = ({height, maxWidth, width}) => {
   return (
     <main>
       <style jsx global>
@@ -68,4 +67,10 @@ export const intrinsic = () => {
       </div>
     </main>
   );
+};
+
+intrinsic.args = {
+  width: 800,
+  height: 600,
+  maxWidth: 400,
 };

@@ -27,12 +27,11 @@ const ampLogoSvg = html`<svg
   </g>
 </svg>`;
 
-const TopLevelWrap = (content) =>
-  html`
-    <div style="border-bottom: 1px solid #ddd">
-      <div class="wrap">${content}</div>
-    </div>
-  `;
+const TopLevelWrap = (content) => html`
+  <div style="border-bottom: 1px solid #ddd">
+    <div class="wrap">${content}</div>
+  </div>
+`;
 
 const Header = ({htmlEnvelopePrefix, jsMode, links}) => html`
   <header>
@@ -68,8 +67,8 @@ function renderTemplate(opt_params = {}) {
     basepath = '/',
     css,
     fileSet = [],
-    serveMode = 'default',
     htmlEnvelopePrefix = '/',
+    serveMode = 'default',
   } = opt_params;
 
   const body = joinFragments([
@@ -82,7 +81,7 @@ function renderTemplate(opt_params = {}) {
     html`
       <div class="center">
         Built with 💙 by
-        <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
+        <a href="https://amp.dev" class="underlined">the AMP Project</a>.
       </div>
     `,
   ]);

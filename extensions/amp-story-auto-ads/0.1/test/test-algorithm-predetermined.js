@@ -1,5 +1,7 @@
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
+import {Services} from '#service';
+
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
   Action,
@@ -17,6 +19,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   let pageManager;
 
   beforeEach(() => {
+    const ampdocService = Services.ampdocServiceFor(env.win);
+    env.sandbox.stub(ampdocService, 'getAmpDoc').returns(env.ampdoc);
     storeService = getStoreService(env.win);
     const storyElement = env.win.document.createElement('amp-story');
     const ampStory = new AmpStory(storyElement);

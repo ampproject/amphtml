@@ -315,7 +315,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /**
    * @private
-   * @param {!Object<string, string>} panningMediaState
+   * @param {!{[key: string]: string}} panningMediaState
    */
   onPanningMediaStateChange_(panningMediaState) {
     if (

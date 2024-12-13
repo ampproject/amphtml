@@ -1,32 +1,34 @@
+import {toggleAttribute, tryFocus} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
+import {closest, matches} from '#core/dom/query';
+import {resetStyles, setImportantStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {
   Action,
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
+import {EventType, dispatch} from './events';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
-import {EventType, dispatch} from './events';
-import {Services} from '#service';
-import {tryFocus} from '#core/dom';
-import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {getAmpdoc} from '../../../src/service-helpers';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
-import {resetStyles, setImportantStyles} from '#core/dom/style';
+import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
+import {getAmpdoc} from '../../../src/service-helpers';
 
 /** @private @const {string} */
 const LAUNCH_ICON_CLASS = 'i-amphtml-tooltip-action-icon-launch';
@@ -70,7 +72,7 @@ const LAUNCHABLE_COMPONENTS = {
 /**
  * Gets the list of components with their respective selectors.
  * @param {!Object} components
- * @return {!Object<string, string>}
+ * @return {!{[key: string]: string}}
  */
 function getComponentSelectors(components) {
   const componentSelectors = {};
@@ -155,6 +157,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {!Element} */
     this.storyEl_ = storyEl;
+
+    /** @private @const {../../../src/service/url-impl.js.Url} */
+    this.urlService_ = Services.urlForDoc(storyEl);
 
     /** @private {?Element} */
     this.shadowRoot_ = null;
@@ -384,18 +389,17 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Reacts to desktop state updates and hides navigation buttons since we
    * already have in the desktop UI.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
-        const isDesktop = [
-          UIType.DESKTOP_FULLBLEED,
-          UIType.DESKTOP_ONE_PANEL,
-        ].includes(uiState);
-        this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
+        const isDesktop =
+          uiState === UIType_Enum.DESKTOP_FULLBLEED ||
+          uiState === UIType_Enum.DESKTOP_ONE_PANEL;
+        toggleAttribute(this.focusedStateOverlay_, 'desktop', isDesktop);
       }
     );
   }
@@ -453,12 +457,12 @@ export class AmpStoryEmbeddedComponent {
       );
     }
     const elUrl = target.getAttribute('href');
-    if (!isProtocolValid(elUrl)) {
+    if (!this.urlService_.isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
       return '';
     }
 
-    return parseUrlDeprecated(elUrl).href;
+    return this.urlService_.parse(elUrl).href;
   }
 
   /**
@@ -516,7 +520,7 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipComponentIcon_(target, embedConfig) {
     const iconUrl = target.getAttribute('data-tooltip-icon');
-    if (!isProtocolValid(iconUrl)) {
+    if (!this.urlService_.isProtocolValid(iconUrl)) {
       user().error(TAG, 'The tooltip icon url is invalid');
       return;
     }
@@ -536,8 +540,9 @@ export class AmpStoryEmbeddedComponent {
       this.mutator_.mutateElement(
         dev().assertElement(tooltipCustomIcon),
         () => {
+          const {href} = this.urlService_.parse(iconUrl);
           setImportantStyles(dev().assertElement(tooltipCustomIcon), {
-            'background-image': `url(${parseUrlDeprecated(iconUrl).href})`,
+            'background-image': `url(${href})`,
           });
         }
       );

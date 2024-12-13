@@ -139,7 +139,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
 
 /**
  * Throws user error if `service` is null.
- * @param {Object} service
+ * @param {object} service
  * @param {string} id
  * @param {string} extension
  * @return {!Object}

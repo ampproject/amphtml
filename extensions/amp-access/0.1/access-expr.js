@@ -38,7 +38,7 @@ export function evaluateAccessExpr(expr, data) {
 export class AmpAccessEvaluator {
   /** */
   constructor() {
-    /** @type {Object<string, boolean>} */
+    /** @type {{[key: string]: boolean}} */
     this.cache = null;
 
     /** @private @type {JsonObject} */

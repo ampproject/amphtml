@@ -36,11 +36,10 @@ body:
     validations:
       required: true
   - type: input
-    id: release_tracker
+    id: amp_versions
     attributes:
-      label: Release Tracker(s)
-      description: The [tracker issue(s)](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for the release to which the cherry-pick will be applied. Remember to update the issue title with this info.
-      placeholder: 'e.g. #44444, #55555'
+      label: AMP Version(s)
+      description: The AMP version(s) to which the cherry-pick will be applied.
     validations:
       required: true
   - type: dropdown

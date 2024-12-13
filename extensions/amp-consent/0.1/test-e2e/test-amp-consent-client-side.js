@@ -1,10 +1,11 @@
+import {afterRenderPromise} from '#testing/helpers';
+
 import {
   findElements,
   resetAllElements,
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
-import {afterRenderPromise} from '#testing/helpers';
 
 describes.endtoend(
   'amp-consent',

@@ -1,4 +1,5 @@
 import {PreactBaseElement} from '#preact/base-element';
+
 import {Render} from './component';
 
 export class BaseElement extends PreactBaseElement {}

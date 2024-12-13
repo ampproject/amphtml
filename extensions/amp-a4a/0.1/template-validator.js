@@ -10,7 +10,7 @@ import {
   mergeExtensionsMetadata,
 } from './amp-ad-utils';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 
 /** @const {string} */

@@ -1,7 +1,9 @@
-import {devAssert} from '#utils/log';
-import {getStyle, setStyle, setStyles} from '#core/dom/style';
 import {loadScript, validateData} from '#3p/3p';
+
+import {getStyle, setStyle, setStyles} from '#core/dom/style';
 import {tryParseJson} from '#core/types/object/json';
+
+import {devAssert} from '#utils/log';
 
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;
@@ -104,7 +106,7 @@ function orientationChangeHandler(global, containerDiv) {
   const oldHeight = getStyle(containerDiv, 'height');
   global.setTimeout(() => {
     // Force DOM reflow and repaint.
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ignore = global.document.body./*OK*/ offsetHeight;
     // Capture new height.
     const newHeight = getStyle(containerDiv, 'height');

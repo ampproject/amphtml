@@ -1,3 +1,5 @@
+import {sleep} from '#testing/helpers';
+
 import {LaterpayVendor} from '../laterpay-impl';
 
 const TAG = 'amp-access-laterpay';
@@ -318,7 +320,7 @@ describes.fakeWin(
         container.parentNode.removeChild(container);
       });
 
-      it('sends request for purchase', (done) => {
+      it('sends request for purchase', async () => {
         const changeEv = new Event('change');
         container.querySelector('input').dispatchEvent(changeEv);
         accessSourceMock
@@ -328,12 +330,10 @@ describes.fakeWin(
         accessSourceMock.expects('loginWithUrl').once();
         const clickEv = new Event('click');
         container.querySelector('button').dispatchEvent(clickEv);
-        setTimeout(() => {
-          done();
-        }, 500);
+        await sleep(500);
       });
 
-      it('sends request for already purchased', (done) => {
+      it('sends request for already purchased', async () => {
         accessSourceMock
           .expects('buildUrl')
           .returns(Promise.resolve('https://apllink'))
@@ -343,9 +343,7 @@ describes.fakeWin(
         container
           .querySelector('.' + TAG + '-already-purchased-link-container > a')
           .dispatchEvent(clickEv);
-        setTimeout(() => {
-          done();
-        }, 500);
+        await sleep(500);
       });
     });
   }

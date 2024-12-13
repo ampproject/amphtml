@@ -1,7 +1,7 @@
 FAIL
 |  <!--
 |    Test Description:
-|    Tests the presence of the the amp-mraid script tag is disallowed in AMP.
+|    Tests the presence of the amp-mraid script tag is disallowed in AMP.
 |  -->
 |  <!doctype html>
 |  <html ⚡ lang="en">
@@ -14,7 +14,7 @@ FAIL
 |    <!-- Invalid: amp-mraid not allowed in AMP; only allowed in AMP ADS -->
 |    <script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-mraid/0.1/test/validator-amp-mraid.html:14:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+amp-mraid/0.1/test/validator-amp-mraid.html:14:2 The attribute 'host-service' may not appear in tag 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>

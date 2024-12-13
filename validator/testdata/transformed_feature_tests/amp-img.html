@@ -65,6 +65,12 @@
     <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
   </amp-img>
 
+  <!-- Valid: amp-img[layout=responsive] > i-amphtml-sizer[slot="i-amphtml-svc"] fetchpriority="high" -->
+  <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
+    <i-amphtml-sizer slot="i-amphtml-svc" style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
+    <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" fetchpriority="high">
+  </amp-img>
+
   <!-- Invalid: amp-img[layout=intrinsic] > i-amphtml-sizer[slot!="i-amphtml-svc"] -->
   <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="intrinsic" width="900" height="600" i-amphtml-layout="intrinsic" i-amphtml-ssr>
     <i-amphtml-sizer slot="asd" class="i-amphtml-sizer">
@@ -90,6 +96,12 @@
   <!-- Invalid: amp-img[layout=responsive] > i-amphtml-sizer[slot] -->
   <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
     <i-amphtml-sizer slot style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
+    <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
+  </amp-img>
+
+  <!-- Invalid: amp-img[layout=responsive] > i-amphtml-sizer[slot="i-amphtml-svc"] fetchpriority="bad" -->
+  <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" fetchpriority="bad" i-amphtml-ssr>
+    <i-amphtml-sizer slot="i-amphtml-svc" style=display:block;padding-top:58.6667%;></i-amphtml-sizer>
     <img loading="lazy" src="/img/canoe_900x600.jpg" alt="An image about canoeing" class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async">
   </amp-img>
 </body>

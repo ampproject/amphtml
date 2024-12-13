@@ -11,7 +11,12 @@ module.exports = function (context) {
               return declarator.init;
             })
             .filter(function (init) {
-              return init && /(?:Call|New)Expression/.test(init.type);
+              return (
+                init &&
+                /(?:Call|New)Expression/.test(init.type) &&
+                // Allow pure()
+                init.callee?.name !== 'pure'
+              );
             })
             .forEach(function (init) {
               context.report({

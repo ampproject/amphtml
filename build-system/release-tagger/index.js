@@ -6,22 +6,19 @@
  * 2. head (AMP version)
  * 3. base (AMP version)
  * 4. channel (beta-percent|stable|lts)
- * 5. time (in UTC, Y-%m-%d %H:%M:%S)
  */
 
-const dedent = require('dedent');
-const {action, base, channel, head, sha, time} = require('minimist')(
+const {default: dedent} = require('dedent');
+const {action, base, channel, head, sha} = require('minimist')(
   process.argv.slice(2),
   {
     string: ['head', 'base'],
   }
 );
 const {addLabels, removeLabels} = require('./label-pull-requests');
-const {createOrUpdateTracker} = require('./update-issue-tracker');
 const {cyan, magenta} = require('kleur/colors');
-const {getRelease} = require('./utils');
 const {log} = require('../common/logging');
-const {makeRelease} = require('./make-release');
+const {getRelease, makeRelease} = require('./make-release');
 const {publishRelease, rollbackRelease} = require('./update-release');
 
 /**
@@ -29,14 +26,12 @@ const {publishRelease, rollbackRelease} = require('./update-release');
  * @return {Promise<void>}
  */
 async function _promote() {
-  const timeParam = decodeURIComponent(time);
   log(
     cyan(dedent`Release tagger triggered with inputs:
     action: ${magenta(action)}
     head: ${magenta(head)}
     base: ${magenta(base)}
     channel: ${magenta(channel)}
-    time: ${magenta(timeParam)}
     sha: ${magenta(sha)}`)
   );
 
@@ -54,7 +49,8 @@ async function _promote() {
   }
 
   if (['stable', 'lts'].includes(channel)) {
-    const {'html_url': url} = await publishRelease(head);
+    const latest = channel == 'stable';
+    const {'html_url': url} = await publishRelease(head, latest);
     log('Published release', magenta(head), 'at', cyan(url));
   }
 
@@ -67,14 +63,6 @@ async function _promote() {
       magenta(channel)
     );
   }
-
-  await createOrUpdateTracker(head, base, channel, timeParam);
-  log(
-    'Updated issue tracker for release',
-    magenta(head),
-    'and channel',
-    magenta(channel)
-  );
 }
 
 /**
@@ -112,8 +100,6 @@ async function main() {
     log('Action: rollback');
     return await _rollback();
   }
-
-  // TODO(estherkim): add release tracker comment on prs
 }
 
 main();

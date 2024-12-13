@@ -154,38 +154,28 @@ describes.sandboxed('#line-delimited-response-handler', {}, (env) => {
       };
     });
 
-    // TODO(lannka, #15748): Fails on Safari 11.1.0.
-    it.configure().skipSafari(
-      'should handle empty streamed response properly',
-      () => {
-        slotData = [];
-        setup();
-        return executeAndVerifyResponse();
-      }
-    );
+    it('should handle empty streamed response properly', () => {
+      slotData = [];
+      setup();
+      return executeAndVerifyResponse();
+    });
 
-    // TODO(lannka, #15748): Fails on Safari 11.1.0.
-    it.configure().skipSafari('should handle no fill response properly', () => {
+    it('should handle no fill response properly', () => {
       slotData = [{headers: {}, creative: ''}];
       setup();
       return executeAndVerifyResponse();
     });
 
-    // TODO(lannka, #15748): Fails on Safari 11.1.0.
-    it.configure().skipSafari(
-      'should handle multiple no fill responses properly',
-      () => {
-        slotData = [
-          {headers: {}, creative: ''},
-          {headers: {}, creative: ''},
-        ];
-        setup();
-        return executeAndVerifyResponse();
-      }
-    );
+    it('should handle multiple no fill responses properly', () => {
+      slotData = [
+        {headers: {}, creative: ''},
+        {headers: {}, creative: ''},
+      ];
+      setup();
+      return executeAndVerifyResponse();
+    });
 
-    // TODO(lannka, #15748): Fails on Safari 11.1.0.
-    it.configure().skipSafari('should stream properly', () => {
+    it('should stream properly', () => {
       slotData = [
         {headers: {}, creative: ''},
         {

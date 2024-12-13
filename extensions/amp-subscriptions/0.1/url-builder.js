@@ -1,5 +1,6 @@
-import {Services} from '#service';
 import {getValueForExpr} from '#core/types/object';
+
+import {Services} from '#service';
 
 export class UrlBuilder {
   /**
@@ -40,7 +41,7 @@ export class UrlBuilder {
   /**
    * @param {string} url
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
+   * @return {!Promise<!{[key: string]: *}>}
    */
   collectUrlVars(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then((vars) => {
@@ -50,7 +51,7 @@ export class UrlBuilder {
 
   /**
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
+   * @return {!Promise<!{[key: string]: *}>}
    * @private
    */
   prepareUrlVars_(useAuthData) {

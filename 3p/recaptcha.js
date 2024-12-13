@@ -1,7 +1,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {
@@ -142,7 +142,7 @@ function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
  *
  * @param {Window} win
  * @param {*} grecaptcha
- * @param {Object} data
+ * @param {object} data
  */
 function actionTypeHandler(win, grecaptcha, data) {
   doesOriginDomainMatchIframeSrc(win, data)
@@ -154,13 +154,10 @@ function actionTypeHandler(win, grecaptcha, data) {
       // .then() promise pollyfilled by recaptcha api script
       executePromise./*OK*/ then(
         function (token) {
-          iframeMessagingClient./*OK*/ sendMessage(
-            'amp-recaptcha-token',
-            dict({
-              'id': data.id,
-              'token': token,
-            })
-          );
+          iframeMessagingClient./*OK*/ sendMessage('amp-recaptcha-token', {
+            'id': data.id,
+            'token': token,
+          });
         },
         function (err) {
           let message =
@@ -170,13 +167,10 @@ function actionTypeHandler(win, grecaptcha, data) {
             message = err.toString();
           }
           user().error(TAG, '%s', message);
-          iframeMessagingClient./*OK*/ sendMessage(
-            'amp-recaptcha-error',
-            dict({
-              'id': data.id,
-              'error': message,
-            })
-          );
+          iframeMessagingClient./*OK*/ sendMessage('amp-recaptcha-error', {
+            'id': data.id,
+            'error': message,
+          });
         }
       );
     })
@@ -189,7 +183,7 @@ function actionTypeHandler(win, grecaptcha, data) {
  * Function to verify our origin domain from the
  * parent window.
  * @param {Window} win
- * @param {Object} data
+ * @param {object} data
  * @return {!Promise}
  */
 export function doesOriginDomainMatchIframeSrc(win, data) {

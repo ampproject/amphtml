@@ -19,7 +19,7 @@ const helperMap = {
  * Cache of identifiers to each helper's ImportDeclaration, per file.
  * @const {!WeakMap<
  *   import('@babel/core').BabelFileResult,
- *   Object<string, import('@babel/core').types.Identifier>
+ *   {[key: string]: import('@babel/core').types.Identifier}
  * >}
  */
 const importNamesPerFile = new WeakMap();

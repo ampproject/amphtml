@@ -13,7 +13,7 @@ import {format, getLocale} from './locales';
 /** @const {string} */
 const DEFAULT_LOCALE = 'en_US';
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_DATETIME_OPTIONS = {
   'year': 'numeric',
   'month': 'short',
@@ -22,7 +22,7 @@ const DEFAULT_DATETIME_OPTIONS = {
   'minute': 'numeric',
 };
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
 
 /**

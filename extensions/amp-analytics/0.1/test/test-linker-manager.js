@@ -1,18 +1,20 @@
+import {Services} from '#service';
+import {Priority_Enum} from '#service/navigation';
+
+import {mockWindowInterface} from '#testing/helpers/service';
+
 import * as Cookies from '../../../../src/cookies';
 import {
   LinkerManager,
   areFriendlyDomains,
   isWildCardMatch,
 } from '../linker-manager';
-import {Priority_Enum} from '#service/navigation';
-import {Services} from '#service';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
 import {installSessionServiceForTesting} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
-import {mockWindowInterface} from '#testing/helpers/service';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, (env) => {

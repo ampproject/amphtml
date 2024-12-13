@@ -40,7 +40,7 @@ See the above link for allowed call-to-action buttons. By design, these will be 
 
 ## Example
 
-You can find a fully working example hosted on [ampbyexample.com](https://amp.dev/documentation/examples/advertising-analytics/doubleclick_amp_story_ads/).
+You can find a fully working example hosted on [amp.dev](https://amp.dev/documentation/examples/advertising-analytics/doubleclick_amp_story_ads/).
 
 Google Ad Manager trafficking instructions can be found in the [DFP Help Center](https://support.google.com/dfp_premium/answer/9038178).
 

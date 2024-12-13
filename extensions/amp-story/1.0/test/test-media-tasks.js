@@ -1,3 +1,5 @@
+import {toArray} from '#core/types/array';
+
 import {
   LoadTask,
   MuteTask,
@@ -10,7 +12,6 @@ import {
   UpdateSourcesTask,
 } from '../media-tasks';
 import {Sources} from '../sources';
-import {toArray} from '#core/types/array';
 
 describes.realWin('media-tasks', {}, (env) => {
   let win;
@@ -257,8 +258,7 @@ describes.realWin('media-tasks', {}, (env) => {
   });
 
   describe('SwapOutOfDomTask', () => {
-    // TODO(newmuis): Get this test working.
-    it.skip('should replace element in DOM', async () => {
+    it('should replace element in DOM', async () => {
       const placeholderEl = document.createElement('video');
 
       const parent = document.createElement('div');

@@ -122,7 +122,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {!Object<string,!Array<!LightboxElementMetadataDef>>} */
+    /** @private {!{[key: string]: !Array<!LightboxElementMetadataDef}>} */
     this.elementsMetadata_ = {
       default: [],
     };

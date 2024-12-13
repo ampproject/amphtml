@@ -2,11 +2,12 @@
  * @fileoverview Utils for requests on amp-story and dependencies.
  */
 
-import {Services} from '#service';
 import {getChildJsonConfig} from '#core/dom';
-import {isProtocolValid} from '../../../src/url';
-import {user, userAssert} from '#utils/log';
 import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {user, userAssert} from '#utils/log';
 
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
@@ -23,7 +24,7 @@ const TAG = 'request-utils';
  * @return {(!Promise<!JsonObject>|!Promise<null>)}
  */
 export function executeRequest(el, rawUrl, opts = {}) {
-  if (!isProtocolValid(rawUrl)) {
+  if (!Services.urlForDoc(el).isProtocolValid(rawUrl)) {
     user().error(TAG, 'Invalid config url.');
     return Promise.resolve(null);
   }

@@ -170,7 +170,7 @@ export function getExistingAds(ampdoc) {
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, *>} configObj
+ * @param {!{[key: string]: *}} configObj
  * @return {?AdConstraints}
  */
 export function getAdConstraintsFromConfigObj(ampdoc, configObj) {

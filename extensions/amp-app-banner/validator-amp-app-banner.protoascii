@@ -14,11 +14,11 @@ tags: {  # <amp-app-banner>
   tag_name: "AMP-APP-BANNER"
   mandatory_parent: "BODY"
   requires_extension: "amp-app-banner"
-  requires: "amp-app-banner data source"
+  requires_condition: "amp-app-banner data source"
   # The "amp-app-banner button[open-button]" tag is in
   # validator-main.protoascii and in turn has an "AMP-APP-BANNER"
   # mandatory_parent.
-  requires: "amp-app-banner button[open-button]"
+  requires_condition: "amp-app-banner button[open-button]"
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-id-attr"
   unique: true

@@ -126,7 +126,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
-  it('should preconnect to the the first srcset url if src is not set', async () => {
+  it('should preconnect to the first srcset url if src is not set', async () => {
     const preconnect = {url: sandbox.stub()};
     sandbox.stub(Services, 'preconnectFor').returns(preconnect);
 
@@ -392,6 +392,14 @@ describes.sandboxed('amp-img', {}, (env) => {
     el.setAttribute('width', 100);
     el.setAttribute('height', 100);
     expect(AmpImg.prerenderAllowed(el)).to.equal(true);
+  });
+
+  it('should allow preview by default', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+    expect(AmpImg.previewAllowed(el)).to.equal(true);
   });
 
   it('should propogate src as the final attribute', () => {

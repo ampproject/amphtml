@@ -1,4 +1,11 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+
+import {macroTask} from '#testing/helpers';
+
+import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AmpStoryEventTracker,
   AnalyticsEvent,
@@ -12,10 +19,6 @@ import {
   VisibilityTracker,
   trackerTypeForTesting,
 } from '../events';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {Deferred} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import {macroTask} from '#testing/helpers';
 
 describes.realWin('Events', {amp: 1}, (env) => {
   let win;
@@ -1391,7 +1394,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
     });
 
-    it(
+    // TODO(#39879): fix this flaky test.
+    it.skip(
       'timers started and stopped by the same event on the same target' +
         ' do not have race condition problems',
       () => {

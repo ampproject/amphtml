@@ -9,6 +9,7 @@
   height: 100% !important;
   width: 100% !important;
   z-index: 1 !important;
+  pointer-events: auto !important;
 }
 
 amp-story-page[xdomain-ad] .i-amphtml-glass-pane {

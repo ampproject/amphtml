@@ -1,4 +1,5 @@
 import '#service/real-time-config/real-time-config-impl';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
@@ -25,7 +26,7 @@ const TAG = 'amp-ad-network-valueimpression-impl';
 const DOUBLECLICK_BASE_URL =
   'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @const {Object} */
+/** @const {object} */
 const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
@@ -49,7 +50,7 @@ const Capability_Enum = {
 
 /**
  * See `VisibilityState_Enum` enum.
- * @const {!Object<string, string>}
+ * @const {!{[key: string]: string}}
  */
 const visibilityStateCodes = {
   'visible': '1',
@@ -191,7 +192,7 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
     const consentTuple = opt_consentTuple || {};
-    const {consentString, gdprApplies} = consentTuple;
+    const {consentState, consentString, gdprApplies, purposeOne} = consentTuple;
     const {win} = this;
     const ampDoc = this.getAmpDoc();
 
@@ -229,10 +230,17 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
       });
     const startTime = Date.now();
 
+    const hasStorageConsent =
+      consentState != CONSENT_POLICY_STATE.UNKNOWN &&
+      consentState != CONSENT_POLICY_STATE.INSUFFICIENT &&
+      ((gdprApplies && consentString && purposeOne) || !gdprApplies);
+
     Promise.all([
       rtcParamsPromise,
       referrerPromise,
-      getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
+      hasStorageConsent
+        ? getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga')
+        : Promise.resolve(undefined),
     ]).then((results) => {
       const clientId = results[2];
       const referrer = results[1];
@@ -495,7 +503,7 @@ function elapsedTimeWithCeiling(time, start) {
  * Builds a URL from query parameters, truncating to a maximum length if
  * necessary.
  * @param {string} baseUrl scheme, domain, and path for the URL.
- * @param {!Object<string,string|number|null>} queryParams query parameters for
+ * @param {!{[key: string]: string|number|null}} queryParams query parameters for
  *     the URL.
  * @param {number} maxLength length to truncate the URL to if necessary.
  * @param {?QueryParameterDef=} opt_truncationQueryParam query parameter to

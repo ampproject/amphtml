@@ -260,12 +260,12 @@ const LegacyPropDataType = {
 };
 
 /**
- * @const {!Object<string, {
+ * @const {!{[key: string]: {
  *   access: !LegacyPropAccessType,
  *   attr: (string|undefined),
  *   type: (LegacyPropDataType|undefined),
  *   def: *,
- * }>}
+ * }}}
  */
 const LEGACY_PROPS = {
   'acceptCharset': {

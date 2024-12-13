@@ -1,5 +1,4 @@
-import {API_SERVER} from '../constants';
-import {callPixelEndpoint} from './pixel';
+import {toArray} from '#core/types/array';
 
 import {
   classifyPage,
@@ -12,11 +11,12 @@ import {
   getFragmentId,
   getServiceFromUrlFragment,
 } from './fragment';
-import {dict} from '#core/types/object';
 import {getMetaElements} from './meta';
+import {callPixelEndpoint} from './pixel';
 import {getSessionId} from './session';
+
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '#core/types/array';
+import {API_SERVER} from '../constants';
 
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
@@ -88,7 +88,7 @@ export function getLojsonData(jsonData) {
     win.navigator.doNotTrack !== 'no' &&
     win.navigator.doNotTrack !== '0';
 
-  return dict({
+  return {
     'amp': 1,
     'bl':
       0 |
@@ -123,7 +123,7 @@ export function getLojsonData(jsonData) {
     'sid': getSessionId(),
     'skipb': 1,
     'sr': service,
-  });
+  };
 }
 
 /**

@@ -63,7 +63,7 @@ const MAX_PUB_CONTROL_DIMENSION = 1500;
  * image_card_sidebyside: https://screenshot.googleplex.com/v3qOZY61tFm
  * text: https://screenshot.googleplex.com/taeRQn7DUhq
  * text_card: https://screenshot.googleplex.com/ur45m96Tv0D
- * @const {!Object<!LayoutType, number>}
+ * @const {!{[key: !LayoutType]: number}}
  */
 const LAYOUT_ASPECT_RATIO_MAP = {
   [LayoutType.IMAGE_STACKED]: 1 / 1.91,
@@ -84,7 +84,7 @@ const LAYOUT_ASPECT_RATIO_MAP = {
  * FontSize * LineHeight * NumTitle + Padding * 2 + UrlBoxHeight.
  * image_stacked: https://screenshot.googleplex.com/74S09gFO82b
  * image_card_stacked: https://screenshot.googleplex.com/vedjTonVaDT
- * @const {!Object<!LayoutType, number>}
+ * @const {!{[key: !LayoutType]: number}}
  */
 const LAYOUT_TEXT_HEIGHT_MAP = {
   [LayoutType.IMAGE_STACKED]: 80,
@@ -101,7 +101,7 @@ const LAYOUT_TEXT_HEIGHT_MAP = {
 /**
  * The layout - minimal width map for pub control UIs. We will adjust column
  * numbers according to minimal width.
- * @const {!Object<!LayoutType, number>}
+ * @const {!{[key: !LayoutType]: number}}
  */
 const LAYOUT_AD_WIDTH_MAP = {
   [LayoutType.PUB_CONTROL_IMAGE_STACKED]: 100,

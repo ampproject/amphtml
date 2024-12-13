@@ -1,8 +1,8 @@
 tags: {  # amp-facebook-page
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-facebook-page 0.1"
-  excludes: "amp-facebook 1.0"
+  satisfies_condition: "amp-facebook-page 0.1"
+  excludes_condition: "amp-facebook 1.0"
   extension_spec: {
     name: "amp-facebook-page"
     version: "0.1"
@@ -14,7 +14,7 @@ tags: {  # <amp-facebook-page>
   html_format: AMP
   tag_name: "AMP-FACEBOOK-PAGE"
   requires_extension: "amp-facebook-page"
-  requires: "amp-facebook-page 0.1"
+  requires_condition: "amp-facebook-page 0.1"
   # The amp-facebook-strict attr_list is defined in the amp-facebook protoascii
   attr_lists: "amp-facebook-strict"
   attr_lists: "extended-amp-global"

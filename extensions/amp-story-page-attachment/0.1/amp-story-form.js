@@ -4,6 +4,8 @@ import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {Action} from '../../amp-story/1.0/amp-story-store-service';
 import {
   renderLoadingSpinner,
@@ -28,23 +30,18 @@ export function allowlistFormActions(win) {
 let FormElementChildrenDef;
 
 /**
- * @const {Object<string, (function(Element):!FormElementChildrenDef|function():!FormElementChildrenDef)>}
+ * @const {{[key: string]: (function(Element):!FormElementChildrenDef|function():!FormElementChildrenDef)}}
  */
 const createStatusChildrenByAttribute = {
   'submitting': () => toggleLoadingSpinner(renderLoadingSpinner(), true),
 
-  'submit-success': (localizationService) =>
+  'submit-success': () =>
     createFormResultChildren(
-      localizationService.getLocalizedString(
-        LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_SUCCESS
-      )
+      LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_SUCCESS
     ),
-
-  'submit-error': (localizationService) =>
+  'submit-error': () =>
     createFormResultChildren(
-      localizationService.getLocalizedString(
-        LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_ERROR
-      )
+      LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_ERROR
     ),
 };
 
@@ -52,13 +49,13 @@ const createStatusChildrenByAttribute = {
  * Add a default form attribute element for each absent response attribute.
  * @param {!Element} formEl The form to which the attribute elements will be
  *     selected or added.
- * @param {!../../../src/service/localization.LocalizationService} localizationService
+ * @param {!Element} storyEl
  * @return {Array<!Element>} The list of response attribute elements that
  *     belong to the given form.
  * @private
  */
-export function setupResponseAttributeElements(formEl, localizationService) {
-  return Object.keys(createStatusChildrenByAttribute).map((attr) => {
+export function setupResponseAttributeElements(formEl, storyEl) {
+  const elements = Object.keys(createStatusChildrenByAttribute).map((attr) => {
     const selected = formEl.querySelector(`[${escapeCssSelectorIdent(attr)}]`);
     if (selected) {
       return selected;
@@ -66,23 +63,25 @@ export function setupResponseAttributeElements(formEl, localizationService) {
     const created = (
       <div>
         <div class="i-amphtml-story-page-attachment-form-submission-status">
-          {createStatusChildrenByAttribute[attr](localizationService)}
+          {createStatusChildrenByAttribute[attr]()}
         </div>
       </div>
     );
     created.setAttribute(attr, '');
     return formEl.appendChild(created);
   });
+  localizeTemplate(formEl, storyEl);
+  return elements;
 }
 
 /**
- * @param {!FormElementChildrenDef} label
+ * @param {!LocalizedStringId_Enum} localizedStringId
  * @return {!FormElementChildrenDef}
  * @private
  */
-function createFormResultChildren(label) {
+function createFormResultChildren(localizedStringId) {
   return [
     <div class="i-amphtml-story-page-attachment-form-submission-status-icon"></div>,
-    <div>{label}</div>,
+    <div i-amphtml-i18n-text-content={localizedStringId}></div>,
   ];
 }

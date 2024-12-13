@@ -1,7 +1,6 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {Layout_Enum} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -32,20 +31,30 @@ export class PremiumadsNetworkConfig {
   getConfigUrl() {
     const data = this.autoAmpAdsElement_.dataset;
     const host = data.host || 'https://tags.premiumads.com.br';
-    return buildUrl(`${host}/autoads/${data.publisher}`, {}, 4096);
+    return buildUrl(
+      `${host}/autoads/${data.publisher}`,
+      data.json ? {'json': data.json} : {},
+      4096
+    );
+  }
+
+  /** @override */
+  filterConfig(config) {
+    return config;
   }
 
   /** @override */
   getAttributes() {
     const data = this.autoAmpAdsElement_.dataset;
-    return dict({
+    return {
       'type': 'doubleclick',
       'data-ad': 'premiumads',
+      'json': data.json || '',
       'layout': data.layout || Layout_Enum.FIXED,
       'style':
         data['style'] ||
-        'margin: 15px auto; position: relative !important; display: block !important;',
-    });
+        'margin: 0 auto; position: relative !important; display: block !important;',
+    };
   }
 
   /** @override */

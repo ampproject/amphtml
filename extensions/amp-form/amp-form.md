@@ -106,11 +106,25 @@ For details on valid inputs and fields, see [amp-form rules](https://github.com/
 
 You can render success or error responses in your form by using [amp-mustache](../amp-mustache/amp-mustache.md), or success responses through data binding with [amp-bind](../amp-bind/amp-bind.md) and the following response attributes:
 
+[filter formats="websites, ads"]
+
 | Response attribute | Description                                                                                                                                                                                                                                                            |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `submit-success`   | Can be used to display a success message if the response is successful (i.e., has a status of `2XX`).                                                                                                                                                                  |
 | `submit-error`     | Can be used to display a submission error if the response is unsuccessful (i.e., does not have a status of `2XX`).                                                                                                                                                     |
 | `submitting`       | Can be used to display a message when the form is submitting. The template for this attribute has access to the form's input fields for any display purposes. Please see the [full form example below](#example-submitting) for how to use the `submitting` attribute. |
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+| Response attribute | Description                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `submit-success`   | Can be used to display a success message if the response is successful (i.e., has a status of `2XX`).                                                                  |
+| `submit-error`     | Can be used to display a submission error if the response is unsuccessful (i.e., does not have a status of `2XX`).                                                     |
+| `submitting`       | Can be used to display a message when the form is submitting. Please see the [full form example below](#example-submitting) for how to use the `submitting` attribute. |
+
+[/filter]<!-- formats="email" -->
 
 #### To render responses with templating:
 
@@ -125,6 +139,8 @@ When using `<amp-form>` in tandem with another templating AMP component, such as
 <a id="example-submitting"></a>
 
 In the following example, the responses are rendered in an inline template inside the form.
+
+[filter formats="websites, ads"]
 
 ```html
 <form ...>
@@ -151,6 +167,36 @@ In the following example, the responses are rendered in an inline template insid
   </div>
 </form>
 ```
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+```html
+<form ...>
+  <fieldset>
+    <input type="text" name="firstName" />
+    ...
+  </fieldset>
+  <div submitting>
+    Form submitting... Thank you for waiting.
+  </div>
+  <div submit-success>
+    <template type="amp-mustache">
+      Success! Thanks {{name}} for subscribing! Please make sure to check your
+      email {{email}} to confirm! After that we'll start sending you weekly
+      articles on {{#interests}}<b>{{name}}</b> {{/interests}}.
+    </template>
+  </div>
+  <div submit-error>
+    <template type="amp-mustache">
+      Oops! {{name}}, {{message}}.
+    </template>
+  </div>
+</form>
+```
+
+[/filter]<!-- formats="email" -->
 
 The publisher's `action-xhr` endpoint returns the following JSON responses:
 

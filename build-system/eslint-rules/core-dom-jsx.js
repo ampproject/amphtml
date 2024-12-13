@@ -1,7 +1,7 @@
 /**
  * @fileoverview Lints JSX features not supported by core/dom/jsx
  */
-const astUtils = require('eslint/lib/rules/utils/ast-utils');
+const astUtils = require('../../node_modules/eslint/lib/rules/utils/ast-utils');
 
 module.exports = function (context) {
   let isCoreDomJsx = false;

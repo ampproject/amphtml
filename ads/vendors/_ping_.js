@@ -1,5 +1,6 @@
-import {dev, devAssert, userAssert} from '#utils/log';
 import {validateData} from '#3p/3p';
+
+import {dev, devAssert, userAssert} from '#utils/log';
 
 /**
  * A fake ad network integration that is mainly used for testing

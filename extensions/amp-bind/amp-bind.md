@@ -227,6 +227,17 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
 ```
 
+As an `amp-state` element stores a JSON object literal, you can also initialize
+it with an object, as above, or with a constant.
+
+```html
+<amp-state id="singleton">
+  <script type="application/json">
+    'I am a string'
+  </script>
+</amp-state>
+```
+
 [/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]

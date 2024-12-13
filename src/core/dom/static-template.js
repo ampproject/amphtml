@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {map} from '#core/types/object';
+import {hasOwn, map} from '#core/types/object';
 
 /** @type {HTMLElement} */
 let htmlContainer;
@@ -81,7 +81,25 @@ function html(strings) {
  */
 function createNode(container, strings) {
   devAssert(strings.length === 1, 'Improper html template tag usage.');
-  container./*OK*/ innerHTML = strings[0];
+  devAssert(
+    Array.isArray(strings) || hasOwn(strings, 'raw'),
+    'Invalid template strings array'
+  );
+
+  if (self.trustedTypes && self.trustedTypes.createPolicy) {
+    const policy = self.trustedTypes.createPolicy(
+      'static-template#createNode',
+      {
+        createHTML: function (unused) {
+          return strings[0];
+        },
+      }
+    );
+    // @ts-ignore
+    container./*OK*/ innerHTML = policy.createHTML('ignored');
+  } else {
+    container./*OK*/ innerHTML = strings[0];
+  }
 
   const el = /** @type {HTMLElement} */ (container.firstElementChild);
   devAssert(el, 'No elements in template');
@@ -99,7 +117,7 @@ function createNode(container, strings) {
  * Returns a named map of all ref elements.
  *
  * @param {HTMLElement} root
- * @return {Object<string, HTMLElement>}
+ * @return {{[key: string]: HTMLElement}}
  */
 export function htmlRefs(root) {
   const elements = root.querySelectorAll('[ref]');

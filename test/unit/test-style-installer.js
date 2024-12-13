@@ -6,6 +6,7 @@ import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
 
+import {macroTask} from '#testing/helpers';
 import {isAnimationNone} from '#testing/helpers/service';
 
 import * as rds from '../../src/render-delaying-services';
@@ -48,7 +49,7 @@ describes.sandboxed('Styles', {}, () => {
       expect(isAnimationNone(doc.body)).to.be.true;
     });
 
-    it('should wait for render delaying services', () => {
+    it('should wait for render delaying services', async () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
@@ -58,31 +59,25 @@ describes.sandboxed('Styles', {}, () => {
         .withArgs(win)
         .returns(Promise.resolve(['service1', 'service2']));
       styles.makeBodyVisible(doc);
-      return new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      }).then(() => {
-        expect(getStyle(doc.body, 'opacity')).to.equal('1');
-        expect(getStyle(doc.body, 'visibility')).to.equal('visible');
-        expect(isAnimationNone(doc.body)).to.be.true;
-        expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
-        expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
-        expect(ampdoc.signals().get('render-start')).to.be.ok;
-      });
+      await macroTask();
+      expect(getStyle(doc.body, 'opacity')).to.equal('1');
+      expect(getStyle(doc.body, 'visibility')).to.equal('visible');
+      expect(isAnimationNone(doc.body)).to.be.true;
+      expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
+      expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
+      expect(ampdoc.signals().get('render-start')).to.be.ok;
     });
 
-    it('should skip schedulePass if no render delaying services', () => {
+    it('should skip schedulePass if no render delaying services', async () => {
       waitForServicesStub.withArgs(win).returns(Promise.resolve([]));
       styles.makeBodyVisible(doc);
-      return new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      }).then(() => {
-        expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
-        expect(schedulePassSpy).to.not.be.calledWith(
-          env.sandbox.match.number,
-          true
-        );
-        expect(ampdoc.signals().get('render-start')).to.be.ok;
-      });
+      await macroTask();
+      expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
+      expect(schedulePassSpy).to.not.be.calledWith(
+        env.sandbox.match.number,
+        true
+      );
+      expect(ampdoc.signals().get('render-start')).to.be.ok;
     });
   });
 

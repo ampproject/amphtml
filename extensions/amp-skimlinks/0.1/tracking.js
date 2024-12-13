@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
@@ -82,14 +80,14 @@ export class Tracking {
       this.trackingInfo_;
 
     // This data is common to both page & link impression requests.
-    const commonData = dict({
+    const commonData = {
       'pub': pubcode,
       'pag': pageUrl,
       'guid': guid,
       'uuid': pageImpressionId,
       'tz': timezone,
       'jv': PLATFORM_NAME,
-    });
+    };
 
     const {numberAffiliateLinks, urls} = this.extractAnchorTrackingInfo_(
       anchorReplacementList
@@ -118,7 +116,7 @@ export class Tracking {
       timezone,
     } = this.trackingInfo_;
 
-    const data = dict({
+    const data = {
       'pubcode': pubcode,
       'referrer': pageUrl,
       'pref': referrer,
@@ -129,18 +127,15 @@ export class Tracking {
       'uuid': pageImpressionId,
       'product': '1',
       'jv': PLATFORM_NAME,
-    });
+    };
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in NA_CLICK_TRACKING_URL
     // (See constants.js).
-    this.analytics_.trigger(
-      NON_AFFILIATE_CLICK,
-      dict({
-        'data': JSON.stringify(data),
-        'rnd': 'RANDOM',
-      })
-    );
+    this.analytics_.trigger(NON_AFFILIATE_CLICK, {
+      'data': JSON.stringify(data),
+      'rnd': 'RANDOM',
+    });
   }
 
   /**
@@ -153,28 +148,21 @@ export class Tracking {
   sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
-    const data = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({
-          'slc': numberAffiliateLinks,
-          'jsl': 0, // Javascript load time, not relevant in AMP context.
-          'pref': referrer,
-          'uc': customTrackingId,
-          't': 1,
-        }),
-        commonData
-      )
-    );
+    const data = /** @type {!JsonObject} */ ({
+      'slc': numberAffiliateLinks,
+      'jsl': 0,
+      'pref': referrer,
+      'uc': customTrackingId,
+      't': 1,
+      ...commonData,
+    });
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL
     // (See constants.js).
-    this.analytics_.trigger(
-      PAGE_IMPRESSIONS,
-      dict({
-        'data': JSON.stringify(data),
-      })
-    );
+    this.analytics_.trigger(PAGE_IMPRESSIONS, {
+      'data': JSON.stringify(data),
+    });
   }
 
   /**
@@ -191,26 +179,19 @@ export class Tracking {
       return;
     }
 
-    const data = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({
-          'dl': urls,
-          'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
-          'typ': 'l',
-        }),
-        commonData
-      )
-    );
+    const data = /** @type {!JsonObject} */ ({
+      'dl': urls,
+      'hae': numberAffiliateLinks ? 1 : 0,
+      'typ': 'l',
+      ...commonData,
+    });
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
     // (See constants.js).
-    this.analytics_.trigger(
-      LINK_IMPRESSIONS,
-      dict({
-        'data': JSON.stringify(data),
-      })
-    );
+    this.analytics_.trigger(LINK_IMPRESSIONS, {
+      'data': JSON.stringify(data),
+    });
   }
 
   /**
@@ -233,16 +214,14 @@ export class Tracking {
     analyticsBuilder.track(LINK_IMPRESSIONS, linksTrackingUrl);
     analyticsBuilder.track(NON_AFFILIATE_CLICK, nonAffiliateTrackingUrl);
 
-    analyticsBuilder.setTransportConfig(
-      dict({
-        'beacon': true,
-        'image': true,
-        // Tracking API supports CORS with wildcard in Access-Control-Origin
-        // which is not compatible with the credentials flag set to true when
-        // using xhrpost.
-        'xhrpost': false,
-      })
-    );
+    analyticsBuilder.setTransportConfig({
+      'beacon': true,
+      'image': true,
+      // Tracking API supports CORS with wildcard in Access-Control-Origin
+      // which is not compatible with the credentials flag set to true when
+      // using xhrpost.
+      'xhrpost': false,
+    });
 
     return analyticsBuilder.build();
   }
@@ -263,7 +242,7 @@ export class Tracking {
    */
   extractAnchorTrackingInfo_(anchorReplacementList) {
     let numberAffiliateLinks = 0;
-    const urls = dict({});
+    const urls = {};
 
     anchorReplacementList.forEach((anchorReplacement) => {
       const {anchor, replacementUrl} = anchorReplacement;
@@ -274,12 +253,10 @@ export class Tracking {
         return;
       }
 
-      urls[anchor.href] =
-        urls[anchor.href] ||
-        dict({
-          'ae': 1, // 1 means affiliated link.
-          'count': 0,
-        });
+      urls[anchor.href] = urls[anchor.href] || {
+        'ae': 1, // 1 means affiliated link.
+        'count': 0,
+      };
 
       urls[anchor.href]['count'] += 1;
       numberAffiliateLinks += 1;

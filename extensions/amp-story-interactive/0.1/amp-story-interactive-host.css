@@ -1,0 +1,152 @@
+.i-amphtml-story-interactive-component {
+  align-self: center;
+  height: auto !important;
+  pointer-events: none !important;
+  min-width: 14em !important; /* 14em = 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  max-width: 25em !important;
+  font-size: calc(
+    var(--story-page-vmin) * 3
+  ); /* override with ems for pixel perfect layout */
+  width: 100%;
+  /* Properties overrideable by user */
+  --interactive-accent-color: #005af0;
+  --interactive-prompt-background: var(--interactive-accent-color);
+  --interactive-prompt-text-color: white;
+  --interactive-prompt-alignment: initial;
+  /* Shared properties by interactives (overrideable by themes) */
+  --i-amphtml-interactive-option-accent-color: var(
+    --interactive-accent-color
+  ) !important;
+  --i-amphtml-interactive-option-background-color: white !important;
+  --i-amphtml-interactive-options-chip-background-color: var(
+    --i-amphtml-interactive-option-background-color
+  ) !important;
+  --i-amphtml-interactive-option-text-color: #55595e !important;
+  --i-amphtml-interactive-theme-border: rgba(85, 89, 94, 0.2) !important;
+  --i-amphtml-interactive-theme-shading: rgba(85, 89, 94, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-base: rgb(222, 222, 225) !important;
+  --i-amphtml-interactive-theme-shading-flash: rgba(85, 89, 94, 0.5) !important;
+  --i-amphtml-interactive-chip-radius: 2em !important;
+  --i-amphtml-interactive-chip-shadow: 0px 0px 0px transparent !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 0px 0px 0px transparent !important;
+  --i-amphtml-interactive-answer-choice-border: var(
+    --interactive-accent-color
+  ) !important;
+  --i-amphtml-interactive-answer-choice-background: white !important;
+  --i-amphtml-interactive-prompt-text-size: 1.375em !important;
+  --i-amphtml-interactive-prompt-line-height: 1.3em !important;
+  --i-amphtml-interactive-strong-text-color: black !important;
+  --i-amphtml-interactive-animation-time: 0.3s !important;
+  --i-amphtml-interactive-ease-out-curve: cubic-bezier(0.3, 0, 0, 1) !important;
+  --i-amphtml-interactive-animation-delay: 0s !important;
+  --i-amphtml-interactive-component-shadow: 0px 4px 12px rgba(60, 64, 67, 0.08),
+    0px 2px 4px rgba(60, 64, 67, 0.12);
+  --i-amphtml-interactive-prompt-clamp: 4 !important;
+  --i-amphtml-interactive-results-prompt-margin: 20px !important;
+  --i-amphtml-interactive-placeholder-background: rgba(
+    32,
+    33,
+    36,
+    0.2
+  ) !important;
+  --i-amphtml-story-interactive-img-quiz-answer-filter: none;
+  --i-amphtml-interactive-img-border: 0 0 0 transparent !important;
+}
+
+.i-amphtml-story-interactive-component[theme='dark'] {
+  --i-amphtml-interactive-option-text-color: #a7adb4 !important;
+  --i-amphtml-interactive-option-background-color: #202124 !important;
+  --i-amphtml-interactive-theme-border: rgba(167, 173, 180, 0.2) !important;
+  --i-amphtml-interactive-theme-shading: rgba(167, 173, 180, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-base: rgb(60, 61, 63) !important;
+  --i-amphtml-interactive-theme-shading-flash: rgba(
+    167,
+    173,
+    180,
+    0.5
+  ) !important;
+  --i-amphtml-interactive-strong-text-color: white !important;
+  --i-amphtml-interactive-placeholder-background: rgba(
+    255,
+    255,
+    255,
+    0.2
+  ) !important;
+  --i-amphtml-story-interactive-img-quiz-answer-filter: invert(100%);
+}
+
+.i-amphtml-story-interactive-component[chip-style='shadow'] {
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px
+    rgba(0, 0, 0, 0.2) !important;
+  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+}
+
+.i-amphtml-story-interactive-component:not(amp-story-interactive-results)[chip-style='transparent'] {
+  --i-amphtml-interactive-options-chip-background-color: transparent !important;
+  --interactive-prompt-background: transparent !important;
+  --interactive-prompt-alignment: center;
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px
+    rgba(0, 0, 0, 0.2) !important;
+  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+  --i-amphtml-interactive-component-shadow: none !important;
+  --i-amphtml-interactive-img-border: 0 0 0 0.25em
+    var(--i-amphtml-interactive-option-background-color) !important;
+}
+
+.i-amphtml-story-interactive-component[chip-style='shadow'][theme='dark'] {
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.6) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px
+    rgba(0, 0, 0, 0.4) !important;
+}
+
+.i-amphtml-story-interactive-component[prompt-size='large'] {
+  --i-amphtml-interactive-prompt-text-size: 1.75em !important;
+  --i-amphtml-interactive-prompt-clamp: 3 !important;
+}
+
+.i-amphtml-story-interactive-component[prompt-size='small'] {
+  --i-amphtml-interactive-prompt-text-size: 1.125em !important;
+}
+
+.i-amphtml-story-interactive-component:not([prompt-text]) {
+  --interactive-prompt-background: transparent !important;
+}
+
+amp-story-interactive-binary-poll.i-amphtml-story-interactive-component,
+amp-story-interactive-results.i-amphtml-story-interactive-component,
+amp-story-interactive-img-poll.i-amphtml-story-interactive-component,
+amp-story-interactive-img-quiz.i-amphtml-story-interactive-component,
+amp-story-interactive-results-detailed.i-amphtml-story-interactive-component {
+  max-width: 18em !important;
+}
+
+amp-story-interactive-img-poll.i-amphtml-story-interactive-component,
+amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
+  --interactive-prompt-alignment: center;
+}
+
+amp-story-interactive-binary-poll[theme='dark'],
+amp-story-interactive-poll[theme='dark'] {
+  --i-amphtml-interactive-option-accent-color: white !important;
+}
+
+amp-story-interactive-results:not([chip-style='transparent']) {
+  --interactive-prompt-text-color: var(
+    --i-amphtml-interactive-strong-text-color
+  );
+}
+
+amp-story-interactive-results[chip-style='transparent'] {
+  --i-amphtml-interactive-option-text-color: black !important;
+  --i-amphtml-interactive-options-chip-background-color: transparent !important;
+  --interactive-prompt-background: transparent;
+  --i-amphtml-interactive-component-shadow: none !important;
+  --interactive-prompt-text-color: black;
+  --i-amphtml-interactive-results-prompt-margin: 0px !important;
+}
+amp-story-interactive-results[theme='dark'][chip-style='transparent'] {
+  --i-amphtml-interactive-option-text-color: white !important;
+  --interactive-prompt-text-color: white;
+}

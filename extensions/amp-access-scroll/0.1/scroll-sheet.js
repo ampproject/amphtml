@@ -1,5 +1,5 @@
 import {toggle} from '#core/dom/style';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {ScrollComponent} from './scroll-component';
 
@@ -79,20 +79,17 @@ export class Sheet extends ScrollComponent {
    * */
   makeIframe_() {
     this.frame_ = /** @type {!HTMLIFrameElement} */ (
-      this.el(
-        'iframe',
-        dict({
-          'class': 'amp-access-scroll-sheet',
-          'scrolling': 'no',
-          'frameborder': '0',
-          'allowtransparency': 'true',
-          'title': this.DEFAULT_TITLE_,
-          'sandbox':
-            'allow-scripts allow-same-origin ' +
-            'allow-top-navigation allow-popups ' +
-            'allow-popups-to-escape-sandbox',
-        })
-      )
+      this.el('iframe', {
+        'class': 'amp-access-scroll-sheet',
+        'scrolling': 'no',
+        'frameborder': '0',
+        'allowtransparency': 'true',
+        'title': this.DEFAULT_TITLE_,
+        'sandbox':
+          'allow-scripts allow-same-origin ' +
+          'allow-top-navigation allow-popups ' +
+          'allow-popups-to-escape-sandbox',
+      })
     );
     this.root_ = this.frame_;
     this.mount();

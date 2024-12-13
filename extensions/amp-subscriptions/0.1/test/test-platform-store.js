@@ -1,8 +1,8 @@
-import {Entitlement, GrantReason} from '../entitlement';
+import {user} from '#utils/log';
 
+import {Entitlement, GrantReason} from '../entitlement';
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
-import {user} from '#utils/log';
 
 describes.realWin('Platform store', {}, (env) => {
   let platformStore;
@@ -1006,6 +1006,24 @@ describes.realWin('Platform store', {}, (env) => {
     it('should reset a given platform', () => {
       platformStore.resetPlatform(platformKey);
       expect(platform.reset).to.be.calledOnce;
+    });
+  });
+
+  describe('resetPlatformStore', () => {
+    it('the entitlement resolvement callback added through public API should persist even after the platform store gets reset', async () => {
+      const callbackSpy = env.sandbox.spy();
+      platformStore.addOnEntitlementResolvedCallback(callbackSpy);
+
+      const newStore = platformStore.resetPlatformStore();
+      const newEntitlement = new Entitlement({
+        service: 'platform1',
+        granted: false,
+      });
+      newStore.resolveEntitlement('platform1', newEntitlement);
+      expect(callbackSpy).to.have.been.calledOnceWithExactly({
+        platformKey: 'platform1',
+        entitlement: newEntitlement,
+      });
     });
   });
 });

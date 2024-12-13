@@ -26,7 +26,7 @@ import {dev} from '#utils/log';
 
 import {MraidService} from './mraid-service';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-mraid';

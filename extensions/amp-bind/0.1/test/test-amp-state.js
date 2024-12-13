@@ -3,6 +3,8 @@ import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 
+import {macroTask} from '#testing/helpers';
+
 import {UrlReplacementPolicy_Enum} from '../../../../src/batched-json';
 
 describes.realWin(
@@ -77,7 +79,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await macroTask();
 
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
@@ -107,7 +109,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await macroTask();
 
       expect(actions.trigger).to.have.been.calledWithExactly(
         element,
@@ -146,7 +148,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await macroTask();
 
       // One call from build(), one call from "refresh" action.
       expect(ampState.fetch_).to.have.been.calledTwice;
@@ -163,7 +165,7 @@ describes.realWin(
       );
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await macroTask();
 
       expect(ampState.fetch_).to.not.have.been.called;
     });
@@ -185,7 +187,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await macroTask();
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
@@ -223,7 +225,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await macroTask();
 
       expect(ampState.fetch_).to.have.been.called;
       expect(bind.setState).calledWithMatch(

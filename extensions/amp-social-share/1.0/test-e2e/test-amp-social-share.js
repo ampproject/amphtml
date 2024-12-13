@@ -86,7 +86,9 @@ describes.endtoend(
     });
 
     describe('clicking', () => {
-      it('opens a new window on click', async () => {
+      it('opens a new window on click', async function () {
+        this.timeout(5000);
+
         const host = await controller.findElement('#two');
 
         let windows = await controller.getAllWindows();
@@ -98,8 +100,8 @@ describes.endtoend(
         await expect(windows.length).to.equal(2);
         await controller.switchToWindow(windows[1]);
 
-        await expect(controller.getCurrentUrl()).to.equal(
-          'https://twitter.com/intent/tweet?text=amp-social-share&url=http%3A%2F%2Fexample.com%2F'
+        await expect(controller.getCurrentUrl()).to.have.string(
+          'https://x.com/'
         );
       });
 

@@ -4,6 +4,8 @@ formats:
   - websites
 teaser:
   text: Displays a Dailymotion video.
+experimental: true
+bento: true
 ---
 
 # amp-dailymotion

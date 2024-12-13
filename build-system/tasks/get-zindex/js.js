@@ -120,8 +120,8 @@ async function getZindexJs(filename) {
       const name = types.isStringLiteral(key)
         ? key.value
         : types.isIdentifier(key)
-        ? key.name
-        : null;
+          ? key.name
+          : null;
       if (!name) {
         return;
       }

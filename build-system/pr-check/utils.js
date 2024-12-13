@@ -1,11 +1,9 @@
 'use strict';
 
-const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const path = require('path');
 const {
   ciPullRequestSha,
-  circleciBuildNumber,
+  circleciUniqueBuildNumber,
   isCiBuild,
   isCircleciBuild,
 } = require('../common/ci');
@@ -22,23 +20,10 @@ const {cyan, green, yellow} = require('kleur/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {getStdout} = require('../common/process');
-const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
-const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
-const MODULE_CONTAINER_DIRECTORY = 'module';
-
-const ARTIFACT_DIRECTORY = '/tmp/artifacts/';
-const ARTIFACT_FILE_NAME = `${ARTIFACT_DIRECTORY}/amp_nomodule_build.tar.gz`;
 const FILELIST_PATH = '/tmp/filelist.txt';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p', 'dist.tools'];
-const APP_SERVING_DIRS = [
-  ...BUILD_OUTPUT_DIRS,
-  'examples',
-  'test/manual',
-  'test/fixtures/e2e',
-];
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#create-a-git-branch';
@@ -110,7 +95,7 @@ function printChangeSummary() {
 function signalGracefulHalt() {
   if (isCircleciBuild()) {
     const loggingPrefix = getLoggingPrefix();
-    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciUniqueBuildNumber()}`;
     fs.closeSync(fs.openSync(sentinelFile, 'w'));
     logWithoutTimestamp(
       `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
@@ -229,10 +214,9 @@ const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
  * Stores build files to the CI workspace.
- * @param {string} containerDirectory
- * @private
  */
-function storeBuildToWorkspace_(containerDirectory) {
+function storeBuildOutputToWorkspace() {
+  const containerDirectory = circleciUniqueBuildNumber();
   if (isCircleciBuild()) {
     fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
     for (const outputDir of BUILD_OUTPUT_DIRS) {
@@ -244,74 +228,7 @@ function storeBuildToWorkspace_(containerDirectory) {
         );
       }
     }
-    // Bento components are compiled inside the extension source file.
-    for (const componentFile of fastGlob.sync('extensions/*/?.?/dist/*.js')) {
-      fs.ensureDirSync(
-        `/tmp/workspace/builds/${containerDirectory}/${path.dirname(
-          componentFile
-        )}`
-      );
-      fs.moveSync(
-        componentFile,
-        `/tmp/workspace/builds/${containerDirectory}/${componentFile}`
-      );
-    }
   }
-}
-
-/**
- * Stores unminified build files to the CI workspace.
- */
-function storeUnminifiedBuildToWorkspace() {
-  storeBuildToWorkspace_(UNMINIFIED_CONTAINER_DIRECTORY);
-}
-
-/**
- * Stores nomodule build files to the CI workspace.
- */
-function storeNomoduleBuildToWorkspace() {
-  storeBuildToWorkspace_(NOMODULE_CONTAINER_DIRECTORY);
-}
-
-/**
- * Stores module build files to the CI workspace.
- */
-function storeModuleBuildToWorkspace() {
-  storeBuildToWorkspace_(MODULE_CONTAINER_DIRECTORY);
-}
-
-/**
- * Stores an experiment's build files to the CI workspace.
- * @param {string} exp one of 'experimentA', 'experimentB', or 'experimentC'.
- */
-function storeExperimentBuildToWorkspace(exp) {
-  storeBuildToWorkspace_(exp);
-}
-
-/**
- * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
- * @return {Promise<void>}
- */
-async function processAndStoreBuildToArtifacts() {
-  if (!isCircleciBuild()) {
-    return;
-  }
-
-  await replaceUrls('test/manual');
-  await replaceUrls('examples');
-
-  const loggingPrefix = getLoggingPrefix();
-
-  logWithoutTimestamp(
-    `\n${loggingPrefix} Compressing ` +
-      cyan(APP_SERVING_DIRS.join(', ')) +
-      ' into ' +
-      cyan(ARTIFACT_FILE_NAME) +
-      '...'
-  );
-  await fs.ensureDir(ARTIFACT_DIRECTORY);
-  execOrDie(`tar -czf ${ARTIFACT_FILE_NAME} ${APP_SERVING_DIRS.join('/ ')}/`);
-  execOrDie(`du -sh ${ARTIFACT_FILE_NAME}`);
 }
 
 /**
@@ -347,10 +264,6 @@ module.exports = {
   timedExecOrDie,
   timedExecWithError,
   timedExecOrThrow,
-  storeUnminifiedBuildToWorkspace,
-  storeNomoduleBuildToWorkspace,
-  storeModuleBuildToWorkspace,
-  storeExperimentBuildToWorkspace,
-  processAndStoreBuildToArtifacts,
+  storeBuildOutputToWorkspace,
   generateCircleCiShardTestFileList,
 };

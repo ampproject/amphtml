@@ -3,16 +3,15 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const {cyan, green, red} = require('kleur/colors');
-const {decode} = require('sourcemap-codec');
+const {decode} = require('@jridgewell/sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
 
 // Compile related constants
-const distWithSourcemapsCmd = 'amp dist --core_runtime_only --full_sourcemaps';
-const v0JsMap = 'dist/v0.js.map';
+const distWithSourcemapsCmd =
+  'amp dist --core_runtime_only --extensions=amp-audio --full_sourcemaps';
 const distEsmWithSourcemapsCmd =
-  'amp dist --core_runtime_only --full_sourcemaps --esm';
-const v0MjsMap = 'dist/v0.mjs.map';
+  'amp dist --core_runtime_only --extensions=amp-audio --full_sourcemaps --esm';
 
 // Sourcemap URL related constants
 const sourcemapUrlMatcher =
@@ -113,7 +112,7 @@ function checkSourcemapMappings(sourcemapJson, map) {
   }
 
   // See https://www.npmjs.com/package/sourcemap-codec#usage.
-  const firstLineMapping = decode(sourcemapJson.mappings)[0][0];
+  const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
   const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
     firstLineMapping;
 
@@ -154,12 +153,15 @@ function checkSourcemapMappings(sourcemapJson, map) {
 
 /**
  * @param {string} map The map filepath to check
+ * @param {boolean} checkMappings Whether to test a mapping points to a correct source.
  */
-function checkSourceMap(map) {
+function checkSourceMap(map, checkMappings) {
   const sourcemapJson = getSourcemapJson(map);
   checkSourcemapUrl(sourcemapJson, map);
   checkSourcemapSources(sourcemapJson, map);
-  checkSourcemapMappings(sourcemapJson, map);
+  if (checkMappings) {
+    checkSourcemapMappings(sourcemapJson, map);
+  }
 }
 
 /**
@@ -169,8 +171,12 @@ function checkSourceMap(map) {
  */
 async function checkSourcemaps() {
   maybeBuild();
-  checkSourceMap(v0JsMap);
-  checkSourceMap(v0MjsMap);
+  checkSourceMap('dist/v0.js.map', true);
+  checkSourceMap('dist/v0.mjs.map', true);
+
+  checkSourceMap('dist/v0/amp-audio-0.1.js.map', false);
+  checkSourceMap('dist/v0/amp-audio-0.1.mjs.map', false);
+
   log(green('SUCCESS:'), 'All sourcemaps checks passed.');
 }
 

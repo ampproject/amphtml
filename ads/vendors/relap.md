@@ -5,12 +5,13 @@
 ```html
 <amp-ad
   width="auto"
-  height="750"
+  height="790"
   type="relap"
   layout="fixed-height"
   data-token="D3UMgQWBqleq1tPW"
-  data-url="http://bigpicture.ru"
-  data-anchorid="i0xMMY1MoliiZWVl"
+  data-url="https://relap.mail.ru/"
+  data-anchorid="-FVV_OEgYpljt7e3"
+  data-version="v7"
 >
 </amp-ad>
 ```

@@ -15,8 +15,9 @@
  */
 
 import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
-import {parseJson} from '#core/types/object/json';
+
 import {setStyle, setStyles} from '#core/dom/style';
+import {parseJson} from '#core/types/object/json';
 
 /*
  * How to develop:
@@ -27,7 +28,7 @@ import {setStyle, setStyles} from '#core/dom/style';
  * @param {!Array.<!Object>} array
  * @param {!Function} iteratee
  *
- * @return {Object}
+ * @return {object}
  */
 export function keyBy(array, iteratee) {
   return array.reduce(
@@ -52,7 +53,7 @@ export function runWhenFetchingSettled(fetchingSSPs, cb) {
 /**
  * @param {!Element} element
  * @param {boolean} center
- * @param {Object} dimensions
+ * @param {object} dimensions
  */
 export function handlePosition(element, center, dimensions) {
   const styles = {
@@ -199,7 +200,6 @@ export function ssp(global, data) {
         // todo on SSP side (option to register error callback)
         // requestErrorCallback: () => {},
         AMPcallback: (ads) => {
-          /** @suppress {checkTypes} */
           const adById = keyBy(ads, (item) => item.id);
           const ad = adById[position['id']];
 

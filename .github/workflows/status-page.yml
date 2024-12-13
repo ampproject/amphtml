@@ -4,16 +4,24 @@ on:
     types: [opened]
   issue_comment:
     types: [edited]
+permissions:
+  contents: read
+
 jobs:
   status-page:
     if: contains(github.event.issue.title, '🌸 Cherry-pick request')
     runs-on: ubuntu-latest
     environment: status_page
     steps:
-      - uses: actions/setup-node@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
-          node-version: 16
-      - uses: actions/checkout@v2
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        with:
+          node-version: lts/*
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Add progress comment to cherry-pick issue for Stable and LTS
         if: github.event_name == 'issues' && github.event.action == 'opened'
         run: |
@@ -33,3 +41,30 @@ jobs:
           COMMENT_AFTER: ${{ github.event.comment.body }}
           STATUS_PAGE_ID: ${{ secrets.STATUS_PAGE_ID }}
           STATUS_PAGE_TOKEN: ${{ secrets.STATUS_PAGE_TOKEN }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: status-page
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

@@ -1,8 +1,8 @@
 tags: {  # amp-youtube 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-youtube 1.0"
-  excludes: "amp-youtube 0.1"
+  satisfies_condition: "amp-youtube 1.0"
+  excludes_condition: "amp-youtube 0.1"
   extension_spec: {
     name: "amp-youtube"
     version_name: "v1.0"
@@ -15,8 +15,8 @@ tags: {  # amp-youtube 1.0
 tags: {  # amp-youtube 0.1 and latest
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-youtube 0.1"
-  excludes: "amp-youtube 1.0"
+  satisfies_condition: "amp-youtube 0.1"
+  excludes_condition: "amp-youtube 1.0"
   extension_spec: {
     name: "amp-youtube"
     version_name: "v0.1"

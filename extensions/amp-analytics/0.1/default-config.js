@@ -40,6 +40,7 @@ const defaultConfig = jsonConfiguration({
     'fragmentParam': 'FRAGMENT_PARAM',
     'htmlAttr': 'HTML_ATTR',
     'incrementalEngagedTime': 'INCREMENTAL_ENGAGED_TIME',
+    'interactionToNextPaint': 'INTERACTION_TO_NEXT_PAINT',
     'largestContentfulPaint': 'LARGEST_CONTENTFUL_PAINT',
     'makeBodyVisible': 'MAKE_BODY_VISIBLE',
     'navRedirectCount': 'NAV_REDIRECT_COUNT',

@@ -97,7 +97,7 @@
           // resources asynchronously.
           amp.validator.init().then(function() {
             isValidatorReady = true;
-            // In most times, the initilization of AMP validator is slower than
+            // In most times, the initialization of AMP validator is slower than
             // the code that fills the minimal valid JavaScript AMP doc as the
             // default value in the input box. The `refreshEditorAndErrors` call
             // triggered by input box default value returns early because
@@ -203,38 +203,6 @@
           editor.setCursorAndFocus(error.line - 1, error.col);
         });
 
-        // Fetches a doc with JSON from the local server (index.js) and
-        // puts it into the editor.
-        var input = document.getElementById('urlToFetch');
-        var button = document.getElementById('validateButton');
-        button.addEventListener('click', function() {
-          var urlToFetch = input.value.trim();
-          if (urlToFetch.length > 0) {
-            if (!(urlToFetch.indexOf('http://') == 0 ||
-                  urlToFetch.indexOf('https://') == 0)) {
-              urlToFetch = 'https://' + urlToFetch;
-              input.value = urlToFetch;
-            }
-            var params = getLocationHashParams();
-            params['url'] = urlToFetch;
-            setLocationHashParams(params);
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function() {
-              if (xmlHttp.readyState == 4) {
-                if (xmlHttp.status == 200) {
-                  editor.setEditorValue(JSON.parse(xmlHttp.responseText).Contents);
-                } else {
-                  urlForm.displayToast();
-                }
-              }
-            };
-            xmlHttp.open('POST', '/fetch', true);
-            xmlHttp.setRequestHeader('X-Requested-By', 'validator webui');
-            xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xmlHttp.send('url=' + encodeURIComponent(urlToFetch));
-          }
-        });
-
         urlForm.addEventListener('webui-urlform-html-format-changes', function(e) {
           var editorValue = editor.getEditorValue();
           if (e.detail.htmlFormat === 'AMP4ADS') {
@@ -285,7 +253,7 @@
           // Extract doc from query param
           editor.setEditorValue(incomingDocStr);
         } else if (params.hasOwnProperty('url') && params['url']) {
-          // Load doc fromm url
+          // Load doc from url
           this.$.urlForm.setURLAndValidate(params['url']);
         } else {
           // Use minimal valid JavaScript AMP doc

@@ -20,7 +20,7 @@ export class LruCache {
      */
     this.access_ = 0;
 
-    /** @private {Object<(number|string), {payload: T, access: number}>} */
+    /** @private {{[key: (number|string)]: {payload: T, access: number}}} */
     this.cache_ = map();
   }
 

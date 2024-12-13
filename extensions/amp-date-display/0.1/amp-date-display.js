@@ -19,7 +19,7 @@ const DEFAULT_LOCALE = 'en';
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
 
-/** @const {!Object<string, *>} */
+/** @const {!{[key: string]: *}} */
 const DEFAULT_DATETIME_OPTIONS = {
   'year': 'numeric',
   'month': 'short',
@@ -96,7 +96,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = '';
 
-    /** @private {Object<string, *>} */
+    /** @private {{[key: string]: *}} */
     this.localeOptions_ = null;
 
     /** @private {?../../../src/service/template-impl.Templates} */
@@ -212,7 +212,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Element} element
    * @param {string} attrPrefix
-   * @return {Object<string, *>|undefined}
+   * @return {{[key: string]: *}|undefined}
    * @private
    */
   parseLocaleOptionsAttrs_(element, attrPrefix) {
@@ -235,7 +235,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
-   * @param {?Object<string, *>} localeOptions
+   * @param {?{[key: string]: *}} localeOptions
    * @return {string}
    * @private
    */
@@ -250,7 +250,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
-   * @param {?Object<string, *>} localeOptions
+   * @param {?{[key: string]: *}} localeOptions
    * @return {!VariablesDef}
    * @private
    */
@@ -280,7 +280,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
-   * @param {?Object<string, *>} localeOptions
+   * @param {?{[key: string]: *}} localeOptions
    * @return {!VariablesDef}
    * @private
    */

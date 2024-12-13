@@ -16,7 +16,7 @@ const EMPTY_DEPS = [];
  *   type?: Object,
  *   deps?: IContextProp<DEP, *>[],
  *   recursive?: boolean | (function(T[]):boolean),
- *   compute?: function(Node, T[], ...DEP):(T | undefined),
+ *   compute?: function(Node, T[], ...T):(T | undefined),
  *   defaultValue?: T,
  * }} opt_spec
  * @return {IContextProp<T, DEP>}

@@ -8,6 +8,8 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import {sleep} from '#testing/helpers';
+
 import {BaseElement} from '../../../../src/base-element';
 
 class FakeA4A extends BaseElement {
@@ -390,17 +392,12 @@ describes.realWin(
     });
 
     describe('Anchor Ad', () => {
-      it('should not insert anchor ad if not opted in', () => {
-        return getAmpAutoAds().then(() => {
-          return new Promise((resolve) => {
-            setTimeout(() => {
-              expect(
-                env.win.document.getElementsByTagName('AMP-STICKY-AD')
-              ).to.have.lengthOf(0);
-              resolve();
-            }, 500);
-          });
-        });
+      it('should not insert anchor ad if not opted in', async () => {
+        await getAmpAutoAds();
+        await sleep(500);
+        expect(
+          env.win.document.getElementsByTagName('AMP-STICKY-AD')
+        ).to.have.lengthOf(0);
       });
 
       it('should insert three ads plus anchor ad', () => {

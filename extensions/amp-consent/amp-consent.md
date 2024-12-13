@@ -620,8 +620,12 @@ Yes. See example [here](https://amp.dev/documentation/examples/user-consent/geol
 
 ##### Does AMP support the IAB TCF?
 
-AMP supports popular transparency consent frameworks including the IAB TCF v1, TCF v2 and the IAB US Privacy String.
-Please check with your consent management platform (CMP) and ad networks on their AMP support. AMP will read and pass the strings passed by the frameworks (IAB TCF v1, TCF v2 and the IAB US Privacy String) when received by CMPs/ad networks.
+AMP supports popular transparency consent frameworks including the IAB TCF v1, TCF v2, TCF v2.2, the IAB US Privacy String, and the IAB Global Privacy Platform string.
+Please check with your consent management platform (CMP) and ad networks on their AMP support. AMP will read and pass the strings passed by the frameworks (IAB TCF v1, TCF v2, TCF v2.2, the IAB US Privacy String and the IAB Global Privacy Platorm string) when received by CMPs/ad networks.
+
+##### I have a CMP implemented with AMP but for TCF v2 what do I need to do to support TCF v2.2?
+
+For AMP integration, the only thing you need to do is provide the value of `tcfPolicyVersion` during the client-side `postMessage`, and in case you also use `checkConsentHref` you need to provide it in the response, and you can also update it directly from the response too via the `tcfPolicyVersion` field in the response from your server, this will allow you to update consents in case you have not added the tcfPolicyVersion field before the transaction to TCF v2.2.
 
 ##### I can't see feature X being supported, what can I do?
 

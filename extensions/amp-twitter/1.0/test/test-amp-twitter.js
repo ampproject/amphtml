@@ -1,9 +1,11 @@
 import '../amp-twitter';
-import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {serializeMessage} from '#core/3p-frame-messaging';
+import {createElementWithAttributes} from '#core/dom';
+
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/helpers/service';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 
 describes.realWin(
   'amp-twitter-v1.0',

@@ -17,13 +17,13 @@ export class MediaQueryProps {
     this.callback_ = callback;
 
     /**
-     * @type {Object<string, ExprDef>}
+     * @type {{[key: string]: ExprDef}}
      * @private
      */
     this.exprMap_ = {};
 
     /**
-     * @type {?Object<string, ExprDef>}
+     * @type {?{[key: string]: ExprDef}}
      * @private
      */
     this.prevExprMap_ = null;

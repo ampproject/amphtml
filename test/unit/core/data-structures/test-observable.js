@@ -44,4 +44,20 @@ describes.sandboxed('data structures - Observable', {}, () => {
     expect(observer1Called).to.equal(1);
     expect(observer2Called).to.equal(2);
   });
+
+  it('remove while firing', () => {
+    let observer1Called = 0;
+    const observer1 = () => {
+      observer1Called++;
+    };
+    observable.add(observer1);
+    const remove = observable.add(() => {
+      remove();
+    });
+    observable.add(observer1);
+
+    observable.fire();
+
+    expect(observer1Called).to.equal(2);
+  });
 });

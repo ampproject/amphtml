@@ -1,13 +1,17 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import {createElementWithAttributes} from '#core/dom';
+
+import {installTimerService} from '#service/timer-impl';
+
+import {macroTask} from '#testing/helpers';
+
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../concurrent-load';
-import {installTimerService} from '#service/timer-impl';
-import {macroTask} from '#testing/helpers';
 
 describes.realWin('concurrent-load', {}, (env) => {
   describe('getAmpAdRenderOutsideViewport', () => {
@@ -105,8 +109,7 @@ describes.realWin('concurrent-load', {}, (env) => {
       installTimerService(env.win);
     });
 
-    // TODO(jeffkaufman, #13422): this test was silently failing
-    it.skip('should block if incremented', () => {
+    it('should block if incremented', () => {
       incrementLoadingAds(env.win);
       const start = Date.now();
       return waitFor3pThrottle(env.win).then(() =>

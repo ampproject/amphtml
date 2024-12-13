@@ -1,43 +1,36 @@
-import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-
-import * as Preact from '#preact';
-import {useRef, useState} from '#preact';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../../../amp-accordion/1.0/component';
-import {BentoYoutube} from '../component';
+} from '#bento/components/bento-accordion/1.0/component';
+import {BentoYoutube} from '#bento/components/bento-youtube/1.0/component';
+
+import * as Preact from '#preact';
+import {useRef, useState} from '#preact';
 
 export default {
   title: 'YouTube',
   component: BentoYoutube,
-  decorators: [withKnobs],
+  args: {
+    width: 300,
+    height: 300,
+    autoplay: false,
+    loop: false,
+    params: {},
+    credentials: 'include',
+  },
 };
 
 const VIDEOID = 'IAvf-rkzNck';
 const LIVE_CHANNEL_ID = 'sKCkM-f2Qk4';
 
-export const _default = () => {
-  const width = number('width', 300);
-  const height = number('height', 200);
-  const videoid = text('videoid', VIDEOID);
-  const autoplay = boolean('autoplay', false);
-  const loop = boolean('loop', false);
-  const params = object('params', {});
-  const credentials = text('credentials', 'include');
-  return (
-    <BentoYoutube
-      autoplay={autoplay}
-      loop={loop}
-      videoid={videoid}
-      params={params}
-      style={{width, height}}
-      credentials={credentials}
-    />
-  );
+export const _default = ({height, width, ...args}) => {
+  return <BentoYoutube style={{width, height}} {...args} />;
+};
+
+_default.args = {
+  videoid: VIDEOID,
 };
 
 /**
@@ -82,54 +75,23 @@ function WithStateTable({autoplay, credentials, loop, params, style, videoid}) {
   );
 }
 
-/**
- * @return {*}
- */
-export function State() {
-  const width = number('width', 300);
-  const height = number('height', 200);
-  const videoid = text('videoid', VIDEOID);
-  const autoplay = boolean('autoplay', false);
-  const loop = boolean('loop', false);
-  const params = object('params', {});
-  const credentials = text('credentials', 'include');
-  return (
-    <WithStateTable
-      autoplay={autoplay}
-      loop={loop}
-      videoid={videoid}
-      params={params}
-      style={{width, height}}
-      credentials={credentials}
-    />
-  );
+export function State({height, width, ...args}) {
+  return <WithStateTable style={{width, height}} {...args} />;
 }
 
-export const liveChannelId = () => {
-  const width = number('width', 300);
-  const height = number('height', 200);
-  const liveChannelid = text('liveChannelid', LIVE_CHANNEL_ID);
-  const autoplay = boolean('autoplay', false);
-  const loop = boolean('loop', false);
-  const params = object('params', {});
-  const credentials = text('credentials', 'include');
-  return (
-    <BentoYoutube
-      autoplay={autoplay}
-      loop={loop}
-      liveChannelid={liveChannelid}
-      params={params}
-      style={{width, height}}
-      credentials={credentials}
-    />
-  );
+State.args = {
+  videoid: VIDEOID,
 };
 
-export const InsideAccordion = () => {
-  const width = text('width', '320px');
-  const height = text('height', '180px');
-  const videoid = text('videoid', VIDEOID);
-  const params = object('params', {});
+export const liveChannelId = ({height, width, ...args}) => {
+  return <BentoYoutube style={{width, height}} {...args} />;
+};
+
+liveChannelId.args = {
+  liveChannelid: LIVE_CHANNEL_ID,
+};
+
+export const InsideAccordion = ({height, width, ...args}) => {
   return (
     <BentoAccordion expandSingleSection>
       <BentoAccordionSection key={1} expanded>
@@ -137,12 +99,7 @@ export const InsideAccordion = () => {
           <h2>Controls</h2>
         </BentoAccordionHeader>
         <BentoAccordionContent>
-          <BentoYoutube
-            loop={true}
-            videoid={videoid}
-            params={params}
-            style={{width, height}}
-          />
+          <BentoYoutube loop={true} {...args} style={{width, height}} />
         </BentoAccordionContent>
       </BentoAccordionSection>
       <BentoAccordionSection key={2}>
@@ -153,12 +110,15 @@ export const InsideAccordion = () => {
           <BentoYoutube
             autoplay={true}
             loop={true}
-            videoid={videoid}
-            params={params}
+            {...args}
             style={{width, height}}
           />
         </BentoAccordionContent>
       </BentoAccordionSection>
     </BentoAccordion>
   );
+};
+
+InsideAccordion.args = {
+  videoid: VIDEOID,
 };

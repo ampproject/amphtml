@@ -10,11 +10,11 @@ const testFiles = [
   'build-system/release-tagger/test/*test*.js',
   'build-system/server/app-index/test/*test*.js',
   'build-system/server/test/app-utils.test.js',
-  'build-system/tasks/css/test/bento-css.test.js',
   'build-system/tasks/get-zindex/get-zindex.test.js',
   'build-system/tasks/make-extension/test/test.js',
   'build-system/tasks/markdown-toc/test/test.js',
   'build-system/tasks/prepend-global/prepend-global.test.js',
+  'build-system/tasks/remap-dependencies-plugin/test-remap-dependencies.js',
 ];
 
 let targetFiles;

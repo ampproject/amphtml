@@ -1,5 +1,7 @@
 import {loadScript, validateData} from '#3p/3p';
 
+import {setStyle} from '#core/dom/style';
+
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -10,13 +12,6 @@ export function relap(global, data) {
   const urlParam = data['url'] || window.context.canonicalUrl;
 
   if (data['version'] === 'v7') {
-    window.onRelapAPIReady = function (relapAPI) {
-      relapAPI['init']({
-        token: data['token'],
-        url: urlParam,
-      });
-    };
-
     window.onRelapAPIInit = function (relapAPI) {
       relapAPI['addWidget']({
         cfgId: data['anchorid'],
@@ -27,13 +22,21 @@ export function relap(global, data) {
             window.context.renderStart();
           },
           onNoContent: function () {
+            relapAPI['destroy']();
             window.context.noContentAvailable();
           },
         },
       });
     };
 
-    loadScript(global, 'https://relap.io/v7/relap.js');
+    const iframeEl = document.createElement('iframe');
+    setStyle(iframeEl, 'position', 'absolute');
+    setStyle(iframeEl, 'visibility', 'hidden');
+    setStyle(iframeEl, 'left', '-9999px');
+    setStyle(iframeEl, 'top', '-9999px');
+    iframeEl.className = 'relap-runtime-iframe';
+    iframeEl.srcdoc = `<script src="https://relap.io/v7/relap.js" data-relap-token="${data['token']}" data-relap-url="${urlParam}"></script>`;
+    global.document.body.appendChild(iframeEl);
   } else {
     window.relapV6WidgetReady = function () {
       window.context.renderStart();

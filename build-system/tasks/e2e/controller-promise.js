@@ -27,8 +27,7 @@ class ControllerPromise extends Promise {
     /**
      * Returns a Promise that resolves when the given expected value fulfills
      * the given condition.
-     * @param {function(TYPE): ?TYPE} condition
-     * @return {!Promise<?TYPE>}
+     * @type {undefined|function(TYPE,function(TYPE): ?TYPE): Promise<TYPE>}
      */
     this.waitForValue = opt_waitForValue;
   }

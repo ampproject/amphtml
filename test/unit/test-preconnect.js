@@ -306,35 +306,31 @@ describes.sandboxed('preconnect', {}, (env) => {
     });
   });
 
-  // TODO(cramforce, #11827): Make this test work on Safari.
-  it.configure()
-    .skipSafari()
-    .skipFirefox()
-    .run('should add links if feature if detected', () => {
-      // Don't stub preload support allow the test to run through the browser
-      // default regardless of support or not.
-      return getPreconnectIframe(/* detectFeatures */ true).then((iframe) => {
-        preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar', 'script');
-        preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar');
-        preconnect.preload(ampdoc, 'https://a.prefetch.com/other', 'style');
-        preconnect.preload(ampdoc, javascriptUrlPrefix + ':alert()');
+  it('should add links if feature if detected', () => {
+    // Don't stub preload support allow the test to run through the browser
+    // default regardless of support or not.
+    return getPreconnectIframe(/* detectFeatures */ true).then((iframe) => {
+      preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar', 'script');
+      preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar');
+      preconnect.preload(ampdoc, 'https://a.prefetch.com/other', 'style');
+      preconnect.preload(ampdoc, javascriptUrlPrefix + ':alert()');
+      const fetches = iframe.doc.querySelectorAll('link[rel=preload]');
+      expect(fetches).to.have.length(0);
+      return visiblePromise.then(() => {
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href).to.equal(
+          'https://a.prefetch.com/'
+        );
         const fetches = iframe.doc.querySelectorAll('link[rel=preload]');
-        expect(fetches).to.have.length(0);
-        return visiblePromise.then(() => {
-          expect(
-            iframe.doc.querySelectorAll('link[rel=preconnect]')
-          ).to.have.length(1);
-          expect(
-            iframe.doc.querySelector('link[rel=preconnect]').href
-          ).to.equal('https://a.prefetch.com/');
-          const fetches = iframe.doc.querySelectorAll('link[rel=preload]');
-          expect(fetches).to.have.length(2);
-          expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');
-          expect(fetches[1].href).to.equal('https://a.prefetch.com/other');
-          expect(fetches[0].getAttribute('referrerpolicy')).to.equal('origin');
-        });
+        expect(fetches).to.have.length(2);
+        expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');
+        expect(fetches[1].href).to.equal('https://a.prefetch.com/other');
+        expect(fetches[0].getAttribute('referrerpolicy')).to.equal('origin');
       });
     });
+  });
 
   it('should preload', () => {
     preloadSupported = true;

@@ -210,7 +210,7 @@ describes.realWin(
 
         const data = impl.getDataForTemplate_();
 
-        expect(data.localeString).to.equal('上午4:05');
+        expect(data.localeString).to.equal('凌晨4:05');
       });
 
       it('locale, data-options-time-style, and data-options-date-style', async () => {
@@ -223,7 +223,7 @@ describes.realWin(
 
         const data = impl.getDataForTemplate_();
 
-        expect(data.localeString).to.equal('2001年2月3日 星期六 上午4:05:06');
+        expect(data.localeString).to.equal('2001年2月3日 星期六 凌晨4:05:06');
       });
     });
 

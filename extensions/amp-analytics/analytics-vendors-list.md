@@ -21,7 +21,7 @@ Type attribute value: `_fake_`
 
 Type attribute value: `acquialift`
 
-Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://docs.acquia.com/lift](https://docs.acquia.com/lift).
+Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` must be specified. More information about Acquia Lift can be found at [https://app.lift.acquia.com/](https://app.lift.acquia.com/).
 
 ### Adobe Analytics
 
@@ -65,13 +65,17 @@ Type attribute value: `amplitude`
 
 Type attribute value: `appsflyer`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for AppsFlyer. More details for adding AppsFlyer support can be found at [appsflyer.com](https://support.appsflyer.com/hc/en-us/articles/360001610038#amp-support)
+
+<!-- markdown-link-check-enable -->
 
 ### AT Internet
 
 Type attribute value: `atinternet`
 
-Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
+Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](https://developers.atinternet-solutions.com/as2-tagging-en/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/index.html).
 
 ### Baidu Analytics
 
@@ -159,24 +163,21 @@ Adds support for comScore Unified Digital Measurement™ pageview analytics. Req
 
 Type attribute value: `cxense`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Cxense Insight analytics. Requires defining _var_ `siteId` with Cxense-provided _siteId_. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
+
+<!-- markdown-link-check-enable -->
 
 ### Deep.BI
 
 Type attribute value: `deepbi`
-
-### Dynatrace
-
-Type attribute value: `dynatrace`
-
-Adds support for Dynatrace real user monitoring. Requires defining _var_ `app` with a Dynatrace provided _application id_ and _var_ `tenant` with a Dynatrace provided _environment identifier_. More details for adding Dynatrace real user monitoring can be found at [dynatrace.com](https://www.dynatrace.com/technologies/web/amp-monitoring/).
 
 ### EPICA
 
 Type attribute value: `epica`
 
 Adds support for EPICA page views and events.
-More details can be found at [EPICA docs](https://www.epica.ai).
 
 ### Eulerian Analytics
 
@@ -229,7 +230,7 @@ Unlike other analytics vendors, Google Tag Manager is a tag management service, 
 
 Type attribute value: `ibeatanalytics`
 
-Adds support for Ibeat Analytics. More details for adding Ibeat support can be found at [Ibeat Integration Support](https://ibeat.indiatimes.com/support.html#h.a5rit14mwie1).
+Adds support for Ibeat Analytics.
 
 <!-- markdown-link-check-disable -->
 
@@ -319,19 +320,19 @@ Adds support for Krux. Configuration details can be found at [help.krux.com](htt
 
 Type attribute value: `linkpulse`
 
-Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com](http://docs.linkpulse.com).
+Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com](https://www.kilkaya.com/).
 
 ### Lotame
 
 Type attribute value: `lotame`
 
-Adds support for Lotame. More information and configuration details can be found at [my.lotame.com](https://my.lotame.com/t/83h37h9/overview-1st-party-data-collection-in-google-amp).
+Adds support for Lotame. More information and configuration details can be found at [my.lotame.com](https://my.lotame.com/).
 
 ### Mapp Intelligence
 
 Type attribute value: `mapp_intelligence`
 
-Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/pages/viewpage.action?pageId=10027966).
+Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/v1/docs/en/accelerated-mobile-pages-amp).
 
 ### Marin Software
 
@@ -367,7 +368,7 @@ Adds support for Yandex Metrica. Configuration details can be found at [Yandex S
 
 Type attribute value: `moat`
 
-Adds support for Moat. Please contact your Moat representative for configuration details. More information on Moat can be found at [moat.com/analytics](https://moat.com/analytics).
+Adds support for Moat. Please contact your Moat representative for configuration details. More information on Moat can be found at [https://docs.oracle.com/en/cloud/saas/data-cloud-moat/about_moat/moat_analytics_how_it_works.html](https://docs.oracle.com/en/cloud/saas/data-cloud-moat/about_moat/moat_analytics_how_it_works.html).
 
 ### Mobify
 
@@ -399,6 +400,12 @@ Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration d
 
 Type attribute value: `navegg`
 
+### Neodata
+
+Type attribute value: `neodata`
+
+Adds support for Neodata Audience Platform. Please contact our support team to get set up with your `sysId`, `tagId` and `advId` parameters in the `vars` section.
+
 ### New Relic
 
 Type attribute value: `newrelic`
@@ -415,13 +422,17 @@ Adds support for Nielsen DCR. Please contact your Nielsen representative to get 
 
 Type attribute value: `nielsen-marketing-cloud`
 
-Adds support for Nielsen Marketing Cloud. More details can be found at [Nielsen Marketing Cloud](http://www.nielsen.com/us/en/solutions/capabilities/nielsen-marketing-cloud.html).
+Adds support for Nielsen Marketing Cloud. More details can be found at [Nielsen Marketing Cloud](https://www.nielsen.com/solutions/media-planning/marketing-cloud/).
 
 ### OEWA
 
 Type attribute value: `oewa`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for [OEWA](http://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`. More details for adding OEWA support can be found [here](http://www.oewa.at/Implementierung).
+
+<!-- markdown-link-check-enable -->
 
 Additionally, the following variables must be defined:
 
@@ -462,8 +473,21 @@ Adds support for Permutive event collection. Additionally, the following `vars` 
 
 -   `namespace`: your Permutive AMP namespace
 -   `key`: your Permutive public API key
+    <!-- markdown-link-check-disable -->
+    Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](https://support.permutive.com/hc/en-us).
+    <!-- markdown-link-check-enable -->
 
-Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
+### Permutive-ampscript
+
+Type attribute value: `permutive-ampscript`
+
+Adds support for Permutive event collection via the Permutive SDK running inside `amp-script`. This is a newer version of the `Permutive` configuration mentioned above. It will soon replace the old configuration.
+
+<!-- markdown-link-check-disable -->
+
+To add additional properties to Permutive events use the `extraUrlParams` property and use the `customProperties` key to define any custom properties. The value should be a valid json object. Full configuration details can be found at [support.permutive.com](https://support.permutive.com/hc/en-us).
+
+<!-- markdown-link-check-enable -->
 
 ### Piano
 
@@ -523,21 +547,25 @@ Type attribute value: `retargetly`
 
 Type attribute value: `rudderstack`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for RudderStack page views and events.
 Find out more on the implementation check our documentation at [docs.rudderstack.com](https://docs.rudderstack.com/rudderstack-sdk-integration-guides/amp-analytics).
+
+<!-- markdown-link-check-enable -->
 
 ### Segment
 
 Type attribute value: `segment`
 
 Adds support for segment page views and events.
-To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
+To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/connections/spec/).
 
 ### SensorsData
 
 Type attribute value: `sensorsanalytics`
 
-Adds support for Sensors Data. More details for adding Sensors Data support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
+Adds support for Sensors Data. More details for adding Sensors Data support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/).
 
 ### ShinyStat
 
@@ -600,6 +628,10 @@ Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru
 Type attribute value: `treasuredata`
 
 Adds support for Treasure Data. Configuration details can be found at [docs.treasuredata.com](https://docs.treasuredata.com/display/public/INT/Google+Accelerated+Mobile+Pages+AMP).
+
+### Triboo Data Analytics
+
+Type attribute value: `tribooanalytics`
 
 ### Umeng+ Analytics
 

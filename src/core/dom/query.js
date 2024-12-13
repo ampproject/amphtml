@@ -26,12 +26,12 @@ function assertIsName(name) {
  * This method isn't required for modern builds, can be removed.
  * TODO(#37136): This will fail if `root` is a `ShadowRoot`.
  *
- * @param {HTMLElement|ShadowRoot} root
+ * @param {Element|ShadowRoot} root
  * @param {string} selector
  * @return {NodeList}
  */
 function scopedQuerySelectionFallback(root, selector) {
-  const {classList} = /** @type {HTMLElement} */ (root);
+  const {classList} = /** @type {Element} */ (root);
 
   const unique = 'i-amphtml-scoped';
   classList.add(unique);
@@ -44,7 +44,7 @@ function scopedQuerySelectionFallback(root, selector) {
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {HTMLElement|ShadowRoot} root
+ * @param {Element|ShadowRoot} root
  * @param {string} selector
  * @return {?HTMLElement}
  *
@@ -89,6 +89,9 @@ export function scopedQuerySelectorAll(root, selector) {
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
+  if (mode.isEsm()) {
+    return el./*OK*/ matches(selector);
+  }
   const matcher =
     el.matches ||
     el.webkitMatchesSelector ||
@@ -145,7 +148,7 @@ export function closestNode(node, callback) {
  * @return {?HTMLElement} closest ancestor if found.
  */
 export function closestAncestorElementBySelector(element, selector) {
-  return element.closest
+  return mode.isEsm() || element.closest
     ? element.closest(selector)
     : closest(element, (el) => matches(el, selector));
 }
@@ -263,7 +266,7 @@ export function childNodes(parent, callback) {
 
 /**
  * Finds the first child element that has the specified attribute.
- * @param {HTMLElement|ShadowRoot} parent
+ * @param {Element|ShadowRoot} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -389,4 +392,46 @@ function isInternalElement(nodeOrTagName) {
   }
 
   return !!tagName && tagName.toLowerCase().startsWith('i-');
+}
+
+/**
+ * Finds a matching node inside an HTML template slot's children
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {HTMLElement|null}
+ */
+export function querySelectorInSlot(slot, selector) {
+  const nodes = /** @type {HTMLElement[]} */ (slot.assignedElements());
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      return node;
+    }
+    const child = scopedQuerySelector(node, selector);
+    if (child) {
+      return child;
+    }
+  }
+  return null;
+}
+
+/**
+ * Finds a matching node inside an HTML template slot's children
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {HTMLElement[]}
+ */
+export function querySelectorAllInSlot(slot, selector) {
+  const nodes = /** @type {HTMLElement[] } */ (slot.assignedElements());
+
+  const list = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      list.push(node);
+    }
+    const children = scopedQuerySelectorAll(node, selector);
+    children.forEach((child) => list.push(child));
+  }
+  return list;
 }

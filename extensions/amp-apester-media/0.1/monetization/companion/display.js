@@ -1,6 +1,7 @@
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
+
+import {Services} from '#service';
 const ALLOWED_AD_PROVIDER = 'gdt';
 
 /**
@@ -23,6 +24,10 @@ export function handleCompanionDisplay(media, apesterElement) {
     /**@type {!JsonObject}*/ (companionOptions),
     'settings'
   );
+  const rtcConfig = getValueForExpr(
+    /**@type {!JsonObject}*/ (companionOptions),
+    'rtcConfig'
+  );
 
   if (
     enabledDisplayAd &&
@@ -38,7 +43,8 @@ export function handleCompanionDisplay(media, apesterElement) {
       slot,
       bannerSizes,
       apesterElement,
-      refreshInterval
+      refreshInterval,
+      rtcConfig
     );
   }
 }
@@ -48,13 +54,15 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @param {Array} bannerSizes
  * @param {!AmpElement} apesterElement
  * @param {number} refreshInterval
+ * @param {!JsonObject} rtcConfig
  * @return {!Element}
  */
 function constructCompanionDisplayAd(
   slot,
   bannerSizes,
   apesterElement,
-  refreshInterval
+  refreshInterval,
+  rtcConfig
 ) {
   const maxWidth = Math.max.apply(
     null,
@@ -69,17 +77,20 @@ function constructCompanionDisplayAd(
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': `${maxWidth}`,
-      'height': '0',
+      'height': `${maxHeight}`,
       'type': 'doubleclick',
       'layout': 'fixed',
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
       'data-multi-size': multiSizeData,
       'data-enable-refresh': `${refreshInterval}`,
-    })
+    }
   );
+  if (rtcConfig) {
+    ampAd.setAttribute('rtc-config', JSON.stringify(rtcConfig));
+  }
   ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
   Services.mutatorForDoc(apesterElement).requestChangeSize(

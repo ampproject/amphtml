@@ -72,7 +72,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;hgroup></code></li>
         <li><code>&lt;nav></code></li>
         <li><code>&lt;section></code></li>
-        <li><code>&lt;amp-story-cta-layer></code></li>
       </ul>
     </td>
   </tr>

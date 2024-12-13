@@ -23,3 +23,13 @@ export function isElement(value) {
 export function isFiniteNumber(value) {
   return typeof value === 'number' && isFinite(value);
 }
+
+/**
+ * Returns true if obj is a PromiseLike.
+ *
+ * @param {*} obj
+ * @return {obj is Promise<*>}
+ */
+export function isPromise(obj) {
+  return typeof obj?.then === 'function';
+}

@@ -1,5 +1,6 @@
+import {BentoDailymotion} from '#bento/components/bento-dailymotion/1.0/component';
+
 import * as Preact from '#preact';
-import {BentoDailymotion} from '../component';
 
 export default {
   title: 'Dailymotion',

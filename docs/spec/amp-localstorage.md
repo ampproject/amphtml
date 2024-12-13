@@ -48,7 +48,7 @@ The following AMP components and service are using the localStorage.
 
 The localStorage can be used by future AMP components or services with valid reasons to store info client side.
 
-There are a few guidlines to follow due to localStorage implementation in AMP and AMP Viewer.
+There are a few guidelines to follow due to localStorage implementation in AMP and AMP Viewer.
 
 ### Privacy Policy
 
@@ -56,7 +56,7 @@ Entries can be sent to the AMP Viewer and stored in the top level window. No per
 
 ### Storage Policy
 
-All entires will be stored in the top level window domain, which has limited localStorage space. AMP may enforce some size restrictions based on individual usage.
+All entries will be stored in the top level window domain, which has limited localStorage space. AMP may enforce some size restrictions based on individual usage.
 
 Please also note that AMP Viewers may have their own size limitation and implementation to expire or clear localStorage entry. The localStorage value will be handled at best effort.
 

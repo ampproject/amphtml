@@ -29,9 +29,9 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   canonicalUrl: string,
  *   pageViewId: string,
  *   pageViewId64: !Promise<string>,
- *   linkRels: !Object<string, string|!Array<string>>,
+ *   linkRels: !{[key: string]: string|!Array<string>},
  *   viewport: ?string,
- *   replaceParams: ?Object<string, string|!Array<string>>
+ *   replaceParams: ?{[key: string]: string|!Array<string>}
  * }}
  */
 export let DocumentInfoDef;

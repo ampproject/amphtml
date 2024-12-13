@@ -1,8 +1,8 @@
 tags: {  # amp-fit-text 1.0
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-fit-text 1.0"
-  excludes: "amp-fit-text 0.1"
+  satisfies_condition: "amp-fit-text 1.0"
+  excludes_condition: "amp-fit-text 0.1"
   extension_spec: {
     name: "amp-fit-text"
     version_name: "v1.0"
@@ -15,8 +15,8 @@ tags: {  # amp-fit-text 0.1 and latest
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  satisfies: "amp-fit-text 0.1"
-  excludes: "amp-fit-text 1.0"
+  satisfies_condition: "amp-fit-text 0.1"
+  excludes_condition: "amp-fit-text 1.0"
   extension_spec: {
     name: "amp-fit-text"
     version_name: "v0.1"

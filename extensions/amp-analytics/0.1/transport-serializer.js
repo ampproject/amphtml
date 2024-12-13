@@ -83,7 +83,7 @@ class DefaultTransportSerializer {
  * Please register your serializer below.
  * Please keep the object in alphabetic order.
  *
- * @const {Object<string, TransportSerializerDef>}
+ * @const {{[key: string]: TransportSerializerDef}}
  */
 export const TransportSerializers = {
   'default': new DefaultTransportSerializer(),

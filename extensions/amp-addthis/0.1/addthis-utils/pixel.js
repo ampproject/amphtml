@@ -1,13 +1,14 @@
-import {COOKIELESS_API_SERVER} from '../constants';
-import {Services} from '#service';
-import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
 import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
-import {getData} from '#utils/event-helper';
+import {setStyles, toggle} from '#core/dom/style';
 import {isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
 
-import {setStyles, toggle} from '#core/dom/style';
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+
+import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
+import {COOKIELESS_API_SERVER} from '../constants';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';
@@ -57,15 +58,11 @@ const groupPixelsByTime = (pixelList) => {
 
 export const pixelDrop = (url, ampDoc) => {
   const doc = ampDoc.win.document;
-  const ampPixel = createElementWithAttributes(
-    doc,
-    'amp-pixel',
-    dict({
-      'layout': 'nodisplay',
-      'referrerpolicy': 'no-referrer',
-      'src': url,
-    })
-  );
+  const ampPixel = createElementWithAttributes(doc, 'amp-pixel', {
+    'layout': 'nodisplay',
+    'referrerpolicy': 'no-referrer',
+    'src': url,
+  });
   doc.body.appendChild(ampPixel);
 };
 
@@ -77,18 +74,14 @@ const getIframeName = (url) =>
 const iframeDrop = (url, ampDoc, data) => {
   const {name, title} = data;
   const doc = ampDoc.win.document;
-  const iframe = createElementWithAttributes(
-    doc,
-    'iframe',
-    dict({
-      'frameborder': 0,
-      'width': 0,
-      'height': 0,
-      'name': name,
-      'title': title,
-      'src': url,
-    })
-  );
+  const iframe = createElementWithAttributes(doc, 'iframe', {
+    'frameborder': 0,
+    'width': 0,
+    'height': 0,
+    'name': name,
+    'title': title,
+    'src': url,
+  });
   toggle(iframe, false);
   setStyles(iframe, {
     position: 'absolute',
@@ -128,11 +121,11 @@ const dropPixelGroups = (pixels, options) => {
         dropPixelatorPixel(pixel.url, ampDoc);
         return pixel.id;
       });
-      const data = dict({
+      const data = {
         'delay': `${delay}`,
         'ids': pids.join('-'),
         'sid': sid,
-      });
+      };
       const url = addParamsToUrl(`${COOKIELESS_API_SERVER}/live/prender`, data);
 
       if (ampDoc.win.navigator.sendBeacon) {
@@ -150,7 +143,7 @@ const dropPixelGroups = (pixels, options) => {
  * @return {!JsonObject}
  */
 function getJsonObject_(object) {
-  const params = dict();
+  const params = {};
 
   if (object === undefined || object === null) {
     return params;

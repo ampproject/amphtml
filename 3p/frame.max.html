@@ -7,7 +7,9 @@ var url = './integration.js';
 try {
   url = JSON.parse(window.name).bootstrap;
 } catch (e) {}
-document.write('<script src="' + url + '"><' + '/script>');
+var script = document.createElement('script');
+script.src = url;
+document.write(script.outerHTML);
 </script>
 </head>
 <body style="margin:0">

@@ -2,7 +2,7 @@ import {randomlySelectUnsetExperiments} from '#experiments';
 
 /**
  * @const
- * @type {Object<string, string>}
+ * @type {{[key: string]: string}}
  */
 export const StoryAdPlacements = {
   ID: 'story-ad-placements',

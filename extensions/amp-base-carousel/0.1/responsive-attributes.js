@@ -84,17 +84,17 @@ export function getResponsiveAttributeValue(str) {
  */
 export class ResponsiveAttributes {
   /**
-   * @param {!Object<string, function(string)>} config A mapping of attribute
+   * @param {!{[key: string]: function(string)}} config A mapping of attribute
    *    names to functions that should handle them.
    */
   constructor(config) {
     /** @private @const */
     this.config_ = config;
 
-    /** @private @const {!Object<string, string>} */
+    /** @private @const {!{[key: string]: string}} */
     this.existingValuesMap_ = {};
 
-    /** @private @const {!Object<string, !Array<!MediaQueriesListAndValueDef>>} */
+    /** @private @const {!{[key: string]: !Array<!MediaQueriesListAndValueDef>}} */
     this.mediaQueryListsAndValues_ = {};
   }
 

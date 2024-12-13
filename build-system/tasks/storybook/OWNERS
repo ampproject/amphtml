@@ -6,7 +6,6 @@
     {
       owners: [
         {name: 'ampproject/wg-infra'},
-        {name: 'ampproject/wg-bento'},
         {name: 'ampproject/wg-components'},
         {name: 'ampproject/wg-performance'},
         {name: 'alanorozco', notify: true},

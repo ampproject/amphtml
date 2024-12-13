@@ -2,6 +2,8 @@ import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {createCustomEvent} from '#utils/event-helper';
 
+import {sleep} from '#testing/helpers';
+
 import * as chunkModule from '../../../../src/chunk';
 import {
   ORIGINAL_URL_ATTRIBUTE,
@@ -745,7 +747,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, (env) => {
       expect(anchor1.getAttribute(ORIGINAL_URL_ATTRIBUTE)).to.equal(initialUrl);
     });
 
-    it('Should restore the original link after the delay', (done) => {
+    it('Should restore the original link after the delay', async () => {
       const replacementUrl = 'https://replacementurl.com/';
       linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
       linkRewriter.anchorReplacementCache_.updateReplacementUrls([
@@ -754,10 +756,9 @@ describes.fakeWin('Link Rewriter', {amp: true}, (env) => {
       linkRewriter.rewriteAnchorUrl(anchor1);
 
       expect(anchor1.href).to.equal(replacementUrl);
-      setTimeout(() => {
-        expect(anchor1.href).to.equal(initialUrl);
-        done();
-      }, linkRewriter.restoreDelay_ + 1);
+
+      await sleep(linkRewriter.restoreDelay_ + 1);
+      expect(anchor1.href).to.equal(initialUrl);
     });
   });
 });

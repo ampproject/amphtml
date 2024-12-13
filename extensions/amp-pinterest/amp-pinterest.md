@@ -149,7 +149,7 @@ data-url="https://www.pinterest.com/pin/99360735500167749/"
 
 ##### alt
 
-This property like the the `alt` attribute on an `<img>` tag specifies the alternate text. If not provided it will be infered from the pin data provided by the Pinterest API.
+This property like the `alt` attribute on an `<img>` tag specifies the alternate text. If not provided it will be infered from the pin data provided by the Pinterest API.
 
 ## Validation
 
