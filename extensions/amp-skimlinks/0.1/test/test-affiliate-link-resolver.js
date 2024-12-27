@@ -12,7 +12,7 @@ import {Waypoint} from '../waypoint';
 
 const DOMAIN_RESOLVER_API_URL = DEFAULT_CONFIG.beaconUrl;
 
-describes.fakeWin(
+describes.realWin(
   'AffiliateLinkResolver',
   {
     amp: {
