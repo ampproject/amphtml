@@ -160,6 +160,7 @@ function getChromeArgs(config) {
   const args = [
     '--no-sandbox',
     '--disable-gpu',
+    '--disable-features=StandardCompliantNonSpecialSchemeURLParsing',
     `--window-size=${DEFAULT_E2E_INITIAL_RECT.width},${DEFAULT_E2E_INITIAL_RECT.height}`,
   ];
 
