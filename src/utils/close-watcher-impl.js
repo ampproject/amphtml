@@ -71,7 +71,6 @@ export class CloseWatcherImpl {
    */
   requestClose() {
     if (this.watcher_) {
-
       this.watcher_.requestClose();
     } else if (this.handler_) {
       const handler = this.handler_;
@@ -107,7 +106,7 @@ export class CloseWatcherImpl {
   closeOnEscape_(event) {
     if (event.key == Keys_Enum.ESCAPE) {
       event.preventDefault();
-      this.signalClosed();
+      this.requestClose();
     }
   }
 }

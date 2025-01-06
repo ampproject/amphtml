@@ -7,11 +7,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {isCiBuild} = require('../../common/ci');
 
-console.log('erwinm running this');
 const DEFAULT_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation.
   '--disable-extensions',
-  '--disable-features=StandardCompliantNonSpecialSchemeURLParsing',
   // Allows simulating user actions (e.g unmute) which will otherwise be denied.
   '--autoplay-policy=no-user-gesture-required',
   // Makes debugging easy by auto-opening devtools.
