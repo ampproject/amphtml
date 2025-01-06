@@ -67,11 +67,12 @@ export class CloseWatcherImpl {
 
   /**
    * Signals to the close watcher to close the modal.
-   * See `CloseWatcher.signalClosed`.
+   * See `CloseWatcher.requestClose`.
    */
-  signalClosed() {
+  requestClose() {
     if (this.watcher_) {
-      this.watcher_.signalClosed();
+
+      this.watcher_.requestClose();
     } else if (this.handler_) {
       const handler = this.handler_;
       handler();
