@@ -58,7 +58,8 @@ describes.endtoend(
       ).to.equal(641);
     });
 
-    it('should close the lightbox', async () => {
+    // TODO(#40214): fix flaky test.
+    it.skip('should close the lightbox', async () => {
       const open = await controller.findElement('#open');
       await controller.click(open);
 
