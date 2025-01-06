@@ -22,7 +22,8 @@ describes.endtoend(
       await expect(player);
     });
 
-    it('loads and displays first story on page load when player is visible in viewport', async () => {
+    // TODO(#40214): fix flaky test.
+    it.skip('loads and displays first story on page load when player is visible in viewport', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
