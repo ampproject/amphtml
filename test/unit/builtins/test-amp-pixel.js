@@ -141,6 +141,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     });
   });
 
+  // TODO(#40214): fix flaky test.
   it.skip('should not allow attribution reporting', () => {
     const attributionSrc =
       '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';

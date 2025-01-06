@@ -24,6 +24,14 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     historyMock.verify();
   });
 
+  it.configure()
+    .ifChrome()
+    .run('should call the handler on requestClose', async () => {
+      const watcher = new CloseWatcherImpl(ampdoc, handler);
+      watcher.requestClose();
+      expect(handler).to.be.calledOnce;
+    });
+
   // NOTE: Chrome supports the CloseWatcher API so we no longer use the History API.
   it.configure()
     .skipChrome()

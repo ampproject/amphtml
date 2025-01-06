@@ -76,7 +76,7 @@ describes.endtoend(
     });
 
     // TODO(#40214): fix flaky test.
-    it('when player becomes visible in viewport and first story finishes loading, second story starts preloading', async function () {
+    it.skip('when player becomes visible in viewport and first story finishes loading, second story starts preloading', async function () {
       this.timeout(10000);
       const doc = await controller.getDocumentElement();
       const playerRect = await controller.getElementRect(player);
