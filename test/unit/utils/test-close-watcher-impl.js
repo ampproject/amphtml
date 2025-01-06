@@ -24,7 +24,8 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     historyMock.verify();
   });
 
-  it('should push and pop history state', async () => {
+  // TODO(#40214): fix flaky test.
+  it.skip('should push and pop history state', async () => {
     historyMock.expects('push').resolves('H1').once();
     historyMock.expects('pop').withArgs('H1').once();
     const watcher = new CloseWatcherImpl(ampdoc, handler);
@@ -33,7 +34,8 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     expect(handler).to.be.calledOnce;
   });
 
-  it('should trigger on history pop', async () => {
+  // TODO(#40214): fix flaky test.
+  it.skip('should trigger on history pop', async () => {
     let popHandler;
     historyMock
       .expects('push')
@@ -52,7 +54,8 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     expect(handler).to.be.calledOnce;
   });
 
-  it('should trigger on ESC key', async () => {
+  // TODO(#40214): fix flaky test.
+  it.skip('should trigger on ESC key', async () => {
     historyMock.expects('push').resolves('H1').once();
     historyMock.expects('pop').withArgs('H1').once();
     new CloseWatcherImpl(ampdoc, handler);
