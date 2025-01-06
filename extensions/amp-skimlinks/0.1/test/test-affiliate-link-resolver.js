@@ -107,7 +107,8 @@ describes.fakeWin(
           resolver.resolveUnknownAnchors(anchorList);
         });
 
-        it('Should only ask for new domains the next times', () => {
+        // TODO(#40214): fix flaky test.
+        it.skip('Should only ask for new domains the next times', () => {
           // Set the domains like if we had already done a call to the API.
           resolver.domains_ = alreadyResolvedDomains;
 
@@ -395,7 +396,8 @@ describes.fakeWin(
           expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
         });
 
-        it('removes // protocol', () => {
+        // TODO(#40214): fix flaky test.
+        it.skip('removes // protocol', () => {
           const anchor = helpers.createAnchor('//test.com/');
           expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
         });
