@@ -22,8 +22,7 @@ describes.endtoend(
       await expect(player);
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('when player is not visible in first viewport, it builds the shadow DOM container', async () => {
+    it('when player is not visible in first viewport, it builds the shadow DOM container', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
@@ -31,8 +30,7 @@ describes.endtoend(
       await expect(shadowHost);
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('when player is not visible in first viewport, no stories are loaded or prerendered', async () => {
+    it('when player is not visible in first viewport, no stories are loaded or prerendered', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
@@ -51,8 +49,7 @@ describes.endtoend(
       await expect(count).to.eql(2);
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('when player becomes visible in viewport, first story starts playing', async () => {
+    it('when player becomes visible in viewport, first story starts playing', async () => {
       const doc = await controller.getDocumentElement();
       const playerRect = await controller.getElementRect(player);
 
@@ -75,8 +72,7 @@ describes.endtoend(
       await expect(storyEl).to.exist;
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('when player becomes visible in viewport and first story finishes loading, second story starts preloading', async function () {
+    it('when player becomes visible in viewport and first story finishes loading, second story starts preloading', async function () {
       this.timeout(10000);
       const doc = await controller.getDocumentElement();
       const playerRect = await controller.getElementRect(player);

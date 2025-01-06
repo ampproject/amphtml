@@ -62,8 +62,7 @@ describes.endtoend(
       );
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('product2 ad opened', async () => {
+    it('product2 ad opened', async () => {
       const adDiv = await controller.findElement('#product2');
       await setTime(Number.MAX_VALUE);
       await controller.click(adDiv);
@@ -95,8 +94,7 @@ describes.endtoend(
       );
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('should open product2 after setting varible target', async () => {
+    it('should open product2 after setting varible target', async () => {
       const headline = await controller.findElement('h1');
       const nextButton = await controller.findElement('#next-btn');
       await setTime(Number.MAX_VALUE);

@@ -27,8 +27,7 @@ describes.endtoend(
       await expect(player);
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('first story should be playing video', async () => {
+    it('first story should be playing video', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
@@ -50,8 +49,7 @@ describes.endtoend(
       await expect(isVideoPaused).to.eql(false);
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('navigating to next story pauses the previous one', async () => {
+    it('navigating to next story pauses the previous one', async () => {
       // Navigate to next story.
       await controller.click(player);
 

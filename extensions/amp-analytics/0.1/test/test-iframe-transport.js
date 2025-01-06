@@ -178,8 +178,7 @@ describes.realWin(
   'amp-analytics.iframe-transport',
   {amp: true, allowExternalResources: true},
   (env) => {
-    // TODO(#40214): fix flaky test.
-    it.skip('logs poor performance of vendor iframe', () => {
+    it('logs poor performance of vendor iframe', () => {
       const body =
         '<html><head><script>' +
         'function busyWait(count, duration, cb) {\n' +

@@ -107,8 +107,7 @@ describes.realWin(
           resolver.resolveUnknownAnchors(anchorList);
         });
 
-        // TODO(#40214): fix flaky test.
-        it.skip('Should only ask for new domains the next times', () => {
+        it('Should only ask for new domains the next times', () => {
           // Set the domains like if we had already done a call to the API.
           resolver.domains_ = alreadyResolvedDomains;
 
@@ -396,8 +395,7 @@ describes.realWin(
           expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
         });
 
-        // TODO(#40214): fix flaky test.
-        it.skip('removes // protocol', () => {
+        it('removes // protocol', () => {
           const anchor = helpers.createAnchor('//test.com/');
           expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
         });
