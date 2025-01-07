@@ -65,7 +65,7 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     });
 
   it.configure()
-    .skipChrome()
+    .if(() => !('CloseWatcher' in window))
     .run('should trigger on ESC key', async () => {
       historyMock.expects('push').resolves('H1').once();
       historyMock.expects('pop').withArgs('H1').once();
