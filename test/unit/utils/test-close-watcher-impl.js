@@ -32,9 +32,8 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
       expect(handler).to.be.calledOnce;
     });
 
-  // NOTE: Chrome supports the CloseWatcher API so we no longer use the History API.
   it.configure()
-    .skipChrome()
+    .if(() => !('CloseWatcher' in window))
     .run('should push and pop history state', async () => {
       historyMock.expects('push').resolves('H1').once();
       historyMock.expects('pop').withArgs('H1').once();
