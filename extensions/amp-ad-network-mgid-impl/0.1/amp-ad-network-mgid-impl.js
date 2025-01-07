@@ -2,8 +2,7 @@ import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {hasOwn} from '#core/types/object';
+import {removeElement} from '#core/dom';
 
 import {Services} from '#service';
 
