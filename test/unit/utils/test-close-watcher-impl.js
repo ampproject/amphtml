@@ -25,7 +25,7 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
   });
 
   it.configure()
-    .ifChrome()
+    .if(() => 'CloseWatcher' in window)
     .run('should call the handler on requestClose', async () => {
       const watcher = new CloseWatcherImpl(ampdoc, handler);
       watcher.requestClose();
