@@ -63,7 +63,7 @@ describes.endtoend(
     });
 
     // TODO(#40214): fix flaky test.
-    it.skip('product2 ad opened', async () => {
+    it('product2 ad opened', async () => {
       const adDiv = await controller.findElement('#product2');
       await setTime(Number.MAX_VALUE);
       await controller.click(adDiv);
