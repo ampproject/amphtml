@@ -12,7 +12,7 @@ function CloseWatcher() {}
 
 CloseWatcher.prototype.destroy = function () {};
 
-CloseWatcher.prototype.signalClosed = function () {};
+CloseWatcher.prototype.requestClose = function () {};
 
 /** @type {?function(!Event)} */
 CloseWatcher.prototype.onclose;
