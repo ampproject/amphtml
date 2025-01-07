@@ -45,7 +45,7 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     });
 
   it.configure()
-    .skipChrome()
+    .if(() => !('CloseWatcher' in window))
     .run('should trigger on history pop', async () => {
       let popHandler;
       historyMock
