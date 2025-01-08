@@ -107,8 +107,7 @@ describes.fakeWin(
           resolver.resolveUnknownAnchors(anchorList);
         });
 
-        // TODO(#40214): fix flaky test.
-        it.skip('Should only ask for new domains the next times', () => {
+        it('Should only ask for new domains the next times', () => {
           // Set the domains like if we had already done a call to the API.
           resolver.domains_ = alreadyResolvedDomains;
 
