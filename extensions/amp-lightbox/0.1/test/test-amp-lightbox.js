@@ -105,8 +105,7 @@ describes.realWin(
       });
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('should close on close-watcher signal', async () => {
+    it('should close on close-watcher signal', async () => {
       const lightbox = createLightbox();
       const impl = await lightbox.getImpl(true);
 
