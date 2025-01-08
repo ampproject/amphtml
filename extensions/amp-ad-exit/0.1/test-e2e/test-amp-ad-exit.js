@@ -62,8 +62,7 @@ describes.endtoend(
       );
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('product2 ad opened', async () => {
+    it('product2 ad opened', async () => {
       const adDiv = await controller.findElement('#product2');
       await setTime(Number.MAX_VALUE);
       await controller.click(adDiv);
@@ -76,9 +75,11 @@ describes.endtoend(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
 
-      await expect(
-        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
-      ).to.have.sentCount(1);
+      const response = await fetch(
+        'http://localhost:8000/amp4test/request-bank/e2e/withdraw/tracking',
+        {signal: AbortSignal.timeout(500)}
+      );
+      await response.json();
     });
 
     it('variable target "current" should point to product1 by default', async () => {
@@ -95,8 +96,7 @@ describes.endtoend(
       );
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('should open product2 after setting varible target', async () => {
+    it('should open product2 after setting varible target', async () => {
       const headline = await controller.findElement('h1');
       const nextButton = await controller.findElement('#next-btn');
       await setTime(Number.MAX_VALUE);
@@ -110,9 +110,11 @@ describes.endtoend(
       await expect(await controller.getCurrentUrl()).to.match(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
-      await expect(
-        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
-      ).to.have.sentCount(1);
+      const response = await fetch(
+        'http://localhost:8000/amp4test/request-bank/e2e/withdraw/tracking',
+        {signal: AbortSignal.timeout(500)}
+      );
+      await response.json();
     });
   }
 );

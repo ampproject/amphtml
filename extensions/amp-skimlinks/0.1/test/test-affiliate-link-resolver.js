@@ -396,8 +396,7 @@ describes.fakeWin(
           expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
         });
 
-        // TODO(#40214): fix flaky test.
-        it.skip('removes // protocol', () => {
+        it('removes // protocol', () => {
           const anchor = helpers.createAnchor('//test.com/');
           expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
         });

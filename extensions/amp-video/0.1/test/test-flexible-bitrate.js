@@ -47,8 +47,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(currentBitrates(v0)[0]).to.equal(1000);
     });
 
-    // TODO(#40214): fix flaky test.
-    it.skip('should observe lower bandwidth on next sort', () => {
+    it('should observe lower bandwidth on next sort', () => {
       const m = getManager('4g');
       const v0 = getVideo([4000, 1000, 3000, 2000]);
       v0.id = 'v0';
