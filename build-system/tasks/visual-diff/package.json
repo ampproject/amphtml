@@ -9,6 +9,6 @@
     "@percy/puppeteer": "2.0.2",
     "@percy/sdk-utils": "1.30.6",
     "@puppeteer/browsers": "2.7.0",
-    "puppeteer-core": "23.11.1"
+    "puppeteer-core": "24.0.0"
   }
 }
