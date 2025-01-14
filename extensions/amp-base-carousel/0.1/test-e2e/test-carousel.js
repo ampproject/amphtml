@@ -59,8 +59,7 @@ describes.endtoend(
       await expect(slidesRects[0].width).to.equal(pageWidth);
     });
 
-    // TODO(#24195): fix this flaky test.
-    it.skip('should layout the two adjacent slides', async function () {
+    it('should layout the two adjacent slides', async function () {
       const [firstSlideRect, secondSlideRect, lastSlideRect] = [
         await controller.getElementRect(await getSlide(controller, 0)),
         await controller.getElementRect(await getSlide(controller, 1)),
