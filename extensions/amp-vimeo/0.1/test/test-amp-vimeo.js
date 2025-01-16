@@ -50,6 +50,14 @@ describes.realWin(
       expect(iframe.src).to.equal('https://player.vimeo.com/video/123');
     });
 
+    it('renders videos with h param', async () => {
+      const vimeo = await getVimeo('123?h=abc');
+      const iframe = vimeo.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal('https://player.vimeo.com/video/123?h=abc');
+    });
+
     it('renders responsively', async () => {
       const vimeo = await getVimeo('234', true);
       const iframe = vimeo.querySelector('iframe');
