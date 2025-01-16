@@ -720,7 +720,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       env.sandbox.stub(platform, 'activate');
       env.sandbox.stub(platform, 'getEntitlements').callsFake(() => {
-        subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+        subscriptionService.metering_.checkedForEntitlements = true;
         return Promise.resolve();
       });
       env.sandbox.stub(renderer, 'setGrantState');
@@ -792,7 +792,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         platformStore.getGrantStatus.resolves(false);
 
         // We already fetched entitlements with the current metering state.
-        subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+        subscriptionService.metering_.checkedForEntitlements = true;
 
         subscriptionService.startAuthorizationFlow_();
         await flush();
@@ -883,14 +883,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
 
     it('should clear metering flag(s), if metering is enabled', async () => {
-      subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+      subscriptionService.metering_.checkedForEntitlements = true;
 
       await subscriptionService.resetPlatforms();
 
-      expect(
-        subscriptionService.metering_
-          .entitlementsWereFetchedWithCurrentMeteringState
-      ).to.be.false;
+      expect(subscriptionService.metering_.checkedForEntitlements).to.be.false;
     });
   });
 
