@@ -1,6 +1,10 @@
 #include "cpp/htmlparser/css/parse-css.h"
 
+#include <algorithm>
 #include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include <gmock/gmock.h>
