@@ -44,7 +44,7 @@ function locateChromeExecutablePath() {
  * @return {!Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
  */
 async function launchBrowser() {
-  /** @type {import('puppeteer-core').PuppeteerLaunchOptions} */
+  /** @type {import('puppeteer-core').LaunchOptions} */
   const browserOptions = {
     args: [
       '--disable-background-media-suspend',
@@ -107,7 +107,7 @@ async function newPage(browser, viewport = null) {
       );
       return interceptedRequest.respond({
         status: 200,
-        body: fs.readFileSync(mockedFilepath),
+        body: new Uint8Array(fs.readFileSync(mockedFilepath)),
       });
     } else {
       log(
