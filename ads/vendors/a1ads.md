@@ -8,6 +8,8 @@
   height="250"
   type="a1ads"
   data-adhost="AD_SRV_HOSTNAME"
+  data-a1path="/path-to-server"
+  data-adtag="adstream_sx.ads"
   data-sitepage="adsite/page"
   data-pos="Top"
   data-query="keyword=keyvalue&key2=value2"
@@ -17,11 +19,13 @@
 
 
 ## Configuration
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
-
 
 ### Required parameters
 `adhost`: Server Hostname start with protocol.
+
+`a1path`: Path of adtag
+
+`adtag`: ads tag name
 
 `sitepage`: Sitepage configured for this ad spot.
 
