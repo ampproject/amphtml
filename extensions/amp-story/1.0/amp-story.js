@@ -145,6 +145,7 @@ const Attributes = {
   ADVANCE_TO: 'i-amphtml-advance-to',
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   AUTO_ADVANCE_TO: 'auto-advance-to',
+  NO_SHARING: 'hide-share-button',
   MUTED: 'muted',
   ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
@@ -400,6 +401,11 @@ export class AmpStory extends AMP.BaseElement {
         ''
       );
     }
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_SHARE_BUTTON,
+      !this.element.hasAttribute([Attributes.NO_SHARING])
+    );
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
