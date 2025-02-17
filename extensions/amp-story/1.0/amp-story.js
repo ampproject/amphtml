@@ -402,10 +402,9 @@ export class AmpStory extends AMP.BaseElement {
       );
     }
 
-    this.storeService_.dispatch(
-      Action.TOGGLE_SHARE_BUTTON,
-      !this.element.hasAttribute([Attributes.NO_SHARING])
-    );
+    if (this.element.hasAttribute([Attributes.NO_SHARING])) {
+      this.storeService_.dispatch(Action.TOGGLE_SHARE_BUTTON, false);
+    }
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
