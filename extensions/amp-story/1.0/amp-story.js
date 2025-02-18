@@ -374,6 +374,10 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
+    if (this.isShareButtonHidden_()) {
+      this.initializeShareButton_(false);
+    }
+
     // buildCallback already runs in a mutate context. Calling another
     // mutateElement explicitly will force the runtime to remeasure the
     // amp-story element, fixing rendering bugs where the story is inactive
@@ -400,10 +404,6 @@ export class AmpStory extends AMP.BaseElement {
         'data-story-supports-landscape',
         ''
       );
-    }
-
-    if (this.element.hasAttribute([Attributes.NO_SHARING])) {
-      this.storeService_.dispatch(Action.TOGGLE_SHARE_BUTTON, false);
     }
 
     // Removes title in order to prevent incorrect titles appearing on link
@@ -579,6 +579,16 @@ export class AmpStory extends AMP.BaseElement {
     this.lockBody_();
     // Standalone CSS affects sizing of the entire page.
     this.onResizeDebounced();
+  }
+
+  /**
+   * Initializes the share button by toggling its visibility.
+   *
+   * @param {boolean} canShow - A boolean indicating whether the share button should be shown.
+   * @private
+   */
+  initializeShareButton_(canShow) {
+    this.storeService_.dispatch(Action.TOGGLE_SHARE_BUTTON, canShow);
   }
 
   /**
@@ -2025,6 +2035,15 @@ export class AmpStory extends AMP.BaseElement {
    */
   isLandscapeSupported_() {
     return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE);
+  }
+
+  /**
+   * Checks if the share button is hidden.
+   * @return {boolean} True if the share button is hidden, false otherwise.
+   * @private
+   */
+  isShareButtonHidden_() {
+    return this.element.hasAttribute(Attributes.NO_SHARING);
   }
 
   /**
