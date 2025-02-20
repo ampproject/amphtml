@@ -1,13 +1,19 @@
 {
   "requests": {
     "base": "https://tra.neodatagroup.com",
-    "pageview": "${base}/pv?sid=${sysId}&rnd=${random}&id=${tagId}&ad=${advId}&rs=${screenWidth}x${screenHeight}&lg=${browserLanguage}&tz=${timezone}&re=${documentReferrer}&co=${screenColorDepth}&ur=${ampdocUrl}",
-    "cmDbm": "https://cm.g.doubleclick.net/pixel?google_nid=neodata_dmp&google_cm&pv=dbm&sid=${sysId}&rt=img&rnd=${random}"
+    "pageview": "${base}/pv?sid=${sysId}&rnd=${random}&id=${tagId}&ad=${advId}&gdpr_consent=${consentString}&rs=${screenWidth}x${screenHeight}&lg=${browserLanguage}&tz=${timezone}&re=${documentReferrer}&co=${screenColorDepth}&ur=${ampdocUrl}",
+    "cmDbm": "https://cm.g.doubleclick.net/pixel?google_nid=neodata_dmp&google_cm&process_consent=T&pv=dbm&sid=${sysId}&rt=img&rnd=${random}",
+    "ADFORM": "https://dmp.adform.net/serving/cookie/match?party=1056&rt=img&rnd=${random}",
+    "MEDIAMATH" :"https://pixel.mathtag.com/sync/js?sync=auto&mt_exid=10082&exsync=${base}/cm?sid=${sysId}&pv=MEDIAMATH&eid=[MM_UUID]&rt=img&rnd=${random}"
   },
   "triggers": {
     "trackPageview": {
       "on": "visible",
-      "request": ["pageview", "cmDbm"]
+      "request": ["pageview"]
+    },
+    "trackCookieMatch":{
+      "on":"visible",
+      "request": ["cmDbm", "ADFORM", "MEDIAMATH"]
     }
   },
   "transport": {
