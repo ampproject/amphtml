@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.4.8
-  codecov: codecov/codecov@5.0.0
+  browser-tools: circleci/browser-tools@1.5.0
+  codecov: codecov/codecov@5.0.3
   macos: circleci/macos@2.5.2
   node: circleci/node@6.3.0
 
