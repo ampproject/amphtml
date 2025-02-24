@@ -12,12 +12,8 @@ describes.fakeWin('amp-a4a: cookies', {amp: true}, (env) => {
   });
 
   function setCookies() {
-    setCookie(win, '__gads', '_gads_value', Date.now() + 100_000, {
-      secure: 'true',
-    });
-    setCookie(win, '__gpi', '_gpi_value', Date.now() + 100_000, {
-      secure: 'true',
-    });
+    setCookie(win, '__gads', '_gads_value', Date.now() + 100_000);
+    setCookie(win, '__gpi', '_gpi_value', Date.now() + 100_000);
   }
 
   it('does not add cookies without consent tuple', () => {

@@ -2015,7 +2015,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @param {!Response} fetchResponse */
   onAdResponse(fetchResponse) {
-    if (!fetchResponse.header.has(AMP_GFP_SET_COOKIES_HEADER_NAME)) {
+    if (!fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME)) {
       return;
     }
     let cookiesToSet = /** @type {!Array<!Object>} */ [];

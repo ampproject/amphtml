@@ -1828,38 +1828,46 @@ for (const {config, name} of [
         });
       });
 
-      describe('onAdResponse', () => {
+      describes.fakeWin('onAdResponse', {amp: true}, (env) => {
+        let element;
+
         beforeEach(() => {
-          element = doc.createElement('amp-ad');
+          element = env.win.document.createElement('amp-ad');
           element.setAttribute('type', 'doubleclick');
-          doc.body.appendChild(element);
+          env.win.document.body.appendChild(element);
           impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        afterEach(() => {
+          env.win.document.body.removeChild(element);
         });
 
         it('sets cookies', () => {
           impl.onAdResponse({
-            has: (header) => {
-              return header === AMP_GFP_SET_COOKIES_HEADER_NAME;
-            },
-            get: (header) => {
-              if (header !== AMP_GFP_SET_COOKIES_HEADER_NAME) {
-                return;
-              }
+            headers: {
+              has: (header) => {
+                return header === AMP_GFP_SET_COOKIES_HEADER_NAME;
+              },
+              get: (header) => {
+                if (header !== AMP_GFP_SET_COOKIES_HEADER_NAME) {
+                  return;
+                }
 
-              return JSON.stringify([
-                {
-                  '_version_': '1',
-                  '_value_': 'val1',
-                  '_domain_': 'foo.com',
-                  '_expiration_': Date.now() + 100_000,
-                },
-                {
-                  '_version_': '2',
-                  '_value_': 'val2',
-                  '_domain_': 'foo.com',
-                  '_expiration_': Date.now() + 100_000,
-                },
-              ]);
+                return JSON.stringify([
+                  {
+                    '_version_': '1',
+                    '_value_': 'val1',
+                    '_domain_': 'foo.com',
+                    '_expiration_': Date.now() + 100_000,
+                  },
+                  {
+                    '_version_': '2',
+                    '_value_': 'val2',
+                    '_domain_': 'foo.com',
+                    '_expiration_': Date.now() + 100_000,
+                  },
+                ]);
+              },
             },
           });
 

@@ -268,10 +268,10 @@ function checkOriginForSettingCookie(win, options, name) {
  */
 function getTempCookieName(win) {
   let testCookieName = TEST_COOKIE_NAME;
-  const counter = 0;
+  let counter = 0;
   while (getCookie(win, testCookieName)) {
     // test cookie name conflict, append counter to test cookie name
-    testCookieName = TEST_COOKIE_NAME + counter;
+    testCookieName = TEST_COOKIE_NAME + counter++;
   }
   return testCookieName;
 }
