@@ -30,6 +30,8 @@ import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
+import {canSetCookie, getCookie} from 'src/cookies';
+
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {processHead} from './head-validation';
@@ -2591,4 +2593,47 @@ export function isPlatformSupported(win) {
  */
 function isNative(func) {
   return !!func && func.toString().indexOf('[native code]') != -1;
+}
+
+/**
+ * @param {?ConsentTupleDef} consentTuple
+ * @return {boolean}
+ */
+export function hasStorageConsent(consentTuple) {
+  if (!consentTuple) {
+    return false;
+  }
+
+  if (
+    [CONSENT_POLICY_STATE.UNKNOWN, CONSENT_POLICY_STATE.INSUFFICIENT].includes(
+      consentTuple.consentState
+    )
+  ) {
+    return false;
+  }
+
+  const {consentString, gdprApplies, purposeOne} = consentTuple;
+
+  if (!gdprApplies) {
+    return true;
+  }
+
+  return consentString && purposeOne;
+}
+
+/**
+ * @param {?ConsentTupleDef} consentTuple
+ * @param {!Window} win
+ * @param {!{[key: string]: string|boolean|number}} params
+ */
+export function tryAddingCookieParams(consentTuple, win, params) {
+  if (!hasStorageConsent(consentTuple)) {
+    return;
+  }
+  const cookie = getCookie(win, '__gads');
+  params['cookie'] = cookie;
+  params['gpic'] = getCookie(win, '__gpi');
+  if (!cookie && canSetCookie(win)) {
+    params['cookie_enabled'] = '1';
+  }
 }
