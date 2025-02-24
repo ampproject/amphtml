@@ -18,8 +18,11 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import {getCookie} from 'src/cookies';
+
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
+  AMP_GFP_SET_COOKIES_HEADER_NAME,
   AmpA4A,
   CREATIVE_SIZE_HEADER,
   XORIGIN_MODE,
@@ -1822,6 +1825,46 @@ for (const {config, name} of [
             '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
           expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+        });
+      });
+
+      describe('onAdResponse', () => {
+        beforeEach(() => {
+          element = doc.createElement('amp-ad');
+          element.setAttribute('type', 'doubleclick');
+          doc.body.appendChild(element);
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('sets cookies', () => {
+          impl.onAdResponse({
+            has: (header) => {
+              return header === AMP_GFP_SET_COOKIES_HEADER_NAME;
+            },
+            get: (header) => {
+              if (header !== AMP_GFP_SET_COOKIES_HEADER_NAME) {
+                return;
+              }
+
+              return JSON.stringify([
+                {
+                  '_version_': '1',
+                  '_value_': 'val1',
+                  '_domain_': 'foo.com',
+                  '_expiration_': Date.now() + 100_000,
+                },
+                {
+                  '_version_': '2',
+                  '_value_': 'val2',
+                  '_domain_': 'foo.com',
+                  '_expiration_': Date.now() + 100_000,
+                },
+              ]);
+            },
+          });
+
+          expect(getCookie('__gads')).to.equal('val1');
+          expect(getCookie('__gpi')).to.equal('val2');
         });
       });
     }

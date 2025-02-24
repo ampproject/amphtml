@@ -109,6 +109,9 @@ export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 /** @type {string} */
 export const IFRAME_GET = 'IFRAME-GET';
 
+/** @type {string} */
+export const AMP_GFP_SET_COOKIES_HEADER_NAME = 'amp-ff-set-cookies';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -842,6 +845,15 @@ export class AmpA4A extends AMP.BaseElement {
       // response is empty.
       /** @return {!Promise<!Response>} */
       .then((fetchResponse) => {
+        protectFunctionWrapper(this.onAdResponse, this, (err) => {
+          dev().error(
+            TAG,
+            this.element.getAttribute('type'),
+            'Error executing onAdResponse',
+            err
+          );
+        })(fetchResponse);
+
         checkStillCurrent();
         this.maybeTriggerAnalyticsEvent_('adRequestEnd');
         // If the response is null (can occur for non-200 responses)  or
@@ -1673,6 +1685,12 @@ export class AmpA4A extends AMP.BaseElement {
       creativeMetaData ? 'renderFriendlyEnd' : 'renderCrossDomainEnd'
     );
   }
+
+  /**
+   * To be overridden by implementing subclasses.
+   * @param {!Response} unusedFetchResponse
+   */
+  onAdResponse(unusedFetchResponse) {}
 
   /**
    * @param {!Element} iframe that was just created.  To be overridden for

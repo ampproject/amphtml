@@ -76,6 +76,8 @@ import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 import {dev, devAssert, user} from '#utils/log';
 import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
+import {setCookie} from 'src/cookies';
+
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -94,11 +96,13 @@ import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {getMode} from '../../../src/mode';
 import {
+  AMP_GFP_SET_COOKIES_HEADER_NAME,
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
   XORIGIN_MODE,
   assignAdUrlToError,
+  tryAddingCookieParams,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   RefreshManager, // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -629,7 +633,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const tfcdFromJson = this.jsonTargeting && this.jsonTargeting[TFCD];
     const tfuaFromJson = this.jsonTargeting && this.jsonTargeting[TFUA];
 
-    return {
+    const params = {
       'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
@@ -666,6 +670,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           ? gppSectionId
           : null,
     };
+    tryAddingCookieParams(consentTuple, this.win, params);
+    return params;
   }
 
   /**
@@ -1393,6 +1399,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return true;
       });
 
+    // Add listener for GPID cookie optout.
+    this.win.addEventListener('message', (event) => {
+      if (event.source != devAssert(this.iframe.contentWindow)) {
+        return;
+      }
+      try {
+        const message = JSON.parse(event.data);
+        if (message['googMsgType'] === 'gpi-uoo') {
+          this.updateGpidCookies(
+            message['userOptOut'],
+            message['clearAdsData']
+          );
+        }
+      } catch {}
+    });
+
     this.postTroubleshootMessage();
   }
 
@@ -1989,6 +2011,51 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   isFluidRequest() {
     return this.isFluidRequest_;
+  }
+
+  /** @param {!Response} fetchResponse */
+  onAdResponse(fetchResponse) {
+    if (!fetchResponse.header.has(AMP_GFP_SET_COOKIES_HEADER_NAME)) {
+      return;
+    }
+    let cookiesToSet = /** @type {!Array<!Object>} */ [];
+    try {
+      cookiesToSet = JSON.parse(
+        fetchResponse.headers.get(AMP_GFP_SET_COOKIES_HEADER_NAME)
+      );
+    } catch {}
+    for (const cookieInfo of cookiesToSet) {
+      const cookieName =
+        (cookieInfo['_version_'] ?? 1) === 2 ? '__gpi' : '__gads';
+      const value = cookieInfo['_value_'];
+      const domain = cookieInfo['_domain_'];
+      const expiration = Math.max(cookieInfo['_expiration_'], 0);
+      setCookie(this.win, cookieName, value, expiration, {
+        domain,
+        secure: false,
+      });
+    }
+  }
+
+  /**
+   * Update opt-out cookie, and clear cookies if so specified.
+   * @param {boolean} userOptOut
+   * @param {boolean} clearAdsData
+   */
+  updateGpidCookies(userOptOut, clearAdsData) {
+    const domain = this.win.location.hostname;
+    setCookie(
+      this.win,
+      '__gpi_opt_out',
+      userOptOut ? '1' : '0',
+      // Last valid date for 32-bit browsers; 2038-01-19
+      2147483647,
+      {domain}
+    );
+    if (userOptOut || clearAdsData) {
+      setCookie(this.win, '__gads', 'delete', Date.now() - 1000, {domain});
+      setCookie(this.win, '__gpi', 'delete', Date.now() - 1000, {domain});
+    }
   }
 }
 
