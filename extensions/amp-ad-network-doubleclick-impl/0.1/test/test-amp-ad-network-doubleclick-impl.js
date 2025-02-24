@@ -1855,13 +1855,13 @@ for (const {config, name} of [
 
                 return JSON.stringify([
                   {
-                    '_version_': '1',
+                    '_version_': 1,
                     '_value_': 'val1',
                     '_domain_': 'foo.com',
                     '_expiration_': Date.now() + 100_000,
                   },
                   {
-                    '_version_': '2',
+                    '_version_': 2,
                     '_value_': 'val2',
                     '_domain_': 'foo.com',
                     '_expiration_': Date.now() + 100_000,
@@ -1871,8 +1871,8 @@ for (const {config, name} of [
             },
           });
 
-          expect(getCookie('__gads')).to.equal('val1');
-          expect(getCookie('__gpi')).to.equal('val2');
+          expect(getCookie(env.win, '__gads')).to.equal('val1');
+          expect(getCookie(env.win, '__gpi')).to.equal('val2');
         });
       });
     }
