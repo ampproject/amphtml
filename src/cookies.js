@@ -275,3 +275,17 @@ function getTempCookieName(win) {
   }
   return testCookieName;
 }
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function canSetCookie(win) {
+  const testCookieName = getTempCookieName(win);
+  const testCookieValue = 'TESTCOOKIEVALUE';
+  try {
+    setCookie(win, testCookieName, testCookieValue, Date.now() + 1000);
+    return getCookie(win, testCookieName) === testCookieValue;
+  } catch {}
+  return false;
+}
