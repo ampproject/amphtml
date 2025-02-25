@@ -2059,7 +2059,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       '__gpi_opt_out',
       userOptOut ? '1' : '0',
       // Last valid date for 32-bit browsers; 2038-01-19
-      2147483647,
+      2147483646 * 1000,
       {domain}
     );
     if (userOptOut || clearAdsData) {

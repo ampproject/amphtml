@@ -558,7 +558,7 @@ for (const {config, name} of [
           );
         });
 
-        it('should clear cookies as specified in creative response', () => {
+        it('should clear cookies as specified in creative response, with opt out', () => {
           setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
           setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
           expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
@@ -575,8 +575,53 @@ for (const {config, name} of [
             '*'
           );
 
+          expect(getCookie(env.win, '__gpi_opt_out')).to.equal('1');
           expect(getCookie(env.win, '__gads')).to.be.null;
           expect(getCookie(env.win, '__gpi')).to.be.null;
+        });
+
+        it('should clear cookies as specified in creative response, without opt out', () => {
+          setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
+          setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
+
+          impl.onCreativeRender(false);
+          impl.checkIfClearCookiePostMessageHasValidSource_ = () => true;
+          env.win.postMessage(
+            JSON.stringify({
+              googMsgType: 'gpi-uoo',
+              userOptOut: false,
+              clearAdsData: true,
+            }),
+            '*'
+          );
+
+          expect(getCookie(env.win, '__gpi_opt_out')).to.equal('0');
+          expect(getCookie(env.win, '__gads')).to.be.null;
+          expect(getCookie(env.win, '__gpi')).to.be.null;
+        });
+
+        it('should clear cookies as specified in creative response, without opt out or clear ads', () => {
+          setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
+          setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
+
+          impl.onCreativeRender(false);
+          impl.checkIfClearCookiePostMessageHasValidSource_ = () => true;
+          env.win.postMessage(
+            JSON.stringify({
+              googMsgType: 'gpi-uoo',
+              userOptOut: false,
+              clearAdsData: false,
+            }),
+            '*'
+          );
+
+          expect(getCookie(env.win, '__gpi_opt_out')).to.equal('0');
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
         });
 
         it('should register click listener', () => {
