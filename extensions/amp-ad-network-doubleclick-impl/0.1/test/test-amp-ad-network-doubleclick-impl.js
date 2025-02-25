@@ -18,7 +18,7 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
-import {getCookie} from 'src/cookies';
+import {getCookie, setCookie} from 'src/cookies';
 
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
@@ -556,6 +556,27 @@ for (const {config, name} of [
               // Just ensure extensions is loaded, and analytics element appended.
             }
           );
+        });
+
+        it('should clear cookies as specified in creative response', () => {
+          setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
+          setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
+
+          impl.onCreativeRender(false);
+          impl.checkIfClearCookiePostMessageHasValidSource_ = () => true;
+          env.win.postMessage(
+            JSON.stringify({
+              googMsgType: 'gpi-uoo',
+              userOptOut: true,
+              clearAdsData: true,
+            }),
+            '*'
+          );
+
+          expect(getCookie(env.win, '__gads')).to.be.null;
+          expect(getCookie(env.win, '__gpi')).to.be.null;
         });
 
         it('should register click listener', () => {
@@ -1828,7 +1849,7 @@ for (const {config, name} of [
         });
       });
 
-      describes.fakeWin('onAdResponse', {amp: true}, (env) => {
+      describes.fakeWin('#onAdResponse', {amp: true}, (env) => {
         let element;
 
         beforeEach(() => {
@@ -1842,7 +1863,7 @@ for (const {config, name} of [
           env.win.document.body.removeChild(element);
         });
 
-        it('sets cookies', () => {
+        it('sets cookies as specified on the ad response', () => {
           impl.onAdResponse({
             headers: {
               has: (header) => {

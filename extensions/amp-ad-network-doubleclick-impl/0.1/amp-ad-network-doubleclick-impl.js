@@ -1401,7 +1401,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     // Add listener for GPID cookie optout.
     this.win.addEventListener('message', (event) => {
-      if (event.source != devAssert(this.iframe.contentWindow)) {
+      if (!this.checkIfClearCookiePostMessageHasValidSource_(event)) {
         return;
       }
       try {
@@ -1416,6 +1416,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
 
     this.postTroubleshootMessage();
+  }
+
+  /**
+   * Checks whether the postMessage event's source corresponds to the ad
+   * iframe. Exposed as own function to ease unit testing.
+   * @param {Event} event
+   * @return {boolean} True if the source of the message matches the ad iframe.
+   */
+  checkIfClearCookiePostMessageHasValidSource_(event) {
+    return event.source == devAssert(this.iframe.contentWindow);
   }
 
   /**
