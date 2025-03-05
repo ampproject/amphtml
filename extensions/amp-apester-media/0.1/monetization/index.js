@@ -1,3 +1,4 @@
+import {handleAdsetAds} from './adset';
 import {handleBottomAd} from './bottomAd/bottomAd';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
@@ -10,11 +11,19 @@ import {handleInUnitVideo} from './inUnit/video';
  * @return {!Promise}
  */
 export function handleAds(media, apesterElement) {
-  const monetizationSettings = media['campaignData'];
-  if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
+  const companionSettings = media['campaignData'];
+  const adsetSettings = media['adsetData'];
+  if (
+    (companionSettings && !companionSettings.disabledAmpCompanionAds) ||
+    (adsetSettings && adsetSettings._id)
+  ) {
     return getConsentData(apesterElement).then((consentData) => {
-      handleCompanionDisplay(media, apesterElement);
+      if (adsetSettings?.placements?.length) {
+        handleAdsetAds(media, apesterElement, consentData);
+        return;
+      }
       handleCompanionVideo(media, apesterElement, consentData);
+      handleCompanionDisplay(media, apesterElement);
       handleBottomAd(media, apesterElement);
       handleInUnitVideo(media, apesterElement, consentData);
     });
