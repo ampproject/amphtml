@@ -66,6 +66,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string}  */
     this.videoid_ = null;
 
+    /** @private {?string}  */
+    this.channelid_ = null;
+
     /** @private {?string} */
     this.liveChannelid_ = null;
 
@@ -136,6 +139,7 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.videoid_ = this.getVideoId_();
+    this.channelid_ = this.getChannelId_();
     this.liveChannelid_ = this.getLiveChannelId_();
     this.assertDatasourceExists_();
 
@@ -154,9 +158,17 @@ class AmpYoutube extends AMP.BaseElement {
     this.assertDatasourceExists_();
     const urlSuffix = this.getCredentials_() === 'omit' ? '-nocookie' : '';
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
-    const descriptor = this.videoid_
-      ? `${encodeURIComponent(this.videoid_ || '')}?`
-      : `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
+
+    let descriptor = '';
+
+    if (this.videoid_) {
+      descriptor = `${encodeURIComponent(this.videoid_)}?`;
+    } else if (this.liveChannelid_) {
+      descriptor = `live_stream?channel=${encodeURIComponent(this.liveChannelid_)}&`;
+    } else if (this.channelid_) {
+      descriptor = `?listType=playlist&list=${encodeURIComponent(this.channelid_)}&`;
+    }
+
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
@@ -335,6 +347,14 @@ class AmpYoutube extends AMP.BaseElement {
    * @return {?string}
    * @private
    */
+  getChannelId_() {
+    return this.element.getAttribute('data-channelid');
+  }
+
+  /**
+   * @return {?string}
+   * @private
+   */
   getVideoId_() {
     return this.element.getAttribute('data-videoid');
   }
@@ -351,13 +371,15 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   assertDatasourceExists_() {
-    const datasourceExists =
-      !(this.videoid_ && this.liveChannelid_) &&
-      (this.videoid_ || this.liveChannelid_);
+    const numSources = [
+      this.videoid_ ? 1 : 0,
+      this.liveChannelid_ ? 1 : 0,
+      this.channelid_ ? 1 : 0,
+    ].reduce((sum, val) => sum + val, 0);
+
     userAssert(
-      datasourceExists,
-      'Exactly one of data-videoid or ' +
-        'data-live-channelid should be present for <amp-youtube> %s',
+      numSources === 1,
+      'Exactly one of data-videoid, data-live-channelid, or data-channelid should be present for <amp-youtube> %s',
       this.element
     );
   }
