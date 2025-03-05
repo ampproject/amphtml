@@ -71,6 +71,7 @@ function BentoYoutubeWithRef(
     autoplay,
     credentials,
     liveChannelid,
+    channelid,
     loop,
     onLoad,
     params = {},
@@ -80,15 +81,15 @@ function BentoYoutubeWithRef(
   ref
 ) {
   const datasourceExists =
-    !(videoid && liveChannelid) && (videoid || liveChannelid);
+    (videoid ? 1 : 0) + (liveChannelid ? 1 : 0) + (channelid ? 1 : 0) === 1;
 
   if (!datasourceExists) {
     throw new Error(
-      'Exactly one of data-videoid or data-live-channelid should be present for <amp-youtube>'
+      'Exactly one of data-videoid, data-live-channelid, or data-channelid should be present for <amp-youtube>'
     );
   }
 
-  let src = getEmbedUrl(credentials, videoid, liveChannelid);
+  let src = getEmbedUrl(credentials, videoid, liveChannelid, channelid);
   if (!('playsinline' in params)) {
     params['playsinline'] = '1';
   }
@@ -101,8 +102,6 @@ function BentoYoutubeWithRef(
     if (!('iv_load_policy' in params)) {
       params['iv_load_policy'] = `${PlayerFlags.HIDE_ANNOTATION}`;
     }
-
-    // Inline play must be set for autoplay regardless of original value.
     params['playsinline'] = '1';
   }
 
@@ -121,7 +120,6 @@ function BentoYoutubeWithRef(
 
   src = addParamsToUrl(src, params);
 
-  // Player state. Includes `currentTime` and `duration`.
   const playerStateRef = useRef();
   if (!playerStateRef.current) {
     playerStateRef.current = createDefaultInfo();
