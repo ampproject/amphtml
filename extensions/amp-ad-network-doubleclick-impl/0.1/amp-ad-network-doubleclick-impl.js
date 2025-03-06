@@ -6,6 +6,10 @@
 
 import '#service/real-time-config/real-time-config-impl';
 import {
+  handleCookieOptOutPostMessage,
+  maybeSetCookieFromAdResponse,
+} from '#ads/google/a4a/cookie-utils';
+import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '#ads/google/a4a/line-delimited-response-handler';
@@ -76,8 +80,6 @@ import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 import {dev, devAssert, user} from '#utils/log';
 import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
-import {setCookie} from 'src/cookies';
-
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -96,7 +98,6 @@ import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {getMode} from '../../../src/mode';
 import {
-  AMP_GFP_SET_COOKIES_HEADER_NAME,
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
@@ -1401,18 +1402,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     // Add listener for GPID cookie optout.
     this.win.addEventListener('message', (event) => {
-      if (!this.checkIfClearCookiePostMessageHasValidSource_(event)) {
-        return;
+      if (this.checkIfClearCookiePostMessageHasValidSource_(event)) {
+        handleCookieOptOutPostMessage(this.win, event);
       }
-      try {
-        const message = JSON.parse(event.data);
-        if (message['googMsgType'] === 'gpi-uoo') {
-          this.updateGpidCookies(
-            message['userOptOut'],
-            message['clearAdsData']
-          );
-        }
-      } catch {}
     });
 
     this.postTroubleshootMessage();
@@ -1420,7 +1412,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Checks whether the postMessage event's source corresponds to the ad
-   * iframe. Exposed as own function to ease unit testing.
+   * iframe. Exposed as own function to ease unit testing. (It's near
+   * impossible to simulate the postmessage coming from the creative iframe in
+   * unit test environments).
    * @param {Event} event
    * @return {boolean} True if the source of the message matches the ad iframe.
    */
@@ -2025,47 +2019,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @param {!Response} fetchResponse */
   onAdResponse(fetchResponse) {
-    if (!fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME)) {
-      return;
-    }
-    let cookiesToSet = /** @type {!Array<!Object>} */ [];
-    try {
-      cookiesToSet = JSON.parse(
-        fetchResponse.headers.get(AMP_GFP_SET_COOKIES_HEADER_NAME)
-      );
-    } catch {}
-    for (const cookieInfo of cookiesToSet) {
-      const cookieName =
-        (cookieInfo['_version_'] ?? 1) === 2 ? '__gpi' : '__gads';
-      const value = cookieInfo['_value_'];
-      const domain = cookieInfo['_domain_'];
-      const expiration = Math.max(cookieInfo['_expiration_'], 0);
-      setCookie(this.win, cookieName, value, expiration, {
-        domain,
-        secure: false,
-      });
-    }
-  }
-
-  /**
-   * Update opt-out cookie, and clear cookies if so specified.
-   * @param {boolean} userOptOut
-   * @param {boolean} clearAdsData
-   */
-  updateGpidCookies(userOptOut, clearAdsData) {
-    const domain = this.win.location.hostname;
-    setCookie(
-      this.win,
-      '__gpi_opt_out',
-      userOptOut ? '1' : '0',
-      // Last valid date for 32-bit browsers; 2038-01-19
-      2147483646 * 1000,
-      {domain}
-    );
-    if (userOptOut || clearAdsData) {
-      setCookie(this.win, '__gads', 'delete', Date.now() - 1000, {domain});
-      setCookie(this.win, '__gpi', 'delete', Date.now() - 1000, {domain});
-    }
+    maybeSetCookieFromAdResponse(this.win, fetchResponse);
   }
 }
 

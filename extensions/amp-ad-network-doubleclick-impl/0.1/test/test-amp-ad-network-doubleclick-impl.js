@@ -3,6 +3,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AMP_GFP_SET_COOKIES_HEADER_NAME} from '#ads/google/a4a/cookie-utils';
 import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 
 import {
@@ -22,7 +23,6 @@ import {getCookie, setCookie} from 'src/cookies';
 
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
-  AMP_GFP_SET_COOKIES_HEADER_NAME,
   AmpA4A,
   CREATIVE_SIZE_HEADER,
   XORIGIN_MODE,
@@ -602,7 +602,7 @@ for (const {config, name} of [
           expect(getCookie(env.win, '__gpi')).to.be.null;
         });
 
-        it('should clear cookies as specified in creative response, without opt out or clear ads', () => {
+        it('should not clear cookies as specified in creative response, without opt out or clear ads', () => {
           setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
           setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
           expect(getCookie(env.win, '__gads')).to.equal('__gads_val');

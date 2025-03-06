@@ -109,9 +109,6 @@ export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 /** @type {string} */
 export const IFRAME_GET = 'IFRAME-GET';
 
-/** @type {string} */
-export const AMP_GFP_SET_COOKIES_HEADER_NAME = 'amp-ff-set-cookies';
-
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
