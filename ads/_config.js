@@ -350,6 +350,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'appmonsta': {
+    preconnect: 'https://ssp.appmonsta.ai',
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
@@ -743,15 +747,6 @@ const adConfig = jsonConfiguration({
 
   'kuadio': {},
 
-  'lentainform': {
-    renderStartImplemented: true,
-    preconnect: [
-      'https://jsc.lentainform.com',
-      'https://servicer.lentainform.com',
-      'https://s-img.lentainform.com',
-    ],
-  },
-
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
     renderStartImplemented: true,
@@ -999,6 +994,11 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.min.js',
     preconnect: ['https://odb.outbrain.com'],
     consentHandlingOverride: true,
+  },
+
+  'piberica': {
+    preconnect: ['https://trafico.prensaiberica.es'],
+    renderStartImplemented: true,
   },
 
   'pixad': {},
@@ -1490,11 +1490,6 @@ const adConfig = jsonConfiguration({
   'xlift': {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
-  },
-
-  'yahoo': {
-    prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
-    preconnect: 'https://us.adserver.yahoo.com',
   },
 
   'yahoofedads': {

@@ -15,6 +15,7 @@ const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'height': true,
   'width': true,
   'sticky': true,
+  'json': true,
 };
 
 /**

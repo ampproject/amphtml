@@ -1,0 +1,176 @@
+<!doctype html>
+
+<!-- TODO(#40094): Develop "amp-story-social-share" extension with default CTA UX similar to page-attachment and encapsulate amp-social-share functionalities. -->
+
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>My Story with social share</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+  <link rel="canonical" href="amp-story-social-share.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>
+    body {
+      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      animation: -amp-start 8s steps(1, end) 0s 1 normal both
+    }
+
+    @-webkit-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-moz-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-ms-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-o-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+  </style>
+  <style amp-custom>
+    :root {
+      --color-primary: #161616;
+      --color-text-light: #fff;
+    }
+
+    amp-social-share:before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin-right: 5px;
+      background-size: contain;
+    }
+
+    amp-social-share.whatsapp:before {
+      background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46"><path fill="%23FFF" d="M35.4 10.4a18.27 18.27 0 0 0-31.2 13c0 3.2.9 6.3 2.4 9.1L4 42l9.7-2.5c2.7 1.5 5.7 2.2 8.7 2.2a18.4 18.4 0 0 0 13-31.3M22.5 38.6c-2.7 0-5.4-.7-7.7-2.1l-.6-.3-5.8 1.5L9.9 32l-.4-.6c-4.4-7.1-2.3-16.5 4.9-20.9s16.5-2.3 20.9 4.9 2.3 16.5-4.9 20.9c-2.3 1.5-5.1 2.3-7.9 2.3m8.8-11.1-1.1-.5s-1.6-.7-2.6-1.2c-.1 0-.2-.1-.3-.1-.3 0-.5.1-.7.2l-1.5 1.7c-.1.2-.3.3-.5.3h-.1c-.1 0-.3-.1-.4-.2l-.5-.2c-1.1-.5-2.1-1.1-2.9-1.9-.2-.2-.5-.4-.7-.6-.7-.7-1.4-1.5-1.9-2.4l-.1-.2c-.1-.1-.1-.2-.2-.4 0-.2 0-.4.1-.5 0 0 .4-.5.7-.8.2-.2.3-.5.5-.7.2-.3.3-.7.2-1-.1-.5-1.3-3.2-1.6-3.8-.2-.3-.4-.4-.7-.5h-1.1c-.2 0-.4.1-.6.1l-.1.1c-.2.1-.4.3-.6.4-.2.2-.3.4-.5.6a5.1 5.1 0 0 0-.6 5.4l.1.3c.9 1.9 2.1 3.6 3.7 5.1l.4.4c.3.3.6.5.8.8 2.1 1.8 4.5 3.1 7.2 3.8.3.1.7.1 1 .2h1c.5 0 1.1-.2 1.5-.4.3-.2.5-.2.7-.4l.2-.2c.2-.2.4-.3.6-.5s.4-.4.5-.6c.2-.4.3-.9.4-1.4v-.7s-.1-.1-.3-.2"/></svg>');
+    }
+
+    amp-social-share.facebook:before {
+      background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23fff" d="M212 197h-37v60h37v176h70V257h50l5-60h-55v-33c0-14 3-20 17-20h38V83h-49c-52 0-76 23-76 67z"/></svg>')
+    }
+
+    amp-social-share.email:before {
+      background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23fff" d="M101 142v229h310V142zm275 26-120 91-120-91zm-248 26 64 49-64 64zm0 150 85-85 43 33 43-33 85 85zm256-36-64-65 64-49z"/></svg>');
+    }
+
+    amp-social-share.system:before {
+      background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="%23fff"><path fill="none" d="M0 0h24v24H0z"/><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.99 2.99 0 0 0 21 5a3 3 0 1 0-5.91.7L8.04 9.81A2.99 2.99 0 0 0 3 12a3 3 0 0 0 5.04 2.19l7.12 4.16A2.92 2.92 0 1 0 18 16.08"/></svg>');
+    }
+
+    amp-social-share.flex {
+      z-index: 3;
+      padding: 5px 15px;
+      align-items: center;
+      display: flex;
+      width: max-content;
+      position: absolute;
+      bottom: 15px;
+      right: 50%;
+      transform: translateX(50%);
+      font-family: system-ui;
+      text-align: center;
+    }
+
+    /* icons with rounded corners  */
+    amp-social-share.rounded {
+      border-radius: 50px;
+      background-size: 60%;
+      color: var(--color-text-light);
+      background: var(--color-primary);
+    }
+  </style>
+</head>
+
+<body>
+  <amp-story standalone>
+    <amp-story-page id="fill-template-title">
+      <amp-social-share class="rounded flex whatsapp i-amphtml-built i-amphtml-layout i-amphtml-element"
+        aria-label="Share" type="whatsapp" i-amphtml-layout="fixed" role="button" tabindex="0">Share on
+        WhatsApp</amp-social-share>
+      <amp-story-grid-layer template="vertical">
+        <amp-img layout="fill" src="/examples/amp-story/img/poster.jpg"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+        <p>Share on WhatsApp Example</p>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="fill-template-title">
+      <amp-social-share class="rounded flex facebook i-amphtml-built i-amphtml-layout i-amphtml-element"
+        aria-label="Share" type="facebook" i-amphtml-layout="fixed" role="button" tabindex="0">Share on
+        Facebook</amp-social-share>
+      <amp-story-grid-layer template="vertical">
+        <amp-img layout="fill" src="/examples/amp-story/img/poster.jpg"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+        <p>Share on Facebook Example</p>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="fill-template-title">
+      <amp-social-share class="rounded flex email i-amphtml-built i-amphtml-layout i-amphtml-element" aria-label="Share"
+        type="email" i-amphtml-layout="fixed" role="button" tabindex="0">Share by email</amp-social-share>
+      <amp-story-grid-layer template="vertical">
+        <amp-img layout="fill" src="/examples/amp-story/img/poster.jpg"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+        <p>Share by email Example</p>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="fill-template-title">
+      <amp-social-share class="rounded flex system i-amphtml-built i-amphtml-layout i-amphtml-element"
+        aria-label="Share" type="system" i-amphtml-layout="fixed" role="button" tabindex="0">Share with my
+        friends</amp-social-share>
+      <amp-story-grid-layer template="vertical">
+        <amp-img layout="fill" src="/examples/amp-story/img/poster.jpg"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+        <p>System share Example <i>(btn displays if navigator.share is available)</i></p>
+      </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
+
+</body>
+
+</html>

@@ -26,7 +26,7 @@ export function yektanet(global, data) {
   ].join('0');
 
   const scriptSrc = isBanner
-    ? 'https://cdn.yektanet.com/template/bnrs/yn_bnr.min.js'
+    ? 'https://cdn.yektanet.com/template/bnrs/yn_bnr.amp.js'
     : `https://cdn.yektanet.com/js/${encodeURIComponent(
         data['publisherName']
       )}/${encodeURIComponent(data['scriptName'])}`;

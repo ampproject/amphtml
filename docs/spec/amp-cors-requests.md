@@ -422,7 +422,7 @@ You can use the `curl` command to verify that your server is sending the correct
 
 In a same-origin request, the AMP system adds the custom `AMP-Same-Origin:true` header.
 
-Here's our curl command for testing a request from `https://ampbyexample.com` to the `examples.json` file (on the same domain):
+Here's our curl command for testing a request from `https://amp.dev` to the `examples.json` file (on the same domain):
 
 ```shell
 curl 'https://amp.dev/static/samples/json/examples.json' -H 'AMP-Same-Origin: true' -I
@@ -434,7 +434,7 @@ The results from the command show the correct response headers (note: extra info
 HTTP/2 200
 access-control-allow-headers: Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token
 access-control-allow-credentials: true
-access-control-allow-origin: https://ampbyexample.com
+access-control-allow-origin: https://amp.dev
 access-control-allow-methods: POST, GET, OPTIONS
 ```
 

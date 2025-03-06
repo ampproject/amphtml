@@ -113,7 +113,7 @@ describes.realWin(
       const setupCloseSpy = env.sandbox.spy(impl, 'close');
 
       await impl.open_({caller: sourceElement});
-      impl.closeWatcher_.signalClosed();
+      impl.closeWatcher_.requestClose();
       expect(setupCloseSpy).to.be.called;
     });
 
