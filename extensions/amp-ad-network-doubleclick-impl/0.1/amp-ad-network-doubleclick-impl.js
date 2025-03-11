@@ -1415,7 +1415,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * iframe. Exposed as own function to ease unit testing. (It's near
    * impossible to simulate the postmessage coming from the creative iframe in
    * unit test environments).
-   * @param {Event} event
+   * @param {!Event} event
    * @return {boolean} True if the source of the message matches the ad iframe.
    */
   checkIfClearCookiePostMessageHasValidSource_(event) {
