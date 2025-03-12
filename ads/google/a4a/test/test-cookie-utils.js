@@ -41,7 +41,7 @@ describes.fakeWin('#maybeSetCookieFromAdResponse', {amp: true}, (env) => {
   });
 
   it('should not set cookies on proxy origin', () => {
-    env.win.location = 'https://cdn.ampproject.org';
+    env.win.location = 'https://foo-com.cdn.ampproject.org';
     maybeSetCookieFromAdResponse(env.win, {
       headers: {
         has: (header) => {
@@ -138,7 +138,7 @@ describes.fakeWin('#handleCookieOptOutPostMessage', {amp: true}, (env) => {
     setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
     expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
     expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
-    env.win.location = 'https://cdn.ampproject.org';
+    env.win.location = 'https://foo-com.cdn.ampproject.org';
 
     handleCookieOptOutPostMessage(env.win, {
       data: JSON.stringify({
