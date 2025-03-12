@@ -1,4 +1,5 @@
 import {setCookie} from 'src/cookies';
+import {isProxyOrigin} from 'src/url';
 
 /** @type {string} */
 export const AMP_GFP_SET_COOKIES_HEADER_NAME = 'amp-ff-set-cookies';
@@ -8,7 +9,11 @@ export const AMP_GFP_SET_COOKIES_HEADER_NAME = 'amp-ff-set-cookies';
  * @param {!Response} fetchResponse
  */
 export function maybeSetCookieFromAdResponse(win, fetchResponse) {
-  if (!fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME)) {
+  if (
+    !fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME) ||
+    // Cookies are only allowed to be set on non-proxy origins.
+    isProxyOrigin(win.location)
+  ) {
     return;
   }
   let cookiesToSet = /** @type {!Array<!Object>} */ [];
@@ -36,6 +41,11 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
  * @param {!Event} event
  */
 export function handleCookieOptOutPostMessage(win, event) {
+  // Cookie setting above is blocked on proxy origins, but we add this check
+  // just in case.
+  if (isProxyOrigin(win.location)) {
+    return;
+  }
   try {
     const message = JSON.parse(event.data);
     if (message['googMsgType'] === 'gpi-uoo') {
