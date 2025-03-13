@@ -69,9 +69,9 @@ function createDefaultInfo() {
 function BentoYoutubeWithRef(
   {
     autoplay,
+    channelid,
     credentials,
     liveChannelid,
-    channelid,
     loop,
     onLoad,
     params = {},
