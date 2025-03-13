@@ -281,10 +281,10 @@ describes.realWin(
       expect(iframe.src).to.equal(EXAMPLE_NO_COOKIE_VIDEOID_URL);
     });
 
-    it('requires exactly one of data-videoid, data-live-channelid, or data-channelid', () => {
+    it('requires exactly one of data-videoid, data-live-channelid or data-channelid', () => {
       return allowConsoleError(() => {
         return getYt({}).should.eventually.be.rejectedWith(
-          /Exactly one of data-videoid, data-live-channelid, or data-channelid should be present/
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should be present/
         );
       });
     });
