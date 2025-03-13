@@ -379,7 +379,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     userAssert(
       numSources === 1,
-      'Exactly one of data-videoid, data-live-channelid, or data-channelid should be present for <amp-youtube> %s',
+      'Exactly one of data-videoid, data-live-channelid or data-channelid should be present for <amp-youtube> %s',
       this.element
     );
   }

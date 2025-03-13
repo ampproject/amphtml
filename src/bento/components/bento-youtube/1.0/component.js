@@ -85,7 +85,7 @@ function BentoYoutubeWithRef(
 
   if (!datasourceExists) {
     throw new Error(
-      'Exactly one of data-videoid, data-live-channelid, or data-channelid should be present for <amp-youtube>'
+      'Exactly one of data-videoid, data-live-channelid or data-channelid should be present for <amp-youtube>'
     );
   }
 
