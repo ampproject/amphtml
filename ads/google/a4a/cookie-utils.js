@@ -9,11 +9,7 @@ export const AMP_GFP_SET_COOKIES_HEADER_NAME = 'amp-ff-set-cookies';
  * @param {!Response} fetchResponse
  */
 export function maybeSetCookieFromAdResponse(win, fetchResponse) {
-  if (
-    !fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME) ||
-    // Cookies are only allowed to be set on non-proxy origins.
-    isProxyOrigin(win.location)
-  ) {
+  if (!fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME)) {
     return;
   }
   let cookiesToSet = /** @type {!Array<!Object>} */ [];
@@ -26,7 +22,9 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
     const cookieName =
       (cookieInfo['_version_'] ?? 1) === 2 ? '__gpi' : '__gads';
     const value = cookieInfo['_value_'];
-    const domain = cookieInfo['_domain_'];
+    // On proxy origin, we want cookies to be partitioned by subdomain to
+    // prevent sharing across unrelated publishers, so we don't set a domain.
+    const domain = isProxyOrigin(win.location) ? '' : cookieInfo['_domain_'];
     const expiration = Math.max(cookieInfo['_expiration_'], 0);
     setCookie(win, cookieName, value, expiration, {
       domain,
@@ -41,11 +39,6 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
  * @param {!Event} event
  */
 export function handleCookieOptOutPostMessage(win, event) {
-  // Cookie setting above is blocked on proxy origins, but we add this check
-  // just in case.
-  if (isProxyOrigin(win.location)) {
-    return;
-  }
   try {
     const message = JSON.parse(event.data);
     if (message['googMsgType'] === 'gpi-uoo') {
