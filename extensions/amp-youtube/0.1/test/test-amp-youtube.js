@@ -267,7 +267,6 @@ describes.realWin(
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      console.log(iframe.src + ' ' + EXAMPLE_CHANNELID_URL);
       expect(iframe.src).to.include(EXAMPLE_CHANNELID_URL);
     });
 
