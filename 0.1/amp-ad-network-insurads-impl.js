@@ -14,6 +14,10 @@ import {Services} from '#service';
 
 import {dev, devAssert, user} from '#utils/log';
 
+import {LockedIdGenerator} from './lockedid-generator';
+import {MappingService} from './mapping';
+import {RealtimeManager} from './realtime';
+
 import {AmpA4A, AnalyticsTrigger} from '../../amp-a4a/0.1/amp-a4a';
 import {
   RefreshManager,
@@ -126,66 +130,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*OK*/
       .log('First Print');
 
-    // setTimeout(() => {
-    //   const event = new Event('build');
-    //   this.element.dispatchEvent(event);
-
-    //   console.log('Refresh Initiated');
-    //   this.refreshNow();
-    // }, 5000);
-
-    // listen(this.element, AnalyticsTrigger.AD_REFRESH, () => {
-    //   console.log('Listen: Refresh Completed');
-    //   this.element.setAttribute('data-refresh', 'true');
-    // });
-
-    // listen(this.element, '*', () => {
-    //   console.log('Listen: Refresh Completed');
-    //   this.element.setAttribute('data-refresh', 'true');
-    // });
-
-    // listenOnce(this.element, AnalyticsTrigger.AD_REFRESH, () => {
-    //   console.log('Listen: Refresh Completed Once');
-    // });
-
-    // document.addEventListener(
-    //   '*',
-    //   (event) => {
-    //     console.log('any events', event);
-    //   },
-    //   true
-    // );
-
-    // this.element.addEventListener('build', (event) => {
-    //   console.log('build events', event);
-    // }); # WORKING
-
-    // this.element.addEventListener(AnalyticsTrigger.AD_REFRESH, (event) => {
-    //   console.log('Ád Refresh', event);
-    // });
-
-    // window.addEventListener('message', (event) => {
-    //   console.log('message events', event);
-    // }); ## WORKING
-
-    // this.element.addEventListener('*', this.handleAllEvents, true);
-
-    // this.lockedid = new LockedIdGenerator().getLockedIdData();
-
-    // console.log('lockedId', this.lockedid);
-
-    // this.doMappingRequest();
-
-    // this.addWebSocketCommunication();
-
-    // this.addSignalsListeners();
-
-    // listen(
-    //   window,
-    //   AnalyticsTrigger.AD_REFRESH,
-    //   this.handleAllEvents.bind(this)
-    // );
-    // listen(this.element, 'click', this.handleAllEvents.bind(this));
+    /* InsurAds Business  */
+    this.lockedid = new LockedIdGenerator().getLockedIdData();
+    this.realtimeInstance = new RealtimeManager().start();
+    this.mappingService = new MappingService(this.win);
+    /* InsurAds Business  */
 
     AmpAdNetworkInsuradsImpl.prototype.getAdUrl =
       AmpAdNetworkDoubleclickImpl.prototype.getAdUrl;
@@ -230,24 +179,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       AmpAdNetworkDoubleclickImpl.troubleshootData_;
   }
 
-  /**
-   *  Define a function to handle all events
-   * @param event {Event} teste cenas
-   */
-  handleAllEvents(event) {
-    console /*OK*/
-      .log('Event type:', event.type);
-    console /*OK*/
-      .log('Event target:', event.target);
-    // Additional handling logic can be added here
-  }
-
   /** @override */
   buildCallback() {
     super.buildCallback();
     console /*OK*/
       .log('Build Callback');
-    // this.doubleClick.buildCallback();
   }
 
   /** @override */
@@ -267,20 +203,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       console /*OK*/
         .log('Refresh Cycle Initiated');
     } else {
-      const url =
-        'https://run.mocky.io/v3/508f85e2-4a98-48ee-8cca-ddbf65bcf237';
-
-      Services.xhrFor(this.win)
-        .fetch(url, {
-          mode: 'cors',
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Origin': 'http://localhost:8000', // Required for CORS Anywhere
-            'X-Requested-With': 'XMLHttpRequest', // Required for CORS Anywhere
-          },
-        })
-        .then((response) => response.json())
+      this.mappingService
+        .doMappingRequest()
         .then((data) => {
           this.triggerImmediateRefresh(data.impDur);
         })
@@ -298,14 +222,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     // }, 5000);
 
     super.onCreativeRender(creativeMetaData, opt_onLoadPromise);
-  }
-
-  /**
-   * On Refresh
-   */
-  onRefreshCallback() {
-    console /*OK*/
-      .log('onRefreshCallback');
   }
 
   /**
@@ -361,169 +277,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       console /*OK*/
         .log('Refresh Cycle Initiated');
     });
-  }
-
-  /**
-   * Do Mapping Request
-   * @return {Promise<void>}
-   */
-  doMappingRequest() {
-    const url =
-      'https://services.insurads.com/init?appId=4WMPI6PV&h=https%3A%2F%2Fwww.insurads.com%2F&tcfc=1&t=1715249125054';
-
-    // const publicId = this.element.getAttribute('data-public-id');
-    // const slot = this.element.getAttribute('data-slot');
-
-    // const data = {
-    //   publicId: publicId,
-    //   slot: slot,
-    // };
-
-    const xhrInit = {
-      mode: 'no-cors',
-      method: 'GET',
-      credentials: 'include',
-    };
-
-    return Services.xhrFor(this.win)
-      .fetch(url, xhrInit)
-      .then((response) => {
-        console /*OK*/
-          .log('Mapping Response:', response);
-        return response;
-      })
-      .then((data) => {
-        console /*OK*/
-          .log('Mapping Data:', data);
-      })
-      .catch((error) => {
-        console /*OK*/
-          .error('Mapping Error:', error);
-      });
-  }
-
-  /**
-   * Add WebSocket Communication
-   */
-  addWebSocketCommunication() {
-    const hubUrl =
-      'wss://amp-messaging.insurads.com/rt-pub/node/hub?appId=78&dev=Smartphone&br=Safari&os=iOS&cc=PT&rc=11&v=0.2';
-    console /*OK*/
-      .log('Hub URL:', hubUrl);
-
-    // create websocket connection
-    const ws = new WebSocket(hubUrl);
-
-    // Connection opened
-    ws.addEventListener('open', function (event) {
-      ws.send('{"protocol":"json","version":1}', event);
-    });
-
-    // Listen for messages
-    ws.addEventListener('message', function (event) {
-      console /*OK*/
-        .log('Message from server ', event.data);
-    });
-
-    // Connection closed
-    ws.addEventListener('close', function (event) {
-      console /*OK*/
-        .log('Connection closed', event);
-    });
-  }
-
-  /**
-   * Add Signals Listeners
-   */
-  addSignalsListeners() {
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.READY_TO_UPGRADE)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.READY_TO_UPGRADE, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.UPGRADED)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.UPGRADED, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.BUILT)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.BUILT, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.MOUNTED)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.MOUNTED, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.LOAD_START)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.LOAD_START, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.RENDER_START)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.RENDER_START, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.LOAD_END)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.LOAD_END, any);
-      });
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.INI_LOAD)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.INI_LOAD, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(CommonSignals_Enum.UNLOAD)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', CommonSignals_Enum.UNLOAD, any);
-      });
-
-    this.element
-      .signals()
-      .whenSignal(AnalyticsTrigger.AD_REFRESH)
-      .then((any) => {
-        console /*OK*/
-          .log('Signal: ', AnalyticsTrigger.AD_REFRESH, any);
-      });
-
-    // READY_TO_UPGRADE: string;
-    // UPGRADED: string;
-    // BUILT: string;
-    // MOUNTED: string;
-    // LOAD_START: string;
-    // RENDER_START: string;
-    // LOAD_END: string;
-    // INI_LOAD: string;
-    // UNLOAD: string;
   }
 
   /**
