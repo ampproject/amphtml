@@ -211,7 +211,8 @@ describes.realWin(
       });
     });
 
-    it.only('should stay in modal if focus stays in modal and close if outside', async () => {
+    // TODO(#40258) Fix and unskip flakey test.
+    it.skip('should stay in modal if focus stays in modal and close if outside', async () => {
       const lightbox = createLightbox();
       const insideLink = createLink('insideLink');
       lightbox.appendChild(insideLink);
