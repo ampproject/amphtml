@@ -328,6 +328,21 @@ TEST(StringsTest, EscapeUnescapeTest) {
   EXPECT_EQ(str8, "#");
 }
 
+TEST(StringsTest, UnescapeSingleDigitDecimalCodeTest) {
+  std::string str = "&#2";
+  htmlparser::Strings::UnescapeString(&str);
+  EXPECT_EQ(str, "\u0002");
+}
+
+TEST(StringsTest, UnescapeNoDigitsHexCodeTest) {
+  std::string lowercase_str = "&#x";
+  std::string uppercase_str = "&#X";
+  htmlparser::Strings::UnescapeString(&lowercase_str);
+  htmlparser::Strings::UnescapeString(&uppercase_str);
+  EXPECT_EQ(lowercase_str, "&#x");
+  EXPECT_EQ(uppercase_str, "&#X");
+}
+
 TEST(StringsTest, EncodingTest) {
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(224).value(), "à");
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(202).value(), "Ê");

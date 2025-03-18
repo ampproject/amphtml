@@ -308,7 +308,7 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     if (code_point < 0x0800) {
       return std::nullopt;
     }
-    // Check if this is codepoint is low surrgates.
+    // Check if this is codepoint is low surrogates.
     if (code_point >= 0xd800 && code_point <= 0xdfff) {
       return std::nullopt;
     }
@@ -785,7 +785,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
   // i starts at 1 because we already know that s[0] == '&'.
   std::size_t i = 1;
   if (s.at(i) == '#') {
-    if (s.size() <= 3) {  // We need to have at least  "&#.".
+    if (s.size() < 3) {  // We need to have at least  "&#.".
       b->at(dst) = b->at(src);
       return std::pair<int, int>(dst + 1, src + 1);
     }
@@ -793,6 +793,10 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     auto c = s.at(i);
     bool hex = false;
     if (c == 'x' || c == 'X') {
+      if (s.size() == 3) {
+        b->at(dst) = b->at(src);
+        return std::pair<int, int>(dst + 1, src + 1);
+      }
       hex = true;
       i++;
     }
@@ -822,7 +826,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
       break;
     }
 
-    if (i <= 3) {  // No characters matched.
+    if (i < 3 || (hex && i < 4)) {  // No characters matched.
       b->at(dst) = b->at(src);
       return std::pair<int, int>(dst + 1, src + 1);
     }
@@ -831,7 +835,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
       // Replace characters from Windows-1252 with UTF-8 equivalents.
       x = kReplacementTable[x - 0x80];
     } else if (x == 0 || (0xD800 <= x && x <= 0xDFFF) || x > 0x10FFFF) {
-      // Replace invalid characters with the replacement chracter.
+      // Replace invalid characters with the replacement character.
       x = L'\uFFFD';
     }
 
@@ -844,7 +848,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     }
   }
 
-  // Consume the maximum number of chracters possible, with the consumed
+  // Consume the maximum number of characters possible, with the consumed
   // characters matching one of the named references.
   while (i < s.size()) {
     auto c = s.at(i);
@@ -957,7 +961,7 @@ bool ExtractChars(std::string_view str, std::vector<char32_t>* chars) {
   while (!str.empty()) {
     uint8_t c = str.front() & 0xff;
 
-    // ASCII chracters first.
+    // ASCII characters first.
     if (IsOneByteASCIIChar(c)) {
       chars->push_back(c);
       str.remove_prefix(1);
