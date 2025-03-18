@@ -776,7 +776,7 @@ namespace {
 // attribute should be true if passing an attribute value.
 std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     bool attribute) {
-  std::string s = b->substr(src);
+  std::string_view s = std::string_view(*b).substr(src);
   if (s.size() <= 1) {
     b->at(dst) = b->at(src);
     return std::pair<int, int>(dst + 1, src + 1);
@@ -864,7 +864,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     break;
   }
 
-  std::string entityName = s.substr(1, i - 1);
+  std::string_view entityName = s.substr(1, i - 1);
   auto encoded_bytes = EntityLookup(entityName);
   if (entityName.empty()) {
     // No-op.
