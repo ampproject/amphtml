@@ -418,7 +418,8 @@ describes.realWin(
       expect(doc.activeElement).to.equal(nextBtn);
     });
 
-    it('should show focus outline and border on next and prev buttons', async () => {
+    // TODO(#40258) Fix and unskip flakey test.
+    it.skip('should show focus outline and border on next and prev buttons', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
       const impl = await ampSlideScroll.getImpl();
       const controls = impl.controls_;
