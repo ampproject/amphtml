@@ -3,6 +3,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
 
 import {
+  canSetCookie,
   getCookie,
   getHighestAvailableDomain,
   setCookie,
@@ -230,5 +231,14 @@ describes.fakeWin('test-cookies', {amp: true}, (env) => {
         'expires=Thu, 01 Jan 1970 00:00:00 GMT'
     );
     expect(doc.cookie).to.equal('');
+  });
+
+  it('can set cookie', () => {
+    expect(canSetCookie(win)).to.be.true;
+  });
+
+  it('cannot set cookie for proxy domain', () => {
+    win.location = 'https://foo.cdn.ampproject.org/test.html';
+    expect(canSetCookie(win)).to.be.false;
   });
 });

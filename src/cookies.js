@@ -268,10 +268,24 @@ function checkOriginForSettingCookie(win, options, name) {
  */
 function getTempCookieName(win) {
   let testCookieName = TEST_COOKIE_NAME;
-  const counter = 0;
+  let counter = 0;
   while (getCookie(win, testCookieName)) {
     // test cookie name conflict, append counter to test cookie name
-    testCookieName = TEST_COOKIE_NAME + counter;
+    testCookieName = TEST_COOKIE_NAME + counter++;
   }
   return testCookieName;
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function canSetCookie(win) {
+  const testCookieName = getTempCookieName(win);
+  const testCookieValue = 'TESTCOOKIEVALUE';
+  try {
+    setCookie(win, testCookieName, testCookieValue, Date.now() + 1000);
+    return getCookie(win, testCookieName) === testCookieValue;
+  } catch {}
+  return false;
 }
