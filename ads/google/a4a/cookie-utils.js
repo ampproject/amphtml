@@ -5,6 +5,22 @@ import {isProxyOrigin} from 'src/url';
 export const AMP_GFP_SET_COOKIES_HEADER_NAME = 'amp-ff-set-cookies';
 
 /**
+ * Returns the given domain if the current origin is not the AMP proxy origin,
+ * otherwise returns the empty string.
+ *
+ * On proxy origin, we want cookies to be partitioned by subdomain to prevent
+ * sharing across unrelated publishers, in which case we want to set the domain
+ * equal to the empty string (leave it unset).
+ *
+ * @param {!Window} win
+ * @param {string} domain
+ * @return {string}
+ */
+function getProxySafeDomain(win, domain) {
+  return isProxyOrigin(win.location) ? '' : domain;
+}
+
+/**
  * @param {!Window} win
  * @param {!Response} fetchResponse
  */
@@ -24,7 +40,7 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
     const value = cookieInfo['_value_'];
     // On proxy origin, we want cookies to be partitioned by subdomain to
     // prevent sharing across unrelated publishers, so we don't set a domain.
-    const domain = isProxyOrigin(win.location) ? '' : cookieInfo['_domain_'];
+    const domain = getProxySafeDomain(win, cookieInfo['_domain_']);
     const expiration = Math.max(cookieInfo['_expiration_'], 0);
     setCookie(win, cookieName, value, expiration, {
       domain,
@@ -44,7 +60,7 @@ export function handleCookieOptOutPostMessage(win, event) {
     if (message['googMsgType'] === 'gpi-uoo') {
       const userOptOut = !!message['userOptOut'];
       const clearAdsData = !!message['clearAdsData'];
-      const domain = win.location.hostname;
+      const domain = getProxySafeDomain(win, win.location.hostname);
       setCookie(
         win,
         '__gpi_opt_out',
