@@ -6,6 +6,10 @@
 
 import '#service/real-time-config/real-time-config-impl';
 import {
+  handleCookieOptOutPostMessage,
+  maybeSetCookieFromAdResponse,
+} from '#ads/google/a4a/cookie-utils';
+import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '#ads/google/a4a/line-delimited-response-handler';
@@ -99,6 +103,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   XORIGIN_MODE,
   assignAdUrlToError,
+  tryAddingCookieParams,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   RefreshManager, // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -629,7 +634,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const tfcdFromJson = this.jsonTargeting && this.jsonTargeting[TFCD];
     const tfuaFromJson = this.jsonTargeting && this.jsonTargeting[TFUA];
 
-    return {
+    const params = {
       'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
@@ -666,6 +671,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           ? gppSectionId
           : null,
     };
+    tryAddingCookieParams(consentTuple, this.win, params);
+    return params;
   }
 
   /**
@@ -1393,7 +1400,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return true;
       });
 
+    // Add listener for GPID cookie optout.
+    this.win.addEventListener('message', (event) => {
+      if (this.checkIfClearCookiePostMessageHasValidSource_(event)) {
+        handleCookieOptOutPostMessage(this.win, event);
+      }
+    });
+
     this.postTroubleshootMessage();
+  }
+
+  /**
+   * Checks whether the postMessage event's source corresponds to the ad
+   * iframe. Exposed as own function to ease unit testing. (It's near
+   * impossible to simulate the postmessage coming from the creative iframe in
+   * unit test environments).
+   * @param {!Event} event
+   * @return {boolean} True if the source of the message matches the ad iframe.
+   */
+  checkIfClearCookiePostMessageHasValidSource_(event) {
+    return event.source == devAssert(this.iframe.contentWindow);
   }
 
   /**
@@ -1989,6 +2015,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   isFluidRequest() {
     return this.isFluidRequest_;
+  }
+
+  /** @param {!Response} fetchResponse */
+  onAdResponse(fetchResponse) {
+    maybeSetCookieFromAdResponse(this.win, fetchResponse);
   }
 }
 
