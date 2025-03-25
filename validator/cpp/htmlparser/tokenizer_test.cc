@@ -494,5 +494,4 @@ INSTANTIATE_TEST_SUITE_P(
         "<style>inside</style x=\"abc\"z='333'>after",
         "<style>inside</style/x=34>after",
         "<style>inside</style/abc='x&gt;y'qwe>after",
-        "<style>inside</style abc='x>y'>after",
-        ));
+        "<style>inside</style abc='x>y'>after"));
