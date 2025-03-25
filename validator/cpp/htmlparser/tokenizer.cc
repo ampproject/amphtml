@@ -1109,9 +1109,9 @@ Token Tokenizer::token() {
           while (true) {
             auto a = TagAttr();
             if (!a.has_value()) break;
-            auto attr = std::get<Attribute>(a.value());
+            auto& attr = std::get<Attribute>(a.value());
             bool more_attributes = std::get<bool>(a.value());
-            t.attributes.push_back(attr);
+            t.attributes.push_back(std::move(attr));
             if (!more_attributes) break;
           }
         }
