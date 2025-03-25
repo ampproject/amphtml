@@ -547,8 +547,7 @@ bool Tokenizer::ReadCDATA() {
 
 template<typename... Args>
 bool Tokenizer::StartTagIn(Args... ss) {
-  std::vector<std::string> argsList{ss...};
-  for (const auto& s : argsList) {
+  for (std::string_view s : {ss...}) {
     if (data_.end - data_.start != s.size()) continue;
     bool matched = true;
     for (std::size_t i = 0; i < s.size(); ++i) {
@@ -1105,6 +1104,8 @@ Token Tokenizer::token() {
           t.data = tag_name;
         }
         if (has_attributes) {
+          t.attributes.reserve(t.attributes.size() + attributes_.size() -
+                               n_attributes_returned_);
           while (true) {
             auto a = TagAttr();
             if (!a.has_value()) break;

@@ -172,8 +172,7 @@ Node* Parser::top() {
 
 template <typename... Args>
 bool Parser::PopUntil(Scope scope, Args... match_tags) {
-  std::vector<Atom> argsList{match_tags...};
-  int i = IndexOfElementInScope(scope, argsList);
+  int i = IndexOfElementInScope(scope, match_tags...);
   if (i != -1) {
     open_elements_stack_.Pop(open_elements_stack_.size() - i);
     return true;
@@ -181,12 +180,12 @@ bool Parser::PopUntil(Scope scope, Args... match_tags) {
   return false;
 }  // End Parser::PopUntil.
 
-int Parser::IndexOfElementInScope(Scope scope,
-                                  const std::vector<Atom>& match_tags) const {
+template <typename... Args>
+int Parser::IndexOfElementInScope(Scope scope, Args... match_tags) const {
   for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
     Node* node = open_elements_stack_.at(i);
     if (node->name_space_.empty()) {
-      for (Atom a : match_tags) {
+      for (Atom a : {match_tags...}) {
         if (a == node->atom_) {
           return i;
         }
@@ -240,8 +239,7 @@ int Parser::IndexOfElementInScope(Scope scope,
 
 template <typename... Args>
 bool Parser::ElementInScope(Scope scope, Args... tags) const {
-  std::vector<Atom> argsList{tags...};
-  return IndexOfElementInScope(scope, argsList) != -1;
+  return IndexOfElementInScope(scope, tags...) != -1;
 }  // Parser::ElementInScope.
 
 void Parser::ClearStackToContext(Scope scope) {
@@ -440,17 +438,15 @@ void Parser::AddElement() {
       break;
   }
 
-  std::copy(token_.attributes.begin(), token_.attributes.end(),
-            std::back_inserter(element_node->attributes_));
+  element_node->attributes_.insert(element_node->attributes_.end(),
+                                   token_.attributes.begin(),
+                                   token_.attributes.end());
   AddChild(element_node);
 
   if (!record_attribute_offsets_ && !element_node->attributes_.empty()) {
-    std::transform(
-        element_node->attributes_.begin(), element_node->attributes_.end(),
-        element_node->attributes_.begin(), [](Attribute attr) -> Attribute {
-          attr.line_col_in_html_src = std::nullopt;
-          return attr;
-        });
+    for (auto& attr : element_node->attributes_) {
+      attr.line_col_in_html_src = std::nullopt;
+    }
   }
 
   if (on_node_callback_) {
@@ -1606,7 +1602,7 @@ bool Parser::InBodyIM() {  // NOLINT
         }
         case Atom::FORM: {
           if (open_elements_stack_.Contains(Atom::TEMPLATE)) {
-            int i = IndexOfElementInScope(Scope::DefaultScope, {Atom::FORM});
+            int i = IndexOfElementInScope(Scope::DefaultScope, Atom::FORM);
             if (i == -1) {
               // Ignore the token.
               return true;
@@ -1620,7 +1616,7 @@ bool Parser::InBodyIM() {  // NOLINT
           } else {
             Node* node = form_;
             form_ = nullptr;
-            int i = IndexOfElementInScope(Scope::DefaultScope, {Atom::FORM});
+            int i = IndexOfElementInScope(Scope::DefaultScope, Atom::FORM);
             if (!node || i == -1 || open_elements_stack_.at(i) != node) {
               // Ignore the token.
               return true;
