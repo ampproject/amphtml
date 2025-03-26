@@ -1,28 +1,14 @@
-// import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-
-// import {user, userAssert} from '#utils/log';
-import {
-  QQID_HEADER,
-  SANDBOX_HEADER,
-  extractAmpAnalyticsConfig,
-} from '#ads/google/a4a/utils';
-
-import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 
 import {Services} from '#service';
 
-import {dev, devAssert, user} from '#utils/log';
+import {devAssert, user} from '#utils/log';
 
 import {LockedIdGenerator} from './lockedid-generator';
 import {MappingService} from './mapping';
 import {RealtimeManager} from './realtime';
 
-import {AmpA4A, AnalyticsTrigger} from '../../amp-a4a/0.1/amp-a4a';
-import {
-  RefreshManager,
-  getRefreshManager,
-} from '../../amp-a4a/0.1/refresh-manager';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkDoubleclickImpl} from '../../amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
 
 /** @type {string} */

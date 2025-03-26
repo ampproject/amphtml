@@ -14,15 +14,16 @@ export class RealtimeManager {
   /**
    * Returns the singleton instance of RealtimeManager.
    * @return {!RealtimeManager}
+   * @public
    */
   static start() {
     if (!RealtimeManager.instance_) {
       RealtimeManager.instance_ = new RealtimeManager();
-    }
 
-    const ws = new WebSocket(RealtimeManager.HUB_URL_TEMPLATE);
-    RealtimeManager.instance_.setWebSocket_(ws);
-    RealtimeManager.instance_.setupWebSocketEventListeners_();
+      const ws = new WebSocket(RealtimeManager.HUB_URL_TEMPLATE);
+      RealtimeManager.instance_.setWebSocket_(ws);
+      RealtimeManager.instance_.setupWebSocketEventListeners_();
+    }
 
     return RealtimeManager.instance_;
   }
@@ -74,7 +75,7 @@ export class RealtimeManager {
   onConnect_(event) {
     console /*OK*/
       .log('Connection opened', event);
-    this.websocket_.send('{"protocol":"json","version":1}');
+    this.send({'protocol': 'json', 'version': 1});
   }
 
   /**
@@ -96,16 +97,39 @@ export class RealtimeManager {
   onMessageReceive_(event) {
     console /*OK*/
       .log('Message received', event.data);
-    try {
-      const data = JSON.parse(event.data);
-      // Handle parsed data
-      // Process incoming message
-      // emit events
+    // try {
+    //   const data = JSON.parse(event.data);
+    //   // Handle parsed data
+    //   // Process incoming message
+    //   // emit events
+    //   console /*OK*/
+    //     .log('Message data', data);
+    // } catch (e) {
+    //   console /*OK*/
+    //     .error('Failed to parse message', e);
+    // }
+  }
+
+  /**
+   * Sends a message through the WebSocket connection
+   * @param {!Object} message - The message to send
+   * @return {boolean} - True if message was sent, false otherwise
+   */
+  send(message) {
+    if (!this.websocket_ || this.websocket_.readyState !== WebSocket.OPEN) {
       console /*OK*/
-        .log('Message data', data);
+        .error('WebSocket not connected');
+      return false;
+    }
+
+    try {
+      const messageString = JSON.stringify(message);
+      this.websocket_.send(messageString + '');
+      return true;
     } catch (e) {
       console /*OK*/
-        .error('Failed to parse message', e);
+        .error('Failed to send message', e);
+      return false;
     }
   }
 }
