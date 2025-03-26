@@ -8,6 +8,7 @@ import {ExtensionCommunicator} from './extension';
 import {LockedIdGenerator} from './lockedid-generator';
 import {MappingService} from './mapping';
 import {RealtimeManager} from './realtime';
+import {getCapitalizedMethodWithPrefix} from './utils';
 import {VisibilityTracker} from './visibility-tracking';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -16,12 +17,17 @@ import {AmpAdNetworkDoubleclickImpl} from '../../amp-ad-network-doubleclick-impl
 /** @type {string} */
 const TAG = 'amp-ad-network-insurads-impl';
 
+/** @type {string} */
+const DOUBLECLICK_PREFIX = 'doubleclick';
+
 export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /**
    * @param {!Element} element
    */
   constructor(element) {
-    super(element);
+    // TODO: Confirm that this is working as expected
+    // super(element);
+    this.callDoubleClickMethod_('constructor', [element]);
 
     /* DoubleClick & AMP */
     this.element.setAttribute('data-enable-refresh', 'false');
@@ -50,7 +56,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   buildCallback() {
-    super.buildCallback();
+    this.callDoubleClickMethod_('buildCallback');
+
     console /*OK*/
       .log('Build Callback');
 
@@ -60,7 +67,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       (visibilityData) => this.onVisibilityChange_(visibilityData)
     );
 
-    this.sendIframeMessage('cfg', {
+    this.extension.sendIframeMessage('cfg', {
       sessionId: 'XPTO',
       contextId: 'C3PO',
       appId: 1,
@@ -71,9 +78,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   onCreativeRender(creativeMetaData, opt_onLoadPromise) {
-    super.onCreativeRender(creativeMetaData, opt_onLoadPromise);
+    this.callDoubleClickMethod_('onCreativeRender', [
+      creativeMetaData,
+      opt_onLoadPromise,
+    ]);
 
-    this.sendIframeMessage('adUnitChanged', {
+    this.extension.sendIframeMessage('adUnitChanged', {
       id: this.element.getAttribute('data-slot'),
       shortId: this.element.getAttribute('data-amp-slot-index'),
       sizes: ['300x250'],
@@ -100,6 +110,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.refreshCount_++;
     console /*Ok*/
       .log('Refresh', this.slot, this.refreshCount_, this.element, this);
+
+    // DON'T CALL DOUBLE CLICK REFRESH! NOT NEEDED.
     return super.refresh(refreshEndCallback);
   }
 
@@ -112,7 +124,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     console /*Ok*/
       .log('responseHeaders', responseHeaders);
-    return super.extractSize(responseHeaders);
+
+    return this.callDoubleClickMethod_('extractSize', [responseHeaders]);
   }
 
   /** @override */
@@ -121,11 +134,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.getAdUrlInsurAdsDeferred = new Deferred();
 
     const self = this;
-    this.doubleClickGetAdUrl(
+
+    this.callDoubleClickMethod_('getAdUrl', [
       opt_consentTuple,
       opt_rtcResponsesPromise,
-      opt_serveNpaSignal
-    );
+      opt_serveNpaSignal,
+    ]);
 
     this.getAdUrlDeferred.promise.then((doubleClickUrl) => {
       const url = new URL(doubleClickUrl);
@@ -193,14 +207,23 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   initDoubleClickHelper() {
     this.getAdUrlInsurAdsDeferred = new Deferred();
 
-    const exceptions = ['constructor'];
+    const exceptions = [
+      'constructor',
+      'buildCallback',
+      'onCreativeRender',
+      'refresh',
+      'extractSize',
+      'getAdUrl',
+    ];
 
     // Ensure base DoubleClick implementation
     const iatImpl = AmpAdNetworkInsuradsImpl.prototype;
     const dblImpl = AmpAdNetworkDoubleclickImpl.prototype;
     for (const methodName in dblImpl) {
       if (exceptions.indexOf(methodName) >= 0) {
-        iatImpl['doubleClick' + methodName] = dblImpl[methodName];
+        iatImpl[
+          getCapitalizedMethodWithPrefix(DOUBLECLICK_PREFIX, methodName)
+        ] = dblImpl[methodName];
       } else {
         iatImpl[methodName] = dblImpl[methodName];
       }
@@ -208,6 +231,32 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     AmpAdNetworkInsuradsImpl.prototype.doubleClickGetAdUrl =
       AmpAdNetworkDoubleclickImpl.prototype.getAdUrl;
+  }
+
+  /**
+   * Calls a DoubleClick implementation method
+   * @param {string} methodName - The name of the method to call
+   * @param {...*} args - Arguments to pass to the method
+   * @return {*} Result of the method call
+   * @private
+   */
+  callDoubleClickMethod_(methodName, ...args) {
+    const prefixedName = getCapitalizedMethodWithPrefix(
+      DOUBLECLICK_PREFIX,
+      methodName
+    );
+    if (typeof this[prefixedName] === 'function') {
+      try {
+        return this[prefixedName].apply(this, args);
+      } catch (error) {
+        console /*OK*/
+          .error(`Error calling DoubleClick ${methodName}:`, error);
+      }
+    } else {
+      console /*OK*/
+        .warn(`DoubleClick ${methodName} not available`);
+    }
+    return null;
   }
 
   /**
