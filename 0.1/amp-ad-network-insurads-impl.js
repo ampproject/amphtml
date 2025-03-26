@@ -2,11 +2,13 @@ import {Deferred} from '#core/data-structures/promise';
 
 import {Services} from '#service';
 
-import {devAssert, user} from '#utils/log';
+import {devAssert} from '#utils/log';
 
+import {ExtensionCommunicator} from './extension';
 import {LockedIdGenerator} from './lockedid-generator';
 import {MappingService} from './mapping';
 import {RealtimeManager} from './realtime';
+import {VisibilityTracker} from './visibility-tracking';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkDoubleclickImpl} from '../../amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
@@ -21,148 +23,29 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   constructor(element) {
     super(element);
 
-    console /*OK*/
-      .log('AmpAdNetworkInsuradsImpl');
-
-    /**
-     * Config to generate amp-analytics element for active view reporting.
-     * @type {?JsonObject}
-     * @private
-     */
-    this.ampAnalyticsConfig_ = null;
-
-    /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = Services.extensionsFor(this.win);
-
-    /** @private {?string} */
-    this.qqid_ = null;
-
-    /** @type {?string} */
-    this.parameterSize = null;
-
-    /** @private {?{width: number, height: number}} */
-    this.returnedSize_ = null;
-
-    /** @type {?string} */
-    this.parameterSize = null;
-
-    /** @private {?{width: number, height: number}} */
-    this.returnedSize_ = null;
-
-    /** @type {?JsonObject|Object} */
-    this.jsonTargeting = null;
-
-    /** @type {string} */
-    this.adKey = '0';
-
-    /** @type {!Array<string>} */
-    this.experimentIds = [];
-
-    /** @type {!Array<string>} */
-    this.ampExperimentIds = [];
-
-    /** @protected {boolean} */
-    this.useSra = false;
-
-    /** @protected {?Deferred<?Response>} */
-    this.sraDeferred = null;
-
-    /** @private {number} */
-    this.refreshCount_ = 0;
-
-    /** @private {boolean} */
-    this.isFluidRequest_ = false;
-
-    /** @private {!TroubleshootDataDef} */
-    this.troubleshootData_ = /** @type {!TroubleshootDataDef} */ ({});
-
-    /** @type {boolean} whether safeframe forced via tag */
-    this.forceSafeframe = false;
-    if ('forceSafeframe' in this.element.dataset) {
-      if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
-        user().warn(
-          TAG,
-          'Ignoring invalid data-force-safeframe attribute: ' +
-            this.element.dataset['forceSafeframe']
-        );
-      } else {
-        this.forceSafeframe = true;
-      }
-    }
-
-    /** @protected {ConsentTupleDef} */
-    this.consentTuple = {};
-
-    /** @protected {!Deferred<string>} */
-    this.getAdUrlDeferred = new Deferred();
-
-    /** @protected {!Deferred<string>} */
-    this.getAdUrlDeferred = new Deferred();
-
-    /** @private {!TroubleshootDataDef} */
-    this.troubleshootData_ = /** @type {!TroubleshootDataDef} */ ({});
-
-    /** @type {?JsonObject|Object} */
-    this.jsonTargeting = null;
-
-    /** @protected {ConsentTupleDef} */
-    this.consentTuple = {};
-
-    this.lockedid = null;
-
-    /** @private {?RefreshManager} */
-    this.refreshManager_ = null;
-
-    console /*OK*/
-      .log('First Print');
+    /* DoubleClick & AMP */
+    this.element.setAttribute('data-enable-refresh', 'false');
+    this.initDoubleClickHelper();
+    /* DoubleClick& AMP */
 
     /* InsurAds Business  */
     this.lockedid = new LockedIdGenerator().getLockedIdData();
     this.realtimeInstance = new RealtimeManager().start();
     this.mappingService = new MappingService(this.win);
+    this.extension = new ExtensionCommunicator();
+    /** @private {?VisibilityTracker} */
+    this.visibilityTracker_ = null;
+
+    /** @private {number} */
+    this.visibilityPercentage_ = 0;
+
+    /** @private {boolean} */
+    this.isVisible_ = false;
     /* InsurAds Business  */
 
-    AmpAdNetworkInsuradsImpl.prototype.getAdUrl =
-      AmpAdNetworkDoubleclickImpl.prototype.getAdUrl;
-
-    AmpAdNetworkInsuradsImpl.prototype.populateAdUrlState =
-      AmpAdNetworkDoubleclickImpl.prototype.populateAdUrlState;
-
-    AmpAdNetworkInsuradsImpl.prototype.generateAdKey_ =
-      AmpAdNetworkDoubleclickImpl.prototype.generateAdKey_;
-
-    AmpAdNetworkInsuradsImpl.prototype.getParameterSize_ =
-      AmpAdNetworkDoubleclickImpl.prototype.getParameterSize_;
-
-    AmpAdNetworkInsuradsImpl.prototype.expandJsonTargeting_ =
-      AmpAdNetworkDoubleclickImpl.prototype.expandJsonTargeting_;
-
-    AmpAdNetworkInsuradsImpl.prototype.mergeRtcResponses_ =
-      AmpAdNetworkDoubleclickImpl.prototype.mergeRtcResponses_;
-
-    AmpAdNetworkInsuradsImpl.prototype.getPageParameters =
-      AmpAdNetworkDoubleclickImpl.prototype.getPageParameters;
-
-    AmpAdNetworkInsuradsImpl.prototype.getBlockParameters_ =
-      AmpAdNetworkDoubleclickImpl.prototype.getBlockParameters_;
-
-    AmpAdNetworkInsuradsImpl.prototype.getLocationQueryParameterValue =
-      AmpAdNetworkDoubleclickImpl.prototype.getLocationQueryParameterValue;
-
-    AmpAdNetworkInsuradsImpl.prototype.expandJsonTargeting_ =
-      AmpAdNetworkDoubleclickImpl.prototype.expandJsonTargeting_;
-
-    AmpAdNetworkInsuradsImpl.prototype.expandValue_ =
-      AmpAdNetworkDoubleclickImpl.prototype.expandValue_;
-
-    AmpAdNetworkInsuradsImpl.prototype.expandString_ =
-      AmpAdNetworkDoubleclickImpl.prototype.expandString_;
-
-    AmpAdNetworkInsuradsImpl.prototype.getCustomRealTimeConfigMacros_ =
-      AmpAdNetworkDoubleclickImpl.prototype.getCustomRealTimeConfigMacros_; // Not sure if this is needed
-
-    AmpAdNetworkInsuradsImpl.troubleshootData_ =
-      AmpAdNetworkDoubleclickImpl.troubleshootData_;
+    this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
+    console /*OK*/
+      .log('Canonical URL:', this.canonicalUrl);
   }
 
   /** @override */
@@ -170,53 +53,120 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     super.buildCallback();
     console /*OK*/
       .log('Build Callback');
+
+    this.visibilityTracker_ = new VisibilityTracker(
+      this.win,
+      this.element,
+      (visibilityData) => this.onVisibilityChange_(visibilityData)
+    );
+
+    this.sendIframeMessage('cfg', {
+      sessionId: 'XPTO',
+      contextId: 'C3PO',
+      appId: 1,
+      section: 1,
+      g_country: 'PT',
+    });
   }
 
   /** @override */
   onCreativeRender(creativeMetaData, opt_onLoadPromise) {
-    super.onCreativeRender(creativeMetaData);
+    super.onCreativeRender(creativeMetaData, opt_onLoadPromise);
 
-    console /*OK*/
-      .log('Creative Rendered', creativeMetaData, opt_onLoadPromise);
-    console /*OK*/
-      .log('Refresh Count:', this.refreshCount_);
+    this.sendIframeMessage('adUnitChanged', {
+      id: this.element.getAttribute('data-slot'),
+      shortId: this.element.getAttribute('data-amp-slot-index'),
+      sizes: ['300x250'],
+      instance: this.element.getAttribute('data-amp-slot-index'),
+      configuration: null,
+      customTargeting: null,
+      rotation: 'Enabled',
+      isFirstPrint: true,
+      isTracking: false,
+      visible: true,
+      width: 300,
+      height: 250,
+      dfpMapping: null,
+      isAmpSlot: true,
+    });
+  }
 
+  /** @override */
+  refresh(refreshEndCallback) {
     if (this.isRefreshing) {
-      devAssert(this.refreshManager_);
-      this.refreshManager_.initiateRefreshCycle();
-      this.isRefreshing = false;
-      this.isRelayoutNeededFlag = false;
-      console /*OK*/
-        .log('Refresh Cycle Initiated');
-    } else {
-      this.mappingService
-        .doMappingRequest()
-        .then((data) => {
-          this.triggerImmediateRefresh(data.impDur);
-        })
-        .catch((error) => {
-          console /*OK*/
-            .error('Mapping Error:', error);
-        });
+      return;
     }
 
-    // this.a4a_.refresh(() => this.refreshManager_.initiateRefreshCycle());
-    // setTimeout(() => {
-    //   this.refreshManager_.initiateRefreshCycle();
-    //   console /*OK*/
-    //     .log('AmpAdNetworkInsuradsImpl');
-    // }, 5000);
+    this.refreshCount_++;
+    console /*Ok*/
+      .log('Refresh', this.slot, this.refreshCount_, this.element, this);
+    return super.refresh(refreshEndCallback);
+  }
 
-    super.onCreativeRender(creativeMetaData, opt_onLoadPromise);
+  /** @override */
+  extractSize(responseHeaders) {
+    console /*Ok*/
+      .log('CreativeId', responseHeaders.get('google-creative-id') || '-1');
+    console /*Ok*/
+      .log('lineItemId', responseHeaders.get('google-lineitem-id') || '-1');
+
+    console /*Ok*/
+      .log('responseHeaders', responseHeaders);
+    return super.extractSize(responseHeaders);
+  }
+
+  /** @override */
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
+    this.getAdUrlDeferred = new Deferred();
+    this.getAdUrlInsurAdsDeferred = new Deferred();
+
+    const self = this;
+    this.doubleClickGetAdUrl(
+      opt_consentTuple,
+      opt_rtcResponsesPromise,
+      opt_serveNpaSignal
+    );
+
+    this.getAdUrlDeferred.promise.then((doubleClickUrl) => {
+      const url = new URL(doubleClickUrl);
+
+      if (self.refreshCount_ > 0) {
+        console.log('Refresh count:', self.refreshCount_);
+
+        const adUrl =
+          this.slot === '/134642692/amp-samples/amp-MREC'
+            ? '/134642692/MREC'
+            : '/134642692/MREC_JM';
+
+        const params = url.searchParams;
+        params.set('iu', adUrl);
+        params.set('sz', '300x250');
+        console /*OK*/
+          .log(url.toString());
+      }
+
+      self.getAdUrlInsurAdsDeferred.resolve(url.toString());
+    });
+
+    return this.getAdUrlInsurAdsDeferred.promise;
+  }
+
+  /**
+   * refreshEndCallback
+   *
+   */
+  refreshEndCallback() {
+    console /*OK*/
+      .log('Refresh End Callback');
   }
 
   /**
    * Triggers an immediate refresh of the ad.
-   * This can be called when receiving realtime messages that require a refresh.
-   * @param {number} impDur
+   * This can be called when receiving realtime messages that require a refresh
+   * or an Extension Refresh message.
    * @return {boolean}
    */
-  triggerImmediateRefresh(impDur) {
+  triggerImmediateRefresh() {
     console /*OK*/
       .log('Triggering immediate ad refresh');
 
@@ -234,60 +184,44 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return false;
     }
 
-    // Create a refresh manager if it doesn't exist yet
-    if (!this.refreshManager_) {
-      console /*OK*/
-        .warn(
-          'No refresh manager available, creating one with default settings'
-        );
-      this.refreshManager_ =
-        getRefreshManager(this) ||
-        new RefreshManager(
-          this,
-          {
-            'visiblePercentageMin': 50,
-            'continuousTimeMin': 1,
-          },
-          impDur * 1000
-        ); // Default refresh interval as fallback
+    this.refresh(this.refreshEndCallback);
+  }
+
+  /**
+   * Enables the use of the DoubleClick implementation.
+   */
+  initDoubleClickHelper() {
+    this.getAdUrlInsurAdsDeferred = new Deferred();
+
+    const exceptions = ['constructor'];
+
+    // Ensure base DoubleClick implementation
+    const iatImpl = AmpAdNetworkInsuradsImpl.prototype;
+    const dblImpl = AmpAdNetworkDoubleclickImpl.prototype;
+    for (const methodName in dblImpl) {
+      if (exceptions.indexOf(methodName) >= 0) {
+        iatImpl['doubleClick' + methodName] = dblImpl[methodName];
+      } else {
+        iatImpl[methodName] = dblImpl[methodName];
+      }
     }
 
-    this.refresh(() => {
-      // Mark the ad as refreshing
-      // this.isRefreshing = true;
-      this.refreshCount_++;
-      devAssert(this.refreshManager_);
-      this.refreshManager_.initiateRefreshCycle();
-      this.isRefreshing = true;
-      this.isRelayoutNeededFlag = true;
-      console /*OK*/
-        .log('Refresh Cycle Initiated');
-    });
+    AmpAdNetworkInsuradsImpl.prototype.doubleClickGetAdUrl =
+      AmpAdNetworkDoubleclickImpl.prototype.getAdUrl;
   }
 
   /**
-   * Returns the width and height of the slot as defined by the width and height
-   * attributes, or the dimensions as computed by
-   * getIntersectionElementLayoutBox.
-   * @return {!LayoutRectOrDimsDef}
+   * Handles visibility changes
+   * @param {!Object} visibilityData - Visibility data object
+   * @private
    */
-  getSlotSize() {
-    const {height, width} = this.getDeclaredSlotSize_();
-    return {width, height};
-  }
-
-  /**
-   * Returns the width and height, as defined by the slot element's width and
-   * height attributes.
-   * @return {!SizeDef}
-   */
-  getDeclaredSlotSize_() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
-    return {width, height};
+  onVisibilityChange_(visibilityData) {
+    // Store visibility percentage and if is visible for other methods to access
+    this.visibilityPercentage_ = visibilityData.visibilityPercentage;
+    this.isVisible_ = visibilityData.isViewable;
   }
 }
 
-AMP.extension('amp-ad-network-insurads-impl', '0.1', (AMP) => {
-  AMP.registerElement('amp-ad-network-insurads-impl', AmpAdNetworkInsuradsImpl);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpAdNetworkInsuradsImpl);
 });
