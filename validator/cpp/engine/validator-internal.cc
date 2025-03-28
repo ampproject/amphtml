@@ -389,8 +389,7 @@ class ParsedHtmlTag {
       lower_tag_name_ = AsciiStrToLower(tagname);
       upper_tag_name_ = AsciiStrToUpper(tagname);
     }
-    bool remove_duplicates = lower_tag_name_ == "script";
-    node_->SortAttributes(remove_duplicates);
+    node_->SortAttributes(false);
     for (const auto& attr : node_->Attributes()) {
       attributes_.push_back(ParsedHtmlTagAttr{attr.KeyPart(), attr.value});
     }
@@ -596,7 +595,7 @@ class ParsedAttrSpec {
     return value_property_by_name_;
   }
 
-  const absl::flat_hash_map<std::string, const CssDeclaration*>&
+  const unordered_map<std::string, const CssDeclaration*>&
   css_declaration_by_name() const {
     return css_declaration_by_name_;
   }
@@ -621,8 +620,7 @@ class ParsedAttrSpec {
   // Name lookup for spec().value_properties().properties().
   unordered_map<std::string, const PropertySpec*> value_property_by_name_;
   // Name lookup for spec().css_declaration().
-  absl::flat_hash_map<std::string, const CssDeclaration*>
-      css_declaration_by_name_;
+  unordered_map<std::string, const CssDeclaration*> css_declaration_by_name_;
   // The mandatory spec().value_properties().properties().
   vector<const PropertySpec*> mandatory_value_properties_;
   vector<TypeIdentifier> disabled_by_;
@@ -4325,7 +4323,7 @@ void ValidateAttrDeclaration(const ParsedAttrSpec& parsed_attr_spec,
   // If there were errors parsing, exit from validating further.
   if (!css_errors.empty()) return;
 
-  const absl::flat_hash_map<std::string, const CssDeclaration*>&
+  const unordered_map<std::string, const CssDeclaration*>&
       css_declaration_by_name = parsed_attr_spec.css_declaration_by_name();
 
   for (auto& declaration : declarations) {
