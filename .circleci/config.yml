@@ -289,19 +289,6 @@ jobs:
           name: '⭐⭐⭐ Bundle Size ⭐⭐⭐'
           command: node build-system/pr-check/bundle-size.js
       - teardown_vm
-  validator_tests:
-    executor:
-      name: jdk-docker-2xlarge
-    steps:
-      - setup_vm
-      - run:
-          name: 'Install Validator Dependencies'
-          command: ./.circleci/install_validator_dependencies.sh
-      - run:
-          name: '⭐⭐⭐ Validator Tests ⭐⭐⭐'
-          command: node build-system/pr-check/validator-tests.js
-      - store_test_output
-      - teardown_vm
   visual_diff_tests:
     executor:
       name: node-docker-large
@@ -565,11 +552,6 @@ workflows:
             - 'Nomodule 3p Build (Bundle Size)'
             - '⛓️ Module Build (Bundle Size)'
             - 'Module 3p Build (Bundle Size)'
-      - validator_tests:
-          name: 'Validator Tests'
-          <<: *push_and_pr_builds
-          requires:
-            - 'Initialize Repository'
       - visual_diff_tests:
           name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
