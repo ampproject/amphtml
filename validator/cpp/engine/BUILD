@@ -1,7 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("embed_data.bzl", "embed_data")
-load("//tools/build_defs/license:license.bzl", "license")
 
 # Requirements:
 # clang with c++17 support.
@@ -15,15 +14,7 @@ load("//tools/build_defs/license:license.bzl", "license")
 #
 # bazel test --cxxopt='-std=c++17' validator_test
 
-package(
-    default_applicable_licenses = [":license"],
-    default_visibility = ["//visibility:public"],
-)
-
-license(
-    name = "license",
-    package_name = "ampvalidator",
-)
+package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
