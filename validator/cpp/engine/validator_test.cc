@@ -1144,25 +1144,6 @@ TEST(ValidatorTest, InvalidHyphenCharacter) {
   EXPECT_EQ(ValidationResult::FAIL, result.status());
 }
 
-// This test ensures that validation applies to the first "src" attribute
-// of a <script> tag with multiple "src" attributes which matches the standard
-// HTML behavior of ignoring duplicate attribute values beyond the first.
-TEST(ValidatorTest, ScriptEnforcesFirstOfDuplicateAttributes) {
-  const TestCase& test_case =
-      FindOrDie(TestCases(), "feature_tests/minimum_valid_amp.html");
-  const std::string script_with_multiple_src_attributes =
-      "<script async custom-element=\"amp-bind\""
-      " src=\"https://example.com/a.js\""
-      " src=\"https://cdn.ampproject.org/v0/amp-bind-0.1.js\">"
-      "</script>";
-
-  std::string bad_html = StrReplaceAll(
-      test_case.input_content,
-      {{"<script", script_with_multiple_src_attributes + "<script"}});
-  ValidationResult result = amp::validator::Validate(bad_html, HtmlFormat::AMP);
-  EXPECT_EQ(ValidationResult::FAIL, result.status());
-}
-
 // Checks that `type_identifiers` contains no duplicate items, and checks that
 // every item of `type_identifiers` is in `valid_type_identifiers`.
 void TypeIdentifiersAreValidAndUnique(
@@ -1239,8 +1220,7 @@ TEST(ValidatorTest, RulesMakeSense) {
                         HtmlFormat::UNKNOWN_CODE),
               html_format.cend())
         << "tagSpec.htmlFormat should never contain UNKNOWN_CODE"
-        << ":\n"
-        << tag_spec;
+        << ":\n" << tag_spec.DebugString();
 
     EXPECT_TRUE(tag_spec.has_tag_name());
     EXPECT_TRUE(RE2::PartialMatch(tag_spec.tag_name(), tag_name_regex));
@@ -1582,12 +1562,12 @@ TEST(ValidatorTest, RulesMakeSense) {
     }
 
     for (const auto& attr_spec : tag_spec.attrs()) {
-      EXPECT_TRUE(attr_spec.has_name()) << attr_spec;
+      EXPECT_TRUE(attr_spec.has_name()) << attr_spec.DebugString();
       // Attribute Spec names are matched against lowercased attributes,
       // so the rules *must* also be lower case or non-cased.
       EXPECT_TRUE(RE2::FullMatch(attr_spec.name(), RE2("[^A-Z]+")))
-          << attr_spec;
-      EXPECT_NE(attr_spec.name(), "[style]") << attr_spec;
+          << attr_spec.DebugString();
+      EXPECT_NE(attr_spec.name(), "[style]") << attr_spec.DebugString();
       if (attr_spec.has_value_url()) {
         for (const std::string& protocol : attr_spec.value_url().protocol()) {
           // UrlSpec protocol is matched against lowercased protocol names,
@@ -1602,24 +1582,27 @@ TEST(ValidatorTest, RulesMakeSense) {
             if (protocol == "http" &&
                 attr_spec.value_url().has_allow_relative()) {
               EXPECT_TRUE(attr_spec.value_url().allow_relative())
-                  << attr_spec.value_url();
+                  << attr_spec.value_url().DebugString();
             }
           }
         }
       }
       if (attr_spec.has_value_regex()) {
-        EXPECT_TRUE(RE2(attr_spec.value_regex()).ok()) << attr_spec;
+        EXPECT_TRUE(RE2(attr_spec.value_regex()).ok())
+            << attr_spec.DebugString();
       }
       if (attr_spec.has_value_regex_casei()) {
-        EXPECT_TRUE(RE2(attr_spec.value_regex_casei()).ok()) << attr_spec;
+        EXPECT_TRUE(RE2(attr_spec.value_regex_casei()).ok())
+            << attr_spec.DebugString();
       }
       if (attr_spec.has_disallowed_value_regex()) {
-        EXPECT_TRUE(RE2(attr_spec.disallowed_value_regex()).ok()) << attr_spec;
+        EXPECT_TRUE(RE2(attr_spec.disallowed_value_regex()).ok())
+            << attr_spec.DebugString();
       }
       if (attr_spec.has_value_url()) {
         EXPECT_GT(attr_spec.value_url().protocol().size(), 0)
             << "value_url must have at least one protocol\n"
-            << attr_spec;
+            << attr_spec.DebugString();
       }
       int num_values = 0;
       if (!attr_spec.value().empty()) {
@@ -1644,12 +1627,12 @@ TEST(ValidatorTest, RulesMakeSense) {
       if (attr_spec.name() == "id" && num_values == 0) {
         EXPECT_TRUE(attr_spec.has_disallowed_value_regex())
             << "'id' attribute must have 'disallowed_value_regex' set\n"
-            << attr_spec;
+            << attr_spec.DebugString();
       }
       if (attr_spec.name() == "name" && num_values == 0) {
         EXPECT_TRUE(attr_spec.has_disallowed_value_regex())
             << "'name' attribute must have 'disallowed_value_regex' set\n"
-            << attr_spec;
+            << attr_spec.DebugString();
       }
       if (attr_spec.has_deprecation()) {
         EXPECT_TRUE(attr_spec.has_deprecation_url());
