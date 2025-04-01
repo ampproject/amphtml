@@ -42,3 +42,26 @@ amp-story-page amp-ad[type='adsense'] {
   max-width: calc(3 / 5 * 75vh) !important;
   transform: translateX(-50%) !important;
 }
+
+/* For ads that have aspect ratio 31/40 or greater */
+.i-amphtml-story-desktop-fullbleed
+  .i-amphtml-landscape-ad
+  amp-story-grid-layer[template="fill"]
+  > amp-ad {
+  min-width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+}
+
+.i-amphtml-story-desktop-fullbleed .i-amphtml-landscape-ad iframe {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.i-amphtml-story-desktop-fullbleed
+  .i-amphtml-landscape-ad
+  .i-amphtml-cta-container {
+    bottom: 0 !important;
+    top: 0 !important;
+}

@@ -339,7 +339,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType_Enum.DESKTOP_FULLBLEED) {
+      if (
+        uiState === UIType_Enum.DESKTOP_FULLBLEED &&
+        !this.visibleAdPage_?.hasLandscapeAd()
+      ) {
+        // Proper landscape ads in DESKTOP_FULLBLEED do not need the attribute
         this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
       if (uiState === UIType_Enum.DESKTOP_ONE_PANEL) {
@@ -466,6 +470,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.mutateElement(() => {
       adPage.toggleVisibility();
       this.visibleAdPage_ = adPage;
+      if (this.visibleAdPage_.hasLandscapeAd()) {
+        // Proper landscape ads in DESKTOP_FULLBLEED do not need the attribute
+        this.adBadgeContainer_.removeAttribute(Attributes.DESKTOP_FULLBLEED);
+      }
     });
   }
 
