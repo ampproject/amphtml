@@ -14,6 +14,7 @@
   visibility: hidden !important;
   --i-amphtml-draggable-drawer-background-color: #fff !important;
   --i-amphtml-draggable-drawer-text-color: #202125 !important;
+  --i-amphtml-draggable-drawer-header-title-height: 44px !important;
 }
 
 [theme="dark"].amp-story-draggable-drawer-root {
