@@ -5,9 +5,9 @@ import {parseUrlDeprecated} from '../../../src/url';
 import {createFrameFor} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
 import {setStyle} from '#core/dom/style';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {listen, listenOnce} from '#event-helper';
 import {getDataParamsFromAttributes} from '../../../src/core/dom';
 
 /**
