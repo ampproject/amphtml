@@ -30,6 +30,10 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string} */
     this.searchTerm_ = null;
 
+    /** @private {?string} */
+    this.channelid_ = null;
+
+
 
     /** @private {?string} */
     this.liveChannelid_ = null;
@@ -73,6 +77,8 @@ class AmpYoutube extends AMP.BaseElement {
     this.liveChannelid_ = this.getLiveChannelId_();
     this.playlistid_ = this.element.getAttribute('data-playlistid');
     this.searchTerm_ = this.element.getAttribute('data-search');
+    this.channelid_ = this.element.getAttribute('data-channelid');
+
 
 
     this.assertDatasourceExists_();
@@ -123,7 +129,7 @@ class AmpYoutube extends AMP.BaseElement {
     return addParamsToUrl(src, params);
   }
 
-  /** @private */
+/** @private */
 getEmbedUrl_() {
   let descriptor;
   if (this.videoid_) {
@@ -132,20 +138,24 @@ getEmbedUrl_() {
     descriptor = `live_stream?channel=${encodeURIComponent(this.liveChannelid_)}&`;
   } else if (this.playlistid_) {
     descriptor = `videoseries?list=${encodeURIComponent(this.playlistid_)}&`;
+  } else if (this.channelid_) {
+    // Convert the channel ID (UC...) to the uploads playlist ID (UU...)
+    const uploadsPlaylistId = this.channelid_.replace(/^UC/, 'UU');
+    descriptor = `videoseries?list=${encodeURIComponent(uploadsPlaylistId)}&`;
   } else if (this.element.getAttribute('data-user')) {
     const username = this.element.getAttribute('data-user');
     descriptor = `?listType=user_uploads&list=${encodeURIComponent(username)}&`;
   } else if (this.searchTerm_) {
     descriptor = `results?search_query=${encodeURIComponent(this.searchTerm_)}&`;
-  }
-    else {
+  } else {
     userAssert(
       false,
-      'Must specify one of data-videoid, data-live-channelid, data-playlistid, or data-user'
+      'Must specify one of data-videoid, data-live-channelid, data-playlistid, data-user, data-search, or data-channelid'
     );
   }
   return `https://www.youtube.com/embed/${descriptor}`;
 }
+
 
 
   /** @private */
@@ -161,11 +171,12 @@ getEmbedUrl_() {
   /** @private */
   assertDatasourceExists_() {
     const datasourceExists =
-    [this.videoid_, this.liveChannelid_, this.playlistid_, this.element.getAttribute('data-user'),this.searchTerm_]
+    [this.videoid_, this.liveChannelid_, this.playlistid_, this.element.getAttribute('data-user'),this.searchTerm_,this.channelid_]
     .filter(Boolean).length === 1;
     userAssert(
       datasourceExists,
-      'Exactly one of data-videoid, data-live-channelid, data-playlistid, data-user, or data-search should be present.'
+      'Exactly one of data-videoid, data-live-channelid, data-playlistid, data-user, data-search, or data-channelid should be present.'
+
     );
   }
 
