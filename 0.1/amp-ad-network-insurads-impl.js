@@ -2,12 +2,10 @@ import {Deferred} from '#core/data-structures/promise';
 
 import {Services} from '#service';
 
-import {devAssert} from '#utils/log';
-
 import {ExtensionCommunicator} from './extension';
 import {LockedIdGenerator} from './lockedid-generator';
 import {MappingService} from './mapping';
-import {RealtimeManager} from './realtime';
+import {RealtimeMessaging} from './realtime-messaging';
 import {getCapitalizedMethodWithPrefix} from './utils';
 import {VisibilityTracker} from './visibility-tracking';
 
@@ -36,17 +34,21 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     /* InsurAds Business  */
     this.lockedid = new LockedIdGenerator().getLockedIdData();
-    this.realtimeInstance = new RealtimeManager().start();
+    this.realtimeMessaging_ = new RealtimeMessaging({
+      appInitHandler: (message) => this.handleAppInit_(message),
+      unitInitHandler: (message) => this.handleUnitInit_(message),
+      unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
+    });
     this.mappingService = new MappingService(this.win);
     this.extension = new ExtensionCommunicator();
-    /** @private {?VisibilityTracker} */
-    this.visibilityTracker_ = null;
+    // /** @private {?VisibilityTracker} */
+    // this.visibilityTracker_ = null;
 
-    /** @private {number} */
-    this.visibilityPercentage_ = 0;
+    // /** @private {number} */
+    // this.visibilityPercentage_ = 0;
 
-    /** @private {boolean} */
-    this.isVisible_ = false;
+    // /** @private {boolean} */
+    // this.isVisible_ = false;
     /* InsurAds Business  */
 
     this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
@@ -67,11 +69,14 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       (visibilityData) => this.onVisibilityChange_(visibilityData)
     );
 
+    this.realtimeMessaging_.sendAppInit(null, 1, 1, this.canonicalUrl);
+
     this.extension.sendIframeMessage('cfg', {
       sessionId: 'XPTO',
       contextId: 'C3PO',
       appId: 1,
       section: 1,
+      // eslint-disable-next-line local/camelcase
       g_country: 'PT',
     });
   }
@@ -145,7 +150,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       const url = new URL(doubleClickUrl);
 
       if (self.refreshCount_ > 0) {
-        console.log('Refresh count:', self.refreshCount_);
+        console./*Ok*/ log('Refresh count:', self.refreshCount_);
 
         const adUrl =
           this.slot === '/134642692/amp-samples/amp-MREC'
@@ -268,6 +273,36 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     // Store visibility percentage and if is visible for other methods to access
     this.visibilityPercentage_ = visibilityData.visibilityPercentage;
     this.isVisible_ = visibilityData.isViewable;
+  }
+
+  /**
+   * Handles app initialization messages
+   * @param {!Object} message - The app initialization message
+   * @private
+   */
+  handleAppInit_(message) {
+    console /*OK*/
+      .log('App Init:', message);
+  }
+
+  /**
+   * Handles unit initialization messages
+   * @param {!Object} message - The app initialization message
+   * @private
+   */
+  handleUnitInit_(message) {
+    console /*OK*/
+      .log('Unit Init:', message);
+  }
+
+  /**
+   * Handles unit waterfall messages
+   * @param {!Object} message - The app initialization message
+   * @private
+   */
+  handleUnitWaterfall_(message) {
+    console /*OK*/
+      .log('Unit Waterfall:', message);
   }
 }
 
