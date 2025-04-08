@@ -89,7 +89,7 @@ export class RealtimeManager {
 
     try {
       const messageString = JSON.stringify(message);
-      this.ws.send(messageString + '');
+      this.ws.send(messageString + '\u001e');
       return true;
     } catch (e) {
       console /*OK*/
