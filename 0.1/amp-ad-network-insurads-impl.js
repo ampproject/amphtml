@@ -24,12 +24,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   constructor(element) {
     // TODO: Confirm that this is working as expected
-    // super(element);
-    this.callDoubleClickMethod_('constructor', [element]);
+    super(element);
 
     /* DoubleClick & AMP */
-    this.element.setAttribute('data-enable-refresh', 'false');
     this.initDoubleClickHelper();
+    // this.callDoubleClickMethod_('constructor', [element]);
+    this.element.setAttribute('data-enable-refresh', 'false');
     /* DoubleClick& AMP */
 
     /* InsurAds Business  */
