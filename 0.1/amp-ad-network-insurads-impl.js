@@ -16,7 +16,7 @@ import {AmpAdNetworkDoubleclickImpl} from '../../amp-ad-network-doubleclick-impl
 const TAG = 'amp-ad-network-insurads-impl';
 
 /** @type {string} */
-const DOUBLECLICK_PREFIX = 'doubleclick';
+const DOUBLECLICK_PREFIX = 'doubleClick';
 
 export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /**
@@ -25,11 +25,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   constructor(element) {
     // TODO: Confirm that this is working as expected
     super(element);
+    // this.element.setAttribute('data-enable-refresh', 'false');
 
     /* DoubleClick & AMP */
-    this.initDoubleClickHelper();
+    // this.initDoubleClickHelper();
     // this.callDoubleClickMethod_('constructor', [element]);
-    this.element.setAttribute('data-enable-refresh', 'false');
     /* DoubleClick& AMP */
 
     /* InsurAds Business  */
@@ -233,9 +233,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         iatImpl[methodName] = dblImpl[methodName];
       }
     }
-
-    AmpAdNetworkInsuradsImpl.prototype.doubleClickGetAdUrl =
-      AmpAdNetworkDoubleclickImpl.prototype.getAdUrl;
   }
 
   /**
@@ -246,6 +243,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   callDoubleClickMethod_(methodName, ...args) {
+    return true;
     const prefixedName = getCapitalizedMethodWithPrefix(
       DOUBLECLICK_PREFIX,
       methodName

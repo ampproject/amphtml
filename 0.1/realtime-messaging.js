@@ -51,7 +51,7 @@ export class RealtimeMessaging {
    */
   sendHandshake() {
     const handshake = new HandshakeMessage();
-    this.realtimeManager_.send(handshake);
+    this.realtimeManager_.send(handshake.serialize());
   }
 
   /**

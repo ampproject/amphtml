@@ -22,11 +22,13 @@ export class BaseMessage {
    * @return {string}
    */
   serialize() {
-    return JSON.stringify({
-      type: this.type,
-      data: this.data,
-      timestamp: this.timestamp,
-    });
+    return (
+      JSON.stringify({
+        type: this.type,
+        data: this.data,
+        timestamp: this.timestamp,
+      }) + '\u001e'
+    );
   }
 
   /**
@@ -64,7 +66,7 @@ export class HandshakeMessage {
    * @return {string}
    */
   serialize() {
-    return JSON.stringify(this.data);
+    return JSON.stringify(this.data) + '\u001e';
   }
 }
 
