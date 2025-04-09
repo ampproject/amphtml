@@ -16,14 +16,14 @@ export class RealtimeMessaging {
    * @param {Object=} handlers - Message handlers
    */
   constructor(handlers = {}) {
-    /** @private {!MessageHandler} */
-    this.messageHandler_ = new MessageHandler(handlers);
-
     /** @private {!RealtimeManager} */
     this.realtimeManager_ = RealtimeManager.start();
 
     // Set up connection
     this.setupRealtimeConnection_();
+
+    /** @private {!MessageHandler} */
+    this.messageHandler_ = new MessageHandler(handlers);
   }
 
   /**
@@ -34,11 +34,6 @@ export class RealtimeMessaging {
     const ws = this.realtimeManager_.getWebSocket();
 
     if (ws) {
-      // Listen for connection open to send handshake
-      ws.addEventListener('open', () => {
-        this.sendHandshake();
-      });
-
       // Listen for messages
       ws.addEventListener('message', (event) => {
         this.messageHandler_.processMessage(event.data);
@@ -50,25 +45,29 @@ export class RealtimeMessaging {
    * Sends a handshake message
    */
   sendHandshake() {
+    // if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+    //   console /*OK*/
+    //     .error('WebSocket not connected');
+    //   setTimeout(() => {
+    //     this.sendHandshake();
+    //   }, 100);
+    //   return;
+    // }
+
     const handshake = new HandshakeMessage();
-    this.realtimeManager_.send(handshake.serialize());
+    this.realtimeManager_.sendHandshake(handshake.serialize());
   }
 
   /**
    * Sends an app initialization message
-   * @param {string} lockedIdData - Locked ID data
-   * @param {number} newVisitor - New visitor flag
-   * @param {number} extension - Extension status
+   * @param {string} lockedId - Locked ID data
+   * @param {boolean} newVisitor - New visitor flag
+   * @param {boolean} extension - Extension status
    * @param {string=} url - Page URL
    */
-  sendAppInit(lockedIdData, newVisitor, extension, url) {
-    const appInit = new AppInitMessage(
-      lockedIdData,
-      newVisitor,
-      extension,
-      url
-    );
-    this.realtimeManager_.send(appInit);
+  sendAppInit(lockedId, newVisitor, extension, url) {
+    const appInit = new AppInitMessage(lockedId, newVisitor, extension, url);
+    this.realtimeManager_.send(appInit.serialize());
   }
 
   /**
@@ -102,7 +101,7 @@ export class RealtimeMessaging {
       keyValues,
       provider
     );
-    this.realtimeManager_.send(unitInit);
+    this.realtimeManager_.send(unitInit.serialize());
   }
 
   /**
@@ -112,7 +111,7 @@ export class RealtimeMessaging {
    */
   sendUnitVisibility(code, visible) {
     const snapshot = new UnitSnapshotMessage(code, visible);
-    this.realtimeManager_.send(snapshot);
+    this.realtimeManager_.send(snapshot.serialize());
   }
 
   /**
@@ -122,7 +121,7 @@ export class RealtimeMessaging {
    */
   sendPageStatus(isEngaged, metrics = {}) {
     const status = new AppStatusMessage(isEngaged, metrics);
-    this.realtimeManager_.send(status);
+    this.realtimeManager_.send(status.serialize());
   }
 
   /**

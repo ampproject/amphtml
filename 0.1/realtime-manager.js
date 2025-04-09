@@ -10,6 +10,12 @@ export class RealtimeManager {
   /** @private {?WebSocket} */
   ws = null;
 
+  /** @private {boolean} */
+  handshakeComplete_ = false;
+
+  /** @private {Array<Object>} */
+  messageQueue_ = [];
+
   /** constructor */
   constructor() {}
 
@@ -53,6 +59,11 @@ export class RealtimeManager {
    */
   setupWebSocketEventListeners_() {
     if (this.ws) {
+      // Listen for connection open to send handshake
+      this.ws.addEventListener('open', () => {
+        this.sendHandshake();
+        this.processQueuedMessages_();
+      });
       this.ws.addEventListener('close', this.onDisconnect_.bind(this));
       this.ws.addEventListener('error', (event) => {
         console /*OK*/
@@ -76,11 +87,79 @@ export class RealtimeManager {
   }
 
   /**
+   * Process all queued messages after handshake completes
+   * @private
+   */
+  processQueuedMessages_() {
+    console /*OK*/
+      .log(`Processing ${this.messageQueue_.length} queued messages`);
+
+    // Send all queued messages
+    while (this.messageQueue_.length > 0) {
+      const queuedMessage = this.messageQueue_.shift();
+      this.sendImmediately_(queuedMessage);
+    }
+  }
+
+  /**
    * Sends a message through the WebSocket connection
    * @param {!Object} message - The message to send
-   * @return {boolean} - True if message was sent, false otherwise
+   * @return {boolean} - True if message was sent or queued, false otherwise
    */
   send(message) {
+    // If handshake isn't complete, queue the message
+    if (!this.handshakeComplete_) {
+      console /*OK*/
+        .log('Handshake not complete, queueing message');
+      this.messageQueue_.push(message);
+
+      // If WebSocket is open but handshake isn't sent yet, send it now
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.sendHandshake();
+      }
+
+      return true; // Message was queued
+    }
+
+    // Handshake is complete, send the message immediately
+    return this.sendImmediately_(message);
+  }
+
+  /**
+   * Sends a handshake message to initialize the connection
+   * @return {boolean} - True if handshake was sent, false otherwise
+   */
+  sendHandshake() {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      console /*OK*/
+        .error('Cannot send handshake - WebSocket not connected');
+      return false;
+    }
+
+    try {
+      const handshakeMsg = JSON.stringify({
+        protocol: 'json',
+        version: 1,
+      });
+
+      this.ws.send(handshakeMsg + '\u001e');
+      console /*OK*/
+        .log('Handshake sent');
+      return true;
+    } catch (e) {
+      console /*OK*/
+        .error('Failed to send handshake', e);
+      return false;
+    }
+  }
+
+  /**
+   * Immediately sends a message without checking handshake status
+   * @param {!Object} message - The message to send
+   * @return {boolean} - True if message was sent, false otherwise
+   * @private
+   */
+  sendImmediately_(message) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       console /*OK*/
         .error('WebSocket not connected');
@@ -88,7 +167,12 @@ export class RealtimeManager {
     }
 
     try {
-      this.ws.send(message);
+      const payload = {
+        arguments: message,
+        target: 'SendMessage',
+        type: 1,
+      };
+      this.ws.send(JSON.stringify(payload) + '\u001e');
       return true;
     } catch (e) {
       console /*OK*/

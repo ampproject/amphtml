@@ -12,9 +12,6 @@ export class BaseMessage {
 
     /** @public {Object} */
     this.data = data;
-
-    /** @public {number} */
-    this.timestamp = Date.now();
   }
 
   /**
@@ -22,13 +19,7 @@ export class BaseMessage {
    * @return {string}
    */
   serialize() {
-    return (
-      JSON.stringify({
-        type: this.type,
-        data: this.data,
-        timestamp: this.timestamp,
-      }) + '\u001e'
-    );
+    return [this.type, JSON.stringify(this.data)];
   }
 
   /**
@@ -75,14 +66,14 @@ export class HandshakeMessage {
  */
 export class AppInitMessage extends BaseMessage {
   /**
-   * @param {string} lockedIdData - Locked ID data
-   * @param {number} newVisitor - New Visitor
-   * @param {number} extension - Extension Status
+   * @param {string} lockedId - Locked ID data
+   * @param {boolean} newVisitor - New Visitor
+   * @param {boolean} extension - Extension Status
    * @param {string} url - Url
    */
-  constructor(lockedIdData, newVisitor, extension, url = {}) {
+  constructor(lockedId, newVisitor, extension, url = {}) {
     super('app-init', {
-      lockedIdData,
+      lockedId,
       newVisitor,
       extension,
       url,
@@ -306,6 +297,7 @@ export class MessageHandler {
    * @return {boolean} Whether the message was handled
    */
   processMessage(message) {
+    message = message.replace(/[^\x20-\x7E]/g, '');
     const messageObj = MessageFactory.fromJson(message);
 
     if (!messageObj) {
