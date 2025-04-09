@@ -326,7 +326,7 @@ export class AbstractAmpContext {
   /**
    *  Parse the metadata attributes from the name and add them to
    *  the class instance.
-   *  @param {!Object|string} data
+   *  @param {string} data
    *  @private
    */
   setupMetadata_(data) {
@@ -346,6 +346,17 @@ export class AbstractAmpContext {
       delete this.data['_context'];
     }
 
+    this.setupMetadataFromContext_(context);
+
+    this.embedType_ = dataObject.type || null;
+  }
+
+  /**
+   *  Set the metadata attributes from the "context" instance directly.
+   *  @param {!Object} context
+   *  @private
+   */
+  setupMetadataFromContext_(context) {
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
@@ -367,8 +378,6 @@ export class AbstractAmpContext {
     this.sourceUrl = context.sourceUrl;
     this.startTime = context.startTime;
     this.tagName = context.tagName;
-
-    this.embedType_ = dataObject.type || null;
   }
 
   /**
@@ -403,8 +412,11 @@ export class AbstractAmpContext {
     } else if (this.win_.AMP_CONTEXT_DATA) {
       if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
         this.sentinel = this.win_.AMP_CONTEXT_DATA;
+        // If AMP_CONTEXT_DATA is an Object, Assume that it is the Context Object
+        // and not inside the attributes._context which is the structure
+        // parsed from "name" on other instances.
       } else if (isObject(this.win_.AMP_CONTEXT_DATA)) {
-        this.setupMetadata_(this.win_.AMP_CONTEXT_DATA);
+        this.setupMetadataFromContext_(this.win_.AMP_CONTEXT_DATA);
       }
     } else {
       this.setupMetadata_(this.win_.name);
