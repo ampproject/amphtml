@@ -419,6 +419,33 @@ describes.realWin(
         storeService.dispatch(Action.TOGGLE_RTL, true);
         expect(adBadgeContainer).to.have.attribute(Attributes.DIR, 'rtl');
       });
+
+      it('should propagate the desktop-fullbleed attribute to ad badge', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
+        );
+        expect(adBadgeContainer).not.to.have.attribute(
+          Attributes.DESKTOP_FULLBLEED
+        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_FULLBLEED);
+        expect(adBadgeContainer).to.have.attribute(
+          Attributes.DESKTOP_FULLBLEED
+        );
+      });
+
+      it('should not propagate the desktop-fullbleed attribute to ad badge for landscape ads', () => {
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
+        );
+        autoAds.visibleAdPage_ = {hasLandscapeAd: () => true};
+        expect(adBadgeContainer).not.to.have.attribute(
+          Attributes.DESKTOP_FULLBLEED
+        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_FULLBLEED);
+        expect(adBadgeContainer).not.to.have.attribute(
+          Attributes.DESKTOP_FULLBLEED
+        );
+      });
     });
 
     describe('analytics triggers', () => {
