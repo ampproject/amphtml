@@ -2,21 +2,17 @@ import {Deferred} from '#core/data-structures/promise';
 
 import {Services} from '#service';
 
+import {DoubleClickHelper} from './doubleclick-helper';
+import {EngagementTracker} from './engagement-tracking';
 import {ExtensionCommunicator} from './extension';
 import {LockedId} from './lockedid';
-import {MappingService} from './mapping';
 import {RealtimeMessaging} from './realtime-messaging';
-import {getCapitalizedMethodWithPrefix} from './utils';
-// import {VisibilityTracker} from './visibility-tracking';
+import {VisibilityTracker} from './visibility-tracking';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {AmpAdNetworkDoubleclickImpl} from '../../amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-insurads-impl';
-
-/** @type {string} */
-const DOUBLECLICK_PREFIX = 'doubleClick';
 
 export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /**
@@ -25,26 +21,36 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   constructor(element) {
     // TODO: Confirm that this is working as expected
     super(element);
-    // this.element.setAttribute('data-enable-refresh', 'false');
+    // Always disable A4A Refresh, as we are using our own refresh mechanism
+    this.element.setAttribute('data-enable-refresh', 'false');
 
     /* DoubleClick & AMP */
-    this.initDoubleClickHelper();
-    // this.callDoubleClickMethod_('constructor', [element]);
-    this.doubleClickConstructor(element);
+    this.dCHelper = new DoubleClickHelper(this);
+    this.dCHelper.callMethod('constructor', element);
     /* DoubleClick& AMP */
+
+    this.code = Math.random().toString(36).substring(2, 15);
+    this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
+    this.slot = this.element.getAttribute('data-slot');
+    this.sellerId = this.element.getAttribute('data-public-id');
+    this.appEnabled = false;
+    this.ivm = false;
+    this.iabTaxonomy = {};
+    this.sellerKeyValues = [];
+    this.nextRefresh = {}; // TODO: Implement model for this
+    this.isViewable_ = false;
 
     /* InsurAds Business  */
     this.lockedid = new LockedId().getLockedIdData();
-    this.realtimeMessaging_ = new RealtimeMessaging({
+    this.realtimeMessaging_ = new RealtimeMessaging(this.sellerId, {
       appInitHandler: (message) => this.handleAppInit_(message),
       unitInitHandler: (message) => this.handleUnitInit_(message),
       unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
     });
-    this.mappingService = new MappingService(this.win);
+
     this.extension = new ExtensionCommunicator();
     /* InsurAds Business  */
 
-    this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
     console /*OK*/
       .log('Canonical URL:', this.canonicalUrl);
   }
@@ -52,7 +58,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     // Call the AMP A4A buildCallback to set up base functionality
-    this.callDoubleClickMethod_('buildCallback');
+    this.dCHelper.callMethod('buildCallback');
 
     console /*OK*/
       .log('Build Callback');
@@ -76,7 +82,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   onCreativeRender(creativeMetaData, opt_onLoadPromise) {
-    this.callDoubleClickMethod_(
+    this.isRefreshing = false;
+    this.dCHelper.callMethod(
       'onCreativeRender',
       creativeMetaData,
       opt_onLoadPromise
@@ -119,8 +126,23 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*Ok*/
       .log('lineItemId', responseHeaders.get('google-lineitem-id') || '-1');
     console /*Ok*/
-      .log('responseHeaders', responseHeaders);
-    return this.callDoubleClickMethod_('extractSize', responseHeaders);
+      .log('size', responseHeaders.get('google-size') || '300x250');
+    console /*Ok*/
+      .log('slot', this.slot);
+
+    this.realtimeMessaging_.sendUnitInit(
+      this.code,
+      this.slot,
+      responseHeaders.get('google-lineitem-id') || '-1',
+      responseHeaders.get('google-creative-id') || '-1',
+      responseHeaders.get('google-size') || '',
+      this.sizes || [],
+      this.keyValues || [],
+      'pgam',
+      0
+    );
+
+    return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
 
   /** @override */
@@ -128,7 +150,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.getAdUrlDeferred = new Deferred();
     this.getAdUrlInsurAdsDeferred = new Deferred();
     const self = this;
-    this.callDoubleClickMethod_(
+    this.dCHelper.callMethod(
       'getAdUrl',
       opt_consentTuple,
       opt_rtcResponsesPromise,
@@ -138,13 +160,13 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       const url = new URL(doubleClickUrl);
       if (self.refreshCount_ > 0) {
         console./*Ok*/ log('Refresh count:', self.refreshCount_);
-        const adUrl =
-          this.slot === '/134642692/amp-samples/amp-MREC'
-            ? '/134642692/MREC'
-            : '/134642692/MREC_JM';
+        // this.slot === '/134642692/AMPTestsV3'
+        // ? '/30497360/a4a/a4a_native'
+        // : '/134642692/AMPTestsV3';
+
         const params = url.searchParams;
-        params.set('iu', adUrl);
-        params.set('sz', '300x250');
+        params.set('iu', this.nextRefresh.path);
+        params.set('sz', this.nextRefresh.sizesString);
         console /*OK*/
           .log(url.toString());
       }
@@ -169,6 +191,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @return {boolean}
    */
   triggerImmediateRefresh() {
+    if (!this.appEnabled) {
+      console /*OK*/
+        .log('App not enabled, ignoring refresh trigger');
+      return false;
+    }
+
     console /*OK*/
       .log('Triggering immediate ad refresh');
     // Don't refresh if we're already in the process of refreshing
@@ -187,64 +215,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   }
 
   /**
-   * Enables the use of the DoubleClick implementation.
-   */
-  initDoubleClickHelper() {
-    this.getAdUrlInsurAdsDeferred = new Deferred();
-    const exceptions = [
-      'constructor',
-      'buildCallback',
-      'onCreativeRender',
-      'refresh',
-      'extractSize',
-      'getAdUrl',
-    ];
-    // Ensure base DoubleClick implementation
-    const iatImpl = AmpAdNetworkInsuradsImpl.prototype;
-    const dblImpl = AmpAdNetworkDoubleclickImpl.prototype;
-    for (const methodName in dblImpl) {
-      if (exceptions.indexOf(methodName) >= 0) {
-        iatImpl[
-          getCapitalizedMethodWithPrefix(DOUBLECLICK_PREFIX, methodName)
-        ] = dblImpl[methodName];
-      } else {
-        iatImpl[methodName] = dblImpl[methodName];
-      }
-    }
-  }
-
-  /**
-   * Calls a DoubleClick implementation method
-   * @param {string} methodName - The name of the method to call
-   * @param {...*} args - Arguments to pass to the method
-   * @return {*} Result of the method call
-   * @private
-   */
-  callDoubleClickMethod_(methodName, ...args) {
-    const prefixedName = getCapitalizedMethodWithPrefix(
-      DOUBLECLICK_PREFIX,
-      methodName
-    );
-    if (typeof this[prefixedName] === 'function') {
-      try {
-        return this[prefixedName](...args);
-      } catch (error) {
-        console /*OK*/
-          .error(`Error calling DoubleClick ${methodName}:`, error);
-      }
-    } else {
-      console /*OK*/
-        .warn(`DoubleClick ${methodName} not available`);
-    }
-    return null;
-  }
-
-  /**
    * Handles app initialization messages
    * @param {!Object} message - The app initialization message
    * @private
    */
   handleAppInit_(message) {
+    this.appEnabled = message.status === 'ok' ? true : false;
+    this.ivm = !!message.ivm;
+    this.iabTaxonomy = message.iabTaxonomy;
+    this.sellerKeyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
     console /*OK*/
       .log('App Init:', message);
   }
@@ -255,8 +234,24 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleUnitInit_(message) {
+    this.adUnitId = message.adUnitId;
     console /*OK*/
       .log('Unit Init:', message);
+
+    if (!this.visibilityTracker) {
+      this.visibilityTracker = new VisibilityTracker(
+        this.win,
+        this.element,
+        this.onVisibilityChange_.bind(this)
+      );
+    }
+
+    if (!this.engagement_) {
+      this.engagement_ = EngagementTracker.getInstance(this.win);
+      this.engagement_
+        .init()
+        .onEngagementChange(this.onEngagementChange_.bind(this));
+    }
   }
 
   /**
@@ -265,8 +260,99 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleUnitWaterfall_(message) {
+    if (message.code !== this.code) {
+      console /*OK*/
+        .log('Wrong Unit Waterfall:', message);
+      return;
+    }
+
+    // TODO: Define the paramteters for the next refresh!!!
+    this.nextRefresh = this.processWaterfallMessage_(message);
+    this.triggerImmediateRefresh();
+
     console /*OK*/
       .log('Unit Waterfall:', message);
+  }
+
+  /**
+   * Processes a waterfall message into a structured format for ad refresh
+   * @param {!Object} message - The waterfall message to process
+   * @return {!Object} Processed waterfall data
+   * @private
+   */
+  processWaterfallMessage_(message) {
+    const processed = {
+      code: message.code,
+      provider: message.provider,
+      path: message.path,
+      sizesArray: [],
+      sizesString: '',
+      keyValues: [],
+      parameters: message.parametersMap,
+    };
+
+    if (Array.isArray(message.sizes) && message.sizes.length > 0) {
+      processed.sizesArray = message.sizes
+        .map((size) => {
+          if (Array.isArray(size) && size.length >= 2) {
+            return [parseInt(size[0], 10), parseInt(size[1], 10)];
+          } else if (typeof size === 'string' && size.includes('x')) {
+            const [width, height] = size
+              .split('x')
+              .map((dim) => parseInt(dim, 10));
+            return [width, height];
+          }
+          return null;
+        })
+        .filter((size) => size !== null);
+
+      processed.sizesString = processed.sizesArray
+        .map((size) => `${size[0]}x${size[1]}`)
+        .join('|');
+    }
+
+    // TODO: Process key-values for ad targeting
+
+    // TODO: Process parametersMap
+
+    return processed;
+  }
+
+  /**
+   * Handles visibility changes
+   * @param {!Object} visibilityData - Visibility data object
+   * @private
+   */
+  onVisibilityChange_(visibilityData) {
+    if (this.isViewable_ !== visibilityData.isViewable) {
+      this.realtimeMessaging_.sendUnitSnapshot(
+        this.code,
+        visibilityData.isViewable
+      );
+
+      this.isViewable_ = visibilityData.isViewable;
+    }
+
+    console /*OK*/
+      .log('Visibility Change:', visibilityData.isViewable);
+    console /*OK*/
+      .log('Visibility Percentage:', visibilityData.visibilityPercentage);
+  }
+
+  /**
+   * Handles user engagement changes
+   * @param {boolean} isEngaged - Whether user is engaged
+   * @private
+   */
+  onEngagementChange_(isEngaged) {
+    const state = this.engagement_.getState();
+
+    if (this.realtimeMessaging_) {
+      this.realtimeMessaging_.sendPageStatus(isEngaged);
+    }
+
+    console /*OK*/
+      .log('Engagement changed:', isEngaged, state);
   }
 }
 

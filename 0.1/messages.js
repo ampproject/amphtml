@@ -3,15 +3,15 @@
  */
 export class BaseMessage {
   /**
-   * @param {string} type - Message type
-   * @param {Object=} data - Message data
+   * @param {string} action - Message action
+   * @param {Object=} message - Message content
    */
-  constructor(type, data = {}) {
+  constructor(action, message = {}) {
     /** @public {string} */
-    this.type = type;
+    this.action = action;
 
     /** @public {Object} */
-    this.data = data;
+    this.message = message;
   }
 
   /**
@@ -19,7 +19,7 @@ export class BaseMessage {
    * @return {string}
    */
   serialize() {
-    return [this.type, JSON.stringify(this.data)];
+    return [this.action, JSON.stringify(this.message)];
   }
 
   /**
@@ -31,10 +31,10 @@ export class BaseMessage {
   static fromJson(json) {
     try {
       const parsed = JSON.parse(json);
-      return new BaseMessage(parsed.type, parsed.data);
+      return new BaseMessage(parsed.action, parsed.message);
     } catch (e) {
-      console /*OK*/
-        .error('Error parsing message:', e);
+      // console /*OK*/
+      //   .error('Error parsing message:', e);
       return null;
     }
   }
@@ -49,7 +49,7 @@ export class HandshakeMessage {
    */
   constructor() {
     /** @public {Object} */
-    this.data = {protocol: 'json', version: 1};
+    this.message = {protocol: 'json', version: 1};
   }
 
   /**
@@ -57,7 +57,7 @@ export class HandshakeMessage {
    * @return {string}
    */
   serialize() {
-    return JSON.stringify(this.data) + '\u001e';
+    return JSON.stringify(this.message) + '\u001e';
   }
 }
 
@@ -66,7 +66,7 @@ export class HandshakeMessage {
  */
 export class AppInitMessage extends BaseMessage {
   /**
-   * @param {string} lockedId - Locked ID data
+   * @param {string} lockedId - Locked ID message
    * @param {boolean} newVisitor - New Visitor
    * @param {boolean} extension - Extension Status
    * @param {string} url - Url
@@ -160,13 +160,17 @@ export class AppInitResponseMessage extends BaseMessage {
    * @param {number} ivm - IntelliSense Viewability Mode - Experimental feature that uses an alternative method to control engagement and viewability (default is false)
    * @param {number} mobile - Is Mobile
    * @param {object} keyValues - Accepted Key values for targeting
+   * @param {object} iabTaxonomy - IAB Taxonomy
+   * @param {boolean} status - Status of the app
    */
-  constructor(sellerId, ivm, mobile, keyValues) {
+  constructor(sellerId, ivm, mobile, keyValues, iabTaxonomy, status) {
     super('app-init-response', {
       sellerId,
       ivm,
       mobile,
       keyValues,
+      iabTaxonomy,
+      status,
     });
   }
 }
@@ -216,38 +220,41 @@ export class UnitWaterfallMessage extends BaseMessage {
  */
 export class MessageFactory {
   /**
-   * Creates a message of the appropriate type from raw data
-   * @param {string} type - Message type
-   * @param {object} data - Message data
+   * Creates a message of the appropriate action from raw message
+   * @param {string} action - Message action
+   * @param {object} message - Message message
    * @return {BaseMessage}
    */
-  static createMessage(type, data) {
-    switch (type) {
+  static createMessage(action, message) {
+    message = JSON.parse(message);
+    switch (action) {
       case 'app-init-response':
         return new AppInitResponseMessage(
-          data.code || 'unknown',
-          data.ivm ? 1 : 0,
-          data.mobile ? 1 : 0,
-          data.keyValues || {}
+          message.sellerId || 'unknown',
+          message.ivm ? 1 : 0,
+          message.mobile ? 1 : 0,
+          message.keyValues || {},
+          message.iabTaxonomy || {},
+          message.status || false
         );
 
       case 'unit-init-response':
         return new UnitInitResponseMessage(
-          data.code || 'unknown',
-          data.adunitId || 'unknown'
+          message.code || 'unknown',
+          message.adunitId || 'unknown'
         );
 
       case 'unit-waterfall':
         return new UnitWaterfallMessage(
-          data.code || 'unknown',
-          data.provider || 'unknown',
-          data.path || '',
-          data.sizes || [],
-          data.keyValues || [],
-          data.parametersMap || []
+          message.code || 'unknown',
+          message.provider || 'unknown',
+          message.path || '',
+          message.sizes || [],
+          message.keyValues || [],
+          message.parametersMap || []
         );
       default:
-        return new BaseMessage(type, data);
+        return new BaseMessage(action, message);
     }
   }
 
@@ -259,10 +266,10 @@ export class MessageFactory {
   static fromJson(json) {
     try {
       const parsed = JSON.parse(json);
-      return this.createMessage(parsed.type, parsed.data);
+      return this.createMessage(parsed.action, parsed.message);
     } catch (e) {
-      console /*OK*/
-        .error('Error parsing message:', e);
+      // console /*OK*/
+      //   .error('Error parsing message:', e);
       return null;
     }
   }
@@ -293,32 +300,40 @@ export class MessageHandler {
 
   /**
    * Processes a message
-   * @param {BaseMessage} message - Message to process
+   * @param {string} raw
    * @return {boolean} Whether the message was handled
    */
-  processMessage(message) {
-    message = message.replace(/[^\x20-\x7E]/g, '');
-    const messageObj = MessageFactory.fromJson(message);
+  processMessage(raw) {
+    const messages = raw.split('\u001e').filter(Boolean);
+    const parsedMessages = messages.map((m) => JSON.parse(m));
 
-    if (!messageObj) {
-      return false;
-    }
+    console /*Ok*/
+      .log('total messages:', parsedMessages.length);
 
-    const handler = this.handlers_[messageObj.type];
-    if (handler && typeof handler === 'function') {
-      handler(messageObj);
-      return true;
-    }
+    parsedMessages.forEach((message) => {
+      const messageObj = MessageFactory.fromJson(message.arguments);
+      if (messageObj) {
+        if (!messageObj) {
+          return false;
+        }
 
-    return false;
+        const handler = this.handlers_[messageObj.action];
+        if (handler && typeof handler === 'function') {
+          handler(messageObj.message);
+          return true;
+        }
+
+        return false;
+      }
+    });
   }
 
   /**
-   * Registers a handler for a specific message type
-   * @param {string} type - Message type
+   * Registers a handler for a specific message action
+   * @param {string} action - Message action
    * @param {Function} handler - Message handler
    */
-  registerHandler(type, handler) {
-    this.handlers_[type] = handler;
+  registerHandler(action, handler) {
+    this.handlers_[action] = handler;
   }
 }

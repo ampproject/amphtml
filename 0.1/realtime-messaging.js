@@ -13,13 +13,13 @@ import {RealtimeManager} from './realtime-manager';
  */
 export class RealtimeMessaging {
   /**
+   * @param {string} sellerId - Seller ID
    * @param {Object=} handlers - Message handlers
    */
-  constructor(handlers = {}) {
+  constructor(sellerId, handlers = {}) {
     /** @private {!RealtimeManager} */
-    this.realtimeManager_ = RealtimeManager.start();
+    this.realtimeManager_ = RealtimeManager.start(sellerId);
 
-    // Set up connection
     this.setupRealtimeConnection_();
 
     /** @private {!MessageHandler} */
@@ -34,7 +34,6 @@ export class RealtimeMessaging {
     const ws = this.realtimeManager_.getWebSocket();
 
     if (ws) {
-      // Listen for messages
       ws.addEventListener('message', (event) => {
         this.messageHandler_.processMessage(event.data);
       });
@@ -45,15 +44,6 @@ export class RealtimeMessaging {
    * Sends a handshake message
    */
   sendHandshake() {
-    // if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-    //   console /*OK*/
-    //     .error('WebSocket not connected');
-    //   setTimeout(() => {
-    //     this.sendHandshake();
-    //   }, 100);
-    //   return;
-    // }
-
     const handshake = new HandshakeMessage();
     this.realtimeManager_.sendHandshake(handshake.serialize());
   }
@@ -80,6 +70,7 @@ export class RealtimeMessaging {
    * @param {Array<string>} sizes - Available sizes
    * @param {Array<Object>} keyValues - Key-value targeting
    * @param {string} provider - Ad provider
+   * @param {number} parentMawId - Parent MAW ID
    */
   sendUnitInit(
     code,
@@ -89,7 +80,8 @@ export class RealtimeMessaging {
     servedSize,
     sizes,
     keyValues,
-    provider
+    provider,
+    parentMawId
   ) {
     const unitInit = new UnitInitMessage(
       code,
@@ -99,7 +91,8 @@ export class RealtimeMessaging {
       servedSize,
       sizes,
       keyValues,
-      provider
+      provider,
+      parentMawId
     );
     this.realtimeManager_.send(unitInit.serialize());
   }
@@ -109,7 +102,7 @@ export class RealtimeMessaging {
    * @param {string} code - Ad unit code
    * @param {number} visible - Visibility percentage (0-1)
    */
-  sendUnitVisibility(code, visible) {
+  sendUnitSnapshot(code, visible) {
     const snapshot = new UnitSnapshotMessage(code, visible);
     this.realtimeManager_.send(snapshot.serialize());
   }
@@ -117,19 +110,18 @@ export class RealtimeMessaging {
   /**
    * Sends a page status update
    * @param {boolean} isEngaged - Whether user is engaged
-   * @param {Object=} metrics - Performance metrics
    */
-  sendPageStatus(isEngaged, metrics = {}) {
-    const status = new AppStatusMessage(isEngaged, metrics);
+  sendPageStatus(isEngaged) {
+    const status = new AppStatusMessage(isEngaged);
     this.realtimeManager_.send(status.serialize());
   }
 
   /**
-   * Registers a handler for a specific incoming message type
-   * @param {string} type - Message type
+   * Registers a handler for a specific incoming message action
+   * @param {string} action - Message action
    * @param {Function} handler - Message handler
    */
-  registerHandler(type, handler) {
-    this.messageHandler_.registerHandler(type, handler);
+  registerHandler(action, handler) {
+    this.messageHandler_.registerHandler(action, handler);
   }
 }

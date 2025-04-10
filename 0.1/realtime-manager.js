@@ -3,7 +3,7 @@ export class RealtimeManager {
   static HUB_URL_TEMPLATE =
     'wss://amp-messaging.insurads.com/rt-pub/node/hub?appId=78&dev=$DEV$&br=$BR$&os=$OS$&cc=$CC$&rc=$RC$&v=0.2';
   static HUB_URL_TEMPLATE_DEV =
-    'ws://localhost:5082/amp-poc/server/hub?pid=WQWFLKD&ht=1&v=1';
+    'ws://localhost:5082/amp-poc/server/hub?pid=$SELLERID$&ht=$HT$&v=$V$';
   /** @private {?RealtimeManager} */
   static instance_ = null;
 
@@ -21,14 +21,21 @@ export class RealtimeManager {
 
   /**
    * Returns the singleton instance of RealtimeManager.
+   * @param {string} sellerId - The seller ID
    * @return {!RealtimeManager}
    * @public
    */
-  static start() {
+  static start(sellerId) {
     if (!RealtimeManager.instance_) {
       RealtimeManager.instance_ = new RealtimeManager();
 
-      const ws = new WebSocket(RealtimeManager.HUB_URL_TEMPLATE_DEV);
+      const url = RealtimeManager.HUB_URL_TEMPLATE_DEV.replace(
+        '$SELLERID$',
+        sellerId
+      )
+        .replace('$HT$', '1')
+        .replace('$V$', '1');
+      const ws = new WebSocket(url);
       RealtimeManager.instance_.setWebSocket_(ws);
       RealtimeManager.instance_.setupWebSocketEventListeners_();
     }
@@ -59,7 +66,6 @@ export class RealtimeManager {
    */
   setupWebSocketEventListeners_() {
     if (this.ws) {
-      // Listen for connection open to send handshake
       this.ws.addEventListener('open', () => {
         this.sendHandshake();
         this.processQueuedMessages_();
@@ -94,7 +100,6 @@ export class RealtimeManager {
     console /*OK*/
       .log(`Processing ${this.messageQueue_.length} queued messages`);
 
-    // Send all queued messages
     while (this.messageQueue_.length > 0) {
       const queuedMessage = this.messageQueue_.shift();
       this.sendImmediately_(queuedMessage);
@@ -107,21 +112,18 @@ export class RealtimeManager {
    * @return {boolean} - True if message was sent or queued, false otherwise
    */
   send(message) {
-    // If handshake isn't complete, queue the message
     if (!this.handshakeComplete_) {
       console /*OK*/
         .log('Handshake not complete, queueing message');
       this.messageQueue_.push(message);
 
-      // If WebSocket is open but handshake isn't sent yet, send it now
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.sendHandshake();
       }
 
-      return true; // Message was queued
+      return true;
     }
 
-    // Handshake is complete, send the message immediately
     return this.sendImmediately_(message);
   }
 
@@ -145,6 +147,7 @@ export class RealtimeManager {
       this.ws.send(handshakeMsg + '\u001e');
       console /*OK*/
         .log('Handshake sent');
+      this.handshakeComplete_ = true;
       return true;
     } catch (e) {
       console /*OK*/

@@ -5,7 +5,6 @@ export class LockedId {
   /**
    * Get Hash
    * controlHash is the hash returned from server that contains the public ip address of the client
-   * @param {string} visitCookie
    * @return {object}
    */
   getLockedIdData() {
@@ -45,10 +44,6 @@ export class LockedId {
    * @return {string}
    * */
   getCanvasPrint_() {
-    // if (!this.c.allowLockedId || !this.c.consent) {
-    //   return '';
-    // }
-
     // create a canvas element
     const canvas = document.createElement('canvas');
     // define a context var that will be used for browsers with canvas support

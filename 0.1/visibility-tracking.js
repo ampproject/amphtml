@@ -23,7 +23,6 @@ export class VisibilityTracker {
     /** @private {?IntersectionObserver} */
     this.visibilityObserver_ = null;
 
-    // Start tracking immediately
     this.setupVisibilityTracking();
   }
 
@@ -63,7 +62,6 @@ export class VisibilityTracker {
             Math.round(this.visibilityPercentage_ * 100) + '%'
           );
 
-        // Prepare visibility data object
         const visibilityData = {
           visibilityPercentage: this.visibilityPercentage_,
           isVisible: this.visibilityPercentage_ > 0,
@@ -75,27 +73,11 @@ export class VisibilityTracker {
           timestamp: Date.now(),
         };
 
-        // Dispatch custom event
-        this.dispatchVisibilityEvent(visibilityData);
-
-        // Call callback if provided
         if (this.onVisibilityChange_) {
           this.onVisibilityChange_(visibilityData);
         }
       }
     });
-  }
-
-  /**
-   * Dispatches a custom visibility change event with detailed data
-   * @param {!Object} visibilityData - Visibility data to include with event
-   */
-  dispatchVisibilityEvent(visibilityData) {
-    const event = this.createCustomEvent('amp-ad-visibility-change', {
-      detail: visibilityData,
-      bubbles: true,
-    });
-    this.element_.dispatchEvent(event);
   }
 
   /**
