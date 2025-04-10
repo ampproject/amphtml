@@ -181,12 +181,12 @@ export class AppInitResponseMessage extends BaseMessage {
 export class UnitInitResponseMessage extends BaseMessage {
   /**
    * @param {string} code - Ad unit code identifier
-   * @param {string} adunitId - Ad unit ID
+   * @param {string} adUnitId - Ad unit ID
    */
-  constructor(code, adunitId) {
+  constructor(code, adUnitId) {
     super('unit-init-response', {
       code,
-      adunitId,
+      adUnitId,
     });
   }
 }

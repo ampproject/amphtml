@@ -2,6 +2,8 @@
  * Handles communication between the AMP ad and the extension iframe
  */
 export class ExtensionCommunicator {
+  queue = [];
+
   /**
    * nothig to declare
    */

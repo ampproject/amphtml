@@ -70,14 +70,14 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.canonicalUrl
     );
 
-    // this.extension.sendIframeMessage('cfg', {
-    //   sessionId: 'XPTO',
-    //   contextId: 'C3PO',
-    //   appId: 1,
-    //   section: 1,
-    //   // eslint-disable-next-line local/camelcase
-    //   g_country: 'PT',
-    // });
+    this.extension.sendIframeMessage('cfg', {
+      sessionId: 'XPTO',
+      contextId: 'C3PO',
+      appId: 1,
+      section: 1,
+      // eslint-disable-next-line local/camelcase
+      g_country: 'PT',
+    });
   }
 
   /** @override */
@@ -88,23 +88,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       creativeMetaData,
       opt_onLoadPromise
     );
-
-    // this.extension.sendIframeMessage('adUnitChanged', {
-    //   id: this.element.getAttribute('data-slot'),
-    //   shortId: this.element.getAttribute('data-amp-slot-index'),
-    //   sizes: ['300x250'],
-    //   instance: this.element.getAttribute('data-amp-slot-index'),
-    //   configuration: null,
-    //   customTargeting: null,
-    //   rotation: 'Enabled',
-    //   isFirstPrint: true,
-    //   isTracking: false,
-    //   visible: true,
-    //   width: 300,
-    //   height: 250,
-    //   dfpMapping: null,
-    //   isAmpSlot: true,
-    // });
   }
 
   /** @override */
@@ -235,6 +218,31 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   handleUnitInit_(message) {
     this.adUnitId = message.adUnitId;
+    this.element.setAttribute(
+      'tg-zone',
+      message.adUnitId + '.' + this.element.getAttribute('data-amp-slot-index')
+    );
+
+    this.extension.sendIframeMessage('adUnitChanged', {
+      id:
+        message.adUnitId +
+        '.' +
+        this.element.getAttribute('data-amp-slot-index'),
+      shortId: message.adUnitId,
+      sizes: ['300x250'],
+      instance: this.element.getAttribute('data-amp-slot-index'),
+      configuration: null,
+      customTargeting: null,
+      rotation: 'Enabled',
+      isFirstPrint: true,
+      isTracking: false,
+      visible: true,
+      width: 300,
+      height: 250,
+      dfpMapping: null,
+      isAmpSlot: true,
+    });
+
     console /*OK*/
       .log('Unit Init:', message);
 
