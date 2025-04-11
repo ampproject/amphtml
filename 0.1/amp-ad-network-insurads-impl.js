@@ -1,3 +1,5 @@
+import {is} from 'date-fns/locale';
+
 import {Deferred} from '#core/data-structures/promise';
 
 import {Services} from '#service';
@@ -48,7 +50,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
     });
 
-    this.extension = new ExtensionCommunicator();
+    if (window.frames['TG-listener']) {
+      this.extension_ = new ExtensionCommunicator(
+        this.handlerExtensionMessages.bind(this)
+      );
+    }
     /* InsurAds Business  */
 
     console /*OK*/
@@ -70,7 +76,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.canonicalUrl
     );
 
-    this.extension.sendIframeMessage('cfg', {
+    this.extension_.sendIframeMessage('cfg', {
       sessionId: 'XPTO',
       contextId: 'C3PO',
       appId: 1,
@@ -147,9 +153,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         // ? '/30497360/a4a/a4a_native'
         // : '/134642692/AMPTestsV3';
 
+        // TODO: Make this code generic
         const params = url.searchParams;
-        params.set('iu', this.nextRefresh.path);
-        params.set('sz', this.nextRefresh.sizesString);
+        if (this.nextRefresh.path) {
+          params.set('iu', this.nextRefresh.path);
+        }
+        if (this.nextRefresh.sizesString) {
+          params.set('sz', this.nextRefresh.sizesString);
+        }
+
         console /*OK*/
           .log(url.toString());
       }
@@ -218,30 +230,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   handleUnitInit_(message) {
     this.adUnitId = message.adUnitId;
-    this.element.setAttribute(
-      'tg-zone',
-      message.adUnitId + '.' + this.element.getAttribute('data-amp-slot-index')
-    );
-
-    this.extension.sendIframeMessage('adUnitChanged', {
-      id:
-        message.adUnitId +
-        '.' +
-        this.element.getAttribute('data-amp-slot-index'),
-      shortId: message.adUnitId,
-      sizes: ['300x250'],
-      instance: this.element.getAttribute('data-amp-slot-index'),
-      configuration: null,
-      customTargeting: null,
-      rotation: 'Enabled',
-      isFirstPrint: true,
-      isTracking: false,
-      visible: true,
-      width: 300,
-      height: 250,
-      dfpMapping: null,
-      isAmpSlot: true,
-    });
+    this.element.setAttribute('tg-zone', this.getAdUnitId());
 
     console /*OK*/
       .log('Unit Init:', message);
@@ -260,6 +249,26 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         .init()
         .onEngagementChange(this.onEngagementChange_.bind(this));
     }
+
+    const {height, width} = this.creativeSize_ || this.initialSize_;
+
+    // TODO: Shall we bring other info from the server to inform the extension?
+    this.extension_.sendIframeMessage('adUnitChanged', {
+      id: this.getAdUnitId(),
+      shortId: message.adUnitId,
+      sizes: this.sizesArray,
+      instance: this.element.getAttribute('data-amp-slot-index'),
+      configuration: null,
+      customTargeting: null,
+      rotation: 'Enabled',
+      isFirstPrint: this.refreshCount_ === 0,
+      isTracking: false,
+      visible: this.isViewable_,
+      width,
+      height,
+      dfpMapping: null,
+      isAmpSlot: true,
+    });
   }
 
   /**
@@ -280,6 +289,22 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     console /*OK*/
       .log('Unit Waterfall:', message);
+  }
+
+  /**
+   * Handle incoming messages from the extension
+   * @param {MessageEvent} msg - The message event
+   */
+  handlerExtensionMessages(msg) {
+    if (msg.data.adUnitId !== this.getAdUnitId()) {
+      return;
+    }
+
+    switch (msg.data.action) {
+      case 'changeBanner':
+        this.refresh(this.refreshEndCallback);
+        break;
+    }
   }
 
   /**
@@ -359,8 +384,26 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.realtimeMessaging_.sendPageStatus(isEngaged);
     }
 
+    if (this.extension_) {
+      // TODO: Create BrowserStates and extend with Idle,etc
+      this.extension_.sendIframeMessage('engagementStatusChanged', {
+        index: isEngaged ? 1 : 0,
+        name: isEngaged ? 'Active' : 'Inactive',
+      });
+    }
+
     console /*OK*/
       .log('Engagement changed:', isEngaged, state);
+  }
+
+  /**
+   * Return the Full AdUnit Id with the slot index
+   * @return {string}
+   */
+  getAdUnitId() {
+    const adUnitId =
+      this.adUnitId + '.' + this.element.getAttribute('data-amp-slot-index');
+    return adUnitId;
   }
 }
 

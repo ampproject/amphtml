@@ -5,9 +5,11 @@ export class ExtensionCommunicator {
   queue = [];
 
   /**
-   * nothig to declare
+   * @param {function()} handler message handler
    */
-  constructor() {}
+  constructor(handler) {
+    this.handler = handler;
+  }
 
   /**
    * Create Extension Communication Channel
@@ -30,22 +32,6 @@ export class ExtensionCommunicator {
       if (this.listenerAttacher) {
         clearInterval(this.listenerAttacher);
       }
-    }
-  }
-
-  /**
-   * Handle incoming messages from the extension
-   * @param {MessageEvent} msg - The message event
-   */
-  handler(msg) {
-    if (msg.data.adUnitId !== this.slot) {
-      return;
-    }
-
-    switch (msg.data.action) {
-      case 'changeBanner':
-        this.refreshCallback();
-        break;
     }
   }
 
