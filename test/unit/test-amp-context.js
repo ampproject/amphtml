@@ -103,8 +103,8 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     expect(context.referrer).to.equal('baz.net');
   });
 
-  it('should add metadata to window.context using window var.', () => {
-    win.AMP_CONTEXT_DATA = generateAttributes();
+  it('should add metadata to window.context using window global.', () => {
+    win.AMP_CONTEXT_DATA = generateAMPConfigObject();
     const context = new AmpContext(win);
     expect(context.location).to.deep.equal({
       'hash': '',
@@ -392,6 +392,20 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     expect(successCallbackSpy).to.not.be.called;
   });
 });
+
+function generateAMPConfigObject() {
+  return {
+    location: {
+      href: 'https://foo.com/a?b=c',
+    },
+    canonicalUrl: 'https://bar.com',
+    pageViewId: '1',
+    pageViewId64: 'abcdef',
+    sentinel: '1-291921',
+    startTime: 0,
+    referrer: 'baz.net',
+  };
+}
 
 function generateSerializedAttributes(opt_sentinel) {
   return JSON.stringify(generateAttributes(opt_sentinel));
