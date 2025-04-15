@@ -64,24 +64,6 @@ const PageAttributes = {
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
 };
 
-/**
- * Get the aspect ratio of the media asset in the ad. Returns 0 if no video or image found.
- * @param {?Element} adElement
- * @return {number}
- * */
-const getAdAspectRatio = (adElement) => {
-  const adVideo = adElement?.querySelector('video');
-  const adImg = adElement?.querySelector('img');
-
-  if (adVideo) {
-    // If video exists, assumes that the video is the main asset
-    return adVideo.videoWidth / adVideo.videoHeight;
-  } else if (adImg) {
-    return adImg.naturalWidth / adImg.naturalHeight;
-  }
-  return 0;
-};
-
 export class StoryAdPage {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -377,13 +359,37 @@ export class StoryAdPage {
   }
 
   /**
+   * Get the aspect ratio of the main content in the ad.
+   * Returns 0 if no video, image, or text content is found.
+   * @param {?Element} adElement
+   * @return {number}
+   * @private
+   * */
+  getAdAspectRatio_(adElement) {
+    const adVideo = adElement?.querySelector('video');
+    const adImg = adElement?.querySelector('img');
+    // if `adElement` is an iframe (like `this.adDoc_`), we need to check the body
+    const adContent = adElement?.body?.firstChild || adElement?.firstChild;
+
+    if (adVideo) {
+      // If video exists, assumes that the video is the main asset
+      return adVideo.videoWidth / adVideo.videoHeight;
+    } else if (adImg) {
+      return adImg.naturalWidth / adImg.naturalHeight;
+    } else if (adContent) {
+      return adContent./*OK*/ offsetWidth / adContent./*OK*/ offsetHeight;
+    }
+    return 0;
+  }
+
+  /**
    * Sets the landscape ad class on the page element if the asset's
    * aspect ratio is greater than or equal to 31/40.
    * @param {!Element} container
    * @private
    */
   maybeApplyLandscapeAdClass_(container) {
-    if (getAdAspectRatio(container) >= 31 / 40) {
+    if (this.getAdAspectRatio_(container) >= 31 / 40) {
       this.hasLandscapeAd_ = true;
       this.pageElement_.classList.add(LANDSCAPE_AD_CLASS);
     }
@@ -416,6 +422,9 @@ export class StoryAdPage {
         .then(() => {
           this.maybeApplyLandscapeAdClass_(ampImg);
         });
+    } else {
+      // Assuming text ad
+      this.maybeApplyLandscapeAdClass_(this.adElement_);
     }
   }
 
@@ -589,7 +598,6 @@ export class StoryAdPage {
     if (!this.adChoicesIcon_) {
       return;
     }
-
     this.adChoicesIcon_.classList.toggle(
       DESKTOP_FULLBLEED_CLASS,
       uiState === UIType_Enum.DESKTOP_FULLBLEED
