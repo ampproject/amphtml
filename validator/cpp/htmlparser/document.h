@@ -110,6 +110,9 @@ class Document {
 
   iterator begin() { return iterator{root_node_}; }
   iterator end() { return iterator{nullptr}; }
+  const_iterator begin() const { return const_iterator{root_node_}; }
+  const_iterator end() const { return const_iterator{nullptr}; }
+
   const_iterator cbegin() const { return const_iterator{root_node_}; }
   const_iterator cend() const { return const_iterator{nullptr}; }
 

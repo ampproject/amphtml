@@ -1,5 +1,8 @@
 #include "cpp/htmlparser/validators/supported_media_query.h"
 
+#include <string_view>
+#include <utility>
+
 #include "gtest/gtest.h"
 
 namespace htmlparser::css {
