@@ -366,19 +366,27 @@ export class StoryAdPage {
    * @private
    * */
   getAdAspectRatio_(adElement) {
-    const adVideo = adElement?.querySelector('video');
-    const adImg = adElement?.querySelector('img');
-    // if `adElement` is an iframe (like `this.adDoc_`), we need to check the body
-    const adContent = adElement?.body?.firstChild || adElement?.firstChild;
+    if (!adElement) {
+      return 0;
+    }
 
-    if (adVideo) {
+    const adVideo = adElement.querySelector('video');
+    const adImg = adElement.querySelector('img');
+    // if `adElement` is an iframe (like `this.adDoc_`), we need to check the body
+    const adContent = adElement.body?.firstChild || adElement.firstChild;
+
+    if (adVideo?.videoWidth && adVideo?.videoHeight) {
       // If video exists, assumes that the video is the main asset
       return adVideo.videoWidth / adVideo.videoHeight;
-    } else if (adImg) {
+    } else if (adImg?.naturalWidth && adImg?.naturalHeight) {
       return adImg.naturalWidth / adImg.naturalHeight;
-    } else if (adContent) {
+    } else if (
+      adContent?./*OK*/ offsetWidth &&
+      adContent?./*OK*/ offsetHeight
+    ) {
       return adContent./*OK*/ offsetWidth / adContent./*OK*/ offsetHeight;
     }
+
     return 0;
   }
 
