@@ -434,10 +434,10 @@ describes.realWin(
       });
 
       it('should not propagate the desktop-fullbleed attribute to ad badge for landscape ads', () => {
+        autoAds.fullbleedAdExpEnabled_ = true;
         const adBadgeContainer = doc.querySelector(
           '.i-amphtml-ad-overlay-container'
         );
-        autoAds.visibleAdPage_ = {hasLandscapeAd: () => true};
         expect(adBadgeContainer).not.to.have.attribute(
           Attributes.DESKTOP_FULLBLEED
         );
@@ -445,6 +445,7 @@ describes.realWin(
         expect(adBadgeContainer).not.to.have.attribute(
           Attributes.DESKTOP_FULLBLEED
         );
+        autoAds.fullbleedAdExpEnabled_ = false;
       });
     });
 

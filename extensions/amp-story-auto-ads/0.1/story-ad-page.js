@@ -9,10 +9,10 @@ import {setStyle} from '#core/dom/style';
 import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {getExperimentBranch} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
-import {getData, listen, listenOnce} from '#utils/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
 import {
@@ -36,7 +36,6 @@ import {getFrameDoc, localizeCtaText} from './utils';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {VideoEvents_Enum} from '../../../src/video-interface';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   StateProperty,
@@ -56,7 +55,7 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
 
 /** @const {string} */
-const LANDSCAPE_AD_CLASS = 'i-amphtml-landscape-ad';
+const FULLBLEED_AD_CLASS = 'i-amphtml-fullbleed-ad';
 
 /** @enum {string} */
 const PageAttributes = {
@@ -133,9 +132,6 @@ export class StoryAdPage {
 
     /** @private {boolean} */
     this.is3pAdFrame_ = false;
-
-    /** @private {boolean} */
-    this.hasLandscapeAd_ = false;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -168,11 +164,6 @@ export class StoryAdPage {
   /** @return {?Element} */
   getPageElement() {
     return this.pageElement_;
-  }
-
-  /** @return {boolean} */
-  hasLandscapeAd() {
-    return this.hasLandscapeAd_;
   }
 
   /**
@@ -359,84 +350,6 @@ export class StoryAdPage {
   }
 
   /**
-   * Get the aspect ratio of the main content in the ad.
-   * Returns 0 if no video, image, or text content is found.
-   * @param {?Element} adElement
-   * @return {number}
-   * @private
-   * */
-  getAdAspectRatio_(adElement) {
-    if (!adElement) {
-      return 0;
-    }
-
-    const adVideo = adElement.querySelector('video');
-    const adImg = adElement.querySelector('img');
-    // if `adElement` is an iframe (like `this.adDoc_`), we need to check the body
-    const adContent = adElement.body?.firstChild || adElement.firstChild;
-
-    if (adVideo?.videoWidth && adVideo?.videoHeight) {
-      // If video exists, assumes that the video is the main asset
-      return adVideo.videoWidth / adVideo.videoHeight;
-    } else if (adImg?.naturalWidth && adImg?.naturalHeight) {
-      return adImg.naturalWidth / adImg.naturalHeight;
-    } else if (
-      adContent?./*OK*/ offsetWidth &&
-      adContent?./*OK*/ offsetHeight
-    ) {
-      return adContent./*OK*/ offsetWidth / adContent./*OK*/ offsetHeight;
-    }
-
-    return 0;
-  }
-
-  /**
-   * Sets the landscape ad class on the page element if the asset's
-   * aspect ratio is greater than or equal to 31/40.
-   * @param {!Element} container
-   * @private
-   */
-  maybeApplyLandscapeAdClass_(container) {
-    if (this.getAdAspectRatio_(container) >= 31 / 40) {
-      this.hasLandscapeAd_ = true;
-      this.pageElement_.classList.add(LANDSCAPE_AD_CLASS);
-    }
-  }
-
-  /**
-   * Checks if the ad is a landscape ad.
-   * @return {number}
-   * @private
-   */
-  checkForLandscapeAd_() {
-    if (this.adDoc_) {
-      this.maybeApplyLandscapeAdClass_(this.adDoc_);
-      return;
-    }
-
-    // Wait for ads to load before checking for landscape ad.
-    const ampImg = this.adElement_.querySelector('amp-img');
-    const ampVideo = this.adElement_.querySelector('amp-video');
-
-    if (ampVideo) {
-      // If video exists, assumes that the video is the main asset
-      listenOnce(ampVideo, VideoEvents_Enum.LOAD, () => {
-        this.maybeApplyLandscapeAdClass_(ampVideo);
-      });
-    } else if (ampImg) {
-      ampImg
-        .signals()
-        .whenSignal(CommonSignals_Enum.LOAD_END)
-        .then(() => {
-          this.maybeApplyLandscapeAdClass_(ampImg);
-        });
-    } else {
-      // Assuming text ad
-      this.maybeApplyLandscapeAdClass_(this.adElement_);
-    }
-  }
-
-  /**
    * Creates listeners to receive signal that ad is ready to be shown
    * for both FIE & inabox case.
    * @private
@@ -518,7 +431,9 @@ export class StoryAdPage {
       );
     }
 
-    this.checkForLandscapeAd_();
+    if (isExperimentOn(this.win_, 'story-ad-allow-fullbleed')) {
+      this.pageElement_.classList.add(FULLBLEED_AD_CLASS);
+    }
 
     this.loaded_ = true;
 
@@ -606,6 +521,7 @@ export class StoryAdPage {
     if (!this.adChoicesIcon_) {
       return;
     }
+
     this.adChoicesIcon_.classList.toggle(
       DESKTOP_FULLBLEED_CLASS,
       uiState === UIType_Enum.DESKTOP_FULLBLEED

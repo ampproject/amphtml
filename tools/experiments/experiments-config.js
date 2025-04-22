@@ -203,4 +203,9 @@ export const EXPERIMENTS = [
     name: 'Enable new INP metrics reporting on amp-analytics',
     spec: 'https://github.com/ampproject/amphtml/issues/38470',
   },
+  {
+    id: 'story-ad-allow-fullbleed',
+    name: 'Allows story ads in AMP fullbleed mode to fill the whole screen.',
+    spec: 'https://github.com/ampproject/amphtml/pull/40264',
+  },
 ];

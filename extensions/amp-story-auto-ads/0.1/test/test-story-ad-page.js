@@ -1,12 +1,12 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {dispatchCustomEvent} from '#core/dom';
+
+import {toggleExperiment} from '#experiments';
 
 import {macroTask} from '#testing/helpers';
 
 import {Gestures} from '../../../../src/gesture';
 import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
-import {VideoEvents_Enum} from '../../../../src/video-interface';
 import {
   Action,
   UIType_Enum,
@@ -459,171 +459,24 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
     });
   });
 
-  describe('landscape ads', () => {
-    const landscapeAdClass = 'i-amphtml-landscape-ad';
-    let ampAdElement;
-    let pageElement;
+  describe('fullbleed ads', () => {
+    it('should set fullbleed ad class', async () => {
+      const fullbleedAdClass = 'i-amphtml-fullbleed-ad';
+      const iframe = doc.createElement('iframe');
+      const video = doc.createElement('video');
+      const pageElement = storyAdPage.build();
 
-    beforeEach(() => {
-      pageElement = storyAdPage.build();
+      toggleExperiment(env.win, 'story-ad-allow-fullbleed', true);
       doc.body.appendChild(pageElement);
       pageElement.getImpl = () => Promise.resolve(pageImplMock);
-      ampAdElement = doc.querySelector('amp-ad');
-    });
 
-    describe('adDoc loaded', () => {
-      let iframe;
+      const ampAdElement = doc.querySelector('amp-ad');
+      ampAdElement.appendChild(iframe);
+      iframe.contentDocument.body.appendChild(video);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
 
-      beforeEach(() => {
-        iframe = doc.createElement('iframe');
-        ampAdElement.appendChild(iframe);
-      });
-
-      describe('video ad', () => {
-        it('should set landscape ad class if video ad has aspect ratio >= 31 / 40', async () => {
-          const video = doc.createElement('video');
-          Object.defineProperty(video, 'videoWidth', {value: 1280});
-          Object.defineProperty(video, 'videoHeight', {value: 720});
-          iframe.contentDocument.body.appendChild(video);
-          await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-          expect(pageElement).to.have.class(landscapeAdClass);
-        });
-
-        it('should not set landscape ad class if video ad has aspect ratio < 31 / 40', async () => {
-          const video = doc.createElement('video');
-          Object.defineProperty(video, 'videoWidth', {value: 720});
-          Object.defineProperty(video, 'videoHeight', {value: 1280});
-          iframe.contentDocument.body.appendChild(video);
-          await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-          expect(pageElement).not.to.have.class(landscapeAdClass);
-        });
-      });
-
-      describe('image ad', () => {
-        it('should set landscape ad class if image ad has aspect ratio >= 31 / 40', async () => {
-          const img = doc.createElement('img');
-          Object.defineProperty(img, 'naturalWidth', {value: 1280});
-          Object.defineProperty(img, 'naturalHeight', {value: 720});
-          iframe.contentDocument.body.appendChild(img);
-          await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-          expect(pageElement).to.have.class(landscapeAdClass);
-        });
-
-        it('should not set landscape ad class if image ad has aspect ratio < 31 / 40', async () => {
-          const img = doc.createElement('img');
-          Object.defineProperty(img, 'naturalWidth', {value: 720});
-          Object.defineProperty(img, 'naturalHeight', {value: 1280});
-          iframe.contentDocument.body.appendChild(img);
-          await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-          expect(pageElement).not.to.have.class(landscapeAdClass);
-        });
-      });
-
-      describe('text ad', () => {
-        it('should set landscape ad class if text ad has aspect ratio >= 31 / 40', async () => {
-          const textAd = doc.createElement('div');
-          Object.defineProperty(textAd, 'offsetWidth', {value: 1280});
-          Object.defineProperty(textAd, 'offsetHeight', {value: 720});
-          iframe.contentDocument.body.appendChild(textAd);
-          await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-          expect(pageElement).to.have.class(landscapeAdClass);
-        });
-
-        it('should not set landscape ad class if text ad has aspect ratio < 31 / 40', async () => {
-          const textAd = doc.createElement('div');
-          Object.defineProperty(textAd, 'offsetWidth', {value: 720});
-          Object.defineProperty(textAd, 'offsetHeight', {value: 1280});
-          iframe.contentDocument.body.appendChild(textAd);
-          await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-          expect(pageElement).not.to.have.class(landscapeAdClass);
-        });
-      });
-    });
-
-    describe('amp-video ad', () => {
-      it('should set landscape ad class if video ad has aspect ratio >= 31 / 40', async () => {
-        const ampVideo = doc.createElement('amp-video');
-        const video = doc.createElement('video');
-        Object.defineProperty(video, 'videoWidth', {value: 1280});
-        Object.defineProperty(video, 'videoHeight', {value: 720});
-        ampVideo.appendChild(video);
-        ampAdElement.appendChild(ampVideo);
-        await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-        await dispatchCustomEvent(ampVideo, VideoEvents_Enum.LOAD);
-
-        expect(pageElement).to.have.class(landscapeAdClass);
-      });
-
-      it('should not set landscape ad class if video ad has aspect ratio < 31 / 40', async () => {
-        const ampVideo = doc.createElement('amp-video');
-        const video = doc.createElement('video');
-        Object.defineProperty(video, 'videoWidth', {value: 720});
-        Object.defineProperty(video, 'videoHeight', {value: 1280});
-        ampVideo.appendChild(video);
-        ampAdElement.appendChild(ampVideo);
-        await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-        await dispatchCustomEvent(ampVideo, VideoEvents_Enum.LOAD);
-
-        expect(pageElement).not.to.have.class(landscapeAdClass);
-      });
-    });
-
-    describe('amp-img ad', () => {
-      it('should set landscape ad class if image ad has aspect ratio >= 31 / 40', async () => {
-        const ampImg = doc.createElement('amp-img');
-        const img = doc.createElement('img');
-        Object.defineProperty(img, 'naturalWidth', {value: 1280});
-        Object.defineProperty(img, 'naturalHeight', {value: 720});
-        ampImg.appendChild(img);
-        ampImg.setAttribute('layout', 'fill');
-        ampAdElement.appendChild(ampImg);
-        await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-        await ampImg.signals().signal(CommonSignals_Enum.LOAD_END);
-
-        expect(pageElement).to.have.class(landscapeAdClass);
-      });
-
-      it('should not set landscape ad class if image ad has aspect ratio < 31 / 40', async () => {
-        const ampImg = doc.createElement('amp-img');
-        const img = doc.createElement('img');
-        Object.defineProperty(img, 'naturalWidth', {value: 720});
-        Object.defineProperty(img, 'naturalHeight', {value: 1280});
-        ampImg.appendChild(img);
-        ampImg.setAttribute('layout', 'fill');
-        ampAdElement.appendChild(ampImg);
-        await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-        await ampImg.signals().signal(CommonSignals_Enum.LOAD_END);
-
-        expect(pageElement).not.to.have.class(landscapeAdClass);
-      });
-    });
-
-    describe('custom text ad', () => {
-      it('should set landscape ad class if text ad has aspect ratio >= 31 / 40', async () => {
-        const textAd = doc.createElement('div');
-        Object.defineProperty(textAd, 'offsetWidth', {value: 1280});
-        Object.defineProperty(textAd, 'offsetHeight', {value: 720});
-        ampAdElement.appendChild(textAd);
-        await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-        expect(pageElement).to.have.class(landscapeAdClass);
-      });
-
-      it('should not set landscape ad class if text ad has aspect ratio < 31 / 40', async () => {
-        const textAd = doc.createElement('div');
-        Object.defineProperty(textAd, 'offsetWidth', {value: 720});
-        Object.defineProperty(textAd, 'offsetHeight', {value: 1280});
-        ampAdElement.appendChild(textAd);
-        await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
-
-        expect(pageElement).not.to.have.class(landscapeAdClass);
-      });
+      expect(pageElement).to.have.class(fullbleedAdClass);
+      toggleExperiment(env.win, 'story-ad-allow-fullbleed', false);
     });
   });
 

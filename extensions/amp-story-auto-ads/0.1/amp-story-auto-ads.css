@@ -43,9 +43,9 @@ amp-story-page amp-ad[type='adsense'] {
   transform: translateX(-50%) !important;
 }
 
-/* For ads that have aspect ratio 31/40 or greater */
+/* If experiment `story-ad-allow-fullbleed` is enabled, show fullbleed ads  */
 .i-amphtml-story-desktop-fullbleed
-  .i-amphtml-landscape-ad
+  .i-amphtml-fullbleed-ad
   amp-story-grid-layer[template="fill"]
   > amp-ad {
   min-width: 100% !important;
@@ -54,13 +54,13 @@ amp-story-page amp-ad[type='adsense'] {
   max-height: 100% !important;
 }
 
-.i-amphtml-story-desktop-fullbleed .i-amphtml-landscape-ad iframe {
+.i-amphtml-story-desktop-fullbleed .i-amphtml-fullbleed-ad iframe {
   width: 100% !important;
   height: 100% !important;
 }
 
 .i-amphtml-story-desktop-fullbleed
-  .i-amphtml-landscape-ad
+  .i-amphtml-fullbleed-ad
   .i-amphtml-cta-container {
     bottom: 0 !important;
     top: 0 !important;

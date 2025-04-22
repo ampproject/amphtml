@@ -1,6 +1,6 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 
-import {forceExperimentBranch} from '#experiments';
+import {forceExperimentBranch, isExperimentOn} from '#experiments';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -91,6 +91,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?StoryAdPageManager} */
     this.adPageManager_ = null;
+
+    /** @private {boolean} */
+    this.fullbleedAdExpEnabled_ = isExperimentOn(
+      this.win,
+      'story-ad-allow-fullbleed'
+    );
   }
 
   /** @override */
@@ -341,7 +347,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
       if (
         uiState === UIType_Enum.DESKTOP_FULLBLEED &&
-        !this.visibleAdPage_?.hasLandscapeAd()
+        !this.fullbleedAdExpEnabled_
       ) {
         // Proper landscape ads in DESKTOP_FULLBLEED do not need the attribute
         this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
@@ -470,7 +476,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.mutateElement(() => {
       adPage.toggleVisibility();
       this.visibleAdPage_ = adPage;
-      if (this.visibleAdPage_.hasLandscapeAd()) {
+      if (this.fullbleedAdExpEnabled_) {
         // Proper landscape ads in DESKTOP_FULLBLEED do not need the attribute
         this.adBadgeContainer_.removeAttribute(Attributes.DESKTOP_FULLBLEED);
       }
