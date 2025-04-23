@@ -22,12 +22,8 @@ module.exports = function ({types: t}) {
   return {
     name: 'amp-story-supported-languages',
     visitor: {
-      // Ignore 'ReferencedIdentifier' does not exist in type 'Visitor<PluginPass>'.
-      // The tests prove that this type of visitor works with the current
-      // version of babel we use.
-      // @ts-ignore
       ReferencedIdentifier(path) {
-        if (path.get('name').node !== 'AMP_STORY_SUPPORTED_LANGUAGES') {
+        if (path.node.name !== 'AMP_STORY_SUPPORTED_LANGUAGES') {
           return;
         }
 

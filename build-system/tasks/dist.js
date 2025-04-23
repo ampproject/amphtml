@@ -24,7 +24,10 @@ const {
 } = require('../compile/internal-version');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {buildVendorConfigs} = require('./3p-vendor-helpers');
+const {
+  buildVendorConfigs,
+  shouldBuildVendorConfigs,
+} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
@@ -130,12 +133,7 @@ async function dist() {
   await buildExtensions(options);
 
   // This step is to be run only during a full `amp dist`.
-  if (
-    !argv.core_runtime_only &&
-    !argv.extensions &&
-    !argv.extensions_from &&
-    !argv.noextensions
-  ) {
+  if (shouldBuildVendorConfigs()) {
     await buildVendorConfigs(options);
   }
 
@@ -397,6 +395,8 @@ dist.flags = {
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
+  vendor_configs:
+    'Build 3p party vendor configuration files (defaults to true unless one of --core_runtime_only, --extensions, or --extensions_from is set)',
   full_sourcemaps: 'Include source code content in sourcemaps',
   sourcemap_url: 'Set a custom sourcemap URL with placeholder {version}',
   type: 'Point sourcemap to fetch files from the correct GitHub tag',

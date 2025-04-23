@@ -102,17 +102,17 @@ class RuntimeTestConfig {
   }
 
   /**
-   * Picks a browser config based on the the test type and command line flags.
+   * Picks a browser config based on the test type and command line flags.
    * Defaults to Chrome.
    */
   updateBrowsers() {
     const browser = argv.edge
       ? 'EdgeCustom'
       : argv.firefox
-      ? 'FirefoxCustom'
-      : argv.safari
-      ? 'SafariCustom'
-      : 'ChromeCustom';
+        ? 'FirefoxCustom'
+        : argv.safari
+          ? 'SafariCustom'
+          : 'ChromeCustom';
     Object.assign(this, {browsers: [browser], customLaunchers});
   }
 
@@ -133,6 +133,15 @@ class RuntimeTestConfig {
       this.junitReporter = {
         outputFile: `result-reports/${this.testType}.xml`,
         useBrowserName: false,
+        nameFormatter(_, result) {
+          return result.description.trim();
+        },
+        classNameFormatter(_, result) {
+          return result.suite
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .join(' » ');
+        },
       };
     }
 

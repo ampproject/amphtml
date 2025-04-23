@@ -1,3 +1,5 @@
+import {Assertion} from 'chai';
+
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {tryResolve} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
@@ -293,13 +295,10 @@ describes.realWin(
       const areaDeltaPerc = RENDER_AREA_RATIO * 100;
       const {vh, vw} = {vw: 1000, vh: 600};
 
-      const expectMeetsSizingCriteria = (
-        renderWidth,
-        renderHeight,
-        naturalWidth,
-        naturalHeight
-      ) =>
-        expect(
+      Assertion.addProperty('meetSizingCriteria', function () {
+        const {naturalHeight, naturalWidth, renderHeight, renderWidth} =
+          this._obj;
+        this.assert(
           meetsSizingCriteria(
             renderWidth,
             renderHeight,
@@ -307,8 +306,12 @@ describes.realWin(
             naturalHeight,
             vw,
             vh
-          )
+          ),
+          'expected #{this} to meet sizing criteria for #{exp}',
+          'expected #{this} to not meet sizing criteria for #{exp}',
+          {vw, vh}
         );
+      });
 
       it(`accepts elements ${areaDeltaPerc}%+ of size than render area`, () => {
         const renderWidth = 1000;
@@ -321,12 +324,8 @@ describes.realWin(
 
         const axisRange = [minDim + 1, minDim + 10, minDim + 100];
         iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
-          expectMeetsSizingCriteria(
-            renderWidth,
-            renderHeight,
-            naturalWidth,
-            naturalHeight
-          ).to.be.true;
+          expect({renderWidth, renderHeight, naturalWidth, naturalHeight}).to
+            .meetSizingCriteria;
         });
       });
 
@@ -341,12 +340,8 @@ describes.realWin(
 
         const axisRange = [minDim, minDim - 10, minDim - 100];
         iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
-          expectMeetsSizingCriteria(
-            renderWidth,
-            renderHeight,
-            naturalWidth,
-            naturalHeight
-          ).to.be.false;
+          expect({renderWidth, renderHeight, naturalWidth, naturalHeight}).to
+            .not.meetSizingCriteria;
         });
       });
 
@@ -361,12 +356,8 @@ describes.realWin(
 
         const axisRange = [minDim, minDim + 10, minDim + 100];
         iterProduct(axisRange, axisRange, (renderWidth, renderHeight) => {
-          expectMeetsSizingCriteria(
-            renderWidth,
-            renderHeight,
-            naturalWidth,
-            naturalHeight
-          ).to.be.true;
+          expect({renderWidth, renderHeight, naturalWidth, naturalHeight}).to
+            .meetSizingCriteria;
         });
       });
 
@@ -376,12 +367,12 @@ describes.realWin(
 
         const axisRange = [minDim - 1, minDim - 10, minDim - 100];
         iterProduct(axisRange, axisRange, (renderWidth, renderHeight) => {
-          expectMeetsSizingCriteria(
+          expect({
             renderWidth,
             renderHeight,
-            /* naturalWidth */ renderWidth,
-            /* naturalHeight */ renderHeight
-          ).to.be.false;
+            naturalWidth: renderWidth,
+            naturalHeight: renderHeight,
+          }).to.not.meetSizingCriteria;
         });
       });
 
@@ -390,12 +381,12 @@ describes.realWin(
         const renderHeight = vh;
 
         [vh + 1, vh + 10, vh + 100].forEach((naturalHeight) => {
-          expectMeetsSizingCriteria(
+          expect({
             renderWidth,
             renderHeight,
-            /* naturalWidth */ renderWidth,
-            naturalHeight
-          ).to.be.true;
+            naturalWidth: renderWidth,
+            naturalHeight,
+          }).to.meetSizingCriteria;
         });
       });
 
@@ -404,12 +395,12 @@ describes.realWin(
         const renderHeight = vh;
 
         [vw + 1, vw + 10, vw + 100].forEach((naturalWidth) => {
-          expectMeetsSizingCriteria(
+          expect({
             renderWidth,
             renderHeight,
             naturalWidth,
-            /* naturalHeight */ renderHeight
-          ).to.be.true;
+            naturalHeight: renderHeight,
+          }).to.meetSizingCriteria;
         });
       });
 
@@ -419,12 +410,8 @@ describes.realWin(
 
         const axisRange = [renderWidth, renderWidth - 10, renderWidth - 100];
         iterProduct(axisRange, axisRange, (naturalWidth, naturalHeight) => {
-          expectMeetsSizingCriteria(
-            renderWidth,
-            renderHeight,
-            naturalWidth,
-            naturalHeight
-          ).to.be.false;
+          expect({renderWidth, renderHeight, naturalWidth, naturalHeight}).to
+            .not.meetSizingCriteria;
         });
       });
     });

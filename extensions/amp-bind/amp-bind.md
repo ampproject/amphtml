@@ -332,12 +332,16 @@ Expressions are not evaluated on page load, but you may define an initial state.
 
 Use [expressions](#expressions) to reference **state variables**. If the JSON data is not nested in the `<amp-state>` component, reference the states via dot syntax. In the above example, `myState.foo` evaluates to "bar".
 
+[filter formats="websites, ads"]
+
 An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [`<amp-state>` specification](#amp-state-specification) for details.
 
 ```html
 <amp-state id="myRemoteState" src="/static/samples/json/websites.json">
 </amp-state>
 ```
+
+[/filter] <!-- formats="websites, ads" -->
 
 ### Updating state variables with `AMP.setState()`
 

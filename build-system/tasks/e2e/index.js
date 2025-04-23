@@ -70,7 +70,7 @@ function createMocha_() {
     slow: SLOW_TEST_THRESHOLD_MS,
     reporter,
     retries: TEST_RETRIES,
-    fullStackTrace: true,
+    fullTrace: true,
     reporterOptions: isCiBuild()
       ? {
           mochaFile: 'result-reports/e2e.xml',

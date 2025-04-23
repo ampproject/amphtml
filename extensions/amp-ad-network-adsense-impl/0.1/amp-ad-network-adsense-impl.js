@@ -5,6 +5,10 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
+  handleCookieOptOutPostMessage,
+  maybeSetCookieFromAdResponse,
+} from '#ads/google/a4a/cookie-utils';
+import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInManualExperiment,
@@ -279,6 +283,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     let additionalConsent = undefined;
     let consentStringType = undefined;
     let consentSharedData = undefined;
+    let gppSectionId = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
@@ -286,6 +291,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       additionalConsent = consentTuple.additionalConsent;
       consentStringType = consentTuple.consentStringType;
       consentSharedData = consentTuple.consentSharedData;
+      gppSectionId = consentTuple.gppSectionId;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -380,10 +386,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ? this.responsiveState_.getRafmtParam()
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent':
-        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
-          ? consentString
-          : null,
+      'gdpr_consent': [
+        undefined,
+        CONSENT_STRING_TYPE.TCF_V1,
+        CONSENT_STRING_TYPE.TCF_V2,
+      ].includes(consentStringType)
+        ? consentString
+        : null,
       'addtl_consent': additionalConsent,
       'us_privacy':
         consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
@@ -405,6 +414,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         : null,
       'tfcd': consentSharedData?.['adsense-tfcd'] ?? null,
       'tfua': consentSharedData?.['adsense-tfua'] ?? null,
+      'gpp':
+        consentStringType == CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM
+          ? consentString
+          : null,
+      'gpp_sid':
+        consentStringType == CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM
+          ? gppSectionId
+          : null,
     };
 
     const experimentIds = [];
@@ -554,6 +571,25 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }
     dev().assertElement(this.iframe).id = `google_ads_iframe_${this.ifi_}`;
+
+    // Add listener for GPID cookie optout.
+    this.win.addEventListener('message', (event) => {
+      if (this.checkIfClearCookiePostMessageHasValidSource_(event)) {
+        handleCookieOptOutPostMessage(this.win, event);
+      }
+    });
+  }
+
+  /**
+   * Checks whether the postMessage event's source corresponds to the ad
+   * iframe. Exposed as own function to ease unit testing. (It's near
+   * impossible to simulate the postmessage coming from the creative iframe in
+   * unit test environments).
+   * @param {!Event} event
+   * @return {boolean} True if the source of the message matches the ad iframe.
+   */
+  checkIfClearCookiePostMessageHasValidSource_(event) {
+    return event.source == devAssert(this.iframe.contentWindow);
   }
 
   /** @override */
@@ -627,6 +663,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return true;
     }
     return false;
+  }
+
+  /** @param {!Response} fetchResponse */
+  onAdResponse(fetchResponse) {
+    maybeSetCookieFromAdResponse(this.win, fetchResponse);
   }
 }
 

@@ -108,6 +108,7 @@ exports.rules = [
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
+      'ads/google/a4a/cookie-utils.js->src/cookies.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -355,6 +356,8 @@ exports.rules = [
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
+        'src/service/video-manager-impl.js',
+      'extensions/amp-connatix-player/0.1/amp-connatix-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
         'src/service/url-replacements-impl.js',

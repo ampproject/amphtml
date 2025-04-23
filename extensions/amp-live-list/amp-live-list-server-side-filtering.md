@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `amp-live-list` component is allowed to make requests to its server (depending on where the file is hosted from, the server could be the Google AMP Cache, another AMP cache, or the publisher’s server) for the the latest AMP document and update the current DOM with information from the received AMP document. It can work with a full AMP document as the response, but to reduce the payload and save on bandwidth and CPU cycles `amp-live-list` has defined the minimum HTML structure, the tags and its attributes needed by the component to correctly make an update to the live DOM. This spec depends on the [`amp-live-list` spec](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/amp-live-list.md) and defines its [Server side filtering](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/amp-live-list.md#server-side-filtering) section.
+The `amp-live-list` component is allowed to make requests to its server (depending on where the file is hosted from, the server could be the Google AMP Cache, another AMP cache, or the publisher’s server) for the latest AMP document and update the current DOM with information from the received AMP document. It can work with a full AMP document as the response, but to reduce the payload and save on bandwidth and CPU cycles `amp-live-list` has defined the minimum HTML structure, the tags and its attributes needed by the component to correctly make an update to the live DOM. This spec depends on the [`amp-live-list` spec](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/amp-live-list.md) and defines its [Server side filtering](https://github.com/ampproject/amphtml/blob/main/extensions/amp-live-list/amp-live-list.md#server-side-filtering) section.
 
 ## Design
 
@@ -110,7 +110,7 @@ Example 2
 </amp-live-list>
 ```
 
-Example 3 is the latest document fetched from the publisher, and using `amp_latest_update_time=1462955848172` allows us to filter the `items` reference point, which only leaves us with the the element with `id=item-3` (the `amp-twitter` element).
+Example 3 is the latest document fetched from the publisher, and using `amp_latest_update_time=1462955848172` allows us to filter the `items` reference point, which only leaves us with the element with `id=item-3` (the `amp-twitter` element).
 
 Example 3
 

@@ -1,0 +1,106 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-social-share component inside amp-story.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|
+|  <head>
+|    <meta charset="utf-8">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+|    <title>My Story</title>
+|    <meta name="description" content="Get started with amp-story">
+|    <link rel="canonical" href="validator-amp-social-share.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <style amp-boilerplate>
+|      body {
+|        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|        animation: -amp-start 8s steps(1, end) 0s 1 normal both
+|      }
+|
+|      @-webkit-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @-moz-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @-ms-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @-o-keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|
+|      @keyframes -amp-start {
+|        from {
+|          visibility: hidden
+|        }
+|
+|        to {
+|          visibility: visible
+|        }
+|      }
+|    </style><noscript>
+|      <style amp-boilerplate>
+|        body {
+|          -webkit-animation: none;
+|          -moz-animation: none;
+|          -ms-animation: none;
+|          animation: none
+|        }
+|      </style>
+|    </noscript>
+|  </head>
+|
+|  <body>
+|    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png"
+|      poster-portrait-src="http://me.com/poster.jpg">
+|      <amp-story-page id="fill-template-title">
+|        <amp-social-share
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-amp-social-share.html:90:6 The attribute 'class' in tag 'amp-social-share' is set to the invalid value 'i-amphtml-layout-fixed i-amphtml-layout-size-defined amp-social-share-system i-amphtml-built i-amphtml-layout i-amphtml-element'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/#disallowed-styles)
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-amp-social-share.html:90:6 The attribute 'i-amphtml-layout' may not appear in tag 'amp-social-share'. (see https://amp.dev/documentation/components/amp-social-share)
+|          class="i-amphtml-layout-fixed i-amphtml-layout-size-defined amp-social-share-system i-amphtml-built i-amphtml-layout i-amphtml-element"
+|          aria-label="Share" type="system" width="48" height="48" i-amphtml-layout="fixed"
+|          style="width: 48px; height: 48px;" role="button" tabindex="0"></amp-social-share>
+|          <amp-story-grid-layer template="vertical">
+|            <p>Content</p>
+|          </amp-story-grid-layer>
+|      </amp-story-page>
+|    </amp-story>
+|  </body>
+|
+|  </html>

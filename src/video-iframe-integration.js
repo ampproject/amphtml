@@ -278,7 +278,10 @@ export class AmpVideoIntegration {
       });
 
       // in case `canplay` fires before this script loads
-      if (player.readyState() >= /* HAVE_FUTURE_DATA */ 3) {
+      if (
+        player.readyState() >= /* HAVE_FUTURE_DATA */ 3 ||
+        /iPhone|iPad|iPod/i.test(this.win_.navigator.userAgent) // iOS 12+ no longer fires `canplay`, this is a workaround
+      ) {
         this.postEvent(canplay);
       } else {
         player.on(canplay, () => this.postEvent(canplay));

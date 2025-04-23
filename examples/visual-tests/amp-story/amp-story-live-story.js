@@ -1,12 +1,14 @@
 'use strict';
 
+const {sleep} = require('../../../build-system/tasks/visual-diff/helpers');
+
 module.exports = {
   'should show the notification.': async (page) => {
     await page.waitForSelector('amp-story-page#cover[active]');
     await page.$eval('.i-amphtml-story-system-layer', (e) =>
       e.setAttribute('i-amphtml-story-has-new-page', 'show')
     );
-    await page.waitForTimeout(2000); // For animations to finish.
+    await sleep(2000); // For animations to finish.
     await page.waitForSelector(
       '.i-amphtml-story-has-new-page-notification-container',
       {opacity: 1}
@@ -18,7 +20,7 @@ module.exports = {
     await page.$eval('.i-amphtml-story-system-layer', (e) =>
       e.setAttribute('i-amphtml-story-has-new-page', 'show')
     );
-    await page.waitForTimeout(2000); // For animations to finish.
+    await sleep(2000); // For animations to finish.
     await page.waitForSelector(
       '.i-amphtml-story-has-new-page-notification-container',
       {opacity: 1}

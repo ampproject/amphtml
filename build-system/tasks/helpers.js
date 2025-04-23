@@ -261,7 +261,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const entryPoint = path.join(srcDir, srcFilename);
   const filename = options.minify
     ? options.minifiedName
-    : options.toName ?? srcFilename;
+    : (options.toName ?? srcFilename);
   // This guards against someone passing `minify: true` but no `minifiedName`.
   if (!filename) {
     throw new Error('No minifiedName provided for ' + srcFilename);
@@ -476,11 +476,12 @@ const mangleIdentifier = {
  */
 async function minify(code, options = {}) {
   /* eslint-disable local/camelcase */
+  /** @type {terser.MinifyOptions} */
   const terserOptions = {
     mangle: {
       properties: {
         regex: '_AMP_PRIVATE_$',
-        keep_quoted: /** @type {'strict'} */ ('strict'),
+        keep_quoted: 'strict',
       },
     },
     compress: {

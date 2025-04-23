@@ -19,8 +19,8 @@ const {
   shortSha,
 } = require('../../common/git');
 const {
-  fetchBrowserExecutablePath,
   launchBrowser,
+  locateChromeExecutablePath,
   newPage,
   resetPage,
 } = require('./browser');
@@ -143,10 +143,9 @@ function setPercyTargetCommit() {
 /**
  * Launches a Percy agent instance.
  *
- * @param {string} executablePath browser executable path.
  * @return {!Promise<Percy|undefined>} percy agent instance.
  */
-async function launchPercyAgent(executablePath) {
+async function launchPercyAgent() {
   if (argv.percy_disabled) {
     return;
   }
@@ -159,7 +158,7 @@ async function launchPercyAgent(executablePath) {
     config: path.join(__dirname, '.percy.yaml'),
     discovery: {
       launchOptions: {
-        executable: executablePath,
+        executable: locateChromeExecutablePath(),
       },
     },
   });
@@ -614,10 +613,9 @@ async function visualDiff() {
     log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
   }
 
-  const executablePath = await fetchBrowserExecutablePath();
-  const percy = await launchPercyAgent(executablePath);
+  const percy = await launchPercyAgent();
   try {
-    await performVisualTests(executablePath);
+    await performVisualTests();
   } finally {
     await percy?.stop();
   }
@@ -627,13 +625,12 @@ async function visualDiff() {
 /**
  * Runs the AMP visual diff tests.
  *
- * @param {string} executablePath browser executable path.
  * @return {Promise<void>}
  */
-async function performVisualTests(executablePath) {
+async function performVisualTests() {
   setDebuggingLevel();
 
-  const browser = await launchBrowser(executablePath);
+  const browser = await launchBrowser();
   const handlerProcess = createCtrlcHandler(
     'visual-diff:browser',
     browser.process()?.pid
@@ -703,6 +700,8 @@ visualDiff.flags = {
   'percy_agent_debug': 'Print debug info from the @percy/agent instance',
   'debug': 'Set all debugging flags',
   'verbose': 'Print verbose log statements',
+  'executablePath':
+    'Full path to the Chrome/Chromium executable (optional if Chrome is on $PATH)',
   'grep': 'Run tests that match the pattern',
   'minified': 'Serve minified JS',
   'percy_token': 'Override the PERCY_TOKEN environment variable',

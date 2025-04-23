@@ -611,8 +611,8 @@ export function dev() {
       logNum >= 3
         ? LogLevel_Enum.FINE
         : logNum >= 2
-        ? LogLevel_Enum.INFO
-        : LogLevel_Enum.OFF
+          ? LogLevel_Enum.INFO
+          : LogLevel_Enum.OFF
     ))
   );
 }

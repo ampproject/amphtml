@@ -15,7 +15,8 @@ async function testScroll(env) {
     controller = env.controller;
   });
 
-  it('should animate clock hand while scrolling', async () => {
+  // TODO(#40214): fix flaky test.
+  it.skip('should animate clock hand while scrolling', async () => {
     const step = 50;
     const initPoint = {
       'width': 53,

@@ -42,6 +42,8 @@ const ALLOWED_SANDBOX_ATTRIBUTES = [
 
 const IFRAME_RUNNING_TIMEOUT = 1000;
 
+const IFRAME_ALLOWED_PERMISSIONS = ['geolocation', 'payment'];
+
 export const actionState = {
   error: 'error',
   success: 'success',
@@ -470,7 +472,9 @@ export class ConsentUI {
   createPromptIframe_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
     const sandbox = this.getSandboxAttribute_(promptUISrc);
+    iframe.setAttribute('title', this.parent_.title || 'Consent Banner');
     iframe.setAttribute('sandbox', sandbox);
+    iframe.setAttribute('allow', IFRAME_ALLOWED_PERMISSIONS.join('; '));
     const {classList} = iframe;
     classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.

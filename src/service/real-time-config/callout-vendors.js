@@ -69,7 +69,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   criteo: {
-    url: 'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF&cst=CONSENT_STATE&cst_str=CONSENT_STRING&cst_type=CONSENT_METADATA(consentStringType)&cst_gdpr_applies=CONSENT_METADATA(gdprApplies)',
+    url: 'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&uid=ADUNIT_ID&pid=PUBLISHER_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF&cst=CONSENT_STATE&cst_str=CONSENT_STRING&cst_type=CONSENT_METADATA(consentStringType)&cst_gdpr_applies=CONSENT_METADATA(gdprApplies)',
     macros: [
       'ZONE_ID',
       'NETWORK_ID',
@@ -77,6 +77,8 @@ const RTC_VENDORS = jsonConfiguration({
       'LINE_ITEM_RANGES',
       'CONSENT_STATE',
       'CONSENT_STRING',
+      'ADUNIT_ID',
+      'PUBLISHER_ID',
     ],
     disableKeyAppend: true,
   },
@@ -145,8 +147,8 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   navegg: {
-    url: 'https://usr.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
-    macros: ['NVG_ACC'],
+    url: 'https://usr.navdmp.com/usr?acc=NVG_ACC&wst=WST&wct=WCT&wla=WLA&v=10',
+    macros: ['NVG_ACC', 'WST', 'WCT', 'WLA'],
     disableKeyAppend: true,
   },
   newspassid: {
@@ -210,7 +212,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   prebidrubicon: {
-    url: 'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&consent_string=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)&pvid=PAGEVIEWID',
+    url: 'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&consent_string=CONSENT_STRING&account=ACCOUNT_ID&gdpr_applies=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)&gpp_sid=CONSENT_METADATA(gppSectionId)&pvid=PAGEVIEWID',
     macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },

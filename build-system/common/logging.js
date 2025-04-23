@@ -7,7 +7,7 @@ const {isCiBuild} = require('./ci');
  * Used by tests to wrap progress dots. Attempts to match the terminal width
  * during local development and defaults to 150 if it couldn't be determined.
  */
-const dotWrappingWidth = isCiBuild() ? 150 : process.stdout.columns ?? 150;
+const dotWrappingWidth = isCiBuild() ? 150 : (process.stdout.columns ?? 150);
 
 /**
  * Used by CI job scripts to print a prefix before top-level logging lines.

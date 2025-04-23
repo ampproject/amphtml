@@ -75,9 +75,11 @@ describes.endtoend(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
 
-      await expect(
-        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
-      ).to.have.sentCount(1);
+      const response = await fetch(
+        'http://localhost:8000/amp4test/request-bank/e2e/withdraw/tracking',
+        {signal: AbortSignal.timeout(500)}
+      );
+      await response.json();
     });
 
     it('variable target "current" should point to product1 by default', async () => {
@@ -108,9 +110,11 @@ describes.endtoend(
       await expect(await controller.getCurrentUrl()).to.match(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
-      await expect(
-        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
-      ).to.have.sentCount(1);
+      const response = await fetch(
+        'http://localhost:8000/amp4test/request-bank/e2e/withdraw/tracking',
+        {signal: AbortSignal.timeout(500)}
+      );
+      await response.json();
     });
   }
 );

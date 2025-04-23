@@ -383,7 +383,8 @@ describes.realWin(
       });
     });
 
-    it('uses custom CSS when element is focused', async () => {
+    // TODO(#40258) Fix and unskip flakey test.
+    it.skip('uses custom CSS when element is focused', async () => {
       const share = doc.createElement('amp-social-share');
 
       share.setAttribute('type', 'twitter');

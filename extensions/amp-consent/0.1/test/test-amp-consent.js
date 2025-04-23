@@ -4,7 +4,7 @@ import {xhrServiceForTesting} from '#service/xhr-impl';
 
 import {dev, user} from '#utils/log';
 
-import {macroTask} from '#testing/helpers';
+import {macroTask, sleep} from '#testing/helpers';
 
 import {
   registerServiceBuilder,
@@ -911,7 +911,7 @@ describes.realWin(
 
       it('should remove invalid consentStringType', () => {
         const spy = env.sandbox.stub(user(), 'error');
-        const responseMetadata = {'consentStringType': 4};
+        const responseMetadata = {'consentStringType': 400};
         expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
           constructMetadata()
         );
@@ -1161,7 +1161,7 @@ describes.realWin(
 
         beforeEach(async () => {
           ampConsent.buildCallback();
-          await macroTask();
+          await sleep(50);
           managerSpy = env.sandbox.spy(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'

@@ -97,7 +97,7 @@
           // resources asynchronously.
           amp.validator.init().then(function() {
             isValidatorReady = true;
-            // In most times, the initilization of AMP validator is slower than
+            // In most times, the initialization of AMP validator is slower than
             // the code that fills the minimal valid JavaScript AMP doc as the
             // default value in the input box. The `refreshEditorAndErrors` call
             // triggered by input box default value returns early because
@@ -253,7 +253,7 @@
           // Extract doc from query param
           editor.setEditorValue(incomingDocStr);
         } else if (params.hasOwnProperty('url') && params['url']) {
-          // Load doc fromm url
+          // Load doc from url
           this.$.urlForm.setURLAndValidate(params['url']);
         } else {
           // Use minimal valid JavaScript AMP doc

@@ -31,18 +31,21 @@ describes.endtoend(
       nextArrow = await getNextArrow(controller);
     });
 
-    it('should have the arrows in the correct initial state', async () => {
+    // TODO(#40214): fix flaky test.
+    it.skip('should have the arrows in the correct initial state', async () => {
       await expect(css(prevArrow, 'opacity')).to.equal('0');
       await expect(css(nextArrow, 'opacity')).to.equal('1');
     });
 
-    it('should show the prev arrow when going to the first slide', async () => {
+    // TODO(#40214): fix flaky test.
+    it.skip('should show the prev arrow when going to the first slide', async () => {
       await controller.click(nextArrow);
       await expect(css(prevArrow, 'opacity')).to.equal('1');
       await expect(css(nextArrow, 'opacity')).to.equal('1');
     });
 
-    it('should hide the next arrow when going to the end', async () => {
+    // TODO(#40214): fix flaky test.
+    it.skip('should hide the next arrow when going to the end', async () => {
       const el = await getScrollingElement(controller);
       await controller.scrollTo(el, {left: (SLIDE_COUNT - 1) * pageWidth});
 

@@ -29,8 +29,8 @@ const customLaunchers = {
     base: argv.headless
       ? 'ChromeHeadless'
       : argv.chrome_canary
-      ? 'ChromeCanary'
-      : 'Chrome',
+        ? 'ChromeCanary'
+        : 'Chrome',
     flags: argv.chrome_flags
       ? argv.chrome_flags.split(',').map((flag) => `--${flag}`)
       : DEFAULT_CHROME_FLAGS,

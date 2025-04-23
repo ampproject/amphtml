@@ -93,7 +93,6 @@ amp-script
 amp-selector
 amp-sidebar
 amp-skimlinks
-amp-slikeplayer
 amp-smartlinks
 amp-social-share
 amp-soundcloud

@@ -160,4 +160,3 @@ export class ResourcesInterface {
    */
   updateLayoutPriority(element, newLayoutPriority) {}
 }
-/* eslint-enable no-unused-vars */

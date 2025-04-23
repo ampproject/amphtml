@@ -345,7 +345,7 @@ export class AmpWebPushHelperFrame {
   }
 
   /**
-   * Returns a Promise that is resolved when the the page controlling the
+   * Returns a Promise that is resolved when the page controlling the
    * service worker is activated. This Promise never rejects.
    *
    * @return {Promise}

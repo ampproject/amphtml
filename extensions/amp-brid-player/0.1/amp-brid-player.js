@@ -493,6 +493,7 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', (AMP) => {
-  AMP.registerElement(TAG, AmpBridPlayer);
+AMP.extension('amp-brid-player', '0.1', (AMP) => {
+  AMP.registerElement('amp-brid-player', AmpBridPlayer);
+  AMP.registerElement('amp-target-video-player', AmpBridPlayer);
 });

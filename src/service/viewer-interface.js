@@ -226,4 +226,3 @@ export class ViewerInterface {
    */
   replaceUrl(newUrl) {}
 }
-/* eslint-enable no-unused-vars */

@@ -45,9 +45,9 @@ describes.sandboxed('document-info', {}, (env) => {
   }
 
   it('should provide the canonicalUrl', () => {
-    return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
+    return getWin({'canonical': ['https://x.com/']}).then((win) => {
       expect(Services.documentInfoForDoc(win.document).canonicalUrl).to.equal(
-        'https://twitter.com/'
+        'https://x.com/'
       );
     });
   });
@@ -133,7 +133,7 @@ describes.sandboxed('document-info', {}, (env) => {
   });
 
   it('should provide the pageViewId', () => {
-    return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
+    return getWin({'canonical': ['https://x.com/']}).then((win) => {
       expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal(
         '1234'
       );
@@ -144,7 +144,7 @@ describes.sandboxed('document-info', {}, (env) => {
   });
 
   it('should provide the pageViewId64', () => {
-    return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
+    return getWin({'canonical': ['https://x.com/']}).then((win) => {
       expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
         'abcdef'
       );
@@ -164,12 +164,12 @@ describes.sandboxed('document-info', {}, (env) => {
 
   it('should provide the linkRels containing link tag rels', () => {
     return getWin({
-      'canonical': ['https://twitter.com/'],
+      'canonical': ['https://x.com/'],
       'icon': ['https://foo.html/bar.gif'],
     }).then((win) => {
       expect(
         Services.documentInfoForDoc(win.document).linkRels['canonical']
-      ).to.equal('https://twitter.com/');
+      ).to.equal('https://x.com/');
       expect(
         Services.documentInfoForDoc(win.document).linkRels['icon']
       ).to.equal('https://foo.html/bar.gif');
@@ -201,15 +201,15 @@ describes.sandboxed('document-info', {}, (env) => {
       'space in rel',
     () => {
       return getWin({
-        'sharelink canonical': ['https://twitter.com/'],
+        'sharelink canonical': ['https://x.com/'],
         'icon': ['https://foo.html/bar.gif'],
       }).then((win) => {
         expect(
           Services.documentInfoForDoc(win.document).linkRels['sharelink']
-        ).to.equal('https://twitter.com/');
+        ).to.equal('https://x.com/');
         expect(
           Services.documentInfoForDoc(win.document).linkRels['canonical']
-        ).to.equal('https://twitter.com/');
+        ).to.equal('https://x.com/');
         expect(
           Services.documentInfoForDoc(win.document).linkRels['icon']
         ).to.equal('https://foo.html/bar.gif');
@@ -222,7 +222,7 @@ describes.sandboxed('document-info', {}, (env) => {
       'hrefs',
     () => {
       return getWin({
-        'canonical': ['https://twitter.com/'],
+        'canonical': ['https://x.com/'],
         'icon': ['https://foo.html/bar.gif'],
         'stylesheet': [
           'https://foo.html/style1.css',
@@ -230,9 +230,7 @@ describes.sandboxed('document-info', {}, (env) => {
         ],
       }).then((win) => {
         const documentInfo = Services.documentInfoForDoc(win.document);
-        expect(documentInfo.linkRels['canonical']).to.equal(
-          'https://twitter.com/'
-        );
+        expect(documentInfo.linkRels['canonical']).to.equal('https://x.com/');
         expect(documentInfo.linkRels['icon']).to.equal(
           'https://foo.html/bar.gif'
         );
@@ -252,7 +250,7 @@ describes.sandboxed('document-info', {}, (env) => {
       'prefetch/preload/preconnect rels',
     () => {
       return getWin({
-        'canonical': ['https://twitter.com/'],
+        'canonical': ['https://x.com/'],
         'icon': ['https://foo.html/bar.gif'],
         'prefetch': ['https://foo1.com'],
         'preload': ['https://foo2.com'],
@@ -260,7 +258,7 @@ describes.sandboxed('document-info', {}, (env) => {
       }).then((win) => {
         expect(
           Services.documentInfoForDoc(win.document).linkRels['canonical']
-        ).to.equal('https://twitter.com/');
+        ).to.equal('https://x.com/');
         expect(
           Services.documentInfoForDoc(win.document).linkRels['icon']
         ).to.equal('https://foo.html/bar.gif');

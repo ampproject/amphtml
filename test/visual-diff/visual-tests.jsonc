@@ -735,6 +735,8 @@
       "no_base_test": true
     },
     {
+      "flaky": true,
+      // See https://app.circleci.com/pipelines/github/ampproject/amphtml/30897/workflows/f282d8cb-5906-400d-93e6-add6ae10f59b/jobs/669174
       "url": "examples/visual-tests/amp-story-player/player-amp-version.html",
       "name": "amp-story-player AMP version",
       "interactive_tests": "examples/visual-tests/amp-story-player/player-amp-version.js",

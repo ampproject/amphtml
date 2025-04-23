@@ -2,8 +2,8 @@
   "requests": {
     "host": "https://ase.clmbtech.com",
     "base": "${host}/message",
-    "pageview": "${base}?cid=${id}&val_101=${id}&val_101=${int}${canonicalPath}&ch=${canonicalHost}&val_108=${title}&val_120=3&val_102=${sourceUrl}&val_124=${externalReferrer}&uuid=${uid}",
-    "event": "${base}?cid=${id}&val_101=${id}&val_101=${int}${canonicalPath}&val_101=${tet}${totalEngagedTime}&val_102=${clk}${sourceUrl}"
+    "pageview": "${base}?cid=${id}&val_101=${id}&val_101=${int}${canonicalPath}&ch=${canonicalHost}&val_108=${title}&val_120=3&val_102=${sourceUrl}&val_124=${externalReferrer}&uuid=${uid}&val_122=CLIENT_ID(site-user-id-cookie-fallback-name)-0000000",
+    "event": "${base}?cid=${id}&val_101=${id}&val_101=${int}${canonicalPath}&val_101=${tet}${totalEngagedTime}&val_102=${clk}${sourceUrl}&val_122=CLIENT_ID(site-user-id-cookie-fallback-name)"
   },
   "vars": {
     "int": "int:",

@@ -321,7 +321,7 @@ export class ContextNode {
    */
   setIsRoot(isRoot) {
     this.isRoot = isRoot;
-    const newRoot = isRoot ? this : this.parent?.root ?? null;
+    const newRoot = isRoot ? this : (this.parent?.root ?? null);
     this.updateRoot(newRoot);
   }
 

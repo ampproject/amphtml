@@ -3,7 +3,7 @@
  * Make release for the release tagger.
  */
 
-const dedent = require('dedent');
+const {default: dedent} = require('dedent');
 const {GitHubApi} = require('./utils');
 
 /** @typedef {import('@octokit/graphql').GraphQlQueryResponseData} GraphQlQueryResponseData */

@@ -5,8 +5,8 @@ export type AsProps<TAs extends AsComponent> =
   TAs extends keyof IntrinsicElements
     ? {as?: TAs} & IntrinsicElements[TAs]
     : TAs extends ComponentType<infer TProps>
-    ? {as?: TAs} & TProps
-    : never;
+      ? {as?: TAs} & TProps
+      : never;
 
 export type AriaAttributes = {
   'aria-expanded'?: boolean;

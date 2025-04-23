@@ -114,8 +114,8 @@ export function BentoAppBanner(props) {
   const AppBannerForCurrentPlatform = platformUtils.isIos()
     ? AppBannerIOS
     : platformUtils.isAndroid()
-    ? AppBannerAndroid
-    : null;
+      ? AppBannerAndroid
+      : null;
 
   if (!AppBannerForCurrentPlatform) {
     logger.info(

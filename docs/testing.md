@@ -369,13 +369,13 @@ firebase deploy
 
 If you are only testing a single file, you can use `amp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
 
-After deploying, you can access your project publically at its hosting URL `https://your-project-name.firebaseapp.com`.
+After deploying, you can access your project publicly at its hosting URL `https://your-project-name.firebaseapp.com`.
 
 Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
 
 #### Testing Ads
 
-Testing ads in deployed demos requires allowlisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
+Testing ads in deployed demos requires allowlisting of 3p urls. You can do this by adding your intended deployment hostname as an environment variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
 
 ```sh
 export AMP_TESTING_HOST="my-project.firebaseapp.com"

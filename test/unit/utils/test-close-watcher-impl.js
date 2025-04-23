@@ -24,43 +24,57 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     historyMock.verify();
   });
 
-  it('should push and pop history state', async () => {
-    historyMock.expects('push').resolves('H1').once();
-    historyMock.expects('pop').withArgs('H1').once();
-    const watcher = new CloseWatcherImpl(ampdoc, handler);
-    await Promise.resolve('H1');
-    watcher.signalClosed();
-    expect(handler).to.be.calledOnce;
-  });
+  it.configure()
+    .if(() => 'CloseWatcher' in window)
+    .run('should call the handler on requestClose', async () => {
+      const watcher = new CloseWatcherImpl(ampdoc, handler);
+      watcher.requestClose();
+      expect(handler).to.be.calledOnce;
+    });
 
-  it('should trigger on history pop', async () => {
-    let popHandler;
-    historyMock
-      .expects('push')
-      .withArgs(
-        env.sandbox.match((a) => {
-          popHandler = a;
-          return true;
-        })
-      )
-      .resolves('H1')
-      .once();
-    new CloseWatcherImpl(ampdoc, handler);
-    await Promise.resolve('H1');
-    expect(popHandler).to.exist;
-    popHandler();
-    expect(handler).to.be.calledOnce;
-  });
+  it.configure()
+    .if(() => !('CloseWatcher' in window))
+    .run('should push and pop history state', async () => {
+      historyMock.expects('push').resolves('H1').once();
+      historyMock.expects('pop').withArgs('H1').once();
+      const watcher = new CloseWatcherImpl(ampdoc, handler);
+      await Promise.resolve('H1');
+      watcher.requestClose();
+      expect(handler).to.be.calledOnce;
+    });
 
-  it('should trigger on ESC key', async () => {
-    historyMock.expects('push').resolves('H1').once();
-    historyMock.expects('pop').withArgs('H1').once();
-    new CloseWatcherImpl(ampdoc, handler);
-    await Promise.resolve('H1');
+  it.configure()
+    .if(() => !('CloseWatcher' in window))
+    .run('should trigger on history pop', async () => {
+      let popHandler;
+      historyMock
+        .expects('push')
+        .withArgs(
+          env.sandbox.match((a) => {
+            popHandler = a;
+            return true;
+          })
+        )
+        .resolves('H1')
+        .once();
+      new CloseWatcherImpl(ampdoc, handler);
+      await Promise.resolve('H1');
+      expect(popHandler).to.exist;
+      popHandler();
+      expect(handler).to.be.calledOnce;
+    });
 
-    doc.documentElement.dispatchEvent(
-      new KeyboardEvent('keydown', {key: Keys_Enum.ESCAPE})
-    );
-    expect(handler).to.be.calledOnce;
-  });
+  it.configure()
+    .if(() => !('CloseWatcher' in window))
+    .run('should trigger on ESC key', async () => {
+      historyMock.expects('push').resolves('H1').once();
+      historyMock.expects('pop').withArgs('H1').once();
+      new CloseWatcherImpl(ampdoc, handler);
+      await Promise.resolve('H1');
+
+      doc.documentElement.dispatchEvent(
+        new KeyboardEvent('keydown', {key: Keys_Enum.ESCAPE})
+      );
+      expect(handler).to.be.calledOnce;
+    });
 });

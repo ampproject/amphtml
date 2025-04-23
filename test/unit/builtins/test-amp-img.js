@@ -126,7 +126,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
-  it('should preconnect to the the first srcset url if src is not set', async () => {
+  it('should preconnect to the first srcset url if src is not set', async () => {
     const preconnect = {url: sandbox.stub()};
     sandbox.stub(Services, 'preconnectFor').returns(preconnect);
 

@@ -41,6 +41,11 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
   /** @override */
   buildCallback() {
+    this.user().error(
+      TAG,
+      'amp-ad-custom is deprecated, see https://github.com/ampproject/amphtml/issues/39443'
+    );
+
     this.getContext().size = {
       // TODO(levitzky) handle non-numeric values.
       width: this.element.getAttribute('width'),

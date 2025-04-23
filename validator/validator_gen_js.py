@@ -884,7 +884,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
     # We emit the attr lists as arrays of arrays of numbers (which are
     # the attr ids), and treat the globalAttrs and the ampLayoutAttrs
-    # seperately for fast access.
+    # separately for fast access.
     direct_attr_lists = []
     global_attrs = []
     amp_layout_attrs = []

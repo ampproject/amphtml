@@ -18,7 +18,11 @@ export function setInViewportForTesting(inV) {
 // Active intervals. Must be global, because people clear intervals
 // with clearInterval from a different window.
 const intervals = {};
-let intervalId = 1;
+
+// TODO(40235): This is so we avoid the ID range of setTimeout. We
+// should also patch setTimeout and clearTimeout to avoid having to
+// use this.
+let intervalId = 10000000;
 
 /**
  * Add instrumentation to a window and all child iframes.

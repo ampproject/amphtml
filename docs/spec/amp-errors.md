@@ -10,23 +10,37 @@ the `betaErrorReportingUrl` config. E.g. for `cdn.ampproject.org`
 The following fields are reported:
 
 -   `v=string` - AMP version
+-   `noamp={0,1}` - whether the document contains non-AMP JavaScript
 -   `m=string` - the error message
--   `a=1` - whether the error is labeled as "user" error (as opposed to a "dev" error).
--   `ex=1` - whether the error is labeled as "expected".
--   `3p=1` - whether the error occured in the 3p context.
--   `ca=1` - whether this is a canary version of AMP.
--   `or=string` - the ancestor origin if available.
--   `iem=1` - whether this document is iframed.
--   `rvu=string` - the viewer URL, provided by the viewer.
--   `mso=string` - the messaging origin for viewer communication.
--   `el=string` - the identifier/information on the associated DOM element.
--   `s=string` - the error stack.
--   `f=string` - the error's file name.
--   `l=number` - the error's line number.
--   `c=number` - the error's column number.
+-   `a={0,1}` - whether the error is labeled as "user" error (as opposed to a "dev" error).
+-   `ex={0,1}` - whether the error is labeled as "expected".
+-   `dw={0,1}` - whether the document is presented in a detached window (e.g., inside an iframe)
+-   `3p={0,1}` - whether the error occurred in the 3p context.
+-   At most one of the following:
+    -   `sxg=1` - the runtime was build with the `--sxg` (Signed Exchanges) flag.
+    -   `esm=1` - the runtime was build with the `--esm` (JavaScript Modules) flag.
+    -   `3p=1` - the runtime is served from a third party.
+-   `rt=string` - the runtime type.
+-   `cdn=string` - the value of `cdnUrl` in the runtime configuration, or the value of the `runtime-host` meta tag if the former is undefined.
+-   `adid=string` - _(`rt=inabox` only)_ the A4A ID.
+-   `ca=1` - _(deprecated)_ whether this is a canary version of AMP.
+-   `bt=string` - runtime release channel type.
+-   `or=string` - _(optional)_ the ancestor origin if available.
+-   `vs=string` - _(optional)_ the viewer's state.
+-   `iem=1` - _(optional)_ whether this document is iframed.
+-   `rvu=string` - _(optional)_ the viewer URL, provided by the viewer.
+-   `mso=string` - _(optional)_ the messaging origin for viewer communication.
+-   `exps=string` - _(optional)_ the defined experiments and whether they are turned on, in the format `expname=1,expname=0,expname=1`...
+-   `el=string` - _(optional)_ the identifier/information on the associated DOM element.
+-   `args=string` - _(optional)_ JSON.Stringified arguments associated with the error object.
+-   `s=string` - _(optional)_ the error stack.
+-   `f=string` - _(optional)_ the error's file name.
+-   `l=number` - _(optional)_ the error's line number.
+-   `c=number` - _(optional)_ the error's column number.
 -   `r=string` - the document's referrer.
 -   `ae=string` - accumulated/correlated error messages.
 -   `fr=string` - the document's location fragment.
+-   `pt=1` - _(optional)_ _internal implementation detail_
 
 ## "Expected" errors
 

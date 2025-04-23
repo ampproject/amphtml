@@ -1491,14 +1491,14 @@ tags: {
       protocol: "tel"
       allow_relative: false
     }
-    # Openning doubly curly brackets {{ (these are mustache delimiters) can only
-    # appear at the beginnig of the attribute's value. Likewise closing doubly
+    # Opening doubly curly brackets {{ (these are mustache delimiters) can only
+    # appear at the beginning of the attribute's value. Likewise closing doubly
     # curly brackets }} can only appear at the end of the attribute's value.
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
     disallowed_value_regex: "__amp_source_origin|"
-        "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
+        "(.|\\s){{|"    # Opening delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
         "^[^{][^{].*}}$|"    # Delimiters must be balanced.
@@ -3866,14 +3866,14 @@ attr_lists: {
       protocol: "https"
       allow_relative: false
     }
-    # Openning doubly curly brackets {{ (these are mustache delimiters) can only
-    # appear at the beginnig of the attribute's value. Likewise closing doubly
+    # Opening doubly curly brackets {{ (these are mustache delimiters) can only
+    # appear at the beginning of the attribute's value. Likewise closing doubly
     # curly brackets }} can only appear at the end of the attribute's value.
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
     disallowed_value_regex: "__amp_source_origin|"
-        "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
+        "(.|\\s){{|"    # Opening delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
         "^[^{][^{].*}}$|"    # Delimiters must be balanced.
@@ -3893,14 +3893,14 @@ attr_lists: {
       protocol: "https"
       allow_relative: false
     }
-    # Openning doubly curly brackets {{ (these are mustache delimiters) can only
-    # appear at the beginnig of the attribute's value. Likewise closing doubly
+    # Opening doubly curly brackets {{ (these are mustache delimiters) can only
+    # appear at the beginning of the attribute's value. Likewise closing doubly
     # curly brackets }} can only appear at the end of the attribute's value.
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
     disallowed_value_regex: "__amp_source_origin|"
-        "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
+        "(.|\\s){{|"    # Opening delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
         "^[^{][^{].*}}$|"    # Delimiters must be balanced.

@@ -17,6 +17,10 @@ tags: {  # <amp-connatix-player>
     name: "data-player-id"
     mandatory: true
   }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   spec_url: "https://amp.dev/documentation/components/amp-connatix-player/"
   amp_layout: {
     supported_layouts: FILL

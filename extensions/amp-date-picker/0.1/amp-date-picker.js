@@ -1084,10 +1084,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       target === this.dateField_
         ? 'date'
         : target === this.startDateField_
-        ? 'startDate'
-        : target === this.endDateField_
-        ? 'endDate'
-        : '';
+          ? 'startDate'
+          : target === this.endDateField_
+            ? 'endDate'
+            : '';
     const moment = this.createMoment_(target.value);
     const isValid =
       moment && moment.isValid() && moment.year() > MIN_PICKER_YEAR;
@@ -1461,8 +1461,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       focusedInput === START_DATE
         ? this.startDateField_
         : focusedInput === END_DATE
-        ? this.endDateField_
-        : this.dateField_;
+          ? this.endDateField_
+          : this.dateField_;
     this.updateDateFieldFocus_(focusedField, this.state_['isOpen']);
 
     this.setState_({

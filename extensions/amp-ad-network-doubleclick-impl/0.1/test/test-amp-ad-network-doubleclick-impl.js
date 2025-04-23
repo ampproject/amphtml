@@ -3,6 +3,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AMP_GFP_SET_COOKIES_HEADER_NAME} from '#ads/google/a4a/cookie-utils';
 import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 
 import {
@@ -17,6 +18,8 @@ import * as bytesUtils from '#core/types/string/bytes';
 import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
+
+import {getCookie, setCookie} from 'src/cookies';
 
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
@@ -553,6 +556,72 @@ for (const {config, name} of [
               // Just ensure extensions is loaded, and analytics element appended.
             }
           );
+        });
+
+        it('should clear cookies as specified in creative response, with opt out', () => {
+          setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
+          setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
+
+          impl.onCreativeRender(false);
+          impl.checkIfClearCookiePostMessageHasValidSource_ = () => true;
+          env.win.postMessage(
+            JSON.stringify({
+              googMsgType: 'gpi-uoo',
+              userOptOut: true,
+              clearAdsData: true,
+            }),
+            '*'
+          );
+
+          expect(getCookie(env.win, '__gpi_opt_out')).to.equal('1');
+          expect(getCookie(env.win, '__gads')).to.be.null;
+          expect(getCookie(env.win, '__gpi')).to.be.null;
+        });
+
+        it('should clear cookies as specified in creative response, without opt out', () => {
+          setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
+          setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
+
+          impl.onCreativeRender(false);
+          impl.checkIfClearCookiePostMessageHasValidSource_ = () => true;
+          env.win.postMessage(
+            JSON.stringify({
+              googMsgType: 'gpi-uoo',
+              userOptOut: false,
+              clearAdsData: true,
+            }),
+            '*'
+          );
+
+          expect(getCookie(env.win, '__gpi_opt_out')).to.equal('0');
+          expect(getCookie(env.win, '__gads')).to.be.null;
+          expect(getCookie(env.win, '__gpi')).to.be.null;
+        });
+
+        it('should not clear cookies as specified in creative response, without opt out or clear ads', () => {
+          setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
+          setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
+
+          impl.onCreativeRender(false);
+          impl.checkIfClearCookiePostMessageHasValidSource_ = () => true;
+          env.win.postMessage(
+            JSON.stringify({
+              googMsgType: 'gpi-uoo',
+              userOptOut: false,
+              clearAdsData: false,
+            }),
+            '*'
+          );
+
+          expect(getCookie(env.win, '__gpi_opt_out')).to.equal('0');
+          expect(getCookie(env.win, '__gads')).to.equal('__gads_val');
+          expect(getCookie(env.win, '__gpi')).to.equal('__gpi_val');
         });
 
         it('should register click listener', () => {
@@ -1259,6 +1328,21 @@ for (const {config, name} of [
             expect(url).to.match(/(\?|&)tfcd=1(&|$)/);
           });
         });
+
+        it('should include gpp, if consentStringType is GLOBAL_PRIVACY_PLATFORM', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          return impl
+            .getAdUrl({
+              consentStringType: CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM,
+              consentString: 'gppString',
+              gppSectionId: '1,2',
+            })
+            .then((url) => {
+              expect(url).to.match(/(\?|&)gpp=gppString(&|$)/);
+              expect(url).to.match(/(\?|&)gpp_sid=1%2C2(&|$)/);
+              expect(url).to.not.match(/(\?|&)us_privacy=/);
+            });
+        });
       });
 
       describe('#getPageParameters', () => {
@@ -1807,6 +1891,54 @@ for (const {config, name} of [
             '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
           expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+        });
+      });
+
+      describes.fakeWin('#onAdResponse', {amp: true}, (env) => {
+        let element;
+
+        beforeEach(() => {
+          element = env.win.document.createElement('amp-ad');
+          element.setAttribute('type', 'doubleclick');
+          env.win.document.body.appendChild(element);
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        afterEach(() => {
+          env.win.document.body.removeChild(element);
+        });
+
+        it('sets cookies as specified on the ad response', () => {
+          impl.onAdResponse({
+            headers: {
+              has: (header) => {
+                return header === AMP_GFP_SET_COOKIES_HEADER_NAME;
+              },
+              get: (header) => {
+                if (header !== AMP_GFP_SET_COOKIES_HEADER_NAME) {
+                  return;
+                }
+
+                return JSON.stringify([
+                  {
+                    '_version_': 1,
+                    '_value_': 'val1',
+                    '_domain_': 'foo.com',
+                    '_expiration_': Date.now() + 100_000,
+                  },
+                  {
+                    '_version_': 2,
+                    '_value_': 'val2',
+                    '_domain_': 'foo.com',
+                    '_expiration_': Date.now() + 100_000,
+                  },
+                ]);
+              },
+            },
+          });
+
+          expect(getCookie(env.win, '__gads')).to.equal('val1');
+          expect(getCookie(env.win, '__gpi')).to.equal('val2');
         });
       });
     }

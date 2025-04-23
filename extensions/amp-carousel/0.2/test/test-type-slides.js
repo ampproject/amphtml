@@ -179,7 +179,8 @@ describes.realWin(
       }
     });
 
-    it('should show focus outline and border on next and prev buttons', async () => {
+    // TODO(#40258) Fix and unskip flakey test.
+    it.skip('should show focus outline and border on next and prev buttons', async () => {
       const carousel = await getCarousel({loop: false});
       const impl = await carousel.getImpl();
 

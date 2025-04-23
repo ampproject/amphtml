@@ -1039,7 +1039,7 @@ export class AmpForm {
   }
 
   /**
-   * Transition the form the the submit error state.
+   * Transition the form the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
    * @param {!ActionTrust_Enum} incomingTrust

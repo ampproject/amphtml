@@ -65,11 +65,11 @@ Notice, that XHR and Fetch API are only some of the sources of documents. Other 
 
 #### Visibility state (`visibilityState`)
 
-The `options` argument is optional and can provide configuration parameters for AMP document. The most relevant of these options is `visibilityState`. By default it takes the value of "visible", but can be configured to "prerender" mode instead. Prerender mode can be used for minimal prerendering of the element. In this mode most of features are disabled, including analytics and ads. The mode can be later changed to "visibile" via `shadowDoc.setVisibilityState()` function.
+The `options` argument is optional and can provide configuration parameters for AMP document. The most relevant of these options is `visibilityState`. By default it takes the value of "visible", but can be configured to "prerender" mode instead. Prerender mode can be used for minimal prerendering of the element. In this mode most of features are disabled, including analytics and ads. The mode can be later changed to "visible" via `shadowDoc.setVisibilityState()` function.
 
 ### Shadow-doc API
 
-Both `AMP.attachShadowDoc` and `AMP.attachShadowDocAsStream` return a `ShadowDoc` object that provides numerous ways for interracting with attached AMP documents. This object exposes the following methods and properties:
+Both `AMP.attachShadowDoc` and `AMP.attachShadowDocAsStream` return a `ShadowDoc` object that provides numerous ways for interacting with attached AMP documents. This object exposes the following methods and properties:
 
 -   `shadowDoc.writer` - the writer that can be used to stream the AMP document. Only available for `attachShadowDocAsStream`.
 -   `shadowDoc.url` - the URL used in the `attachShadowDoc` or `attachShadowDocAsStream`.
@@ -127,6 +127,6 @@ We tested with [WebComponents.js polyfill](https://github.com/webcomponents/webc
 
 ## Examples and references
 
-See [pwa.js](../examples/pwa/pwa.js) for examples of uses of boths APIs.
+See [pwa.js](../../examples/pwa/pwa.js) for examples of uses of both APIs.
 
 See [Combine AMP with PWA](https://amp.dev/documentation/guides-and-tutorials/learn/combine-amp-pwa) and [Embed & use AMP as a data source](https://amp.dev/documentation/guides-and-tutorials/integrate/amp-in-pwa) guides.

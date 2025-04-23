@@ -4,9 +4,9 @@ import '#3p/polyfills';
 import {register} from '#3p/3p';
 import {draw3p, init} from '#3p/integration-lib';
 
-import {yahoo} from '#ads/vendors/yahoo';
+import {sevio} from '#ads/vendors/sevio';
 
 init(window);
-register('yahoo', yahoo);
+register('sevio', sevio);
 
 window.draw3p = draw3p;

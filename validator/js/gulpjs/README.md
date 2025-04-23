@@ -56,7 +56,7 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ### 1.0.3
 
--   Remove engine section from pacakge.json to allow any version of gulpjs.
+-   Remove engine section from package.json to allow any version of gulpjs.
 
 ### 1.0.2
 

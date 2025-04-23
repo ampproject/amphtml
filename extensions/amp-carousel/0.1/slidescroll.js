@@ -160,8 +160,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
       .startsWith('10.3')
       ? true
       : this.isIos_
-      ? false
-      : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
+        ? false
+        : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
 
     /** @private {boolean} */
     this.hasFirstResizedOccured_ = false;
@@ -567,8 +567,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     const timeout = this.hasNativeSnapPoints_
       ? NATIVE_SNAP_TIMEOUT
       : this.isIos_
-      ? IOS_CUSTOM_SNAP_TIMEOUT
-      : CUSTOM_SNAP_TIMEOUT;
+        ? IOS_CUSTOM_SNAP_TIMEOUT
+        : CUSTOM_SNAP_TIMEOUT;
     // Timer that detects scroll end and/or end of snap scroll.
     this.waitForScrollSettled_(timeout);
 
@@ -693,15 +693,15 @@ export class AmpSlideScroll extends AMP.BaseElement {
         newIndex < 0
           ? this.noOfSlides_ - 1
           : newIndex >= this.noOfSlides_
-          ? 0
-          : newIndex;
+            ? 0
+            : newIndex;
     } else {
       newIndex =
         newIndex < 0
           ? 0
           : newIndex >= this.noOfSlides_
-          ? this.noOfSlides_ - 1
-          : newIndex;
+            ? this.noOfSlides_ - 1
+            : newIndex;
     }
     return newIndex;
   }
@@ -779,8 +779,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return currentIndex - 1 >= 0
       ? currentIndex - 1
       : this.shouldLoop_
-      ? this.noOfSlides_ - 1
-      : null;
+        ? this.noOfSlides_ - 1
+        : null;
   }
 
   /**
@@ -793,8 +793,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return currentIndex + 1 < this.noOfSlides_
       ? currentIndex + 1
       : this.shouldLoop_
-      ? 0
-      : null;
+        ? 0
+        : null;
   }
 
   /**
