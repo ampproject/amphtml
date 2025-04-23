@@ -1065,11 +1065,6 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'puffnetwork': {
-    prefetch: 'https://static.puffnetwork.com/amp_ad.js',
-    renderStartImplemented: true,
-  },
-
   'pulse': {
     prefetch: 'https://static.pulse.mail.ru/pulse-widget-amp.js',
     renderStartImplemented: true,
