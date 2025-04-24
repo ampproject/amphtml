@@ -27,7 +27,9 @@ export function getA4ARegistry() {
       'dianomi': () => true,
       'doubleclick': () => true,
       'fake': () => true,
-      'mgid': (win, adTag) => !adTag.hasAttribute('data-container'),
+      'mgid': (win, adTag) =>
+        !adTag.hasAttribute('data-container') &&
+        !adTag.hasAttribute('data-website'),
       'nws': () => true,
       'smartadserver': () => true,
       'valueimpression': () => true,
@@ -47,6 +49,8 @@ export function getA4ARegistry() {
  * @type {!{[key: string]: string}}
  */
 export const signingServerURLs = {
+  /* eslint-disable local/no-forbidden-terms */
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+  /* eslint-enable local/no-forbidden-terms */
 };

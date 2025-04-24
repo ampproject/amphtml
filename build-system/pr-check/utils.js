@@ -3,7 +3,7 @@
 const fs = require('fs-extra');
 const {
   ciPullRequestSha,
-  circleciBuildNumber,
+  circleciUniqueBuildNumber,
   isCiBuild,
   isCircleciBuild,
 } = require('../common/ci');
@@ -20,10 +20,6 @@ const {cyan, green, yellow} = require('kleur/colors');
 const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {getStdout} = require('../common/process');
-
-const UNMINIFIED_CONTAINER_DIRECTORY = 'unminified';
-const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
-const MODULE_CONTAINER_DIRECTORY = 'module';
 
 const FILELIST_PATH = '/tmp/filelist.txt';
 
@@ -99,7 +95,7 @@ function printChangeSummary() {
 function signalGracefulHalt() {
   if (isCircleciBuild()) {
     const loggingPrefix = getLoggingPrefix();
-    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciBuildNumber()}`;
+    const sentinelFile = `/tmp/workspace/.CI_GRACEFULLY_HALT_${circleciUniqueBuildNumber()}`;
     fs.closeSync(fs.openSync(sentinelFile, 'w'));
     logWithoutTimestamp(
       `${loggingPrefix} Created ${cyan(sentinelFile)} to signal graceful halt.`
@@ -218,10 +214,9 @@ const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
  * Stores build files to the CI workspace.
- * @param {string} containerDirectory
- * @private
  */
-function storeBuildToWorkspace_(containerDirectory) {
+function storeBuildOutputToWorkspace() {
+  const containerDirectory = circleciUniqueBuildNumber();
   if (isCircleciBuild()) {
     fs.ensureDirSync(`/tmp/workspace/builds/${containerDirectory}`);
     for (const outputDir of BUILD_OUTPUT_DIRS) {
@@ -234,35 +229,6 @@ function storeBuildToWorkspace_(containerDirectory) {
       }
     }
   }
-}
-
-/**
- * Stores unminified build files to the CI workspace.
- */
-function storeUnminifiedBuildToWorkspace() {
-  storeBuildToWorkspace_(UNMINIFIED_CONTAINER_DIRECTORY);
-}
-
-/**
- * Stores nomodule build files to the CI workspace.
- */
-function storeNomoduleBuildToWorkspace() {
-  storeBuildToWorkspace_(NOMODULE_CONTAINER_DIRECTORY);
-}
-
-/**
- * Stores module build files to the CI workspace.
- */
-function storeModuleBuildToWorkspace() {
-  storeBuildToWorkspace_(MODULE_CONTAINER_DIRECTORY);
-}
-
-/**
- * Stores an experiment's build files to the CI workspace.
- * @param {string} exp one of 'experimentA', 'experimentB', or 'experimentC'.
- */
-function storeExperimentBuildToWorkspace(exp) {
-  storeBuildToWorkspace_(exp);
 }
 
 /**
@@ -298,9 +264,6 @@ module.exports = {
   timedExecOrDie,
   timedExecWithError,
   timedExecOrThrow,
-  storeUnminifiedBuildToWorkspace,
-  storeNomoduleBuildToWorkspace,
-  storeModuleBuildToWorkspace,
-  storeExperimentBuildToWorkspace,
+  storeBuildOutputToWorkspace,
   generateCircleCiShardTestFileList,
 };

@@ -102,7 +102,7 @@ class RuntimeTestConfig {
   }
 
   /**
-   * Picks a browser config based on the the test type and command line flags.
+   * Picks a browser config based on the test type and command line flags.
    * Defaults to Chrome.
    */
   updateBrowsers() {
@@ -133,6 +133,15 @@ class RuntimeTestConfig {
       this.junitReporter = {
         outputFile: `result-reports/${this.testType}.xml`,
         useBrowserName: false,
+        nameFormatter(_, result) {
+          return result.description.trim();
+        },
+        classNameFormatter(_, result) {
+          return result.suite
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .join(' » ');
+        },
       };
     }
 

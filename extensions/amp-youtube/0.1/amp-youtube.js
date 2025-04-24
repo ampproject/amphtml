@@ -115,8 +115,6 @@ class AmpYoutube extends AMP.BaseElement {
     const preconnect = Services.preconnectFor(this.win);
     const ampdoc = this.getAmpDoc();
     preconnect.url(ampdoc, this.getVideoIframeSrc_());
-    // Host that YT uses to serve JS needed by player.
-    preconnect.url(ampdoc, 'https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
     preconnect.url(ampdoc, 'https://i.ytimg.com', opt_onLayout);
   }

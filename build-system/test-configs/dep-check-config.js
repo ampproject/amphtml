@@ -108,6 +108,7 @@ exports.rules = [
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
+      'ads/google/a4a/cookie-utils.js->src/cookies.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper

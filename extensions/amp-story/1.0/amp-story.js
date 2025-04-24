@@ -2528,7 +2528,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Checks for the the storyNavigationPath stack in the history.
+   * Checks for the storyNavigationPath stack in the history.
    * @private
    */
   initializeStoryNavigationPath_() {

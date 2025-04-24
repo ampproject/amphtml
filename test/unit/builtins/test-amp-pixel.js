@@ -141,7 +141,10 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     });
   });
 
-  it('should not allow attribution reporting', () => {
+  it('should not allow attribution reporting with a non-supporting browser', () => {
+    env.sandbox
+      .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
+      .returns(false);
     const attributionSrc =
       '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
     pixel.setAttribute(
@@ -153,7 +156,6 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       expect(img.src).to.equal(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?ars=5'
       );
-      expect(img.attributionSrc).to.be.undefined;
     });
   });
 

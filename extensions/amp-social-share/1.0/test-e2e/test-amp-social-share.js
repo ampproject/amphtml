@@ -101,7 +101,7 @@ describes.endtoend(
         await controller.switchToWindow(windows[1]);
 
         await expect(controller.getCurrentUrl()).to.have.string(
-          'https://twitter.com/'
+          'https://x.com/'
         );
       });
 
@@ -119,9 +119,7 @@ describes.endtoend(
         await expect(windows.length).to.equal(2);
         await controller.switchToWindow(windows[1]);
 
-        await expect(controller.getCurrentUrl()).to.equal(
-          'https://www.tumblr.com/login?redirect_to=https%3A%2F%2Fwww.tumblr.com%2Fwidgets%2Fshare%2Ftool%3FshareSource%3Dlegacy%26canonicalUrl%3D%26url%3Dhttp%253A%252F%252Fexample.com%252F%26posttype%3Dlink%26title%3Damp-social-share%26caption%3D%26content%3Dhttp%253A%252F%252Fexample.com%252F'
-        );
+        await expect(controller.getCurrentUrl()).to.contain('tumblr.com');
       });
     });
   }

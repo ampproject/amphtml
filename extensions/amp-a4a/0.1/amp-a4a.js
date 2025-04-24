@@ -25,10 +25,12 @@ import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
-import {DomTransformStream} from '#utils/dom-tranform-stream';
+import {DomTransformStream} from '#utils/dom-transform-stream';
 import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
+
+import {canSetCookie, getCookie} from 'src/cookies';
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
@@ -145,6 +147,7 @@ export let CreativeMetaDataDef;
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
       consentSharedData: (?Object|undefined),
+      gppSectionId: (?string|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -787,6 +790,12 @@ export class AmpA4A extends AMP.BaseElement {
         const consentStringType = consentMetadata
           ? consentMetadata['consentStringType']
           : consentMetadata;
+        const purposeOne = consentMetadata
+          ? consentMetadata['purposeOne']
+          : consentMetadata;
+        const gppSectionId = consentMetadata
+          ? consentMetadata['gppSectionId']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (
           this.getServeNpaSignal().then((npaSignal) =>
@@ -798,6 +807,8 @@ export class AmpA4A extends AMP.BaseElement {
                 gdprApplies,
                 additionalConsent,
                 consentSharedData,
+                purposeOne,
+                gppSectionId,
               },
               this.tryExecuteRealTimeConfig_(
                 consentState,
@@ -831,6 +842,15 @@ export class AmpA4A extends AMP.BaseElement {
       // response is empty.
       /** @return {!Promise<!Response>} */
       .then((fetchResponse) => {
+        protectFunctionWrapper(this.onAdResponse, this, (err) => {
+          dev().error(
+            TAG,
+            this.element.getAttribute('type'),
+            'Error executing onAdResponse',
+            err
+          );
+        })(fetchResponse);
+
         checkStillCurrent();
         this.maybeTriggerAnalyticsEvent_('adRequestEnd');
         // If the response is null (can occur for non-200 responses)  or
@@ -1664,6 +1684,12 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * To be overridden by implementing subclasses.
+   * @param {!Response} unusedFetchResponse
+   */
+  onAdResponse(unusedFetchResponse) {}
+
+  /**
    * @param {!Element} iframe that was just created.  To be overridden for
    * testing.
    * @visibleForTesting
@@ -2399,6 +2425,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
+    const hasStorageConsent =
+      consentState != CONSENT_POLICY_STATE.UNKNOWN &&
+      consentState != CONSENT_POLICY_STATE.INSUFFICIENT &&
+      ((consentMetadata?.gdprApplies &&
+        consentString &&
+        consentMetadata?.purposeOne) ||
+        !consentMetadata?.gdprApplies);
     if (this.element.getAttribute('rtc-config')) {
       installRealTimeConfigServiceForDoc(this.getAmpDoc());
       return this.getBlockRtc_().then((shouldBlock) =>
@@ -2408,7 +2441,7 @@ export class AmpA4A extends AMP.BaseElement {
               (realTimeConfig) =>
                 realTimeConfig.maybeExecuteRealTimeConfig(
                   this.element,
-                  this.getCustomRealTimeConfigMacros_(),
+                  this.getCustomRealTimeConfigMacros_(hasStorageConsent),
                   consentState,
                   consentString,
                   consentMetadata,
@@ -2422,10 +2455,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
+   * @param {?boolean} unusedHasStorageConsent
    * @return {!Object<string,
    *   !../../../src/service/variable-source.AsyncResolverDef>}
    */
-  getCustomRealTimeConfigMacros_() {
+  getCustomRealTimeConfigMacros_(unusedHasStorageConsent) {
     return {};
   }
 
@@ -2574,4 +2608,47 @@ export function isPlatformSupported(win) {
  */
 function isNative(func) {
   return !!func && func.toString().indexOf('[native code]') != -1;
+}
+
+/**
+ * @param {?ConsentTupleDef} consentTuple
+ * @return {boolean}
+ */
+export function hasStorageConsent(consentTuple) {
+  if (!consentTuple) {
+    return false;
+  }
+
+  if (
+    [CONSENT_POLICY_STATE.UNKNOWN, CONSENT_POLICY_STATE.INSUFFICIENT].includes(
+      consentTuple.consentState
+    )
+  ) {
+    return false;
+  }
+
+  const {consentString, gdprApplies, purposeOne} = consentTuple;
+
+  if (!gdprApplies) {
+    return true;
+  }
+
+  return consentString && purposeOne;
+}
+
+/**
+ * @param {?ConsentTupleDef} consentTuple
+ * @param {!Window} win
+ * @param {!{[key: string]: string|boolean|number}} params
+ */
+export function tryAddingCookieParams(consentTuple, win, params) {
+  if (!hasStorageConsent(consentTuple)) {
+    return;
+  }
+  const cookie = getCookie(win, '__gads');
+  params['cookie'] = cookie;
+  params['gpic'] = getCookie(win, '__gpi');
+  if (!cookie && canSetCookie(win)) {
+    params['cookie_enabled'] = '1';
+  }
 }

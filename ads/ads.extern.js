@@ -551,6 +551,9 @@ data.local;
 data.enablemraid;
 data.jsplayer;
 
+// momagic
+window.momagicAmpInit;
+
 // nativo.js
 var PostRelease;
 PostRelease.Start;
@@ -592,6 +595,12 @@ dfpData.targeting;
 data.dfpSlot;
 data.nc;
 data.auid;
+
+// piberica.js
+data.height;
+data.publisher;
+data.slot;
+data.width;
 
 // pixels.js
 var pixelsAd;

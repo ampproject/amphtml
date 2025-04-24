@@ -1,5 +1,6 @@
 'use strict';
 
+const {sleep} = require('../../build-system/tasks/visual-diff/helpers');
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
@@ -26,7 +27,7 @@ module.exports = {
     await page.tap('#multi_selector span[option="2"]');
     await page.tap('#disabled_selector span[option="2"]');
     await page.tap('#disabled_selector span[option="3"]');
-    await page.waitForTimeout(100);
+    await sleep(100);
   },
 
   'change mutli select': async (page, name) => {

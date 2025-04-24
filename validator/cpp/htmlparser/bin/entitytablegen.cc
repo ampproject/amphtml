@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
 
       if ((code_point & 0xffffff80) == 0) {  // 1 byte sequence.
         // 0b0xxxxxx.
-        fd << "\\x" << code_point;
+        fd << "\\x" << std::hex << static_cast<uint32_t>(code_point);
       } else if ((code_point & 0xfffff800) == 0) {  // 2 byte sequence.
         // 0b110xxxxx 0b10xxxxxx.
         fd << "\\x" << std::hex << ((code_point >> 6) | 0xc0)

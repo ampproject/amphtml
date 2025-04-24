@@ -67,7 +67,6 @@
       <option>comscore</option>
       <option>cxense</option>
       <option>deepbi</option>
-      <option>dynatrace</option>
       <option>epica</option>
       <option>euleriananalytics</option>
       <option>facebook-pixel</option>
@@ -126,6 +125,7 @@
       <option>top100</option>
       <option>topmailru</option>
       <option>treasuredata</option>
+      <option>tribooanalytics</option>
       <option>umenganalytics</option>
       <option>upscore</option>
       <option>vponanalytics</option>
@@ -649,20 +649,6 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Deep.BI example -->
-
-
-<!-- dynatrace tracking -->
-<amp-analytics type="dynatrace" id="dynatrace">
-<script type="application/json">
-{
-  "vars": {
-    "app": "appid",
-    "tenant": "1"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End dynatrace example -->
 
 <!-- EPICA analytics tracking -->
 <amp-analytics type="epica" id="epica">
@@ -1966,6 +1952,19 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Treasure Data example -->
+
+<!-- tribooanalytics example -->
+<amp-analytics type="tribooanalytics" id="tribooanalytics">
+<script type="application/json">
+  {
+    "vars": {
+      "account": "amptest",
+      "page": "Home page"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End tribooanalytics Example -->
 
 <!-- Webtrekk tracking -->
 <amp-analytics type="webtrekk" id="webtrekk">

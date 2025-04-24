@@ -83,7 +83,7 @@ function digitizeValidationErrorFields(error) {
 /**
  * When transforming validation errors and validation results from jspb to plain
  * objects, the protobuf base64 string is also attached to the output.
- * Hence when a plain object needs to be transformed back to protobuf,
+ * Hence when a plain object neeeds to be transformed back to protobuf,
  * the attached base64 could be directly used.
  */
 const PB_BASE64 = '_PB_BASE64';

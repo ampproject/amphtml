@@ -826,7 +826,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
       // Replace characters from Windows-1252 with UTF-8 equivalents.
       x = kReplacementTable[x - 0x80];
     } else if (x == 0 || (0xD800 <= x && x <= 0xDFFF) || x > 0x10FFFF) {
-      // Replace invalid characters with the replacement character.
+      // Replace invalid characters with the replacement chracter.
       x = L'\uFFFD';
     }
 
@@ -839,7 +839,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     }
   }
 
-  // Consume the maximum number of characters possible, with the consumed
+  // Consume the maximum number of chracters possible, with the consumed
   // characters matching one of the named references.
   while (i < s.size()) {
     auto c = s.at(i);
@@ -953,7 +953,7 @@ bool ExtractChars(std::string_view str, std::vector<char32_t>* chars) {
   while (!str.empty()) {
     uint8_t c = str.front() & 0xff;
 
-    // ASCII characters first.
+    // ASCII chracters first.
     if (IsOneByteASCIIChar(c)) {
       chars->push_back(c);
       str.remove_prefix(1);

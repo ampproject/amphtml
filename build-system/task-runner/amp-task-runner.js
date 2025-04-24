@@ -4,7 +4,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const commander = require('commander');
+const {program} = require('commander');
 const esprima = require('esprima');
 const fs = require('fs-extra');
 const os = require('os');
@@ -218,7 +218,7 @@ function createTask(
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
 
   if (isHelpTask) {
-    const task = commander.command(cyan(taskName));
+    const task = program.command(cyan(taskName));
     const description = getTaskDescription(taskSourceFileName, taskFuncName);
     task.description(description);
   }
@@ -226,7 +226,7 @@ function createTask(
     startAtRepoRoot();
     ensureUpdatedPackages(taskSourceFileName);
     const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
-    const task = commander.command(taskName, {isDefault: isDefaultTask});
+    const task = program.command(taskName, {isDefault: isDefaultTask});
     task.description(green(taskFunc.description));
     task.allowUnknownOption(); // Fall through to validateUsage()
     task.helpOption('--help', 'Print this list of flags');
@@ -267,18 +267,18 @@ function validateUsage(task, taskName, taskFunc) {
  * was called.
  */
 function finalizeRunner() {
-  commander.addHelpCommand(false); // We already have `amp --help` and `amp <task> --help`
+  program.addHelpCommand(false); // We already have `amp --help` and `amp <task> --help`
   if (isHelpTask) {
-    commander.helpOption('--help', 'Print this list of tasks');
-    commander.usage('<task> <flags>');
+    program.helpOption('--help', 'Print this list of tasks');
+    program.usage('<task> <flags>');
   }
-  commander.on('command:*', (args) => {
+  program.on('command:*', (args) => {
     log(red('ERROR:'), 'Unknown task', cyan(args.join(' ')));
     log('⤷ Run', cyan('amp --help'), 'for a full list of tasks.');
     log('⤷ Run', cyan('amp <task> --help'), 'for help with a specific task.');
     process.exitCode = 1;
   });
-  commander.parse();
+  program.parse();
 }
 
 module.exports = {

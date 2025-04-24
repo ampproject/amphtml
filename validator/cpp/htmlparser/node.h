@@ -61,7 +61,7 @@ class Node {
   // This does not change order or parent/child relationship of this or child
   // nodes in the tree.
   // Generally, treat this as a private function. Part of public interface for
-  // some specific scenarios:
+  // some specific sceanrios:
   // A) Unit testing.
   // B) When parsing a fragment.
   // C) Custom error/warning reporting.

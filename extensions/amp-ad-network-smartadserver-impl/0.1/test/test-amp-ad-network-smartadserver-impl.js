@@ -23,6 +23,8 @@ import {Services} from '#service';
 
 import {createIframeWithMessageStub} from '#testing/iframe';
 
+import * as consent from '../../../../src/consent';
+import * as iframe from '../../../../src/iframe-attributes';
 import {XORIGIN_MODE} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkSmartadserverImpl} from '../amp-ad-network-smartadserver-impl';
 
@@ -113,7 +115,9 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
 
       impl = new AmpAdNetworkSmartadserverImpl(element, env.win.doc, win);
       const docInfo = Services.documentInfoForDoc(element);
-      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ false
+      );
 
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
       expect(customMacros.PAGEVIEWID_64()).to.equal(docInfo.pageViewId64);
@@ -156,6 +160,63 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         macros['not-allowed']
       );
       expect(customMacros.ATTR('not-allowed')).to.equal('');
+    });
+
+    it('should not set adcid if no storage consent', () => {
+      element = createElementWithAttributes(doc, 'amp-ad');
+      impl = new AmpAdNetworkSmartadserverImpl(element);
+      const customMacros = impl.getCustomRealTimeConfigMacros_(
+        /*hasStorageConsent=*/ false
+      );
+
+      return customMacros.ADCID().then((adcid) => {
+        expect(adcid).to.be.undefined;
+      });
+    });
+  });
+
+  describe('renderViaIframeGet_', () => {
+    let getContextMetadataStub;
+    beforeEach(() => {
+      getContextMetadataStub = env.sandbox
+        .stub(iframe, 'getContextMetadata')
+        .returns({
+          _context: {},
+        });
+      env.sandbox
+        .stub(consent, 'getConsentDataToForward')
+        .resolves({consentString: 'constent', gdprApplies: true});
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        width: '300',
+        height: '250',
+        type: 'smartadserver',
+      });
+      element.getIntersectionChangeEntry = () => ({
+        rootBounds: {},
+        intersectionRect: {},
+        boundingClientRect: {},
+      });
+      impl = new AmpAdNetworkSmartadserverImpl(element);
+      env.sandbox.stub(impl, 'iframeRenderHelper_');
+    });
+    afterEach(() => {
+      env.sandbox.restore();
+    });
+    it('should call maybeTriggerAnalyticsEvent_', async () => {
+      const spy = env.sandbox.spy(impl, 'maybeTriggerAnalyticsEvent_');
+      expect(spy.called).to.be.false;
+      impl.renderViaIframeGet_('fakeURL').then(() => {
+        expect(spy.called).to.be.true;
+      });
+    });
+    it('should call getContextMetadata with a consent data', async () => {
+      expect(getContextMetadataStub.called).to.be.false;
+      impl.renderViaIframeGet_('fakeURL').then(() => {
+        expect(getContextMetadataStub.called).to.be.true;
+        expect(getContextMetadataStub.getCall(0).args[3]).to.be.deep.equal({
+          'consentSharedData': {consentString: 'constent', gdprApplies: true},
+        });
+      });
     });
   });
 

@@ -1907,7 +1907,7 @@ describes.realWin(
             ).to.be.false;
           });
 
-          it('should navigate to the the paywall page', () => {
+          it('should navigate to the paywall page', () => {
             const activePage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );

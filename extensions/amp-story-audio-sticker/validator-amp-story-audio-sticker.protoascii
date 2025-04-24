@@ -11,7 +11,7 @@ tags: {  # <amp-story-audio-sticker>
   html_format: AMP
   tag_name: "AMP-STORY-AUDIO-STICKER"
   requires_extension: "amp-story-audio-sticker"
-  mandatory_parent: "AMP-STORY-GRID-LAYER"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER

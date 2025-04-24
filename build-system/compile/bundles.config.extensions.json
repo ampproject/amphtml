@@ -1032,6 +1032,7 @@
   {
     "name": "amp-story-audio-sticker",
     "version": "0.1",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }

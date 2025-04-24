@@ -12,6 +12,10 @@ const {log, logLocalDev} = require('../common/logging');
 const LARGE_REFACTOR_THRESHOLD = 20;
 const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/main/';
 
+// Certain sites do not like the default user agent string.
+const USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';
+
 let filesIntroducedByPr;
 
 /**
@@ -118,6 +122,14 @@ function checkLinksInFile(file) {
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
       {pattern: /https:.*?__component_name\w*__/},
+    ],
+    httpHeaders: [
+      {
+        urls: ['https://'],
+        headers: {
+          'User-Agent': USER_AGENT,
+        },
+      },
     ],
   };
 

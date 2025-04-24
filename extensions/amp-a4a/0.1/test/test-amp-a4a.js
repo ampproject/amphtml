@@ -918,7 +918,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
       });
 
       it('should set feature policy for attribution-reporting when supported', async () => {
@@ -929,8 +929,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.equal(
-          "sync-xhr 'none';attribution-reporting 'src';"
+        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include(
+          "attribution-reporting 'src';"
         );
       });
 
@@ -942,7 +943,10 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.not.include(
+          "attribution-reporting 'src';"
+        );
       });
     });
 
@@ -2811,6 +2815,8 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           gdprApplies,
           'consentStringType': 1,
           'additionalConsent': 'abc123',
+          purposeOne: true,
+          'gppSectionId': '1,2',
         };
         consentSharedData = {
           'doubleclick-tfcd': 1,
@@ -2857,6 +2863,8 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
             consentSharedData,
+            purposeOne: consentMetadata['purposeOne'],
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2913,6 +2921,8 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
             consentSharedData,
+            purposeOne: consentMetadata['purposeOne'],
+            gppSectionId: consentMetadata['gppSectionId'],
           })
         ).calledOnce;
         expect(
@@ -2963,6 +2973,8 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             gdprApplies: null,
             additionalConsent: null,
             consentSharedData: null,
+            purposeOne: null,
+            gppSectionId: null,
           })
         ).calledOnce;
         expect(
@@ -3533,9 +3545,96 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
     });
   });
 
+  describe('#tryExecuteRealTimeConfig storage consent test', () => {
+    let getCustomRealTimeConfigMacrosSpy;
+
+    beforeEach(() => {
+      element.setAttribute('rtc-config', true);
+      getCustomRealTimeConfigMacrosSpy = env.sandbox.spy(
+        a4a,
+        'getCustomRealTimeConfigMacros_'
+      );
+    });
+
+    for (const {
+      consentState,
+      consentString,
+      gdprApplies,
+      hasStorageConsent,
+      purposeOne,
+    } of [
+      // Unknown consent
+      {
+        consentState: CONSENT_POLICY_STATE.UNKNOWN,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // Insufficient consent
+      {
+        consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // GDPR doesn't apply
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: false,
+        consentString: '',
+        purposeOne: false,
+        hasStorageConsent: true,
+      },
+      // No consent string
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: '',
+        purposeOne: true,
+        hasStorageConsent: false,
+      },
+      // no purpose one consent
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: false,
+        hasStorageConsent: false,
+      },
+      // GDPR applies and all prerequisite satisfied
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        consentString: 'string',
+        purposeOne: true,
+        hasStorageConsent: true,
+      },
+    ]) {
+      it(
+        `storageConsent test - consentState=${consentState}, ` +
+          `consentString=${consentString}, gdprApplies=${gdprApplies},` +
+          `purposeOne=${purposeOne} -> hasStorageConsent=${hasStorageConsent}`,
+        () => {
+          return a4a
+            .tryExecuteRealTimeConfig_(consentState, consentString, {
+              gdprApplies,
+              purposeOne,
+            })
+            .then(() => {
+              expect(getCustomRealTimeConfigMacrosSpy).to.be.calledWith(
+                hasStorageConsent
+              );
+            });
+        }
+      );
+    }
+  });
+
   describe('#getCustomRealTimeConfigMacros_', () => {
     it('should return empty object', () => {
-      expect(a4a.getCustomRealTimeConfigMacros_()).to.deep.equal({});
+      expect(a4a.getCustomRealTimeConfigMacros_(true)).to.deep.equal({});
     });
   });
 

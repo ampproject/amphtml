@@ -148,6 +148,9 @@ describes.realWin(
         expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
           'allow-scripts allow-popups allow-same-origin'
         );
+        expect(consentUI.ui_.getAttribute('allow')).to.equal(
+          'geolocation; payment'
+        );
       });
 
       it('should allow additional sandbox restriction to be removed from iframe', function* () {

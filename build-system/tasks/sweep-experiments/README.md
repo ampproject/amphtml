@@ -179,7 +179,7 @@ If a toggle flip matches the experiment launch value, the call has already been 
 - })
 ```
 
-Otherwise the the test is likely obsolete and will fail, since it requires a state not possible with the current launch value:
+Otherwise the test is likely obsolete and will fail, since it requires a state not possible with the current launch value:
 
 ```diff
 - it('should fail if experiment is off', () => {

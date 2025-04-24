@@ -19,7 +19,7 @@ export interface WrapperComponentProps {
  */
 export interface ContainerWrapperComponentProps {
   as?: FunctionComponent | any;
-  contentAs?: string | FunctionComponent;
+  contentAs?: FunctionComponent | any;
   contentProps?: any;
   style?: Preact.JSX.CSSProperties;
   size?: boolean;

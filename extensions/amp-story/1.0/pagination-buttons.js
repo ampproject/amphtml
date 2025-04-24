@@ -191,13 +191,13 @@ export class PaginationButtons {
       win
     );
 
-    this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
+    this.forwardButton_.element.classList.add('next-container');
 
     this.initializeListeners_();
 
-    this.ampStory_.element.appendChild(this.forwardButton_.element);
     this.ampStory_.element.appendChild(this.backButton_.element);
+    this.ampStory_.element.appendChild(this.forwardButton_.element);
   }
 
   /** @private */

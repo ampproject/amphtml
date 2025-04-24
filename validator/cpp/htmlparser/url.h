@@ -1,4 +1,4 @@
-// Uniform resource locator parsing related static functions.
+// Uniform resouce locator parsing related static functions.
 
 #ifndef CPP_HTMLPARSER_URL_H_
 #define CPP_HTMLPARSER_URL_H_

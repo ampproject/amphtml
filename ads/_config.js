@@ -350,6 +350,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'appmonsta': {
+    preconnect: 'https://ssp.appmonsta.ai',
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
@@ -375,6 +379,11 @@ const adConfig = jsonConfiguration({
       'https://s.beop.io',
       'https://data.beop.io',
     ],
+    renderStartImplemented: true,
+  },
+
+  'bidgear': {
+    prefetch: 'https://platform.bidgear.com/bidgear-amp.js',
     renderStartImplemented: true,
   },
 
@@ -738,15 +747,6 @@ const adConfig = jsonConfiguration({
 
   'kuadio': {},
 
-  'lentainform': {
-    renderStartImplemented: true,
-    preconnect: [
-      'https://jsc.lentainform.com',
-      'https://servicer.lentainform.com',
-      'https://s-img.lentainform.com',
-    ],
-  },
-
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
     renderStartImplemented: true,
@@ -872,6 +872,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://player1.mixpo.com', 'https://player2.mixpo.com'],
   },
 
+  'momagic': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: ['https://amp.truereach.co.in/'],
+  },
+
   'monetizer101': {
     renderStartImplemented: true,
   },
@@ -989,6 +994,11 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.min.js',
     preconnect: ['https://odb.outbrain.com'],
     consentHandlingOverride: true,
+  },
+
+  'piberica': {
+    preconnect: ['https://trafico.prensaiberica.es'],
+    renderStartImplemented: true,
   },
 
   'pixad': {},
@@ -1182,6 +1192,12 @@ const adConfig = jsonConfiguration({
   },
 
   'sekindo': {
+    renderStartImplemented: true,
+  },
+
+  'sevio': {
+    preconnect: ['https://request.adx.ws'],
+    prefetch: ['https://cdn.adx.ws/scripts/amp.js'],
     renderStartImplemented: true,
   },
 
@@ -1474,11 +1490,6 @@ const adConfig = jsonConfiguration({
   'xlift': {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
-  },
-
-  'yahoo': {
-    prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
-    preconnect: 'https://us.adserver.yahoo.com',
   },
 
   'yahoofedads': {

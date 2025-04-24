@@ -268,7 +268,7 @@ describes.realWin('video-iframe-integration', {amp: false}, (env) => {
 
           const player = mockVideoJsPlayer();
 
-          const integration = new AmpVideoIntegration();
+          const integration = new AmpVideoIntegration(env.win);
 
           const listenToOnce = env.sandbox.stub(integration, 'listenToOnce_');
           const methodSpy = env.sandbox.spy(integration, 'method');

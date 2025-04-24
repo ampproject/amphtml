@@ -9,7 +9,7 @@ namespace amp::validator::parse_layout_sizes {
 
 // WARNING: This code is still in development and not ready to be used.
 
-// This is a single representation for the CssSizes object.
+// This is a single represenation for the CssSizes object.
 // It consists of at least a valid size and a possible media condition.
 // See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes
 struct CssSize {

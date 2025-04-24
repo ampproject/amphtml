@@ -27,7 +27,7 @@ module.exports = function (babel) {
 
   /**
    * @param {object} replacements
-   * @return {babel.Node}
+   * @return {babel.types.Statement}
    */
   function buildWrapper(replacements) {
     if (!wrapperTemplate) {
@@ -44,7 +44,7 @@ module.exports = function (babel) {
 
   /**
    * @param {babel.NodePath<import('@babel/types').Program>} path
-   * @param {babel.Node} wrapper
+   * @param {babel.types.Statement} wrapper
    */
   function injectWrapper(path, wrapper) {
     const {body, directives} = path.node;

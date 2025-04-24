@@ -240,7 +240,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     ]);
   });
 
-  it('should preconnect to the the first srcset url if src is not set', () => {
+  it('should preconnect to the first srcset url if src is not set', () => {
     const element = createImg({srcset: SRCSET_STRING});
     expect(AmpImg.getPreconnects(element)).to.deep.equal([
       '/examples/img/hero@1x.jpg',
