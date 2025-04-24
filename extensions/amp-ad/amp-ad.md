@@ -440,7 +440,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [PubScale](../../ads/vendors/pubscale.md)
 -   [Pulse](../../ads/vendors/pulse.md)
 -   [PulsePoint](../../ads/vendors/pulsepoint.md)
--   [PuffNetwork](../../ads/vendors/puffnetwork.md)
 -   [Purch](../../ads/vendors/purch.md)
 -   [R9x](../../ads/vendors/r9x.md)
 -   [Rakuten Unified Ads](../../ads/vendors/rakutenunifiedads.md)
