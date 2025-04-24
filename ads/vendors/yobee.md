@@ -42,7 +42,7 @@ Note that `<amp-sticky-ad />` component requires the following script to be incl
 
 ## Configuration
 
-For details on the configuration semantics, see [Yobee documentation](https://developer.yobee.de/).
+For details on the configuration semantics, see [Yobee documentation](https://developer.yobee.it/).
 
 ### Required parameters
 
