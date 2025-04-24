@@ -1556,6 +1556,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'yobee': {},
+
   'zedo': {
     prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
     renderStartImplemented: true,
