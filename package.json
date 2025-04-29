@@ -121,7 +121,7 @@
     "express": "4.20.0",
     "fast-glob": "3.3.2",
     "fetch-mock": "9.11.0",
-    "formidable": "3.5.1",
+    "formidable": "3.5.4",
     "fs-extra": "11.2.0",
     "gulp-connect": "5.7.0",
     "html-minifier": "4.0.0",
