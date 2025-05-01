@@ -296,7 +296,6 @@ import {yieldbot} from '#ads/vendors/yieldbot';
 import {yieldmo} from '#ads/vendors/yieldmo';
 import {yieldone} from '#ads/vendors/yieldone';
 import {yieldpro} from '#ads/vendors/yieldpro';
-import {yobee} from '#ads/vendors/yobee';
 import {zedo} from '#ads/vendors/zedo';
 import {zen} from '#ads/vendors/zen';
 import {zergnet} from '#ads/vendors/zergnet';

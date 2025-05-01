@@ -7,8 +7,8 @@ import {validateData, writeScript} from '#3p/3p';
 export function yobee(global, data) {
   validateData(data, ['adNetwork', 'adPublisher', 'adTypeId']);
   global._yobee = global._yobee || {
-    publisher: data['adNetwork'],
     adNetwork: data['adPublisher'],
+    publisher: data['adNetwork'],
     adTypeId: data['adTypeId'],
     host: `static.cdn.yobee.it`,
     prefix: `ybe`,
@@ -25,7 +25,7 @@ export function yobee(global, data) {
   global.document.getElementById('c').appendChild(ins);
   ins.parentNode.addEventListener(
     'eventAdbladeRenderStart',
-    global.context.renderStart()
+    () => global.context.renderStart()
   );
   writeScript(global, `https://${global._yobee.host}/showad/showad.min.js`);
 }
