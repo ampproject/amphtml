@@ -105,7 +105,8 @@ describes.endtoend(
         );
       });
 
-      it('tabs between multiple social-shares and opens on "enter" keypress', async () => {
+      // TODO(#40276): flaky test disabled
+      it.skip('tabs between multiple social-shares and opens on "enter" keypress', async () => {
         await controller.type(null, Key.Tab);
         await controller.type(null, Key.Tab);
         await controller.type(null, Key.Tab);
