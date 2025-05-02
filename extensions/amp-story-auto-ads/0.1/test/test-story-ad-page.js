@@ -1,5 +1,7 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 
+import {toggleExperiment} from '#experiments';
+
 import {macroTask} from '#testing/helpers';
 
 import {Gestures} from '../../../../src/gesture';
@@ -454,6 +456,27 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
       expect(attribution).not.to.exist;
+    });
+  });
+
+  describe('fullbleed ads', () => {
+    it('should set fullbleed ad class', async () => {
+      const fullbleedAdClass = 'i-amphtml-fullbleed-ad';
+      const iframe = doc.createElement('iframe');
+      const video = doc.createElement('video');
+      const pageElement = storyAdPage.build();
+
+      toggleExperiment(env.win, 'story-ad-allow-fullbleed', true);
+      doc.body.appendChild(pageElement);
+      pageElement.getImpl = () => Promise.resolve(pageImplMock);
+
+      const ampAdElement = doc.querySelector('amp-ad');
+      ampAdElement.appendChild(iframe);
+      iframe.contentDocument.body.appendChild(video);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
+
+      expect(pageElement).to.have.class(fullbleedAdClass);
+      toggleExperiment(env.win, 'story-ad-allow-fullbleed', false);
     });
   });
 
