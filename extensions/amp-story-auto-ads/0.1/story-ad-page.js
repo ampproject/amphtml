@@ -9,7 +9,7 @@ import {setStyle} from '#core/dom/style';
 import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {getExperimentBranch} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {getData, listen} from '#utils/event-helper';
@@ -53,6 +53,9 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @const {string} */
 const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
+
+/** @const {string} */
+const FULLBLEED_AD_CLASS = 'i-amphtml-fullbleed-ad';
 
 /** @enum {string} */
 const PageAttributes = {
@@ -426,6 +429,10 @@ export class StoryAdPage {
       this.adDoc_ = getFrameDoc(
         /** @type {!HTMLIFrameElement} */ (this.adFrame_)
       );
+    }
+
+    if (isExperimentOn(this.win_, 'story-ad-allow-fullbleed')) {
+      this.pageElement_.classList.add(FULLBLEED_AD_CLASS);
     }
 
     this.loaded_ = true;
