@@ -590,7 +590,6 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('yieldone', yieldone);
 register('yieldpro', yieldpro);
-register('yobee', yobee);
 register('yotpo', yotpo);
 register('zedo', zedo);
 register('zen', zen);
