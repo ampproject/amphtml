@@ -23,9 +23,8 @@ export function yobee(global, data) {
   ins.setAttribute('data-ad-type-id', global._yobee.adTypeId);
   ins.setAttribute('class', `${global._yobee.prefix}-ads-area`);
   global.document.getElementById('c').appendChild(ins);
-  ins.parentNode.addEventListener(
-    'eventAdbladeRenderStart',
-    () => global.context.renderStart()
+  ins.parentNode.addEventListener('eventAdbladeRenderStart', () =>
+    global.context.renderStart()
   );
   writeScript(global, `https://${global._yobee.host}/showad/showad.min.js`);
 }
