@@ -5,6 +5,7 @@ const testTasks = [
   'e2e',
   'integration',
   'visual-diff',
+  //This is first feature
   'unit',
   'check-types',
   'babel-plugin-tests',
