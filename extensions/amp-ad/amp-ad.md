@@ -515,6 +515,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Yieldmo](../../ads/vendors/yieldmo.md)
 -   [Yieldone](../../ads/vendors/yieldone.md)
 -   [Yieldpro](../../ads/vendors/yieldpro.md)
+-   [Yobee](../../ads/vendors/yobee.md)
 -   [Zedo](../../ads/vendors/zedo.md)
 -   [Zucks](../../ads/vendors/zucks.md)
 
