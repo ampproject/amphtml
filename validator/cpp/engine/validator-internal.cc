@@ -595,7 +595,7 @@ class ParsedAttrSpec {
     return value_property_by_name_;
   }
 
-  const unordered_map<std::string, const CssDeclaration*>&
+  const absl::flat_hash_map<std::string, const CssDeclaration*>&
   css_declaration_by_name() const {
     return css_declaration_by_name_;
   }
@@ -620,7 +620,8 @@ class ParsedAttrSpec {
   // Name lookup for spec().value_properties().properties().
   unordered_map<std::string, const PropertySpec*> value_property_by_name_;
   // Name lookup for spec().css_declaration().
-  unordered_map<std::string, const CssDeclaration*> css_declaration_by_name_;
+  absl::flat_hash_map<std::string, const CssDeclaration*>
+      css_declaration_by_name_;
   // The mandatory spec().value_properties().properties().
   vector<const PropertySpec*> mandatory_value_properties_;
   vector<TypeIdentifier> disabled_by_;
@@ -4323,7 +4324,7 @@ void ValidateAttrDeclaration(const ParsedAttrSpec& parsed_attr_spec,
   // If there were errors parsing, exit from validating further.
   if (!css_errors.empty()) return;
 
-  const unordered_map<std::string, const CssDeclaration*>&
+  const absl::flat_hash_map<std::string, const CssDeclaration*>&
       css_declaration_by_name = parsed_attr_spec.css_declaration_by_name();
 
   for (auto& declaration : declarations) {
