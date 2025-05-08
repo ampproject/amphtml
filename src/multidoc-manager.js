@@ -142,7 +142,7 @@ export class MultidocManager {
 
     /**
      * Closes the document, resolving when visibility changes and services have
-     * been cleand up. The document can no longer be activated again.
+     * been cleaned up. The document can no longer be activated again.
      * @return {Promise}
      */
     amp['close'] = () => {
@@ -361,7 +361,7 @@ export class MultidocManager {
               // Must be a font definition: no other stylesheets are allowed.
               if (parentLinks[href]) {
                 dev().fine(TAG, '- stylesheet already included: ', href);
-                // To accomodate icon fonts whose stylesheets include
+                // To accommodate icon fonts whose stylesheets include
                 // the class definitions in addition to the font definition,
                 // we re-import the stylesheet into the shadow document.
                 // Note: <link> in shadow mode is not yet fully supported on

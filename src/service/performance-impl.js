@@ -273,7 +273,7 @@ export class Performance {
     /**
      * This is called to ensure we'll report the current cls window's value
      * after the window closes. Its debounce time is intentionally longer than
-     * the max session time so that we're certain the sesssion has closed
+     * the max session time so that we're certain the session has closed
      * (since a PerfOb is async, entries that belong in the current window may
      * arrive later).
      */
@@ -615,7 +615,7 @@ export class Performance {
     }
     entries.push(entry);
     // Ensure we report the CLS when the session closes. We're not guaranteed
-    // to get more LayoutShift entires, so we need some setTimeout magic to
+    // to get more LayoutShift entries, so we need some setTimeout magic to
     // ensure it happens.
     this.debouncedFlushLayoutShiftScore_();
   }
