@@ -61,7 +61,7 @@ import {ResponsiveState} from './responsive-state';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {getMode} from '../../../src/mode';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, tryAddingCookieParams} from '../../amp-a4a/0.1/amp-a4a';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 
@@ -423,6 +423,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ? gppSectionId
           : null,
     };
+    tryAddingCookieParams(consentTuple, this.win, parameters);
 
     const experimentIds = [];
     return googleAdUrl(
