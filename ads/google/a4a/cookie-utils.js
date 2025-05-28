@@ -32,8 +32,11 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
   try {
     cookiesToSet = JSON.parse(
       fetchResponse.headers.get(AMP_GFP_SET_COOKIES_HEADER_NAME)
-    );
+    )['cookie'];
   } catch {}
+  if (!Array.isArray(cookiesToSet)) {
+    return;
+  }
   for (const cookieInfo of cookiesToSet) {
     const cookieName =
       (cookieInfo['_version_'] ?? 1) === 2 ? '__gpi' : '__gads';
