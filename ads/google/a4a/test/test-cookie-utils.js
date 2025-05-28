@@ -42,21 +42,24 @@ describes.fakeWin('#maybeSetCookieFromAdResponse', {amp: true}, (env) => {
     expect(getCookie(env.win, '__gpi')).to.equal('val2');
   });
 
-it('should not throw for malformed JSON', () => {
-    expect(() => void maybeSetCookieFromAdResponse(env.win, {
-      headers: {
-        has: (header) => {
-          return header === AMP_GFP_SET_COOKIES_HEADER_NAME;
-        },
-        get: (header) => {
-          if (header !== AMP_GFP_SET_COOKIES_HEADER_NAME) {
-            return;
-          }
+  it('should not throw for malformed JSON', () => {
+    expect(
+      () =>
+        void maybeSetCookieFromAdResponse(env.win, {
+          headers: {
+            has: (header) => {
+              return header === AMP_GFP_SET_COOKIES_HEADER_NAME;
+            },
+            get: (header) => {
+              if (header !== AMP_GFP_SET_COOKIES_HEADER_NAME) {
+                return;
+              }
 
-          return JSON.stringify({});
-        },
-      },
-    })).not.to.throw;
+              return JSON.stringify({});
+            },
+          },
+        })
+    ).not.to.throw();
   });
 });
 

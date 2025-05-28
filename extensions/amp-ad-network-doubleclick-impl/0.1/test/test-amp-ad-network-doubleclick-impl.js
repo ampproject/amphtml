@@ -1919,20 +1919,22 @@ for (const {config, name} of [
                   return;
                 }
 
-                return JSON.stringify([
-                  {
-                    '_version_': 1,
-                    '_value_': 'val1',
-                    '_domain_': 'foo.com',
-                    '_expiration_': Date.now() + 100_000,
-                  },
-                  {
-                    '_version_': 2,
-                    '_value_': 'val2',
-                    '_domain_': 'foo.com',
-                    '_expiration_': Date.now() + 100_000,
-                  },
-                ]);
+                return JSON.stringify({
+                  'cookie': [
+                    {
+                      '_version_': 1,
+                      '_value_': 'val1',
+                      '_domain_': 'foo.com',
+                      '_expiration_': Date.now() + 100_000,
+                    },
+                    {
+                      '_version_': 2,
+                      '_value_': 'val2',
+                      '_domain_': 'foo.com',
+                      '_expiration_': Date.now() + 100_000,
+                    },
+                  ],
+                });
               },
             },
           });
