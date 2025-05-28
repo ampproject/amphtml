@@ -652,6 +652,22 @@ describes.realWin(
         );
       });
 
+      it('should contain cookie params', () => {
+        setCookie(env.win, '__gads', '__gads_val', Date.now() + 100_000);
+        setCookie(env.win, '__gpi', '__gpi_val', Date.now() + 100_000);
+        const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+          'layout': 'nodisplay',
+        });
+        ampStickyAd.appendChild(element);
+        doc.body.appendChild(ampStickyAd);
+        return impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.SUFFICIENT})
+          .then((adUrl) => {
+            expect(adUrl).to.contain('cookie=__gads_val');
+            expect(adUrl).to.contain('gpic=__gpi_val');
+          });
+      });
+
       it('should contain act', () => {
         const ampStickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
           'layout': 'nodisplay',
