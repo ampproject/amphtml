@@ -38,8 +38,7 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
     return;
   }
   for (const cookieInfo of cookiesToSet) {
-    const cookieName =
-      (cookieInfo['version'] ?? 1) === 2 ? '__gpi' : '__gads';
+    const cookieName = (cookieInfo['version'] ?? 1) === 2 ? '__gpi' : '__gads';
     const value = cookieInfo['value'];
     // On proxy origin, we want cookies to be partitioned by subdomain to
     // prevent sharing across unrelated publishers, so we don't set a domain.
