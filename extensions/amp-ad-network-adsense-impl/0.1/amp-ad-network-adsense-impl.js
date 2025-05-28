@@ -589,7 +589,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @return {boolean} True if the source of the message matches the ad iframe.
    */
   checkIfClearCookiePostMessageHasValidSource_(event) {
-    return event.source == devAssert(this.iframe.contentWindow);
+    return this.iframe && event.source == this.iframe.contentWindow;
   }
 
   /** @override */
