@@ -32,16 +32,18 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
   try {
     cookiesToSet = JSON.parse(
       fetchResponse.headers.get(AMP_GFP_SET_COOKIES_HEADER_NAME)
-    );
+    )['cookie'];
   } catch {}
+  if (!Array.isArray(cookiesToSet)) {
+    return;
+  }
   for (const cookieInfo of cookiesToSet) {
-    const cookieName =
-      (cookieInfo['_version_'] ?? 1) === 2 ? '__gpi' : '__gads';
-    const value = cookieInfo['_value_'];
+    const cookieName = (cookieInfo['version'] ?? 1) === 2 ? '__gpi' : '__gads';
+    const value = cookieInfo['value'];
     // On proxy origin, we want cookies to be partitioned by subdomain to
     // prevent sharing across unrelated publishers, so we don't set a domain.
-    const domain = getProxySafeDomain(win, cookieInfo['_domain_']);
-    const expiration = Math.max(cookieInfo['_expiration_'], 0);
+    const domain = getProxySafeDomain(win, cookieInfo['domain']);
+    const expiration = Math.max(cookieInfo['expiration'], 0);
     setCookie(win, cookieName, value, expiration, {
       domain,
       secure: false,
