@@ -1740,20 +1740,22 @@ describes.fakeWin(
               return;
             }
 
-            return JSON.stringify([
-              {
-                '_version_': 1,
-                '_value_': 'val1',
-                '_domain_': 'foo.com',
-                '_expiration_': Date.now() + 100_000,
-              },
-              {
-                '_version_': 2,
-                '_value_': 'val2',
-                '_domain_': 'foo.com',
-                '_expiration_': Date.now() + 100_000,
-              },
-            ]);
+            return JSON.stringify({
+              'cookie': [
+                {
+                  'version': 1,
+                  'value': 'val1',
+                  'domain': 'foo.com',
+                  'expiration': Date.now() + 100_000,
+                },
+                {
+                  'version': 2,
+                  'value': 'val2',
+                  'domain': 'foo.com',
+                  'expiration': Date.now() + 100_000,
+                },
+              ],
+            });
           },
         },
       });
