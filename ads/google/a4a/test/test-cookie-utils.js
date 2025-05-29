@@ -18,26 +18,48 @@ describes.fakeWin('#maybeSetCookieFromAdResponse', {amp: true}, (env) => {
             return;
           }
 
-          return JSON.stringify([
-            {
-              '_version_': 1,
-              '_value_': 'val1',
-              '_domain_': 'foo.com',
-              '_expiration_': Date.now() + 100_000,
-            },
-            {
-              '_version_': 2,
-              '_value_': 'val2',
-              '_domain_': 'foo.com',
-              '_expiration_': Date.now() + 100_000,
-            },
-          ]);
+          return JSON.stringify({
+            'cookie': [
+              {
+                'version': 1,
+                'value': 'val1',
+                'domain': 'foo.com',
+                'expiration': Date.now() + 100_000,
+              },
+              {
+                'version': 2,
+                'value': 'val2',
+                'domain': 'foo.com',
+                'expiration': Date.now() + 100_000,
+              },
+            ],
+          });
         },
       },
     });
 
     expect(getCookie(env.win, '__gads')).to.equal('val1');
     expect(getCookie(env.win, '__gpi')).to.equal('val2');
+  });
+
+  it('should not throw for malformed JSON', () => {
+    expect(
+      () =>
+        void maybeSetCookieFromAdResponse(env.win, {
+          headers: {
+            has: (header) => {
+              return header === AMP_GFP_SET_COOKIES_HEADER_NAME;
+            },
+            get: (header) => {
+              if (header !== AMP_GFP_SET_COOKIES_HEADER_NAME) {
+                return;
+              }
+
+              return JSON.stringify({});
+            },
+          },
+        })
+    ).not.to.throw();
   });
 });
 
