@@ -1,4 +1,4 @@
-import {setCookie} from 'src/cookies';
+import {canSetCookie, setCookie} from 'src/cookies';
 import {isProxyOrigin} from 'src/url';
 
 /** @type {string} */
@@ -25,7 +25,10 @@ function getProxySafeDomain(win, domain) {
  * @param {!Response} fetchResponse
  */
 export function maybeSetCookieFromAdResponse(win, fetchResponse) {
-  if (!fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME)) {
+  if (
+    !fetchResponse.headers.has(AMP_GFP_SET_COOKIES_HEADER_NAME) ||
+    !canSetCookie(win)
+  ) {
     return;
   }
   let cookiesToSet = /** @type {!Array<!Object>} */ [];
