@@ -69,6 +69,20 @@
 
     figure {
       margin: 0;
+      text-align: center; 
+    }
+
+    figure .full-bleed {
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+    }
+
+    
+    figure .full-bleed amp-img {
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
     }
 
     figcaption {
@@ -211,6 +225,24 @@
       color: #666666;
     }
 
+    .hero-img {
+      position: relative;
+      width: 90%;
+      
+    }
+
+    amp-img,
+    .full-bleed amp-img,
+    #hero-img,
+    #floating-headline-img {
+      max-width: 1000px;
+      max-height: 500px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
@@ -322,7 +354,7 @@
 
         <div class="author">
           <amp-img src="img/sample.jpg" id="author-avatar" placeholder
-              height="50" width="50">
+              layout="responsive" width="360" height="216">
           </amp-img>
           <div class="byline">
             <p>
