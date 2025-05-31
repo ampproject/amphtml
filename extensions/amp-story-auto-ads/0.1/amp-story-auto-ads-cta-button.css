@@ -25,12 +25,33 @@
   max-width: calc(100vw - 64px);
 }
 
+/* Scale up CTA button for high-resolution displays (4K) */
+@media screen and (min-width: 2560px) {
+  .i-amphtml-story-ad-link {
+    height: 54px !important;
+    line-height: 54px !important;
+    border-radius: 30px !important;
+    bottom: 48px !important;
+    min-width: 180px !important;
+    font-size: 21px !important;
+    padding: 0 15px !important;
+    box-shadow: 0px 3px 18px rgba(0, 0, 0, 0.16) !important;
+  }
+}
+
 [cta-active].i-amphtml-story-ad-link {
   animation-delay: 100ms !important;
   animation-duration: 300ms !important;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
   animation-fill-mode: forwards !important;
   animation-name: ad-cta !important;
+}
+
+/* Adjust animation for high-resolution displays (4K) */
+@media screen and (min-width: 2560px) {
+  [cta-active].i-amphtml-story-ad-link {
+    animation-duration: 350ms !important;
+  }
 }
 
 @keyframes ad-cta {
