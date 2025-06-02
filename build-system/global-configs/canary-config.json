@@ -1,6 +1,7 @@
 {
   "allow-doc-opt-in": [
-    "amp-next-page"
+    "amp-next-page",
+    "story-ad-allow-fullbleed"
   ],
   "allow-url-opt-in": [],
   "canary": 1,
