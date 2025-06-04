@@ -157,11 +157,6 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
 
       // And a few more things depend on a4a.
-      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
-      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
-      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/name-frame-renderer.js',
-      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/template-renderer.js',
-      'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/template-validator.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-utils.js',
@@ -359,8 +354,6 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-connatix-player/0.1/amp-connatix-player.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
-        'src/service/url-replacements-impl.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
