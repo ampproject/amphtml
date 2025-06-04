@@ -195,10 +195,10 @@ cc_library(
     hdrs = [
         "logging.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":glog_polyfill",
     ],
-    copts = ["-std=c++17"],
 )
 
 # Defines token type and token structures, used during tokenization.
@@ -551,7 +551,7 @@ cc_test(
         ":strings",
         ":testconstants",
         ":tokenizer",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_googletest//:gtest_main",
     ],
 )
