@@ -375,7 +375,7 @@ The [`AMP.setState()`](../../docs/spec/amp-actions-and-events.md#amp) action mer
 
 In the example above, triggering the `AMP.setState({})` action on the first button evaluates the `[text]` binding expression. It then inserts the defined **state variable's** value into the `<p>` tag.
 
-When the clicking the second button, with `AMP.setState({myState:{baz: myState.foo}})` action defined, it [deep-merges](#deep-merge-with-amp.setstate()) the "baz" **state variable** value to the same as the "foo" **state variable** value. Both `<p>` tags display "bar".
+When clicking the second button, with `AMP.setState({myState:{baz: myState.foo}})` action defined, it [deep-merges](#deep-merge-with-amp.setstate()) the "baz" **state variable** value to the same as the "foo" **state variable** value. Both `<p>` tags display "bar".
 
 **State variable** values can update to values not defined in the initial state. When clicking the third button, with `"tap:AMP.setState({myState:{baz: 'world'}})"` action defined, it deep merges the "baz" **state variable** value, overriding it to "world".
 
