@@ -26,11 +26,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     // Always disable A4A Refresh, as we are using our own refresh mechanism
     this.element.setAttribute('data-enable-refresh', 'false');
 
-    /* DoubleClick & AMP */
-    this.dCHelper = new DoubleClickHelper(this);
-    this.dCHelper.callMethod('constructor', element);
-    /* DoubleClick& AMP */
-
     this.code = Math.random().toString(36).substring(2, 15);
     this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
     this.slot = this.element.getAttribute('data-slot');
@@ -42,13 +37,22 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.nextRefresh = {}; // TODO: Implement model for this
     this.isViewable_ = false;
 
+    /* DoubleClick & AMP */
+    this.dCHelper = new DoubleClickHelper(this);
+    this.dCHelper.callMethod('constructor', element);
+    /* DoubleClick& AMP */
+
     /* InsurAds Business  */
     this.lockedid = new LockedId().getLockedIdData();
-    this.realtimeMessaging_ = new RealtimeMessaging(this.sellerId, {
-      appInitHandler: (message) => this.handleAppInit_(message),
-      unitInitHandler: (message) => this.handleUnitInit_(message),
-      unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
-    });
+    this.realtimeMessaging_ = new RealtimeMessaging(
+      this.sellerId,
+      this.canonicalUrl,
+      {
+        appInitHandler: (message) => this.handleAppInit_(message),
+        unitInitHandler: (message) => this.handleUnitInit_(message),
+        unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
+      }
+    );
 
     if (window.frames['TG-listener']) {
       this.extension_ = new ExtensionCommunicator(
@@ -247,7 +251,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.engagement_ = EngagementTracker.getInstance(this.win);
       this.engagement_
         .init()
-        .onEngagementChange(this.onEngagementChange_.bind(this));
+        .onEngagementChange(this.updateEngagementStatus_.bind(this));
     }
 
     const {height, width} = this.creativeSize_ || this.initialSize_;
@@ -377,7 +381,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @param {boolean} isEngaged - Whether user is engaged
    * @private
    */
-  onEngagementChange_(isEngaged) {
+  updateEngagementStatus_(isEngaged) {
     const state = this.engagement_.getState();
 
     if (this.realtimeMessaging_) {

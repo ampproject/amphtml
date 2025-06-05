@@ -14,11 +14,12 @@ import {RealtimeManager} from './realtime-manager';
 export class RealtimeMessaging {
   /**
    * @param {string} sellerId - Seller ID
+   * @param {string} canonicalUrl - Canonical URL
    * @param {Object=} handlers - Message handlers
    */
-  constructor(sellerId, handlers = {}) {
+  constructor(sellerId, canonicalUrl, handlers = {}) {
     /** @private {!RealtimeManager} */
-    this.realtimeManager_ = RealtimeManager.start(sellerId);
+    this.realtimeManager_ = RealtimeManager.start(sellerId, canonicalUrl);
 
     this.setupRealtimeConnection_();
 
@@ -34,9 +35,10 @@ export class RealtimeMessaging {
     const ws = this.realtimeManager_.getWebSocket();
 
     if (ws) {
-      ws.addEventListener('message', (event) => {
-        this.messageHandler_.processMessage(event.data);
-      });
+      ws.onReceiveMessage = this.messageHandler_.processMessage;
+      ws.onConnect = () => {
+        this.sendHandshake();
+      };
     }
   }
 
@@ -112,16 +114,18 @@ export class RealtimeMessaging {
    * @param {boolean} isEngaged - Whether user is engaged
    */
   sendPageStatus(isEngaged) {
+    // TODO Check for engagement state is true and if websocket is closed, open it
+    if (
+      isEngaged &&
+      this.realtimeManager_ &&
+      !this.realtimeManager_.getWebSocket()
+    ) {
+      console /*OK*/
+        .log('User is active, reconnecting WebSocket');
+      this.realtimeManager_.connect();
+    }
+
     const status = new AppStatusMessage(isEngaged);
     this.realtimeManager_.send(status.serialize());
-  }
-
-  /**
-   * Registers a handler for a specific incoming message action
-   * @param {string} action - Message action
-   * @param {Function} handler - Message handler
-   */
-  registerHandler(action, handler) {
-    this.messageHandler_.registerHandler(action, handler);
   }
 }

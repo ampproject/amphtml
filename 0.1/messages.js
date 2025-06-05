@@ -294,7 +294,9 @@ export class MessageHandler {
     this.handlers_ = {
       'app-init-response': appInitHandler,
       'unit-init-response': unitInitHandler,
-      'unit-waterfall': unitWaterfallHandler,
+      'waterfall': unitWaterfallHandler,
+      'disconnect': null,
+      'connect': null,
     };
   }
 
@@ -317,6 +319,9 @@ export class MessageHandler {
           return false;
         }
 
+        console /*OK*/
+          .log('[iat-debug] Message:', messageObj.action, messageObj.message);
+
         const handler = this.handlers_[messageObj.action];
         if (handler && typeof handler === 'function') {
           handler(messageObj.message);
@@ -326,14 +331,5 @@ export class MessageHandler {
         return false;
       }
     });
-  }
-
-  /**
-   * Registers a handler for a specific message action
-   * @param {string} action - Message action
-   * @param {Function} handler - Message handler
-   */
-  registerHandler(action, handler) {
-    this.handlers_[action] = handler;
   }
 }
