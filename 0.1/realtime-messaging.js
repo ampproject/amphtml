@@ -1,3 +1,5 @@
+import {ca} from 'date-fns/locale';
+
 import {
   AppInitMessage,
   AppStatusMessage,
@@ -18,10 +20,7 @@ export class RealtimeMessaging {
    * @param {Object=} handlers - Message handlers
    */
   constructor(sellerId, canonicalUrl, handlers = {}) {
-    /** @private {!RealtimeManager} */
-    this.realtimeManager_ = RealtimeManager.start(sellerId, canonicalUrl);
-
-    this.setupRealtimeConnection_();
+    this.setupRealtimeConnection_(sellerId, canonicalUrl);
 
     /** @private {!MessageHandler} */
     this.messageHandler_ = new MessageHandler(handlers);
@@ -29,15 +28,24 @@ export class RealtimeMessaging {
 
   /**
    * Sets up the realtime connection and event handlers
+   * @param {string} sellerId - Seller ID
+   * @param {string} canonicalUrl - Canonical URL
    * @private
    */
-  setupRealtimeConnection_() {
+  setupRealtimeConnection_(sellerId = '', canonicalUrl = '') {
+    /** @private {!RealtimeManager} */
+    this.realtimeManager_ = RealtimeManager.start(sellerId, canonicalUrl);
+
     const ws = this.realtimeManager_.getWebSocket();
 
     if (ws) {
       ws.onReceiveMessage = this.messageHandler_.processMessage;
       ws.onConnect = () => {
         this.sendHandshake();
+      };
+      ws.onDisconnect = () => {
+        console /*OK*/
+          .log('WebSocket disconnected');
       };
     }
   }
@@ -118,11 +126,11 @@ export class RealtimeMessaging {
     if (
       isEngaged &&
       this.realtimeManager_ &&
-      !this.realtimeManager_.getWebSocket()
+      !this.realtimeManager_.isConnected()
     ) {
       console /*OK*/
         .log('User is active, reconnecting WebSocket');
-      this.realtimeManager_.connect();
+      this.setupRealtimeConnection_();
     }
 
     const status = new AppStatusMessage(isEngaged);

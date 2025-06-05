@@ -22,6 +22,16 @@ export class RealtimeManager {
   /** @private {Array<Object>} */
   messageQueue_ = [];
 
+  // Bound event handlers
+  /** @private {?function} */
+  boundOnOpen_ = null;
+  /** @private {?function} */
+  boundOnDisconnect_ = null;
+  /** @private {?function} */
+  boundOnError_ = null;
+  /** @private {?function} */
+  boundOnReceiveMessage_ = null;
+
   // Events and callbacks
   /** @private {?function():void} */
   onConnect = null;
@@ -44,6 +54,11 @@ export class RealtimeManager {
   constructor(sellerId = '', canonicalUrl = '') {
     this.sellerId_ = sellerId;
     this.canonicalUrl_ = canonicalUrl;
+
+    this.boundOnOpen_ = this.onOpen_.bind(this);
+    this.boundOnDisconnect_ = this.onDisconnect_.bind(this);
+    this.boundOnError_ = this.onError_.bind(this);
+    this.boundOnReceiveMessage_ = this.onReceiveMessage_.bind(this);
   }
 
   /**
@@ -59,6 +74,10 @@ export class RealtimeManager {
       RealtimeManager.instance_.connect();
     }
 
+    if (!this.isConnected()) {
+      RealtimeManager.instance_.connect();
+    }
+
     return RealtimeManager.instance_;
   }
 
@@ -71,12 +90,12 @@ export class RealtimeManager {
   }
 
   /**
-   * Sets the WebSocket instance.
-   * @param {WebSocket} ws
-   * @private
-   */
-  setWebSocket_(ws) {
-    this.ws = ws;
+   *  Checks if the WebSocket is connected.
+   *  @return {boolean}
+   *  @public
+   * */
+  isConnected() {
+    return this.ws && this.ws.readyState === WebSocket.OPEN;
   }
 
   /**
@@ -170,21 +189,10 @@ export class RealtimeManager {
 
   /**
    * Connect to the WebSocket
-   * @param {string=} sellerId - Optional seller ID (will use stored value if not provided)
-   * @param {string=} canonicalUrl - Optional canonical URL (will use stored value if not provided)
    * @return {boolean} - True if connection was initiated, false otherwise
    * @public
    */
-  connect(sellerId, canonicalUrl) {
-    // Store the parameters if provided
-    if (sellerId) {
-      this.sellerId_ = sellerId;
-    }
-
-    if (canonicalUrl) {
-      this.canonicalUrl_ = canonicalUrl;
-    }
-
+  connect() {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       console /*OK*/
         .log('Already connected');
@@ -206,13 +214,12 @@ export class RealtimeManager {
         .replace('$V$', '0.5')
         .replace('$URL$', encodeURIComponent(this.canonicalUrl_));
 
-      const ws = new WebSocket(url);
-      this.setWebSocket_(ws);
+      this.ws = new WebSocket(url);
 
-      ws.addEventListener('open', this.onOpen_.bind(this));
-      ws.addEventListener('close', this.onDisconnect_.bind(this));
-      ws.addEventListener('error', this.onError_.bind(this));
-      ws.addEventListener('message', this.onReceiveMessage_.bind(this));
+      this.ws.addEventListener('open', this.boundOnOpen_);
+      this.ws.addEventListener('close', this.boundOnDisconnect_);
+      this.ws.addEventListener('error', this.boundOnError_);
+      this.ws.addEventListener('message', this.boundOnReceiveMessage_);
 
       console /*OK*/
         .log('Connection initiated');
@@ -231,6 +238,7 @@ export class RealtimeManager {
    */
   disconnect(clearQueue = false) {
     if (!this.ws) {
+      this.handshakeComplete_ = false;
       return;
     }
 
@@ -248,10 +256,10 @@ export class RealtimeManager {
         this.ws.close(1000, 'Manual disconnect');
       }
 
-      this.ws.removeEventListener('open', this.onOpen_.bind(this));
-      this.ws.removeEventListener('close', this.onDisconnect_.bind(this));
-      this.ws.removeEventListener('error', this.onError_.bind(this));
-      this.ws.removeEventListener('message', this.onReceiveMessage_.bind(this));
+      this.ws.removeEventListener('open', this.boundOnOpen_);
+      this.ws.removeEventListener('close', this.boundOnDisconnect_);
+      this.ws.removeEventListener('error', this.boundOnError_);
+      this.ws.removeEventListener('message', this.boundOnReceiveMessage_);
 
       this.onConnect = null;
       this.onFailedConnect = null;
