@@ -248,10 +248,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     }
 
     if (!this.engagement_) {
-      this.engagement_ = EngagementTracker.getInstance(this.win);
-      this.engagement_
-        .init()
-        .onEngagementChange(this.updateEngagementStatus_.bind(this));
+      this.engagement_ = EngagementTracker.get(this.win);
+      this.engagement_.onEngagementChange(
+        this.updateEngagementStatus_.bind(this)
+      );
     }
 
     const {height, width} = this.creativeSize_ || this.initialSize_;

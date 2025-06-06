@@ -20,18 +20,6 @@ export class EngagementTracker {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {boolean} */
-    this.isFocused_ = win.document.hasFocus();
-
-    /** @private {boolean} */
-    this.isVisible_ = !isDocumentHidden(win.document);
-
-    /** @private {boolean} */
-    this.isOpen_ = true;
-
-    /** @private {boolean} */
-    this.isEngaged_ = this.calculateEngaged_();
-
     /** @private {Array<function(boolean)>} */
     this.listeners_ = [];
 
@@ -44,6 +32,12 @@ export class EngagementTracker {
     /** @private {number} */
     this.instanceCount_ = 0;
 
+    /** @private {?number} */
+    this.debounceTimer_ = null;
+
+    /** @private {number} */
+    this.debounceDelay_ = 100; // TODO: Needs testing, is this value too high?
+
     return this;
   }
 
@@ -53,9 +47,10 @@ export class EngagementTracker {
    * @return {!EngagementTracker}
    * @public
    */
-  static getInstance(win) {
+  static get(win) {
     if (!EngagementTracker.instance_) {
-      new EngagementTracker(win);
+      EngagementTracker.instance_ = new EngagementTracker(win);
+      EngagementTracker.instance_.init();
     }
     return EngagementTracker.instance_;
   }
@@ -70,6 +65,15 @@ export class EngagementTracker {
     if (this.isInitialized_) {
       return this;
     }
+
+    /** @private {boolean} */
+    this.isFocused_ = this.win.document.hasFocus();
+    /** @private {boolean} */
+    this.isVisible_ = !isDocumentHidden(this.win.document);
+    /** @private {boolean} */
+    this.isOpen_ = true;
+    /** @private {boolean} */
+    this.isEngaged_ = this.calculateEngaged_();
 
     this.unlisteners_.push(
       listen(this.win_, 'focus', () => {
@@ -112,11 +116,23 @@ export class EngagementTracker {
    * @private
    */
   updateEngagement_() {
+    // TODO: Play with debounceDelay_ value to optimize performance
     const newEngaged = this.calculateEngaged_();
 
     if (newEngaged !== this.isEngaged_) {
-      this.isEngaged_ = newEngaged;
-      this.notifyListeners_();
+      if (this.debounceTimer_ !== null) {
+        clearTimeout(this.debounceTimer_);
+      }
+
+      this.debounceTimer_ = setTimeout(() => {
+        this.debounceTimer_ = null;
+
+        const currentEngaged = this.calculateEngaged_();
+        if (currentEngaged !== this.isEngaged_) {
+          this.isEngaged_ = currentEngaged;
+          this.notifyListeners_();
+        }
+      }, this.debounceDelay_);
     }
   }
 
@@ -141,10 +157,6 @@ export class EngagementTracker {
    * @return {function()} Function to remove the listener
    */
   onEngagementChange(listener) {
-    if (!this.isInitialized_) {
-      this.init();
-    }
-
     this.listeners_.push(listener);
 
     try {
