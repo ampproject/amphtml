@@ -1,7 +1,7 @@
 /**
  * Handles communication between the AMP ad and the extension iframe
  */
-export class ExtensionCommunicator {
+export class ExtensionCommunication {
   queue = [];
 
   /**
@@ -14,11 +14,11 @@ export class ExtensionCommunicator {
   /**
    * Create Extension Communication Channel
    */
-  initExtensionCommunication() {
+  initExtensionCommunication_() {
     if (!this.listener) {
       !this.listenerAttacher &&
         (this.listenerAttacher = setInterval(
-          () => this.initExtensionCommunication(),
+          () => this.initExtensionCommunication_(),
           2000
         ));
       this.listener = window.frames['TG-listener'];
@@ -39,15 +39,16 @@ export class ExtensionCommunicator {
    * Send a message to the extension iframe
    * @param {string} type - The message type
    * @param {object} data - The message data
+   * @private
    */
-  sendIframeMessage(type, data) {
+  sendIframeMessage_(type, data) {
     const msg = {
       type,
       data,
     };
 
     this.queue.push(msg);
-    this.initExtensionCommunication();
+    this.initExtensionCommunication_();
   }
 
   /**
@@ -66,4 +67,122 @@ export class ExtensionCommunicator {
     this.listener = null;
     this.queue = [];
   }
+
+  /**
+   *  Setup the extension communication channel
+   * @param {number} applicationId - The application ID
+   * @param {string} country - The country code
+   * @param {number} section - The section ID
+   * @param {string} sessionId - The session ID
+   * @param {string}contextId - The context ID
+   * @param {BrowserState} state - The current browser state
+   *
+   * */
+  setup(applicationId, country, section, sessionId, contextId, state) {
+    const conf = {
+      sessionId,
+      contextId,
+      appId: applicationId,
+      section,
+      // eslint-disable-next-line local/camelcase
+      g_country: country,
+    };
+
+    // Send configuration
+    this.sendIframeMessage_('cfg', conf);
+    // Send browser current status
+    this.engagementStatus(state);
+  }
+
+  /**
+   * Send a message when an ad unit is added
+   * @param {AdUnit} adUnit
+   * */
+  adUnitRemoved(adUnit) {
+    this.sendIframeMessage_('adUnitRemoved', {id: adUnit.id});
+  }
+
+  /**
+   * Send a message when a banner is changed
+   * @param {AdUnit} adUnit
+   * */
+  bannerChanged(adUnit) {
+    const entry = adUnit.getCurrentEntry();
+    if (!entry) {
+      return;
+    }
+    this.sendIframeMessage_('bannerChanged', {
+      id: adUnit.id,
+      index: entry.index,
+      creative: entry.iatCId,
+      order: entry.iatOid,
+      orderLine: entry.iatOlId,
+      impressionId: entry.iid,
+      market: entry.m || ' ',
+      creativeWidth: entry.iatCw,
+      creativeHeight: entry.iatCh,
+      rotation: adUnit.doNotRotate ? 'Disabled' : 'Enabled',
+      dfpMapping: this.getGamMapping(adUnit),
+    });
+  }
+
+  /**
+   *  Send a message when an ad unit is updated
+   *  @param {AdUnit} adUnit
+   */
+  adUnitChanged(adUnit) {
+    this.sendIframeMessage_('adUnitChanged', {
+      id: adUnit.id,
+      shortId: adUnit.adUnitId,
+      sizes: adUnit.sizes,
+      instance: adUnit.id.split('.')[1],
+      configuration: adUnit.config,
+      customTargeting: adUnit.ct,
+      rotation: adUnit.doNotRotate ? 'Disabled' : 'Enabled',
+      isFirstPrint: adUnit.isFirstPrint,
+      isTracking: adUnit.isTrackingUnit,
+      visible: adUnit.isInView(),
+      width: adUnit.position.width,
+      height: adUnit.position.height,
+      dfpMapping: this.getGamMapping(adUnit),
+    });
+  }
+
+  /**
+   *  Send a message to change the banner
+   *  @param {BrowserState} state
+   */
+  engagementStatus(state) {
+    this.sendIframeMessage('engagementStatusChanged', {
+      index: state,
+      name: BrowserState[state],
+    });
+  }
+
+  /**
+   *  Get mapping
+   *  @param {AdUnit} adUnit
+   * @return {object|undefined} - Returns the GAM mapping if available, otherwise undefined
+   */
+  getGamMapping(adUnit) {
+    if (!adUnit.gamMapping) {
+      return undefined;
+    }
+
+    return {
+      creativeWidth: adUnit.gamMapping.cw,
+      creativeHeight: adUnit.gamMapping.ch,
+      slot: adUnit.currentEntryIndex,
+      impDur: adUnit.gamMapping.impDur,
+      dnr: adUnit.gamMapping.dnr,
+      dnrReason: adUnit.gamMapping.dnrReason,
+    };
+  }
 }
+
+const BrowserState = {
+  Unknown: -1,
+  Inactive: 0,
+  Active: 1,
+  Idle: 2,
+};

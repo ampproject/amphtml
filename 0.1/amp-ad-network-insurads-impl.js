@@ -6,7 +6,7 @@ import {Services} from '#service';
 
 import {DoubleClickHelper} from './doubleclick-helper';
 import {EngagementTracker} from './engagement-tracking';
-import {ExtensionCommunicator} from './extension';
+import {ExtensionCommunication} from './extension';
 import {LockedId} from './lockedid';
 import {RealtimeMessaging} from './realtime-messaging';
 import {VisibilityTracker} from './visibility-tracking';
@@ -55,7 +55,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     );
 
     if (window.frames['TG-listener']) {
-      this.extension_ = new ExtensionCommunicator(
+      this.extension_ = new ExtensionCommunication(
         this.handlerExtensionMessages.bind(this)
       );
     }
@@ -80,14 +80,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.canonicalUrl
     );
 
-    this.extension_.sendIframeMessage('cfg', {
-      sessionId: 'XPTO',
-      contextId: 'C3PO',
-      appId: 1,
-      section: 1,
-      // eslint-disable-next-line local/camelcase
-      g_country: 'PT',
-    });
+    // TODO: Get all the params
+    this.extension_.setup(
+      1, // applicationId
+      'PT', // country
+      1, // section
+      'XPTO', // sessionId
+      'C3PO', // contextId
+      this.engagement_.isEngaged() ? 1 : 0 // state
+    );
   }
 
   /** @override */
@@ -134,6 +135,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       'pgam',
       0
     );
+
+    this.extension_.bannerChanged(this); // TODO: Update with correct adunit params
 
     return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
@@ -282,8 +285,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     const {height, width} = this.creativeSize_ || this.initialSize_;
 
-    // TODO: Shall we bring other info from the server to inform the extension?
-    this.extension_.sendIframeMessage('adUnitChanged', {
+    this.extension_.adUnitChanged({
       id: this.getAdUnitId(),
       shortId: message.adUnitId,
       sizes: this.sizesArray,
@@ -416,7 +418,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     if (this.extension_) {
       // TODO: Create BrowserStates and extend with Idle,etc
-      this.extension_.sendIframeMessage('engagementStatusChanged', {
+      this.extension_.engagementStatus({
         index: isEngaged ? 1 : 0,
         name: isEngaged ? 'Active' : 'Inactive',
       });
