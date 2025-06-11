@@ -174,6 +174,32 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     return this.getAdUrlInsurAdsDeferred.promise;
   }
 
+  /** @override */
+  tearDownSlot() {
+    this.dCHelper.callMethod('tearDownSlot');
+    console /*OK*/
+      .log('Tear Down Slot');
+
+    if (this.visibilityTracker) {
+      this.visibilityTracker.destroy();
+      this.visibilityTracker = null;
+    }
+
+    if (this.engagement_) {
+      this.engagement_.release();
+    }
+
+    if (this.realtimeMessaging_) {
+      // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
+    }
+
+    if (this.extension_) {
+      this.extension_.adUnitRemoved(this.getAdUnitId());
+      this.extension_.destroy();
+      this.extension_ = null;
+    }
+  }
+
   /**
    * refreshEndCallback
    *
