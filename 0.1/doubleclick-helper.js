@@ -22,6 +22,7 @@ export class DoubleClickHelper {
       'refresh',
       'extractSize',
       'getAdUrl',
+      'tearDownSlot',
     ];
 
     this.initializeDoubleClickMethods_();
