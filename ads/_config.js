@@ -66,6 +66,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'a1ads': {
+    renderStartImplemented: true,
+  },
+  
   'a8': {
     prefetch: 'https://statics.a8.net/amp/ad.js',
     renderStartImplemented: true,
