@@ -399,6 +399,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
           };
         }
       });
+    }
 
     return processed;
   }
