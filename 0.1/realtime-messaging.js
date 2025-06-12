@@ -120,7 +120,6 @@ export class RealtimeMessaging {
    * @param {boolean} isEngaged - Whether user is engaged
    */
   sendPageStatus(isEngaged) {
-    // TODO Check for engagement state is true and if websocket is closed, open it
     if (
       isEngaged &&
       this.realtimeManager_ &&

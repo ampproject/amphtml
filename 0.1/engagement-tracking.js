@@ -116,7 +116,6 @@ export class EngagementTracker {
    * @private
    */
   updateEngagement_() {
-    // TODO: Play with debounceDelay_ value to optimize performance
     const newEngaged = this.calculateEngaged_();
 
     if (newEngaged !== this.isEngaged_) {

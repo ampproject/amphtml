@@ -13,7 +13,7 @@ export class LockedId {
       this.getCanvasPrint_(),
       this.getGPUInfo_(),
       navigator.language,
-      navigator.languages.join(','), // TODO: check this with aribeiro
+      navigator.languages.join(','),
       navigator.systemLanguage || window.navigator.language,
       navigator.hardwareConcurrency,
     ];

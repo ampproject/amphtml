@@ -1,5 +1,3 @@
-import {is} from 'date-fns/locale';
-
 import {Deferred} from '#core/data-structures/promise';
 
 import {Services} from '#service';
@@ -12,7 +10,6 @@ import {RealtimeMessaging} from './realtime-messaging';
 import {VisibilityTracker} from './visibility-tracking';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-
 /** @type {string} */
 const TAG = 'amp-ad-network-insurads-impl';
 
