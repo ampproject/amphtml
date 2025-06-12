@@ -156,21 +156,29 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       const url = new URL(doubleClickUrl);
       if (self.refreshCount_ > 0) {
         console./*Ok*/ log('Refresh count:', self.refreshCount_);
+
+        // Test code
         // this.slot === '/134642692/AMPTestsV3'
         // ? '/30497360/a4a/a4a_native'
         // : '/134642692/AMPTestsV3';
+        //
+        // if (this.nextRefresh.path) {
+        //   params.set('iu', this.nextRefresh.path);
+        // }
+        // if (this.nextRefresh.sizesString) {
+        //   params.set('sz', this.nextRefresh.sizesString);
+        // }
+        // console /*OK*/
+        //   .log(url.toString());
 
-        // TODO: Make this code generic
         const params = url.searchParams;
-        if (this.nextRefresh.path) {
-          params.set('iu', this.nextRefresh.path);
+        // Assume all the necessary and updated params (including the original parameters)
+        // will come from the server
+        if (this.nextRefresh.parameters.length > 0) {
+          this.nextRefresh.parameters.forEach((param) => {
+            params.set(param.key, param.value);
+          });
         }
-        if (this.nextRefresh.sizesString) {
-          params.set('sz', this.nextRefresh.sizesString);
-        }
-
-        console /*OK*/
-          .log(url.toString());
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
     });
@@ -315,7 +323,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return;
     }
 
-    // TODO: Define the paramteters for the next refresh!!!
     this.nextRefresh = this.processWaterfallMessage_(message);
     this.triggerImmediateRefresh();
 
@@ -346,6 +353,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   processWaterfallMessage_(message) {
+    // TOOD: Validate the need for every param besides parameters map
     const processed = {
       code: message.code,
       provider: message.provider,
@@ -376,9 +384,21 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         .join('|');
     }
 
-    // TODO: Process key-values for ad targeting
-
-    // TODO: Process parametersMap
+    if (Array.isArray(message.keyValues) && message.keyValues.length > 0) {
+      processed.keyValues = message.keyValues.map((kv) => {
+        if (typeof kv === 'object' && kv.key && kv.value) {
+          return {
+            key: kv.key,
+            value: kv.value,
+          };
+        } else if (typeof kv === 'string') {
+          const [key, value] = kv.split('=');
+          return {
+            key: key.trim(),
+            value: value ? value.trim() : '',
+          };
+        }
+      });
 
     return processed;
   }
