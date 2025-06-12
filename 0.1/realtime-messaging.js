@@ -15,10 +15,13 @@ export class RealtimeMessaging {
   /**
    * @param {string} sellerId - Seller ID
    * @param {string} canonicalUrl - Canonical URL
+   * @param reconnectHandler
    * @param {Object=} handlers - Message handlers
    */
-  constructor(sellerId, canonicalUrl, handlers = {}) {
+  constructor(sellerId, canonicalUrl, reconnectHandler, handlers = {}) {
     this.setupRealtimeConnection_(sellerId, canonicalUrl);
+
+    this.reconnectHandler_ = reconnectHandler;
 
     /** @private {!MessageHandler} */
     this.messageHandler_ = new MessageHandler(handlers);
@@ -62,9 +65,16 @@ export class RealtimeMessaging {
    * @param {boolean} newVisitor - New visitor flag
    * @param {boolean} extension - Extension status
    * @param {string=} url - Page URL
+   * @param {boolean=} reconnect - Reconnect flag
    */
-  sendAppInit(lockedId, newVisitor, extension, url) {
-    const appInit = new AppInitMessage(lockedId, newVisitor, extension, url);
+  sendAppInit(lockedId, newVisitor, extension, url, reconnect = false) {
+    const appInit = new AppInitMessage(
+      lockedId,
+      newVisitor,
+      extension,
+      url,
+      reconnect
+    );
     this.realtimeManager_.send(appInit.serialize());
   }
 
@@ -128,6 +138,7 @@ export class RealtimeMessaging {
       console /*OK*/
         .log('User is active, reconnecting WebSocket');
       this.setupRealtimeConnection_();
+      this.reconnectHandler_();
     }
 
     const status = new AppStatusMessage(isEngaged);

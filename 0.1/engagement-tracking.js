@@ -36,7 +36,7 @@ export class EngagementTracker {
     this.debounceTimer_ = null;
 
     /** @private {number} */
-    this.debounceDelay_ = 100; // TODO: Needs testing, is this value too high?
+    this.debounceDelay_ = 100;
 
     return this;
   }
@@ -57,13 +57,18 @@ export class EngagementTracker {
 
   /**
    * Initialize event listeners
+   * @param {Object=} config - Optional configuration object
    * @return {!EngagementTracker} this instance for chaining
    */
-  init() {
+  init(config = {}) {
     this.instanceCount_++;
 
     if (this.isInitialized_) {
       return this;
+    }
+
+    if (config.idleTimer) {
+      this.idleTimeout_ = config.idleTimer * 1000;
     }
 
     /** @private {boolean} */

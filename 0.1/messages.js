@@ -70,13 +70,15 @@ export class AppInitMessage extends BaseMessage {
    * @param {boolean} newVisitor - New Visitor
    * @param {boolean} extension - Extension Status
    * @param {string} url - Url
+   * @param {boolean=} reconnect - Reconnect flag
    */
-  constructor(lockedId, newVisitor, extension, url = {}) {
+  constructor(lockedId, newVisitor, extension, url = {}, reconnect = false) {
     super('app-init', {
       lockedId,
       newVisitor,
       extension,
       url,
+      reconnect,
     });
   }
 }

@@ -52,8 +52,12 @@ export class RealtimeManager {
    * @param {string=} canonicalUrl - Optional canonical URL
    */
   constructor(sellerId = '', canonicalUrl = '') {
-    this.sellerId_ = sellerId;
-    this.canonicalUrl_ = canonicalUrl;
+    if (sellerId) {
+      this.sellerId_ = sellerId;
+    }
+    if (canonicalUrl) {
+      this.canonicalUrl_ = canonicalUrl;
+    }
 
     this.boundOnOpen_ = this.onOpen_.bind(this);
     this.boundOnDisconnect_ = this.onDisconnect_.bind(this);

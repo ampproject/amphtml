@@ -44,6 +44,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.realtimeMessaging_ = new RealtimeMessaging(
       this.sellerId,
       this.canonicalUrl,
+      this.handleReconnect_.bind(this),
       {
         appInitHandler: (message) => this.handleAppInit_(message),
         unitInitHandler: (message) => this.handleUnitInit_(message),
@@ -245,6 +246,23 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return false;
     }
     this.refresh(this.refreshEndCallback);
+  }
+
+  /**
+   * Handles reconnection to InsurAds
+   * This is called when the WebSocket connection is lost and needs to be re-established.
+   * @private
+   * */
+  handleReconnect_() {
+    console /*OK*/
+      .log('Reconnecting to InsurAds');
+    this.realtimeMessaging_.sendAppInit(
+      this.lockedid,
+      true,
+      true,
+      this.canonicalUrl,
+      true
+    );
   }
 
   /**
