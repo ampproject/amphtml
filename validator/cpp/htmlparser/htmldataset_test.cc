@@ -1,15 +1,17 @@
 // Runs webkit html5 test datasets and validates parser.
 
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "absl/flags/flag.h"
 #include "cpp/htmlparser/atomutil.h"
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/fileutil.h"
@@ -22,7 +24,8 @@
 
 ABSL_FLAG(std::string, test_srcdir, "", "Testdata directory");
 
-using namespace htmlparser;
+
+namespace htmlparser {
 
 // Represents a single test case.
 struct TestCaseData {
@@ -113,7 +116,7 @@ TestCaseData ReadParseTest(std::ifstream* fd) {
     line = ReadUntil(fd, "\n");
     std::string trimmed(line);
     Strings::Trim(&trimmed, "| \n");
-    if (trimmed.size() > 0) {
+    if (!trimmed.empty()) {
       if (line.front() == '|' && trimmed.front() == '"') {
         in_quote = true;
       }
@@ -191,7 +194,7 @@ std::optional<Error> DumpLevel(Node* node, std::stringbuf* buffer,
         std::string v = attr.value;
         buffer->sputc('\n');
         DumpIndent(buffer, level);
-        if (ns != "") {
+        if (!ns.empty()) {
           buffer->sputn(ns.c_str(), ns.size());
           buffer->sputc(' ');
           buffer->sputn(k.c_str(), k.size());
@@ -305,9 +308,7 @@ TEST(HTMLDatasetTest, WebkitData) {
   };
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
-    std::string full_path =
-        absl::GetFlag(FLAGS_test_srcdir) +
-        pattern.data();
+    std::string full_path = ::testing::SrcDir() + pattern.data();
     std::vector<std::string> filenames;
     EXPECT_TRUE(FileUtil::Glob(full_path, &filenames))
         << "Error opening files: " << pattern;
@@ -388,4 +389,6 @@ TEST(HTMLDatasetTest, WebkitData) {
   // Hardcoded, whenever dataset changes. Ensures no new tests are added, or
   // old tests mistakenly removed.
   EXPECT_EQ(1484, num_test_cases);
-};
+}
+
+}  // namespace htmlparser
