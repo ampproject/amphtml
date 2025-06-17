@@ -349,7 +349,9 @@ export class AmpScript extends AMP.BaseElement {
       // workerDom will be null if it failed to init.
       if (this.workerDom_) {
         this.workerDom_.onerror = (errorEvent) => {
-          errorEvent.preventDefault();
+          if (errorEvent.preventDefault) {
+            errorEvent.preventDefault();
+          }
           user().error(
             TAG,
             `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
