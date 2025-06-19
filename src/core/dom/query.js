@@ -8,7 +8,7 @@ import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
 /**
  * Asserts that name is just an alphanumeric word, and does not contain
- * advanced CSS selector features like attributes, psuedo-classes, class names,
+ * advanced CSS selector features like attributes, pseudo-classes, class names,
  * nor ids.
  * @param {string} name
  */
@@ -109,7 +109,7 @@ export function matches(el, selector) {
  * up the DOM subtree.
  * @param {HTMLElement} element
  * @param {function(HTMLElement):boolean} callback
- * @param {HTMLElement=} opt_stopAt optional elemnt to stop the search at.
+ * @param {HTMLElement=} opt_stopAt optional element to stop the search at.
  * @return {?HTMLElement}
  */
 export function closest(element, callback, opt_stopAt) {

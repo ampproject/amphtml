@@ -1509,7 +1509,7 @@ export class AnalyticsPercentageTracker {
 
       this.warnForTesting_(
         'This video is too short for `video-percentage-played`. ' +
-          'Reports may be innacurate. For best results, use videos over',
+          'Reports may be inaccurate. For best results, use videos over',
         bestResultLength,
         'seconds long.',
         video.element
