@@ -23,7 +23,6 @@ import {Services} from '#service';
 import {userAssert} from '#utils/log';
 
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
-import {AmpAdCustom} from './amp-ad-custom';
 
 import {CSS} from '../../../build/amp-ad-0.1.css';
 
@@ -61,16 +60,10 @@ export class AmpAd extends AMP.BaseElement {
       : Promise.resolve();
     const type = this.element.getAttribute('type');
     return consent.then(() => {
-      const isCustom = type === 'custom';
       userAssert(
-        isCustom || hasOwn(adConfig, type) || hasOwn(a4aRegistry, type),
+        hasOwn(adConfig, type) || hasOwn(a4aRegistry, type),
         `Unknown ad type "${type}"`
       );
-
-      // Check for the custom ad type (no ad network, self-service)
-      if (isCustom) {
-        return new AmpAdCustom(this.element);
-      }
 
       this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
       const slotId = this.win.ampAdSlotIdCounter++;
