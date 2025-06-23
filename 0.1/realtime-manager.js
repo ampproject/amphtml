@@ -46,6 +46,11 @@ export class RealtimeManager {
   /** @private {?function():void} */
   onHandshakeComplete = null;
 
+  maxRetries = 2;
+  retryCount = 0;
+  retryDelay = 2000;
+  retryTimer = null;
+
   /**
    * Creates a new RealtimeManager
    * @param {string=} sellerId - Optional seller ID
@@ -110,6 +115,8 @@ export class RealtimeManager {
     console /*OK*/
       .log('WebSocket connection opened');
 
+    this.clearRetryTimer_();
+
     if (this.onConnect) {
       this.onConnect();
     }
@@ -121,6 +128,27 @@ export class RealtimeManager {
    * @private
    */
   onDisconnect_(event) {
+    if (
+      !this.retryTimer &&
+      this.retryCount < this.maxRetries &&
+      event.code !== 1000
+    ) {
+      this.retryCount++;
+      console /*OK*/
+        .log(
+          `Connection closed, retrying (${this.retryCount}/${this.maxRetries})`
+        );
+      this.retryTimer = setTimeout(() => {
+        this.connect();
+      }, this.retryDelay);
+      return;
+    }
+
+    if (this.retryTimer) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+    }
+
     if (this.onDisconnect) {
       this.onDisconnect(event);
     }
@@ -227,10 +255,16 @@ export class RealtimeManager {
 
       console /*OK*/
         .log('Connection initiated');
+
+      this.clearRetryTimer_();
+
       return true;
     } catch (e) {
       console /*OK*/
         .error('Failed to connect:', e);
+
+      this.clearRetryTimer_();
+
       return false;
     }
   }
@@ -350,6 +384,20 @@ export class RealtimeManager {
       console /*OK*/
         .error('Failed to send message', e);
       return false;
+    }
+  }
+
+  /**
+   * Clears the retry timer and resets retry count
+   * @private
+   */
+  clearRetryTimer_() {
+    if (this.retryTimer) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+      this.retryCount = 0;
+      console /*OK*/
+        .log('Retry timer cleared');
     }
   }
 }
