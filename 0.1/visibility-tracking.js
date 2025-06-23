@@ -30,8 +30,7 @@ export class VisibilityTracker {
    * Sets up visibility tracking using IntersectionObserver
    */
   setupVisibilityTracking() {
-    // [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    const thresholds = Array.from({length: 11}, (_, i) => i / 10);
+    const thresholds = [0, 0.5, 1];
 
     this.visibilityObserver_ = new this.win_.IntersectionObserver(
       (entries) => this.handleVisibilityChange_(entries),
