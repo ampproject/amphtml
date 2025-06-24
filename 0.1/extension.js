@@ -1,3 +1,5 @@
+import {BrowserState} from './engagement-tracking';
+
 /**
  * Handles communication between the AMP ad and the extension iframe
  */
@@ -179,10 +181,3 @@ export class ExtensionCommunication {
     };
   }
 }
-
-const BrowserState = {
-  Unknown: -1,
-  Inactive: 0,
-  Active: 1,
-  Idle: 2,
-};

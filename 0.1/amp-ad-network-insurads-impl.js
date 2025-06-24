@@ -74,7 +74,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.realtimeMessaging_.sendAppInit(
       this.lockedid,
       true,
-      true,
+      !!this.extension_,
       this.canonicalUrl
     );
 
@@ -301,7 +301,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     if (!this.engagement_) {
       this.engagement_ = EngagementTracker.get(this.win);
-      this.engagement_.onEngagementChange(
+      // TODO: Remove listeners on destroy
+      this.unlistenEngagement_ = this.engagement_.registerListener(
         this.updateEngagementStatus_.bind(this)
       );
     }
@@ -442,26 +443,24 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /**
    * Handles user engagement changes
-   * @param {boolean} isEngaged - Whether user is engaged
+   * @param {!Object} state - Engagement state object
    * @private
    */
-  updateEngagementStatus_(isEngaged) {
-    const state = this.engagement_.getState();
-
+  updateEngagementStatus_(state) {
     if (this.realtimeMessaging_) {
-      this.realtimeMessaging_.sendPageStatus(isEngaged);
+      this.realtimeMessaging_.sendPageStatus(state);
     }
 
     if (this.extension_) {
       // TODO: Create BrowserStates and extend with Idle,etc
       this.extension_.engagementStatus({
-        index: isEngaged ? 1 : 0,
-        name: isEngaged ? 'Active' : 'Inactive',
+        index: state.isEngaged ? 1 : 0,
+        name: state.isEngaged ? 'Active' : 'Inactive',
       });
     }
 
     console /*OK*/
-      .log('Engagement changed:', isEngaged, state);
+      .log('Engagement changed:', state.isEngaged, state);
   }
 
   /**
