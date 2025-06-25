@@ -410,7 +410,7 @@ In the document `<head>` section, add the extension `<script>` tag used by this 
 
 <pre>
 &lt;script async custom-element='<b>amp-cat</b>'
-     src='https://cdn.ampproject.org/v0/<b>amp-cat</b>-0.1.js'&gt;&lt;/scrip&gt;
+     src='https://cdn.ampproject.org/v0/<b>amp-cat</b>-0.1.js'&gt;&lt;/script&gt;
 </pre>
 
 **Add a working example of your tag**
