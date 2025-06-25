@@ -142,13 +142,15 @@ export class UnitSnapshotMessage extends BaseMessage {
 /**
  * Application status update message
  */
-export class AppStatusMessage extends BaseMessage {
+export class PageStatusMessage extends BaseMessage {
   /**
-   * @param {boolean} isEngaged - Whether the user is active
+   * @param {number} Engagement - Engagement status
+   * @param {number} DocumentVisible - Whether the page is visible
    */
-  constructor(isEngaged = {}) {
+  constructor(Engagement = {}, DocumentVisible = {}) {
     super('page-status', {
-      isEngaged,
+      Engagement,
+      DocumentVisible,
     });
   }
 }

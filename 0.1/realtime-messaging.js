@@ -1,8 +1,8 @@
 import {
   AppInitMessage,
-  AppStatusMessage,
   HandshakeMessage,
   MessageHandler,
+  PageStatusMessage,
   UnitInitMessage,
   UnitSnapshotMessage,
 } from './messages';
@@ -15,7 +15,7 @@ export class RealtimeMessaging {
   /**
    * @param {string} sellerId - Seller ID
    * @param {string} canonicalUrl - Canonical URL
-   * @param reconnectHandler
+   * @param {function()} reconnectHandler - Handler for reconnection logic
    * @param {Object=} handlers - Message handlers
    */
   constructor(sellerId, canonicalUrl, reconnectHandler, handlers = {}) {
@@ -127,11 +127,11 @@ export class RealtimeMessaging {
 
   /**
    * Sends a page status update
-   * @param {boolean} isEngaged - Whether user is engaged
+   * @param {!Object} state - Engagement state object
    */
-  sendPageStatus(isEngaged) {
+  sendPageStatus(state) {
     if (
-      isEngaged &&
+      state.isEngaged &&
       this.realtimeManager_ &&
       !this.realtimeManager_.isConnected()
     ) {
@@ -141,7 +141,7 @@ export class RealtimeMessaging {
       this.reconnectHandler_();
     }
 
-    const status = new AppStatusMessage(isEngaged);
+    const status = new PageStatusMessage(state.isEngaged, state.isVisible);
     this.realtimeManager_.send(status.serialize());
   }
 }

@@ -3,6 +3,31 @@ import {isDocumentHidden} from '#core/document/visibility';
 import {listen} from '#utils/event-helper';
 
 /**
+ * Enum for browser/user activity states
+ * @enum {number}
+ */
+export const BrowserState = {
+  UNKNOWN: -1,
+  INACTIVE: 0,
+  ACTIVE: 1,
+  IDLE: 2,
+};
+
+/**
+ * Array of event types which will be listened for on the document to indicate
+ * activity. Other activities are also observed on the AmpDoc and Viewport
+ * objects. See {@link setUpActivityListeners_} for listener implementation.
+ * @private @const {Array<string>}
+ */
+const ACTIVE_EVENT_TYPES = [
+  'mousedown',
+  'mouseup',
+  'mousemove',
+  'keydown',
+  'keyup',
+];
+
+/**
  * A singleton tracker for user engagement across all ad units.
  * This tracks focus, visibility, and page state to determine if the user is engaged.
  */
@@ -32,11 +57,17 @@ export class EngagementTracker {
     /** @private {number} */
     this.instanceCount_ = 0;
 
-    /** @private {?number} */
-    this.debounceTimer_ = null;
-
     /** @private {number} */
-    this.debounceDelay_ = 100;
+    this.idleTimeout_ = 21000; // Default to 21 seconds
+
+    /** @private {?number} */
+    this.idleTimer_ = null;
+
+    /** @private {boolean} */
+    this.ivm_ = false;
+
+    /** @private {BrowserState} */
+    this.currentState_ = BrowserState.UNKNOWN;
 
     return this;
   }
@@ -71,6 +102,10 @@ export class EngagementTracker {
       this.idleTimeout_ = config.idleTimer * 1000;
     }
 
+    if (config.ivm) {
+      this.ivm_ = config.ivm;
+    }
+
     /** @private {boolean} */
     this.isFocused_ = this.win.document.hasFocus();
     /** @private {boolean} */
@@ -79,6 +114,8 @@ export class EngagementTracker {
     this.isOpen_ = true;
     /** @private {boolean} */
     this.isEngaged_ = this.calculateEngaged_();
+    /** @private {boolean} */
+    this.isIdle_ = false;
 
     this.unlisteners_.push(
       listen(this.win_, 'focus', () => {
@@ -103,7 +140,20 @@ export class EngagementTracker {
       })
     );
 
+    this.setUpListenersFromArray_(
+      this.ampdoc.getRootNode(),
+      ACTIVE_EVENT_TYPES,
+      () => {
+        this.isFocused_ = true;
+        this.isVisible_ = true;
+        this.isOpen_ = true;
+        this.updateEngagement_();
+        this.restartIdleTimer_();
+      }
+    );
+
     this.isInitialized_ = true;
+
     return this;
   }
 
@@ -121,33 +171,32 @@ export class EngagementTracker {
    * @private
    */
   updateEngagement_() {
-    const newEngaged = this.calculateEngaged_();
+    const isEngaged = this.calculateEngaged_();
 
-    if (newEngaged !== this.isEngaged_) {
-      if (this.debounceTimer_ !== null) {
-        clearTimeout(this.debounceTimer_);
-      }
+    if (isEngaged !== this.isEngaged_) {
+      this.isEngaged_ = isEngaged;
+      this.currentState_ = isEngaged
+        ? BrowserState.ACTIVE
+        : BrowserState.INACTIVE;
+      this.notifyListeners_();
+    }
 
-      this.debounceTimer_ = setTimeout(() => {
-        this.debounceTimer_ = null;
-
-        const currentEngaged = this.calculateEngaged_();
-        if (currentEngaged !== this.isEngaged_) {
-          this.isEngaged_ = currentEngaged;
-          this.notifyListeners_();
-        }
-      }, this.debounceDelay_);
+    if (isEngaged) {
+      this.restartIdleTimer_();
+    } else {
+      this.isIdle_ = false;
+      clearTimeout(this.idleTimer_);
     }
   }
 
   /**
-   * Notify all listeners of the current engagement state
+   * Notify all listeners of the current page state
    * @private
    */
   notifyListeners_() {
     this.listeners_.forEach((listener) => {
       try {
-        listener(this.isEngaged_);
+        listener(this.getState());
       } catch (e) {
         console /*OK*/
           .error('Error in engagement listener:', e);
@@ -156,15 +205,45 @@ export class EngagementTracker {
   }
 
   /**
+   * Resets the time until the user state changes to idle
+   * @private
+   */
+  restartIdleTimer_() {
+    if (this.ivm_) {
+      return;
+    }
+
+    this.isIdle_ = false;
+    clearTimeout(this.idleTimer_);
+
+    this.idleTimer_ = setTimeout(() => {
+      this.isIdle_ = true;
+    }, this.idleTimeout_);
+  }
+
+  /**
+   *  @private
+   *  @param {!EventTarget} target
+   *  @param {Array<string>} events
+   *  @param {function()} listener
+   */
+  setUpListenersFromArray_(target, events, listener) {
+    for (let i = 0; i < events.length; i++) {
+      this.unlisteners_.push(listen(target, events[i], listener));
+    }
+  }
+
+  /**
    * Add a listener for engagement changes
-   * @param {function(boolean)} listener - Function called when engagement changes
+   * @param {function(!Object)} listener - Function called when engagement changes
    * @return {function()} Function to remove the listener
    */
-  onEngagementChange(listener) {
+  registerListener(listener) {
     this.listeners_.push(listener);
 
     try {
-      listener(this.isEngaged_);
+      const state = this.getState();
+      listener(state);
     } catch (e) {
       console /*OK*/
         .error('Error in initial engagement callback:', e);
@@ -192,10 +271,12 @@ export class EngagementTracker {
    */
   getState() {
     return {
+      currentState: this.currentState_,
       isEngaged: this.isEngaged_,
       isFocused: this.isFocused_,
       isVisible: this.isVisible_,
       isOpen: this.isOpen_,
+      isIdle: this.isIdle_,
       instanceCount: this.instanceCount_,
     };
   }
