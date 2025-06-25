@@ -15,7 +15,7 @@ export class RealtimeMessaging {
   /**
    * @param {string} sellerId - Seller ID
    * @param {string} canonicalUrl - Canonical URL
-   * @param reconnectHandler
+   * @param {function()} reconnectHandler - Handler for reconnection logic
    * @param {Object=} handlers - Message handlers
    */
   constructor(sellerId, canonicalUrl, reconnectHandler, handlers = {}) {

@@ -1,5 +1,3 @@
-import {is} from 'date-fns/locale';
-
 import {isDocumentHidden} from '#core/document/visibility';
 
 import {listen} from '#utils/event-helper';
