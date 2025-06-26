@@ -75,13 +75,14 @@ export class EngagementTracker {
   /**
    * Returns the singleton instance of EngagementTracker.
    * @param {!Window} win - Window object
+   * @param {Object=} config - Optional configuration object
    * @return {!EngagementTracker}
    * @public
    */
-  static get(win) {
+  static get(win, config = {}) {
     if (!EngagementTracker.instance_) {
       EngagementTracker.instance_ = new EngagementTracker(win);
-      EngagementTracker.instance_.init();
+      EngagementTracker.instance_.init(config);
     }
     return EngagementTracker.instance_;
   }

@@ -144,4 +144,34 @@ export class RealtimeMessaging {
     const status = new PageStatusMessage(state.isEngaged, state.isVisible);
     this.realtimeManager_.send(status.serialize());
   }
+
+  /**
+   * Disconnects the WebSocket connection
+   * @param {boolean} clearQueue - Whether to clear the message queue on disconnect (default: true)
+   * @param {number=} code - Optional close code (default: 1000 - normal closure)
+   * @param {string=} reason - Optional reason for closing
+   * @return {boolean} Whether disconnection was successful
+   * @public
+   */
+  disconnect(clearQueue = true, code = 1000, reason = 'AMP is going away') {
+    if (!this.realtimeManager_) {
+      console /*OK*/
+        .log('No active connection to disconnect');
+      return false;
+    }
+
+    try {
+      console /*OK*/
+        .log(`Disconnecting WebSocket: ${reason} (code: ${code})`);
+
+      // Perform the actual disconnection
+      this.realtimeManager_.disconnect(clearQueue, code, reason);
+
+      return true;
+    } catch (e) {
+      console /*OK*/
+        .error('Error disconnecting WebSocket:', e);
+      return false;
+    }
+  }
 }

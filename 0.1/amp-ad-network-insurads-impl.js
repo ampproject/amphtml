@@ -169,6 +169,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         // console /*OK*/
         //   .log(url.toString());
 
+        // TODO: Discuss if we should support single parameters and mantain that logic here
+        // OR do like we planned, keep the logic on the server side, and get only the processed parameters
+
         const params = url.searchParams;
         // Assume all the necessary and updated params (including the original parameters)
         // will come from the server
@@ -189,24 +192,18 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*OK*/
       .log('Tear Down Slot');
 
-    if (this.visibilityTracker) {
-      this.visibilityTracker.destroy();
-      this.visibilityTracker = null;
-    }
+    // Cleanup moved to forceCollapse for now
+  }
 
-    if (this.engagement_) {
-      this.engagement_.release();
-    }
+  /** @override */
+  forceCollapse() {
+    super.forceCollapse();
+    console /*OK*/
+      .log('Force Collapse');
 
-    if (this.realtimeMessaging_) {
-      // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
-    }
-
-    if (this.extension_) {
-      this.extension_.adUnitRemoved(this.getAdUnitId());
-      this.extension_.destroy();
-      this.extension_ = null;
-    }
+    // Destroy the ad and all its components
+    // TODO: This must be tested properly to see if there is a better place for destroy
+    this.destroy_();
   }
 
   /**
@@ -277,6 +274,17 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.sellerKeyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
     console /*OK*/
       .log('App Init:', message);
+
+    if (!this.engagement_) {
+      const config = {
+        ivm: this.ivm,
+      };
+      this.engagement_ = EngagementTracker.get(this.win, config);
+      // TODO: Remove listeners on destroy
+      this.unlistenEngagement_ = this.engagement_.registerListener(
+        this.updateEngagementStatus_.bind(this)
+      );
+    }
   }
 
   /**
@@ -296,14 +304,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.win,
         this.element,
         this.onVisibilityChange_.bind(this)
-      );
-    }
-
-    if (!this.engagement_) {
-      this.engagement_ = EngagementTracker.get(this.win);
-      // TODO: Remove listeners on destroy
-      this.unlistenEngagement_ = this.engagement_.registerListener(
-        this.updateEngagementStatus_.bind(this)
       );
     }
 
@@ -471,6 +471,47 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     const adUnitId =
       this.adUnitId + '.' + this.element.getAttribute('data-amp-slot-index');
     return adUnitId;
+  }
+
+  /**
+   * Destroy implementation
+   * This is called when the ad is removed from the DOM or refreshed
+   * @private
+   */
+  destroy_() {
+    console /*OK*/
+      .log('Force Collapse');
+    // Already Validated. is called when the ad is refreshed or unlayoutCallback
+    // A: Does the teardown happen in every refresh?
+    // B: OR Does the teardown happen when the ad is removed from the DOM // Slot Collapsed?
+    // If A:
+    // Don't destroy the extension, as it will be used in the next refresh
+    // Don't destroy the realtime messaging, as it will be used in the next refresh
+    // Don't destroy the engagement tracker, as it will be used in the next refresh
+    // Don't destroy the visibility tracker, as it will be used in the next refresh
+    // If B: - IT IS B: tearDownSlot is called when the ad is refreshed or unlayoutCallback
+    // Don't destroy all the components, as they will be used in the next refresh
+    // TODO: Find a proper place to proper cleanup of the components (commented bellow)
+    if (this.visibilityTracker) {
+      this.visibilityTracker.destroy();
+      this.visibilityTracker = null;
+    }
+
+    if (this.engagement_) {
+      this.engagement_.release();
+    }
+
+    if (this.realtimeMessaging_) {
+      // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
+      this.realtimeMessaging_.disconnect();
+      this.realtimeMessaging_ = null;
+    }
+
+    if (this.extension_) {
+      this.extension_.adUnitRemoved(this.getAdUnitId());
+      this.extension_.destroy();
+      this.extension_ = null;
+    }
   }
 }
 

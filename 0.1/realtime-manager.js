@@ -271,10 +271,12 @@ export class RealtimeManager {
 
   /**
    * Disconnect the WebSocket
-   * @param {boolean=} clearQueue - Whether to clear the message queue (default: false)
+   * @param {boolean=} clearQueue - Whether to clear the message queue (default: true)
+   * @param {number=} code - Optional close code (default: 1000 - normal closure)
+   * @param {string=} reason - Optional reason for closing
    * @public
    */
-  disconnect(clearQueue = false) {
+  disconnect(clearQueue = true, code = 1000, reason = 'AMP is going away') {
     if (!this.ws) {
       this.handshakeComplete_ = false;
       return;
@@ -291,7 +293,7 @@ export class RealtimeManager {
         this.ws.readyState === WebSocket.OPEN ||
         this.ws.readyState === WebSocket.CONNECTING
       ) {
-        this.ws.close(1000, 'Manual disconnect');
+        this.ws.close(code, reason);
       }
 
       this.ws.removeEventListener('open', this.boundOnOpen_);
