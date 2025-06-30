@@ -6,6 +6,7 @@ import {DoubleClickHelper} from './doubleclick-helper';
 import {EngagementTracker} from './engagement-tracking';
 import {ExtensionCommunication} from './extension';
 import {LockedId} from './lockedid';
+import {NextRefresh} from './next-refresh';
 import {RealtimeMessaging} from './realtime-messaging';
 import {VisibilityTracker} from './visibility-tracking';
 
@@ -31,7 +32,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.ivm = false;
     this.iabTaxonomy = {};
     this.sellerKeyValues = [];
-    this.nextRefresh = {}; // TODO: Implement model for this
+    this.nextRefresh = new NextRefresh();
     this.isViewable_ = false;
 
     /* DoubleClick & AMP */
@@ -130,7 +131,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       responseHeaders.get('google-size') || '',
       this.sizes || [],
       this.keyValues || [],
-      'pgam',
+      this.nextRefresh ? this.nextRefresh.provider : 'pgam',
       0
     );
 
@@ -151,6 +152,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       opt_serveNpaSignal
     );
     this.getAdUrlDeferred.promise.then((doubleClickUrl) => {
+      3;
       const url = new URL(doubleClickUrl);
       if (self.refreshCount_ > 0) {
         console./*Ok*/ log('Refresh count:', self.refreshCount_);
@@ -198,8 +200,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /** @override */
   forceCollapse() {
     super.forceCollapse();
+
     console /*OK*/
       .log('Force Collapse');
+
+    // Should we refresh to our demand on first print blank?
 
     // Destroy the ad and all its components
     // TODO: This must be tested properly to see if there is a better place for destroy
@@ -339,7 +344,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return;
     }
 
-    this.nextRefresh = this.processWaterfallMessage_(message);
+    this.nextRefresh = NextRefresh.fromWaterfallMessage(message);
     this.triggerImmediateRefresh();
 
     console /*OK*/
@@ -360,64 +365,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.refresh(this.refreshEndCallback);
         break;
     }
-  }
-
-  /**
-   * Processes a waterfall message into a structured format for ad refresh
-   * @param {!Object} message - The waterfall message to process
-   * @return {!Object} Processed waterfall data
-   * @private
-   */
-  processWaterfallMessage_(message) {
-    // TOOD: Validate the need for every param besides parameters map
-    const processed = {
-      code: message.code,
-      provider: message.provider,
-      path: message.path,
-      sizesArray: [],
-      sizesString: '',
-      keyValues: [],
-      parameters: message.parametersMap,
-    };
-
-    if (Array.isArray(message.sizes) && message.sizes.length > 0) {
-      processed.sizesArray = message.sizes
-        .map((size) => {
-          if (Array.isArray(size) && size.length >= 2) {
-            return [parseInt(size[0], 10), parseInt(size[1], 10)];
-          } else if (typeof size === 'string' && size.includes('x')) {
-            const [width, height] = size
-              .split('x')
-              .map((dim) => parseInt(dim, 10));
-            return [width, height];
-          }
-          return null;
-        })
-        .filter((size) => size !== null);
-
-      processed.sizesString = processed.sizesArray
-        .map((size) => `${size[0]}x${size[1]}`)
-        .join('|');
-    }
-
-    if (Array.isArray(message.keyValues) && message.keyValues.length > 0) {
-      processed.keyValues = message.keyValues.map((kv) => {
-        if (typeof kv === 'object' && kv.key && kv.value) {
-          return {
-            key: kv.key,
-            value: kv.value,
-          };
-        } else if (typeof kv === 'string') {
-          const [key, value] = kv.split('=');
-          return {
-            key: key.trim(),
-            value: value ? value.trim() : '',
-          };
-        }
-      });
-    }
-
-    return processed;
   }
 
   /**
@@ -479,8 +426,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   destroy_() {
-    console /*OK*/
-      .log('Force Collapse');
     // Already Validated. is called when the ad is refreshed or unlayoutCallback
     // A: Does the teardown happen in every refresh?
     // B: OR Does the teardown happen when the ad is removed from the DOM // Slot Collapsed?

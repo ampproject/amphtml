@@ -220,6 +220,20 @@ export class UnitWaterfallMessage extends BaseMessage {
 }
 
 /**
+ * Disconnect message
+ */
+export class DisconnectMessage extends BaseMessage {
+  /**
+   * @param {string} reason - Reason for disconnect
+   */
+  constructor(reason = 'AMP is going away') {
+    super('disconnect', {
+      reason,
+    });
+  }
+}
+
+/**
  * Factory class to create appropriate message instances
  */
 export class MessageFactory {
@@ -288,9 +302,11 @@ export class MessageHandler {
    * @param {Function=} options.appInitHandler - Handler for app init messages
    * @param {Function=} options.unitInitHandler - Handler for unit init messages
    * @param {Function=} options.unitWaterfallHandler - Handler for unit waterfall messages
+   * @param {Function=} options.disconnectHandler - Handler for disconnect messages
    */
   constructor({
     appInitHandler = null,
+    disconnectHandler = null,
     unitInitHandler = null,
     unitWaterfallHandler = null,
   } = {}) {
@@ -299,8 +315,7 @@ export class MessageHandler {
       'app-init-response': appInitHandler,
       'unit-init-response': unitInitHandler,
       'waterfall': unitWaterfallHandler,
-      'disconnect': null,
-      'connect': null,
+      'disconnect': disconnectHandler,
     };
   }
 
