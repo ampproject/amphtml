@@ -1,3 +1,7 @@
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
 import {AmpAdNetworkInsuradsImpl} from '../amp-ad-network-insurads-impl';
 
 describes.realWin(
@@ -8,42 +12,84 @@ describes.realWin(
     },
   },
   (env) => {
-    let win, doc, impl, elem;
+    let win, doc;
+    let element;
+    let impl;
+    let sandbox;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      sandbox = env.sandbox;
+
+      // Mock Services.documentInfoForDoc
+      const documentInfo = {
+        canonicalUrl: 'https://example.com/test-page',
+      };
+      sandbox.stub(Services, 'documentInfoForDoc').returns(documentInfo);
 
       // Create amp-ad element
-      elem = doc.createElement('amp-ad');
-      elem.setAttribute('type', 'insurads');
-      elem.setAttribute('data-slot', '/1234/example');
-      elem.setAttribute('data-multi-size', '300x250,320x50');
-      doc.body.appendChild(elem);
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '300',
+        'height': '250',
+        'type': 'insurads',
+        'data-slot': '/1234/example',
+        'data-public-id': 'test-seller-id',
+        'data-multi-size': '300x250,320x50',
+      });
+      doc.body.appendChild(element);
 
-      // Stub signing service if needed
-      env.sandbox
-        .stub(AmpAdNetworkInsuradsImpl.prototype, 'getSigningServiceNames')
-        .returns(['google']);
+      impl = new AmpAdNetworkInsuradsImpl(element);
 
-      impl = new AmpAdNetworkInsuradsImpl(elem);
+      // Stub internal components
+      impl.dCHelper = {
+        callMethod: sandbox
+          .stub()
+          .returns(Promise.resolve('https://example.com/test-page')),
+      };
+      impl.engagement_ = {
+        isEngaged: () => true,
+      };
+      impl.realtimeMessaging_ = {
+        sendAppInit: sandbox.stub(),
+      };
+      impl.lockedid = 'LOCKED_ID';
     });
 
-    it('should return a valid ad URL with lockedId param', () => {
-      const adUrl = impl.getAdUrl();
-      expect(adUrl).to.be.a('string');
-      expect(adUrl).to.include('&lockedId=');
+    afterEach(() => {
+      element.remove();
     });
 
-    it('should inherit from doubleclick and call super.getAdUrl', () => {
-      const spy = env.sandbox.spy(
-        AmpAdNetworkInsuradsImpl.prototype.__proto__,
-        'getAdUrl'
+    it('should initialize with correct values', () => {
+      expect(impl.slot).to.equal('/1234/example');
+      expect(impl.sellerId).to.equal('test-seller-id');
+      expect(impl.canonicalUrl).to.equal('https://example.com/test-page');
+      expect(element.getAttribute('data-enable-refresh')).to.equal('false');
+    });
+
+    it('buildCallback should setup messaging', () => {
+      impl.buildCallback();
+
+      expect(impl.realtimeMessaging_.sendAppInit).to.be.calledWith(
+        'LOCKED_ID',
+        true,
+        true,
+        'https://example.com/test-page'
       );
-      impl.getAdUrl();
-      expect(spy).to.have.been.called;
     });
 
-    // Optional: test other behavior unique to your extension
+    it('getAdUrl should apply nextRefresh parameters', async () => {
+      impl.nextRefresh = {
+        parameters: [
+          {key: 'iu', value: '/new/slot'},
+          {key: 'sz', value: '300x250'},
+        ],
+      };
+
+      const url = new URL(await impl.getAdUrl());
+
+      expect(url.searchParams.get('iu')).to.equal('/new/slot');
+      expect(url.searchParams.get('sz')).to.equal('300x250');
+    });
   }
 );
