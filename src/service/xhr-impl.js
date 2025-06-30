@@ -137,7 +137,7 @@ export class Xhr {
   }
 
   /**
-   * A subsitute for the standard response.json(), which may optionally strip a prefix before calling JSON.parse().
+   * A substitute for the standard response.json(), which may optionally strip a prefix before calling JSON.parse().
    *
    * @param {!Response} res fetch response to convert to json.
    * @param {string|undefined} prefix to strip away.
