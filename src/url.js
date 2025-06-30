@@ -2,6 +2,7 @@ import {LruCache} from '#core/data-structures/lru-cache';
 import * as mode from '#core/mode';
 import {arrayOrSingleItemToArray} from '#core/types/array';
 import {hasOwn} from '#core/types/object';
+import {pure} from '#core/types/pure';
 import {endsWith} from '#core/types/string';
 import {INVALID_PROTOCOLS, parseQueryString} from '#core/types/string/url';
 
@@ -11,16 +12,18 @@ import {userAssert} from '#utils/log';
 
 import * as urls from './config/urls';
 
-const SERVING_TYPE_PREFIX = new Set([
-  // No viewer
-  'c',
-  // In viewer
-  'v',
-  // Ad landing page
-  'a',
-  // Ad
-  'ad',
-]);
+const SERVING_TYPE_PREFIX = pure(
+  new Set([
+    // No viewer
+    'c',
+    // In viewer
+    'v',
+    // Ad landing page
+    'a',
+    // Ad
+    'ad',
+  ])
+);
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
