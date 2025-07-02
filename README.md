@@ -19,13 +19,13 @@ Tooling
 
 </details>
 
-[AMP](https://amp.dev) is a web component framework for easily creating user-first websites, stories, ads, emails and more.
+[AMP](https://amp.dev) is a web component framework for easily creating user-first websites, stories, ads, emails and much more.
 
 AMP is an open source project, and we'd love your help making it better!
 
 ## Want to know more about AMP?
 
--   [amp.dev](https://amp.dev) is the best place to learn more about AMP--and of course the site is made using AMP!
+-   [amp.dev](https://amp.dev) is the best place to learn more about AMP--and ofcourse the site is made using AMP!
 -   For developers using AMP, amp.dev includes
     -   [guides and tutorials](https://amp.dev/documentation/guides-and-tutorials/)
     -   [examples](https://amp.dev/documentation/examples/)
@@ -33,7 +33,7 @@ AMP is an open source project, and we'd love your help making it better!
     -   [example templates](https://amp.dev/documentation/templates/)
     -   [tools to make using AMP easier](https://amp.dev/documentation/tools)
 
-## Having a problem using AMP?
+## Having any problem using AMP?
 
 -   The [amp.dev Support page](https://amp.dev/support/) has resources for getting help.
 -   Use [Stack Overflow](http://stackoverflow.com/questions/tagged/amp-html) to ask questions about using AMP and find answers to questions others have asked.
