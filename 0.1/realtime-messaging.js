@@ -13,13 +13,13 @@ import {RealtimeManager} from './realtime-manager';
  */
 export class RealtimeMessaging {
   /**
-   * @param {string} sellerId - Seller ID
+   * @param {string} publicId - Public ID
    * @param {string} canonicalUrl - Canonical URL
    * @param {function()} reconnectHandler - Handler for reconnection logic
    * @param {Object=} handlers - Message handlers
    */
-  constructor(sellerId, canonicalUrl, reconnectHandler, handlers = {}) {
-    this.setupRealtimeConnection_(sellerId, canonicalUrl);
+  constructor(publicId, canonicalUrl, reconnectHandler, handlers = {}) {
+    this.setupRealtimeConnection_(publicId, canonicalUrl);
 
     this.reconnectHandler_ = reconnectHandler;
 
@@ -29,13 +29,13 @@ export class RealtimeMessaging {
 
   /**
    * Sets up the realtime connection and event handlers
-   * @param {string} sellerId - Seller ID
+   * @param {string} publicId - Public ID
    * @param {string} canonicalUrl - Canonical URL
    * @private
    */
-  setupRealtimeConnection_(sellerId = '', canonicalUrl = '') {
+  setupRealtimeConnection_(publicId = '', canonicalUrl = '') {
     /** @private {!RealtimeManager} */
-    this.realtimeManager_ = RealtimeManager.start(sellerId, canonicalUrl);
+    this.realtimeManager_ = RealtimeManager.start(publicId, canonicalUrl);
 
     const ws = this.realtimeManager_.getWebSocket();
 
@@ -64,15 +64,13 @@ export class RealtimeMessaging {
    * @param {string} lockedId - Locked ID data
    * @param {boolean} newVisitor - New visitor flag
    * @param {boolean} extension - Extension status
-   * @param {string=} url - Page URL
    * @param {boolean=} reconnect - Reconnect flag
    */
-  sendAppInit(lockedId, newVisitor, extension, url, reconnect = false) {
+  sendAppInit(lockedId, newVisitor, extension, reconnect = false) {
     const appInit = new AppInitMessage(
       lockedId,
       newVisitor,
       extension,
-      url,
       reconnect
     );
     this.realtimeManager_.send(appInit.serialize());
