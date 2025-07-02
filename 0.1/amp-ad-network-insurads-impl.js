@@ -27,7 +27,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.code = Math.random().toString(36).substring(2, 15);
     this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
     this.slot = this.element.getAttribute('data-slot');
-    this.sellerId = this.element.getAttribute('data-public-id');
+    this.publicId = this.element.getAttribute('data-public-id');
     this.appEnabled = false;
     this.ivm = false;
     this.iabTaxonomy = {};
@@ -43,7 +43,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /* InsurAds Business  */
     this.lockedid = new LockedId().getLockedIdData();
     this.realtimeMessaging_ = new RealtimeMessaging(
-      this.sellerId,
+      this.publicId,
       this.canonicalUrl,
       this.handleReconnect_.bind(this),
       {
@@ -73,10 +73,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       .log('Build Callback');
 
     this.realtimeMessaging_.sendAppInit(
-      this.lockedid,
-      true,
+      this.lockedid, //OK
+      true, //TODO new visitor
       !!this.extension_,
-      this.canonicalUrl
+      this.canonicalUrl // Already use on new realtime messaging instance call
     );
 
     // TODO: Get all the params
@@ -132,7 +132,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.sizes || [],
       this.keyValues || [],
       this.nextRefresh ? this.nextRefresh.provider : 'pgam',
-      0
+      0 // Parent Maw Id ???
+      //Passback ????
     );
 
     this.extension_.bannerChanged(this); // TODO: Update with correct adunit params
@@ -260,10 +261,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       .log('Reconnecting to InsurAds');
     this.realtimeMessaging_.sendAppInit(
       this.lockedid,
-      true,
-      true,
-      this.canonicalUrl,
-      true
+      true, //??
+      true, //??
+      this.canonicalUrl, // Already use on new realtime messaging instance call
+      true //??
     );
   }
 
@@ -273,10 +274,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleAppInit_(message) {
+    //this.sellerId = message.sellerId;
     this.appEnabled = message.status === 'ok' ? true : false;
     this.ivm = !!message.ivm;
-    this.iabTaxonomy = message.iabTaxonomy;
+    //this.mobile = message.mobile;
     this.sellerKeyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
+    //this.status = message.status;
+    this.iabTaxonomy = message.iabTaxonomy;
+    this.gatekeeperMap = message.gatekeeperMap; // # TODO: Needs to handle the gatekeeper
+
     console /*OK*/
       .log('App Init:', message);
 
@@ -294,11 +300,13 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /**
    * Handles unit initialization messages
-   * @param {!Object} message - The app initialization message
+   * @param {!Object} message - The unit initialization message
    * @private
    */
   handleUnitInit_(message) {
-    this.adUnitId = message.adUnitId;
+    //this.code = message.unitcode; ?????
+    this.adUnitId = message.adUnitId; // unitId ???
+    // other information from message ???
     this.element.setAttribute('tg-zone', this.getAdUnitId());
 
     console /*OK*/

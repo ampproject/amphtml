@@ -3,7 +3,7 @@ export class RealtimeManager {
   static HUB_URL_TEMPLATE =
     'wss://amp-messaging.insurads.com/rt-pub/node/hub?appId=78&dev=$DEV$&br=$BR$&os=$OS$&cc=$CC$&rc=$RC$&v=0.2';
   static HUB_URL_TEMPLATE_DEV =
-    'wss://localhost:5082/rt-pub/node2/hub?pid=$SELLERID$&ht=$HT$&v=$V$&url=$URL$';
+    'wss://localhost:5082/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$';
   /** @private {?RealtimeManager} */
   static instance_ = null;
 
@@ -11,7 +11,7 @@ export class RealtimeManager {
   ws = null;
 
   /** @private {string} */
-  sellerId_ = '';
+  publicId_ = '';
 
   /** @private {string} */
   canonicalUrl_ = '';
@@ -53,12 +53,12 @@ export class RealtimeManager {
 
   /**
    * Creates a new RealtimeManager
-   * @param {string=} sellerId - Optional seller ID
+   * @param {string=} publicId - Optional public ID
    * @param {string=} canonicalUrl - Optional canonical URL
    */
-  constructor(sellerId = '', canonicalUrl = '') {
-    if (sellerId) {
-      this.sellerId_ = sellerId;
+  constructor(publicId = '', canonicalUrl = '') {
+    if (publicId) {
+      this.publicId_ = publicId;
     }
     if (canonicalUrl) {
       this.canonicalUrl_ = canonicalUrl;
@@ -72,14 +72,14 @@ export class RealtimeManager {
 
   /**
    * Returns the singleton instance of RealtimeManager.
-   * @param {string} sellerId - The seller ID
+   * @param {string} publicId - The public ID
    * @param {string} canonicalUrl - The canonical URL
    * @return {!RealtimeManager}
    * @public
    */
-  static start(sellerId, canonicalUrl) {
+  static start(publicId, canonicalUrl) {
     if (!RealtimeManager.instance_) {
-      RealtimeManager.instance_ = new RealtimeManager(sellerId, canonicalUrl);
+      RealtimeManager.instance_ = new RealtimeManager(publicId, canonicalUrl);
       RealtimeManager.instance_.connect();
     }
 
@@ -232,15 +232,15 @@ export class RealtimeManager {
     }
 
     try {
-      if (!this.sellerId_ || !this.canonicalUrl_) {
+      if (!this.publicId_ || !this.canonicalUrl_) {
         console /*OK*/
-          .error('Missing sellerId or canonicalUrl for connection');
+          .error('Missing publicId or canonicalUrl for connection');
         return false;
       }
 
       const url = RealtimeManager.HUB_URL_TEMPLATE_DEV.replace(
-        '$SELLERID$',
-        this.sellerId_
+        '$PUBLICID$',
+        this.publicId_
       )
         .replace('$HT$', '1')
         .replace('$V$', '0.5')
