@@ -50,7 +50,7 @@ describes.realWin(
       impl.engagement_ = {
         isEngaged: () => true,
       };
-      impl.realtimeMessaging_ = {
+      impl.core_ = {
         sendAppInit: sandbox.stub(),
       };
       impl.lockedid = 'LOCKED_ID';

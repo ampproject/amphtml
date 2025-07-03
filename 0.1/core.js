@@ -1,3 +1,4 @@
+import {LockedId} from './lockedid';
 import {
   AppInitMessage,
   HandshakeMessage,
@@ -9,22 +10,52 @@ import {
 import {RealtimeManager} from './realtime-manager';
 
 /**
- * Integration with the RealtimeManager
+ * Insurads Core
  */
-export class RealtimeMessaging {
+export class Core {
+  /** @private {?Core} */
+  static instance_ = null;
+
+  /** @private {!Object<string, AdUnitHandlers>} */
+  adUnitHandlerMap = {};
+
+  /** @private {!LockedId} */
+  lockedid_ = null;
+  /** @private {!ExtensionCommunication} */
+  extension_ = null;
+  constructor() {
+    this.lockedid_ = new LockedId().getLockedIdData();
+    this.extension_ = new ExtensionCommunication();
+  }
+
   /**
-   * @param {string} publicId - Public ID
-   * @param {string} canonicalUrl - Canonical URL
+   * Returns the singleton instance of Core.
+   * @param {string} publicId - The public ID
+   * @param {string} canonicalUrl - The canonical URL
+   * @param {string} adUnitCode - Ad unit code
    * @param {function()} reconnectHandler - Handler for reconnection logic
    * @param {Object=} handlers - Message handlers
+   * @return {!Core}
+   * @public
    */
-  constructor(publicId, canonicalUrl, reconnectHandler, handlers = {}) {
-    this.setupRealtimeConnection_(publicId, canonicalUrl);
+  static start(
+    publicId,
+    canonicalUrl,
+    adUnitCode,
+    reconnectHandler,
+    handlers = {}
+  ) {
+    if (!Core.instance_) {
+      Core.instance_ = new Core();
+      Core.instance_.setupRealtimeConnection_(publicId, canonicalUrl);
+    }
 
-    this.reconnectHandler_ = reconnectHandler;
+    Core.instance_.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
+      reconnectHandler,
+      new MessageHandler(handlers)
+    );
 
-    /** @private {!MessageHandler} */
-    this.messageHandler_ = new MessageHandler(handlers);
+    return Core.instance_;
   }
 
   /**
@@ -61,16 +92,14 @@ export class RealtimeMessaging {
 
   /**
    * Sends an app initialization message
-   * @param {string} lockedId - Locked ID data
    * @param {boolean} newVisitor - New visitor flag
-   * @param {boolean} extension - Extension status
    * @param {boolean=} reconnect - Reconnect flag
    */
-  sendAppInit(lockedId, newVisitor, extension, reconnect = false) {
+  sendAppInit(newVisitor, reconnect = false) {
     const appInit = new AppInitMessage(
-      lockedId,
+      this.lockedId,
+      !!this.extension_,
       newVisitor,
-      extension,
       reconnect
     );
     this.realtimeManager_.send(appInit.serialize());
@@ -171,5 +200,21 @@ export class RealtimeMessaging {
         .error('Error disconnecting WebSocket:', e);
       return false;
     }
+  }
+}
+
+class AdUnitHandlers {
+  /** @public {?function()} */
+  reconnectHandler = null;
+  /** @public {?MessageHandler} */
+  messageHandlers = null;
+
+  /**
+   * @param {function()} reconnectHandler - Handler for reconnection logic
+   * @param {Object=} handlers - Message handlers
+   */
+  constructor(reconnectHandler, handlers = {}) {
+    this.reconnectHandler = reconnectHandler;
+    this.messageHandlers = new MessageHandler(handlers);
   }
 }

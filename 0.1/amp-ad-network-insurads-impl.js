@@ -2,12 +2,11 @@ import {Deferred} from '#core/data-structures/promise';
 
 import {Services} from '#service';
 
+import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
 import {EngagementTracker} from './engagement-tracking';
 import {ExtensionCommunication} from './extension';
-import {LockedId} from './lockedid';
 import {NextRefresh} from './next-refresh';
-import {RealtimeMessaging} from './realtime-messaging';
 import {VisibilityTracker} from './visibility-tracking';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -41,10 +40,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /* DoubleClick& AMP */
 
     /* InsurAds Business  */
-    this.lockedid = new LockedId().getLockedIdData();
-    this.realtimeMessaging_ = new RealtimeMessaging(
+    this.core_ = Core.Start(
       this.publicId,
       this.canonicalUrl,
+      this.code,
       this.handleReconnect_.bind(this),
       {
         appInitHandler: (message) => this.handleAppInit_(message),
@@ -54,7 +53,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     );
 
     if (window.frames['TG-listener']) {
-      this.extension_ = new ExtensionCommunication(
+      this.extension_ = ExtensionCommunication.start(
         this.handlerExtensionMessages.bind(this)
       );
     }
@@ -72,7 +71,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*OK*/
       .log('Build Callback');
 
-    this.realtimeMessaging_.sendAppInit(
+    this.core_.sendAppInit(
       this.lockedid, //OK
       true, //TODO new visitor
       !!this.extension_,
@@ -123,7 +122,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*Ok*/
       .log('slot', this.slot);
 
-    this.realtimeMessaging_.sendUnitInit(
+    this.core_.sendUnitInit(
       this.code,
       this.slot,
       responseHeaders.get('google-lineitem-id') || '-1',
@@ -304,7 +303,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   handleReconnect_() {
     console /*OK*/
       .log('Reconnecting to InsurAds');
-    this.realtimeMessaging_.sendAppInit(
+    this.core_.sendAppInit(
       this.lockedid,
       true, //??
       true, //??
@@ -320,9 +319,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   handleAppInit_(message) {
     //this.sellerId = message.sellerId;
+    this.status = message.status;
+    this.reason = message.reason || '';
     this.appEnabled = message.status > 0 ? true : false;
     this.ivm = !!message.ivm;
-    //this.mobile = message.mobile;
     this.sellerKeyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
     //this.status = message.status;
     this.iabTaxonomy = message.iabTaxonomy;
@@ -427,10 +427,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   onVisibilityChange_(visibilityData) {
     if (this.isViewable_ !== visibilityData.isViewable) {
-      this.realtimeMessaging_.sendUnitSnapshot(
-        this.code,
-        visibilityData.isViewable
-      );
+      this.core_.sendUnitSnapshot(this.code, visibilityData.isViewable);
 
       this.isViewable_ = visibilityData.isViewable;
     }
@@ -447,8 +444,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   updateEngagementStatus_(state) {
-    if (this.realtimeMessaging_) {
-      this.realtimeMessaging_.sendPageStatus(state);
+    if (this.core_) {
+      this.core_.sendPageStatus(state);
     }
 
     if (this.extension_) {
@@ -499,10 +496,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.engagement_.release();
     }
 
-    if (this.realtimeMessaging_) {
+    if (this.core_) {
       // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
-      this.realtimeMessaging_.disconnect();
-      this.realtimeMessaging_ = null;
+      this.core_.disconnect();
+      this.core_ = null;
     }
 
     if (this.extension_) {

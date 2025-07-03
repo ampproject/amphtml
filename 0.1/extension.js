@@ -4,13 +4,32 @@ import {BrowserState} from './engagement-tracking';
  * Handles communication between the AMP ad and the extension iframe
  */
 export class ExtensionCommunication {
+  /** @private {?ExtensionCommunication} */
+  static instance_ = null;
+
+  adUnitHandlerMap = {};
+
   queue = [];
 
+  // constructor() {}
+
   /**
+   * Returns the singleton instance of ExtensionCommunication.
+   * @param publicId
+   * @param canonicalUrl
+   * @param adUnitCode
    * @param {function()} handler message handler
+   * @return {!ExtensionCommunication}
+   * @public
    */
-  constructor(handler) {
-    this.handler = handler;
+  static start(publicId, canonicalUrl, adUnitCode, handler = {}) {
+    if (!ExtensionCommunication.instance_) {
+      ExtensionCommunication.instance_ = new ExtensionCommunication();
+    }
+
+    this.adUnitHandlerMap[adUnitCode] = handler;
+
+    return ExtensionCommunication.instance_;
   }
 
   /**
