@@ -176,13 +176,56 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         // OR do like we planned, keep the logic on the server side, and get only the processed parameters
 
         const params = url.searchParams;
-        // Assume all the necessary and updated params (including the original parameters)
-        // will come from the server
-        if (this.nextRefresh.parameters.length > 0) {
-          this.nextRefresh.parameters.forEach((param) => {
-            params.set(param.key, param.value);
-          });
+        // params.set('key', 'value');
+
+        // Entry
+        //   - position (n)
+        //   - provider (n)
+        //   - path: "/123123123/cenas/cenas (y)
+        //   - sizes (y)
+        //   - keyValues (y)
+        //     - "iat-iab-content": "1", "2"
+        //     - "iat-fluffy": "10"
+        //   - vendors (n)
+        //     - "aps": {"PUB_ID": "600", "PUB_UUID": 'enter you UAM publisher ID', "PARAMS":{"amp":"1"}}
+        //     - "openwrap": {"PUB_ID", "162930", "PROFILE_ID": "9578"}
+        // - commonKeyValues (y)
+        //     - "iat-imp-app": "1"
+
+        if (this.nextRefresh.path) {
+          params.set('iu', this.nextRefresh.path);
         }
+
+        if (this.nextRefresh.sizesString) {
+          params.set('sz', this.nextRefresh.sizesString);
+        }
+
+        const keyValues = params.get('scp') || '';
+        if (this.nextRefresh.keyValues.length > 0) {
+          const newValues = this.nextRefresh.keyValues
+            .map((kv) => {
+              let {value} = kv;
+              if (Array.isArray(kv.value)) {
+                value = kv.value.join(',');
+              }
+              return `${kv.key}=${value}`;
+            })
+            .join('&');
+          keyValues += '&' + newValues;
+        }
+        if (this.nextRefresh.commonKeyValues.length > 0) {
+          const newValues = this.nextRefresh.commonKeyValues
+            .map((kv) => {
+              let {value} = kv;
+              if (Array.isArray(kv.value)) {
+                value = kv.value.join(',');
+              }
+              return `${kv.key}=${value}`;
+            })
+            .join('&');
+          keyValues += '&' + newValues;
+        }
+        params.set('scp', keyValues);
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
     });
@@ -231,6 +274,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (!this.appEnabled) {
       console /*OK*/
         .log('App not enabled, ignoring refresh trigger');
+      // TODO: Validate this logic for destroy here
+      this.destroy_();
       return false;
     }
 
@@ -275,7 +320,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   handleAppInit_(message) {
     //this.sellerId = message.sellerId;
-    this.appEnabled = message.status === 'ok' ? true : false;
+    this.appEnabled = message.status > 0 ? true : false;
     this.ivm = !!message.ivm;
     //this.mobile = message.mobile;
     this.sellerKeyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
