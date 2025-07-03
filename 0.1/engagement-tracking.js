@@ -34,14 +34,9 @@ const ACTIVE_EVENT_TYPES = [
 export class EngagementTracker {
   /**
    * @param {!Window} win - Window object
+   * @param {Object=} config - Optional configuration object
    */
-  constructor(win) {
-    if (EngagementTracker.instance_) {
-      return EngagementTracker.instance_;
-    }
-
-    EngagementTracker.instance_ = this;
-
+  constructor(win, config = {}) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -50,12 +45,6 @@ export class EngagementTracker {
 
     /** @private {Array<!UnlistenDef>} */
     this.unlisteners_ = [];
-
-    /** @private {boolean} */
-    this.isInitialized_ = false;
-
-    /** @private {number} */
-    this.instanceCount_ = 0;
 
     /** @private {number} */
     this.idleTimeout_ = 21000; // Default to 21 seconds
@@ -69,42 +58,22 @@ export class EngagementTracker {
     /** @private {BrowserState} */
     this.currentState_ = BrowserState.UNKNOWN;
 
-    return this;
-  }
+    /** @private {Object=} */
+    this.config_ = config;
 
-  /**
-   * Returns the singleton instance of EngagementTracker.
-   * @param {!Window} win - Window object
-   * @param {Object=} config - Optional configuration object
-   * @return {!EngagementTracker}
-   * @public
-   */
-  static get(win, config = {}) {
-    if (!EngagementTracker.instance_) {
-      EngagementTracker.instance_ = new EngagementTracker(win);
-      EngagementTracker.instance_.init(config);
-    }
-    return EngagementTracker.instance_;
+    this.init();
   }
 
   /**
    * Initialize event listeners
-   * @param {Object=} config - Optional configuration object
-   * @return {!EngagementTracker} this instance for chaining
    */
-  init(config = {}) {
-    this.instanceCount_++;
-
-    if (this.isInitialized_) {
-      return this;
+  init() {
+    if (this.config_.idleTimer) {
+      this.idleTimeout_ = this.config_.idleTimer * 1000;
     }
 
-    if (config.idleTimer) {
-      this.idleTimeout_ = config.idleTimer * 1000;
-    }
-
-    if (config.ivm) {
-      this.ivm_ = config.ivm;
+    if (this.config_.ivm) {
+      this.ivm_ = this.config_.ivm;
     }
 
     /** @private {boolean} */
@@ -152,10 +121,6 @@ export class EngagementTracker {
         this.restartIdleTimer_();
       }
     );
-
-    this.isInitialized_ = true;
-
-    return this;
   }
 
   /**
@@ -300,8 +265,6 @@ export class EngagementTracker {
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_ = [];
     this.listeners_ = [];
-    this.isInitialized_ = false;
-    this.instanceCount_ = 0;
 
     EngagementTracker.instance_ = null;
   }

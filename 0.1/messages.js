@@ -211,21 +211,16 @@ export class UnitInitResponseMessage extends BaseMessage {
  */
 export class UnitWaterfallMessage extends BaseMessage {
   /**
-   * @param {string} code - Ad unit code identifier
-   * @param {string} provider - Provider name
-   * @param {string} path - Path of the Ad Unit
-   * @param {Array<Array<number>>} sizes - Available sizes
-   * @param {Array<object>} keyValues - Key values for targeting
-   * @param {Array<string>} parametersMap - Parameters map
+   * @param {object} params The parameters for the message.
+   * @param {string} params.unitCode The unique code for the ad unit.
+   * @param {!Array<!WaterfallEntry>} params.entries The waterfall entries for different providers.
+   * @param {{[key: string]: string}=} params.commonKeyValues Key-values to be applied to all entries.
    */
-  constructor(code, provider, path, sizes, keyValues, parametersMap) {
+  constructor({commonKeyValues = {}, entries = [], unitCode}) {
     super('unit-waterfall', {
-      code,
-      provider,
-      path,
-      sizes,
-      keyValues,
-      parametersMap,
+      unitCode,
+      entries,
+      commonKeyValues,
     });
   }
 }
@@ -241,6 +236,47 @@ export class DisconnectMessage extends BaseMessage {
     super('disconnect', {
       reason,
     });
+  }
+}
+
+/**
+ * Represents a single entry in an ad unit's waterfall.
+ */
+export class WaterfallEntry {
+  /**
+   * @param {object} params The parameters for the entry.
+   * @param {number=} params.position The position of this entry in the waterfall.
+   * @param {string=} params.provider The ad provider for this entry (e.g., 'pgam').
+   * @param {string=} params.path The ad unit path for this provider.
+   * @param {!Array<!Array<number>>=} params.sizes The ad sizes for this entry.
+   * @param {{[key: string]: (string|Array<string>)}=} params.keyValues Specific key-values for this entry.
+   * @param {{[key: string]: Object}=} params.vendors Vendor-specific data (e.g., for prebid).
+   */
+  constructor({
+    keyValues = {},
+    path = '',
+    position = 0,
+    provider = '',
+    sizes = [],
+    vendors = {},
+  } = {}) {
+    /** @public {number} */
+    this.position = position;
+
+    /** @public {string} */
+    this.provider = provider;
+
+    /** @public {string} */
+    this.path = path;
+
+    /** @public {!Array<!Array<number>>} */
+    this.sizes = sizes;
+
+    /** @public {!Object<string, string|!Array<string>>} */
+    this.keyValues = keyValues;
+
+    /** @public {!Object<string, !Object>} */
+    this.vendors = vendors;
   }
 }
 
@@ -267,14 +303,14 @@ export class MessageFactory {
         );
 
       case 'unit-waterfall':
-        return new UnitWaterfallMessage(
-          message.code || 'unknown',
-          message.provider || 'unknown',
-          message.path || '',
-          message.sizes || [],
-          message.keyValues || [],
-          message.parametersMap || []
+        const entries = (message.entries || []).map(
+          (entryData) => new WaterfallEntry(entryData)
         );
+        return new UnitWaterfallMessage({
+          unitCode: message.unitCode || 'unknown',
+          entries,
+          commonKeyValues: message.commonKeyValues || {},
+        });
       default:
         return new BaseMessage(action, message);
     }

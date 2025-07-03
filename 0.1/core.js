@@ -303,7 +303,7 @@ export class Core {
       const config = {
         ivm: this.ivm,
       };
-      this.engagement_ = EngagementTracker.get(this.win, config);
+      this.engagement_ = new EngagementTracker(this.win, config);
       // TODO: Remove listeners on destroy
       this.unlistenEngagement_ = this.engagement_.registerListener(
         this.updateEngagementStatus_.bind(this)

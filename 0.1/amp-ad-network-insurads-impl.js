@@ -5,8 +5,8 @@ import {Services} from '#service';
 import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
 import {ExtensionCommunication} from './extension';
-import {NextRefresh} from './next-refresh';
 import {VisibilityTracker} from './visibility-tracking';
+import {Waterfall} from './waterfall';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 /** @type {string} */
@@ -32,7 +32,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.isViewable_ = false;
 
     // TODO: To be changed
-    this.nextRefresh = new NextRefresh();
+    this.nextRefresh = null;
 
     /* DoubleClick & AMP */
     this.dCHelper = new DoubleClickHelper(this);
@@ -229,16 +229,20 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   forceCollapse() {
-    super.forceCollapse();
+    if (this.refreshCount_ === 0) {
+      // Blank on first print, Insurads does nothing, so we will
+      // call the super.forceCollapse to mantain the A4A flow
+      super.forceCollapse();
 
-    console /*OK*/
-      .log('Force Collapse');
-
-    // Should we refresh to our demand on first print blank?
-
-    // Destroy the ad and all its components
-    // TODO: This must be tested properly to see if there is a better place for destroy
-    this.destroy_();
+      // Destroy the ad and all its components
+      // TODO: This must be tested properly to see if there is a better place for destroy
+      this.destroy_();
+      console /*OK*/
+        .log('Force Collapse');
+    } else {
+      // On blanks after first print, we refresh
+      this.triggerImmediateRefresh();
+    }
   }
 
   /**
@@ -279,6 +283,13 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         .log('Ad not ready for refresh yet');
       return false;
     }
+
+    this.nextRefresh = Waterfall.getNextEntry();
+
+    if (!this.nextRefresh) {
+      return false;
+    }
+
     this.refresh(this.refreshEndCallback);
   }
 
@@ -375,7 +386,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return;
     }
 
-    this.nextRefresh = NextRefresh.fromWaterfallMessage(message);
+    this.waterfall = Waterfall.fromWaterfallMessage(message);
     this.triggerImmediateRefresh();
 
     console /*OK*/
