@@ -31,8 +31,12 @@ export class Core {
 
   /**
    * Constructs the Core instance.
+   * @param {string} publicId - Public ID
+   * @param {string} canonicalUrl - Canonical URL
    */
-  constructor() {
+  constructor(publicId, canonicalUrl) {
+    this.publicId = publicId;
+    this.canonicalUrl = canonicalUrl;
     this.lockedId_ = new LockedId().getLockedIdData();
     this.extension_ = new ExtensionCommunication();
   }
@@ -55,8 +59,8 @@ export class Core {
     handlers = {}
   ) {
     if (!Core.instance_) {
-      Core.instance_ = new Core();
-      Core.instance_.setupRealtimeConnection_(publicId, canonicalUrl);
+      Core.instance_ = new Core(publicId, canonicalUrl);
+      Core.instance_.setupRealtimeConnection_();
     }
 
     this.lockedid_ = new LockedId().getLockedIdData();
@@ -72,13 +76,12 @@ export class Core {
 
   /**
    * Sets up the realtime connection and event handlers
-   * @param {string} publicId - Public ID
-   * @param {string} canonicalUrl - Canonical URL
+   * @param {boolean} reconnect
    * @private
    */
-  setupRealtimeConnection_(publicId = '', canonicalUrl = '') {
+  setupRealtimeConnection_(reconnect = false) {
     /** @private {!RealtimeManager} */
-    this.realtimeManager_ = RealtimeManager.start(publicId, canonicalUrl);
+    this.realtimeManager_ = RealtimeManager.start();
 
     const ws = this.realtimeManager_.getWebSocket();
 
@@ -86,6 +89,12 @@ export class Core {
       ws.onReceiveMessage = this._dispatchMessage_.bind(this);
       ws.onConnect = () => {
         this.sendHandshake();
+        this.sendAppInit(0, reconnect);
+        if (reconnect) {
+          for (const code in this.adUnitHandlerMap) {
+            this.adUnitHandlerMap[code].reconnectHandler();
+          }
+        }
       };
       ws.onDisconnect = () => {
         console /*OK*/
@@ -176,8 +185,7 @@ export class Core {
     ) {
       console /*OK*/
         .log('User is active, reconnecting WebSocket');
-      this.setupRealtimeConnection_();
-      this.reconnectHandler_();
+      this.setupRealtimeConnection_(true);
     }
 
     const status = new PageStatusMessage(state.isEngaged, state.isVisible);
@@ -261,17 +269,32 @@ export class Core {
 
   /**
    * Handles app initialization messages
-   * @param {!Object} message - The app initialization message
+   * @param {!Object} appInitMessage - The app initialization message
    * @private
    */
-  processAppInitResponse_(message) {
-    // TODO: WIP keep only necessary data
-    this.status = message.status;
-    this.reason = message.reason || '';
-    this.appEnabled = message.status > 0 ? true : false;
-    this.ivm = !!message.ivm;
-    this.requiredKeys = message.requiredKeys;
-    this.iabTaxonomy = message.iabTaxonomy;
+  processAppInitResponse_(appInitMessage) {
+    const {message} = appInitMessage;
+
+    if (message.status !== undefined) {
+      this.status = message.status;
+      this.appEnabled = message.status > 0 ? true : false;
+    }
+
+    if (message.reason !== undefined) {
+      this.reason = message.reason;
+    }
+
+    if (message.ivm !== undefined) {
+      this.ivm = message.ivm;
+    }
+
+    if (message.requiredKeys !== undefined) {
+      this.requiredKeys = message.requiredKeys;
+    }
+
+    if (message.iabTaxonomy !== undefined) {
+      this.iabTaxonomy = message.iabTaxonomy;
+    }
 
     console /*OK*/
       .log('App Init:', message);
@@ -284,6 +307,20 @@ export class Core {
       // TODO: Remove listeners on destroy
       this.unlistenEngagement_ = this.engagement_.registerListener(
         this.updateEngagementStatus_.bind(this)
+      );
+    }
+
+    // Setup the extension with the initial parameters
+    // TODO: We don't have all the parameters
+    if (this.extension_) {
+      this.extension_.setup(
+        1, // applicationId
+        'PT', // country
+        1, // section
+        'XPTO', // sessionId
+        'C3PO', // contextId
+        this.ivm,
+        this.engagement_.isEngaged() ? 1 : 0 // state
       );
     }
   }

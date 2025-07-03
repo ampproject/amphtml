@@ -27,11 +27,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.slot = this.element.getAttribute('data-slot');
     this.publicId = this.element.getAttribute('data-public-id');
     this.appEnabled = false;
-    this.ivm = false;
     this.iabTaxonomy = {};
-    this.sellerKeyValues = [];
-    this.nextRefresh = new NextRefresh();
+    this.requiredKeys = [];
     this.isViewable_ = false;
+
+    // TODO: To be changed
+    this.nextRefresh = new NextRefresh();
 
     /* DoubleClick & AMP */
     this.dCHelper = new DoubleClickHelper(this);
@@ -69,23 +70,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     console /*OK*/
       .log('Build Callback');
-
-    this.core_.sendAppInit(
-      this.lockedid, //OK
-      true, //TODO new visitor
-      !!this.extension_,
-      this.canonicalUrl // Already use on new realtime messaging instance call
-    );
-
-    // TODO: Get all the params
-    this.extension_.setup(
-      1, // applicationId
-      'PT', // country
-      1, // section
-      'XPTO', // sessionId
-      'C3PO', // contextId
-      this.engagement_.isEngaged() ? 1 : 0 // state
-    );
   }
 
   /** @override */
@@ -121,17 +105,21 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*Ok*/
       .log('slot', this.slot);
 
+    this.lineItemId = responseHeaders.get('google-lineitem-id') || '-1';
+    this.creativeId = responseHeaders.get('google-creative-id') || '-1';
+    this.creativeSize = responseHeaders.get('google-size') || '';
+
     this.core_.sendUnitInit(
       this.code,
       this.slot,
-      responseHeaders.get('google-lineitem-id') || '-1',
-      responseHeaders.get('google-creative-id') || '-1',
-      responseHeaders.get('google-size') || '',
+      this.lineItemId,
+      this.creativeId,
+      this.creativeSize,
       this.sizes || [],
       this.keyValues || [],
       this.nextRefresh ? this.nextRefresh.provider : 'pgam',
-      0 // Parent Maw Id ???
-      //Passback ????
+      0, // Parent Maw Id ???
+      0 //Passback ????
     );
 
     this.extension_.bannerChanged(this); // TODO: Update with correct adunit params
@@ -302,12 +290,20 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   handleReconnect_() {
     console /*OK*/
       .log('Reconnecting to InsurAds');
-    this.core_.sendAppInit(
-      this.lockedid,
-      true, //??
-      true, //??
-      this.canonicalUrl, // Already use on new realtime messaging instance call
-      true //??
+
+    // TODO: send unit init with reconnect
+    this.core_.sendUnitInit(
+      this.code,
+      this.slot,
+      this.lineItemId,
+      this.creativeId,
+      this.creativeSize,
+      this.sizes || [],
+      this.keyValues || [],
+      this.nextRefresh ? this.nextRefresh.provider : 'pgam',
+      0, // Parent Maw Id ???
+      0, //Passback ????
+      true
     );
   }
 
@@ -317,13 +313,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleAppInit_(message) {
-    // TODO: WIP Remove not needed params
-    this.status = message.status;
-    this.reason = message.reason || '';
     this.appEnabled = message.status > 0 ? true : false;
-    this.ivm = !!message.ivm;
-    this.sellerKeyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
-    //this.status = message.status;
+    this.requiredKeys.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
     this.iabTaxonomy = message.iabTaxonomy;
 
     console /*OK*/

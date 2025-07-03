@@ -160,20 +160,33 @@ export class PageStatusMessage extends BaseMessage {
  */
 export class AppInitResponseMessage extends BaseMessage {
   /**
-   * @param {number} ivm - IntelliSense Viewability Mode - Experimental feature that uses an alternative method to control engagement and viewability (default is false)
-   * @param {number} mobile - Is Mobile
-   * @param {object} requiredKeys - Accepted Key values for targeting
-   * @param {object} iabTaxonomy - IAB Taxonomy
-   * @param {number} status - Status of the app
+   * @param {object} params - The parameters for the message.
+   * @param {boolean=} params.ivm - IntelliSense Viewability Mode.
+   * @param {object=} params.requiredKeys - Accepted Key values for targeting.
+   * @param {object=} params.iabTaxonomy - IAB Taxonomy.
+   * @param {number=} params.status - Status of the app.
+   * @param {string=} params.reason - Reason for the status.
    */
-  constructor(ivm, mobile, requiredKeys, iabTaxonomy, status) {
-    super('app-init-response', {
-      ivm,
-      mobile,
-      requiredKeys,
-      iabTaxonomy,
-      status,
-    });
+  constructor({iabTaxonomy, ivm, reason, requiredKeys, status}) {
+    const messagePayload = {};
+
+    if (ivm !== undefined) {
+      messagePayload.ivm = ivm;
+    }
+    if (requiredKeys !== undefined) {
+      messagePayload.requiredKeys = requiredKeys;
+    }
+    if (iabTaxonomy !== undefined) {
+      messagePayload.iabTaxonomy = iabTaxonomy;
+    }
+    if (status !== undefined) {
+      messagePayload.status = status;
+    }
+    if (reason !== undefined) {
+      messagePayload.reason = reason;
+    }
+
+    super('app-init-response', messagePayload);
   }
 }
 
@@ -245,13 +258,7 @@ export class MessageFactory {
     message = JSON.parse(message);
     switch (action) {
       case 'app-init-response':
-        return new AppInitResponseMessage(
-          message.ivm ? 1 : 0,
-          message.mobile ? 1 : 0,
-          message.requiredKeys || {},
-          message.iabTaxonomy || {},
-          message.status || 0
-        );
+        return new AppInitResponseMessage(message);
 
       case 'unit-init-response':
         return new UnitInitResponseMessage(
