@@ -1,4 +1,5 @@
 import {Deferred} from '#core/data-structures/promise';
+import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
@@ -28,8 +29,21 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.publicId = this.element.getAttribute('data-public-id');
     this.appEnabled = false;
     this.iabTaxonomy = {};
-    this.requiredKeys = [];
     this.isViewable_ = false;
+
+    this.requiredKeys = [];
+    this.requiredKeyValues = [];
+
+    const jsonTargeting = tryParseJson(this.element.getAttribute('json')) || {};
+    this.requiredKeys.forEach((key) => {
+      const {targeting} = jsonTargeting;
+      if (targeting && targeting[key]) {
+        this.requiredKeyValues.push({
+          key,
+          value: targeting[key],
+        });
+      }
+    });
 
     // TODO: To be changed
     this.nextRefresh = null;
@@ -116,7 +130,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.creativeId,
       this.creativeSize,
       this.sizes || [],
-      this.keyValues || [],
+      this.requiredKeyValues,
       this.nextRefresh ? this.nextRefresh.provider : 'pgam',
       0, // Parent Maw Id ???
       0 //Passback ????
@@ -144,73 +158,35 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       if (self.refreshCount_ > 0) {
         console./*Ok*/ log('Refresh count:', self.refreshCount_);
 
-        // Test code
-        // this.slot === '/134642692/AMPTestsV3'
-        // ? '/30497360/a4a/a4a_native'
-        // : '/134642692/AMPTestsV3';
-        //
-        // if (this.nextRefresh.path) {
-        //   params.set('iu', this.nextRefresh.path);
-        // }
-        // if (this.nextRefresh.sizesString) {
-        //   params.set('sz', this.nextRefresh.sizesString);
-        // }
-        // console /*OK*/
-        //   .log(url.toString());
-
-        // TODO: Discuss if we should support single parameters and mantain that logic here
-        // OR do like we planned, keep the logic on the server side, and get only the processed parameters
-
         const params = url.searchParams;
-        // params.set('key', 'value');
-
-        // Entry
-        //   - position (n)
-        //   - provider (n)
-        //   - path: "/123123123/cenas/cenas (y)
-        //   - sizes (y)
-        //   - keyValues (y)
-        //     - "iat-iab-content": "1", "2"
-        //     - "iat-fluffy": "10"
-        //   - vendors (n)
-        //     - "aps": {"PUB_ID": "600", "PUB_UUID": 'enter you UAM publisher ID', "PARAMS":{"amp":"1"}}
-        //     - "openwrap": {"PUB_ID", "162930", "PROFILE_ID": "9578"}
-        // - commonKeyValues (y)
-        //     - "iat-imp-app": "1"
 
         if (this.nextRefresh.path) {
           params.set('iu', this.nextRefresh.path);
         }
 
-        if (this.nextRefresh.sizesString) {
-          params.set('sz', this.nextRefresh.sizesString);
+        const keyValuesParam = params.get('scp') || '';
+        let keyValues = keyValuesParam;
+
+        const allKeyValues = [
+          ...(this.nextRefresh.keyValues || []),
+          ...(this.nextRefresh.commonKeyValues || []),
+        ];
+
+        if (allKeyValues.length > 0) {
+          const merged = this.serializeKeyValueArray_(allKeyValues);
+          keyValues += (keyValues ? '&' : '') + merged;
         }
 
-        const keyValues = params.get('scp') || '';
-        if (this.nextRefresh.keyValues.length > 0) {
-          const newValues = this.nextRefresh.keyValues
-            .map((kv) => {
-              let {value} = kv;
-              if (Array.isArray(kv.value)) {
-                value = kv.value.join(',');
-              }
-              return `${kv.key}=${value}`;
-            })
-            .join('&');
-          keyValues += '&' + newValues;
+        if (this.iabTaxonomy && this.nextEntry.provider === 'hgam') {
+          const userSignals = this.convertToUserSignals(this.iabTaxonomy);
+
+          const encodedSignals = encodeURIComponent(
+            btoa(JSON.stringify(userSignals))
+          );
+
+          params.set('ppsj', encodedSignals);
         }
-        if (this.nextRefresh.commonKeyValues.length > 0) {
-          const newValues = this.nextRefresh.commonKeyValues
-            .map((kv) => {
-              let {value} = kv;
-              if (Array.isArray(kv.value)) {
-                value = kv.value.join(',');
-              }
-              return `${kv.key}=${value}`;
-            })
-            .join('&');
-          keyValues += '&' + newValues;
-        }
+
         params.set('scp', keyValues);
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
@@ -286,6 +262,16 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     this.nextRefresh = Waterfall.getNextEntry();
 
+    // Update rtc-config with our vendors information
+    //   - vendors (n)
+    //     - "aps": {"PUB_ID": "600", "PUB_UUID": 'enter you UAM publisher ID', "PARAMS":{"amp":"1"}}
+    //     - "openwrap": {"PUB_ID", "162930", "PROFILE_ID": "9578"}
+    const rtcConfig = tryParseJson(this.element.getAttribute('rtc-config'));
+    if (rtcConfig && rtcConfig.vendors) {
+      Object.assign(rtcConfig.vendors, this.nextRefresh.vendors || {});
+      this.element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
+    }
+
     if (!this.nextRefresh) {
       return false;
     }
@@ -310,7 +296,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.creativeId,
       this.creativeSize,
       this.sizes || [],
-      this.keyValues || [],
+      this.requiredKeyValues,
       this.nextRefresh ? this.nextRefresh.provider : 'pgam',
       0, // Parent Maw Id ???
       0, //Passback ????
@@ -417,7 +403,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   onVisibilityChange_(visibilityData) {
     if (this.isViewable_ !== visibilityData.isViewable) {
       this.core_.sendUnitSnapshot(this.code, visibilityData.isViewable);
-
       this.isViewable_ = visibilityData.isViewable;
     }
 
@@ -447,6 +432,67 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.visibilityTracker.destroy();
       this.visibilityTracker = null;
     }
+  }
+
+  /**
+   * Serializes an array of [key, value] pairs into a query string.
+   * @param {!Array<!Array<string, (!Array<string>|string)>>} pairs
+   * @return {string}
+   * @private
+   */
+  serializeKeyValueArray_(pairs) {
+    return pairs
+      .map(([key, value]) => this.serializeItem_(key, value))
+      .join('&');
+  }
+
+  /**
+   * @param {string} key
+   * @param {(!Array<string>|string)} value
+   * @return {string}
+   * @private
+   */
+  serializeItem_(key, value) {
+    const serializedValue = (Array.isArray(value) ? value : [value])
+      .map(encodeURIComponent)
+      .join();
+    return `${encodeURIComponent(key)}=${serializedValue}`;
+  }
+
+  /**
+   * Convert the IabTaxonomy to Google required format
+   * @param {object} data - IabTaxonomy data.
+   * @return {object} - Formatted signals
+   */
+  convertToUserSignals(data) {
+    const taxonomyMap = {
+      content: 'IAB_CONTENT',
+      audience: 'IAB_AUDIENCE',
+    };
+
+    const PublisherProvidedTaxonomySignals = [];
+
+    for (const [type, taxonomies] of Object.entries(data)) {
+      const prefix = taxonomyMap[type];
+      if (!prefix) {
+        continue;
+      }
+
+      for (const [version, items] of Object.entries(taxonomies)) {
+        const values = items
+          .map((item) => item.id)
+          .filter((id) => id !== undefined);
+
+        if (values.length > 0) {
+          PublisherProvidedTaxonomySignals.push({
+            taxonomy: `${prefix}_${version.replace(/\./g, '_')}`,
+            values,
+          });
+        }
+      }
+    }
+
+    return {PublisherProvidedTaxonomySignals};
   }
 }
 
