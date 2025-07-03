@@ -1,7 +1,10 @@
+import {EngagementTracker} from './engagement-tracking';
+import {ExtensionCommunication} from './extension';
 import {LockedId} from './lockedid';
 import {
   AppInitMessage,
   HandshakeMessage,
+  MessageFactory,
   MessageHandler,
   PageStatusMessage,
   UnitInitMessage,
@@ -23,8 +26,14 @@ export class Core {
   lockedid_ = null;
   /** @private {!ExtensionCommunication} */
   extension_ = null;
+  /** @private {!EngagementTracker} */
+  engagement_ = null;
+
+  /**
+   * Constructs the Core instance.
+   */
   constructor() {
-    this.lockedid_ = new LockedId().getLockedIdData();
+    this.lockedId_ = new LockedId().getLockedIdData();
     this.extension_ = new ExtensionCommunication();
   }
 
@@ -50,6 +59,9 @@ export class Core {
       Core.instance_.setupRealtimeConnection_(publicId, canonicalUrl);
     }
 
+    this.lockedid_ = new LockedId().getLockedIdData();
+    this.extension_ = new ExtensionCommunication();
+
     Core.instance_.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
       reconnectHandler,
       new MessageHandler(handlers)
@@ -71,7 +83,7 @@ export class Core {
     const ws = this.realtimeManager_.getWebSocket();
 
     if (ws) {
-      ws.onReceiveMessage = this.messageHandler_.processMessage;
+      ws.onReceiveMessage = this._dispatchMessage_.bind(this);
       ws.onConnect = () => {
         this.sendHandshake();
       };
@@ -97,7 +109,7 @@ export class Core {
    */
   sendAppInit(newVisitor, reconnect = false) {
     const appInit = new AppInitMessage(
-      this.lockedId,
+      this.lockedId_,
       !!this.extension_,
       newVisitor,
       reconnect
@@ -199,6 +211,138 @@ export class Core {
       console /*OK*/
         .error('Error disconnecting WebSocket:', e);
       return false;
+    }
+  }
+
+  /**
+   * Central dispatcher for all incoming WebSocket messages.
+   * Routes messages to the correct ad unit handler.
+   * Brodcasts global messages
+   * @param {string} raw The raw message string from the WebSocket.
+   * @private
+   */
+  _dispatchMessage_(raw) {
+    const messages = raw.split('\u001e').filter(Boolean);
+
+    messages.forEach((rawMessage) => {
+      try {
+        const messageData = JSON.parse(rawMessage);
+        const action = messageData.arguments[0];
+        const data = JSON.parse(messageData.arguments[1]);
+
+        const parsedMessage = MessageFactory.createMessage(action, data);
+        if (!parsedMessage) {
+          return;
+        }
+
+        if (action === 'app-init-response') {
+          // Global message, should brodcast to all adUnits
+          for (const code in this.adUnitHandlerMap) {
+            this.adUnitHandlerMap[code].messageHandlers.processMessage(
+              parsedMessage
+            );
+          }
+          // Save relevant data for core
+          this.processAppInitResponse_(parsedMessage);
+        }
+
+        const adUnitCode = parsedMessage.message.code;
+
+        if (adUnitCode && this.adUnitHandlerMap[adUnitCode]) {
+          const adUnitHandlers = this.adUnitHandlerMap[adUnitCode];
+          adUnitHandlers.messageHandlers.processMessage(parsedMessage);
+        }
+      } catch (e) {
+        console /*Ok*/
+          .error('Error processing incoming message:', e, rawMessage);
+      }
+    });
+  }
+
+  /**
+   * Handles app initialization messages
+   * @param {!Object} message - The app initialization message
+   * @private
+   */
+  processAppInitResponse_(message) {
+    // TODO: WIP keep only necessary data
+    this.status = message.status;
+    this.reason = message.reason || '';
+    this.appEnabled = message.status > 0 ? true : false;
+    this.ivm = !!message.ivm;
+    this.requiredKeys = message.requiredKeys;
+    this.iabTaxonomy = message.iabTaxonomy;
+
+    console /*OK*/
+      .log('App Init:', message);
+
+    if (!this.engagement_) {
+      const config = {
+        ivm: this.ivm,
+      };
+      this.engagement_ = EngagementTracker.get(this.win, config);
+      // TODO: Remove listeners on destroy
+      this.unlistenEngagement_ = this.engagement_.registerListener(
+        this.updateEngagementStatus_.bind(this)
+      );
+    }
+  }
+
+  /**
+   * Handles user engagement changes
+   * @param {!Object} state - Engagement state object
+   * @private
+   */
+  updateEngagementStatus_(state) {
+    if (this.core_) {
+      this.core_.sendPageStatus(state);
+    }
+
+    if (this.extension_) {
+      // TODO: Create BrowserStates and extend with Idle,etc
+      this.extension_.engagementStatus({
+        index: state.isEngaged ? 1 : 0,
+        name: state.isEngaged ? 'Active' : 'Inactive',
+      });
+    }
+
+    console /*OK*/
+      .log('Engagement changed:', state.isEngaged, state);
+  }
+
+  /**
+   * Destroy implementation
+   * This is called when the ad is removed from the DOM or refreshed
+   * @public
+   */
+  destroy() {
+    // Already Validated. is called when the ad is refreshed or unlayoutCallback
+    // A: Does the teardown happen in every refresh?
+    // B: OR Does the teardown happen when the ad is removed from the DOM // Slot Collapsed?
+    // If A:
+    // Don't destroy the extension, as it will be used in the next refresh
+    // Don't destroy the realtime messaging, as it will be used in the next refresh
+    // Don't destroy the engagement tracker, as it will be used in the next refresh
+    // Don't destroy the visibility tracker, as it will be used in the next refresh
+    // If B: - IT IS B: tearDownSlot is called when the ad is refreshed or unlayoutCallback
+    // Don't destroy all the components, as they will be used in the next refresh
+    // TODO: Find a proper place to proper cleanup of the components (commented bellow)
+
+    if (this.engagement_) {
+      this.unlistenEngagement_();
+      this.unlistenEngagement_.release();
+    }
+
+    if (this.core_) {
+      // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
+      this.core_.disconnect();
+      this.core_ = null;
+    }
+
+    if (this.extension_) {
+      this.extension_.adUnitRemoved(this.getAdUnitId());
+      this.extension_.destroy();
+      this.extension_ = null;
     }
   }
 }

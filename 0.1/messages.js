@@ -160,19 +160,17 @@ export class PageStatusMessage extends BaseMessage {
  */
 export class AppInitResponseMessage extends BaseMessage {
   /**
-   * @param {string} sellerId - Seller ID
    * @param {number} ivm - IntelliSense Viewability Mode - Experimental feature that uses an alternative method to control engagement and viewability (default is false)
    * @param {number} mobile - Is Mobile
-   * @param {object} keyValues - Accepted Key values for targeting
+   * @param {object} requiredKeys - Accepted Key values for targeting
    * @param {object} iabTaxonomy - IAB Taxonomy
-   * @param {boolean} status - Status of the app
+   * @param {number} status - Status of the app
    */
-  constructor(sellerId, ivm, mobile, keyValues, iabTaxonomy, status) {
+  constructor(ivm, mobile, requiredKeys, iabTaxonomy, status) {
     super('app-init-response', {
-      sellerId,
       ivm,
       mobile,
-      keyValues,
+      requiredKeys,
       iabTaxonomy,
       status,
     });
@@ -248,12 +246,11 @@ export class MessageFactory {
     switch (action) {
       case 'app-init-response':
         return new AppInitResponseMessage(
-          message.sellerId || 'unknown',
           message.ivm ? 1 : 0,
           message.mobile ? 1 : 0,
-          message.keyValues || {},
+          message.requiredKeys || {},
           message.iabTaxonomy || {},
-          message.status || false
+          message.status || 0
         );
 
       case 'unit-init-response':
@@ -320,35 +317,24 @@ export class MessageHandler {
   }
 
   /**
-   * Processes a message
-   * @param {string} raw
-   * @return {boolean} Whether the message was handled
+   * Processes a pre-parsed message object.
+   * @param {?BaseMessage} messageObj The message object to handle.
+   * @return {boolean} Whether the message was handled.
    */
-  processMessage(raw) {
-    const messages = raw.split('\u001e').filter(Boolean);
-    const parsedMessages = messages.map((m) => JSON.parse(m));
+  processMessage(messageObj) {
+    if (!messageObj) {
+      return false;
+    }
 
-    console /*Ok*/
-      .log('total messages:', parsedMessages.length);
+    console /*OK*/
+      .log('[iat-debug] Message:', messageObj.action, messageObj.message);
 
-    parsedMessages.forEach((message) => {
-      const messageObj = MessageFactory.fromJson(message.arguments);
-      if (messageObj) {
-        if (!messageObj) {
-          return false;
-        }
+    const handler = this.handlers_[messageObj.action];
+    if (handler && typeof handler === 'function') {
+      handler(messageObj.message);
+      return true;
+    }
 
-        console /*OK*/
-          .log('[iat-debug] Message:', messageObj.action, messageObj.message);
-
-        const handler = this.handlers_[messageObj.action];
-        if (handler && typeof handler === 'function') {
-          handler(messageObj.message);
-          return true;
-        }
-
-        return false;
-      }
-    });
+    return false;
   }
 }

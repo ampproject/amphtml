@@ -4,7 +4,6 @@ import {Services} from '#service';
 
 import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
-import {EngagementTracker} from './engagement-tracking';
 import {ExtensionCommunication} from './extension';
 import {NextRefresh} from './next-refresh';
 import {VisibilityTracker} from './visibility-tracking';
@@ -318,7 +317,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleAppInit_(message) {
-    //this.sellerId = message.sellerId;
+    // TODO: WIP Remove not needed params
     this.status = message.status;
     this.reason = message.reason || '';
     this.appEnabled = message.status > 0 ? true : false;
@@ -326,21 +325,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.sellerKeyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
     //this.status = message.status;
     this.iabTaxonomy = message.iabTaxonomy;
-    this.gatekeeperMap = message.gatekeeperMap; // # TODO: Needs to handle the gatekeeper
 
     console /*OK*/
       .log('App Init:', message);
-
-    if (!this.engagement_) {
-      const config = {
-        ivm: this.ivm,
-      };
-      this.engagement_ = EngagementTracker.get(this.win, config);
-      // TODO: Remove listeners on destroy
-      this.unlistenEngagement_ = this.engagement_.registerListener(
-        this.updateEngagementStatus_.bind(this)
-      );
-    }
   }
 
   /**
@@ -439,28 +426,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   }
 
   /**
-   * Handles user engagement changes
-   * @param {!Object} state - Engagement state object
-   * @private
-   */
-  updateEngagementStatus_(state) {
-    if (this.core_) {
-      this.core_.sendPageStatus(state);
-    }
-
-    if (this.extension_) {
-      // TODO: Create BrowserStates and extend with Idle,etc
-      this.extension_.engagementStatus({
-        index: state.isEngaged ? 1 : 0,
-        name: state.isEngaged ? 'Active' : 'Inactive',
-      });
-    }
-
-    console /*OK*/
-      .log('Engagement changed:', state.isEngaged, state);
-  }
-
-  /**
    * Return the Full AdUnit Id with the slot index
    * @return {string}
    */
@@ -476,36 +441,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   destroy_() {
-    // Already Validated. is called when the ad is refreshed or unlayoutCallback
-    // A: Does the teardown happen in every refresh?
-    // B: OR Does the teardown happen when the ad is removed from the DOM // Slot Collapsed?
-    // If A:
-    // Don't destroy the extension, as it will be used in the next refresh
-    // Don't destroy the realtime messaging, as it will be used in the next refresh
-    // Don't destroy the engagement tracker, as it will be used in the next refresh
-    // Don't destroy the visibility tracker, as it will be used in the next refresh
-    // If B: - IT IS B: tearDownSlot is called when the ad is refreshed or unlayoutCallback
-    // Don't destroy all the components, as they will be used in the next refresh
-    // TODO: Find a proper place to proper cleanup of the components (commented bellow)
     if (this.visibilityTracker) {
       this.visibilityTracker.destroy();
       this.visibilityTracker = null;
-    }
-
-    if (this.engagement_) {
-      this.engagement_.release();
-    }
-
-    if (this.core_) {
-      // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
-      this.core_.disconnect();
-      this.core_ = null;
-    }
-
-    if (this.extension_) {
-      this.extension_.adUnitRemoved(this.getAdUnitId());
-      this.extension_.destroy();
-      this.extension_ = null;
     }
   }
 }

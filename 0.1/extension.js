@@ -15,9 +15,9 @@ export class ExtensionCommunication {
 
   /**
    * Returns the singleton instance of ExtensionCommunication.
-   * @param publicId
-   * @param canonicalUrl
-   * @param adUnitCode
+   * @param {string} publicId
+   * @param {string} canonicalUrl
+   * @param {string} adUnitCode
    * @param {function()} handler message handler
    * @return {!ExtensionCommunication}
    * @public
