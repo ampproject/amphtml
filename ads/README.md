@@ -279,13 +279,13 @@ documentation with the new behaviors on user's consent choices. You can refer to
 
 #### JS reuse across iframes
 
-To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
+To allow ads to bundle HTTP requests across multiple ad units on the same page, use `window.context.coordinator` to access the coordinating iframe window object, and `window.context.isCoordinator` to check if the current frame is the coordinating frame.
 
-**Note:** Preferred alternatives are available as `window.context.coordinator` and `window.context.isCoordinator` respectively.
+_Note: The legacy properties `window.context.master` and `window.context.isMaster` are still available for backward compatibility._
 
-The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/main/3p/3p.js) for function signature.
+The `computeInCoordinatingFrame` function is designed to make it easy to perform a task only in the coordinating frame and provide the result to all frames. It is available to custom ad iframes as `window.context.computeInCoordinatingFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/main/3p/3p.js) for the function signature.
 
-**Note:** A preferred alternative is available as `window.context.computeInCoordinatingFrame`.
+_Note: The legacy function `window.context.computeInMasterFrame` is still available for backward compatibility._
 
 #### Preconnect and prefetch
 
