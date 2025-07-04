@@ -113,9 +113,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       responseHeaders.get('google-creative-id') || '-1'
     );
 
-    this.unitInfo.setServedSize(
-      responseHeaders.get('google-size') || '' // TODO: Check if this is correct when the response is empty, unknown or ''
-    );
+    this.unitInfo.setServedSize(responseHeaders.get('google-size') || '');
 
     this.sendUnitInit_();
 
@@ -277,20 +275,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*OK*/
       .log('Reconnecting to InsurAds');
 
-    // TODO: send unit init with reconnect
-    this.core_.sendUnitInit(
-      this.code,
-      this.slot,
-      this.lineItemId,
-      this.creativeId,
-      this.creativeSize,
-      this.sizes || [],
-      this.requiredKeyValues,
-      this.nextRefresh ? this.nextRefresh.provider : 'pgam',
-      0, // Parent Maw Id ???
-      0, //Passback ????
-      true
-    );
+    this.core_.sendUnitInit(this.unitInfo, true);
   }
 
   /**
@@ -321,6 +306,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (message.iabTaxonomy !== undefined) {
       this.iabTaxonomy = message.iabTaxonomy;
     }
+
+    if (this.unitInfo.pendingUnitInit) {
+      this.sendUnitInit_();
+      this.unitInfo.setPendingUnitInit(false);
+    }
+
     console /*OK*/
       .log('App Init:', message);
   }
@@ -419,11 +410,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
       this.unitInfo.setIsVisible(visibilityData.isViewable);
     }
-
-    console /*OK*/
-      .log('Visibility Change:', visibilityData.isViewable);
-    console /*OK*/
-      .log('Visibility Percentage:', visibilityData.visibilityPercentage);
   }
 
   /**
@@ -432,8 +418,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   sendUnitInit_() {
     if (this.appEnabled) {
-      // TODO: send message to Core manager
       this.core_.sendUnitInit(this.unitInfo);
+    } else {
+      this.unitInfo.setPendingUnitInit(true);
     }
   }
 
