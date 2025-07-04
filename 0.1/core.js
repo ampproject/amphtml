@@ -129,11 +129,18 @@ export class Core {
   }
 
   /**
-   * Sends an ad unit initialization message using a data object.
-   * @param {!UnitInfo} unitInfo - An object containing all the ad unit's data.
+   * Sends an ad unit initialization message
+   * @param {UnitInfo} unitInfo - Ad unit information
+   * @param {boolean=} reconnect - Reconnect flag
+   * @param {boolean=} passback - Passback flag
    */
-  sendUnitInit(unitInfo) {
-    const unitInit = new UnitInitMessage(unitInfo);
+  sendUnitInit(unitInfo, reconnect = false, passback = false) {
+    const info = {
+      ...unitInfo,
+      reconnect,
+      passback,
+    };
+    const unitInit = new UnitInitMessage(info);
     this.realtimeManager_.send(unitInit.serialize());
   }
 

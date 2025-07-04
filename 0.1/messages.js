@@ -90,23 +90,27 @@ export class UnitInitMessage extends BaseMessage {
   /**
    * @param {object} params
    * @param {string} params.code - Generated Ad Unit ID
-   * @param {string} params.path - Path of the Ad Unit
-   * @param {string} params.lineItemId - Line Item ID
    * @param {string} params.creativeId - Creative ID
+   * @param {Array<object>} params.keyValues - Key values for targeting
+   * @param {string} params.lineItemId - Line Item ID
+   * @param {number=} params.parentMawId - Parent MAW ID
+   * @param {number=} params.passback - Passback
+   * @param {string} params.path - Path of the Ad Unit
+   * @param {string} params.provider - Provider name
+   * @param {boolean=} params.reconnect - reconnect
    * @param {string} params.servedSize - Served Size
    * @param {Array<string>} params.sizes - Available sizes
-   * @param {Array<object>} params.keyValues - Key values for targeting
-   * @param {string} params.provider - Provider name
-   * @param {number=} params.parentMawId - Parent MAW ID
    */
   constructor({
     code,
     creativeId,
     keyValues,
     lineItemId,
-    parentMawId = {},
+    parentMawId = 0,
+    passback = false,
     path,
     provider,
+    reconnect = false,
     servedSize,
     sizes,
   }) {
@@ -120,6 +124,8 @@ export class UnitInitMessage extends BaseMessage {
       keyValues,
       provider,
       parentMawId,
+      passback,
+      reconnect,
     });
   }
 }
