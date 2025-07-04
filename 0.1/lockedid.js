@@ -1,3 +1,5 @@
+import {stringHash32} from '#core/types/string';
+
 export class LockedId {
   /** constructor */
   constructor() {}
@@ -72,7 +74,7 @@ export class LockedId {
     ctx.fillText(txt, 2, 15);
     ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
     ctx.fillText(txt, 4, 17);
-    return canvas.toDataURL();
+    return stringHash32(canvas.toDataURL());
   }
 
   /**

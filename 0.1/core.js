@@ -1,3 +1,4 @@
+import {Cookie} from './cookie';
 import {EngagementTracker} from './engagement-tracking';
 import {ExtensionCommunication} from './extension';
 import {LockedId} from './lockedid';
@@ -22,27 +23,31 @@ export class Core {
   /** @private {!Object<string, AdUnitHandlers>} */
   adUnitHandlerMap = {};
 
-  /** @private {!LockedId} */
-  lockedid_ = null;
-  /** @private {!ExtensionCommunication} */
-  extension_ = null;
   /** @private {!EngagementTracker} */
   engagement_ = null;
 
   /**
    * Constructs the Core instance.
+   * @param {Window} win
    * @param {string} publicId - Public ID
    * @param {string} canonicalUrl - Canonical URL
    */
-  constructor(publicId, canonicalUrl) {
+  constructor(win, publicId, canonicalUrl) {
+    this.win = win;
     this.publicId = publicId;
     this.canonicalUrl = canonicalUrl;
-    this.lockedId_ = new LockedId().getLockedIdData();
+
+    /** @private {!LockedId} */
+    this.lockedData_ = new LockedId().getLockedIdData();
+    /** @private {!ExtensionCommunication} */
     this.extension_ = new ExtensionCommunication();
+    /** @private {!CookieMonster} */
+    this.cookies_ = new Cookie(this.win, this.canonicalUrl);
   }
 
   /**
    * Returns the singleton instance of Core.
+   * @param {Window} win
    * @param {string} publicId - The public ID
    * @param {string} canonicalUrl - The canonical URL
    * @param {string} adUnitCode - Ad unit code
@@ -52,6 +57,7 @@ export class Core {
    * @public
    */
   static start(
+    win,
     publicId,
     canonicalUrl,
     adUnitCode,
@@ -59,12 +65,9 @@ export class Core {
     handlers = {}
   ) {
     if (!Core.instance_) {
-      Core.instance_ = new Core(publicId, canonicalUrl);
+      Core.instance_ = new Core(win, publicId, canonicalUrl);
       Core.instance_.setupRealtimeConnection_();
     }
-
-    this.lockedid_ = new LockedId().getLockedIdData();
-    this.extension_ = new ExtensionCommunication();
 
     Core.instance_.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
       reconnectHandler,
@@ -89,7 +92,7 @@ export class Core {
       ws.onReceiveMessage = this._dispatchMessage_.bind(this);
       ws.onConnect = () => {
         this.sendHandshake();
-        this.sendAppInit(0, reconnect);
+        this.sendAppInit(reconnect);
         if (reconnect) {
           for (const code in this.adUnitHandlerMap) {
             this.adUnitHandlerMap[code].reconnectHandler();
@@ -113,14 +116,13 @@ export class Core {
 
   /**
    * Sends an app initialization message
-   * @param {boolean} newVisitor - New visitor flag
    * @param {boolean=} reconnect - Reconnect flag
    */
-  sendAppInit(newVisitor, reconnect = false) {
+  sendAppInit(reconnect = false) {
     const appInit = new AppInitMessage(
-      this.lockedId_,
+      this.lockedData_,
       !!this.extension_,
-      newVisitor,
+      this.cookies_.isNewVisitor(),
       reconnect
     );
     this.realtimeManager_.send(appInit.serialize());
@@ -302,8 +304,7 @@ export class Core {
         1, // applicationId
         'PT', // country
         1, // section
-        'XPTO', // sessionId
-        'C3PO', // contextId
+        this.cookies_.getSessionCookie(), // sessionId
         this.ivm,
         this.engagement_.isEngaged() ? 1 : 0 // state
       );

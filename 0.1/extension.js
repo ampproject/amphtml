@@ -95,15 +95,13 @@ export class ExtensionCommunication {
    * @param {string} country - The country code
    * @param {number} section - The section ID
    * @param {string} sessionId - The session ID
-   * @param {string} contextId - The context ID
    * @param {boolean} ivm - IntelliSense Viewability Mode
    * @param {BrowserState} state - The current browser state
    *
    * */
-  setup(applicationId, country, section, sessionId, contextId, ivm, state) {
+  setup(applicationId, country, section, sessionId, ivm, state) {
     const conf = {
       sessionId,
-      contextId,
       appId: applicationId,
       section,
       // eslint-disable-next-line local/camelcase
