@@ -233,6 +233,7 @@ export class Core {
           }
           // Save relevant data for core
           this.processAppInitResponse_(parsedMessage);
+          return;
         }
 
         const adUnitCode = parsedMessage.message.code;
@@ -254,13 +255,23 @@ export class Core {
    * @private
    */
   processAppInitResponse_(appInitMessage) {
-    this.AppInitResponseMessage = appInitMessage;
     const {message} = appInitMessage;
 
-    if (message.status !== undefined) {
-      // It is a real app init with important configuration,
-      // Set app status, start engagement and extension if exists.
+    // Merge the app init response with the existing one
+    // This allows us to accumulate configuration data
+    // and avoid overwriting previous responses.
+    if (!this.appInitResponse_) {
+      this.appInitResponse_ = appInitMessage;
+    } else {
+      const existingPayload = this.appInitResponse_.message;
+      const newPayload = appInitMessage.message;
+      const mergedPayload = {...existingPayload, ...newPayload};
+      this.appInitResponse_.message = mergedPayload;
+    }
 
+    // It is a app init response with general configuration,
+    // Set app status, start engagement and extension if exists.
+    if (message.status !== undefined) {
       this.status = message.status;
       this.appEnabled = message.status > 0 ? true : false;
 

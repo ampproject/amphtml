@@ -299,25 +299,28 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleAppInit_(message) {
-    this.appEnabled = message.status > 0 ? true : false;
-    this.requiredKeys.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
+    if (message.status !== undefined) {
+      this.appEnabled = message.status > 0 ? true : false;
+      this.requiredKeys.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
 
-    if (this.requiredKeys.length > 0) {
-      const jsonTargeting =
-        tryParseJson(this.element.getAttribute('json')) || {};
-      this.requiredKeys.forEach((key) => {
-        const {targeting} = jsonTargeting;
-        if (targeting && targeting[key]) {
-          this.requiredKeyValues.push({
-            key,
-            value: targeting[key],
-          });
-        }
-      });
+      if (this.requiredKeys.length > 0) {
+        const jsonTargeting =
+          tryParseJson(this.element.getAttribute('json')) || {};
+        this.requiredKeys.forEach((key) => {
+          const {targeting} = jsonTargeting;
+          if (targeting && targeting[key]) {
+            this.requiredKeyValues.push({
+              key,
+              value: targeting[key],
+            });
+          }
+        });
+      }
     }
 
-    this.iabTaxonomy = message.iabTaxonomy;
-
+    if (message.iabTaxonomy !== undefined) {
+      this.iabTaxonomy = message.iabTaxonomy;
+    }
     console /*OK*/
       .log('App Init:', message);
   }
