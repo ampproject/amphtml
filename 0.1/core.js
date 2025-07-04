@@ -26,15 +26,16 @@ export class Core {
   /** @private {!EngagementTracker} */
   engagement_ = null;
 
+  /** @private {?AppInitResponseMessage} */
+  appInitResponse_ = null;
+
   /**
    * Constructs the Core instance.
    * @param {Window} win
-   * @param {string} publicId - Public ID
    * @param {string} canonicalUrl - Canonical URL
    */
-  constructor(win, publicId, canonicalUrl) {
+  constructor(win, canonicalUrl) {
     this.win = win;
-    this.publicId = publicId;
     this.canonicalUrl = canonicalUrl;
 
     /** @private {!LockedId} */
@@ -48,7 +49,6 @@ export class Core {
   /**
    * Returns the singleton instance of Core.
    * @param {Window} win
-   * @param {string} publicId - The public ID
    * @param {string} canonicalUrl - The canonical URL
    * @param {string} adUnitCode - Ad unit code
    * @param {function()} reconnectHandler - Handler for reconnection logic
@@ -56,16 +56,9 @@ export class Core {
    * @return {!Core}
    * @public
    */
-  static start(
-    win,
-    publicId,
-    canonicalUrl,
-    adUnitCode,
-    reconnectHandler,
-    handlers = {}
-  ) {
+  static start(win, canonicalUrl, adUnitCode, reconnectHandler, handlers = {}) {
     if (!Core.instance_) {
-      Core.instance_ = new Core(win, publicId, canonicalUrl);
+      Core.instance_ = new Core(win, canonicalUrl);
       Core.instance_.setupRealtimeConnection_();
     }
 
@@ -73,6 +66,13 @@ export class Core {
       reconnectHandler,
       new MessageHandler(handlers)
     );
+
+    if (Core.instance_.appInitResponse_) {
+      // If app init response is already received, send it to the ad unit handler
+      Core.instance_.adUnitHandlerMap[
+        adUnitCode
+      ].messageHandlers.processMessage(Core.instance_.appInitResponse_);
+    }
 
     return Core.instance_;
   }
@@ -129,39 +129,11 @@ export class Core {
   }
 
   /**
-   * Sends an ad unit initialization message
-   * @param {string} code - Ad unit code
-   * @param {string} path - Ad unit path
-   * @param {string} lineItemId - Line item ID
-   * @param {string} creativeId - Creative ID
-   * @param {string} servedSize - Served size
-   * @param {Array<string>} sizes - Available sizes
-   * @param {Array<Object>} keyValues - Key-value targeting
-   * @param {string} provider - Ad provider
-   * @param {number} parentMawId - Parent MAW ID
+   * Sends an ad unit initialization message using a data object.
+   * @param {!UnitInfo} unitInfo - An object containing all the ad unit's data.
    */
-  sendUnitInit(
-    code,
-    path,
-    lineItemId,
-    creativeId,
-    servedSize,
-    sizes,
-    keyValues,
-    provider,
-    parentMawId
-  ) {
-    const unitInit = new UnitInitMessage(
-      code,
-      path,
-      lineItemId,
-      creativeId,
-      servedSize,
-      sizes,
-      keyValues,
-      provider,
-      parentMawId
-    );
+  sendUnitInit(unitInfo) {
+    const unitInit = new UnitInitMessage(unitInfo);
     this.realtimeManager_.send(unitInit.serialize());
   }
 
@@ -271,58 +243,53 @@ export class Core {
 
   /**
    * Handles app initialization messages
-   * @param {!Object} appInitMessage - The app initialization message
+   * @param {!AppInitResponseMessage} appInitMessage - The app initialization message
    * @private
    */
   processAppInitResponse_(appInitMessage) {
+    this.AppInitResponseMessage = appInitMessage;
     const {message} = appInitMessage;
 
     if (message.status !== undefined) {
+      // It is a real app init with important configuration,
+      // Set app status, start engagement and extension if exists.
+
       this.status = message.status;
       this.appEnabled = message.status > 0 ? true : false;
-    }
 
-    if (message.reason !== undefined) {
-      this.reason = message.reason;
-    }
+      // TODO: Verify this, should we destroy?
+      if (!this.appEnabled) {
+        this.destroy();
+        return;
+      }
 
-    if (message.ivm !== undefined) {
-      this.ivm = message.ivm;
-    }
+      console /*OK*/
+        .log('App Init:', message);
 
-    if (message.requiredKeys !== undefined) {
-      this.requiredKeys = message.requiredKeys;
-    }
+      if (!this.engagement_) {
+        const config = {
+          ivm: message.ivm,
+        };
+        this.engagement_ = new EngagementTracker(this.win, config);
+        // TODO: Remove listeners on destroy
+        this.unlistenEngagement_ = this.engagement_.registerListener(
+          this.updateEngagementStatus_.bind(this)
+        );
+      }
 
-    if (message.iabTaxonomy !== undefined) {
-      this.iabTaxonomy = message.iabTaxonomy;
-    }
-
-    console /*OK*/
-      .log('App Init:', message);
-
-    if (!this.engagement_) {
-      const config = {
-        ivm: this.ivm,
-      };
-      this.engagement_ = new EngagementTracker(this.win, config);
-      // TODO: Remove listeners on destroy
-      this.unlistenEngagement_ = this.engagement_.registerListener(
-        this.updateEngagementStatus_.bind(this)
-      );
-    }
-
-    // Setup the extension with the initial parameters
-    // TODO: We don't have all the parameters
-    if (this.extension_) {
-      this.extension_.setup(
-        1, // applicationId
-        'PT', // country
-        1, // section
-        this.cookies_.getSessionCookie(), // sessionId
-        this.ivm,
-        this.engagement_.isEngaged() ? 1 : 0 // state
-      );
+      // Setup the extension with the initial parameters
+      // TODO: We don't have all the parameters
+      // TODO: Do this only once, we receive multiple app inits
+      if (this.extension_) {
+        this.extension_.setup(
+          message.applicationId, // applicationId
+          message.countryCode, // country
+          message.sectionId, // section
+          this.cookies_.getSessionCookie(), // sessionId
+          this.ivm,
+          this.engagement_.isEngaged() ? 1 : 0 // state
+        );
+      }
     }
   }
 
@@ -354,27 +321,21 @@ export class Core {
    * @public
    */
   destroy() {
-    // Already Validated. is called when the ad is refreshed or unlayoutCallback
-    // A: Does the teardown happen in every refresh?
-    // B: OR Does the teardown happen when the ad is removed from the DOM // Slot Collapsed?
-    // If A:
-    // Don't destroy the extension, as it will be used in the next refresh
-    // Don't destroy the realtime messaging, as it will be used in the next refresh
-    // Don't destroy the engagement tracker, as it will be used in the next refresh
-    // Don't destroy the visibility tracker, as it will be used in the next refresh
-    // If B: - IT IS B: tearDownSlot is called when the ad is refreshed or unlayoutCallback
-    // Don't destroy all the components, as they will be used in the next refresh
-    // TODO: Find a proper place to proper cleanup of the components (commented bellow)
-
     if (this.engagement_) {
       this.unlistenEngagement_();
-      this.unlistenEngagement_.release();
+      this.engagement_.destroy();
+      this.engagement_ = null;
     }
 
     if (this.core_) {
       // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
       this.core_.disconnect();
       this.core_ = null;
+    }
+
+    if (this.realtimeManager_) {
+      this.realtimeManager_.destroy();
+      this.realtimeManager_ = null;
     }
 
     if (this.extension_) {
