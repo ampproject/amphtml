@@ -304,8 +304,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.iabTaxonomy = message.iabTaxonomy;
 
     if (this.unitInfo.pendingUnitInit) {
-      this.sendUnitInit_();
       this.unitInfo.setPendingUnitInit(false);
+      this.sendUnitInit_();
     }
 
     console /*OK*/
