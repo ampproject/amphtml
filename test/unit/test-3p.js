@@ -1,4 +1,5 @@
 import {
+  computeInCoordinatingFrame,
   computeInMasterFrame,
   loadScript,
   nextTick,
@@ -262,6 +263,57 @@ describes.sandboxed('3p', {}, (env) => {
     expect(progress).to.equal(';slave0;master;slave1');
     computeInMasterFrame(slave2, taskId, work, frame('slave2'));
     expect(progress).to.equal(';slave0;master;slave1;slave2');
+    expect(workCalls).to.equal(1);
+  });
+
+  it('should do work only in coordinator (coordinatingFrame alias)', () => {
+    const taskId = 'exampleId';
+    const coordinator = {
+      context: {
+        isMaster: true,
+      },
+    };
+    coordinator.context.master = coordinator;
+    const client0 = {
+      context: {
+        isMaster: false,
+        master: coordinator,
+      },
+    };
+    const client1 = {
+      context: {
+        isMaster: false,
+        master: coordinator,
+      },
+    };
+    const client2 = {
+      context: {
+        isMaster: false,
+        master: coordinator,
+      },
+    };
+    let done;
+    let workCalls = 0;
+    const work = (d) => {
+      workCalls++;
+      done = d;
+    };
+    let progress = '';
+    const frame = (id) => {
+      return (result) => {
+        progress += result + id;
+      };
+    };
+    computeInCoordinatingFrame(client0, taskId, work, frame('client0'));
+    expect(workCalls).to.equal(0);
+    computeInCoordinatingFrame(coordinator, taskId, work, frame('coordinator'));
+    expect(workCalls).to.equal(1);
+    computeInCoordinatingFrame(client1, taskId, work, frame('client1'));
+    expect(progress).to.equal('');
+    done(';');
+    expect(progress).to.equal(';client0;coordinator;client1');
+    computeInCoordinatingFrame(client2, taskId, work, frame('client2'));
+    expect(progress).to.equal(';client0;coordinator;client1;client2');
     expect(workCalls).to.equal(1);
   });
 
