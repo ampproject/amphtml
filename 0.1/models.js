@@ -61,4 +61,11 @@ export class UnitInfo {
   setIsVisible(isVisible) {
     this.isVisible = isVisible;
   }
+
+  /**
+   * @param {boolean} isPending
+   */
+  setPendingUnitInit(isPending) {
+    this.pendingUnitInit = isPending;
+  }
 }
