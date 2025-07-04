@@ -128,37 +128,22 @@ export class Core {
 
   /**
    * Sends an ad unit initialization message
-   * @param {string} code - Ad unit code
-   * @param {string} path - Ad unit path
-   * @param {string} lineItemId - Line item ID
-   * @param {string} creativeId - Creative ID
-   * @param {string} servedSize - Served size
-   * @param {Array<string>} sizes - Available sizes
-   * @param {Array<Object>} keyValues - Key-value targeting
-   * @param {string} provider - Ad provider
-   * @param {number} parentMawId - Parent MAW ID
+   * @param {UnitInfo} unitInfo - Ad unit information
+   * @param {boolean=} reconnect - Reconnect flag
+   * @param {boolean=} passback - Passback flag
    */
-  sendUnitInit(
-    code,
-    path,
-    lineItemId,
-    creativeId,
-    servedSize,
-    sizes,
-    keyValues,
-    provider,
-    parentMawId
-  ) {
+  sendUnitInit(unitInfo, reconnect = false, passback = false) {
     const unitInit = new UnitInitMessage(
-      code,
-      path,
-      lineItemId,
-      creativeId,
-      servedSize,
-      sizes,
-      keyValues,
-      provider,
-      parentMawId
+      unitInfo.code,
+      unitInfo.path,
+      unitInfo.lineItemId,
+      unitInfo.creativeId,
+      unitInfo.servedSize,
+      unitInfo.sizes,
+      unitInfo.keyValues,
+      unitInfo.provider,
+      reconnect,
+      passback
     );
     this.realtimeManager_.send(unitInit.serialize());
   }

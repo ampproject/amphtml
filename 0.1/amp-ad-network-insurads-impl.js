@@ -19,8 +19,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @param {!Element} element
    */
   constructor(element) {
-    // TODO: Confirm that this is working as expected
     super(element);
+
     // Always disable A4A Refresh, as we are using our own refresh mechanism
     this.element.setAttribute('data-enable-refresh', 'false');
 
@@ -28,14 +28,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.unitInfo.setPath(this.element.getAttribute('data-slot'));
     this.unitInfo.setLineItemId(this.element.getAttribute('data-line-item-id'));
     this.unitInfo.setCreativeId(this.element.getAttribute('data-creative-id'));
-    this.unitInfo.setServedSize(this.element.getAttribute('data-served-size')); // TODO: USE getMultiSizeDimensions from doubleclick to get sizes properly
-    this.unitInfo.setSizes(this.element.getAttribute('data-multi-size') || '');
-    this.unitInfo.setKeyValues(
-      this.element.getAttribute('data-key-values') || {}
-    );
-    this.unitInfo.setProvider(
-      this.element.getAttribute('data-provider') || 'pgam'
-    );
 
     this.unitInfo.setIsVisible(false);
 
@@ -189,6 +181,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         }
 
         params.set('scp', keyValues);
+
+        const sizesString = params.get('sz');
+        const sizesArray = sizesString
+          .split('|')
+          .map((size) => size.split('x').map(Number));
+        this.unitInfo.setSizes(sizesArray);
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
     });
@@ -427,7 +425,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   sendUnitInit_() {
     if (this.appEnabled) {
       // TODO: send message to Core manager
-      this.realtimeMessaging_.sendUnitInit(this.unitInfo);
+      this.core_.sendUnitInit(this.unitInfo);
     }
   }
 
