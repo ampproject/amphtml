@@ -1,0 +1,160 @@
+import {
+  AppInitMessage,
+  HandshakeMessage,
+  MessageHandler,
+  PageStatusMessage,
+  UnitInitMessage,
+  UnitSnapshotMessage,
+} from './messages';
+import {RealtimeManager} from './realtime-manager';
+
+/**
+ * Integration with the RealtimeManager
+ */
+export class RealtimeMessaging {
+  /**
+   * @param {string} publicId - Public ID
+   * @param {string} canonicalUrl - Canonical URL
+   * @param {function()} reconnectHandler - Handler for reconnection logic
+   * @param {Object=} handlers - Message handlers
+   */
+  constructor(publicId, canonicalUrl, reconnectHandler, handlers = {}) {
+    this.setupRealtimeConnection_(publicId, canonicalUrl);
+
+    this.reconnectHandler_ = reconnectHandler;
+
+    /** @private {!MessageHandler} */
+    this.messageHandler_ = new MessageHandler(handlers);
+  }
+
+  /**
+   * Sets up the realtime connection and event handlers
+   * @param {string} publicId - Public ID
+   * @param {string} canonicalUrl - Canonical URL
+   * @private
+   */
+  setupRealtimeConnection_(publicId = '', canonicalUrl = '') {
+    /** @private {!RealtimeManager} */
+    this.realtimeManager_ = RealtimeManager.start(publicId, canonicalUrl);
+
+    const ws = this.realtimeManager_.getWebSocket();
+
+    if (ws) {
+      ws.onReceiveMessage = this.messageHandler_.processMessage;
+      ws.onConnect = () => {
+        this.sendHandshake();
+      };
+      ws.onDisconnect = () => {
+        console /*OK*/
+          .log('WebSocket disconnected');
+      };
+    }
+  }
+
+  /**
+   * Sends a handshake message
+   */
+  sendHandshake() {
+    const handshake = new HandshakeMessage();
+    this.realtimeManager_.sendHandshake(handshake.serialize());
+  }
+
+  /**
+   * Sends an app initialization message
+   * @param {string} lockedId - Locked ID data
+   * @param {boolean} newVisitor - New visitor flag
+   * @param {boolean} extension - Extension status
+   * @param {boolean=} reconnect - Reconnect flag
+   */
+  sendAppInit(lockedId, newVisitor, extension, reconnect = false) {
+    const appInit = new AppInitMessage(
+      lockedId,
+      newVisitor,
+      extension,
+      reconnect
+    );
+    this.realtimeManager_.send(appInit.serialize());
+  }
+
+  /**
+   * Sends an ad unit initialization message
+   * @param {UnitInfo} unitInfo - Ad unit information
+   * @param {boolean=} reconnect - Reconnect flag
+   * @param {boolean=} passback - Passback flag
+   */
+  sendUnitInit(unitInfo, reconnect = false, passback = false) {
+    const unitInit = new UnitInitMessage(
+      unitInfo.code,
+      unitInfo.path,
+      unitInfo.lineItemId,
+      unitInfo.creativeId,
+      unitInfo.servedSize,
+      unitInfo.sizes,
+      unitInfo.keyValues,
+      unitInfo.provider,
+      reconnect,
+      passback
+    );
+    this.realtimeManager_.send(unitInit.serialize());
+  }
+
+  /**
+   * Sends an ad unit visibility snapshot
+   * @param {string} code - Ad unit code
+   * @param {number} visible - Visibility percentage (0-1)
+   */
+  sendUnitSnapshot(code, visible) {
+    const snapshot = new UnitSnapshotMessage(code, visible);
+    this.realtimeManager_.send(snapshot.serialize());
+  }
+
+  /**
+   * Sends a page status update
+   * @param {!Object} state - Engagement state object
+   */
+  sendPageStatus(state) {
+    if (
+      state.isEngaged &&
+      this.realtimeManager_ &&
+      !this.realtimeManager_.isConnected()
+    ) {
+      console /*OK*/
+        .log('User is active, reconnecting WebSocket');
+      this.setupRealtimeConnection_();
+      this.reconnectHandler_();
+    }
+
+    const status = new PageStatusMessage(state.isEngaged, state.isVisible);
+    this.realtimeManager_.send(status.serialize());
+  }
+
+  /**
+   * Disconnects the WebSocket connection
+   * @param {boolean} clearQueue - Whether to clear the message queue on disconnect (default: true)
+   * @param {number=} code - Optional close code (default: 1000 - normal closure)
+   * @param {string=} reason - Optional reason for closing
+   * @return {boolean} Whether disconnection was successful
+   * @public
+   */
+  disconnect(clearQueue = true, code = 1000, reason = 'AMP is going away') {
+    if (!this.realtimeManager_) {
+      console /*OK*/
+        .log('No active connection to disconnect');
+      return false;
+    }
+
+    try {
+      console /*OK*/
+        .log(`Disconnecting WebSocket: ${reason} (code: ${code})`);
+
+      // Perform the actual disconnection
+      this.realtimeManager_.disconnect(clearQueue, code, reason);
+
+      return true;
+    } catch (e) {
+      console /*OK*/
+        .error('Error disconnecting WebSocket:', e);
+      return false;
+    }
+  }
+}

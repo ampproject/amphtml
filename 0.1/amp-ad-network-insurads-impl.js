@@ -6,6 +6,7 @@ import {Services} from '#service';
 import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
 import {ExtensionCommunication} from './extension';
+import {UnitInfo} from './models';
 import {VisibilityTracker} from './visibility-tracking';
 import {Waterfall} from './waterfall';
 
@@ -23,13 +24,26 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     // Always disable A4A Refresh, as we are using our own refresh mechanism
     this.element.setAttribute('data-enable-refresh', 'false');
 
-    this.code = Math.random().toString(36).substring(2, 15);
+    this.unitInfo = new UnitInfo(Math.random().toString(36).substring(2, 15));
+    this.unitInfo.setPath(this.element.getAttribute('data-slot'));
+    this.unitInfo.setLineItemId(this.element.getAttribute('data-line-item-id'));
+    this.unitInfo.setCreativeId(this.element.getAttribute('data-creative-id'));
+    this.unitInfo.setServedSize(this.element.getAttribute('data-served-size')); // TODO: USE getMultiSizeDimensions from doubleclick to get sizes properly
+    this.unitInfo.setSizes(this.element.getAttribute('data-multi-size') || '');
+    this.unitInfo.setKeyValues(
+      this.element.getAttribute('data-key-values') || {}
+    );
+    this.unitInfo.setProvider(
+      this.element.getAttribute('data-provider') || 'pgam'
+    );
+
+    this.unitInfo.setIsVisible(false);
+
     this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    this.slot = this.element.getAttribute('data-slot');
     this.publicId = this.element.getAttribute('data-public-id');
+
     this.appEnabled = false;
     this.iabTaxonomy = {};
-    this.isViewable_ = false;
 
     this.requiredKeys = [];
     this.requiredKeyValues = [];
@@ -93,40 +107,27 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     }
     this.refreshCount_++;
     console /*Ok*/
-      .log('Refresh', this.slot, this.refreshCount_, this.element, this);
+      .log('Refresh', this.path, this.refreshCount_, this.element, this);
     // DON'T CALL DOUBLE CLICK REFRESH! NOT NEEDED.
     return super.refresh(refreshEndCallback);
   }
 
   /** @override */
   extractSize(responseHeaders) {
-    console /*Ok*/
-      .log('CreativeId', responseHeaders.get('google-creative-id') || '-1');
-    console /*Ok*/
-      .log('lineItemId', responseHeaders.get('google-lineitem-id') || '-1');
-    console /*Ok*/
-      .log('size', responseHeaders.get('google-size') || '300x250');
-    console /*Ok*/
-      .log('slot', this.slot);
-
-    this.lineItemId = responseHeaders.get('google-lineitem-id') || '-1';
-    this.creativeId = responseHeaders.get('google-creative-id') || '-1';
-    this.creativeSize = responseHeaders.get('google-size') || '';
-
-    this.core_.sendUnitInit(
-      this.code,
-      this.slot,
-      this.lineItemId,
-      this.creativeId,
-      this.creativeSize,
-      this.sizes || [],
-      this.requiredKeyValues,
-      this.nextRefresh ? this.nextRefresh.provider : 'pgam',
-      0, // Parent Maw Id ???
-      0 //Passback ????
+    this.unitInfo.setLineItemId(
+      responseHeaders.get('google-lineitem-id') || '-1'
+    );
+    this.unitInfo.setCreativeId(
+      responseHeaders.get('google-creative-id') || '-1'
     );
 
-    this.extension_.bannerChanged(this); // TODO: Update with correct adunit params
+    this.unitInfo.setServedSize(
+      responseHeaders.get('google-size') || '' // TODO: Check if this is correct when the response is empty, unknown or ''
+    );
+
+    this.sendUnitInit_();
+
+    this.extension_.bannerChanged(this.unitInfo);
 
     return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
@@ -350,7 +351,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.extension_.adUnitChanged({
       id: this.getAdUnitId(),
       shortId: message.adUnitId,
-      sizes: this.sizesArray,
+      sizes: this.sizes,
       instance: this.element.getAttribute('data-amp-slot-index'),
       configuration: null,
       customTargeting: null,
@@ -406,15 +407,33 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   onVisibilityChange_(visibilityData) {
-    if (this.isViewable_ !== visibilityData.isViewable) {
-      this.core_.sendUnitSnapshot(this.code, visibilityData.isViewable);
-      this.isViewable_ = visibilityData.isViewable;
+    if (
+      this.unitInfo.isVisible !== visibilityData.isViewable &&
+      this.appEnabled
+    ) {
+      this.core_.sendUnitSnapshot(
+        this.unitInfo.code,
+        visibilityData.isViewable
+      );
+
+      this.unitInfo.setIsVisible(visibilityData.isViewable);
     }
 
     console /*OK*/
       .log('Visibility Change:', visibilityData.isViewable);
     console /*OK*/
       .log('Visibility Percentage:', visibilityData.visibilityPercentage);
+  }
+
+  /**
+   * Sends the unit initialization message
+   * @private
+   */
+  sendUnitInit_() {
+    if (this.appEnabled) {
+      // TODO: send message to Core manager
+      this.realtimeMessaging_.sendUnitInit(this.unitInfo);
+    }
   }
 
   /**
