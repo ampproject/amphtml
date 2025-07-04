@@ -187,6 +187,8 @@ window.context.sourceUrl;
 window.context.experimentToggles;
 window.context.master;
 window.context.isMaster;
+window.context.coordinator;
+window.context.isCoordinator;
 window.context.ampcontextVersion;
 window.context.ampcontextFilepath;
 window.context.canary;
