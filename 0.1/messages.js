@@ -68,16 +68,22 @@ export class AppInitMessage extends BaseMessage {
   /**
    * @param {string} lockedId - Locked ID message
    * @param {boolean} newVisitor - New Visitor
+   * @param {number} lastTimestamp - Last Time Stamp
    * @param {boolean} extension - Extension Status
-   * @param {string} url - Url
    * @param {boolean=} reconnect - Reconnect flag
    */
-  constructor(lockedId, newVisitor, extension, url = {}, reconnect = false) {
+  constructor(
+    lockedId,
+    newVisitor,
+    lastTimestamp,
+    extension,
+    reconnect = false
+  ) {
     super('app-init', {
       lockedId,
       newVisitor,
+      lastTimeStamp: lastTimestamp,
       extension,
-      url,
       reconnect,
     });
   }
@@ -173,9 +179,10 @@ export class AppInitResponseMessage extends BaseMessage {
    * @param {boolean=} params.ivm - IntelliSense Viewability Mode.
    * @param {object=} params.requiredKeys - Accepted Key values for targeting.
    * @param {object=} params.iabTaxonomy - IAB Taxonomy.
-   * @param {number=} params.status - Status of the app.
    * @param {string=} params.reason - Reason for the status.
-   * @param {number=} params.sectionId
+   * @param {number=} params.sectionId - Section ID for the app.
+   * @param {string=} params.serverTimestamp - The Server Timestamp
+   * @param {number=} params.status - Status of the app.
    */
   constructor({
     applicationId,
@@ -185,6 +192,7 @@ export class AppInitResponseMessage extends BaseMessage {
     reason,
     requiredKeys,
     sectionId,
+    serverTimestamp,
     status,
   }) {
     const messagePayload = {};
@@ -210,9 +218,11 @@ export class AppInitResponseMessage extends BaseMessage {
     if (reason !== undefined) {
       messagePayload.reason = reason;
     }
-
     if (sectionId !== undefined) {
       messagePayload.sectionId = sectionId;
+    }
+    if (serverTimestamp !== undefined) {
+      messagePayload.serverTimestamp = serverTimestamp;
     }
 
     super('app-init-response', messagePayload);

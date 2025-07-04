@@ -121,8 +121,9 @@ export class Core {
   sendAppInit(reconnect = false) {
     const appInit = new AppInitMessage(
       this.lockedData_,
-      !!this.extension_,
       this.cookies_.isNewVisitor(),
+      this.cookies_.getLastTimeStamp(),
+      !!this.extension_,
       reconnect
     );
     this.realtimeManager_.send(appInit.serialize());
@@ -289,7 +290,6 @@ export class Core {
           ivm: message.ivm,
         };
         this.engagement_ = new EngagementTracker(this.win, config);
-        // TODO: Remove listeners on destroy
         this.unlistenEngagement_ = this.engagement_.registerListener(
           this.updateEngagementStatus_.bind(this)
         );
@@ -300,14 +300,16 @@ export class Core {
       // TODO: Do this only once, we receive multiple app inits
       if (this.extension_) {
         this.extension_.setup(
-          message.applicationId, // applicationId
-          message.countryCode, // country
-          message.sectionId, // section
-          this.cookies_.getSessionCookie(), // sessionId
+          message.applicationId,
+          message.countryCode,
+          message.sectionId,
+          this.cookies_.getSessionCookie(),
           this.ivm,
-          this.engagement_.isEngaged() ? 1 : 0 // state
+          this.engagement_.isEngaged() ? 1 : 0
         );
       }
+
+      this.cookie_updateVisitCookie(message.lockedId, message.serverTimestamp);
     }
   }
 

@@ -21,12 +21,10 @@ class Cookie {
    * CookieMonster constructor`
    * @param {Window} win
    * @param {string} canonicalUrl
-   * @param {number} ts
    */
-  constructor(win, canonicalUrl, ts) {
+  constructor(win, canonicalUrl) {
     this.doc_ = win.document;
     this.domain_ = new URL(canonicalUrl).hostname;
-    this.ts_ = ts;
     this.sessionId_ = Array.from(crypto.getRandomValues(new Uint8Array(16)))
       .map((n) => (n % 36).toString(36))
       .join('');
@@ -61,6 +59,18 @@ class Cookie {
   }
 
   /**
+   *  Get Last Time Stamp
+   * @return {number} - The last timestamp from the visit cookie or the current timestamp
+   */
+  getLastTimeStamp() {
+    if (this.visitCookie_) {
+      const parts = this.visitCookie_.split('.');
+      return parts.length > 2 ? parseInt(parts[2], 10) : 0;
+    }
+    return 0;
+  }
+
+  /**
    * Get Cookies Enabled
    * @return {boolean}
    */
@@ -78,10 +88,11 @@ class Cookie {
   /**
    * Update Visitor Cookie
    * @param {String} lockedId
+   * @param {number} ts - The server timestamp
    */
-  updateVisitCookie(lockedId) {
+  updateVisitCookie(lockedId, ts) {
     // Update visitor cookie with current server timestamp, plus all IatId stuff
-    this.writeCookie_(VCN, VCD, this.prepareVisitorCookie_(lockedId));
+    this.writeCookie_(VCN, VCD, this.prepareVisitorCookie_(lockedId, ts));
   }
 
   /**
@@ -141,9 +152,10 @@ class Cookie {
   /**
    * Prepare visitor cookie
    * @param {String} lockedId
+   * @param {number} ts - The server timestamp
    * @return {string} - The formatted visitor cookie string
    */
-  prepareVisitorCookie_(lockedId) {
+  prepareVisitorCookie_(lockedId, ts) {
     const visitCookieParts = this.visitCookie_.split(".");
 
     let retVal =
@@ -151,7 +163,7 @@ class Cookie {
       '.' +
       lockedId +
       '.' +
-      this.ts_ +
+      ts +
       '.' +
       visitCookieParts[3] || '' + // TODO: locked.iatIdB - not available at the moment, use existing
       '.' +

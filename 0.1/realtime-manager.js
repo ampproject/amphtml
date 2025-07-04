@@ -1,7 +1,7 @@
 export class RealtimeManager {
   /** @const {string} */
   static HUB_URL_TEMPLATE =
-    'wss://amp-messaging.insurads.com/rt-pub/node/hub?appId=78&dev=$DEV$&br=$BR$&os=$OS$&cc=$CC$&rc=$RC$&v=0.2';
+    'wss://amp-messaging.insurads.com/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$';
   static HUB_URL_TEMPLATE_DEV =
     'wss://localhost:5082/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$';
   /** @private {?RealtimeManager} */
@@ -238,12 +238,12 @@ export class RealtimeManager {
         return false;
       }
 
-      const url = RealtimeManager.HUB_URL_TEMPLATE_DEV.replace(
+      const url = RealtimeManager.HUB_URL_TEMPLATE.replace(
         '$PUBLICID$',
         this.publicId_
       )
-        .replace('$HT$', '1')
-        .replace('$V$', '0.5')
+        .replace('$HT$', '2')
+        .replace('$V$', '1.0')
         .replace('$URL$', encodeURIComponent(this.canonicalUrl_));
 
       this.ws = new WebSocket(url);
