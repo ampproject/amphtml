@@ -34,17 +34,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.requiredKeys = [];
     this.requiredKeyValues = [];
 
-    const jsonTargeting = tryParseJson(this.element.getAttribute('json')) || {};
-    this.requiredKeys.forEach((key) => {
-      const {targeting} = jsonTargeting;
-      if (targeting && targeting[key]) {
-        this.requiredKeyValues.push({
-          key,
-          value: targeting[key],
-        });
-      }
-    });
-
     // TODO: To be changed
     this.nextRefresh = null;
 
@@ -55,6 +44,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     /* InsurAds Business  */
     this.core_ = Core.Start(
+      this.win,
       this.publicId,
       this.canonicalUrl,
       this.code,
@@ -312,6 +302,21 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   handleAppInit_(message) {
     this.appEnabled = message.status > 0 ? true : false;
     this.requiredKeys.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
+
+    if (this.requiredKeys.length > 0) {
+      const jsonTargeting =
+        tryParseJson(this.element.getAttribute('json')) || {};
+      this.requiredKeys.forEach((key) => {
+        const {targeting} = jsonTargeting;
+        if (targeting && targeting[key]) {
+          this.requiredKeyValues.push({
+            key,
+            value: targeting[key],
+          });
+        }
+      });
+    }
+
     this.iabTaxonomy = message.iabTaxonomy;
 
     console /*OK*/
