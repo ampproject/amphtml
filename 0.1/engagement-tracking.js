@@ -248,20 +248,9 @@ export class EngagementTracker {
   }
 
   /**
-   * Release one instance reference to the singleton
-   */
-  release() {
-    this.instanceCount_--;
-
-    if (this.instanceCount_ <= 0) {
-      this.dispose();
-    }
-  }
-
-  /**
    * Clean up resources and reset the singleton
    */
-  dispose() {
+  destroy() {
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_ = [];
     this.listeners_ = [];

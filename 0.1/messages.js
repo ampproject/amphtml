@@ -88,27 +88,32 @@ export class AppInitMessage extends BaseMessage {
  */
 export class UnitInitMessage extends BaseMessage {
   /**
-   * @param {string} code - Generated Ad Unit ID
-   * @param {string} path - Path of the Ad Unit
-   * @param {string} lineItemId - Line Item ID
-   * @param {string} creativeId - Creative ID
-   * @param {string} servedSize - Served Size
-   * @param {Array<string>} sizes - Available sizes
-   * @param {Array<object>} keyValues - Key values for targeting
-   * @param {string} provider - Provider name
-   * @param {number} parentMawId - Parent MAW ID
+   * @param {object} params
+   * @param {string} params.code - Generated Ad Unit ID
+   * @param {string} params.creativeId - Creative ID
+   * @param {Array<object>} params.keyValues - Key values for targeting
+   * @param {string} params.lineItemId - Line Item ID
+   * @param {number=} params.parentMawId - Parent MAW ID
+   * @param {number=} params.passback - Passback
+   * @param {string} params.path - Path of the Ad Unit
+   * @param {string} params.provider - Provider name
+   * @param {boolean=} params.reconnect - reconnect
+   * @param {string} params.servedSize - Served Size
+   * @param {Array<string>} params.sizes - Available sizes
    */
-  constructor(
+  constructor({
     code,
-    path,
-    lineItemId,
     creativeId,
+    keyValues,
+    lineItemId,
+    parentMawId = 0,
+    passback = false,
+    path,
+    provider,
+    reconnect = false,
     servedSize,
     sizes,
-    keyValues,
-    provider,
-    parentMawId = {}
-  ) {
+  }) {
     super('unit-init', {
       code,
       path,
@@ -119,6 +124,8 @@ export class UnitInitMessage extends BaseMessage {
       keyValues,
       provider,
       parentMawId,
+      passback,
+      reconnect,
     });
   }
 }
@@ -161,15 +168,33 @@ export class PageStatusMessage extends BaseMessage {
 export class AppInitResponseMessage extends BaseMessage {
   /**
    * @param {object} params - The parameters for the message.
+   * @param {number=} params.applicationId
+   * @param {string=} params.countryCode
    * @param {boolean=} params.ivm - IntelliSense Viewability Mode.
    * @param {object=} params.requiredKeys - Accepted Key values for targeting.
    * @param {object=} params.iabTaxonomy - IAB Taxonomy.
    * @param {number=} params.status - Status of the app.
    * @param {string=} params.reason - Reason for the status.
+   * @param {number=} params.sectionId
    */
-  constructor({iabTaxonomy, ivm, reason, requiredKeys, status}) {
+  constructor({
+    applicationId,
+    countryCode,
+    iabTaxonomy,
+    ivm,
+    reason,
+    requiredKeys,
+    sectionId,
+    status,
+  }) {
     const messagePayload = {};
 
+    if (applicationId !== undefined) {
+      messagePayload.applicationId = applicationId;
+    }
+    if (countryCode !== undefined) {
+      messagePayload.countryCode = countryCode;
+    }
     if (ivm !== undefined) {
       messagePayload.ivm = ivm;
     }
@@ -184,6 +209,10 @@ export class AppInitResponseMessage extends BaseMessage {
     }
     if (reason !== undefined) {
       messagePayload.reason = reason;
+    }
+
+    if (sectionId !== undefined) {
+      messagePayload.sectionId = sectionId;
     }
 
     super('app-init-response', messagePayload);
@@ -221,20 +250,6 @@ export class UnitWaterfallMessage extends BaseMessage {
       unitCode,
       entries,
       commonKeyValues,
-    });
-  }
-}
-
-/**
- * Disconnect message
- */
-export class DisconnectMessage extends BaseMessage {
-  /**
-   * @param {string} reason - Reason for disconnect
-   */
-  constructor(reason = 'AMP is going away') {
-    super('disconnect', {
-      reason,
     });
   }
 }
