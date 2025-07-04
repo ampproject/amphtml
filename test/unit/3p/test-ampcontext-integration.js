@@ -1,4 +1,7 @@
-import {IntegrationAmpContext, masterSelection} from '#3p/ampcontext-integration';
+import {
+  IntegrationAmpContext,
+  masterSelection,
+} from '#3p/ampcontext-integration';
 
 describes.fakeWin('#masterSelect', {}, (env) => {
   it('should allow sharing between configured networks', () =>
@@ -19,14 +22,14 @@ describes.sandboxed('IntegrationAmpContext aliases', {}, (env) => {
 
   it('should delegate coordinator to master', () => {
     const result = context.coordinator;
-    
+
     expect(context.master_).to.have.been.calledOnce;
     expect(result).to.equal('test-master-window');
   });
 
   it('should delegate isCoordinator to isMaster', () => {
     const result = context.isCoordinator;
-    
+
     expect(context.isMaster_).to.have.been.calledOnce;
     expect(result).to.equal(true);
   });
