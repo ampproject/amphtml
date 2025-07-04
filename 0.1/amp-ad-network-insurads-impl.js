@@ -1,15 +1,14 @@
 import {Deferred} from '#core/data-structures/promise';
+import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
-import {EngagementTracker} from './engagement-tracking';
 import {ExtensionCommunication} from './extension';
-import {LockedId} from './lockedid';
 import {UnitInfo} from './models';
-import {NextRefresh} from './next-refresh';
-import {RealtimeMessaging} from './realtime-messaging';
 import {VisibilityTracker} from './visibility-tracking';
+import {Waterfall} from './waterfall';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 /** @type {string} */
@@ -44,9 +43,24 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.publicId = this.element.getAttribute('data-public-id');
 
     this.appEnabled = false;
-    this.ivm = false;
     this.iabTaxonomy = {};
-    this.nextRefresh = new NextRefresh();
+
+    this.requiredKeys = [];
+    this.requiredKeyValues = [];
+
+    const jsonTargeting = tryParseJson(this.element.getAttribute('json')) || {};
+    this.requiredKeys.forEach((key) => {
+      const {targeting} = jsonTargeting;
+      if (targeting && targeting[key]) {
+        this.requiredKeyValues.push({
+          key,
+          value: targeting[key],
+        });
+      }
+    });
+
+    // TODO: To be changed
+    this.nextRefresh = null;
 
     /* DoubleClick & AMP */
     this.dCHelper = new DoubleClickHelper(this);
@@ -54,10 +68,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /* DoubleClick& AMP */
 
     /* InsurAds Business  */
-    this.lockedid = new LockedId().getLockedIdData();
-    this.realtimeMessaging_ = new RealtimeMessaging(
+    this.core_ = Core.Start(
       this.publicId,
       this.canonicalUrl,
+      this.code,
       this.handleReconnect_.bind(this),
       {
         appInitHandler: (message) => this.handleAppInit_(message),
@@ -67,7 +81,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     );
 
     if (window.frames['TG-listener']) {
-      this.extension_ = new ExtensionCommunication(
+      this.extension_ = ExtensionCommunication.start(
         this.handlerExtensionMessages.bind(this)
       );
     }
@@ -84,23 +98,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     console /*OK*/
       .log('Build Callback');
-
-    this.realtimeMessaging_.sendAppInit(
-      this.lockedid, //OK
-      true, //TODO new visitor
-      !!this.extension_,
-      this.canonicalUrl // Already use on new realtime messaging instance call
-    );
-
-    // TODO: Get all the params
-    this.extension_.setup(
-      1, // applicationId
-      'PT', // country
-      1, // section
-      'XPTO', // sessionId
-      'C3PO', // contextId
-      this.engagement_.isEngaged() ? 1 : 0 // state
-    );
   }
 
   /** @override */
@@ -135,7 +132,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     );
 
     this.unitInfo.setServedSize(
-      responseHeaders.get('google-size') || 'unknown' // TODO: Check if this is correct when the response is empty, unknown or ''
+      responseHeaders.get('google-size') || '' // TODO: Check if this is correct when the response is empty, unknown or ''
     );
 
     this.sendUnitInit_();
@@ -162,31 +159,36 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       if (self.refreshCount_ > 0) {
         console./*Ok*/ log('Refresh count:', self.refreshCount_);
 
-        // Test code
-        // this.slot === '/134642692/AMPTestsV3'
-        // ? '/30497360/a4a/a4a_native'
-        // : '/134642692/AMPTestsV3';
-        //
-        // if (this.nextRefresh.path) {
-        //   params.set('iu', this.nextRefresh.path);
-        // }
-        // if (this.nextRefresh.sizesString) {
-        //   params.set('sz', this.nextRefresh.sizesString);
-        // }
-        // console /*OK*/
-        //   .log(url.toString());
-
-        // TODO: Discuss if we should support single parameters and mantain that logic here
-        // OR do like we planned, keep the logic on the server side, and get only the processed parameters
-
         const params = url.searchParams;
-        // Assume all the necessary and updated params (including the original parameters)
-        // will come from the server
-        if (this.nextRefresh.parameters.length > 0) {
-          this.nextRefresh.parameters.forEach((param) => {
-            params.set(param.key, param.value);
-          });
+
+        if (this.nextRefresh.path) {
+          params.set('iu', this.nextRefresh.path);
         }
+
+        const keyValuesParam = params.get('scp') || '';
+        let keyValues = keyValuesParam;
+
+        const allKeyValues = [
+          ...(this.nextRefresh.keyValues || []),
+          ...(this.nextRefresh.commonKeyValues || []),
+        ];
+
+        if (allKeyValues.length > 0) {
+          const merged = this.serializeKeyValueArray_(allKeyValues);
+          keyValues += (keyValues ? '&' : '') + merged;
+        }
+
+        if (this.iabTaxonomy && this.nextEntry.provider === 'hgam') {
+          const userSignals = this.convertToUserSignals(this.iabTaxonomy);
+
+          const encodedSignals = encodeURIComponent(
+            btoa(JSON.stringify(userSignals))
+          );
+
+          params.set('ppsj', encodedSignals);
+        }
+
+        params.set('scp', keyValues);
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
     });
@@ -204,16 +206,20 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   forceCollapse() {
-    super.forceCollapse();
+    if (this.refreshCount_ === 0) {
+      // Blank on first print, Insurads does nothing, so we will
+      // call the super.forceCollapse to mantain the A4A flow
+      super.forceCollapse();
 
-    console /*OK*/
-      .log('Force Collapse');
-
-    // Should we refresh to our demand on first print blank?
-
-    // Destroy the ad and all its components
-    // TODO: This must be tested properly to see if there is a better place for destroy
-    this.destroy_();
+      // Destroy the ad and all its components
+      // TODO: This must be tested properly to see if there is a better place for destroy
+      this.destroy_();
+      console /*OK*/
+        .log('Force Collapse');
+    } else {
+      // On blanks after first print, we refresh
+      this.triggerImmediateRefresh();
+    }
   }
 
   /**
@@ -235,6 +241,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (!this.appEnabled) {
       console /*OK*/
         .log('App not enabled, ignoring refresh trigger');
+      // TODO: Validate this logic for destroy here
+      this.destroy_();
       return false;
     }
 
@@ -252,6 +260,23 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         .log('Ad not ready for refresh yet');
       return false;
     }
+
+    this.nextRefresh = Waterfall.getNextEntry();
+
+    // Update rtc-config with our vendors information
+    //   - vendors (n)
+    //     - "aps": {"PUB_ID": "600", "PUB_UUID": 'enter you UAM publisher ID', "PARAMS":{"amp":"1"}}
+    //     - "openwrap": {"PUB_ID", "162930", "PROFILE_ID": "9578"}
+    const rtcConfig = tryParseJson(this.element.getAttribute('rtc-config'));
+    if (rtcConfig && rtcConfig.vendors) {
+      Object.assign(rtcConfig.vendors, this.nextRefresh.vendors || {});
+      this.element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
+    }
+
+    if (!this.nextRefresh) {
+      return false;
+    }
+
     this.refresh(this.refreshEndCallback);
   }
 
@@ -263,12 +288,20 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   handleReconnect_() {
     console /*OK*/
       .log('Reconnecting to InsurAds');
-    this.realtimeMessaging_.sendAppInit(
-      this.lockedid,
-      true, //??
-      true, //??
-      this.canonicalUrl, // Already use on new realtime messaging instance call
-      true //??
+
+    // TODO: send unit init with reconnect
+    this.core_.sendUnitInit(
+      this.code,
+      this.slot,
+      this.lineItemId,
+      this.creativeId,
+      this.creativeSize,
+      this.sizes || [],
+      this.requiredKeyValues,
+      this.nextRefresh ? this.nextRefresh.provider : 'pgam',
+      0, // Parent Maw Id ???
+      0, //Passback ????
+      true
     );
   }
 
@@ -278,27 +311,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleAppInit_(message) {
-    //this.sellerId = message.sellerId;
-    this.appEnabled = message.status === 'ok' ? true : false;
-    this.ivm = !!message.ivm;
-    //this.mobile = message.mobile;
-    this.keyValues.push(...message.keyValues); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
-    //this.status = message.status;
+    this.appEnabled = message.status > 0 ? true : false;
+    this.requiredKeys.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
     this.iabTaxonomy = message.iabTaxonomy;
 
     console /*OK*/
       .log('App Init:', message);
-
-    if (!this.engagement_) {
-      const config = {
-        ivm: this.ivm,
-      };
-      this.engagement_ = EngagementTracker.get(this.win, config);
-      // TODO: Remove listeners on destroy
-      this.unlistenEngagement_ = this.engagement_.registerListener(
-        this.updateEngagementStatus_.bind(this)
-      );
-    }
   }
 
   /**
@@ -355,7 +373,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return;
     }
 
-    this.nextRefresh = NextRefresh.fromWaterfallMessage(message);
+    this.waterfall = Waterfall.fromWaterfallMessage(message);
     this.triggerImmediateRefresh();
 
     console /*OK*/
@@ -388,8 +406,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.unitInfo.isVisible !== visibilityData.isViewable &&
       this.appEnabled
     ) {
-      // TODO: send message to Core manager
-      this.realtimeMessaging_.sendUnitSnapshot(
+      this.core_.sendUnitSnapshot(
         this.unitInfo.code,
         visibilityData.isViewable
       );
@@ -401,28 +418,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       .log('Visibility Change:', visibilityData.isViewable);
     console /*OK*/
       .log('Visibility Percentage:', visibilityData.visibilityPercentage);
-  }
-
-  /**
-   * Handles user engagement changes
-   * @param {!Object} state - Engagement state object
-   * @private
-   */
-  updateEngagementStatus_(state) {
-    if (this.realtimeMessaging_) {
-      this.realtimeMessaging_.sendPageStatus(state);
-    }
-
-    if (this.extension_) {
-      // TODO: Create BrowserStates and extend with Idle,etc
-      this.extension_.engagementStatus({
-        index: state.isEngaged ? 1 : 0,
-        name: state.isEngaged ? 'Active' : 'Inactive',
-      });
-    }
-
-    console /*OK*/
-      .log('Engagement changed:', state.isEngaged, state);
   }
 
   /**
@@ -452,37 +447,71 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   destroy_() {
-    // Already Validated. is called when the ad is refreshed or unlayoutCallback
-    // A: Does the teardown happen in every refresh?
-    // B: OR Does the teardown happen when the ad is removed from the DOM // Slot Collapsed?
-    // If A:
-    // Don't destroy the extension, as it will be used in the next refresh
-    // Don't destroy the realtime messaging, as it will be used in the next refresh
-    // Don't destroy the engagement tracker, as it will be used in the next refresh
-    // Don't destroy the visibility tracker, as it will be used in the next refresh
-    // If B: - IT IS B: tearDownSlot is called when the ad is refreshed or unlayoutCallback
-    // Don't destroy all the components, as they will be used in the next refresh
-    // TODO: Find a proper place to proper cleanup of the components (commented bellow)
     if (this.visibilityTracker) {
       this.visibilityTracker.destroy();
       this.visibilityTracker = null;
     }
+  }
 
-    if (this.engagement_) {
-      this.engagement_.release();
+  /**
+   * Serializes an array of [key, value] pairs into a query string.
+   * @param {!Array<!Array<string, (!Array<string>|string)>>} pairs
+   * @return {string}
+   * @private
+   */
+  serializeKeyValueArray_(pairs) {
+    return pairs
+      .map(([key, value]) => this.serializeItem_(key, value))
+      .join('&');
+  }
+
+  /**
+   * @param {string} key
+   * @param {(!Array<string>|string)} value
+   * @return {string}
+   * @private
+   */
+  serializeItem_(key, value) {
+    const serializedValue = (Array.isArray(value) ? value : [value])
+      .map(encodeURIComponent)
+      .join();
+    return `${encodeURIComponent(key)}=${serializedValue}`;
+  }
+
+  /**
+   * Convert the IabTaxonomy to Google required format
+   * @param {object} data - IabTaxonomy data.
+   * @return {object} - Formatted signals
+   */
+  convertToUserSignals(data) {
+    const taxonomyMap = {
+      content: 'IAB_CONTENT',
+      audience: 'IAB_AUDIENCE',
+    };
+
+    const PublisherProvidedTaxonomySignals = [];
+
+    for (const [type, taxonomies] of Object.entries(data)) {
+      const prefix = taxonomyMap[type];
+      if (!prefix) {
+        continue;
+      }
+
+      for (const [version, items] of Object.entries(taxonomies)) {
+        const values = items
+          .map((item) => item.id)
+          .filter((id) => id !== undefined);
+
+        if (values.length > 0) {
+          PublisherProvidedTaxonomySignals.push({
+            taxonomy: `${prefix}_${version.replace(/\./g, '_')}`,
+            values,
+          });
+        }
+      }
     }
 
-    if (this.realtimeMessaging_) {
-      // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
-      this.realtimeMessaging_.disconnect();
-      this.realtimeMessaging_ = null;
-    }
-
-    if (this.extension_) {
-      this.extension_.adUnitRemoved(this.getAdUnitId());
-      this.extension_.destroy();
-      this.extension_ = null;
-    }
+    return {PublisherProvidedTaxonomySignals};
   }
 }
 

@@ -4,13 +4,32 @@ import {BrowserState} from './engagement-tracking';
  * Handles communication between the AMP ad and the extension iframe
  */
 export class ExtensionCommunication {
+  /** @private {?ExtensionCommunication} */
+  static instance_ = null;
+
+  adUnitHandlerMap = {};
+
   queue = [];
 
+  // constructor() {}
+
   /**
+   * Returns the singleton instance of ExtensionCommunication.
+   * @param {string} publicId
+   * @param {string} canonicalUrl
+   * @param {string} adUnitCode
    * @param {function()} handler message handler
+   * @return {!ExtensionCommunication}
+   * @public
    */
-  constructor(handler) {
-    this.handler = handler;
+  static start(publicId, canonicalUrl, adUnitCode, handler = {}) {
+    if (!ExtensionCommunication.instance_) {
+      ExtensionCommunication.instance_ = new ExtensionCommunication();
+    }
+
+    this.adUnitHandlerMap[adUnitCode] = handler;
+
+    return ExtensionCommunication.instance_;
   }
 
   /**
@@ -76,11 +95,12 @@ export class ExtensionCommunication {
    * @param {string} country - The country code
    * @param {number} section - The section ID
    * @param {string} sessionId - The session ID
-   * @param {string}contextId - The context ID
+   * @param {string} contextId - The context ID
+   * @param {boolean} ivm - IntelliSense Viewability Mode
    * @param {BrowserState} state - The current browser state
    *
    * */
-  setup(applicationId, country, section, sessionId, contextId, state) {
+  setup(applicationId, country, section, sessionId, contextId, ivm, state) {
     const conf = {
       sessionId,
       contextId,
@@ -88,6 +108,7 @@ export class ExtensionCommunication {
       section,
       // eslint-disable-next-line local/camelcase
       g_country: country,
+      ivm,
     };
 
     // Send configuration

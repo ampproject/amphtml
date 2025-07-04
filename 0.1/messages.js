@@ -160,22 +160,33 @@ export class PageStatusMessage extends BaseMessage {
  */
 export class AppInitResponseMessage extends BaseMessage {
   /**
-   * @param {string} sellerId - Seller ID
-   * @param {number} ivm - IntelliSense Viewability Mode - Experimental feature that uses an alternative method to control engagement and viewability (default is false)
-   * @param {number} mobile - Is Mobile
-   * @param {object} keyValues - Accepted Key values for targeting
-   * @param {object} iabTaxonomy - IAB Taxonomy
-   * @param {boolean} status - Status of the app
+   * @param {object} params - The parameters for the message.
+   * @param {boolean=} params.ivm - IntelliSense Viewability Mode.
+   * @param {object=} params.requiredKeys - Accepted Key values for targeting.
+   * @param {object=} params.iabTaxonomy - IAB Taxonomy.
+   * @param {number=} params.status - Status of the app.
+   * @param {string=} params.reason - Reason for the status.
    */
-  constructor(sellerId, ivm, mobile, keyValues, iabTaxonomy, status) {
-    super('app-init-response', {
-      sellerId,
-      ivm,
-      mobile,
-      keyValues,
-      iabTaxonomy,
-      status,
-    });
+  constructor({iabTaxonomy, ivm, reason, requiredKeys, status}) {
+    const messagePayload = {};
+
+    if (ivm !== undefined) {
+      messagePayload.ivm = ivm;
+    }
+    if (requiredKeys !== undefined) {
+      messagePayload.requiredKeys = requiredKeys;
+    }
+    if (iabTaxonomy !== undefined) {
+      messagePayload.iabTaxonomy = iabTaxonomy;
+    }
+    if (status !== undefined) {
+      messagePayload.status = status;
+    }
+    if (reason !== undefined) {
+      messagePayload.reason = reason;
+    }
+
+    super('app-init-response', messagePayload);
   }
 }
 
@@ -200,21 +211,16 @@ export class UnitInitResponseMessage extends BaseMessage {
  */
 export class UnitWaterfallMessage extends BaseMessage {
   /**
-   * @param {string} code - Ad unit code identifier
-   * @param {string} provider - Provider name
-   * @param {string} path - Path of the Ad Unit
-   * @param {Array<Array<number>>} sizes - Available sizes
-   * @param {Array<object>} keyValues - Key values for targeting
-   * @param {Array<string>} parametersMap - Parameters map
+   * @param {object} params The parameters for the message.
+   * @param {string} params.unitCode The unique code for the ad unit.
+   * @param {!Array<!WaterfallEntry>} params.entries The waterfall entries for different providers.
+   * @param {{[key: string]: string}=} params.commonKeyValues Key-values to be applied to all entries.
    */
-  constructor(code, provider, path, sizes, keyValues, parametersMap) {
+  constructor({commonKeyValues = {}, entries = [], unitCode}) {
     super('unit-waterfall', {
-      code,
-      provider,
-      path,
-      sizes,
-      keyValues,
-      parametersMap,
+      unitCode,
+      entries,
+      commonKeyValues,
     });
   }
 }
@@ -234,6 +240,47 @@ export class DisconnectMessage extends BaseMessage {
 }
 
 /**
+ * Represents a single entry in an ad unit's waterfall.
+ */
+export class WaterfallEntry {
+  /**
+   * @param {object} params The parameters for the entry.
+   * @param {number=} params.position The position of this entry in the waterfall.
+   * @param {string=} params.provider The ad provider for this entry (e.g., 'pgam').
+   * @param {string=} params.path The ad unit path for this provider.
+   * @param {!Array<!Array<number>>=} params.sizes The ad sizes for this entry.
+   * @param {{[key: string]: (string|Array<string>)}=} params.keyValues Specific key-values for this entry.
+   * @param {{[key: string]: Object}=} params.vendors Vendor-specific data (e.g., for prebid).
+   */
+  constructor({
+    keyValues = {},
+    path = '',
+    position = 0,
+    provider = '',
+    sizes = [],
+    vendors = {},
+  } = {}) {
+    /** @public {number} */
+    this.position = position;
+
+    /** @public {string} */
+    this.provider = provider;
+
+    /** @public {string} */
+    this.path = path;
+
+    /** @public {!Array<!Array<number>>} */
+    this.sizes = sizes;
+
+    /** @public {!Object<string, string|!Array<string>>} */
+    this.keyValues = keyValues;
+
+    /** @public {!Object<string, !Object>} */
+    this.vendors = vendors;
+  }
+}
+
+/**
  * Factory class to create appropriate message instances
  */
 export class MessageFactory {
@@ -247,14 +294,7 @@ export class MessageFactory {
     message = JSON.parse(message);
     switch (action) {
       case 'app-init-response':
-        return new AppInitResponseMessage(
-          message.sellerId || 'unknown',
-          message.ivm ? 1 : 0,
-          message.mobile ? 1 : 0,
-          message.keyValues || {},
-          message.iabTaxonomy || {},
-          message.status || false
-        );
+        return new AppInitResponseMessage(message);
 
       case 'unit-init-response':
         return new UnitInitResponseMessage(
@@ -263,14 +303,14 @@ export class MessageFactory {
         );
 
       case 'unit-waterfall':
-        return new UnitWaterfallMessage(
-          message.code || 'unknown',
-          message.provider || 'unknown',
-          message.path || '',
-          message.sizes || [],
-          message.keyValues || [],
-          message.parametersMap || []
+        const entries = (message.entries || []).map(
+          (entryData) => new WaterfallEntry(entryData)
         );
+        return new UnitWaterfallMessage({
+          unitCode: message.unitCode || 'unknown',
+          entries,
+          commonKeyValues: message.commonKeyValues || {},
+        });
       default:
         return new BaseMessage(action, message);
     }
@@ -320,35 +360,24 @@ export class MessageHandler {
   }
 
   /**
-   * Processes a message
-   * @param {string} raw
-   * @return {boolean} Whether the message was handled
+   * Processes a pre-parsed message object.
+   * @param {?BaseMessage} messageObj The message object to handle.
+   * @return {boolean} Whether the message was handled.
    */
-  processMessage(raw) {
-    const messages = raw.split('\u001e').filter(Boolean);
-    const parsedMessages = messages.map((m) => JSON.parse(m));
+  processMessage(messageObj) {
+    if (!messageObj) {
+      return false;
+    }
 
-    console /*Ok*/
-      .log('total messages:', parsedMessages.length);
+    console /*OK*/
+      .log('[iat-debug] Message:', messageObj.action, messageObj.message);
 
-    parsedMessages.forEach((message) => {
-      const messageObj = MessageFactory.fromJson(message.arguments);
-      if (messageObj) {
-        if (!messageObj) {
-          return false;
-        }
+    const handler = this.handlers_[messageObj.action];
+    if (handler && typeof handler === 'function') {
+      handler(messageObj.message);
+      return true;
+    }
 
-        console /*OK*/
-          .log('[iat-debug] Message:', messageObj.action, messageObj.message);
-
-        const handler = this.handlers_[messageObj.action];
-        if (handler && typeof handler === 'function') {
-          handler(messageObj.message);
-          return true;
-        }
-
-        return false;
-      }
-    });
+    return false;
   }
 }
