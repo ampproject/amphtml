@@ -69,6 +69,10 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string} */
     this.liveChannelid_ = null;
 
+    /** @private {?string} */
+    this.playlistid_ = null;
+
+
     /** @private {?boolean}  */
     this.muted_ = false;
 
@@ -135,9 +139,11 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = this.getVideoId_();
-    this.liveChannelid_ = this.getLiveChannelId_();
-    this.assertDatasourceExists_();
+  this.videoid_ = this.getVideoId_();
+  this.liveChannelid_ = this.getLiveChannelId_();
+  this.playlistid_ = this.getPlaylistId_();
+  this.assertDatasourceExists_();
+
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -154,9 +160,15 @@ class AmpYoutube extends AMP.BaseElement {
     this.assertDatasourceExists_();
     const urlSuffix = this.getCredentials_() === 'omit' ? '-nocookie' : '';
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
-    const descriptor = this.videoid_
-      ? `${encodeURIComponent(this.videoid_ || '')}?`
-      : `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
+let descriptor = '';
+if (this.videoid_) {
+  descriptor = `${encodeURIComponent(this.videoid_)}?`;
+} else if (this.liveChannelid_) {
+  descriptor = `live_stream?channel=${encodeURIComponent(this.liveChannelid_)}&`;
+} else if (this.playlistid_) {
+  descriptor = `videoseries?list=${encodeURIComponent(this.playlistid_)}&`;
+}
+
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
@@ -311,17 +323,32 @@ class AmpYoutube extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    if (mutations['data-videoid'] == null) {
-      return;
-    }
-    this.videoid_ = this.getVideoId_();
-    if (!this.iframe_) {
-      return;
-    }
-    this.sendCommand_('loadVideoById', [this.videoid_]);
+
+/** @override */
+mutatedAttributesCallback(mutations) {
+  const videoidChanged = mutations['data-videoid'] !== undefined;
+  const playlistidChanged = mutations['data-playlistid'] !== undefined;
+  const liveChannelidChanged = mutations['data-live-channelid'] !== undefined;
+
+  if (!videoidChanged && !playlistidChanged && !liveChannelidChanged) {
+    return;
   }
+
+  this.videoid_ = this.getVideoId_();
+  this.liveChannelid_ = this.getLiveChannelId_();
+  this.playlistid_ = this.getPlaylistId_();
+
+  if (!this.iframe_) {
+    return;
+  }
+
+  // If iframe already exists, stop current video and reload with new data
+  this.sendCommand_('stopVideo');
+
+  // Clean up and re-render
+  this.unlayoutCallback();
+  this.layoutCallback();
+}
 
   /**
    * @return {?string}
@@ -340,6 +367,14 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /**
+ * @return {?string}
+ * @private
+ */
+getPlaylistId_() {
+  return this.element.getAttribute('data-playlistid');
+}
+
+  /**
    * @return {string}
    * @private
    */
@@ -350,17 +385,16 @@ class AmpYoutube extends AMP.BaseElement {
   /**
    * @private
    */
-  assertDatasourceExists_() {
-    const datasourceExists =
-      !(this.videoid_ && this.liveChannelid_) &&
-      (this.videoid_ || this.liveChannelid_);
-    userAssert(
-      datasourceExists,
-      'Exactly one of data-videoid or ' +
-        'data-live-channelid should be present for <amp-youtube> %s',
-      this.element
-    );
-  }
+assertDatasourceExists_() {
+  const onlyOne =
+    [this.videoid_, this.liveChannelid_, this.playlistid_].filter(Boolean)
+      .length === 1;
+  userAssert(
+    onlyOne,
+    'Exactly one of data-videoid, data-live-channelid or data-playlistid should be present for <amp-youtube> %s',
+    this.element
+  );
+}
 
   /**
    * Sends a command to the player through postMessage.
@@ -463,72 +497,59 @@ class AmpYoutube extends AMP.BaseElement {
     );
   }
 
-  /** @override */
-  createPlaceholderCallback() {
-    if (!this.videoid_) {
-      return null;
-    }
-
-    const {element: el} = this;
-    const imgPlaceholder = htmlFor(el)`<img placeholder referrerpolicy=origin>`;
-    const videoid = dev().assertString(this.videoid_);
-
-    setStyles(imgPlaceholder, {
-      // Cover matches YouTube Player styling.
-      'object-fit': 'cover',
-      // Hiding the placeholder initially to give the browser time to fix
-      // the object-fit: cover.
-      'visibility': 'hidden',
-    });
-    propagateAttributes(['aria-label'], this.element, imgPlaceholder);
-    // TODO(mkhatib): Maybe add srcset to allow the browser to
-    // load the needed size or even better match YTPlayer logic for loading
-    // player thumbnails for different screen sizes for a cache win!
-    imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
-      videoid
-    )}/sddefault.jpg#404_is_fine`;
-
-    if (imgPlaceholder.hasAttribute('aria-label')) {
-      imgPlaceholder.setAttribute(
-        'alt',
-        'Loading video - ' + imgPlaceholder.getAttribute('aria-label')
-      );
-    } else {
-      imgPlaceholder.setAttribute('alt', 'Loading video');
-    }
-    applyFillContent(imgPlaceholder);
-
-    // Because sddefault.jpg isn't available for all videos, we try to load
-    // it and fallback to hqdefault.jpg.
-    this.loadPromise(imgPlaceholder)
-      .then(() => {
-        // A pretty ugly hack since onerror won't fire on YouTube image 404.
-        // This might be due to the fact that YouTube returns data to the request
-        // even when the status is 404. YouTube returns a placeholder image that
-        // is 120x90.
-        if (
-          imgPlaceholder.naturalWidth == 120 &&
-          imgPlaceholder.naturalHeight == 90
-        ) {
-          throw new Error('sddefault.jpg is not found');
-        }
-      })
-      .catch(() => {
-        imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
-          videoid
-        )}/hqdefault.jpg`;
-        return this.loadPromise(imgPlaceholder);
-      })
-      .then(() => {
-        this.getVsync().mutate(() => {
-          setStyles(imgPlaceholder, {
-            'visibility': '',
-          });
-        });
-      });
-
-    return imgPlaceholder;
+/** @override */
+createPlaceholderCallback() {
+  if (!this.videoid_) {
+    // Only videoid can have a thumbnail.
+    return null;
   }
+
+  const {element: el} = this;
+  const imgPlaceholder = htmlFor(el)`<img placeholder referrerpolicy=origin>`;
+  const videoid = dev().assertString(this.videoid_);
+
+  setStyles(imgPlaceholder, {
+    'object-fit': 'cover',
+    'visibility': 'hidden',
+  });
+  propagateAttributes(['aria-label'], this.element, imgPlaceholder);
+  imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
+    videoid
+  )}/sddefault.jpg#404_is_fine`;
+
+  if (imgPlaceholder.hasAttribute('aria-label')) {
+    imgPlaceholder.setAttribute(
+      'alt',
+      'Loading video - ' + imgPlaceholder.getAttribute('aria-label')
+    );
+  } else {
+    imgPlaceholder.setAttribute('alt', 'Loading video');
+  }
+  applyFillContent(imgPlaceholder);
+
+  this.loadPromise(imgPlaceholder)
+    .then(() => {
+      if (
+        imgPlaceholder.naturalWidth == 120 &&
+        imgPlaceholder.naturalHeight == 90
+      ) {
+        throw new Error('sddefault.jpg is not found');
+      }
+    })
+    .catch(() => {
+      imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
+        videoid
+      )}/hqdefault.jpg`;
+      return this.loadPromise(imgPlaceholder);
+    })
+    .then(() => {
+      this.getVsync().mutate(() => {
+        setStyles(imgPlaceholder, {'visibility': ''});
+      });
+    });
+
+  return imgPlaceholder;
+}
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 

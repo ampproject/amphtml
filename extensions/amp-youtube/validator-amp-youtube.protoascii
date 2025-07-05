@@ -41,12 +41,14 @@ tags: {  # <amp-youtube>
   }
   attrs: {
     name: "data-live-channelid"
-    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
     value_regex: "[^=/?:]+"
   }
   attrs: {
     name: "data-videoid"
-    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
+    value_regex: "[^=/?:]+"
+  }
+  attrs: {
+    name: "data-playlistid"
     value_regex: "[^=/?:]+"
   }
   attrs: {
@@ -65,4 +67,5 @@ tags: {  # <amp-youtube>
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
+  mandatory_oneof: "['data-live-channelid', 'data-videoid', 'data-playlistid']"
 }

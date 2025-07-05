@@ -1,5 +1,6 @@
 import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
-import {BaseElement} from '#bento/components/bento-youtube/1.0/base-element';
+import {YoutubeWithContext as BaseElement} from './base-element';
+
 
 import {isExperimentOn} from '#experiments';
 
