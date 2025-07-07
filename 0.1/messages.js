@@ -102,7 +102,7 @@ export class UnitInitMessage extends BaseMessage {
    * @param {number=} params.parentMawId - Parent MAW ID
    * @param {number=} params.passback - Passback
    * @param {string} params.path - Path of the Ad Unit
-   * @param {string} params.position - Waterfall Position
+   * @param {number} params.position - Waterfall Position
    * @param {boolean=} params.reconnect - reconnect
    * @param {string} params.servedSize - Served Size
    * @param {Array<string>} params.sizes - Available sizes
