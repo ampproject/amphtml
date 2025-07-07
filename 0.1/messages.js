@@ -102,20 +102,22 @@ export class UnitInitMessage extends BaseMessage {
    * @param {number=} params.parentMawId - Parent MAW ID
    * @param {number=} params.passback - Passback
    * @param {string} params.path - Path of the Ad Unit
-   * @param {string} params.provider - Provider name
+   * @param {string} params.position - Waterfall Position
    * @param {boolean=} params.reconnect - reconnect
    * @param {string} params.servedSize - Served Size
    * @param {Array<string>} params.sizes - Available sizes
+   * @param {boolean} params.isHouseDemand - Is House Demand
    */
   constructor({
     code,
     creativeId,
+    isHouseDemand,
     keyValues,
     lineItemId,
     parentMawId = 0,
     passback = false,
     path,
-    provider,
+    position,
     reconnect = false,
     servedSize,
     sizes,
@@ -128,10 +130,11 @@ export class UnitInitMessage extends BaseMessage {
       servedSize,
       sizes,
       keyValues,
-      provider,
+      position,
       parentMawId,
       passback,
       reconnect,
+      isHouseDemand,
     });
   }
 }
