@@ -53,38 +53,37 @@ export class Core {
    * @param {Window} win - The window object
    * @param {string} canonicalUrl - The canonical URL
    * @param {string} publicId - The public ID
-   * @param {string} adUnitCode - Ad unit code
-   * @param {function()} reconnectHandler - Handler for reconnection logic
-   * @param {Object=} handlers - Message handlers
    * @return {!Core}
    * @public
    */
-  static start(
-    win,
-    canonicalUrl,
-    publicId,
-    adUnitCode,
-    reconnectHandler,
-    handlers = {}
-  ) {
+  static start(win, canonicalUrl, publicId) {
     if (!Core.instance_) {
       Core.instance_ = new Core(win, canonicalUrl, publicId);
       Core.instance_.setupRealtimeConnection_();
     }
 
-    Core.instance_.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
+    return Core.instance_;
+  }
+
+  /**
+   * Registers a new ad unit with the Core service.
+   * Each ad unit instance on the page should call this.
+   * @param {string} adUnitCode - The unique code for the ad unit.
+   * @param {function()} reconnectHandler - Handler for reconnection logic.
+   * @param {Object=} handlers - Message handlers for this specific ad unit.
+   */
+  registerAdUnit(adUnitCode, reconnectHandler, handlers = {}) {
+    this.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
       reconnectHandler,
       new MessageHandler(handlers)
     );
 
-    if (Core.instance_.appInitResponse_) {
-      // If app init response is already received, send it to the ad unit handler
-      Core.instance_.adUnitHandlerMap[
-        adUnitCode
-      ].messageHandlers.processMessage(Core.instance_.appInitResponse_);
+    // If the app is already initialized, immediately send the config to the new ad unit.
+    if (this.appInitResponse_) {
+      this.adUnitHandlerMap[adUnitCode].messageHandlers.processMessage(
+        this.appInitResponse_
+      );
     }
-
-    return Core.instance_;
   }
 
   /**

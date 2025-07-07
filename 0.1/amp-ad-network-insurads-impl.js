@@ -49,10 +49,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /* DoubleClick& AMP */
 
     /* InsurAds Business  */
-    this.core_ = Core.start(
-      this.win,
-      this.canonicalUrl,
-      this.publicId,
+    this.core_ = Core.start(this.win, this.canonicalUrl, this.publicId);
+    this.core_.registerAdUnit(
       this.unitInfo.code,
       this.handleReconnect_.bind(this),
       {
