@@ -33,10 +33,12 @@ export class Core {
    * Constructs the Core instance.
    * @param {Window} win
    * @param {string} canonicalUrl - Canonical URL
+   * @param {string} publicId
    */
-  constructor(win, canonicalUrl) {
+  constructor(win, canonicalUrl, publicId) {
     this.win = win;
     this.canonicalUrl = canonicalUrl;
+    this.publicId = publicId;
 
     /** @private {!LockedId} */
     this.lockedData_ = new LockedId().getLockedIdData();
@@ -66,8 +68,8 @@ export class Core {
     handlers = {}
   ) {
     if (!Core.instance_) {
-      Core.instance_ = new Core(win, canonicalUrl);
-      Core.instance_.setupRealtimeConnection_(publicId, canonicalUrl);
+      Core.instance_ = new Core(win, canonicalUrl, publicId);
+      Core.instance_.setupRealtimeConnection_();
     }
 
     Core.instance_.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
@@ -87,14 +89,15 @@ export class Core {
 
   /**
    * Sets up the realtime connection and event handlers
-   * @param publicId
-   * @param canonicalUrl
    * @param {boolean} reconnect
    * @private
    */
-  setupRealtimeConnection_(publicId, canonicalUrl, reconnect = false) {
+  setupRealtimeConnection_(reconnect = false) {
     /** @private {!RealtimeManager} */
-    this.realtimeManager_ = RealtimeManager.start(publicId, canonicalUrl);
+    this.realtimeManager_ = RealtimeManager.start(
+      this.publicId,
+      this.canonicalUrl
+    );
 
     if (this.realtimeManager_) {
       this.realtimeManager_.onReceiveMessage = this.dispatchMessage_.bind(this);
@@ -110,6 +113,9 @@ export class Core {
       this.realtimeManager_.onDisconnect = (event) => {
         console /*OK*/
           .log('WebSocket disconnected', event);
+        if (event.code !== 1000) {
+          this.destroy();
+        }
       };
     }
   }
@@ -349,6 +355,8 @@ export class Core {
    * @public
    */
   destroy() {
+    console /*OK*/
+      .log('Destroying Core instance');
     if (this.engagement_) {
       this.unlistenEngagement_();
       this.engagement_.destroy();
@@ -367,7 +375,7 @@ export class Core {
     }
 
     if (this.extension_) {
-      this.extension_.adUnitRemoved(this.getAdUnitId());
+      // this.extension_.adUnitRemoved(this.getAdUnitId()); TODO: implement this
       this.extension_.destroy();
       this.extension_ = null;
     }

@@ -258,6 +258,3 @@ export class EngagementTracker {
     EngagementTracker.instance_ = null;
   }
 }
-
-/** @private {?EngagementTracker} */
-EngagementTracker.instance_ = null;

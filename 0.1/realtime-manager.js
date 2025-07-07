@@ -394,4 +394,11 @@ export class RealtimeManager {
         .log('Retry timer cleared');
     }
   }
+
+  /**
+   * Clean up resources and reset the singleton
+   */
+  destroy() {
+    RealtimeManager.instance_ = null;
+  }
 }

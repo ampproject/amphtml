@@ -126,6 +126,8 @@ export class ExtensionCommunication {
    * @param {AdUnit} adUnit
    * */
   bannerChanged(adUnit) {
+    console /*Ok*/
+      .log(adUnit);
     // const entry = adUnit.getCurrentEntry();
     // if (!entry) {
     //   return;
