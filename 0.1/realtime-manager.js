@@ -83,19 +83,11 @@ export class RealtimeManager {
       RealtimeManager.instance_.connect();
     }
 
-    if (!this.isConnected()) {
+    if (!RealtimeManager.instance_.isConnected()) {
       RealtimeManager.instance_.connect();
     }
 
     return RealtimeManager.instance_;
-  }
-
-  /**
-   * Returns the WebSocket instance.
-   * @return {?WebSocket}
-   */
-  getWebSocket() {
-    return this.ws;
   }
 
   /**

@@ -15,19 +15,17 @@ export class ExtensionCommunication {
 
   /**
    * Returns the singleton instance of ExtensionCommunication.
-   * @param {string} publicId
-   * @param {string} canonicalUrl
    * @param {string} adUnitCode
    * @param {function()} handler message handler
    * @return {!ExtensionCommunication}
    * @public
    */
-  static start(publicId, canonicalUrl, adUnitCode, handler = {}) {
+  static start(adUnitCode, handler = {}) {
     if (!ExtensionCommunication.instance_) {
       ExtensionCommunication.instance_ = new ExtensionCommunication();
     }
 
-    this.adUnitHandlerMap[adUnitCode] = handler;
+    ExtensionCommunication.instance_.adUnitHandlerMap[adUnitCode] = handler;
 
     return ExtensionCommunication.instance_;
   }
@@ -128,23 +126,23 @@ export class ExtensionCommunication {
    * @param {AdUnit} adUnit
    * */
   bannerChanged(adUnit) {
-    const entry = adUnit.getCurrentEntry();
-    if (!entry) {
-      return;
-    }
-    this.sendIframeMessage_('bannerChanged', {
-      id: adUnit.id,
-      index: entry.index,
-      creative: entry.iatCId,
-      order: entry.iatOid,
-      orderLine: entry.iatOlId,
-      impressionId: entry.iid,
-      market: entry.m || ' ',
-      creativeWidth: entry.iatCw,
-      creativeHeight: entry.iatCh,
-      rotation: adUnit.doNotRotate ? 'Disabled' : 'Enabled',
-      dfpMapping: this.getGamMapping(adUnit),
-    });
+    // const entry = adUnit.getCurrentEntry();
+    // if (!entry) {
+    //   return;
+    // }
+    // this.sendIframeMessage_('bannerChanged', {
+    //   id: adUnit.id,
+    //   index: entry.index,
+    //   creative: entry.iatCId,
+    //   order: entry.iatOid,
+    //   orderLine: entry.iatOlId,
+    //   impressionId: entry.iid,
+    //   market: entry.m || ' ',
+    //   creativeWidth: entry.iatCw,
+    //   creativeHeight: entry.iatCh,
+    //   rotation: adUnit.doNotRotate ? 'Disabled' : 'Enabled',
+    //   dfpMapping: this.getGamMapping(adUnit),
+    // });
   }
 
   /**

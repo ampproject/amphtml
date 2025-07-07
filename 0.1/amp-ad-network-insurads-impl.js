@@ -49,11 +49,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /* DoubleClick& AMP */
 
     /* InsurAds Business  */
-    this.core_ = Core.Start(
+    this.core_ = Core.start(
       this.win,
-      this.publicId,
       this.canonicalUrl,
-      this.code,
+      this.publicId,
+      this.unitInfo.code,
       this.handleReconnect_.bind(this),
       {
         appInitHandler: (message) => this.handleAppInit_(message),
@@ -64,6 +64,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     if (window.frames['TG-listener']) {
       this.extension_ = ExtensionCommunication.start(
+        this.unitInfo.code,
         this.handlerExtensionMessages.bind(this)
       );
     }

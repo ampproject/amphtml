@@ -50,16 +50,24 @@ export class Core {
    * Returns the singleton instance of Core.
    * @param {Window} win
    * @param {string} canonicalUrl - The canonical URL
+   * @param publicId
    * @param {string} adUnitCode - Ad unit code
    * @param {function()} reconnectHandler - Handler for reconnection logic
    * @param {Object=} handlers - Message handlers
    * @return {!Core}
    * @public
    */
-  static start(win, canonicalUrl, adUnitCode, reconnectHandler, handlers = {}) {
+  static start(
+    win,
+    canonicalUrl,
+    publicId,
+    adUnitCode,
+    reconnectHandler,
+    handlers = {}
+  ) {
     if (!Core.instance_) {
       Core.instance_ = new Core(win, canonicalUrl);
-      Core.instance_.setupRealtimeConnection_();
+      Core.instance_.setupRealtimeConnection_(publicId, canonicalUrl);
     }
 
     Core.instance_.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
@@ -79,18 +87,18 @@ export class Core {
 
   /**
    * Sets up the realtime connection and event handlers
+   * @param publicId
+   * @param canonicalUrl
    * @param {boolean} reconnect
    * @private
    */
-  setupRealtimeConnection_(reconnect = false) {
+  setupRealtimeConnection_(publicId, canonicalUrl, reconnect = false) {
     /** @private {!RealtimeManager} */
-    this.realtimeManager_ = RealtimeManager.start();
+    this.realtimeManager_ = RealtimeManager.start(publicId, canonicalUrl);
 
-    const ws = this.realtimeManager_.getWebSocket();
-
-    if (ws) {
-      ws.onReceiveMessage = this._dispatchMessage_.bind(this);
-      ws.onConnect = () => {
+    if (this.realtimeManager_) {
+      this.realtimeManager_.onReceiveMessage = this.dispatchMessage_.bind(this);
+      this.realtimeManager_.onConnect = () => {
         this.sendHandshake();
         this.sendAppInit(reconnect);
         if (reconnect) {
@@ -99,9 +107,9 @@ export class Core {
           }
         }
       };
-      ws.onDisconnect = () => {
+      this.realtimeManager_.onDisconnect = (event) => {
         console /*OK*/
-          .log('WebSocket disconnected');
+          .log('WebSocket disconnected', event);
       };
     }
   }
@@ -211,7 +219,7 @@ export class Core {
    * @param {string} raw The raw message string from the WebSocket.
    * @private
    */
-  _dispatchMessage_(raw) {
+  dispatchMessage_(raw) {
     const messages = raw.split('\u001e').filter(Boolean);
 
     messages.forEach((rawMessage) => {
@@ -309,7 +317,7 @@ export class Core {
         );
       }
 
-      this.cookie_updateVisitCookie(message.lockedId, message.serverTimestamp);
+      this.cookie_.updateVisitCookie(message.lockedId, message.serverTimestamp);
     }
   }
 

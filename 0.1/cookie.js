@@ -7,7 +7,7 @@ const SCD = 30 * 60; // 30 minutes
 /** @type {number} */
 const VCD = 6 * 30 * 24 * 60 * 60; // 6 months
 
-class Cookie {
+export class Cookie {
 
   cookies_ = true; // TODO: Get from server?
   consent_ = true; // TODO: Get from server?
@@ -114,7 +114,7 @@ class Cookie {
     // If application does not support cookies, erase it
     // setting a negative value in the duration
     const dt = new Date();
-    dt.setTime(dt.now() + (this.cookies ? cookieDuration : -1) * 1000);
+    dt.setTime(dt.getTime() + (this.cookies ? cookieDuration : -1) * 1000);
     const expires = '; expires=' + dt.toGMTString();
     this.doc_.cookie =
       cookieName +
