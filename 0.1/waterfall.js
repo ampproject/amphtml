@@ -10,8 +10,10 @@ class WaterfallEntry {
    * @param {!Array<!Array<number>>} params.sizes
    * @param {{[key: string]: (string|!Array<string>)}} params.keyValues
    * @param {{[key: string]: !Object}} params.vendors
+   * @param {boolean} params.isHouseDemand
    */
   constructor({
+    isHouseDemand = false,
     keyValues = {},
     path = '',
     position = 0,
@@ -25,6 +27,7 @@ class WaterfallEntry {
     this.sizes = sizes;
     this.keyValues = keyValues;
     this.vendors = vendors;
+    this.isHouseDemand = isHouseDemand;
   }
 }
 
