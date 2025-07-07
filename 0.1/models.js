@@ -56,6 +56,20 @@ export class UnitInfo {
   }
 
   /**
+   * @param {number} position
+   */
+  setPosition(position) {
+    this.position = position;
+  }
+
+  /**
+   * @param {boolean} isHouseDemand
+   */
+  setIsHouseDemand(isHouseDemand) {
+    this.isHouseDemand = isHouseDemand;
+  }
+
+  /**
    * @param {boolean} isVisible
    */
   setIsVisible(isVisible) {

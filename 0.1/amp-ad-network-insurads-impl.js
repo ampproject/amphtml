@@ -108,9 +108,19 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     this.unitInfo.setServedSize(responseHeaders.get('google-size') || '');
 
+    const entry = Waterfall.getCurrentEntry();
+
+    if (entry) {
+      this.unitInfo.setIsHouseDemand(entry.isHouseDemand);
+      this.unitInfo.setPosition(entry.position);
+      this.unitInfo.setProvider(entry.provider);
+    }
+
     this.sendUnitInit_();
 
-    this.extension_.bannerChanged(this.unitInfo);
+    if (this.extension_) {
+      this.extension_.bannerChanged(this.unitInfo);
+    }
 
     return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
