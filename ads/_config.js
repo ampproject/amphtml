@@ -469,6 +469,18 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'clickio': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://s.clickiocdn.com',
+      'https://up.clickiocdn.com',
+      'https://cns.clickiocdn.com',
+      'https://partner.googleadservices.com',
+      'https://securepubads.g.doubleclick.net',
+      'https://tpc.googlesyndication.com',
+    ],
+  },
+  
   'dable': {
     preconnect: [
       'https://static.dable.io',
