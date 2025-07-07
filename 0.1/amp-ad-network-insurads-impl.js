@@ -24,24 +24,18 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     // Always disable A4A Refresh, as we are using our own refresh mechanism
     this.element.setAttribute('data-enable-refresh', 'false');
 
+    this.publicId = this.element.getAttribute('data-public-id');
+    this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
+
     this.unitInfo = new UnitInfo(Math.random().toString(36).substring(2, 15));
     this.unitInfo.setPath(this.element.getAttribute('data-slot'));
-    this.unitInfo.setLineItemId(this.element.getAttribute('data-line-item-id'));
-    this.unitInfo.setCreativeId(this.element.getAttribute('data-creative-id'));
-
     this.unitInfo.setIsVisible(false);
-
-    this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    this.publicId = this.element.getAttribute('data-public-id');
 
     this.appEnabled = false;
     this.iabTaxonomy = {};
 
     this.requiredKeys = [];
     this.requiredKeyValues = [];
-
-    // TODO: To be changed
-    this.nextRefresh = null;
 
     /* DoubleClick & AMP */
     this.dCHelper = new DoubleClickHelper(this);
@@ -138,18 +132,20 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       if (self.refreshCount_ > 0) {
         console./*Ok*/ log('Refresh count:', self.refreshCount_);
 
+        const nextRefresh = this.waterfall.getCurrentEntry();
+
         const params = url.searchParams;
 
-        if (this.nextRefresh.path) {
-          params.set('iu', this.nextRefresh.path);
+        if (nextRefresh.path) {
+          params.set('iu', nextRefresh.path);
         }
 
         const keyValuesParam = params.get('scp') || '';
         let keyValues = keyValuesParam;
 
         const allKeyValues = [
-          ...(this.nextRefresh.keyValues || []),
-          ...(this.nextRefresh.commonKeyValues || []),
+          ...(nextRefresh.keyValues || []),
+          ...(nextRefresh.commonKeyValues || []),
         ];
 
         if (allKeyValues.length > 0) {
@@ -246,7 +242,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return false;
     }
 
-    this.nextRefresh = Waterfall.getNextEntry();
+    const nextRefresh = this.waterfall.getNextEntry();
+
+    if (!nextRefresh) {
+      return false;
+    }
 
     // Update rtc-config with our vendors information
     //   - vendors (n)
@@ -254,12 +254,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     //     - "openwrap": {"PUB_ID", "162930", "PROFILE_ID": "9578"}
     const rtcConfig = tryParseJson(this.element.getAttribute('rtc-config'));
     if (rtcConfig && rtcConfig.vendors) {
-      Object.assign(rtcConfig.vendors, this.nextRefresh.vendors || {});
+      Object.assign(rtcConfig.vendors, nextRefresh.vendors || {});
       this.element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
-    }
-
-    if (!this.nextRefresh) {
-      return false;
     }
 
     this.refresh(this.refreshEndCallback);
