@@ -229,6 +229,8 @@ export class Core {
 
     messages.forEach((rawMessage) => {
       try {
+        // TODO: Investigate the need for the double parsing,
+        // maybe this can be improved on server/client
         const messageData = JSON.parse(rawMessage);
         const action = messageData.arguments[0];
         const data = JSON.parse(messageData.arguments[1]);
@@ -270,6 +272,8 @@ export class Core {
    */
   processAppInitResponse_(appInitMessage) {
     const {message} = appInitMessage;
+
+    // TODO: This needs to be improved
 
     // Merge the app init response with the existing one
     // This allows us to accumulate configuration data
@@ -356,21 +360,20 @@ export class Core {
   destroy() {
     console /*OK*/
       .log('Destroying Core instance');
-    if (this.engagement_) {
+    if (this.unlistenEngagement_) {
       this.unlistenEngagement_();
-      this.engagement_.destroy();
-      this.engagement_ = null;
-    }
-
-    if (this.core_) {
-      // TODO: Shall we disconnect/destroy the realtime messaging if no more instances present?
-      this.core_.disconnect();
-      this.core_ = null;
+      this.unlistenEngagement_ = null;
     }
 
     if (this.realtimeManager_) {
+      this.realtimeManager_.disconnect(true, 1000, 'Core is being destroyed');
       this.realtimeManager_.destroy();
       this.realtimeManager_ = null;
+    }
+
+    if (this.engagement_) {
+      this.engagement_.destroy();
+      this.engagement_ = null;
     }
 
     if (this.extension_) {
