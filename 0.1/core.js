@@ -33,7 +33,7 @@ export class Core {
    * Constructs the Core instance.
    * @param {Window} win
    * @param {string} canonicalUrl - Canonical URL
-   * @param {string} publicId
+   * @param {string} publicId - The public ID
    */
   constructor(win, canonicalUrl, publicId) {
     this.win = win;
@@ -50,9 +50,9 @@ export class Core {
 
   /**
    * Returns the singleton instance of Core.
-   * @param {Window} win
+   * @param {Window} win - The window object
    * @param {string} canonicalUrl - The canonical URL
-   * @param publicId
+   * @param {string} publicId - The public ID
    * @param {string} adUnitCode - Ad unit code
    * @param {function()} reconnectHandler - Handler for reconnection logic
    * @param {Object=} handlers - Message handlers
