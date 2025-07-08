@@ -196,6 +196,18 @@ export function computeInMasterFrame(global, taskId, work, cb) {
 }
 
 /**
+ * Preferred alternative to computeInMasterFrame.
+ * @param {!Window} global
+ * @param {string} taskId
+ * @param {function(*)} work
+ * @param {function(*)} cb
+ * @return {undefined}
+ */
+export function computeInCoordinatingFrame(global, taskId, work, cb) {
+  return computeInMasterFrame(global, taskId, work, cb);
+}
+
+/**
  * Validates given data. Throws an exception if the data does not
  * contains a mandatory field. If called with the optional param
  * opt_optionalFields, it also validates that the data contains no fields other
