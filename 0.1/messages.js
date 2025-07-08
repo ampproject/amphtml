@@ -83,7 +83,7 @@ export class AppInitMessage extends BaseMessage {
     super('app-init', {
       lockedId,
       newVisitor,
-      lastTimeStamp: lastTimestamp,
+      lastTimestamp,
       extension,
       reconnect,
     });
@@ -161,13 +161,13 @@ export class UnitSnapshotMessage extends BaseMessage {
  */
 export class PageStatusMessage extends BaseMessage {
   /**
-   * @param {number} Engagement - Engagement status
-   * @param {number} DocumentVisible - Whether the page is visible
+   * @param {boolean} engagement - Engagement status
+   * @param {boolean} documentVisible - Whether the page is visible
    */
-  constructor(Engagement = {}, DocumentVisible = {}) {
+  constructor(engagement, documentVisible) {
     super('page-status', {
-      Engagement,
-      DocumentVisible,
+      engagement,
+      documentVisible,
     });
   }
 }
@@ -178,10 +178,11 @@ export class PageStatusMessage extends BaseMessage {
 export class AppInitResponseMessage extends BaseMessage {
   /**
    * @param {object} params - The parameters for the message.
-   * @param {number=} params.applicationId
-   * @param {string=} params.countryCode
+   * @param {number=} params.accountId - Account ID.
+   * @param {number=} params.applicationId - Application ID.
+   * @param {string=} params.countryCode - Country code.
    * @param {boolean=} params.ivm - IntelliSense Viewability Mode.
-   * @param {object=} params.requiredKeys - Accepted Key values for targeting.
+   * @param {object=} params.requiredKeys - Required Key values for targeting.
    * @param {object=} params.iabTaxonomy - IAB Taxonomy.
    * @param {string=} params.reason - Reason for the status.
    * @param {number=} params.sectionId - Section ID for the app.
@@ -189,6 +190,7 @@ export class AppInitResponseMessage extends BaseMessage {
    * @param {number=} params.status - Status of the app.
    */
   constructor({
+    accountId,
     applicationId,
     countryCode,
     iabTaxonomy,
@@ -201,6 +203,9 @@ export class AppInitResponseMessage extends BaseMessage {
   }) {
     const messagePayload = {};
 
+    if (accountId !== undefined) {
+      messagePayload.accountId = accountId;
+    }
     if (applicationId !== undefined) {
       messagePayload.applicationId = applicationId;
     }
@@ -280,8 +285,10 @@ export class WaterfallEntry {
    * @param {!Array<!Array<number>>=} params.sizes The ad sizes for this entry.
    * @param {{[key: string]: (string|Array<string>)}=} params.keyValues Specific key-values for this entry.
    * @param {{[key: string]: Object}=} params.vendors Vendor-specific data (e.g., for prebid).
+   * @param {boolean} params.isHouseDemand - Is House Demand
    */
   constructor({
+    isHouseDemand = false,
     keyValues = {},
     path = '',
     position = 0,
@@ -306,6 +313,9 @@ export class WaterfallEntry {
 
     /** @public {!Object<string, !Object>} */
     this.vendors = vendors;
+
+    /** @public {boolean} */
+    this.isHouseDemand = isHouseDemand;
   }
 }
 
