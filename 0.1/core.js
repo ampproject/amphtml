@@ -144,7 +144,18 @@ export class Core {
 
   /**
    * Sends an ad unit initialization message
-   * @param {UnitInfo} unitInfo - Ad unit information
+   * @param {{
+   *   code: string,
+   *   creativeId: (string|undefined),
+   *   isHouseDemand: (boolean|undefined),
+   *   keyValues: (Array|undefined),
+   *   lineItemId: (string|undefined),
+   *   parentMawId: (number|undefined),
+   *   path: (string|undefined),
+   *   position: (number|undefined),
+   *   servedSize: (string|undefined)
+   *   sizes: (Array|undefined)
+   * }} unitInfo - Ad unit information object.
    * @param {boolean=} reconnect - Reconnect flag
    * @param {boolean=} passback - Passback flag
    */

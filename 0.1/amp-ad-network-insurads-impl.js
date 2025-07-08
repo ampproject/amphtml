@@ -6,7 +6,6 @@ import {Services} from '#service';
 import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
 import {ExtensionCommunication} from './extension';
-import {UnitInfo} from './models';
 import {VisibilityTracker} from './visibility-tracking';
 import {Waterfall} from './waterfall';
 
@@ -27,15 +26,26 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.publicId = this.element.getAttribute('data-public-id');
     this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
 
-    this.unitInfo = new UnitInfo(Math.random().toString(36).substring(2, 15));
-    this.unitInfo.setPath(this.element.getAttribute('data-slot'));
-    this.unitInfo.setIsVisible(false);
+    // This exist to store the information that is received in ExtractSize
+    /** @private {?Object} */
+    this.adResponseData_ = null;
 
+    // Parameters that represent the AdUnit
+    this.code_ = Math.random().toString(36).substring(2, 15);
+    this.path_ = this.element.getAttribute('data-slot');
+    this.requiredKeys_ = [];
+    this.requiredKeyValues_ = [];
+
+    // States of the AdUnit
+    this.isViewable_ = false;
+
+    // Parameteres that represent the Application
+    this.iabTaxonomy_ = {};
+
+    // States of the Application
     this.appEnabled = false;
-    this.iabTaxonomy = {};
-
-    this.requiredKeys = [];
-    this.requiredKeyValues = [];
+    /** @private @const {!Deferred} */
+    this.appReadyDeferred_ = new Deferred();
 
     /* DoubleClick & AMP */
     this.dCHelper = new DoubleClickHelper(this);
@@ -44,19 +54,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     /* InsurAds Business  */
     this.core_ = Core.start(this.win, this.canonicalUrl, this.publicId);
-    this.core_.registerAdUnit(
-      this.unitInfo.code,
-      this.handleReconnect_.bind(this),
-      {
-        appInitHandler: (message) => this.handleAppInit_(message),
-        unitInitHandler: (message) => this.handleUnitInit_(message),
-        unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
-      }
-    );
+    this.core_.registerAdUnit(this.code, this.handleReconnect_.bind(this), {
+      appInitHandler: (message) => this.handleAppInit_(message),
+      unitInitHandler: (message) => this.handleUnitInit_(message),
+      unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
+    });
 
     if (window.frames['TG-listener']) {
       this.extension_ = ExtensionCommunication.start(
-        this.unitInfo.code,
+        this.code,
         this.handlerExtensionMessages.bind(this)
       );
     }
@@ -99,28 +105,22 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   extractSize(responseHeaders) {
-    this.unitInfo.setLineItemId(
-      responseHeaders.get('google-lineitem-id') || '-1'
-    );
-    this.unitInfo.setCreativeId(
-      responseHeaders.get('google-creative-id') || '-1'
-    );
+    // Store the data from the response.
+    this.adResponseData_ = {
+      lineItemId: responseHeaders.get('google-lineitem-id') || '-1',
+      creativeId: responseHeaders.get('google-creative-id') || '-1',
+      servedSize: responseHeaders.get('google-size') || '',
+    };
 
-    this.unitInfo.setServedSize(responseHeaders.get('google-size') || '');
+    // After the ad is served and the app is ready, send our init message.
+    this.appReadyDeferred_.promise.then(() => {
+      // This will now correctly execute on the initial load AND every refresh.
+      this.sendUnitInit_();
+    });
 
-    const entry = Waterfall.getCurrentEntry();
-
-    if (entry) {
-      this.unitInfo.setIsHouseDemand(entry.isHouseDemand);
-      this.unitInfo.setPosition(entry.position);
-      this.unitInfo.setProvider(entry.provider);
-    }
-
-    this.sendUnitInit_();
-
-    if (this.extension_) {
-      this.extension_.bannerChanged(this.unitInfo);
-    }
+    // if (this.extension_) {
+    //   this.extension_.bannerChanged(this.unitInfo);
+    // }
 
     return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
@@ -163,8 +163,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
           keyValues += (keyValues ? '&' : '') + merged;
         }
 
-        if (this.iabTaxonomy && this.nextEntry.provider === 'hgam') {
-          const userSignals = this.convertToUserSignals(this.iabTaxonomy);
+        if (this.iabTaxonomy_ && this.nextEntry.provider === 'hgam') {
+          const userSignals = this.convertToUserSignals(this.iabTaxonomy_);
 
           const encodedSignals = encodeURIComponent(
             btoa(JSON.stringify(userSignals))
@@ -280,7 +280,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     console /*OK*/
       .log('Reconnecting to InsurAds');
 
-    this.core_.sendUnitInit(this.unitInfo, true);
+    this.sendUnitInit_(true);
   }
 
   /**
@@ -291,15 +291,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   handleAppInit_(message) {
     if (message.status !== undefined) {
       this.appEnabled = message.status > 0 ? true : false;
-      this.requiredKeys.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
+      this.requiredKeys_.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
 
       if (this.requiredKeys.length > 0) {
         const jsonTargeting =
           tryParseJson(this.element.getAttribute('json')) || {};
-        this.requiredKeys.forEach((key) => {
+        this.requiredKeys_.forEach((key) => {
           const {targeting} = jsonTargeting;
           if (targeting && targeting[key]) {
-            this.requiredKeyValues.push({
+            this.requiredKeyValues_.push({
               key,
               value: targeting[key],
             });
@@ -309,12 +309,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     }
 
     if (message.iabTaxonomy !== undefined) {
-      this.iabTaxonomy = message.iabTaxonomy;
+      this.iabTaxonomy_ = message.iabTaxonomy;
     }
 
-    if (this.unitInfo.pendingUnitInit) {
-      this.unitInfo.setPendingUnitInit(false);
-      this.sendUnitInit_();
+    if (!this.appReadyDeferred_.isDone()) {
+      this.appReadyDeferred_.resolve();
     }
 
     console /*OK*/
@@ -352,7 +351,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       instance: this.element.getAttribute('data-amp-slot-index'),
       configuration: null,
       customTargeting: null,
-      rotation: 'Enabled',
+      rotation: message.rotation ? message.rotation : false,
       isFirstPrint: this.refreshCount_ === 0,
       isTracking: false,
       visible: this.isViewable_,
@@ -393,7 +392,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     switch (msg.data.action) {
       case 'changeBanner':
-        this.refresh(this.refreshEndCallback);
+        this.sendUnitInit_(false, true);
         break;
     }
   }
@@ -419,13 +418,34 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /**
    * Sends the unit initialization message
+   * @param {boolean=} reconnect - Whether this is a reconnect
+   * @param {boolean=} passback - Whether this is a passback
    * @private
    */
-  sendUnitInit_() {
+  sendUnitInit_(reconnect = false, passback = false) {
     if (this.appEnabled) {
-      this.core_.sendUnitInit(this.unitInfo);
-    } else {
-      this.unitInfo.setPendingUnitInit(true);
+      const entry = this.waterfall ? this.waterfall.getCurrentEntry() : null;
+
+      // Maybe create a method to get the object parameters if this is going to be reused for extension?
+      const unitInit = {
+        // Unit
+        code: this.code_,
+        adUnitId: this.getAdUnitId(), // ????? dont need
+        keyValues: this.requiredKeyValues_,
+        path: entry ? entry.path : this.path_,
+        // Ad Response
+        lineItemId: this.adResponseData_.lineItemId,
+        creativeId: this.adResponseData_.creativeId,
+        servedSize: this.adResponseData_.servedSize,
+        // Waterfall Entry
+        isHouseDemand: entry ? entry.isHouseDemand : false,
+        position: entry ? entry.position : undefined,
+
+        parentMawId: 0, // TODO
+        sizes: this.sizes_,
+      };
+
+      this.core_.sendUnitInit(unitInit, reconnect, passback);
     }
   }
 
