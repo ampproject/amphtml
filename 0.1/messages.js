@@ -66,19 +66,20 @@ export class HandshakeMessage {
  */
 export class AppInitMessage extends BaseMessage {
   /**
-   * @param {string} lockedId - Locked ID message
-   * @param {boolean} newVisitor - New Visitor
-   * @param {number} lastTimestamp - Last Time Stamp
-   * @param {boolean} extension - Extension Status
-   * @param {boolean=} reconnect - Reconnect flag
+   * @param {object} params
+   * @param {string} params.lockedId - Locked ID message
+   * @param {boolean} params.newVisitor - New Visitor
+   * @param {number} params.lastTimestamp - Last Time Stamp
+   * @param {boolean} params.extension - Extension Status
+   * @param {boolean=} params.reconnect - Reconnect flag
    */
-  constructor(
+  constructor({
+    extension,
+    lastTimestamp,
     lockedId,
     newVisitor,
-    lastTimestamp,
-    extension,
-    reconnect = false
-  ) {
+    reconnect = false,
+  }) {
     super('app-init', {
       lockedId,
       newVisitor,

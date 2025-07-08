@@ -132,13 +132,13 @@ export class Core {
    * @param {boolean=} reconnect - Reconnect flag
    */
   sendAppInit(reconnect = false) {
-    const appInit = new AppInitMessage(
-      this.lockedData_,
-      this.cookies_.isNewVisitor(),
-      this.cookies_.getLastTimeStamp(),
-      !!this.extension_,
-      reconnect
-    );
+    const appInit = new AppInitMessage({
+      lockedId: this.lockedData_,
+      newVisitor: this.cookies_.isNewVisitor(),
+      lastTimestamp: this.cookies_.getLastTimeStamp(),
+      extension: !!this.extension_,
+      reconnect,
+    });
     this.realtimeManager_.send(appInit.serialize());
   }
 
