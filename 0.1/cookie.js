@@ -9,29 +9,34 @@ const VCD = 6 * 30 * 24 * 60 * 60; // 6 months
 
 export class Cookie {
 
-  cookies_ = true; // TODO: Get from server?
-  consent_ = true; // TODO: Get from server?
-  sessionId_ = null;
-  sessionCookie_ = null;
-  cookiesEnabled_ = null;
-  newVisitor = false;
-  visitCookie_ = null;
-
   /**
    * CookieMonster constructor`
    * @param {Window} win
    * @param {string} canonicalUrl
    */
   constructor(win, canonicalUrl) {
+    /** @private {!Document} */
     this.doc_ = win.document;
+    /** @private {string} */
     this.domain_ = new URL(canonicalUrl).hostname;
+
+    /** @private {boolean} */
+    this.cookies_ = true; // TODO: Get from server?
+    /** @private {boolean} */
+    this.consent_ = true; // TODO: Get from server?
+
+    // Generate a random session ID
+    /** @private {string|null} */
     this.sessionId_ = Array.from(crypto.getRandomValues(new Uint8Array(16)))
       .map((n) => (n % 36).toString(36))
       .join('');
 
-    // Read and update session cookie, testing support for cookies
+    // Read and update session cookie
+    /** @private {string|null} */
     this.sessionCookie_ = this.getCookie_(SCN);
-    this.newVisitor_ = this.sessionCookie_ ? 0 : 1;
+    /** @private {boolean} */
+    this.newVisitor_ = this.sessionCookie_ ? false : true;
+    /** @private {boolean|null} */
     this.cookiesEnabled_ = this.writeAndTestCookie_(
       SCN,
       SCD,
@@ -39,12 +44,13 @@ export class Cookie {
     );
 
     // Read visitor cookie
-    this.visitCookie = this.getCookie_(VCN);
+    /** @private {string|null} */
+    this.visitCookie_ = this.getCookie_(VCN);
   }
 
   /**
    * Get Session Cookie
-   * @return {string}
+   * @return {string|null}
    */
   getSessionCookie() {
     return this.sessionCookie_;
@@ -52,7 +58,7 @@ export class Cookie {
 
   /**
    * Get Visit Cookie
-   * @return {string}
+   * @return {string|null}
    */
   getVisitCookie() {
     return this.visitCookie_;
@@ -87,7 +93,7 @@ export class Cookie {
 
   /**
    * Update Visitor Cookie
-   * @param {String} lockedId
+   * @param {string} lockedId
    * @param {number} ts - The server timestamp
    */
   updateVisitCookie(lockedId, ts) {
@@ -98,7 +104,7 @@ export class Cookie {
   /**
    * Get Cookie
    * @param {string} cookieName
-   * @return {string} - The value of the cookie or undefined if not found
+   * @return {string|undefined} - The value of the cookie or undefined if not found
    */
   getCookie_(cookieName) {
     return (this.doc_.cookie.match('(^|; )' + cookieName + '=([^;]*)') || 0)[2];
@@ -107,14 +113,14 @@ export class Cookie {
   /**
    * Write Cookie
    * @param {string} cookieName
-   * @param {string} cookieDuration
+   * @param {number} cookieDuration
    * @param {string} cookieValue
    */
   writeCookie_(cookieName, cookieDuration, cookieValue) {
     // If application does not support cookies, erase it
     // setting a negative value in the duration
     const dt = new Date();
-    dt.setTime(dt.getTime() + (this.cookies ? cookieDuration : -1) * 1000);
+    dt.setTime(dt.getTime() + (this.cookies_ ? cookieDuration : -1) * 1000);
     const expires = '; expires=' + dt.toGMTString();
     this.doc_.cookie =
       cookieName +
@@ -129,7 +135,7 @@ export class Cookie {
   /**
    * Write and test Cookie
    * @param {string} cookieName
-   * @param {string} cookieDuration
+   * @param {number} cookieDuration
    * @param {string} cookieValue
    * @return {boolean} - True if the cookie was successfully written and tested
    */
@@ -141,7 +147,7 @@ export class Cookie {
     // If consent was not granted, set cookies as not supported from now on
     // and delete the cookie previously created
     if (!this.consent_) {
-      this.cookies = 0;
+      this.cookies_ = false;
       this.writeCookie_(cookieName, cookieDuration, cookieValue);
     }
 
@@ -156,7 +162,7 @@ export class Cookie {
    * @return {string} - The formatted visitor cookie string
    */
   prepareVisitorCookie_(lockedId, ts) {
-    const visitCookieParts = this.visitCookie_.split(".");
+    const visitCookieParts = (this.visitCookie_ || '').split(".");
 
     let retVal =
       this.sessionId_ +
@@ -165,16 +171,16 @@ export class Cookie {
       '.' +
       ts +
       '.' +
-      visitCookieParts[3] || '' + // TODO: locked.iatIdB - not available at the moment, use existing
+      (visitCookieParts[3] || '') +
       '.' +
-      visitCookieParts[4] || '' + // TODO: locked.controlHash - not available at the moment, use existing
+      (visitCookieParts[4] || '') +
       '.' +
-      visitCookieParts[5] || '' + // TODO: locked.iatIdM - not available at the moment, use existing
+      (visitCookieParts[5] || '') +
       '.' +
-      visitCookieParts[6] || ''; // TODO: locked.iatIdV - not available at the moment, use existing
+      (visitCookieParts[6] || '');
 
     // If available, store the new server choice for later decisions, otherwise keep current value
-    retVal += '.' + visitCookieParts[7] || ''; // (c.lockedId || locked.lLockedId) - not available at the moment, use existing
+    retVal += '.' + (visitCookieParts[7] || ''); // (c.lockedId || locked.lLockedId) - not available at the moment, use existing
     return retVal;
   }
 }
