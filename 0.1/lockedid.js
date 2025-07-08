@@ -25,6 +25,7 @@ export class LockedId {
   /**
    * Get Time Zone.  Return a string containing the time zone.
    * @return {string}
+   * @private
    */
   getTimeZone_() {
     const rightNow = new Date();
@@ -44,6 +45,7 @@ export class LockedId {
   /**
    * Get Canvas Print. Return a string containing the canvas URI data.
    * @return {string}
+   * @private
    * */
   getCanvasPrint_() {
     // create a canvas element
@@ -80,6 +82,7 @@ export class LockedId {
   /**
    * Get GPU Info. Return a string containing the GPU vendor and renderer.
    * @return {string}
+   * @private
    */
   getGPUInfo_() {
     // if (!this.c.allowLockedId || !this.c.consent) {

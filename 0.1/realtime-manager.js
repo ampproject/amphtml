@@ -1,9 +1,18 @@
+/** @type {string} */
+const HUB_URL_TEMPLATE =
+  'wss://amp-messaging.insurads.com/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$';
+//'wss://localhost:5082/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$'
+/** @type {number} */
+const HUB_TYPE_AMP = 2;
+/** @type {number} */
+const MSG_VERSION = 1.0;
+
+/** @type {number} */
+const MAX_RETRIES = 2;
+/** @type {number} */
+const RETRY_DELAY = 1000;
+
 export class RealtimeManager {
-  /** @const {string} */
-  static HUB_URL_TEMPLATE =
-    'wss://amp-messaging.insurads.com/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$';
-  static HUB_URL_TEMPLATE_DEV =
-    'wss://localhost:5082/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$';
   /** @private {?RealtimeManager} */
   static instance_ = null;
 
@@ -41,15 +50,14 @@ export class RealtimeManager {
   onDisconnect = null;
   /** @private {?function(string):void} */
   onReceiveMessage = null;
-  /** @private {?function(*):void} */
-  onLogMessage = null;
   /** @private {?function():void} */
-  onHandshakeComplete = null;
+  onHandshakeComplete_ = null;
 
-  maxRetries = 2;
-  retryCount = 0;
-  retryDelay = 2000;
-  retryTimer = null;
+  // Retry logic
+  /** @private {number} */
+  retryCount_ = 0;
+  /** @private {?number} */
+  retryTimer_ = null;
 
   /**
    * Creates a new RealtimeManager
@@ -121,23 +129,23 @@ export class RealtimeManager {
    */
   onDisconnect_(event) {
     if (
-      !this.retryTimer &&
-      this.retryCount < this.maxRetries &&
+      !this.retryTimer_ &&
+      this.retryCount_ < MAX_RETRIES &&
       event.code !== 1000
     ) {
-      this.retryCount++;
+      this.retryCount_++;
       console /*OK*/
         .log(
-          `Connection closed, retrying (${this.retryCount}/${this.maxRetries})`
+          `Connection closed, retrying (${this.retryCount_}/${MAX_RETRIES})`
         );
       this.retryTimer = setTimeout(() => {
         this.connect();
-      }, this.retryDelay);
+      }, RETRY_DELAY);
       return;
     }
 
-    if (this.retryTimer) {
-      clearTimeout(this.retryTimer);
+    if (this.retryTimer_) {
+      clearTimeout(this.retryTimer_);
       this.retryTimer = null;
     }
 
@@ -189,8 +197,8 @@ export class RealtimeManager {
 
     this.handshakeComplete_ = true;
 
-    if (this.onHandshakeComplete) {
-      this.onHandshakeComplete();
+    if (this.onHandshakeComplete_) {
+      this.onHandshakeComplete_();
     }
 
     // Process any queued messages now that handshake is complete
@@ -230,12 +238,9 @@ export class RealtimeManager {
         return false;
       }
 
-      const url = RealtimeManager.HUB_URL_TEMPLATE.replace(
-        '$PUBLICID$',
-        this.publicId_
-      )
-        .replace('$HT$', '2')
-        .replace('$V$', '1.0')
+      const url = HUB_URL_TEMPLATE.replace('$PUBLICID$', this.publicId_)
+        .replace('$HT$', HUB_TYPE_AMP)
+        .replace('$V$', MSG_VERSION)
         .replace('$URL$', encodeURIComponent(this.canonicalUrl_));
 
       this.ws = new WebSocket(url);
@@ -297,8 +302,7 @@ export class RealtimeManager {
       this.onFailedConnect = null;
       this.onDisconnect = null;
       this.onReceiveMessage = null;
-      this.onLogMessage = null;
-      this.onHandshakeComplete = null;
+      this.onHandshakeComplete_ = null;
 
       this.ws = null;
       console /*OK*/
@@ -386,8 +390,8 @@ export class RealtimeManager {
    * @private
    */
   clearRetryTimer_() {
-    if (this.retryTimer) {
-      clearTimeout(this.retryTimer);
+    if (this.retryTimer_) {
+      clearTimeout(this.retryTimer_);
       this.retryTimer = null;
       this.retryCount = 0;
       console /*OK*/

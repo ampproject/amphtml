@@ -23,13 +23,14 @@ export class VisibilityTracker {
     /** @private {?IntersectionObserver} */
     this.visibilityObserver_ = null;
 
-    this.setupVisibilityTracking();
+    this.setupVisibilityTracking_();
   }
 
   /**
    * Sets up visibility tracking using IntersectionObserver
+   * @private
    */
-  setupVisibilityTracking() {
+  setupVisibilityTracking_() {
     const thresholds = [0, 0.5, 1];
 
     this.visibilityObserver_ = new this.win_.IntersectionObserver(
@@ -77,30 +78,6 @@ export class VisibilityTracker {
         }
       }
     });
-  }
-
-  /**
-   * Returns the current visibility percentage of the ad
-   * @return {number} Percentage between 0 and 1
-   */
-  getVisibilityPercentage() {
-    return this.visibilityPercentage_;
-  }
-
-  /**
-   * Returns whether the ad is currently considered viewable (>= 50% visible)
-   * @return {boolean}
-   */
-  isViewable() {
-    return this.visibilityPercentage_ >= 0.5;
-  }
-
-  /**
-   * Returns whether the ad is currently fully visible (>= 90% visible)
-   * @return {boolean}
-   */
-  isFullyVisible() {
-    return this.visibilityPercentage_ >= 0.9;
   }
 
   /**

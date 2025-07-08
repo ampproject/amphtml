@@ -7,9 +7,11 @@ export class ExtensionCommunication {
   /** @private {?ExtensionCommunication} */
   static instance_ = null;
 
-  adUnitHandlerMap = {};
+  /** @type {Object<string, function()>} */
+  adUnitHandlerMap_ = {};
 
-  queue = [];
+  /** @type {Array<object>} */
+  queue_ = [];
 
   // constructor() {}
 
@@ -45,8 +47,8 @@ export class ExtensionCommunication {
     if (this.listener) {
       this.listener.addEventListener('message', this.handler);
       // this.listener./*OK*/ postMessage('extensionReady', '*');
-      while (this.queue.length !== 0) {
-        this.listener./*OK*/ postMessage(this.queue.shift(), '*');
+      while (this.queue_.length !== 0) {
+        this.listener./*OK*/ postMessage(this.queue_.shift(), '*');
       }
       if (this.listenerAttacher) {
         clearInterval(this.listenerAttacher);
@@ -66,7 +68,7 @@ export class ExtensionCommunication {
       data,
     };
 
-    this.queue.push(msg);
+    this.queue_.push(msg);
     this.initExtensionCommunication_();
   }
 

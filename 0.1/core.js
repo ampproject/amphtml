@@ -306,7 +306,8 @@ export class Core {
         const config = {
           ivm: message.ivm,
         };
-        this.engagement_ = new EngagementTracker(this.win, config);
+        this.engagement_ = new EngagementTracker(this.win);
+        this.engagement_.init(config);
         this.unlistenEngagement_ = this.engagement_.registerListener(
           this.updateEngagementStatus_.bind(this)
         );

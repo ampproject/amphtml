@@ -14,9 +14,16 @@ export const BrowserState = {
 };
 
 /**
+ * @typedef {{
+ *   idleTimer: (number|undefined),
+ *   ivm: (boolean|undefined)
+ * }} EngagementConfig
+ */
+
+/**
  * Array of event types which will be listened for on the document to indicate
  * activity. Other activities are also observed on the AmpDoc and Viewport
- * objects. See {@link setUpActivityListeners_} for listener implementation.
+ * objects.
  * @private @const {Array<string>}
  */
 const ACTIVE_EVENT_TYPES = [
@@ -34,13 +41,12 @@ const ACTIVE_EVENT_TYPES = [
 export class EngagementTracker {
   /**
    * @param {!Window} win - Window object
-   * @param {Object=} config - Optional configuration object
    */
-  constructor(win, config = {}) {
+  constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {Array<function(boolean)>} */
+    /** @private {Array<function(!Object)>} */
     this.listeners_ = [];
 
     /** @private {Array<!UnlistenDef>} */
@@ -58,65 +64,87 @@ export class EngagementTracker {
     /** @private {BrowserState} */
     this.currentState_ = BrowserState.UNKNOWN;
 
-    /** @private {Object=} */
-    this.config_ = config;
+    /** @private {boolean} */
+    this.isFocused_ = false;
 
-    this.init();
+    /** @private {boolean} */
+    this.isVisible_ = false;
+
+    /** @private {boolean} */
+    this.isOpen_ = false;
+
+    /** @private {boolean} */
+    this.isEngaged_ = false;
+
+    /** @private {boolean} */
+    this.isIdle_ = false;
+
+    /** @private {boolean} */
+    this.initialized_ = false;
   }
 
   /**
    * Initialize event listeners
+   * @param {EngagementConfig=} config
    */
-  init() {
-    if (this.config_.idleTimer) {
-      this.idleTimeout_ = this.config_.idleTimer * 1000;
+  init(config = {}) {
+    if (this.initialized_) {
+      return;
+    }
+    this.initialized_ = true;
+
+    if (config.idleTimer !== undefined) {
+      this.idleTimeout_ = config.idleTimer * 1000;
     }
 
-    if (this.config_.ivm) {
-      this.ivm_ = this.config_.ivm;
+    if (config.ivm !== undefined) {
+      this.ivm_ = config.ivm;
     }
 
-    /** @private {boolean} */
-    this.isFocused_ = this.win.document.hasFocus();
-    /** @private {boolean} */
-    this.isVisible_ = !isDocumentHidden(this.win.document);
-    /** @private {boolean} */
+    this.isFocused_ = this.win_.document.hasFocus();
+    this.isVisible_ = !isDocumentHidden(this.win_.document);
     this.isOpen_ = true;
-    /** @private {boolean} */
     this.isEngaged_ = this.calculateEngaged_();
-    /** @private {boolean} */
     this.isIdle_ = false;
 
+    // Define listeners as const for clarity and possible future removal
+    const onFocus = () => {
+      this.isFocused_ = true;
+      this.updateEngagement_();
+    };
+    const onBlur = () => {
+      this.isFocused_ = false;
+      this.updateEngagement_();
+    };
+    const onPageShow = () => {
+      this.isOpen_ = true;
+      this.updateEngagement_();
+    };
+    const onPageHide = () => {
+      this.isOpen_ = false;
+      this.updateEngagement_();
+    };
+    const onVisibilityChange = () => {
+      this.isVisible_ = !isDocumentHidden(this.win_.document);
+      this.updateEngagement_();
+    };
+
     this.unlisteners_.push(
-      listen(this.win_, 'focus', () => {
-        this.isFocused_ = true;
-        this.updateEngagement_();
-      }),
-      listen(this.win_, 'blur', () => {
-        this.isFocused_ = false;
-        this.updateEngagement_();
-      }),
-      listen(this.win_, 'pageshow', () => {
-        this.isOpen_ = true;
-        this.updateEngagement_();
-      }),
-      listen(this.win_, 'pagehide', () => {
-        this.isOpen_ = false;
-        this.updateEngagement_();
-      }),
-      listen(this.win_.document, 'visibilitychange', () => {
-        this.isVisible_ = !isDocumentHidden(this.win_.document);
-        this.updateEngagement_();
-      })
+      listen(this.win_, 'focus', onFocus),
+      listen(this.win_, 'blur', onBlur),
+      listen(this.win_, 'pageshow', onPageShow),
+      listen(this.win_, 'pagehide', onPageHide),
+      listen(this.win_.document, 'visibilitychange', onVisibilityChange)
     );
 
     this.setUpListenersFromArray_(
-      this.ampdoc.getRootNode(),
+      this.win_.document,
       ACTIVE_EVENT_TYPES,
       () => {
         this.isFocused_ = true;
         this.isVisible_ = true;
         this.isOpen_ = true;
+        this.isIdle_ = false;
         this.updateEngagement_();
         this.restartIdleTimer_();
       }
@@ -179,11 +207,11 @@ export class EngagementTracker {
       return;
     }
 
-    this.isIdle_ = false;
     clearTimeout(this.idleTimer_);
 
     this.idleTimer_ = setTimeout(() => {
       this.isIdle_ = true;
+      this.currentState_ = BrowserState.IDLE;
     }, this.idleTimeout_);
   }
 
@@ -243,7 +271,6 @@ export class EngagementTracker {
       isVisible: this.isVisible_,
       isOpen: this.isOpen_,
       isIdle: this.isIdle_,
-      instanceCount: this.instanceCount_,
     };
   }
 
@@ -251,10 +278,17 @@ export class EngagementTracker {
    * Clean up resources and reset the singleton
    */
   destroy() {
-    this.unlisteners_.forEach((unlisten) => unlisten());
+    this.unlisteners_.forEach((unlisten) => {
+      try {
+        unlisten();
+      } catch (e) {
+        // Ignore errors from already-removed listeners
+      }
+    });
     this.unlisteners_ = [];
     this.listeners_ = [];
-
-    EngagementTracker.instance_ = null;
+    clearTimeout(this.idleTimer_);
+    this.idleTimer_ = null;
+    this.initialized_ = false;
   }
 }
