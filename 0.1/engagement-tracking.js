@@ -146,7 +146,6 @@ export class EngagementTracker {
         this.isOpen_ = true;
         this.isIdle_ = false;
         this.updateEngagement_();
-        this.restartIdleTimer_();
       }
     );
   }
@@ -175,10 +174,9 @@ export class EngagementTracker {
       this.notifyListeners_();
     }
 
-    if (isEngaged) {
+    if (this.currentState_ === BrowserState.ACTIVE) {
       this.restartIdleTimer_();
-    } else {
-      this.isIdle_ = false;
+    } else if (this.currentState_ === BrowserState.INACTIVE) {
       clearTimeout(this.idleTimer_);
     }
   }
