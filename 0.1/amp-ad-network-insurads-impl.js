@@ -29,6 +29,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     // This exist to store the information that is received in ExtractSize
     /** @private {?Object} */
     this.adResponseData_ = null;
+    /** @private {number} */
+    this.parentMawId_ = 0;
 
     // Parameters that represent the AdUnit
     this.code_ = Math.random().toString(36).substring(2, 15);
@@ -179,7 +181,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         const sizesArray = sizesString
           .split('|')
           .map((size) => size.split('x').map(Number));
-        this.unitInfo.setSizes(sizesArray);
+        this.sizes_ = sizesArray;
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
     });
@@ -293,7 +295,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.appEnabled = message.status > 0 ? true : false;
       this.requiredKeys_.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
 
-      if (this.requiredKeys.length > 0) {
+      if (this.requiredKeys_.length > 0) {
         const jsonTargeting =
           tryParseJson(this.element.getAttribute('json')) || {};
         this.requiredKeys_.forEach((key) => {
@@ -347,7 +349,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.extension_.adUnitChanged({
       id: this.getAdUnitId(),
       shortId: message.adUnitId,
-      sizes: this.sizes,
+      sizes: this.sizes_,
       instance: this.element.getAttribute('data-amp-slot-index'),
       configuration: null,
       customTargeting: null,
@@ -403,17 +405,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   onVisibilityChange_(visibilityData) {
-    if (
-      this.unitInfo.isVisible !== visibilityData.isViewable &&
-      this.appEnabled
-    ) {
-      this.core_.sendUnitSnapshot(
-        this.unitInfo.code,
-        visibilityData.isViewable
-      );
-
-      this.unitInfo.setIsVisible(visibilityData.isViewable);
+    if (this.isViewable_ !== visibilityData.isViewable && this.appEnabled) {
+      this.core_.sendUnitSnapshot(this.code_, visibilityData.isViewable);
     }
+    this.isViewable_ = visibilityData.isViewable;
   }
 
   /**
@@ -430,7 +425,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       const unitInit = {
         // Unit
         code: this.code_,
-        adUnitId: this.getAdUnitId(), // ????? dont need
         keyValues: this.requiredKeyValues_,
         path: entry ? entry.path : this.path_,
         // Ad Response
@@ -441,7 +435,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         isHouseDemand: entry ? entry.isHouseDemand : false,
         position: entry ? entry.position : undefined,
 
-        parentMawId: 0, // TODO
+        parentMawId: this.parentMawId_,
         sizes: this.sizes_,
       };
 
