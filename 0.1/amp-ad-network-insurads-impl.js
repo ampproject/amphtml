@@ -22,6 +22,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     this.element.setAttribute('data-enable-refresh', 'false');
 
+    /** @private {number} */
+    this.adUnitId_ = 0;
+
     /** @private {?Object} */
     this.adResponseData_ = null;
 
@@ -50,6 +53,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /** @private @const {!Deferred} */
     this.appReadyDeferred_ = new Deferred();
 
+    /** @private {?ExtensionCommunication} */
+    this.extension_ = null;
+
     /** @private {?Waterfall} */
     this.waterfall_ = null;
 
@@ -67,14 +73,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       unitInitHandler: (message) => this.handleUnitInit_(message),
       unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
     });
-
-    if (window.frames['TG-listener']) {
-      /** @private {?ExtensionCommunication} */
-      this.extension_ = ExtensionCommunication.start(
-        this.code,
-        this.handlerExtensionMessages_.bind(this)
-      );
-    }
   }
 
   /** @override */
@@ -114,9 +112,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.sendUnitInit_();
     });
 
-    // if (this.extension_) {
-    //   this.extension_.bannerChanged(this.unitInfo);
-    // }
+    if (this.extension_) {
+      this.extension_.bannerChanged(this.unitInfo);
+    }
 
     return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
@@ -280,8 +278,23 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleUnitInit_(message) {
-    this.adUnitId = message.adUnitId;
+    this.adUnitId_ = message.adUnitId;
     this.element.setAttribute('tg-zone', this.getAdUnitId_());
+
+    if (!this.visibilityTracker) {
+      this.visibilityTracker = new VisibilityTracker(
+        this.win,
+        this.element,
+        this.onVisibilityChange_.bind(this)
+      );
+    }
+
+    if (window.frames['TG-listener'] && !this.extension_) {
+      this.extension_ = ExtensionCommunication.start(
+        this.getAdUnitId_(),
+        this.handlerExtensionMessages_.bind(this)
+      );
+    }
 
     const {height, width} = this.creativeSize_ || this.initialSize_;
 
@@ -379,7 +392,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   getAdUnitId_() {
     const adUnitId =
-      this.adUnitId + '.' + this.element.getAttribute('data-amp-slot-index');
+      this.adUnitId_ + '.' + this.element.getAttribute('data-amp-slot-index');
     return adUnitId;
   }
 
@@ -392,6 +405,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (this.visibilityTracker) {
       this.visibilityTracker.destroy();
       this.visibilityTracker = null;
+    }
+
+    if (this.extension_) {
+      this.extension_.adUnitRemoved(this.getAdUnitId_());
+      this.extension_ = null;
     }
   }
 

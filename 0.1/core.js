@@ -43,7 +43,9 @@ export class Core {
     /** @private {!LockedId} */
     this.lockedData_ = new LockedId().getLockedIdData();
     /** @private {!ExtensionCommunication} */
-    this.extension_ = new ExtensionCommunication();
+    this.extension_ = win.frames['TG-listener']
+      ? new ExtensionCommunication()
+      : null;
     /** @private {!CookieMonster} */
     this.cookies_ = new Cookie(this.win, this.canonicalUrl);
   }
@@ -389,7 +391,6 @@ export class Core {
     }
 
     if (this.extension_) {
-      // this.extension_.adUnitRemoved(this.getAdUnitId()); TODO: implement this
       this.extension_.destroy();
       this.extension_ = null;
     }
