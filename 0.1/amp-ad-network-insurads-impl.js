@@ -57,7 +57,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (window.frames['TG-listener']) {
       this.extension_ = ExtensionCommunication.start(
         this.unitInfo.code,
-        this.handlerExtensionMessages.bind(this)
+        this.handlerExtensionMessages_.bind(this)
       );
     }
     /* InsurAds Business  */
@@ -164,7 +164,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         }
 
         if (this.iabTaxonomy && this.nextEntry.provider === 'hgam') {
-          const userSignals = this.convertToUserSignals(this.iabTaxonomy);
+          const userSignals = this.convertToUserSignals_(this.iabTaxonomy);
 
           const encodedSignals = encodeURIComponent(
             btoa(JSON.stringify(userSignals))
@@ -209,15 +209,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         .log('Force Collapse');
     } else {
       // On blanks after first print, we refresh
-      this.triggerImmediateRefresh();
+      this.triggerImmediateRefresh_();
     }
   }
 
   /**
    * refreshEndCallback
-   *
+   * @private
    */
-  refreshEndCallback() {
+  refreshEndCallback_() {
     console /*OK*/
       .log('Refresh End Callback');
   }
@@ -227,8 +227,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * This can be called when receiving realtime messages that require a refresh
    * or an Extension Refresh message.
    * @return {boolean}
+   * @private
    */
-  triggerImmediateRefresh() {
+  triggerImmediateRefresh_() {
     if (!this.appEnabled) {
       console /*OK*/
         .log('App not enabled, ignoring refresh trigger');
@@ -268,7 +269,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
     }
 
-    this.refresh(this.refreshEndCallback);
+    this.refresh(this.refreshEndCallback_);
   }
 
   /**
@@ -330,7 +331,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     //this.code = message.unitcode; ?????
     this.adUnitId = message.adUnitId; // unitId ???
     // other information from message ???
-    this.element.setAttribute('tg-zone', this.getAdUnitId());
+    this.element.setAttribute('tg-zone', this.getAdUnitId_());
 
     console /*OK*/
       .log('Unit Init:', message);
@@ -346,7 +347,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     const {height, width} = this.creativeSize_ || this.initialSize_;
 
     this.extension_.adUnitChanged({
-      id: this.getAdUnitId(),
+      id: this.getAdUnitId_(),
       shortId: message.adUnitId,
       sizes: this.sizes,
       instance: this.element.getAttribute('data-amp-slot-index'),
@@ -376,7 +377,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     }
 
     this.waterfall = Waterfall.fromWaterfallMessage(message);
-    this.triggerImmediateRefresh();
+    this.triggerImmediateRefresh_();
 
     console /*OK*/
       .log('Unit Waterfall:', message);
@@ -385,15 +386,16 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /**
    * Handle incoming messages from the extension
    * @param {MessageEvent} msg - The message event
+   * @private
    */
-  handlerExtensionMessages(msg) {
-    if (msg.data.adUnitId !== this.getAdUnitId()) {
+  handlerExtensionMessages_(msg) {
+    if (msg.data.adUnitId !== this.getAdUnitId_()) {
       return;
     }
 
     switch (msg.data.action) {
       case 'changeBanner':
-        this.refresh(this.refreshEndCallback);
+        this.refresh(this.refreshEndCallback_);
         break;
     }
   }
@@ -432,8 +434,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /**
    * Return the Full AdUnit Id with the slot index
    * @return {string}
+   * @private
    */
-  getAdUnitId() {
+  getAdUnitId_() {
     const adUnitId =
       this.adUnitId + '.' + this.element.getAttribute('data-amp-slot-index');
     return adUnitId;
@@ -480,8 +483,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * Convert the IabTaxonomy to Google required format
    * @param {object} data - IabTaxonomy data.
    * @return {object} - Formatted signals
+   * @private
    */
-  convertToUserSignals(data) {
+  convertToUserSignals_(data) {
     const taxonomyMap = {
       content: 'IAB_CONTENT',
       audience: 'IAB_AUDIENCE',
