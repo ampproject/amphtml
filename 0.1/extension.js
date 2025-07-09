@@ -153,7 +153,7 @@ export class ExtensionCommunication {
    *  Send a message when an ad unit is updated
    *  @param {AdUnit} adUnit
    */
-  adUnitChanged(adUnit) {
+  adUnitCreated(adUnit) {
     this.sendIframeMessage_('adUnitChanged', {
       id: adUnit.id,
       shortId: adUnit.adUnitId,

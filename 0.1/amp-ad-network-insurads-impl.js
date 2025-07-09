@@ -50,6 +50,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /** @private @const {!Deferred} */
     this.appReadyDeferred_ = new Deferred();
 
+    /** @private {?Waterfall} */
     this.waterfall_ = null;
 
     /** @public {?DoubleClickHelper} */
@@ -263,6 +264,14 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (message.iabTaxonomy !== undefined) {
       this.iabTaxonomy_ = message.iabTaxonomy;
     }
+
+    if (!this.visibilityTracker) {
+      this.visibilityTracker = new VisibilityTracker(
+        this.win,
+        this.element,
+        this.onVisibilityChange_.bind(this)
+      );
+    }
   }
 
   /**
@@ -274,17 +283,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.adUnitId = message.adUnitId;
     this.element.setAttribute('tg-zone', this.getAdUnitId_());
 
-    if (!this.visibilityTracker) {
-      this.visibilityTracker = new VisibilityTracker(
-        this.win,
-        this.element,
-        this.onVisibilityChange_.bind(this)
-      );
-    }
-
     const {height, width} = this.creativeSize_ || this.initialSize_;
 
-    this.extension_.adUnitChanged({
+    this.extension_.adUnitCreated({
       id: this.getAdUnitId_(),
       shortId: message.adUnitId,
       sizes: this.sizes_,
