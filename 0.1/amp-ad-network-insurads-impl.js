@@ -22,9 +22,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     this.element.setAttribute('data-enable-refresh', 'false');
 
-    this.publicId = this.element.getAttribute('data-public-id');
-    this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-
     /** @private {?Object} */
     this.adResponseData_ = null;
 
@@ -53,12 +50,17 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     /** @private @const {!Deferred} */
     this.appReadyDeferred_ = new Deferred();
 
+    this.waterfall_ = null;
+
     /** @public {?DoubleClickHelper} */
     this.dCHelper = new DoubleClickHelper(this);
     this.dCHelper.callMethod('constructor', element);
 
+    const publicId = this.element.getAttribute('data-public-id');
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+
     /** @private {?Core} */
-    this.core_ = Core.start(this.win, this.canonicalUrl, this.publicId);
+    this.core_ = Core.start(this.win, canonicalUrl, publicId);
     this.core_.registerAdUnit(this.code, this.handleReconnect_.bind(this), {
       appInitHandler: (message) => this.handleAppInit_(message),
       unitInitHandler: (message) => this.handleUnitInit_(message),
@@ -132,20 +134,20 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.getAdUrlDeferred.promise.then((doubleClickUrl) => {
       const url = new URL(doubleClickUrl);
       if (self.refreshCount_ > 0) {
-        const nextRefresh = this.waterfall.getCurrentEntry();
+        const entry = this.waterfall_.getCurrentEntry();
 
         const params = url.searchParams;
 
-        if (nextRefresh.path) {
-          params.set('iu', nextRefresh.path);
+        if (entry.path) {
+          params.set('iu', entry.path);
         }
 
         const keyValuesParam = params.get('scp') || '';
         let keyValues = keyValuesParam;
 
         const allKeyValues = [
-          ...(nextRefresh.keyValues || []),
-          ...(nextRefresh.commonKeyValues || []),
+          ...(entry.keyValues || []),
+          ...(entry.commonKeyValues || []),
         ];
 
         if (allKeyValues.length > 0) {
@@ -153,7 +155,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
           keyValues += (keyValues ? '&' : '') + merged;
         }
 
-        if (this.iabTaxonomy_ && this.nextEntry.provider === 'hgam') {
+        if (this.iabTaxonomy_ && entry.isHouseDemand) {
           const userSignals = this.convertToUserSignals_(this.iabTaxonomy_);
 
           const encodedSignals = encodeURIComponent(
@@ -221,13 +223,13 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return false;
     }
 
-    const nextRefresh = this.waterfall.getNextEntry();
+    const nextEntry = this.waterfall_.getNextEntry();
 
-    if (!nextRefresh) {
+    if (!nextEntry) {
       return false;
     }
 
-    this.updateRtcConfig_(nextRefresh);
+    this.updateRtcConfig_(nextEntry);
 
     this.refresh(this.refreshEndCallback_);
   }
@@ -310,7 +312,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return;
     }
 
-    this.waterfall = Waterfall.fromWaterfallMessage(message);
+    this.waterfall_ = Waterfall.fromWaterfallMessage(message);
     this.triggerImmediateRefresh_();
   }
 
@@ -351,8 +353,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   sendUnitInit_(reconnect = false, passback = false) {
     if (this.appEnabled_) {
-      const entry = this.waterfall ? this.waterfall.getCurrentEntry() : null;
-
+      const entry = this.waterfall_ ? this.waterfall_.getCurrentEntry() : null;
       const unitInit = {
         code: this.code_,
         keyValues: this.requiredKeyValues_,
