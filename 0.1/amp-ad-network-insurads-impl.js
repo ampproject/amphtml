@@ -275,27 +275,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return false;
     }
 
-    // Update rtc-config with our vendors information
-    //   - vendors (n)
-    //     - "aps": {"PUB_ID": "600", "PUB_UUID": 'enter you UAM publisher ID', "PARAMS":{"amp":"1"}}
-    //     - "openwrap": {"PUB_ID", "162930", "PROFILE_ID": "9578"}
-    if (nextRefresh.isHouseDemand && nextRefresh.vendors) {
-      const rtcConfig = {
-        vendors: nextRefresh.vendors || {},
-        timeoutMillis: 750,
-      };
-      const rtcConfigStr = JSON.stringify(rtcConfig);
-      if (this.element.getAttribute('rtc-config') !== rtcConfigStr) {
-        this.element.setAttribute('rtc-config', rtcConfigStr);
-      }
-    } else if (this.originalRtcConfig_) {
-      const originalStr = JSON.stringify(this.originalRtcConfig_);
-      if (this.element.getAttribute('rtc-config') !== originalStr) {
-        this.element.setAttribute('rtc-config', originalStr);
-      }
-    } else {
-      this.element.removeAttribute('rtc-config');
-    }
+    this.updateRtcConfig_(nextRefresh);
 
     this.refresh(this.refreshEndCallback_);
   }
@@ -554,6 +534,40 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     }
 
     return {PublisherProvidedTaxonomySignals};
+  }
+
+  /**
+   * Updates the rtc-config attribute based on the next entry / original rtc config.
+   * @param {!Object} entry
+   * @private
+   */
+  updateRtcConfig_(entry) {
+    let rtcConfigStr = null;
+
+    if (
+      entry.isHouseDemand &&
+      entry.vendors &&
+      Object.keys(entry.vendors).length > 0
+    ) {
+      rtcConfigStr = JSON.stringify({
+        vendors: entry.vendors,
+        timeoutMillis: 750,
+      });
+    } else if (
+      this.originalRtcConfig_ &&
+      Object.keys(this.originalRtcConfig_).length > 0
+    ) {
+      rtcConfigStr = JSON.stringify(this.originalRtcConfig_);
+    }
+
+    if (rtcConfigStr) {
+      const currentRtcConfig = this.element.getAttribute('rtc-config');
+      if (currentRtcConfig !== rtcConfigStr) {
+        this.element.setAttribute('rtc-config', rtcConfigStr);
+      }
+    } else {
+      this.element.removeAttribute('rtc-config');
+    }
   }
 }
 
