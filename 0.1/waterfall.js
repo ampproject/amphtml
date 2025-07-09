@@ -64,11 +64,10 @@ export class Waterfall {
 
   /**
    * Advances the waterfall to the next entry.
-   * @return {?WaterfallEntry} The new current entry, or null if the waterfall is exhausted.
+   * @return {?WaterfallEntry} The entry at the current index before incrementing, or null if exhausted.
    */
   getNextEntry() {
-    this.currentIndex_++;
-    return this.getCurrentEntry();
+    return this.entries_[this.currentIndex_++] || null;
   }
 
   /**
