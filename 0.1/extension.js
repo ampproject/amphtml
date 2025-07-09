@@ -17,17 +17,17 @@ export class ExtensionCommunication {
 
   /**
    * Returns the singleton instance of ExtensionCommunication.
-   * @param {string} adUnitCode
+   * @param {string} adUnitId
    * @param {function()} handler message handler
    * @return {!ExtensionCommunication}
    * @public
    */
-  static start(adUnitCode, handler = {}) {
+  static start(adUnitId, handler = {}) {
     if (!ExtensionCommunication.instance_) {
       ExtensionCommunication.instance_ = new ExtensionCommunication();
     }
 
-    ExtensionCommunication.instance_.adUnitHandlerMap[adUnitCode] = handler;
+    ExtensionCommunication.instance_.adUnitHandlerMap_[adUnitId] = handler;
 
     return ExtensionCommunication.instance_;
   }
@@ -45,7 +45,7 @@ export class ExtensionCommunication {
       this.listener = window.frames['TG-listener'];
     }
     if (this.listener) {
-      this.listener.addEventListener('message', this.handler);
+      this.listener.addEventListener('message', this.handlerExtensionMessages_);
       // this.listener./*OK*/ postMessage('extensionReady', '*');
       while (this.queue_.length !== 0) {
         this.listener./*OK*/ postMessage(this.queue_.shift(), '*');
@@ -54,6 +54,16 @@ export class ExtensionCommunication {
         clearInterval(this.listenerAttacher);
       }
     }
+  }
+
+  /**
+   * Send message back to adUnit handler
+   * @param {object} message - The message to send
+   * @private
+   */
+  handlerExtensionMessages_(message) {
+    this.adUnitHandlerMap_[message.data.adUnitId] &&
+      this.adUnitHandlerMap_[message.data.adUnitId](message);
   }
 
   /**
@@ -77,7 +87,10 @@ export class ExtensionCommunication {
    */
   destroy() {
     if (this.listener) {
-      this.listener.removeEventListener('message', this.handler);
+      this.listener.removeEventListener(
+        'message',
+        this.handlerExtensionMessages_
+      );
     }
 
     if (this.listenerAttacher) {
