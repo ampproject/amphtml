@@ -476,11 +476,10 @@ const adConfig = jsonConfiguration({
       'https://up.clickiocdn.com',
       'https://cns.clickiocdn.com',
       'https://partner.googleadservices.com',
-      'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
   },
-  
+
   'dable': {
     preconnect: [
       'https://static.dable.io',
