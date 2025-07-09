@@ -31,28 +31,41 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.adResponseData_ = null;
 
     // Parameters that represent the AdUnit
+    /** @private {string} */
     this.code_ = Math.random().toString(36).substring(2, 15);
+    /** @private {string} */
     this.path_ = this.element.getAttribute('data-slot');
+    /** @private {!Array<string>} */
     this.requiredKeys_ = [];
+    /** @private {!Array<!Object<string, string>>} */
     this.requiredKeyValues_ = [];
+    /** @private {?Object} */
+    this.originalRtcConfig_ = tryParseJson(
+      this.element.getAttribute('rtc-config')
+    );
 
     // States of the AdUnit
+    /** @private {boolean} */
     this.isViewable_ = false;
 
     // Parameteres that represent the Application
+    /** @private {?Object} */
     this.iabTaxonomy_ = {};
 
     // States of the Application
-    this.appEnabled = false;
+    /** @private {boolean} */
+    this.appEnabled_ = false;
     /** @private @const {!Deferred} */
     this.appReadyDeferred_ = new Deferred();
 
     /* DoubleClick & AMP */
+    /** @public {?DoubleClickHelper} */
     this.dCHelper = new DoubleClickHelper(this);
     this.dCHelper.callMethod('constructor', element);
     /* DoubleClick& AMP */
 
     /* InsurAds Business  */
+    /** @private {?Core} */
     this.core_ = Core.start(this.win, this.canonicalUrl, this.publicId);
     this.core_.registerAdUnit(this.code, this.handleReconnect_.bind(this), {
       appInitHandler: (message) => this.handleAppInit_(message),
@@ -61,6 +74,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     });
 
     if (window.frames['TG-listener']) {
+      /** @private {?ExtensionCommunication} */
       this.extension_ = ExtensionCommunication.start(
         this.code,
         this.handlerExtensionMessages_.bind(this)
@@ -230,7 +244,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   triggerImmediateRefresh_() {
-    if (!this.appEnabled) {
+    if (!this.appEnabled_) {
       console /*OK*/
         .log('App not enabled, ignoring refresh trigger');
       // TODO: Validate this logic for destroy here
@@ -263,10 +277,22 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     //   - vendors (n)
     //     - "aps": {"PUB_ID": "600", "PUB_UUID": 'enter you UAM publisher ID', "PARAMS":{"amp":"1"}}
     //     - "openwrap": {"PUB_ID", "162930", "PROFILE_ID": "9578"}
-    const rtcConfig = tryParseJson(this.element.getAttribute('rtc-config'));
-    if (rtcConfig && rtcConfig.vendors) {
-      Object.assign(rtcConfig.vendors, nextRefresh.vendors || {});
-      this.element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
+    if (nextRefresh.isHouseDemand && nextRefresh.vendors) {
+      const rtcConfig = {
+        vendors: nextRefresh.vendors || {},
+        timeoutMillis: 750,
+      };
+      const rtcConfigStr = JSON.stringify(rtcConfig);
+      if (this.element.getAttribute('rtc-config') !== rtcConfigStr) {
+        this.element.setAttribute('rtc-config', rtcConfigStr);
+      }
+    } else if (this.originalRtcConfig_) {
+      const originalStr = JSON.stringify(this.originalRtcConfig_);
+      if (this.element.getAttribute('rtc-config') !== originalStr) {
+        this.element.setAttribute('rtc-config', originalStr);
+      }
+    } else {
+      this.element.removeAttribute('rtc-config');
     }
 
     this.refresh(this.refreshEndCallback_);
@@ -291,7 +317,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   handleAppInit_(message) {
     if (message.status !== undefined) {
-      this.appEnabled = message.status > 0 ? true : false;
+      this.appEnabled_ = message.status > 0 ? true : false;
       this.requiredKeys_.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
 
       if (this.requiredKeys.length > 0) {
@@ -407,7 +433,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   onVisibilityChange_(visibilityData) {
     if (
       this.unitInfo.isVisible !== visibilityData.isViewable &&
-      this.appEnabled
+      this.appEnabled_
     ) {
       this.core_.sendUnitSnapshot(
         this.unitInfo.code,
@@ -425,7 +451,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   sendUnitInit_(reconnect = false, passback = false) {
-    if (this.appEnabled) {
+    if (this.appEnabled_) {
       const entry = this.waterfall ? this.waterfall.getCurrentEntry() : null;
 
       // Maybe create a method to get the object parameters if this is going to be reused for extension?
