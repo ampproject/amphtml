@@ -253,15 +253,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (message.status !== undefined) {
       this.appEnabled_ = message.status > 0 ? true : false;
 
+      if (!this.appReadyDeferred_.isDone()) {
+        this.appReadyDeferred_.resolve();
+      }
+
       this.populateRequiredKeysAndValues_(message.requiredKeys);
     }
 
     if (message.iabTaxonomy !== undefined) {
       this.iabTaxonomy_ = message.iabTaxonomy;
-    }
-
-    if (!this.appReadyDeferred_.isDone()) {
-      this.appReadyDeferred_.resolve();
     }
   }
 
