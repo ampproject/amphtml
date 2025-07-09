@@ -281,14 +281,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.adUnitId_ = message.adUnitId;
     this.element.setAttribute('tg-zone', this.getAdUnitId_());
 
-    if (!this.visibilityTracker) {
-      this.visibilityTracker = new VisibilityTracker(
-        this.win,
-        this.element,
-        this.onVisibilityChange_.bind(this)
-      );
-    }
-
     if (window.frames['TG-listener'] && !this.extension_) {
       this.extension_ = ExtensionCommunication.start(
         this.getAdUnitId_(),
