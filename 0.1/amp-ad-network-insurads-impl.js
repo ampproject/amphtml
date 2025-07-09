@@ -20,19 +20,17 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   constructor(element) {
     super(element);
 
-    // Always disable A4A Refresh, as we are using our own refresh mechanism
     this.element.setAttribute('data-enable-refresh', 'false');
 
     this.publicId = this.element.getAttribute('data-public-id');
     this.canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
 
-    // This exist to store the information that is received in ExtractSize
     /** @private {?Object} */
     this.adResponseData_ = null;
+
     /** @private {number} */
     this.parentMawId_ = 0;
 
-    // Parameters that represent the AdUnit
     /** @private {string} */
     this.code_ = Math.random().toString(36).substring(2, 15);
     /** @private {string} */
@@ -44,27 +42,21 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.element.getAttribute('rtc-config')
     );
 
-    // States of the AdUnit
     /** @private {boolean} */
     this.isViewable_ = false;
 
-    // Parameteres that represent the Application
     /** @private {?Object} */
     this.iabTaxonomy_ = {};
 
-    // States of the Application
     /** @private {boolean} */
     this.appEnabled_ = false;
     /** @private @const {!Deferred} */
     this.appReadyDeferred_ = new Deferred();
 
-    /* DoubleClick & AMP */
     /** @public {?DoubleClickHelper} */
     this.dCHelper = new DoubleClickHelper(this);
     this.dCHelper.callMethod('constructor', element);
-    /* DoubleClick& AMP */
 
-    /* InsurAds Business  */
     /** @private {?Core} */
     this.core_ = Core.start(this.win, this.canonicalUrl, this.publicId);
     this.core_.registerAdUnit(this.code, this.handleReconnect_.bind(this), {
@@ -80,19 +72,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.handlerExtensionMessages_.bind(this)
       );
     }
-    /* InsurAds Business  */
-
-    console /*OK*/
-      .log('Canonical URL:', this.canonicalUrl);
   }
 
   /** @override */
   buildCallback() {
-    // Call the AMP A4A buildCallback to set up base functionality
     this.dCHelper.callMethod('buildCallback');
-
-    console /*OK*/
-      .log('Build Callback');
   }
 
   /** @override */
@@ -111,24 +95,19 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       return;
     }
     this.refreshCount_++;
-    console /*Ok*/
-      .log('Refresh', this.path, this.refreshCount_, this.element, this);
-    // DON'T CALL DOUBLE CLICK REFRESH! NOT NEEDED.
+
     return super.refresh(refreshEndCallback);
   }
 
   /** @override */
   extractSize(responseHeaders) {
-    // Store the data from the response.
     this.adResponseData_ = {
       lineItemId: responseHeaders.get('google-lineitem-id') || '-1',
       creativeId: responseHeaders.get('google-creative-id') || '-1',
       servedSize: responseHeaders.get('google-size') || '',
     };
 
-    // After the ad is served and the app is ready, send our init message.
     this.appReadyDeferred_.promise.then(() => {
-      // This will now correctly execute on the initial load AND every refresh.
       this.sendUnitInit_();
     });
 
@@ -153,8 +132,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.getAdUrlDeferred.promise.then((doubleClickUrl) => {
       const url = new URL(doubleClickUrl);
       if (self.refreshCount_ > 0) {
-        console./*Ok*/ log('Refresh count:', self.refreshCount_);
-
         const nextRefresh = this.waterfall.getCurrentEntry();
 
         const params = url.searchParams;
@@ -202,26 +179,14 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   /** @override */
   tearDownSlot() {
     this.dCHelper.callMethod('tearDownSlot');
-    console /*OK*/
-      .log('Tear Down Slot');
-
-    // Cleanup moved to forceCollapse for now
   }
 
   /** @override */
   forceCollapse() {
     if (this.refreshCount_ === 0) {
-      // Blank on first print, Insurads does nothing, so we will
-      // call the super.forceCollapse to mantain the A4A flow
       super.forceCollapse();
-
-      // Destroy the ad and all its components
-      // TODO: This must be tested properly to see if there is a better place for destroy
       this.destroy_();
-      console /*OK*/
-        .log('Force Collapse');
     } else {
-      // On blanks after first print, we refresh
       this.triggerImmediateRefresh_();
     }
   }
@@ -244,25 +209,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   triggerImmediateRefresh_() {
     if (!this.appEnabled_) {
-      console /*OK*/
-        .log('App not enabled, ignoring refresh trigger');
-      // TODO: Validate this logic for destroy here
       this.destroy_();
       return false;
     }
 
-    console /*OK*/
-      .log('Triggering immediate ad refresh');
-    // Don't refresh if we're already in the process of refreshing
     if (this.isRefreshing) {
-      console /*OK*/
-        .log('Already refreshing, ignoring refresh trigger');
       return false;
     }
-    // Check if the ad is in a state where it can be refreshed
+
     if (!this.iframe) {
-      console /*OK*/
-        .log('Ad not ready for refresh yet');
       return false;
     }
 
@@ -283,9 +238,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    * */
   handleReconnect_() {
-    console /*OK*/
-      .log('Reconnecting to InsurAds');
-
     this.sendUnitInit_(true);
   }
 
@@ -309,9 +261,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (!this.appReadyDeferred_.isDone()) {
       this.appReadyDeferred_.resolve();
     }
-
-    console /*OK*/
-      .log('App Init:', message);
   }
 
   /**
@@ -320,13 +269,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleUnitInit_(message) {
-    //this.code = message.unitcode; ?????
-    this.adUnitId = message.adUnitId; // unitId ???
-    // other information from message ???
+    this.adUnitId = message.adUnitId;
     this.element.setAttribute('tg-zone', this.getAdUnitId_());
-
-    console /*OK*/
-      .log('Unit Init:', message);
 
     if (!this.visibilityTracker) {
       this.visibilityTracker = new VisibilityTracker(
@@ -363,16 +307,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   handleUnitWaterfall_(message) {
     if (message.code !== this.code) {
-      console /*OK*/
-        .log('Wrong Unit Waterfall:', message);
       return;
     }
 
     this.waterfall = Waterfall.fromWaterfallMessage(message);
     this.triggerImmediateRefresh_();
-
-    console /*OK*/
-      .log('Unit Waterfall:', message);
   }
 
   /**
@@ -414,20 +353,15 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (this.appEnabled_) {
       const entry = this.waterfall ? this.waterfall.getCurrentEntry() : null;
 
-      // Maybe create a method to get the object parameters if this is going to be reused for extension?
       const unitInit = {
-        // Unit
         code: this.code_,
         keyValues: this.requiredKeyValues_,
         path: entry ? entry.path : this.path_,
-        // Ad Response
         lineItemId: this.adResponseData_.lineItemId,
         creativeId: this.adResponseData_.creativeId,
         servedSize: this.adResponseData_.servedSize,
-        // Waterfall Entry
         isHouseDemand: entry ? entry.isHouseDemand : false,
         position: entry ? entry.position : undefined,
-
         parentMawId: this.parentMawId_,
         sizes: this.sizes_,
       };
