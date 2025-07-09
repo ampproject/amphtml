@@ -71,7 +71,7 @@ export class AppInitMessage extends BaseMessage {
    * @param {boolean} params.newVisitor - New Visitor
    * @param {number} params.lastTimestamp - Last Time Stamp
    * @param {boolean} params.extension - Extension Status
-   * @param {boolean=} params.reconnect - Reconnect flag
+   * @param {boolean} params.reconnect - Reconnect flag
    */
   constructor({
     extension,
@@ -100,11 +100,11 @@ export class UnitInitMessage extends BaseMessage {
    * @param {string} params.creativeId - Creative ID
    * @param {Array<object>} params.keyValues - Key values for targeting
    * @param {string} params.lineItemId - Line Item ID
-   * @param {number=} params.parentMawId - Parent MAW ID
-   * @param {number=} params.passback - Passback
+   * @param {number} params.parentMawId - Parent MAW ID
+   * @param {number} params.passback - Passback
    * @param {string} params.path - Path of the Ad Unit
    * @param {number} params.position - Waterfall Position
-   * @param {boolean=} params.reconnect - reconnect
+   * @param {boolean} params.reconnect - reconnect
    * @param {string} params.servedSize - Served Size
    * @param {Array<string>} params.sizes - Available sizes
    * @param {boolean} params.isHouseDemand - Is House Demand
