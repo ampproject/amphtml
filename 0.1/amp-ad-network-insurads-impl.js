@@ -37,10 +37,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.code_ = Math.random().toString(36).substring(2, 15);
     /** @private {string} */
     this.path_ = this.element.getAttribute('data-slot');
-    /** @private {!Array<string>} */
-    this.requiredKeys_ = [];
-    /** @private {!Array<!Object<string, string>>} */
-    this.requiredKeyValues_ = [];
+    /** @private {!Object<string, *>} */
+    this.requiredKeyValues_ = {};
     /** @private {?Object} */
     this.originalRtcConfig_ = tryParseJson(
       this.element.getAttribute('rtc-config')
@@ -153,7 +151,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       opt_serveNpaSignal
     );
     this.getAdUrlDeferred.promise.then((doubleClickUrl) => {
-      3;
       const url = new URL(doubleClickUrl);
       if (self.refreshCount_ > 0) {
         console./*Ok*/ log('Refresh count:', self.refreshCount_);
@@ -298,23 +295,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleAppInit_(message) {
+    // TODO: REVIEW WITH ANDRE
     if (message.status !== undefined) {
       this.appEnabled_ = message.status > 0 ? true : false;
-      this.requiredKeys_.push(...message.requiredKeys); // # TODO: Needs to handle the key values, like duplicates, accepted keys, etc
 
-      if (this.requiredKeys_.length > 0) {
-        const jsonTargeting =
-          tryParseJson(this.element.getAttribute('json')) || {};
-        this.requiredKeys_.forEach((key) => {
-          const {targeting} = jsonTargeting;
-          if (targeting && targeting[key]) {
-            this.requiredKeyValues_.push({
-              key,
-              value: targeting[key],
-            });
-          }
-        });
-      }
+      this.populateRequiredKeysAndValues_(message.requiredKeys);
     }
 
     if (message.iabTaxonomy !== undefined) {
@@ -568,6 +553,25 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     } else {
       this.element.removeAttribute('rtc-config');
     }
+  }
+
+  /**
+   * Populates requiredKeys_ and requiredKeyValues_ from requiredKeys and element targeting.
+   * @param {!Array<string>} requiredKeys
+   * @private
+   */
+  populateRequiredKeysAndValues_(requiredKeys) {
+    if (!Array.isArray(requiredKeys) || requiredKeys.length === 0) {
+      return;
+    }
+
+    const jsonTargeting = tryParseJson(this.element.getAttribute('json')) || {};
+    const {targeting} = jsonTargeting;
+    requiredKeys.forEach((key) => {
+      if (targeting && targeting[key]) {
+        this.requiredKeyValues_[key] = targeting[key];
+      }
+    });
   }
 }
 
