@@ -123,15 +123,12 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
           : null;
 
         this.extension_.bannerChanged({
-          id: this.getAdUnitId_(),
+          unitId: this.getAdUnitId_(),
           shortId: this.adUnitId_,
-          creative: null,
-          order: null,
-          orderLine: null,
           impressionId: this.generateImpressionId_(),
-          market: entry ? entry.provider : '',
-          creativeWidth: this.adResponseData_.servedSize.width,
-          creativeHeight: this.adResponseData_.servedSize.height,
+          provider: entry ? entry.provider : '',
+          width: this.adResponseData_.servedSize.width,
+          height: this.adResponseData_.servedSize.height,
         });
       }
     });
@@ -313,14 +310,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (!this.extensionReadyDeferred_.isDone()) {
       if (this.extension_) {
         this.extension_.adUnitCreated({
-          id: this.getAdUnitId_(),
+          unitId: this.getAdUnitId_(),
           shortId: message.adUnitId,
           sizes: this.sizes_,
-          configuration: null,
-          customTargeting: null,
           rotation: message.rotation ? message.rotation : false,
-          isFirstPrint: false,
-          isTracking: false,
           visible: this.isViewable_,
           width,
           height,
