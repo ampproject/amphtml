@@ -23,7 +23,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.element.setAttribute('data-enable-refresh', 'false');
 
     /** @private {number} */
-    this.adUnitId_ = 0;
+    this.unitId_ = 0;
 
     /** @private {?Object} */
     this.adResponseData_ = null;
@@ -123,8 +123,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
           : null;
 
         this.extension_.bannerChanged({
-          id: this.getAdUnitId_(),
-          shortId: this.adUnitId_,
+          id: this.getUnitId_(),
+          shortId: this.unitId_,
           creative: null,
           order: null,
           orderLine: null,
@@ -298,7 +298,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleUnitInit_(message) {
-    this.adUnitId_ = message.adUnitId;
+    this.unitId_ = message.unitId;
     this.element.setAttribute('tg-zone', this.getUnitId_());
 
     if (window.frames['TG-listener'] && !this.extension_) {
@@ -312,9 +312,9 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     if (!this.extensionReadyDeferred_.isDone()) {
       if (this.extension_) {
-        this.extension_.adUnitCreated({
-          id: this.getAdUnitId_(),
-          shortId: message.adUnitId,
+        this.extension_.unitCreated({
+          id: this.getUnitId_(),
+          shortId: message.unitId,
           sizes: this.sizes_,
           configuration: null,
           customTargeting: null,
@@ -351,7 +351,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handlerExtensionMessages_(msg) {
-    if (msg.data.adUnitId !== this.getUnitId_()) {
+    if (msg.data.unitId !== this.getUnitId_()) {
       return;
     }
 
@@ -407,7 +407,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   getUnitId_() {
     const unitId =
-      this.adUnitId_ + '.' + this.element.getAttribute('data-amp-slot-index');
+      this.unitId_ + '.' + this.element.getAttribute('data-amp-slot-index');
     return unitId;
   }
 
