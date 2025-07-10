@@ -34,7 +34,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.parentMawId_ = 0;
 
     /** @private {string} */
-    this.code_ = Math.random().toString(36).substring(2, 15);
+    this.unitCode_ = Math.random().toString(36).substring(2, 15);
     /** @private {string} */
     this.path_ = this.element.getAttribute('data-slot');
     /** @private {!Object<string, *>} */
@@ -72,7 +72,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     /** @private {?Core} */
     this.core_ = Core.start(this.win, canonicalUrl, publicId);
-    this.core_.registerAdUnit(this.code, this.handleReconnect_.bind(this), {
+    this.core_.registerUnit(this.unitCode_, this.handleReconnect_.bind(this), {
       appInitHandler: (message) => this.handleAppInit_(message),
       unitInitHandler: (message) => this.handleUnitInit_(message),
       unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
@@ -299,11 +299,11 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   handleUnitInit_(message) {
     this.adUnitId_ = message.adUnitId;
-    this.element.setAttribute('tg-zone', this.getAdUnitId_());
+    this.element.setAttribute('tg-zone', this.getUnitId_());
 
     if (window.frames['TG-listener'] && !this.extension_) {
       this.extension_ = ExtensionCommunication.start(
-        this.getAdUnitId_(),
+        this.getUnitId_(),
         this.handlerExtensionMessages_.bind(this)
       );
     }
@@ -337,7 +337,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleUnitWaterfall_(message) {
-    if (message.code !== this.code) {
+    if (message.unitCode !== this.unitCode_) {
       return;
     }
 
@@ -351,7 +351,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handlerExtensionMessages_(msg) {
-    if (msg.data.adUnitId !== this.getAdUnitId_()) {
+    if (msg.data.adUnitId !== this.getUnitId_()) {
       return;
     }
 
@@ -369,7 +369,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   onVisibilityChange_(visibilityData) {
     if (this.isViewable_ !== visibilityData.isViewable && this.appEnabled) {
-      this.core_.sendUnitSnapshot(this.code_, visibilityData.isViewable);
+      this.core_.sendUnitSnapshot(this.unitCode_, visibilityData.isViewable);
     }
     this.isViewable_ = visibilityData.isViewable;
   }
@@ -384,7 +384,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     if (this.appEnabled_) {
       const entry = this.waterfall_ ? this.waterfall_.getCurrentEntry() : null;
       const unitInit = {
-        code: this.code_,
+        unitCode: this.unitCode_,
         keyValues: this.requiredKeyValues_,
         path: entry ? entry.path : this.path_,
         lineItemId: this.adResponseData_.lineItemId,
@@ -401,14 +401,14 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
   }
 
   /**
-   * Return the Full AdUnit Id with the slot index
+   * Return the Full Unit Id with the slot index
    * @return {string}
    * @private
    */
-  getAdUnitId_() {
-    const adUnitId =
+  getUnitId_() {
+    const unitId =
       this.adUnitId_ + '.' + this.element.getAttribute('data-amp-slot-index');
-    return adUnitId;
+    return unitId;
   }
 
   /**
@@ -423,7 +423,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     }
 
     if (this.extension_) {
-      this.extension_.adUnitRemoved(this.getAdUnitId_());
+      this.extension_.unitRemoved(this.getUnitId_());
       this.extension_ = null;
     }
   }
