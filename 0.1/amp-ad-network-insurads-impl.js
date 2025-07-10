@@ -6,6 +6,7 @@ import {Services} from '#service';
 import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
 import {ExtensionCommunication} from './extension';
+import {CryptoUtils} from './utilities';
 import {VisibilityTracker} from './visibility-tracking';
 import {Waterfall} from './waterfall';
 
@@ -34,7 +35,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.parentMawId_ = 0;
 
     /** @private {string} */
-    this.unitCode_ = Math.random().toString(36).substring(2, 15);
+    this.unitCode_ = new CryptoUtils().generateCode();
     /** @private {string} */
     this.path_ = this.element.getAttribute('data-slot');
     /** @private {!Object<string, *>} */
@@ -125,7 +126,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.extension_.bannerChanged({
           unitId: this.getUnitId_(),
           shortId: this.unitId_,
-          impressionId: this.generateImpressionId_(),
+          impressionId: new CryptoUtils().generateImpressionId(),
           provider: entry ? entry.provider : '',
           width: this.adResponseData_.servedSize.width,
           height: this.adResponseData_.servedSize.height,
@@ -361,7 +362,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   onVisibilityChange_(visibilityData) {
-    if (this.isViewable_ !== visibilityData.isViewable && this.appEnabled) {
+    if (this.isViewable_ !== visibilityData.isViewable && this.appEnabled_) {
       this.core_.sendUnitSnapshot(this.unitCode_, visibilityData.isViewable);
     }
     this.isViewable_ = visibilityData.isViewable;
@@ -534,31 +535,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.requiredKeyValues_[key] = targeting[key];
       }
     });
-  }
-
-  /**
-   * Generates an impression id.
-   * @return {string}
-   * @private
-   */
-  generateImpressionId_() {
-    return this.generate_(43).toLowerCase();
-  }
-
-  /**
-   * Generates a random string.
-   * @param {number} length
-   * @return {string}
-   * @private
-   */
-  generate_(length) {
-    let text = '';
-    const charSet =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < length; i++) {
-      text += charSet.charAt(Math.floor(Math.random() * charSet.length));
-    }
-    return text;
   }
 }
 

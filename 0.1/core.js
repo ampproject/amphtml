@@ -1,7 +1,6 @@
 import {Cookie} from './cookie';
 import {EngagementTracker} from './engagement-tracking';
 import {ExtensionCommunication} from './extension';
-import {LockedId} from './lockedid';
 import {
   AppInitMessage,
   HandshakeMessage,
@@ -12,6 +11,7 @@ import {
   UnitSnapshotMessage,
 } from './messages';
 import {RealtimeManager} from './realtime-manager';
+import {LockedId} from './utilities';
 
 /**
  * Insurads Core
