@@ -299,8 +299,6 @@ export class Core {
   processAppInitResponse_(appInitMessage) {
     const {message} = appInitMessage;
 
-    // TODO: This needs to be improved
-
     // Merge the app init response with the existing one
     // This allows us to accumulate configuration data
     // and avoid overwriting previous responses.
@@ -319,7 +317,6 @@ export class Core {
       this.status = message.status;
       this.appEnabled = message.status > 0 ? true : false;
 
-      // TODO: Verify this, should we destroy?
       if (!this.appEnabled) {
         this.destroy();
         return;
@@ -337,15 +334,13 @@ export class Core {
       }
 
       // Setup the extension with the initial parameters
-      // TODO: We don't have all the parameters
-      // TODO: Do this only once, we receive multiple app inits
       if (this.extension_) {
         this.extension_.setup(
           message.applicationId,
           message.countryCode,
           message.sectionId,
           this.cookies_.getSessionCookie(),
-          this.ivm,
+          message.ivm,
           this.engagement_.isEngaged() ? 1 : 0
         );
       }
