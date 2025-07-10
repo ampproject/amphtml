@@ -265,9 +265,13 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @private
    */
   handleAppInit_(message) {
-    // TODO: REVIEW WITH ANDRE
     if (message.status !== undefined) {
       this.appEnabled_ = message.status > 0 ? true : false;
+
+      if (!this.appEnabled_) {
+        this.destroy_();
+        return;
+      }
 
       if (!this.appReadyDeferred_.isDone()) {
         this.appReadyDeferred_.resolve();
