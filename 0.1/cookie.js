@@ -8,7 +8,6 @@ const SCD = 30 * 60; // 30 minutes
 const VCD = 6 * 30 * 24 * 60 * 60; // 6 months
 
 export class Cookie {
-
   /**
    * CookieMonster constructor`
    * @param {Window} win
@@ -37,11 +36,7 @@ export class Cookie {
     /** @private {boolean} */
     this.newVisitor_ = this.sessionCookie_ ? false : true;
     /** @private {boolean|null} */
-    this.cookiesEnabled_ = this.writeAndTestCookie_(
-      SCN,
-      SCD,
-      this.sessionId_
-    );
+    this.cookiesEnabled_ = this.writeAndTestCookie_(SCN, SCD, this.sessionId_);
 
     // Read visitor cookie
     /** @private {string|null} */
@@ -120,7 +115,7 @@ export class Cookie {
     // If application does not support cookies, erase it
     // setting a negative value in the duration
     const dt = new Date();
-    dt.setTime(dt.getTime() + (this.cookies_ ? cookieDuration : -1) * 1000);
+    dt.setTime(dt.valueOf() + (this.cookies_ ? cookieDuration : -1) * 1000);
     const expires = '; expires=' + dt.toGMTString();
     this.doc_.cookie =
       cookieName +
@@ -157,12 +152,12 @@ export class Cookie {
 
   /**
    * Prepare visitor cookie
-   * @param {String} lockedId
+   * @param {string} lockedId
    * @param {number} ts - The server timestamp
    * @return {string} - The formatted visitor cookie string
    */
   prepareVisitorCookie_(lockedId, ts) {
-    const visitCookieParts = (this.visitCookie_ || '').split(".");
+    const visitCookieParts = (this.visitCookie_ || '').split('.');
 
     let retVal =
       this.sessionId_ +
