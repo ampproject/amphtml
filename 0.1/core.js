@@ -21,7 +21,7 @@ export class Core {
   static instance_ = null;
 
   /** @private {!Object<string, UnitHandlers>} */
-  unitHandlersMap = {};
+  unitHandlerMap = {};
 
   /** @private {!EngagementTracker} */
   engagement_ = null;
@@ -75,14 +75,14 @@ export class Core {
    * @param {Object=} handlers - Message handlers for this specific ad unit.
    */
   registerUnit(unitCode, reconnectHandler, handlers = {}) {
-    this.unitHandlersMap[unitCode] = new UnitHandlers(
+    this.unitHandlerMap[unitCode] = new UnitHandlers(
       reconnectHandler,
       new MessageHandler(handlers)
     );
 
     // If the app is already initialized, immediately send the config to the new ad unit.
     if (this.appInitResponse_) {
-      this.unitHandlersMap[unitCode].messageHandlers.processMessage(
+      this.unitHandlerMap[unitCode].messageHandlers.processMessage(
         this.appInitResponse_
       );
     }
@@ -237,8 +237,8 @@ export class Core {
     this.sendHandshake_();
     this.sendAppInit_(reconnect);
     if (reconnect) {
-      for (const unitCode in this.unitHandlersMap) {
-        this.unitHandlersMap[unitCode].reconnectHandler();
+      for (const unitCode in this.unitHandlerMap) {
+        this.unitHandlerMap[unitCode].reconnectHandler();
       }
     }
   }
@@ -246,7 +246,7 @@ export class Core {
   /**
    * Central dispatcher for all incoming WebSocket messages.
    * Routes messages to the correct ad unit handler.
-   * Brodcasts global messages
+   * Broadcasts global messages
    * @param {string} raw The raw message string from the WebSocket.
    * @private
    */
@@ -267,9 +267,9 @@ export class Core {
         }
 
         if (action === 'app-init-response') {
-          // Global message, should brodcast to all units
-          for (const unitCode in this.unitHandlersMap) {
-            this.unitHandlersMap[unitCode].messageHandlers.processMessage(
+          // Global message, should broadcast to all units
+          for (const unitCode in this.unitHandlerMap) {
+            this.unitHandlerMap[unitCode].messageHandlers.processMessage(
               parsedMessage
             );
           }
@@ -280,8 +280,8 @@ export class Core {
 
         const {unitCode} = parsedMessage.message;
 
-        if (unitCode && this.unitHandlersMap[unitCode]) {
-          const unitHandlers = this.unitHandlersMap[unitCode];
+        if (unitCode && this.unitHandlerMap[unitCode]) {
+          const unitHandlers = this.unitHandlerMap[unitCode];
           unitHandlers.messageHandlers.processMessage(parsedMessage);
         }
       } catch (e) {
@@ -325,9 +325,6 @@ export class Core {
         return;
       }
 
-      console /*OK*/
-        .log('App Init:', message);
-
       if (!this.engagement_) {
         const config = {
           ivm: message.ivm,
@@ -353,7 +350,10 @@ export class Core {
         );
       }
 
-      this.cookie_.updateVisitCookie(message.lockedId, message.serverTimestamp);
+      this.cookies_.updateVisitCookie(
+        message.lockedId,
+        message.serverTimestamp
+      );
     }
   }
 
@@ -366,15 +366,11 @@ export class Core {
     this.sendPageStatus_(state);
 
     if (this.extension_) {
-      // TODO: Create BrowserStates and extend with Idle,etc
       this.extension_.engagementStatus({
         index: state.isEngaged ? 1 : 0,
         name: state.isEngaged ? 'Active' : 'Inactive',
       });
     }
-
-    console /*OK*/
-      .log('Engagement changed:', state.isEngaged, state);
   }
 
   /**
@@ -383,8 +379,6 @@ export class Core {
    * @public
    */
   destroy() {
-    console /*OK*/
-      .log('Destroying Core instance');
     if (this.unlistenEngagement_) {
       this.unlistenEngagement_();
       this.unlistenEngagement_ = null;
