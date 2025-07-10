@@ -55,6 +55,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     /** @private {?ExtensionCommunication} */
     this.extension_ = null;
+    /** @private @const {!Deferred} */
+    this.extensionReadyDeferred_ = new Deferred();
 
     /** @private {?Waterfall} */
     this.waterfall_ = null;
@@ -112,9 +114,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.sendUnitInit_();
     });
 
-    if (this.extension_) {
-      this.extension_.bannerChanged(this.unitInfo);
-    }
+    this.extensionReadyDeferred_.promise.then(() => {});
 
     return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
@@ -290,22 +290,35 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     const {height, width} = this.creativeSize_ || this.initialSize_;
 
+    // TODO: try to run only the first time
     this.extension_.adUnitCreated({
       id: this.getAdUnitId_(),
       shortId: message.adUnitId,
       sizes: this.sizes_,
-      instance: this.element.getAttribute('data-amp-slot-index'),
       configuration: null,
       customTargeting: null,
       rotation: message.rotation ? message.rotation : false,
-      isFirstPrint: this.refreshCount_ === 0,
+      isFirstPrint: false,
       isTracking: false,
       visible: this.isViewable_,
       width,
       height,
-      dfpMapping: null,
-      isAmpSlot: true,
     });
+
+    // TODO: resolve promises
+    if (this.extension_) {
+      this.extension_.bannerChanged({
+        id: this.getAdUnitId_(),
+        shortId: this.adUnitId_,
+        creative: null,
+        order: null,
+        orderLine: null,
+        impressionId: 123234, // check function from client script
+        market: '', // provider from current entry (m)
+        creativeWidth: width,
+        creativeHeight: height,
+      });
+    }
   }
 
   /**
