@@ -108,3 +108,39 @@ export class LockedId {
     return vendor + '~' + renderer;
   }
 }
+
+export class CryptoUtils {
+  /** constructor */
+  constructor() {}
+
+  /**
+   * Generates a random code.
+   * @return {string}
+   */
+  generateCode() {
+    return Math.random().toString(36).substring(2, 15);
+  }
+  /**
+   * Generates an impression id.
+   * @return {string}
+   */
+  generateImpressionId() {
+    return this.generate_(43).toLowerCase();
+  }
+
+  /**
+   * Generates a random string.
+   * @param {number} length
+   * @return {string}
+   * @private
+   */
+  generate_(length) {
+    let text = '';
+    const charSet =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < length; i++) {
+      text += charSet.charAt(Math.floor(Math.random() * charSet.length));
+    }
+    return text;
+  }
+}
