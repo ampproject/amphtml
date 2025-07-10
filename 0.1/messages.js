@@ -244,12 +244,12 @@ export class AppInitResponseMessage extends BaseMessage {
 export class UnitInitResponseMessage extends BaseMessage {
   /**
    * @param {string} code - Ad unit code identifier
-   * @param {string} adUnitId - Ad unit ID
+   * @param {string} unitId - Ad unit ID
    */
-  constructor(code, adUnitId) {
+  constructor(code, unitId) {
     super('unit-init-response', {
       code,
-      adUnitId,
+      unitId,
     });
   }
 }
@@ -338,7 +338,7 @@ export class MessageFactory {
       case 'unit-init-response':
         return new UnitInitResponseMessage(
           message.code || 'unknown',
-          message.adunitId || 'unknown'
+          message.unitId || 'unknown'
         );
 
       case 'unit-waterfall':

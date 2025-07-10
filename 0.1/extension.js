@@ -17,17 +17,17 @@ export class ExtensionCommunication {
 
   /**
    * Returns the singleton instance of ExtensionCommunication.
-   * @param {string} adUnitId
+   * @param {string} unitId
    * @param {function()} handler message handler
    * @return {!ExtensionCommunication}
    * @public
    */
-  static start(adUnitId, handler = {}) {
+  static start(unitId, handler = {}) {
     if (!ExtensionCommunication.instance_) {
       ExtensionCommunication.instance_ = new ExtensionCommunication();
     }
 
-    ExtensionCommunication.instance_.adUnitHandlerMap_[adUnitId] = handler;
+    ExtensionCommunication.instance_.adUnitHandlerMap_[unitId] = handler;
 
     return ExtensionCommunication.instance_;
   }
@@ -62,8 +62,8 @@ export class ExtensionCommunication {
    * @private
    */
   handlerExtensionMessages_(message) {
-    this.adUnitHandlerMap_[message.data.adUnitId] &&
-      this.adUnitHandlerMap_[message.data.adUnitId](message);
+    this.adUnitHandlerMap_[message.data.unitId] &&
+      this.adUnitHandlerMap_[message.data.unitId](message);
   }
 
   /**
