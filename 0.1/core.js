@@ -399,6 +399,8 @@ export class Core {
       this.extension_.destroy();
       this.extension_ = null;
     }
+
+    this.unitHandlerMap = {};
   }
 }
 
