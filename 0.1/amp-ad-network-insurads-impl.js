@@ -114,7 +114,25 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.sendUnitInit_();
     });
 
-    this.extensionReadyDeferred_.promise.then(() => {});
+    this.extensionReadyDeferred_.promise.then(() => {
+      if (this.extension_) {
+        const entry = this.waterfall_
+          ? this.waterfall_.getCurrentEntry()
+          : null;
+
+        this.extension_.bannerChanged({
+          id: this.getAdUnitId_(),
+          shortId: this.adUnitId_,
+          creative: null,
+          order: null,
+          orderLine: null,
+          impressionId: this.generateImpressionId_(),
+          market: entry ? entry.provider : '',
+          creativeWidth: this.adResponseData_.servedSize.width,
+          creativeHeight: this.adResponseData_.servedSize.height,
+        });
+      }
+    });
 
     return this.dCHelper.callMethod('extractSize', responseHeaders);
   }
@@ -290,34 +308,24 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     const {height, width} = this.creativeSize_ || this.initialSize_;
 
-    // TODO: try to run only the first time
-    this.extension_.adUnitCreated({
-      id: this.getAdUnitId_(),
-      shortId: message.adUnitId,
-      sizes: this.sizes_,
-      configuration: null,
-      customTargeting: null,
-      rotation: message.rotation ? message.rotation : false,
-      isFirstPrint: false,
-      isTracking: false,
-      visible: this.isViewable_,
-      width,
-      height,
-    });
+    if (!this.extensionReadyDeferred_.isDone()) {
+      if (this.extension_) {
+        this.extension_.adUnitCreated({
+          id: this.getAdUnitId_(),
+          shortId: message.adUnitId,
+          sizes: this.sizes_,
+          configuration: null,
+          customTargeting: null,
+          rotation: message.rotation ? message.rotation : false,
+          isFirstPrint: false,
+          isTracking: false,
+          visible: this.isViewable_,
+          width,
+          height,
+        });
+      }
 
-    // TODO: resolve promises
-    if (this.extension_) {
-      this.extension_.bannerChanged({
-        id: this.getAdUnitId_(),
-        shortId: this.adUnitId_,
-        creative: null,
-        order: null,
-        orderLine: null,
-        impressionId: 123234, // check function from client script
-        market: '', // provider from current entry (m)
-        creativeWidth: width,
-        creativeHeight: height,
-      });
+      this.extensionReadyDeferred_.resolve();
     }
   }
 
@@ -531,6 +539,31 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.requiredKeyValues_[key] = targeting[key];
       }
     });
+  }
+
+  /**
+   * Generates an impression id.
+   * @return {string}
+   * @private
+   */
+  generateImpressionId_() {
+    return this.generate_(43).toLowerCase();
+  }
+
+  /**
+   * Generates a random string.
+   * @param {number} length
+   * @return {string}
+   * @private
+   */
+  generate_(length) {
+    let text = '';
+    const charSet =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < length; i++) {
+      text += charSet.charAt(Math.floor(Math.random() * charSet.length));
+    }
+    return text;
   }
 }
 
