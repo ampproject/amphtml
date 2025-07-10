@@ -27,6 +27,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     /** @private {?Object} */
     this.adResponseData_ = null;
+    /** @private {?Array<!Array<number>>} */
+    this.sizes_ = null;
 
     /** @private {number} */
     this.parentMawId_ = 0;

@@ -104,84 +104,92 @@ export class ExtensionCommunication {
 
   /**
    *  Setup the extension communication channel
-   * @param {number} applicationId - The application ID
-   * @param {string} country - The country code
-   * @param {number} section - The section ID
-   * @param {string} sessionId - The session ID
-   * @param {boolean} ivm - IntelliSense Viewability Mode
-   * @param {BrowserState} state - The current browser state
-   *
-   * */
-  setup(applicationId, country, section, sessionId, ivm, state) {
+   *  @param {{
+   *    applicationId: number,
+   *    country: string,
+   *    section: number,
+   *    sessionId: string,
+   *    ivm: boolean,
+   *    state: BrowserState
+   *  }} params
+   */
+  setup(params) {
     const conf = {
-      sessionId,
-      appId: applicationId,
-      section,
+      sessionId: params.sessionId,
+      appId: params.applicationId,
+      section: params.section,
       // eslint-disable-next-line local/camelcase
-      g_country: country,
-      ivm,
+      g_country: params.country,
+      ivm: params.ivm,
     };
 
     // Send configuration
     this.sendIframeMessage_('cfg', conf);
     // Send browser current status
-    this.engagementStatus(state);
+    this.engagementStatus(params.state);
   }
 
   /**
    * Send a message when an ad unit is added
-   * @param {AdUnit} adUnit
+   * @param {string} unitId
    * */
-  adUnitRemoved(adUnit) {
-    this.sendIframeMessage_('adUnitRemoved', {id: adUnit.id});
+  adUnitRemoved(unitId) {
+    this.sendIframeMessage_('adUnitRemoved', {id: unitId});
   }
 
   /**
-   * Send a message when a banner is changed
-   * @param {AdUnit} adUnit
-   * */
-  bannerChanged(adUnit) {
-    console /*Ok*/
-      .log(adUnit);
-    // const entry = adUnit.getCurrentEntry();
-    // if (!entry) {
-    //   return;
-    // }
-    // this.sendIframeMessage_('bannerChanged', {
-    //   id: adUnit.id,
-    //   index: entry.index,
-    //   creative: entry.iatCId,
-    //   order: entry.iatOid,
-    //   orderLine: entry.iatOlId,
-    //   impressionId: entry.iid,
-    //   market: entry.m || ' ',
-    //   creativeWidth: entry.iatCw,
-    //   creativeHeight: entry.iatCh,
-    //   rotation: adUnit.doNotRotate ? 'Disabled' : 'Enabled',
-    //   dfpMapping: this.getGamMapping(adUnit),
-    // });
-  }
-
-  /**
-   *  Send a message when an ad unit is updated
-   *  @param {AdUnit} adUnit
+   * Send a message when a banner is changed.
+   * @param {{
+   *   unitId: (string),
+   *   shortId: (string),
+   *   impressionId: (string),
+   *   provider: (string),
+   *   width: number,
+   *   height: number
+   * }} params
    */
-  adUnitCreated(adUnit) {
-    this.sendIframeMessage_('adUnitChanged', {
-      id: adUnit.id,
-      shortId: adUnit.adUnitId,
-      sizes: adUnit.sizes,
-      instance: adUnit.id.split('.')[1],
-      configuration: adUnit.config,
-      customTargeting: adUnit.ct,
-      rotation: adUnit.doNotRotate ? 'Disabled' : 'Enabled',
-      isFirstPrint: adUnit.isFirstPrint,
-      isTracking: adUnit.isTrackingUnit,
-      visible: adUnit.isInView(),
-      width: adUnit.position.width,
-      height: adUnit.position.height,
-      dfpMapping: this.getGamMapping(adUnit),
-    });
+  bannerChanged(params) {
+    const msg = {
+      id: params.unitId,
+      shortId: params.shortId,
+      creative: null,
+      order: null,
+      orderLine: null,
+      impressionId: params.impressionId,
+      market: params.provider || '',
+      creativeWidth: params.width,
+      creativeHeight: params.height,
+    };
+    this.sendIframeMessage_('bannerChanged', msg);
+  }
+
+  /**
+   * Send a message when an ad unit is created.
+   * @param {{
+   *   unitId: (string),
+   *   shortId: (string),
+   *   sizes: (!Array<!Array<number>>),
+   *   rotation: (string|boolean),
+   *   visible: (boolean),
+   *   width: (number),
+   *   height: (number),
+   * }} params
+   */
+  adUnitCreated(params) {
+    const msg = {
+      id: params.unitId,
+      shortId: params.shortId,
+      sizes: params.sizes,
+      configuration: null,
+      customTargeting: null,
+      rotation: params.rotation,
+      isFirstPrint: false,
+      isTracking: false,
+      visible: params.visible,
+      width: params.width,
+      height: params.height,
+    };
+    this.sendIframeMessage_('adUnitChanged', msg);
   }
 
   /**
@@ -193,25 +201,5 @@ export class ExtensionCommunication {
       index: state,
       name: BrowserState[state],
     });
-  }
-
-  /**
-   *  Get mapping
-   *  @param {AdUnit} adUnit
-   * @return {object|undefined} - Returns the GAM mapping if available, otherwise undefined
-   */
-  getGamMapping(adUnit) {
-    if (!adUnit.gamMapping) {
-      return undefined;
-    }
-
-    return {
-      creativeWidth: adUnit.gamMapping.cw,
-      creativeHeight: adUnit.gamMapping.ch,
-      slot: adUnit.currentEntryIndex,
-      impDur: adUnit.gamMapping.impDur,
-      dnr: adUnit.gamMapping.dnr,
-      dnrReason: adUnit.gamMapping.dnrReason,
-    };
   }
 }
