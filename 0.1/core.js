@@ -102,15 +102,10 @@ export class Core {
 
     if (this.realtimeManager_) {
       this.realtimeManager_.onReceiveMessage = this.dispatchMessage_.bind(this);
-      this.realtimeManager_.onConnect = () => {
-        this.sendHandshake();
-        this.sendAppInit(reconnect);
-        if (reconnect) {
-          for (const unitCode in this.unitHandlersMap) {
-            this.unitHandlersMap[unitCode].reconnectHandler();
-          }
-        }
-      };
+      this.realtimeManager_.onConnect = this.onRealtimeConnect_.bind(
+        this,
+        reconnect
+      );
       this.realtimeManager_.onDisconnect = (event) => {
         console /*OK*/
           .log('WebSocket disconnected', event);
@@ -123,8 +118,9 @@ export class Core {
 
   /**
    * Sends a handshake message
+   * @private
    */
-  sendHandshake() {
+  sendHandshake_() {
     const handshake = new HandshakeMessage();
     this.realtimeManager_.sendHandshake(handshake.serialize());
   }
@@ -132,8 +128,9 @@ export class Core {
   /**
    * Sends an app initialization message
    * @param {boolean=} reconnect - Reconnect flag
+   * @private
    */
-  sendAppInit(reconnect = false) {
+  sendAppInit_(reconnect = false) {
     const appInit = new AppInitMessage({
       lockedId: this.lockedData_,
       newVisitor: this.cookies_.isNewVisitor(),
@@ -184,8 +181,9 @@ export class Core {
   /**
    * Sends a page status update
    * @param {!Object} state - Engagement state object
+   * @private
    */
-  sendPageStatus(state) {
+  sendPageStatus_(state) {
     if (
       state.isEngaged &&
       this.realtimeManager_ &&
@@ -227,6 +225,21 @@ export class Core {
       console /*OK*/
         .error('Error disconnecting WebSocket:', e);
       return false;
+    }
+  }
+
+  /**
+   * Handles logic to run when the realtime connection is established.
+   * @param {boolean} reconnect
+   * @private
+   */
+  onRealtimeConnect_(reconnect) {
+    this.sendHandshake_();
+    this.sendAppInit_(reconnect);
+    if (reconnect) {
+      for (const unitCode in this.unitHandlersMap) {
+        this.unitHandlersMap[unitCode].reconnectHandler();
+      }
     }
   }
 
@@ -350,9 +363,7 @@ export class Core {
    * @private
    */
   updateEngagementStatus_(state) {
-    if (this.core_) {
-      this.core_.sendPageStatus(state);
-    }
+    this.sendPageStatus_(state);
 
     if (this.extension_) {
       // TODO: Create BrowserStates and extend with Idle,etc
