@@ -8,7 +8,7 @@ export class ExtensionCommunication {
   static instance_ = null;
 
   /** @type {Object<string, function()>} */
-  adUnitHandlerMap_ = {};
+  unitHandlerMap_ = {};
 
   /** @type {Array<object>} */
   queue_ = [];
@@ -27,7 +27,7 @@ export class ExtensionCommunication {
       ExtensionCommunication.instance_ = new ExtensionCommunication();
     }
 
-    ExtensionCommunication.instance_.adUnitHandlerMap_[unitId] = handler;
+    ExtensionCommunication.instance_.unitHandlerMap_[unitId] = handler;
 
     return ExtensionCommunication.instance_;
   }
@@ -57,13 +57,13 @@ export class ExtensionCommunication {
   }
 
   /**
-   * Send message back to adUnit handler
+   * Send message back to unit handler
    * @param {object} message - The message to send
    * @private
    */
   handlerExtensionMessages_(message) {
-    this.adUnitHandlerMap_[message.data.unitId] &&
-      this.adUnitHandlerMap_[message.data.unitId](message);
+    this.unitHandlerMap_[message.data.unitId] &&
+      this.unitHandlerMap_[message.data.unitId](message);
   }
 
   /**
@@ -133,7 +133,7 @@ export class ExtensionCommunication {
    * Send a message when an ad unit is added
    * @param {string} unitId
    * */
-  adUnitRemoved(unitId) {
+  unitRemoved(unitId) {
     this.sendIframeMessage_('adUnitRemoved', {id: unitId});
   }
 
@@ -175,7 +175,7 @@ export class ExtensionCommunication {
    *   height: (number),
    * }} params
    */
-  adUnitCreated(params) {
+  unitCreated(params) {
     const msg = {
       id: params.unitId,
       shortId: params.shortId,

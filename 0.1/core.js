@@ -20,8 +20,8 @@ export class Core {
   /** @private {?Core} */
   static instance_ = null;
 
-  /** @private {!Object<string, AdUnitHandlers>} */
-  adUnitHandlerMap = {};
+  /** @private {!Object<string, UnitHandlers>} */
+  unitHandlersMap = {};
 
   /** @private {!EngagementTracker} */
   engagement_ = null;
@@ -70,19 +70,19 @@ export class Core {
   /**
    * Registers a new ad unit with the Core service.
    * Each ad unit instance on the page should call this.
-   * @param {string} adUnitCode - The unique code for the ad unit.
+   * @param {string} unitCode - The unique code for the ad unit.
    * @param {function()} reconnectHandler - Handler for reconnection logic.
    * @param {Object=} handlers - Message handlers for this specific ad unit.
    */
-  registerAdUnit(adUnitCode, reconnectHandler, handlers = {}) {
-    this.adUnitHandlerMap[adUnitCode] = new AdUnitHandlers(
+  registerUnit(unitCode, reconnectHandler, handlers = {}) {
+    this.unitHandlersMap[unitCode] = new UnitHandlers(
       reconnectHandler,
       new MessageHandler(handlers)
     );
 
     // If the app is already initialized, immediately send the config to the new ad unit.
     if (this.appInitResponse_) {
-      this.adUnitHandlerMap[adUnitCode].messageHandlers.processMessage(
+      this.unitHandlersMap[unitCode].messageHandlers.processMessage(
         this.appInitResponse_
       );
     }
@@ -106,8 +106,8 @@ export class Core {
         this.sendHandshake();
         this.sendAppInit(reconnect);
         if (reconnect) {
-          for (const code in this.adUnitHandlerMap) {
-            this.adUnitHandlerMap[code].reconnectHandler();
+          for (const unitCode in this.unitHandlersMap) {
+            this.unitHandlersMap[unitCode].reconnectHandler();
           }
         }
       };
@@ -147,7 +147,7 @@ export class Core {
   /**
    * Sends an ad unit initialization message
    * @param {{
-   *   code: string,
+   *   unitCode: string,
    *   creativeId: (string|undefined),
    *   isHouseDemand: (boolean|undefined),
    *   keyValues: (Array|undefined),
@@ -173,11 +173,11 @@ export class Core {
 
   /**
    * Sends an ad unit visibility snapshot
-   * @param {string} code - Ad unit code
+   * @param {string} unitCode - Ad unit code
    * @param {number} visible - Visibility percentage (0-1)
    */
-  sendUnitSnapshot(code, visible) {
-    const snapshot = new UnitSnapshotMessage(code, visible);
+  sendUnitSnapshot(unitCode, visible) {
+    const snapshot = new UnitSnapshotMessage(unitCode, visible);
     this.realtimeManager_.send(snapshot.serialize());
   }
 
@@ -254,9 +254,9 @@ export class Core {
         }
 
         if (action === 'app-init-response') {
-          // Global message, should brodcast to all adUnits
-          for (const code in this.adUnitHandlerMap) {
-            this.adUnitHandlerMap[code].messageHandlers.processMessage(
+          // Global message, should brodcast to all units
+          for (const unitCode in this.unitHandlersMap) {
+            this.unitHandlersMap[unitCode].messageHandlers.processMessage(
               parsedMessage
             );
           }
@@ -265,11 +265,11 @@ export class Core {
           return;
         }
 
-        const adUnitCode = parsedMessage.message.code;
+        const {unitCode} = parsedMessage.message;
 
-        if (adUnitCode && this.adUnitHandlerMap[adUnitCode]) {
-          const adUnitHandlers = this.adUnitHandlerMap[adUnitCode];
-          adUnitHandlers.messageHandlers.processMessage(parsedMessage);
+        if (unitCode && this.unitHandlersMap[unitCode]) {
+          const unitHandlers = this.unitHandlersMap[unitCode];
+          unitHandlers.messageHandlers.processMessage(parsedMessage);
         }
       } catch (e) {
         console /*Ok*/
@@ -397,7 +397,7 @@ export class Core {
   }
 }
 
-class AdUnitHandlers {
+class UnitHandlers {
   /** @public {?function()} */
   reconnectHandler = null;
   /** @public {?MessageHandler} */

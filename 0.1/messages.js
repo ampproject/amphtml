@@ -96,7 +96,7 @@ export class AppInitMessage extends BaseMessage {
 export class UnitInitMessage extends BaseMessage {
   /**
    * @param {object} params
-   * @param {string} params.code - Generated Ad Unit ID
+   * @param {string} params.unitCode - Generated Ad Unit ID
    * @param {string} params.creativeId - Creative ID
    * @param {Array<object>} params.keyValues - Key values for targeting
    * @param {string} params.lineItemId - Line Item ID
@@ -110,7 +110,6 @@ export class UnitInitMessage extends BaseMessage {
    * @param {boolean} params.isHouseDemand - Is House Demand
    */
   constructor({
-    code,
     creativeId,
     isHouseDemand,
     keyValues,
@@ -122,9 +121,10 @@ export class UnitInitMessage extends BaseMessage {
     reconnect = false,
     servedSize,
     sizes,
+    unitCode,
   }) {
     super('unit-init', {
-      code,
+      unitCode,
       path,
       lineItemId,
       creativeId,
@@ -145,12 +145,12 @@ export class UnitInitMessage extends BaseMessage {
  */
 export class UnitSnapshotMessage extends BaseMessage {
   /**
-   * @param {string} code - Ad unit ID
+   * @param {string} unitCode - Ad unit ID
    * @param {number} visible -  Whether ad is considered visible
    */
-  constructor(code, visible = {}) {
+  constructor(unitCode, visible = {}) {
     super('unit-snapshot', {
-      code,
+      unitCode,
       visible,
     });
   }
@@ -243,12 +243,12 @@ export class AppInitResponseMessage extends BaseMessage {
  */
 export class UnitInitResponseMessage extends BaseMessage {
   /**
-   * @param {string} code - Ad unit code identifier
+   * @param {string} unitCode - Ad unit code identifier
    * @param {string} unitId - Ad unit ID
    */
-  constructor(code, unitId) {
+  constructor(unitCode, unitId) {
     super('unit-init-response', {
-      code,
+      unitCode,
       unitId,
     });
   }
@@ -337,7 +337,7 @@ export class MessageFactory {
 
       case 'unit-init-response':
         return new UnitInitResponseMessage(
-          message.code || 'unknown',
+          message.unitCode || 'unknown',
           message.unitId || 'unknown'
         );
 
