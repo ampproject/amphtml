@@ -20,9 +20,9 @@ export class Cookie {
     this.domain_ = new URL(canonicalUrl).hostname;
 
     /** @private {boolean} */
-    this.cookies_ = true; // TODO: Get from server?
+    this.cookies_ = true;
     /** @private {boolean} */
-    this.consent_ = true; // TODO: Get from server?
+    this.consent_ = true;
 
     // Generate a random session ID
     /** @private {string|null} */
