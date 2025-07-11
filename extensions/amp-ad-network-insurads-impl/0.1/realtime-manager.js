@@ -1,7 +1,6 @@
 /** @type {string} */
 const HUB_URL_TEMPLATE =
   'wss://amp-messaging.insurads.com/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$';
-//'wss://localhost:5082/rt-pub/node2/hub?pid=$PUBLICID$&ht=$HT$&v=$V$&url=$URL$'
 /** @type {number} */
 const HUB_TYPE_AMP = 2;
 /** @type {number} */
@@ -112,9 +111,6 @@ export class RealtimeManager {
    *  @private
    * */
   onOpen_() {
-    console /*OK*/
-      .log('WebSocket connection opened');
-
     this.clearRetryTimer_();
 
     if (this.onConnect) {
@@ -134,10 +130,6 @@ export class RealtimeManager {
       event.code !== 1000
     ) {
       this.retryCount_++;
-      console /*OK*/
-        .log(
-          `Connection closed, retrying (${this.retryCount_}/${MAX_RETRIES})`
-        );
       this.retryTimer = setTimeout(() => {
         this.connect();
       }, RETRY_DELAY);
@@ -153,8 +145,6 @@ export class RealtimeManager {
       this.onDisconnect(event);
     }
 
-    console /*OK*/
-      .log('Connection closed', event);
     this.handshakeComplete_ = false;
     this.ws = null;
   }
@@ -168,9 +158,6 @@ export class RealtimeManager {
     if (this.onFailedConnect) {
       this.onFailedConnect(event);
     }
-
-    console /*OK*/
-      .error('WebSocket error:', event);
   }
 
   /**
@@ -179,9 +166,6 @@ export class RealtimeManager {
    *  @private
    * */
   onReceiveMessage_(event) {
-    console /*OK*/
-      .log('Received message:', event.data);
-
     if (this.onReceiveMessage) {
       this.onReceiveMessage(event.data);
     }
@@ -192,9 +176,6 @@ export class RealtimeManager {
    *  @private
    * */
   onHandshakeComplete_() {
-    console /*OK*/
-      .log('Handshake completed successfully');
-
     this.handshakeComplete_ = true;
 
     if (this.onHandshakeComplete_) {
@@ -210,9 +191,6 @@ export class RealtimeManager {
    * @private
    */
   processQueuedMessages_() {
-    console /*OK*/
-      .log(`Processing ${this.messageQueue_.length} queued messages`);
-
     while (this.messageQueue_.length > 0) {
       const queuedMessage = this.messageQueue_.shift();
       this.sendImmediately_(queuedMessage);
@@ -226,15 +204,11 @@ export class RealtimeManager {
    */
   connect() {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console /*OK*/
-        .log('Already connected');
       return true;
     }
 
     try {
       if (!this.publicId_ || !this.canonicalUrl_) {
-        console /*OK*/
-          .error('Missing publicId or canonicalUrl for connection');
         return false;
       }
 
@@ -250,18 +224,11 @@ export class RealtimeManager {
       this.ws.addEventListener('error', this.boundOnError_);
       this.ws.addEventListener('message', this.boundOnReceiveMessage_);
 
-      console /*OK*/
-        .log('Connection initiated');
-
       this.clearRetryTimer_();
 
       return true;
     } catch (e) {
-      console /*OK*/
-        .error('Failed to connect:', e);
-
       this.clearRetryTimer_();
-
       return false;
     }
   }
@@ -305,11 +272,8 @@ export class RealtimeManager {
       this.onHandshakeComplete_ = null;
 
       this.ws = null;
-      console /*OK*/
-        .log('Disconnected from WebSocket server');
     } catch (e) {
-      console /*OK*/
-        .error('Error during disconnect:', e);
+      return;
     }
   }
 
@@ -320,8 +284,6 @@ export class RealtimeManager {
    */
   send(message) {
     if (!this.handshakeComplete_) {
-      console /*OK*/
-        .log('Handshake not complete, queueing message');
       this.messageQueue_.push(message);
 
       return true;
@@ -337,22 +299,16 @@ export class RealtimeManager {
    */
   sendHandshake(message) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console /*OK*/
-        .error('Cannot send handshake - WebSocket not connected');
       return false;
     }
 
     try {
       this.ws.send(message);
-      console /*OK*/
-        .log('Handshake sent');
 
       this.onHandshakeComplete_();
 
       return true;
     } catch (e) {
-      console /*OK*/
-        .error('Failed to send handshake', e);
       return false;
     }
   }
@@ -365,8 +321,6 @@ export class RealtimeManager {
    */
   sendImmediately_(message) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console /*OK*/
-        .error('WebSocket not connected');
       return false;
     }
 
@@ -379,8 +333,6 @@ export class RealtimeManager {
       this.ws.send(JSON.stringify(payload) + '\u001e');
       return true;
     } catch (e) {
-      console /*OK*/
-        .error('Failed to send message', e);
       return false;
     }
   }
@@ -394,8 +346,6 @@ export class RealtimeManager {
       clearTimeout(this.retryTimer_);
       this.retryTimer = null;
       this.retryCount = 0;
-      console /*OK*/
-        .log('Retry timer cleared');
     }
   }
 

@@ -197,7 +197,7 @@ export class ExtensionCommunication {
    *  @param {BrowserState} state
    */
   engagementStatus(state) {
-    this.sendIframeMessage('engagementStatusChanged', {
+    this.sendIframeMessage_('engagementStatusChanged', {
       index: state,
       name: BrowserState[state],
     });
