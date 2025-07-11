@@ -318,14 +318,14 @@ export class Core {
       }
 
       if (this.extension_) {
-        this.extension_.setup(
-          message.applicationId,
-          message.countryCode,
-          message.sectionId,
-          this.cookies_.getSessionCookie(),
-          message.ivm,
-          this.engagement_.isEngaged() ? 1 : 0
-        );
+        this.extension_.setup({
+          applicationId: message.applicationId,
+          country: message.countryCode,
+          section: message.sectionId,
+          sessionId: this.cookies_.getSessionCookie(),
+          ivm: message.ivm,
+          state: this.engagement_.isEngaged() ? 1 : 0,
+        });
       }
 
       this.cookies_.updateVisitCookie(
