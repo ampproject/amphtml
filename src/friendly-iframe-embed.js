@@ -295,7 +295,7 @@ function mergeHtml(spec) {
 
   const result = [];
 
-  // Preambule.
+  // Preamble.
   if (ip > 0) {
     result.push(originalHtml.substring(0, ip));
   }
@@ -468,7 +468,7 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * Signal that indicates that all DOM elements have been tranferred to live
+   * Signal that indicates that all DOM elements have been transferred to live
    * embed DOM.
    */
   renderCompleted() {

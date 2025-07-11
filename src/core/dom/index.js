@@ -362,7 +362,7 @@ export function isRTL(doc) {
 }
 
 /**
- * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
+ * Escapes `<`, `>` and other HTML characters with their escaped forms.
  * @param {string} text
  * @return {string}
  */

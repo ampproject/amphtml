@@ -1,5 +1,5 @@
 /**
- * Registred singleton on AMP doc.
+ * Registered singleton on AMP doc.
  * @enum {number}
  */
 export const AMPDOC_SINGLETON_NAME_ENUM = {
