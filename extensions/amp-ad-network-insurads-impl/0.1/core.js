@@ -169,7 +169,7 @@ export class Core {
   /**
    * Sends an ad unit visibility snapshot
    * @param {string} unitCode - Ad unit code
-   * @param {number} visible - Visibility percentage (0-1)
+   * @param {boolean} visible - Visibility
    */
   sendUnitSnapshot(unitCode, visible) {
     const snapshot = new UnitSnapshotMessage(unitCode, visible);

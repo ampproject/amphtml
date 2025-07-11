@@ -99,7 +99,7 @@ export class UnitInitMessage extends BaseMessage {
    * @param {Array<object>} params.keyValues - Key values for targeting
    * @param {string} params.lineItemId - Line Item ID
    * @param {number} params.parentMawId - Parent MAW ID
-   * @param {number} params.passback - Passback
+   * @param {boolean} params.passback - Passback
    * @param {string} params.path - Path of the Ad Unit
    * @param {number} params.position - Waterfall Position
    * @param {boolean} params.reconnect - reconnect
@@ -144,7 +144,7 @@ export class UnitInitMessage extends BaseMessage {
 export class UnitSnapshotMessage extends BaseMessage {
   /**
    * @param {string} unitCode - Ad unit ID
-   * @param {number} visible -  Whether ad is considered visible
+   * @param {boolean} visible -  Whether ad is considered visible
    */
   constructor(unitCode, visible = {}) {
     super('unit-snapshot', {
@@ -283,7 +283,7 @@ export class WaterfallEntry {
    * @param {!Array<!Array<number>>=} params.sizes The ad sizes for this entry.
    * @param {{[key: string]: (string|Array<string>)}=} params.keyValues Specific key-values for this entry.
    * @param {{[key: string]: Object}=} params.vendors Vendor-specific data (e.g., for prebid).
-   * @param {boolean} params.isHouseDemand - Is House Demand
+   * @param {boolean=} params.isHouseDemand - Is House Demand
    */
   constructor({
     isHouseDemand = false,
