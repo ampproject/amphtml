@@ -1,0 +1,162 @@
+<!doctype html>
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>InsurAds example - AMP News Example</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
+  <style amp-custom>
+    amp-ad {
+      max-width: 500px;
+    }
+
+    .talldiv {
+      height: 2000px;
+    }
+
+    amp-ad div[placeholder] {
+      background-color: lightgray;
+    }
+
+    amp-ad div[fallback] {
+      background-color: black;
+    }
+
+    amp-ad div[placeholder]::after {
+      content: 'loading ...';
+    }
+
+    amp-ad div[fallback]::after {
+      content: 'No ad';
+      color: white;
+    }
+
+    amp-ad div[placeholder]::after,
+    amp-ad div[fallback]::after {
+      font-size: 20px;
+      line-height: 30px;
+      text-align: center;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(50% - 15px);
+    }
+
+    .news-section {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0;
+    }
+
+    .news-article {
+      flex: 1;
+      padding: 10px;
+    }
+  </style>
+  <style amp-boilerplate>
+    body {
+      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    }
+
+    @-webkit-keyframes -amp-start {
+      from {
+        visibility: hidden;
+      }
+
+      to {
+        visibility: visible;
+      }
+    }
+
+    @-moz-keyframes -amp-start {
+      from {
+        visibility: hidden;
+      }
+
+      to {
+        visibility: visible;
+      }
+    }
+
+    @-ms-keyframes -amp-start {
+      from {
+        visibility: hidden;
+      }
+
+      to {
+        visibility: visible;
+      }
+    }
+
+    @-o-keyframes -amp-start {
+      from {
+        visibility: hidden;
+      }
+
+      to {
+        visibility: visible;
+      }
+    }
+
+    @keyframes -amp-start {
+      from {
+        visibility: hidden;
+      }
+
+      to {
+        visibility: visible;
+      }
+    }
+  </style>
+  <noscript>
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: none;
+        -moz-animation: none;
+        -ms-animation: none;
+        animation: none;
+      }
+    </style>
+  </noscript>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+  <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <h2>InsurAds example</h2>
+    <h1>Today's Headlines</h1>
+
+    <div style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0;">
+      <h3>Breaking News</h3>
+      <p>Stay updated with the latest news from around the world. Fast, reliable, and always up to date.</p>
+      <button style="background-color: #0066cc; color: white; border: none; padding: 10px 15px; border-radius: 3px;">
+        Subscribe Now
+      </button>
+    </div>
+
+    <amp-ad type="insurads" data-public-id="4WMPI6PV" width="300" height="250" data-multi-size="300x250,300x50,300x50"
+      data-slot="/134642692/AMPTestsV3" json='{"targeting":{"target":["news"],"pos":["amp"]}}'>
+    </amp-ad>
+
+    <div class="news-section">
+      <div class="news-article">
+        <h4>World</h4>
+        <p>Global leaders meet to discuss climate change initiatives and future cooperation.</p>
+      </div>
+      <div class="news-article">
+        <h4>Technology</h4>
+        <p>New smartphone release sets the bar for innovation and user experience.</p>
+      </div>
+      <div class="news-article">
+        <h4>Sports</h4>
+        <p>Local team wins championship in a thrilling final match.</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
