@@ -1,3 +1,5 @@
+import {CryptoUtils} from './utilities';
+
 /** @type {string} */
 const SCN = '___iat_ses';
 /** @type {string} */
@@ -26,9 +28,7 @@ export class Cookie {
 
     // Generate a random session ID
     /** @private {string|null} */
-    this.sessionId_ = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-      .map((n) => (n % 36).toString(36))
-      .join('');
+    this.sessionId_ = CryptoUtils.generateSessionId();
 
     // Read and update session cookie
     /** @private {string|null} */

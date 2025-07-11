@@ -23,9 +23,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
     this.element.setAttribute('data-enable-refresh', 'false');
 
-    /** @private @const {!CryptoUtils} */
-    this.cryptoUtils_ = new CryptoUtils();
-
     /** @private {number} */
     this.unitId_ = 0;
 
@@ -38,7 +35,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     this.parentMawId_ = 0;
 
     /** @private {string} */
-    this.unitCode_ = this.cryptoUtils_.generateCode();
+    this.unitCode_ = CryptoUtils.generateCode();
     /** @private {string} */
     this.path_ = this.element.getAttribute('data-slot');
     /** @private {!Object<string, *>} */
@@ -129,7 +126,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.extension_.bannerChanged({
           unitId: this.getUnitId_(),
           shortId: this.unitId_,
-          impressionId: this.cryptoUtils_.generateImpressionId(),
+          impressionId: CryptoUtils.generateImpressionId(),
           provider: entry ? entry.provider : '',
           width: this.adResponseData_.servedSize.width,
           height: this.adResponseData_.servedSize.height,

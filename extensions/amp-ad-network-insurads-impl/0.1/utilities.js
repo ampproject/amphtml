@@ -103,15 +103,24 @@ export class CryptoUtils {
    * Generates a random code.
    * @return {string}
    */
-  generateCode() {
-    return Math.random().toString(36).substring(2, 15);
+  static generateCode() {
+    return this.generate_(11).toLowerCase();
   }
+
   /**
    * Generates an impression id.
    * @return {string}
    */
-  generateImpressionId() {
+  static generateImpressionId() {
     return this.generate_(43).toLowerCase();
+  }
+
+  /**
+   * Generates a session id.
+   * @return {string}
+   */
+  static generateSessionId() {
+    return this.generate_(16).toUpperCase();
   }
 
   /**
@@ -120,7 +129,7 @@ export class CryptoUtils {
    * @return {string}
    * @private
    */
-  generate_(length) {
+  static generate_(length) {
     let text = '';
     const charSet =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
