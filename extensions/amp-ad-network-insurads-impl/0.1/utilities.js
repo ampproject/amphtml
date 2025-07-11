@@ -1,9 +1,6 @@
 import {stringHash32} from '#core/types/string';
 
 export class LockedId {
-  /** constructor */
-  constructor() {}
-
   /**
    * Get Hash
    * controlHash is the hash returned from server that contains the public ip address of the client
@@ -102,9 +99,6 @@ export class LockedId {
 }
 
 export class CryptoUtils {
-  /** constructor */
-  constructor() {}
-
   /**
    * Generates a random code.
    * @return {string}
