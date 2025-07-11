@@ -107,7 +107,6 @@ export class EngagementTracker {
     this.isEngaged_ = this.calculateEngaged_();
     this.isIdle_ = false;
 
-    // Define listeners as const for clarity and possible future removal
     const onFocus = () => {
       this.isFocused_ = true;
       this.updateEngagement_();
@@ -189,10 +188,7 @@ export class EngagementTracker {
     this.listeners_.forEach((listener) => {
       try {
         listener(this.getState());
-      } catch (e) {
-        console /*OK*/
-          .error('Error in engagement listener:', e);
-      }
+      } catch (e) {}
     });
   }
 
@@ -236,10 +232,7 @@ export class EngagementTracker {
     try {
       const state = this.getState();
       listener(state);
-    } catch (e) {
-      console /*OK*/
-        .error('Error in initial engagement callback:', e);
-    }
+    } catch (e) {}
 
     return () => {
       const index = this.listeners_.indexOf(listener);
@@ -279,9 +272,7 @@ export class EngagementTracker {
     this.unlisteners_.forEach((unlisten) => {
       try {
         unlisten();
-      } catch (e) {
-        // Ignore errors from already-removed listeners
-      }
+      } catch (e) {}
     });
     this.unlisteners_ = [];
     this.listeners_ = [];

@@ -72,13 +72,7 @@ export class DoubleClickHelper {
     if (typeof this.impl_[prefixedName] === 'function') {
       try {
         return this.impl_[prefixedName](...args);
-      } catch (error) {
-        console /*OK*/
-          .error(`Error calling DoubleClick ${methodName}:`, error);
-      }
-    } else {
-      console /*OK*/
-        .warn(`DoubleClick ${methodName} not available`);
+      } catch (error) {}
     }
 
     return null;

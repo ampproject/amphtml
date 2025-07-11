@@ -33,8 +33,6 @@ export class BaseMessage {
       const parsed = JSON.parse(json);
       return new BaseMessage(parsed.action, parsed.message);
     } catch (e) {
-      // console /*OK*/
-      //   .error('Error parsing message:', e);
       return null;
     }
   }
@@ -365,8 +363,6 @@ export class MessageFactory {
       const parsed = JSON.parse(json);
       return this.createMessage(parsed.action, parsed.message);
     } catch (e) {
-      // console /*OK*/
-      //   .error('Error parsing message:', e);
       return null;
     }
   }
@@ -407,9 +403,6 @@ export class MessageHandler {
     if (!messageObj) {
       return false;
     }
-
-    console /*OK*/
-      .log('[iat-debug] Message:', messageObj.action, messageObj.message);
 
     const handler = this.handlers_[messageObj.action];
     if (handler && typeof handler === 'function') {

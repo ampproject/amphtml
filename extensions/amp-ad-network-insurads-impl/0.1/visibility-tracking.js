@@ -56,12 +56,6 @@ export class VisibilityTracker {
       const visibilityChanged =
         Math.abs(this.visibilityPercentage_ - previousVisibility) >= 0.1;
       if (visibilityChanged) {
-        console /*OK*/
-          .log(
-            'Ad visibility:',
-            Math.round(this.visibilityPercentage_ * 100) + '%'
-          );
-
         const visibilityData = {
           visibilityPercentage: this.visibilityPercentage_,
           isVisible: this.visibilityPercentage_ > 0,

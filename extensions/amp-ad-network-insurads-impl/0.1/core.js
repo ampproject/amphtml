@@ -107,8 +107,6 @@ export class Core {
         reconnect
       );
       this.realtimeManager_.onDisconnect = (event) => {
-        console /*OK*/
-          .log('WebSocket disconnected', event);
         if (event.code !== 1000) {
           this.destroy();
         }
@@ -189,8 +187,6 @@ export class Core {
       this.realtimeManager_ &&
       !this.realtimeManager_.isConnected()
     ) {
-      console /*OK*/
-        .log('User is active, reconnecting WebSocket');
       this.setupRealtimeConnection_(true);
     }
 
@@ -208,22 +204,13 @@ export class Core {
    */
   disconnect(clearQueue = true, code = 1000, reason = 'AMP is going away') {
     if (!this.realtimeManager_) {
-      console /*OK*/
-        .log('No active connection to disconnect');
       return false;
     }
 
     try {
-      console /*OK*/
-        .log(`Disconnecting WebSocket: ${reason} (code: ${code})`);
-
-      // Perform the actual disconnection
       this.realtimeManager_.disconnect(clearQueue, code, reason);
-
       return true;
     } catch (e) {
-      console /*OK*/
-        .error('Error disconnecting WebSocket:', e);
       return false;
     }
   }
@@ -273,7 +260,7 @@ export class Core {
               parsedMessage
             );
           }
-          // Save relevant data for core
+
           this.processAppInitResponse_(parsedMessage);
           return;
         }
@@ -284,10 +271,7 @@ export class Core {
           const unitHandlers = this.unitHandlerMap[unitCode];
           unitHandlers.messageHandlers.processMessage(parsedMessage);
         }
-      } catch (e) {
-        console /*Ok*/
-          .error('Error processing incoming message:', e, rawMessage);
-      }
+      } catch (e) {}
     });
   }
 
@@ -311,7 +295,7 @@ export class Core {
       this.appInitResponse_.message = mergedPayload;
     }
 
-    // It is a app init response with general configuration,
+    // It is an app init response with general configuration,
     // Set app status, start engagement and extension if exists.
     if (message.status !== undefined) {
       this.status = message.status;
@@ -333,7 +317,6 @@ export class Core {
         );
       }
 
-      // Setup the extension with the initial parameters
       if (this.extension_) {
         this.extension_.setup(
           message.applicationId,

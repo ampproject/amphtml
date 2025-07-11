@@ -13,8 +13,6 @@ export class ExtensionCommunication {
   /** @type {Array<object>} */
   queue_ = [];
 
-  // constructor() {}
-
   /**
    * Returns the singleton instance of ExtensionCommunication.
    * @param {string} unitId
@@ -46,7 +44,6 @@ export class ExtensionCommunication {
     }
     if (this.listener) {
       this.listener.addEventListener('message', this.handlerExtensionMessages_);
-      // this.listener./*OK*/ postMessage('extensionReady', '*');
       while (this.queue_.length !== 0) {
         this.listener./*OK*/ postMessage(this.queue_.shift(), '*');
       }
@@ -123,9 +120,7 @@ export class ExtensionCommunication {
       ivm: params.ivm,
     };
 
-    // Send configuration
     this.sendIframeMessage_('cfg', conf);
-    // Send browser current status
     this.engagementStatus(params.state);
   }
 
