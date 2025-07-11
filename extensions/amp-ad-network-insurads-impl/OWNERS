@@ -4,7 +4,11 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-ads-reviewers'}, {name: 'joseclimaco'}],
+      owners: [
+        {name: 'ampproject/wg-ads-reviewers'},
+        {name: 'joseclimaco'},
+        {name: 'aribeiro-insurads'},
+      ],
     },
   ],
 }
