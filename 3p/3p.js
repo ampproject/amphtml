@@ -204,7 +204,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
  * @return {undefined}
  */
 export function computeInCoordinatingFrame(global, taskId, work, cb) {
-  return computeInMasterFrame(global, taskId, work, cb);
+  computeInMasterFrame(global, taskId, work, cb);
 }
 
 /**

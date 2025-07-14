@@ -17,7 +17,6 @@ describes.sandboxed('IntegrationAmpContext aliases', {}, (env) => {
     context = Object.create(IntegrationAmpContext.prototype);
     context.master_ = env.sandbox.stub().returns('test-master-window');
     context.isMaster_ = env.sandbox.stub().returns(true);
-    context.computeInMasterFrame = env.sandbox.stub();
   });
 
   it('should delegate coordinator to master', () => {
