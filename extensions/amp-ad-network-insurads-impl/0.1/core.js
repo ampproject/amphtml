@@ -46,8 +46,8 @@ export class Core {
     this.extension_ = win.frames['TG-listener']
       ? new ExtensionCommunication()
       : null;
-    /** @private {!CookieMonster} */
-    this.cookies_ = new Cookie(this.win, this.canonicalUrl);
+    /** @private {!Cookie} */
+    this.cookies_ = new Cookie(this.win);
   }
 
   /**

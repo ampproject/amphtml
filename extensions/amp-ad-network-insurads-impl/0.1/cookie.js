@@ -1,3 +1,5 @@
+import {getCookie, setCookie} from 'src/cookies';
+
 import {CryptoUtils} from './utilities';
 
 /** @type {string} */
@@ -13,13 +15,10 @@ export class Cookie {
   /**
    * CookieMonster constructor`
    * @param {Window} win
-   * @param {string} canonicalUrl
    */
-  constructor(win, canonicalUrl) {
+  constructor(win) {
     /** @private {!Document} */
-    this.doc_ = win.document;
-    /** @private {string} */
-    this.domain_ = new URL(canonicalUrl).hostname;
+    this.win_ = win.document;
 
     /** @private {boolean} */
     this.cookies_ = true;
@@ -102,7 +101,7 @@ export class Cookie {
    * @return {string|undefined} - The value of the cookie or undefined if not found
    */
   getCookie_(cookieName) {
-    return (this.doc_.cookie.match('(^|; )' + cookieName + '=([^;]*)') || 0)[2];
+    return getCookie(this.win_, cookieName);
   }
 
   /**
@@ -112,19 +111,12 @@ export class Cookie {
    * @param {string} cookieValue
    */
   writeCookie_(cookieName, cookieDuration, cookieValue) {
-    // If application does not support cookies, erase it
-    // setting a negative value in the duration
-    const dt = new Date();
-    dt.setTime(dt.valueOf() + (this.cookies_ ? cookieDuration : -1) * 1000);
-    const expires = '; expires=' + dt.toGMTString();
-    this.doc_.cookie =
-      cookieName +
-      '=' +
-      cookieValue +
-      expires +
-      '; domain=' +
-      (this.domain_ === 'localhost' ? '' : '.' + this.domain_) +
-      '; path=/; samesite=lax';
+    const expires = Date.now() + (this.cookies_ ? cookieDuration : -1) * 1000;
+    const options = {
+      highestAvailableDomain: true,
+    };
+
+    setCookie(this.win_, cookieName, cookieValue, expires, options);
   }
 
   /**
