@@ -13,12 +13,12 @@ const VCD = 6 * 30 * 24 * 60 * 60; // 6 months
 
 export class Cookie {
   /**
-   * CookieMonster constructor`
+   * Cookie constructor`
    * @param {Window} win
    */
   constructor(win) {
     /** @private {!Document} */
-    this.win_ = win.document;
+    this.win_ = win;
 
     /** @private {boolean} */
     this.cookies_ = true;
