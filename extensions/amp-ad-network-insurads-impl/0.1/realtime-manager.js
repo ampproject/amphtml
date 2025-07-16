@@ -345,7 +345,7 @@ export class RealtimeManager {
     if (this.retryTimer_) {
       clearTimeout(this.retryTimer_);
       this.retryTimer = null;
-      this.retryCount = 0;
+      this.retryCount_ = 0;
     }
   }
 
