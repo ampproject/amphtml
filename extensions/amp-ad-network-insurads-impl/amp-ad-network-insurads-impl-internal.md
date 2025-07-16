@@ -1,58 +1,61 @@
-# <a name="amp-ad-network-fake-impl"></a> `amp-ad-network-fake-impl`
+# InsurAds _Temporary_
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>This is a fake ad network implementation for local testing only.
-    It produces only one 'request', for a local resource.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>Development</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code></td>
-  </tr>
-</table>
+## Example
 
-## Behavior
+### Basic sample
 
-The 'fake' ad network produces only a single ad request and
-attempts to render it via the A4A fast rendering path. It is intended only
-for testing and demos. To send an ad request with 'fake' ad network, it is
-required that the ad element to have an id value starts with `i-amphtml-demo-`
-which makes the AMP page invalid.
+```html
+<amp-ad
+  width="300"
+  height="250"
+  type="insurads"
+  data-public-id="4WMPI6PV"
+  data-slot="/134642692/amp-samples"
+>
+</amp-ad>
+```
 
-Like all A4A ad networks, you do not place an `<amp-ad-network-fake-impl>`
-tag directly on the page. Instead, you place an `<amp-ad type="fake">` tag.
+### Sample with multisize
 
-The fake implementation will fetch the creative from the given path if using
-the `src` attribute. If using the `srcdoc` attribute the fake impl will write
-the inlined document string as the test creative. Using either `src` or
-`srcdoc` is required.
+```html
+<amp-ad
+  width="300"
+  height="250"
+  type="insurads"
+  data-public-id="4WMPI6PV"
+  data-slot="/134642692/amp-samples"
+  data-multi-size="320x50"
+>
+</amp-ad>
+```
 
-The fake impl loads an A4A creative or an AMP creative and converts it to an A4A
-creative. Use `a4a-conversion` attribute to instruct the fake impl to perform creative
-conversion.
+### Sample with targeting
 
-The fake impl will skip signature verification by default. To enforce this check,
-set `checksig` attribute. This can be useful to test the ad's behavior when signature
-verification fails.
+```html
+<amp-ad
+  width="320"
+  height="50"
+  type="insurads"
+  data-public-id="4WMPI6PV"
+  data-slot="/134642692/amp-samples"
+  json='{"targeting":{"target":["sample"],"pos":["amp"]}}'
+>
+</amp-ad>
+```
 
-## Attributes
+## Configuration
 
-Fake impl largely uses the same tags as `<amp-ad>`. The following are
-special tags for fake or special behaviors of existing tags:
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
 
-**id** Must start with `i-amphtml-demo-` to enable sending ad request.
+## Supported parameters
 
-**type** Must be `"fake"`.
+| Parameter name  | Description                         | Required |
+| --------------- | ----------------------------------- | -------- |
+| width           | Primary size width                  | Yes      |
+| height          | Primary size height                 | Yes      |
+| data-public-id  | Application public id               | Yes      |
+| data-slot       | Ad unit code                        | Yes      |
+| data-multi-size | Comma separated list of other sizes | No       |
+| json            | Custom targeting map                | No       |
 
-**src** The file source.
-
-**srcdoc** Inlined text containing creative's document.
-
-**a4a-conversion** To instruct the fake impl to convert creative response to A4A creative.
-
-**checksig** To enforce the signature check.
+Note: if any of the required parameters is not present, the ad slot will not be filled.
