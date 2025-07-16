@@ -255,7 +255,7 @@ export class UnitInitResponseMessage extends BaseMessage {
 /**
  * Unit Waterfall message
  */
-export class UnitWaterfallMessage extends BaseMessage {
+export class WaterfallMessage extends BaseMessage {
   /**
    * @param {object} params The parameters for the message.
    * @param {string} params.unitCode The unique code for the ad unit.
@@ -343,7 +343,7 @@ export class MessageFactory {
         const entries = (message.entries || []).map(
           (entryData) => new WaterfallEntry(entryData)
         );
-        return new UnitWaterfallMessage({
+        return new WaterfallMessage({
           unitCode: message.unitCode || 'unknown',
           entries,
           commonKeyValues: message.commonKeyValues || {},

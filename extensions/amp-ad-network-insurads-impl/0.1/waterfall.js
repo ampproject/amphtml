@@ -71,8 +71,8 @@ export class Waterfall {
   }
 
   /**
-   * Creates a Waterfall instance from a UnitWaterfallMessage.
-   * @param {!UnitWaterfallMessage} waterfallMessage The message to process.
+   * Creates a Waterfall instance from a WaterfallMessage.
+   * @param {!WaterfallMessage} waterfallMessage The message to process.
    * @return {!Waterfall}
    */
   static fromWaterfallMessage(waterfallMessage) {

@@ -96,7 +96,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         {
           appInitHandler: (message) => this.handleAppInit_(message),
           unitInitHandler: (message) => this.handleUnitInit_(message),
-          waterfallHandler: (message) => this.handleUnitWaterfall_(message),
+          waterfallHandler: (message) => this.handleWaterfall_(message),
         }
       );
     });
@@ -360,7 +360,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    * @param {!Object} message - The app initialization message
    * @private
    */
-  handleUnitWaterfall_(message) {
+  handleWaterfall_(message) {
     if (message.unitCode !== this.unitCode_) {
       return;
     }
