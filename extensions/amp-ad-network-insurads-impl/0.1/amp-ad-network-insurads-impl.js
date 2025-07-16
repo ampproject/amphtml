@@ -1,7 +1,17 @@
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from 'src/consent';
 
 import {Core} from './core';
 import {DoubleClickHelper} from './doubleclick-helper';
@@ -11,6 +21,7 @@ import {VisibilityTracker} from './visibility-tracking';
 import {Waterfall} from './waterfall';
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+
 /** @type {string} */
 const TAG = 'amp-ad-network-insurads-impl';
 
@@ -71,12 +82,22 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     const publicId = this.element.getAttribute('data-public-id');
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
 
-    /** @private {?Core} */
-    this.core_ = Core.start(this.win, canonicalUrl, publicId);
-    this.core_.registerUnit(this.unitCode_, this.handleReconnect_.bind(this), {
-      appInitHandler: (message) => this.handleAppInit_(message),
-      unitInitHandler: (message) => this.handleUnitInit_(message),
-      unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
+    this.consentPromise = this.getConsent().then((consent) => {
+      console /*OK*/
+        .debug('Consent Promise resolved with:', consent);
+      const consentTuple = consent ? this.parseConsent_(consent) : null;
+
+      /** @private {?Core} */
+      this.core_ = Core.start(this.win, canonicalUrl, publicId, consentTuple);
+      this.core_.registerUnit(
+        this.unitCode_,
+        this.handleReconnect_.bind(this),
+        {
+          appInitHandler: (message) => this.handleAppInit_(message),
+          unitInitHandler: (message) => this.handleUnitInit_(message),
+          unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
+        }
+      );
     });
   }
 
@@ -139,6 +160,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
+    console /*OK*/
+      .log('getAdUrl called with consentTuple:', opt_consentTuple);
     this.getAdUrlDeferred = new Deferred();
     this.getAdUrlInsurAdsDeferred = new Deferred();
     const self = this;
@@ -191,6 +214,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.sizes_ = sizesArray;
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
+      console /*OK*/
+        .log('Get Ad Url !!!');
     });
     return this.getAdUrlInsurAdsDeferred.promise;
   }
@@ -539,6 +564,95 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.requiredKeyValues_[key] = targeting[key];
       }
     });
+  }
+
+  /**
+   * Get Consent
+   * @return {Promise<?Array>|undefined} - Resolves with consent state, string, metadata, and shared data, or undefined if no policy ID
+   */
+  getConsent() {
+    const consentPolicyId = super.getConsentPolicy();
+    console /*Ok*/
+      .log('getConsent called with policy ID:', consentPolicyId);
+
+    if (consentPolicyId) {
+      const consentStatePromise = getConsentPolicyState(
+        this.element,
+        consentPolicyId
+      ).catch((err) => {
+        user().error(TAG, 'Error determining consent state', err);
+        return CONSENT_POLICY_STATE.UNKNOWN;
+      });
+
+      const consentStringPromise = getConsentPolicyInfo(
+        this.element,
+        consentPolicyId
+      ).catch((err) => {
+        user().error(TAG, 'Error determining consent string', err);
+        return null;
+      });
+
+      const consentMetadataPromise = getConsentMetadata(
+        this.element,
+        consentPolicyId
+      ).catch((err) => {
+        user().error(TAG, 'Error determining consent metadata', err);
+        return null;
+      });
+
+      const consentSharedDataPromise = getConsentPolicySharedData(
+        this.element,
+        consentPolicyId
+      ).catch((err) => {
+        user().error(TAG, 'Error determining consent shared data', err);
+        return null;
+      });
+
+      return Promise.all([
+        consentStatePromise,
+        consentStringPromise,
+        consentMetadataPromise,
+        consentSharedDataPromise,
+      ]);
+    }
+  }
+
+  /**
+   * Parses the consent tuple into a structured object
+   * @param {Array} consentTuple - The consent tuple
+   * @return {?ConsentTupleDef} The parsed consent object
+   * @private
+   */
+  parseConsent_(consentTuple) {
+    const {consentMetadata, consentSharedData, consentState, consentString} =
+      consentTuple;
+
+    const gdprApplies = consentMetadata
+      ? consentMetadata['gdprApplies']
+      : consentMetadata;
+    const additionalConsent = consentMetadata
+      ? consentMetadata['additionalConsent']
+      : consentMetadata;
+    const consentStringType = consentMetadata
+      ? consentMetadata['consentStringType']
+      : consentMetadata;
+    const purposeOne = consentMetadata
+      ? consentMetadata['purposeOne']
+      : consentMetadata;
+    const gppSectionId = consentMetadata
+      ? consentMetadata['gppSectionId']
+      : consentMetadata;
+
+    return {
+      consentState,
+      consentString,
+      consentStringType,
+      gdprApplies,
+      additionalConsent,
+      consentSharedData,
+      purposeOne,
+      gppSectionId,
+    };
   }
 }
 

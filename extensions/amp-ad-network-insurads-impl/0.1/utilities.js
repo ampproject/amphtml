@@ -4,13 +4,14 @@ export class LockedId {
   /**
    * Get Hash
    * controlHash is the hash returned from server that contains the public ip address of the client
+   * @param {boolean} allowStorage
    * @return {object}
    */
-  getLockedIdData() {
+  getLockedIdData(allowStorage = false) {
     const keyParts = [
       this.getTimeZone_(),
-      this.getCanvasPrint_(),
-      this.getGPUInfo_(),
+      this.getCanvasPrint_(allowStorage),
+      this.getGPUInfo_(allowStorage),
       navigator.language,
       navigator.languages.join(','),
       navigator.systemLanguage || window.navigator.language,
@@ -41,10 +42,14 @@ export class LockedId {
 
   /**
    * Get Canvas Print. Return a string containing the canvas URI data.
+   * @param {boolean} allowStorage
    * @return {string}
    * @private
    * */
-  getCanvasPrint_() {
+  getCanvasPrint_(allowStorage = false) {
+    if (!allowStorage) {
+      return '';
+    }
     const canvas = document.createElement('canvas');
     let ctx;
 
@@ -69,14 +74,14 @@ export class LockedId {
 
   /**
    * Get GPU Info. Return a string containing the GPU vendor and renderer.
+   * @param {boolean} allowStorage
    * @return {string}
    * @private
    */
-  getGPUInfo_() {
-    // TODO: Add validation for consent
-    // if (!this.allowLockedId || !this.consent) {
-    //   return '';
-    // }
+  getGPUInfo_(allowStorage = false) {
+    if (!allowStorage) {
+      return '';
+    }
 
     const canvas = document.createElement('canvas');
     let gl;

@@ -13,6 +13,7 @@ import {
 import {RealtimeManager} from './realtime-manager';
 import {LockedId} from './utilities';
 
+import {hasStorageConsent} from '../../amp-a4a/0.1/amp-a4a';
 /**
  * Insurads Core
  */
@@ -34,20 +35,22 @@ export class Core {
    * @param {Window} win
    * @param {string} canonicalUrl - Canonical URL
    * @param {string} publicId - The public ID
+   * @param {?ConsentTupleDef|null} consentTuple - Consent tuple containing consent data
    */
-  constructor(win, canonicalUrl, publicId) {
-    this.win = win;
-    this.canonicalUrl = canonicalUrl;
-    this.publicId = publicId;
+  constructor(win, canonicalUrl, publicId, consentTuple) {
+    this.win_ = win;
+    this.canonicalUrl_ = canonicalUrl;
+    this.publicId_ = publicId;
+    this.consent_ = hasStorageConsent(consentTuple);
 
     /** @private {!LockedId} */
-    this.lockedData_ = new LockedId().getLockedIdData();
+    this.lockedData_ = new LockedId().getLockedIdData(this.consent_);
     /** @private {!ExtensionCommunication} */
     this.extension_ = win.frames['TG-listener']
       ? new ExtensionCommunication()
       : null;
     /** @private {!Cookie} */
-    this.cookies_ = new Cookie(this.win);
+    this.cookies_ = new Cookie(this.win_, this.consent_);
   }
 
   /**
@@ -55,12 +58,13 @@ export class Core {
    * @param {Window} win - The window object
    * @param {string} canonicalUrl - The canonical URL
    * @param {string} publicId - The public ID
+   * @param {object} consentTuple - Consent tuple containing consent data
    * @return {!Core}
    * @public
    */
-  static start(win, canonicalUrl, publicId) {
+  static start(win, canonicalUrl, publicId, consentTuple) {
     if (!Core.instance_) {
-      Core.instance_ = new Core(win, canonicalUrl, publicId);
+      Core.instance_ = new Core(win, canonicalUrl, publicId, consentTuple);
       Core.instance_.setupRealtimeConnection_();
     }
 
@@ -96,8 +100,8 @@ export class Core {
   setupRealtimeConnection_(reconnect = false) {
     /** @private {!RealtimeManager} */
     this.realtimeManager_ = RealtimeManager.start(
-      this.publicId,
-      this.canonicalUrl
+      this.publicId_,
+      this.canonicalUrl_
     );
 
     if (this.realtimeManager_) {
@@ -310,7 +314,7 @@ export class Core {
         const config = {
           ivm: message.ivm,
         };
-        this.engagement_ = new EngagementTracker(this.win);
+        this.engagement_ = new EngagementTracker(this.win_);
         this.engagement_.init(config);
         this.unlistenEngagement_ = this.engagement_.registerListener(
           this.updateEngagementStatus_.bind(this)

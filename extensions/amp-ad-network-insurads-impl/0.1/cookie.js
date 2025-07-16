@@ -15,15 +15,16 @@ export class Cookie {
   /**
    * Cookie constructor`
    * @param {Window} win
+   * @param {boolean} allowStorage
    */
-  constructor(win) {
+  constructor(win, allowStorage) {
     /** @private {!Document} */
     this.win_ = win;
 
     /** @private {boolean} */
     this.cookies_ = true;
     /** @private {boolean} */
-    this.consent_ = true;
+    this.consent_ = allowStorage;
 
     // Generate a random session ID
     /** @private {string|null} */
@@ -40,6 +41,15 @@ export class Cookie {
     // Read visitor cookie
     /** @private {string|null} */
     this.visitCookie_ = this.getCookie_(VCN);
+
+    console /*OK*/
+      .debug(
+        'CookieMonster: sessionId: %s, sessionCookie: %s, visitCookie: %s, cookiesEnabled: %s',
+        this.sessionId_,
+        this.sessionCookie_,
+        this.visitCookie_,
+        this.cookiesEnabled_
+      );
   }
 
   /**
@@ -77,6 +87,7 @@ export class Cookie {
   isCookiesEnabled() {
     return this.cookiesEnabled_;
   }
+
   /**
    * Get New Visitor
    * @return {boolean}
