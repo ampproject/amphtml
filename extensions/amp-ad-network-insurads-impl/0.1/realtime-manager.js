@@ -49,8 +49,6 @@ export class RealtimeManager {
   onDisconnect = null;
   /** @private {?function(string):void} */
   onReceiveMessage = null;
-  /** @private {?function():void} */
-  onHandshakeComplete_ = null;
 
   // Retry logic
   /** @private {number} */
@@ -87,7 +85,6 @@ export class RealtimeManager {
   static start(publicId, canonicalUrl) {
     if (!RealtimeManager.instance_) {
       RealtimeManager.instance_ = new RealtimeManager(publicId, canonicalUrl);
-      RealtimeManager.instance_.connect();
     }
 
     if (!RealtimeManager.instance_.isConnected()) {
@@ -178,10 +175,6 @@ export class RealtimeManager {
   onHandshakeComplete_() {
     this.handshakeComplete_ = true;
 
-    if (this.onHandshakeComplete_) {
-      this.onHandshakeComplete_();
-    }
-
     // Process any queued messages now that handshake is complete
     this.processQueuedMessages_();
   }
@@ -269,7 +262,6 @@ export class RealtimeManager {
       this.onFailedConnect = null;
       this.onDisconnect = null;
       this.onReceiveMessage = null;
-      this.onHandshakeComplete_ = null;
 
       this.ws = null;
     } catch (e) {
@@ -344,7 +336,7 @@ export class RealtimeManager {
   clearRetryTimer_() {
     if (this.retryTimer_) {
       clearTimeout(this.retryTimer_);
-      this.retryTimer = null;
+      this.retryTimer_ = null;
       this.retryCount_ = 0;
     }
   }
