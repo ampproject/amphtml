@@ -138,7 +138,7 @@ export class RealtimeManager {
 
     if (this.retryTimer_) {
       clearTimeout(this.retryTimer_);
-      this.retryTimer = null;
+      this.retryTimer_ = null;
     }
 
     if (this.onDisconnect) {
