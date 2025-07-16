@@ -130,7 +130,7 @@ export class RealtimeManager {
       event.code !== 1000
     ) {
       this.retryCount_++;
-      this.retryTimer = setTimeout(() => {
+      this.retryTimer_ = setTimeout(() => {
         this.connect();
       }, RETRY_DELAY);
       return;
@@ -138,7 +138,7 @@ export class RealtimeManager {
 
     if (this.retryTimer_) {
       clearTimeout(this.retryTimer_);
-      this.retryTimer = null;
+      this.retryTimer_ = null;
     }
 
     if (this.onDisconnect) {
@@ -345,7 +345,7 @@ export class RealtimeManager {
     if (this.retryTimer_) {
       clearTimeout(this.retryTimer_);
       this.retryTimer = null;
-      this.retryCount = 0;
+      this.retryCount_ = 0;
     }
   }
 
