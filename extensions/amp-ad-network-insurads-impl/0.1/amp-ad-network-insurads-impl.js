@@ -83,8 +83,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
 
     this.getConsent_().then((consent) => {
-      console /*OK*/
-        .debug('Consent Promise resolved with:', consent);
       const consentTuple = consent ? this.parseConsent_(consent) : null;
       const storageConsent = hasStorageConsent(consentTuple);
 
@@ -161,8 +159,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
-    console /*OK*/
-      .log('getAdUrl called with consentTuple:', opt_consentTuple);
     this.getAdUrlDeferred = new Deferred();
     this.getAdUrlInsurAdsDeferred = new Deferred();
     const self = this;
@@ -215,8 +211,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         this.sizes_ = sizesArray;
       }
       self.getAdUrlInsurAdsDeferred.resolve(url.toString());
-      console /*OK*/
-        .log('Get Ad Url !!!');
     });
     return this.getAdUrlInsurAdsDeferred.promise;
   }
@@ -574,8 +568,6 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
    */
   getConsent_() {
     const consentPolicyId = super.getConsentPolicy();
-    console /*Ok*/
-      .log('getConsent called with policy ID:', consentPolicyId);
 
     if (consentPolicyId) {
       const consentStatePromise = getConsentPolicyState(

@@ -41,15 +41,6 @@ export class Cookie {
     // Read visitor cookie
     /** @private {string|null} */
     this.visitCookie_ = this.getCookie_(VCN);
-
-    console /*OK*/
-      .debug(
-        'CookieMonster: sessionId: %s, sessionCookie: %s, visitCookie: %s, cookiesEnabled: %s',
-        this.sessionId_,
-        this.sessionCookie_,
-        this.visitCookie_,
-        this.cookiesEnabled_
-      );
   }
 
   /**
