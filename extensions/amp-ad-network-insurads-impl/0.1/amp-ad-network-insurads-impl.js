@@ -95,7 +95,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         {
           appInitHandler: (message) => this.handleAppInit_(message),
           unitInitHandler: (message) => this.handleUnitInit_(message),
-          unitWaterfallHandler: (message) => this.handleUnitWaterfall_(message),
+          waterfallHandler: (message) => this.handleUnitWaterfall_(message),
         }
       );
     });

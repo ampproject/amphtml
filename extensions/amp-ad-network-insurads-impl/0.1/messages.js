@@ -376,20 +376,20 @@ export class MessageHandler {
    * @param {Object=} options - Options object
    * @param {Function=} options.appInitHandler - Handler for app init messages
    * @param {Function=} options.unitInitHandler - Handler for unit init messages
-   * @param {Function=} options.unitWaterfallHandler - Handler for unit waterfall messages
+   * @param {Function=} options.waterfallHandler - Handler for unit waterfall messages
    * @param {Function=} options.disconnectHandler - Handler for disconnect messages
    */
   constructor({
     appInitHandler = null,
     disconnectHandler = null,
     unitInitHandler = null,
-    unitWaterfallHandler = null,
+    waterfallHandler = null,
   } = {}) {
     /** @private {Object<string, Function>} */
     this.handlers_ = {
       'app-init-response': appInitHandler,
       'unit-init-response': unitInitHandler,
-      'waterfall': unitWaterfallHandler,
+      'waterfall': waterfallHandler,
       'disconnect': disconnectHandler,
     };
   }
