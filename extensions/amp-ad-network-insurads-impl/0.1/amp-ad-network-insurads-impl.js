@@ -20,7 +20,7 @@ import {CryptoUtils} from './utilities';
 import {VisibilityTracker} from './visibility-tracking';
 import {Waterfall} from './waterfall';
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, hasStorageConsent} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-insurads-impl';
@@ -82,13 +82,14 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     const publicId = this.element.getAttribute('data-public-id');
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
 
-    this.consentPromise = this.getConsent().then((consent) => {
+    this.getConsent_().then((consent) => {
       console /*OK*/
         .debug('Consent Promise resolved with:', consent);
       const consentTuple = consent ? this.parseConsent_(consent) : null;
+      const storageConsent = hasStorageConsent(consentTuple);
 
       /** @private {?Core} */
-      this.core_ = Core.start(this.win, canonicalUrl, publicId, consentTuple);
+      this.core_ = Core.start(this.win, canonicalUrl, publicId, storageConsent);
       this.core_.registerUnit(
         this.unitCode_,
         this.handleReconnect_.bind(this),
@@ -568,9 +569,10 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
 
   /**
    * Get Consent
-   * @return {Promise<?Array>|undefined} - Resolves with consent state, string, metadata, and shared data, or undefined if no policy ID
+   * @return {!Promise<Array<Promise>>} - Resolves with consent state, string, metadata, and shared data, or undefined if no policy ID
+   * @private
    */
-  getConsent() {
+  getConsent_() {
     const consentPolicyId = super.getConsentPolicy();
     console /*Ok*/
       .log('getConsent called with policy ID:', consentPolicyId);
@@ -615,17 +617,21 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
         consentSharedDataPromise,
       ]);
     }
+
+    return Promise.resolve(null);
   }
 
   /**
    * Parses the consent tuple into a structured object
-   * @param {Array} consentTuple - The consent tuple
+   * @param {Array} consentResponse - The consent response array
    * @return {?ConsentTupleDef} The parsed consent object
    * @private
    */
-  parseConsent_(consentTuple) {
-    const {consentMetadata, consentSharedData, consentState, consentString} =
-      consentTuple;
+  parseConsent_(consentResponse) {
+    const consentState = consentResponse[0];
+    const consentString = consentResponse[1];
+    const consentMetadata = consentResponse[2];
+    const consentSharedData = consentResponse[3];
 
     const gdprApplies = consentMetadata
       ? consentMetadata['gdprApplies']

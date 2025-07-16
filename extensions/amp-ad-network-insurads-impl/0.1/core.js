@@ -12,8 +12,6 @@ import {
 } from './messages';
 import {RealtimeManager} from './realtime-manager';
 import {LockedId} from './utilities';
-
-import {hasStorageConsent} from '../../amp-a4a/0.1/amp-a4a';
 /**
  * Insurads Core
  */
@@ -35,13 +33,13 @@ export class Core {
    * @param {Window} win
    * @param {string} canonicalUrl - Canonical URL
    * @param {string} publicId - The public ID
-   * @param {?ConsentTupleDef|null} consentTuple - Consent tuple containing consent data
+   * @param {boolean} hasStorageConsent - If Consent was given or does not apply
    */
-  constructor(win, canonicalUrl, publicId, consentTuple) {
+  constructor(win, canonicalUrl, publicId, hasStorageConsent) {
     this.win_ = win;
     this.canonicalUrl_ = canonicalUrl;
     this.publicId_ = publicId;
-    this.consent_ = hasStorageConsent(consentTuple);
+    this.consent_ = hasStorageConsent;
 
     /** @private {!LockedId} */
     this.lockedData_ = new LockedId().getLockedIdData(this.consent_);
@@ -58,13 +56,13 @@ export class Core {
    * @param {Window} win - The window object
    * @param {string} canonicalUrl - The canonical URL
    * @param {string} publicId - The public ID
-   * @param {object} consentTuple - Consent tuple containing consent data
+   * @param {boolean} hasStorageConsent - If Consent was given or does not apply
    * @return {!Core}
    * @public
    */
-  static start(win, canonicalUrl, publicId, consentTuple) {
+  static start(win, canonicalUrl, publicId, hasStorageConsent) {
     if (!Core.instance_) {
-      Core.instance_ = new Core(win, canonicalUrl, publicId, consentTuple);
+      Core.instance_ = new Core(win, canonicalUrl, publicId, hasStorageConsent);
       Core.instance_.setupRealtimeConnection_();
     }
 
