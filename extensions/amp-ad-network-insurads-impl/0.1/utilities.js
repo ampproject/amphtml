@@ -5,7 +5,7 @@ export class LockedId {
    * Get Hash
    * controlHash is the hash returned from server that contains the public ip address of the client
    * @param {boolean} allowStorage
-   * @return {object}
+   * @return {!Array<(string|number)>}
    */
   getLockedIdData(allowStorage = false) {
     const keyParts = [
