@@ -114,9 +114,9 @@ export class StandardActions {
   }
 
   /**
-   * Handles initiliazing the theme mode.
+   * Handles initializing the theme mode.
    *
-   * This methode needs to be called on page load to set the `amp-dark-mode`
+   * This method needs to be called on page load to set the `amp-dark-mode`
    * class on the body if the user prefers the dark mode.
    */
   initThemeMode_() {
@@ -132,7 +132,7 @@ export class StandardActions {
 
   /**
    * Checks whether the user prefers dark mode based on local storage and
-   * user's operating systen settings.
+   * user's operating system settings.
    *
    * @return {boolean}
    */

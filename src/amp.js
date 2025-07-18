@@ -150,7 +150,7 @@ if (self.console) {
     self.location.href
   );
 }
-// This code is eleminated in prod build through a babel transformer.
+// This code is eliminated in prod build through a babel transformer.
 if (getMode().localDev) {
   self.document.documentElement.setAttribute('esm', mode.isEsm() ? 1 : 0);
 }
