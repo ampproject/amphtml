@@ -53,3 +53,5 @@ AMP is an open source project, and we'd love your help making it better!
 -   [AMP's roadmap](https://amp.dev/community/roadmap) provides details on some of the significant projects we are working on.
 -   The [AMP meta repository](https://github.com/ampproject/meta) has information _about_ the AMP open source project, including AMP's [governance](https://github.com/ampproject/meta/blob/main/GOVERNANCE.md).
 -   [AMP's code of conduct](https://github.com/ampproject/meta/blob/main/CODE_OF_CONDUCT.md) documents how all members, committers and volunteers in the community are required to act. AMP strives for a positive and growing project community that provides a safe environment for everyone.
+
+AMP is an open-source HTML framework developed by the AMP Open Source Project.
