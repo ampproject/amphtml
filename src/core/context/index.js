@@ -72,7 +72,7 @@ export function rediscoverChildren(node) {
 }
 
 /**
- * Sets the property's input value. This is analagous to a CSS specified
+ * Sets the property's input value. This is analogous to a CSS specified
  * value. Several values for the same property can be set on a node - one
  * per each setter. A repeated call for the same setter overwrites a
  * previously set input. This is similar to how the same CSS property can be

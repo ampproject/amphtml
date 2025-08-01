@@ -71,7 +71,7 @@ export function isShadowCssSupported() {
 /**
  * Returns `true` if the passed function is native to the browser, and is not
  * polyfilled
- * @param {Function|undefined} func A function that is attatched to a JS
+ * @param {Function|undefined} func A function that is attached to a JS
  * object.
  * @return {boolean}
  */

@@ -4,7 +4,7 @@ import * as mode from '#core/mode';
 import {map} from '#core/types/object';
 
 /**
- * For type anotations where Element is a local variable.
+ * For type annotations where Element is a local variable.
  * @typedef {!Element}
  */
 let ElementOrigDef;
@@ -439,7 +439,7 @@ class Registry {
    *
    * Mutation Observers are conveniently available in every browser we care
    * about. When a node is connected to the root document, all custom
-   * elements (including that node iteself) will be upgraded and call
+   * elements (including that node itself) will be upgraded and call
    * connectedCallback. When a node is disconnectedCallback from the root
    * document, all custom elements will call disconnectedCallback.
    *
@@ -622,7 +622,7 @@ function installPatches(win, registry) {
     'innerHTML'
   );
   if (!innerHTMLDesc) {
-    // Sigh... IE11 puts innerHTML desciptor on HTMLElement. But, we've
+    // Sigh... IE11 puts innerHTML descriptor on HTMLElement. But, we've
     // replaced HTMLElement with a polyfill wrapper, so have to get its proto.
     innerHTMLProto = Object.getPrototypeOf(win.HTMLElement.prototype);
     innerHTMLDesc = Object.getOwnPropertyDescriptor(
@@ -908,7 +908,7 @@ export function install(win, ctor) {
       // here.
       const instance = /** @type {!Function} */ (Object.create(ctor.prototype));
 
-      // This will throw an error unless we're in a transpiled environemnt.
+      // This will throw an error unless we're in a transpiled environment.
       // Native classes must be called as `new Ctor`, not `Ctor.call(instance)`.
       // We use `Function.call.call` because Closure is too smart for regular
       // `Ctor.call`.
