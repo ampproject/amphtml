@@ -24,7 +24,7 @@ export class AbstractAmpContext {
     /** @protected {!Window} */
     this.win_ = win;
 
-    // This value is cached since it could be overwritten by the master frame
+    // This value is cached since it could be overwritten by the primary frame
     // check using a value of a different type.
     /** @private {?string} */
     this.cachedFrameName_ = this.win_.name || null;

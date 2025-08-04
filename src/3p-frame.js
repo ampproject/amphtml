@@ -94,7 +94,7 @@ export function getIframe(
   const baseUrl = getBootstrapBaseUrl(parentWindow, ampdoc);
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
-  // be the master frame. That is ok, as we will read the name off
+  // be the primary frame. That is ok, as we will read the name off
   // for our uses before that would occur.
   // @see https://github.com/ampproject/amphtml/blob/main/3p/integration.js
   const name = JSON.stringify({

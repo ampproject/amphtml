@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
+import {computeInPrimaryFrame, loadScript, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -36,7 +36,7 @@ export function imedia(global, data) {
   }
   mW.inPagePositions.push({parentElement, context: global.context});
 
-  computeInMasterFrame(
+  computeInPrimaryFrame(
     global,
     'imedia-load',
     (done) => {

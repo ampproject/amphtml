@@ -1,10 +1,10 @@
 import {dev, user, userAssert} from '#utils/log';
 
-import {computeInMasterFrame} from './3p';
+import {computeInPrimaryFrame} from './3p';
 import {AbstractAmpContext} from './ampcontext';
 
 /**
- * Returns the "master frame" for all widgets of a given type.
+ * Returns the "primary frame" for all widgets of a given type.
  * This frame should be used to e.g. fetch scripts that can
  * be reused across frames.
  * once experiment is removed.
@@ -12,25 +12,25 @@ import {AbstractAmpContext} from './ampcontext';
  * @param {string} type
  * @return {!Window}
  */
-export function masterSelection(win, type) {
+export function primaryFrameSelection(win, type) {
   type = type.toLowerCase();
-  // The master has a special name.
-  const masterName = 'frame_' + type + '_master';
-  let master;
+  // The primary frame has a special name.
+  const primaryFrameName = 'frame_' + type + '_primary';
+  let primaryFrame;
   try {
-    // Try to get the master from the parent. If it does not
+    // Try to get the primary frame from the parent. If it does not
     // exist yet we get a security exception that we catch
     // and ignore.
-    master = win.parent.frames[masterName];
+    primaryFrame = win.parent.frames[primaryFrameName];
   } catch (expected) {
     /* ignore */
   }
-  if (!master) {
-    // No master yet, rename ourselves to be master. Yaihh.
-    win.name = masterName;
-    master = win;
+  if (!primaryFrame) {
+    // No primary frame yet, rename ourselves to be primary frame. Yaihh.
+    win.name = primaryFrameName;
+    primaryFrame = win;
   }
-  return master;
+  return primaryFrame;
 }
 
 export class IntegrationAmpContext extends AbstractAmpContext {
@@ -58,23 +58,34 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   }
 
   /** @return {!Window} */
-  get master() {
-    return this.master_();
+  get primary() {
+    return this.primary_();
   }
 
   /** @return {!Window} */
-  master_() {
-    return masterSelection(this.win_, dev().assertString(this.embedType_));
+  primary_() {
+    return primaryFrameSelection(this.win_, dev().assertString(this.embedType_));
+  }
+
+  /** @return {boolean} */
+  get isPrimary() {
+    return this.isPrimary_();
+  }
+
+  /** @return {boolean} */
+  isPrimary_() {
+    return this.primary == this.win_;
+  }
+
+  // Legacy getters for backward compatibility
+  /** @return {!Window} */
+  get master() {
+    return this.primary;
   }
 
   /** @return {boolean} */
   get isMaster() {
-    return this.isMaster_();
-  }
-
-  /** @return {boolean} */
-  isMaster_() {
-    return this.master == this.win_;
+    return this.isPrimary;
   }
 
   /**
@@ -130,7 +141,12 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {function(*)} cb Callback function that is called when the work is
    *     done. The first argument is the result.
    */
+  computeInPrimaryFrame(global, taskId, work, cb) {
+    computeInPrimaryFrame(global, taskId, work, cb);
+  }
+
+  // Legacy method for backward compatibility
   computeInMasterFrame(global, taskId, work, cb) {
-    computeInMasterFrame(global, taskId, work, cb);
+    this.computeInPrimaryFrame(global, taskId, work, cb);
   }
 }
