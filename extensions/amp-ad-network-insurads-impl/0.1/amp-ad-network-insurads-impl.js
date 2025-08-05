@@ -83,20 +83,7 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
     const {canonicalUrl} = Services.documentInfoForDoc(this.element);
 
     this.getConsent_().then((consent) => {
-      const consentTuple = consent ? this.parseConsent_(consent) : null;
-      const storageConsent = hasStorageConsent(consentTuple);
-
-      /** @private {?Core} */
-      this.core_ = Core.start(this.win, canonicalUrl, publicId, storageConsent);
-      this.core_.registerUnit(
-        this.unitCode_,
-        this.handleReconnect_.bind(this),
-        {
-          appInitHandler: (message) => this.handleAppInit_(message),
-          unitInitHandler: (message) => this.handleUnitInit_(message),
-          waterfallHandler: (message) => this.handleWaterfall_(message),
-        }
-      );
+      this.initializeWithConsent_(consent, canonicalUrl, publicId);
     });
   }
 
@@ -169,48 +156,8 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       opt_serveNpaSignal
     );
     this.getAdUrlDeferred.promise.then((doubleClickUrl) => {
-      const url = new URL(doubleClickUrl);
-      if (self.refreshCount_ > 0) {
-        const entry = this.waterfall_.getCurrentEntry();
-
-        const params = url.searchParams;
-
-        if (entry.path) {
-          params.set('iu', entry.path);
-        }
-
-        const keyValuesParam = params.get('scp') || '';
-        let keyValues = keyValuesParam;
-
-        const allKeyValues = [
-          ...(entry.keyValues || []),
-          ...(entry.commonKeyValues || []),
-        ];
-
-        if (allKeyValues.length > 0) {
-          const merged = this.serializeKeyValueArray_(allKeyValues);
-          keyValues += (keyValues ? '&' : '') + merged;
-        }
-
-        if (this.iabTaxonomy_ && entry.isHouseDemand) {
-          const userSignals = this.convertToUserSignals_(this.iabTaxonomy_);
-
-          const encodedSignals = encodeURIComponent(
-            btoa(JSON.stringify(userSignals))
-          );
-
-          params.set('ppsj', encodedSignals);
-        }
-
-        params.set('scp', keyValues);
-
-        const sizesString = params.get('sz');
-        const sizesArray = sizesString
-          .split('|')
-          .map((size) => size.split('x').map(Number));
-        this.sizes_ = sizesArray;
-      }
-      self.getAdUrlInsurAdsDeferred.resolve(url.toString());
+      const augmentedAdUrl = this.augmentAdUrl_(doubleClickUrl);
+      self.getAdUrlInsurAdsDeferred.resolve(augmentedAdUrl);
     });
     return this.getAdUrlInsurAdsDeferred.promise;
   }
@@ -227,6 +174,152 @@ export class AmpAdNetworkInsuradsImpl extends AmpA4A {
       this.destroy_();
     } else {
       this.triggerImmediateRefresh_();
+    }
+  }
+
+  /**
+   * Initializes the InsurAds instance with consent data.
+   * @param {string=} consent - The consent data string
+   * @param {string} canonicalUrl - The canonical URL of the document
+   * @param {string} publicId - The public ID for the ad
+   * @private
+   */
+  initializeWithConsent_(consent, canonicalUrl, publicId) {
+    const consentTuple = consent ? this.parseConsent_(consent) : null;
+    const storageConsent = hasStorageConsent(consentTuple);
+
+    this.core_ = Core.start(this.win, canonicalUrl, publicId, storageConsent);
+    this.core_.registerUnit(this.unitCode_, this.handleReconnect_.bind(this), {
+      appInitHandler: (message) => this.handleAppInit_(message),
+      unitInitHandler: (message) => this.handleUnitInit_(message),
+      waterfallHandler: (message) => this.handleWaterfall_(message),
+    });
+  }
+
+  /**
+   * Appends InsurAds URL parameters for ad requests.
+   * @param {string} adUrl
+   * @return {string} The augmented URL with InsurAds parameters
+   * @private
+   */
+  augmentAdUrl_(adUrl) {
+    if (
+      !this.appEnabled_ ||
+      !this.waterfall_ ||
+      this.api_.getRefreshCount() === 0
+    ) {
+      // If app is not enabled or no waterfall, return the original ad URL
+      console /*OK*/
+        .log(
+          'InsurAds: App not enabled or no waterfall, returning original ad URL'
+        );
+      const url = new URL(adUrl); // TODO: return adUrl original
+      const params = url.searchParams;
+      params.set('iat', 'not-enabled');
+      return url.toString();
+    }
+
+    const url = new URL(adUrl);
+    const params = url.searchParams;
+    const entry = this.waterfall_.getCurrentEntry();
+
+    if (entry.path) {
+      params.set('iu', entry.path);
+    }
+
+    this.mergeKeyValuesWithParams_(params, entry);
+    this.addUserSignalsToParams_(params, entry);
+    this.parseSizesFromParams_(params);
+
+    return url.toString();
+  }
+
+  /**
+   * Merges entry key values with existing URL parameters
+   * @param {!URLSearchParams} params - The URL parameters
+   * @param {!Object} entry - The waterfall entry
+   * @private
+   */
+  mergeKeyValuesWithParams_(params, entry) {
+    if (!params || !entry) {
+      return;
+    }
+    const existingKeyValues = params.get('scp');
+    const allKeyValues = [];
+
+    if (entry.keyValues) {
+      allKeyValues.push(...entry.keyValues);
+    }
+    if (entry.commonKeyValues) {
+      allKeyValues.push(...entry.commonKeyValues);
+    }
+
+    if (allKeyValues.length === 0) {
+      return;
+    }
+
+    const serializedKeyValues = this.serializeKeyValueArray_(allKeyValues);
+    const mergedKeyValues = existingKeyValues
+      ? `${existingKeyValues}&${serializedKeyValues}`
+      : serializedKeyValues;
+
+    params.set('scp', mergedKeyValues);
+  }
+
+  /**
+   * Adds IAB taxonomy user signals to URL parameters if conditions are met
+   * @param {!URLSearchParams} params - The URL parameters to modify
+   * @param {!Object} entry - The waterfall entry
+   * @private
+   */
+  addUserSignalsToParams_(params, entry) {
+    if (!params || !entry) {
+      return;
+    }
+
+    if (!this.iabTaxonomy_ || !entry.isHouseDemand) {
+      return;
+    }
+
+    try {
+      const userSignals = this.convertToUserSignals_(this.iabTaxonomy_);
+      const encodedSignals = this.encodeUserSignals_(userSignals);
+      params.set('ppsj', encodedSignals);
+    } catch (error) {
+      console /*Ok*/
+        .error('Failed to encode user signals:', error);
+    }
+  }
+
+  /**
+   * Encodes user signals for URL transmission
+   * @param {!Object} userSignals - The user signals object
+   * @return {string} Base64 encoded and URI encoded signals
+   * @private
+   */
+  encodeUserSignals_(userSignals) {
+    const jsonString = JSON.stringify(userSignals);
+    const base64Encoded = btoa(jsonString);
+    return encodeURIComponent(base64Encoded);
+  }
+
+  /**
+   * Parses and stores ad sizes from URL parameters
+   * @param {!URLSearchParams} params - The URL parameters
+   * @private
+   */
+  parseSizesFromParams_(params) {
+    const sizesString = params.get('sz');
+
+    if (!sizesString) {
+      this.sizes_ = [];
+      return;
+    }
+
+    try {
+      this.sizes_ = this.parseSizeString_(sizesString);
+    } catch (error) {
+      this.sizes_ = [];
     }
   }
 
