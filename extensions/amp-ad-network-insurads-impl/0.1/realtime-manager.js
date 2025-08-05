@@ -7,7 +7,7 @@ const HUB_TYPE_AMP = 2;
 const MSG_VERSION = 1.0;
 
 /** @type {number} */
-const MAX_RETRIES = 2;
+const MAX_RETRIES = 3;
 /** @type {number} */
 const RETRY_DELAY = 1000;
 
@@ -337,7 +337,6 @@ export class RealtimeManager {
     if (this.retryTimer_) {
       clearTimeout(this.retryTimer_);
       this.retryTimer_ = null;
-      this.retryCount_ = 0;
     }
   }
 
