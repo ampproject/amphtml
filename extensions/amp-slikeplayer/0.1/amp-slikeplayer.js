@@ -30,14 +30,24 @@ const TAG = 'amp-slikeplayer';
  * @private
  */
 
-const SlEvent = {
+const CleoEvent = {
   'ready': VideoEvents_Enum.LOAD,
   'play': VideoEvents_Enum.PLAYING,
   'pause': VideoEvents_Enum.PAUSE,
   'complete': VideoEvents_Enum.ENDED,
   'visible': VideoEvents_Enum.VISIBILITY,
+  'seeked': VideoEvents_Enum.SEEKED,
+  'seeking': VideoEvents_Enum.SEEKING,
   'adStart': VideoEvents_Enum.AD_START,
   'adEnd': VideoEvents_Enum.AD_END,
+  'adPlay': VideoEvents_Enum.AD_PLAY,
+  'adPause': VideoEvents_Enum.AD_PAUSE,
+  'adSkip': VideoEvents_Enum.AD_SKIP,
+  'adComplete': VideoEvents_Enum.AD_END,
+  'adError': VideoEvents_Enum.AD_ERROR,
+  'adLoaded': VideoEvents_Enum.AD_LOADED,
+  'adImpression': VideoEvents_Enum.AD_IMPRESSION,
+  'adClick': VideoEvents_Enum.AD_CLICK,
 };
 
 export class AmpSlikeplayer extends AMP.BaseElement {
@@ -161,6 +171,15 @@ export class AmpSlikeplayer extends AMP.BaseElement {
   }
 
   /** @override */
+  viewportCallback(inViewport) {
+    if (inViewport) {
+      this.play();
+    } else {
+      this.pause();
+    }
+  }
+
+  /** @override */
   preimplementsAutoFullscreen() {
     return false;
   }
@@ -198,7 +217,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
       return;
     }
     const {element} = this;
-    if (redispatch(element, event, SlEvent)) {
+    if (redispatch(element, event, CleoEvent)) {
       return;
     }
     if (detail && event) {
@@ -218,6 +237,23 @@ export class AmpSlikeplayer extends AMP.BaseElement {
         case 'adTime':
           const {position} = detail;
           this.currentTime_ = position;
+          break;
+        case 'seeked':
+        case 'seeking':
+          // Seek events are handled by the redispatch above
+          break;
+        case 'adStart':
+        case 'adEnd':
+        case 'adPlay':
+        case 'adPause':
+        case 'adSkip':
+        case 'adComplete':
+        case 'adError':
+        case 'adLoaded':
+        case 'adImpression':
+        case 'adClick':
+          // Ad events are handled by the redispatch above
+          break;
         default:
           break;
       }
