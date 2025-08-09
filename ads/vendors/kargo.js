@@ -1,4 +1,4 @@
-import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
+import {computeInPrimaryFrame, loadScript, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -24,7 +24,7 @@ export function kargo(global, data) {
   // Add window source reference to ad options
   options.source_window = global;
 
-  computeInMasterFrame(
+  computeInPrimaryFrame(
     global,
     'kargo-load',
     function (done) {

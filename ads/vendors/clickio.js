@@ -27,7 +27,7 @@ export function clickio(global, data) {
       const clickioGlobal = global[CLICKIO_GLOBAL_NAME];
 
       // base config
-      clickioGlobal.ampMode = context.isMaster ? 1 : 2;
+      clickioGlobal.ampMode = context.isPrimary ? 1 : 2;
       clickioGlobal.pageUrl = global.context.location.href;
       clickioGlobal.sendPageUrl = true;
 
@@ -61,8 +61,8 @@ export function clickio(global, data) {
         'https://s.clickiocdn.com/t/' + data.siteId + '/360_amp.js'
       );
 
-      // load consent module for master
-      if (context.isMaster) {
+      // load consent module for primary frame
+      if (context.isPrimary) {
         // consent module
         if (
           context.initialConsentMetadata !== null &&
@@ -86,7 +86,7 @@ export function clickio(global, data) {
 
       dev().info(
         CLICKIO_LOG_TAG,
-        'clickio: running (' + (context.isMaster ? 'master' : 'slave') + ')'
+        'clickio: running (' + (context.isPrimary ? 'primary' : 'secondary') + ')'
       );
     }
   } else {

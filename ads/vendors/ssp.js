@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
+import {computeInPrimaryFrame, loadScript, validateData} from '#3p/3p';
 
 import {setStyle, setStyles} from '#core/dom/style';
 import {parseJson} from '#core/types/object/json';
@@ -139,7 +139,7 @@ export function ssp(global, data) {
   }
 
   // This is super important. Without this any variables on context are not shared
-  const mW = global.context.isMaster ? global : global.context.master;
+  const mW = global.context.isPrimary ? global : global.context.primary;
 
   // create parent element
   const parentElement = document.createElement('div');
@@ -153,7 +153,7 @@ export function ssp(global, data) {
   const sizing = sizeAgainstWindow(parentElement./*OK*/ clientWidth, data);
 
   // https://github.com/ampproject/amphtml/blob/main/3p/3p.js#L186
-  computeInMasterFrame(
+  computeInPrimaryFrame(
     global,
     'ssp-load',
     (done) => {
