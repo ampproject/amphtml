@@ -117,7 +117,10 @@ export class History {
    * @return {!Promise}
    */
   replace(opt_stateUpdate) {
-    return this.enqueue_(() => this.binding_.replace(opt_stateUpdate), 'replace');
+    return this.enqueue_(
+      () => this.binding_.replace(opt_stateUpdate),
+      'replace'
+    );
   }
 
   /**
