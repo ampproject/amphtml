@@ -33,13 +33,11 @@ This update contains guidance on using the Web Story Player to support:
 -   [Custom Events](#custom-events)
 -   [Upcoming API Change: Poster Image](#upcoming-api-change-poster-image)
 -   [Additional use case demos](#additional-use-case-demos)
--   [Additional explorations and roadmap](#additional-explorations-and-roadmap)
 -   [FAQs (please feel free to reach out with other questions & thoughts)](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 Beyond this, you’ll also find:
 
 -   [Additional use case demos](#Additional-use-case-demos)
--   [Additional explorations and roadmap](#Additional-explorations-and-roadmap)
 -   [FAQs](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 ## Player setup
@@ -427,10 +425,6 @@ This new API is still a work in progress, and will send more information when it
 
 <a href="https://codepen.io/maenrique/pen/WNxpPqJ" target="_blank" rel="noopener noreferrer">Card entry point + scrolling + lightbox</a>
 
-## Additional explorations and roadmap
-
-Follow feature requests & bugs in the [Github project](https://github.com/ampproject/amphtml/projects/109).
-
 ## FAQs (please feel free to reach out with other questions & thoughts)
 
 ### The Web Player supports more features on non-AMP pages than on AMP pages currently. What features are missing for AMP-pages?
@@ -442,7 +436,7 @@ Good question. While the basic functionality of the player is in the [AMP versio
 -   Customizable UI controls
 -   Custom events
 
-Follow our [roadmap on Github](https://github.com/ampproject/amphtml/projects/109) and the wg-stories updates for the [latest status updates](https://github.com/ampproject/wg-stories/issues).
+Follow the wg-stories updates for the [latest status updates](https://github.com/ampproject/wg-stories/issues).
 
 ### Is the player ready to use? When will these features be ready?
 
