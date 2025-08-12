@@ -33,7 +33,6 @@ This update contains guidance on using the Web Story Player to support:
 -   [Custom Events](#custom-events)
 -   [Upcoming API Change: Poster Image](#upcoming-api-change-poster-image)
 -   [Additional use case demos](#additional-use-case-demos)
--   [Additional explorations and roadmap](#additional-explorations-and-roadmap)
 -   [FAQs (please feel free to reach out with other questions & thoughts)](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 Beyond this, you’ll also find:
