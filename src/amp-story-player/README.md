@@ -427,10 +427,6 @@ This new API is still a work in progress, and will send more information when it
 
 <a href="https://codepen.io/maenrique/pen/WNxpPqJ" target="_blank" rel="noopener noreferrer">Card entry point + scrolling + lightbox</a>
 
-## Additional explorations and roadmap
-
-Follow feature requests & bugs in the [Github project](https://github.com/ampproject/amphtml/projects/109).
-
 ## FAQs (please feel free to reach out with other questions & thoughts)
 
 ### The Web Player supports more features on non-AMP pages than on AMP pages currently. What features are missing for AMP-pages?
