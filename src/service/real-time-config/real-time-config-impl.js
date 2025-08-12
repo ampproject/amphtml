@@ -41,7 +41,7 @@ let RtcConfigDef;
  * @enum {string}
  */
 export const RTC_ERROR_ENUM = {
-  // Occurs when response is unparseable as JSON
+  // Occurs when response is unparsable as JSON
   MALFORMED_JSON_RESPONSE: '4',
   // Occurs when a publisher has specified the same url
   // or vendor url (after macros are substituted) to call out to more than once.
@@ -294,7 +294,7 @@ export class RealTimeConfigManager {
     macros['CONSENT_METADATA'] =
       /** @type {!../../../src/service/variable-source.AsyncResolverDef} */ (
         (key) => {
-          userAssert(key, 'CONSENT_METADATA macro must contian a key');
+          userAssert(key, 'CONSENT_METADATA macro must contain a key');
           return this.consentMetadata_ ? this.consentMetadata_[key] : null;
         }
       );
@@ -358,7 +358,7 @@ export class RealTimeConfigManager {
       // There are two valid configurations of the vendor object.
       // It can either be an object of macros mapping string to string,
       // or it can be an object with sub-objects, one of which can be
-      // 'macros'. This is for backwards compatability.
+      // 'macros'. This is for backwards compatibility.
       const vendorMacros = isObject(this.rtcConfig_.vendors[vendor]['macros'])
         ? this.rtcConfig_.vendors[vendor]['macros']
         : this.rtcConfig_.vendors[vendor];
@@ -372,7 +372,7 @@ export class RealTimeConfigManager {
             isObject(value) || isArray(value) ? JSON.stringify(value) : value;
         }
       });
-      // The ad network defined macros override vendor defined/pub specifed.
+      // The ad network defined macros override vendor defined/pub specified.
       const macros = Object.assign(validVendorMacros, customMacros);
       this.inflateAndSendRtc_(
         url,

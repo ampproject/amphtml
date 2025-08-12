@@ -196,7 +196,7 @@ export class Navigation {
    * @param {!Window} win A window to use to open a new window.
    * @param {string} url THe URL to open.
    * @param {string} target The target for the newly opened window.
-   * @param {boolean} opener Whether or not the new window should have acccess
+   * @param {boolean} opener Whether or not the new window should have access
    *   to the opener (win).
    */
   openWindow(win, url, target, opener) {

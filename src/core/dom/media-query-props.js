@@ -158,7 +158,7 @@ function parseMediaQueryListExpr(win, exprString) {
             }
           }
 
-          // Then, skip to the begining to the function's name.
+          // Then, skip to the beginning to the function's name.
           const funcEnd = div - 1;
           if (div > 0) {
             div--;

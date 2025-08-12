@@ -52,8 +52,8 @@ export function getContextMetadata(
   // values with name
   // ampcontext.js and this file are compiled in different compilation unit
 
-  // Note: Field names can by perserved by using JsonObject, or by adding
-  // perserved name to extern. We are doing both right now.
+  // Note: Field names can by preserved by using JsonObject, or by adding
+  // preserved name to extern. We are doing both right now.
   // Please also add new introduced variable
   // name to the extern list.
   attributes['_context'] = {

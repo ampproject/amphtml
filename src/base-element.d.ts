@@ -92,7 +92,7 @@ declare namespace AMP {
       element?: Element
     ): Promise<void>;
     mutateElementSkipRemeasure(mutator: any): Promise<void>;
-    collapsedCalback(element: AmpElement): void;
+    collapsedCallback(element: AmpElement): void;
     expand(): void;
     mutatedAttributesCallback(mutations: Mutations): void;
     onLayoutMeasure(): void;

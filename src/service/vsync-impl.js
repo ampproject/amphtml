@@ -457,7 +457,7 @@ function callTask_(callback, state) {
     if (ret !== undefined) {
       dev().error(
         'VSYNC',
-        'callback returned a value but vsync cannot propogate it: %s',
+        'callback returned a value but vsync cannot propagate it: %s',
         callback.toString()
       );
     }

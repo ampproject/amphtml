@@ -168,7 +168,7 @@ export function fromStructuredCloneable(response, responseType) {
  * - The AMP doc is in single doc mode
  * - The requested resource is not a 1p request.
  * - The viewer has the `xhrInterceptor` capability
- * - The Viewer is a trusted viewer or AMP is currently in developement mode
+ * - The Viewer is a trusted viewer or AMP is currently in development mode
  * - The AMP doc is opted-in for XHR interception (`<html>` tag has
  *   `allow-xhr-interception` attribute)
  *
