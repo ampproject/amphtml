@@ -49,6 +49,12 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       }),
     };
 
+    env.sandbox.stub(Services, 'timerFor').returns({
+      promise: (timeout) =>
+        // Caps the timeout in test to 500ms to avoid tests timing out due to prolonged layouts.
+        new Promise((resolve) => setTimeout(resolve, Math.min(timeout, 500))),
+    });
+
     const localizationService = new LocalizationService(win.document.body);
     env.sandbox
       .stub(Services, 'localizationForDoc')
