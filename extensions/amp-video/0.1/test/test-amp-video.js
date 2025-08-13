@@ -66,7 +66,11 @@ describes.realWin(
         opt_beforeLayoutCallback(v, impl);
       }
       try {
-        await v.layoutCallback();
+        await Promise.race([
+          v.layoutCallback(),
+          // Caps the layoutCallback in test to 500ms to avoid tests timing out due to prolonged layouts.
+          Services.timerFor(win).promise(500),
+        ]);
         return v;
       } catch (e) {
         // Ignore failed to load errors since sources are fake.
