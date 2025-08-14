@@ -50,17 +50,21 @@ describes.sandboxed('amp-bind', {}, function () {
     }
   );
 
+  const BEFORE_IMG_DATA_URL =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAAAABGdBTUEAALGPC/xhBQAAABtJREFUWAntwYEAAAAAw6D7Uw/hAtUAAAAAjgAQQAABWWUZmwAAAABJRU5ErkJggg==';
+  const AFTER_IMG_DATA_URL =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAAAABGdBTUEAALGPC/xhBQAAAClJREFUWMPtzEERAAAMAiD7l9YQ++0gAOlRBAKBQCAQCAQCgUAgEHwPBqcL8OI+wmxEAAAAAElFTkSuQmCC';
   describes.integration(
     '+ amp-img',
     {
       body: `
       <amp-img id="image" layout="responsive"
-        src="http://example.com/before.jpg" [src]="src"
+        src="${BEFORE_IMG_DATA_URL}" [src]="src"
         alt="before_alt" [alt]="alt"
         width="1" [width]="w"
         height="1" [height]="h"></amp-img>
 
-      <button on="tap:AMP.setState({src: 'http://example.com/after.jpg'})" id="changeSrc"></button>
+      <button on="tap:AMP.setState({src: '${AFTER_IMG_DATA_URL}'})" id="changeSrc"></button>
       <button on="tap:AMP.setState({alt: 'after_alt'})" id="changeAlt"></button>
       <button on="tap:AMP.setState({w: 2, h: 2})" id="changeSize"></button>
     `,
@@ -76,13 +80,11 @@ describes.sandboxed('amp-bind', {}, function () {
 
       it('[src] with valid URL', async () => {
         const button = doc.getElementById('changeSrc');
-        expect(img.getAttribute('src')).to.equal(
-          'http://example.com/before.jpg'
-        );
+        expect(img.getAttribute('src')).to.equal(BEFORE_IMG_DATA_URL);
         button.click();
         await poll(
           '[src]',
-          () => img.getAttribute('src') === 'http://example.com/after.jpg'
+          () => img.getAttribute('src') === AFTER_IMG_DATA_URL
         ).should.be.fulfilled;
       });
 
