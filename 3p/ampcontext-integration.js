@@ -1,6 +1,6 @@
 import {dev, user, userAssert} from '#utils/log';
 
-import {computeInMasterFrame} from './3p';
+import {computeInCoordinatingFrame, computeInMasterFrame} from './3p';
 import {AbstractAmpContext} from './ampcontext';
 
 /**
@@ -67,6 +67,11 @@ export class IntegrationAmpContext extends AbstractAmpContext {
     return masterSelection(this.win_, dev().assertString(this.embedType_));
   }
 
+  /** @return {!Window} */
+  get coordinator() {
+    return this.master_();
+  }
+
   /** @return {boolean} */
   get isMaster() {
     return this.isMaster_();
@@ -75,6 +80,11 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   /** @return {boolean} */
   isMaster_() {
     return this.master == this.win_;
+  }
+
+  /** @return {boolean} */
+  get isCoordinator() {
+    return this.isMaster_();
   }
 
   /**
@@ -132,5 +142,16 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    */
   computeInMasterFrame(global, taskId, work, cb) {
     computeInMasterFrame(global, taskId, work, cb);
+  }
+
+  /**
+   * Preferred alternative to computeInMasterFrame.
+   * @param {!Window} global
+   * @param {string} taskId
+   * @param {function(*)} work
+   * @param {function(*)} cb
+   */
+  computeInCoordinatingFrame(global, taskId, work, cb) {
+    computeInCoordinatingFrame(global, taskId, work, cb);
   }
 }
