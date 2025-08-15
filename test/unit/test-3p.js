@@ -1,5 +1,5 @@
 import {
-  computeInMasterFrame,
+  computeInPrimaryFrame,
   loadScript,
   nextTick,
   validateData,
@@ -214,30 +214,30 @@ describes.sandboxed('3p', {}, (env) => {
     expect(called).to.equal(1);
   });
 
-  it('should do work only in master', () => {
+  it('should do work only in primary frame', () => {
     const taskId = 'exampleId';
-    const master = {
+    const primary = {
       context: {
-        isMaster: true,
+        isPrimary: true,
       },
     };
-    master.context.master = master;
-    const slave0 = {
+    primary.context.primary = primary;
+    const secondary0 = {
       context: {
-        isMaster: false,
-        master,
+        isPrimary: false,
+        primary,
       },
     };
-    const slave1 = {
+    const secondary1 = {
       context: {
-        isMaster: false,
-        master,
+        isPrimary: false,
+        primary,
       },
     };
-    const slave2 = {
+    const secondary2 = {
       context: {
-        isMaster: false,
-        master,
+        isPrimary: false,
+        primary,
       },
     };
     let done;
@@ -252,16 +252,16 @@ describes.sandboxed('3p', {}, (env) => {
         progress += result + id;
       };
     };
-    computeInMasterFrame(slave0, taskId, work, frame('slave0'));
+    computeInPrimaryFrame(secondary0, taskId, work, frame('secondary0'));
     expect(workCalls).to.equal(0);
-    computeInMasterFrame(master, taskId, work, frame('master'));
+    computeInPrimaryFrame(primary, taskId, work, frame('primary'));
     expect(workCalls).to.equal(1);
-    computeInMasterFrame(slave1, taskId, work, frame('slave1'));
+    computeInPrimaryFrame(secondary1, taskId, work, frame('secondary1'));
     expect(progress).to.equal('');
     done(';');
-    expect(progress).to.equal(';slave0;master;slave1');
-    computeInMasterFrame(slave2, taskId, work, frame('slave2'));
-    expect(progress).to.equal(';slave0;master;slave1;slave2');
+    expect(progress).to.equal(';secondary0;primary;secondary1');
+    computeInPrimaryFrame(secondary2, taskId, work, frame('secondary2'));
+    expect(progress).to.equal(';secondary0;primary;secondary1;secondary2');
     expect(workCalls).to.equal(1);
   });
 

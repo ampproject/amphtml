@@ -33,15 +33,15 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
 
     // 3p library stubs
     sandbox.stub(_3p, 'validateData').callsFake(noop);
-    sandbox.stub(_3p, 'computeInMasterFrame').callsFake(noop);
+    sandbox.stub(_3p, 'computeInPrimaryFrame').callsFake(noop);
     sandbox.stub(_3p, 'loadScript').callsFake(noop);
 
     return createIframePromise(true).then((iframe) => {
       // Simulate the iframe that ssp will be called inside.
       win = iframe.win;
       win.context = {
-        isMaster: false,
-        master: {},
+        isPrimary: false,
+        primary: {},
         renderStart: sandbox.spy(),
         noContentAvailable: sandbox.spy(),
         canonicalUrl: 'https://test.com',
@@ -84,18 +84,18 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
     );
   });
 
-  it('should call computeInMasterFrame()', () => {
+  it('should call computeInPrimaryFrame()', () => {
     ssp(win, commonData);
 
-    expect(_3p.computeInMasterFrame).to.have.been.calledOnce;
-    expect(_3p.computeInMasterFrame).to.have.been.calledWith(win, 'ssp-load');
+    expect(_3p.computeInPrimaryFrame).to.have.been.calledOnce;
+    expect(_3p.computeInPrimaryFrame).to.have.been.calledWith(win, 'ssp-load');
   });
 
   it('should call loadScript()', () => {
-    _3p.computeInMasterFrame.restore();
+    _3p.computeInPrimaryFrame.restore();
 
     sandbox
-      .stub(_3p, 'computeInMasterFrame')
+      .stub(_3p, 'computeInPrimaryFrame')
       .callsFake((global, id, work) => work());
 
     ssp(win, commonData);
@@ -108,7 +108,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
   });
 
   it('should call finish work with true', () => {
-    _3p.computeInMasterFrame.restore();
+    _3p.computeInPrimaryFrame.restore();
     _3p.loadScript.restore();
 
     const callbackSpy = sandbox.spy();
@@ -125,7 +125,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
       cb();
     });
     sandbox
-      .stub(_3p, 'computeInMasterFrame')
+      .stub(_3p, 'computeInPrimaryFrame')
       .callsFake((global, id, work) => work(callbackSpy));
 
     ssp(win, commonData);
@@ -135,7 +135,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
   });
 
   it('should call ssp.config()', () => {
-    _3p.computeInMasterFrame.restore();
+    _3p.computeInPrimaryFrame.restore();
     _3p.loadScript.restore();
 
     const callbackSpy = sandbox.spy();
@@ -152,7 +152,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
       cb();
     });
     sandbox
-      .stub(_3p, 'computeInMasterFrame')
+      .stub(_3p, 'computeInPrimaryFrame')
       .callsFake((global, id, work) => work(callbackSpy));
 
     ssp(win, commonData);
@@ -165,11 +165,11 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
   });
 
   it('should call context.noContentAvailable() when position is invalid', () => {
-    _3p.computeInMasterFrame.restore();
+    _3p.computeInPrimaryFrame.restore();
     _3p.loadScript.restore();
 
     sandbox
-      .stub(_3p, 'computeInMasterFrame')
+      .stub(_3p, 'computeInPrimaryFrame')
       .callsFake((global, id, work, cb) => cb(true));
 
     commonData.position = '{}';
@@ -182,7 +182,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
   });
 
   it('should call context.noContentAvailable() when script is not loaded', () => {
-    _3p.computeInMasterFrame.restore();
+    _3p.computeInPrimaryFrame.restore();
     _3p.loadScript.restore();
 
     const sssp = {
@@ -195,13 +195,13 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
     sandbox.stub(_3p, 'loadScript').callsFake((window, url, cb) => {
       // Mock script adding global object
       window.sssp = sssp;
-      window.context.master.ssp = sssp;
+      window.context.primary.ssp = sssp;
       window.ssp = sssp;
 
       cb();
     });
     sandbox
-      .stub(_3p, 'computeInMasterFrame')
+      .stub(_3p, 'computeInPrimaryFrame')
       .callsFake((global, id, work, cb) => {
         work(callbackSpy);
         cb(false);
@@ -215,7 +215,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
   });
 
   it('should call getAds()', () => {
-    _3p.computeInMasterFrame.restore();
+    _3p.computeInPrimaryFrame.restore();
     _3p.loadScript.restore();
 
     const sssp = {
@@ -233,7 +233,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
     });
 
     sandbox
-      .stub(_3p, 'computeInMasterFrame')
+      .stub(_3p, 'computeInPrimaryFrame')
       .callsFake((global, id, work, cb) => {
         work(callbackSpy);
         cb(true);
