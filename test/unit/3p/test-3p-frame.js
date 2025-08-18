@@ -263,7 +263,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         setupElementFunctions(div);
         container.appendChild(div);
         const iframe = getIframe(window, div, 'none');
-        expect(iframe.getAttribute('allow')).to.equal("sync-xhr=()");
+        expect(iframe.getAttribute('allow')).to.equal('sync-xhr=()');
       });
 
       it('should set sandbox', () => {
