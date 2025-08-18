@@ -2,122 +2,92 @@
   "images": [
     {
       "id": "0",
-      "author": "Alejandro Escamilla",
-      "width": 5616,
-      "height": 3744,
+      "author": "Local Example",
+      "width": 300,
+      "height": 300,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/yC-Yzbqy7PY",
-        "picsum": "https://picsum.photos/id/0/5616/3744"
+        "local": "./img/sample.jpg"
       }
     },
     {
       "id": "1",
-      "author": "Alejandro Escamilla",
-      "width": 5616,
-      "height": 3744,
+      "author": "Local Example",
+      "width": 720,
+      "height": 405,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/LNRyGwIJr5c",
-        "picsum": "https://picsum.photos/id/1/5616/3744"
+        "local": "./img/bigbuckbunny.jpg"
       }
     },
     {
-      "id": "10",
-      "author": "Paul Jarvis",
-      "width": 2500,
-      "height": 1667,
+      "id": "2",
+      "author": "Local Example",
+      "width": 640,
+      "height": 360,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/6J--NXulQCs",
-        "picsum": "https://picsum.photos/id/10/2500/1667"
+        "local": "./img/hero@1x.jpg"
       }
     },
     {
-      "id": "100",
-      "author": "Tina Rataj",
-      "width": 2500,
-      "height": 1656,
+      "id": "3",
+      "author": "Local Example",
+      "width": 300,
+      "height": 300,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/pwaaqfoMibI",
-        "picsum": "https://picsum.photos/id/100/2500/1656"
+        "local": "./img/sea@1x.jpg"
       }
     },
     {
-      "id": "1000",
-      "author": "Lukas Budimaier",
-      "width": 5626,
-      "height": 3635,
+      "id": "4",
+      "author": "Local Example",
+      "width": 300,
+      "height": 300,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/6cY-FvMlmkQ",
-        "picsum": "https://picsum.photos/id/1000/5626/3635"
+        "local": "./img/sea@2x.jpg"
       }
     },
     {
-      "id": "1001",
-      "author": "Danielle MacInnes",
-      "width": 5616,
-      "height": 3744,
+      "id": "5",
+      "author": "Local Example",
+      "width": 640,
+      "height": 360,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/1DkWWN1dr-s",
-        "picsum": "https://picsum.photos/id/1001/5616/3744"
+        "local": "./img/hero@2x.jpg"
       }
     },
     {
-      "id": "1002",
-      "author": "NASA",
-      "width": 4312,
-      "height": 2868,
+      "id": "6",
+      "author": "Local Example",
+      "width": 200,
+      "height": 200,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/6-jTZysYY_U",
-        "picsum": "https://picsum.photos/id/1002/4312/2868"
+        "local": "./img/clock.jpg"
       }
     },
     {
-      "id": "1003",
-      "author": "E+N Photographies",
-      "width": 1181,
-      "height": 1772,
+      "id": "7",
+      "author": "Local Example",
+      "width": 100,
+      "height": 100,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/GYumuBnTqKc",
-        "picsum": "https://picsum.photos/id/1003/1181/1772"
+        "local": "./img/cats-anim.gif"
       }
     },
     {
-      "id": "1004",
-      "author": "Greg Rakozy",
-      "width": 5616,
-      "height": 3744,
+      "id": "8",
+      "author": "Local Example",
+      "width": 100,
+      "height": 100,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/SSxIGsySh8o",
-        "picsum": "https://picsum.photos/id/1004/5616/3744"
+        "local": "./img/cats-anim-placeholder.gif"
       }
     },
     {
-      "id": "1005",
-      "author": "Matthew Wiebe",
-      "width": 5760,
-      "height": 3840,
+      "id": "9",
+      "author": "Local Example",
+      "width": 100,
+      "height": 100,
       "urls": {
-        "unsplash": "https://unsplash.com/photos/tBtuxtLvAZs",
-        "picsum": "https://picsum.photos/id/1005/5760/3840"
-      }
-    },
-    {
-      "id": "1006",
-      "author": "Vladimir Kudinov",
-      "width": 3000,
-      "height": 2000,
-      "urls": {
-        "unsplash": "https://unsplash.com/photos/-wWRHIUklxM",
-        "picsum": "https://picsum.photos/id/1006/3000/2000"
-      }
-    },
-    {
-      "id": "1008",
-      "author": "Benjamin Combs",
-      "width": 5616,
-      "height": 3744,
-      "urls": {
-        "unsplash": "https://unsplash.com/photos/5L4XAgMSno0",
-        "picsum": "https://picsum.photos/id/1008/5616/3744"
+        "local": "./img/stars.png"
       }
     }
   ]
