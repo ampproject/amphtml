@@ -28,7 +28,7 @@ export const countGenerators = {};
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
 // as they block the UI thread for the arbitrary amount of time until the
 // request completes.
-const BLOCK_SYNC_XHR = "sync-xhr 'none'";
+const BLOCK_SYNC_XHR = "sync-xhr=()";
 
 // TODO(wg-bento): UA check for required flags without iframe element
 const DEFAULT_SANDBOX =
