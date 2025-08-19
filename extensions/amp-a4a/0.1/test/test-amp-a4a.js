@@ -1046,7 +1046,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         await a4a.layoutCallback();
         verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
         expect(a4a.iframe.getAttribute('allow')).to.equal(
-          "sync-xhr=()attribution-reporting 'src';"
+          "sync-xhr=(); attribution-reporting 'src';"
         );
       });
 
