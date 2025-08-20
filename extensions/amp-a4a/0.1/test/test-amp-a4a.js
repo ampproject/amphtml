@@ -918,7 +918,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include('sync-xhr=();');
       });
 
       it('should set feature policy for attribution-reporting when supported', async () => {
@@ -929,7 +929,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include('sync-xhr=();');
         expect(a4a.iframe.getAttribute('allow')).to.include(
           "attribution-reporting 'src';"
         );
@@ -943,7 +943,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.include('sync-xhr=()');
         expect(a4a.iframe.getAttribute('allow')).to.not.include(
           "attribution-reporting 'src';"
         );
@@ -1046,7 +1046,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         await a4a.layoutCallback();
         verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
         expect(a4a.iframe.getAttribute('allow')).to.equal(
-          "sync-xhr 'none';attribution-reporting 'src';"
+          "sync-xhr=();attribution-reporting 'src';"
         );
       });
 
@@ -1058,7 +1058,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
         verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.equal('sync-xhr=()');
       });
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
@@ -1183,7 +1183,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           false /* shouldSandbox */
         );
         expect(a4a.iframe.getAttribute('allow')).to.equal(
-          "sync-xhr 'none';attribution-reporting 'src';"
+          "sync-xhr=();attribution-reporting 'src';"
         );
       });
 
@@ -1199,7 +1199,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           DEFAULT_SAFEFRAME_VERSION,
           false /* shouldSandbox */
         );
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
+        expect(a4a.iframe.getAttribute('allow')).to.equal('sync-xhr=()');
       });
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(

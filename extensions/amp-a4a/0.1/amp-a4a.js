@@ -2071,13 +2071,13 @@ export class AmpA4A extends AMP.BaseElement {
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    let featurePolicies = "sync-xhr 'none';";
+    let permissionPolicies = 'sync-xhr=()';
 
     if (isAttributionReportingAllowed(this.win.document)) {
-      featurePolicies += "attribution-reporting 'src';";
+      permissionPolicies += ";attribution-reporting 'src';";
     }
 
-    mergedAttributes['allow'] = featurePolicies;
+    mergedAttributes['allow'] = permissionPolicies;
 
     this.maybeDestroyIframe_();
     this.iframe = /** @type {!HTMLIFrameElement} */ (
