@@ -2074,7 +2074,7 @@ export class AmpA4A extends AMP.BaseElement {
     let permissionPolicies = 'sync-xhr=()';
 
     if (isAttributionReportingAllowed(this.win.document)) {
-      permissionPolicies += "; attribution-reporting 'src'";
+      permissionPolicies += ";attribution-reporting 'src';";
     }
 
     mergedAttributes['allow'] = permissionPolicies;
