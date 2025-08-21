@@ -2,6 +2,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {once} from '#core/types/function';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -80,7 +81,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     this.poster_ = '';
 
     /** @private {string} */
-    this.baseUrl_ = 'https://tvid.in/sdk/amp/ampembed.html';
+    this.baseUrl_ = 'https://tvid.in/player/amp.html';
 
     /** @private {number} */
     this.duration_ = 1;
@@ -90,6 +91,12 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
     /** @private {function()} */
     this.onMessage_ = this.onMessage_.bind(this);
+
+    /** @private {?function()} */
+    this.unlistenViewport_ = null;
+
+    /** @private {number} 0..1 */
+    this.viewportVisibleThreshold_ = 0;
   }
 
   /** @override */
@@ -114,8 +121,31 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
     this.baseUrl_ = element.getAttribute('data-iframe-src') || this.baseUrl_;
     this.config_ = element.getAttribute('data-config') || '';
+
+    // Read optional viewport visibility threshold from data-config
+    if (this.config_) {
+      try {
+        const params = new URLSearchParams(this.config_);
+        if (params.has('viewport')) {
+          let threshold = parseFloat(
+            /** @type {string} */ (params.get('viewport'))
+          );
+          if (isFinite(threshold)) {
+            if (threshold > 1) {
+              threshold = threshold / 100; // percent -> ratio
+            }
+            this.viewportVisibleThreshold_ = Math.max(
+              0,
+              Math.min(1, threshold)
+            );
+          }
+        }
+      } catch {}
+    }
+
     installVideoManagerForDoc(element);
-    Services.videoManagerForDoc(element).register(this);
+    const videoManager = Services.videoManagerForDoc(element);
+    videoManager.register(this);
   }
 
   /** @override */
@@ -154,9 +184,27 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     );
 
     addUnsafeAllowAutoplay(frame);
-    disableScrollingOnIframe(frame);
     this.unlistenFrame_ = listen(this.win, 'message', this.onMessage_);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (frame);
+
+    // Observe visibility to auto play/pause when entering/leaving viewport
+    const threshold = this.viewportVisibleThreshold_;
+    if (threshold > 0) {
+      this.unlistenViewport_ = observeIntersections(
+        this.element,
+        (entry) => {
+          const ratio =
+            entry && typeof entry.intersectionRatio === 'number'
+              ? entry.intersectionRatio
+              : entry && entry.isIntersecting
+                ? 1
+                : 0;
+          this.viewportCallback(ratio >= threshold);
+        },
+        {threshold}
+      );
+    }
+
     return this.loadPromise(this.iframe_);
   }
 
@@ -172,11 +220,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    if (inViewport) {
-      this.play();
-    } else {
-      this.pause();
-    }
+    this.handleViewportPlayPause(inViewport);
   }
 
   /** @override */
@@ -262,15 +306,6 @@ export class AmpSlikeplayer extends AMP.BaseElement {
   /**
    * @override
    */
-  postMessage_(message) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/ postMessage(message);
-    }
-  }
-
-  /**
-   * @override
-   */
   play() {
     this.postMessage_('play', '');
   }
@@ -280,6 +315,10 @@ export class AmpSlikeplayer extends AMP.BaseElement {
    */
   pause() {
     this.postMessage_('pause', '');
+  }
+
+  handleViewportPlayPause(inViewport) {
+    this.postMessage_('handleViewport', inViewport);
   }
 
   /**
@@ -294,11 +333,6 @@ export class AmpSlikeplayer extends AMP.BaseElement {
    */
   unmute() {
     this.postMessage_('unmute', '');
-  }
-
-  /** @override */
-  preimplementsAutoFullscreen() {
-    return false;
   }
 
   /** @override */
@@ -349,6 +383,15 @@ export class AmpSlikeplayer extends AMP.BaseElement {
         '*'
       );
     });
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.unlistenViewport_) {
+      this.unlistenViewport_();
+      this.unlistenViewport_ = null;
+    }
+    return true;
   }
 }
 
