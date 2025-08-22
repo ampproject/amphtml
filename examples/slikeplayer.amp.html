@@ -1,345 +1,461 @@
 <!doctype html>
 <html ⚡ lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Slike Player Example</title>
-  <link rel="canonical" href="./slikeplayer.amp.html">
-  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  
-  <!-- Include required AMP scripts -->
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-slikeplayer" src="https://cdn.ampproject.org/v0/amp-slikeplayer-0.1.js"></script>
-  
-  
+  <head>
+    <meta charset="utf-8" />
+    <title>Slike Player Example</title>
+    <link rel="canonical" href="./slikeplayer.amp.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
 
-  <style amp-custom>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background: #f8f9fa;
-    }
+    <!-- Include required AMP scripts -->
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-slikeplayer"
+      src="https://cdn.ampproject.org/v0/amp-slikeplayer-0.1.js"
+    ></script>
 
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 2rem 1rem;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
+    <style amp-custom>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f8f9fa;
+      }
 
-    .header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50" cy="50" r="50"><stop offset="0%" stop-color="rgba(255,255,255,.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>') repeat-x;
-      opacity: 0.1;
-    }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 1rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
 
-    .header h1 {
-      margin: 0;
-      font-size: 2.5rem;
-      font-weight: 700;
-      position: relative;
-      z-index: 1;
-    }
+      .header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50" cy="50" r="50"><stop offset="0%" stop-color="rgba(255,255,255,.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>')
+          repeat-x;
+        opacity: 0.1;
+      }
 
-    .header p {
-      margin: 0.5rem 0 0;
-      font-size: 1.2rem;
-      opacity: 0.9;
-      position: relative;
-      z-index: 1;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    .content-section {
-      background: white;
-      margin: 2rem 0;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-      overflow: hidden;
-    }
-
-    .section-header {
-      background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
-      color: white;
-      padding: 1.5rem;
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    .section-content {
-      padding: 2rem;
-    }
-
-    .player-section {
-      background: white;
-      margin: 3rem 0;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .player-header {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      color: white;
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    .player-header h2 {
-      margin: 0;
-      font-size: 1.8rem;
-      font-weight: 600;
-    }
-
-    .player-header p {
-      margin: 0.5rem 0 0;
-      opacity: 0.9;
-      font-size: 1rem;
-    }
-
-    .player-container {
-      padding: 2rem;
-      background: #f8f9fa;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin: 2rem 0;
-    }
-
-    .feature-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-      border-left: 4px solid #667eea;
-    }
-
-    .feature-card h3 {
-      margin: 0 0 1rem;
-      color: #667eea;
-      font-size: 1.3rem;
-    }
-
-    .feature-card p {
-      margin: 0;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    .spacer {
-      height: 80vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-      color: white;
-      font-size: 1.2rem;
-      text-align: center;
-      margin: 2rem 0;
-      border-radius: 12px;
-    }
-
-    
-
-    
-
-    .intro-text {
-      background: white;
-      padding: 2rem;
-      margin: 2rem 0;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-      border-left: 4px solid #4facfe;
-    }
-
-    .intro-text h2 {
-      margin: 0 0 1rem;
-      color: #4facfe;
-      font-size: 1.5rem;
-    }
-
-    .highlight {
-      background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-weight: 600;
-    }
-
-    @media (max-width: 768px) {
       .header h1 {
-        font-size: 2rem;
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
       }
-      
+
+      .header p {
+        margin: 0.5rem 0 0;
+        font-size: 1.2rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+      }
+
       .container {
-        padding: 0 0.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
       }
-      
+
+      .content-section {
+        background: white;
+        margin: 2rem 0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        overflow: hidden;
+      }
+
+      .section-header {
+        background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 1.5rem;
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .section-content {
+        padding: 2rem;
+      }
+
+      .player-section {
+        background: white;
+        margin: 3rem 0;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .player-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+      }
+
+      .player-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
+
+      .player-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+      }
+
+      .player-container {
+        padding: 2rem;
+        background: #f8f9fa;
+      }
+
       .feature-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
       }
-    }
-  </style>
-</head>
 
-<body>
-  
+      .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #667eea;
+      }
 
-  <!-- Header Section -->
-  <div class="header">
+      .feature-card h3 {
+        margin: 0 0 1rem;
+        color: #667eea;
+        font-size: 1.3rem;
+      }
+
+      .feature-card p {
+        margin: 0;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .spacer {
+        height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          45deg,
+          #ff9a9e 0%,
+          #fecfef 50%,
+          #fecfef 100%
+        );
+        color: white;
+        font-size: 1.2rem;
+        text-align: center;
+        margin: 2rem 0;
+        border-radius: 12px;
+      }
+
+      .intro-text {
+        background: white;
+        padding: 2rem;
+        margin: 2rem 0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        border-left: 4px solid #4facfe;
+      }
+
+      .intro-text h2 {
+        margin: 0 0 1rem;
+        color: #4facfe;
+        font-size: 1.5rem;
+      }
+
+      .highlight {
+        background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .container {
+          padding: 0 0.5rem;
+        }
+
+        .feature-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Header Section -->
+    <div class="header">
+      <div class="container">
+        <h1>Slike Player Demo</h1>
+        <p>Experience seamless video playback</p>
+      </div>
+    </div>
+
     <div class="container">
-      <h1>Slike Player Demo</h1>
-      <p>Experience seamless video playback</p>
-    </div>
-  </div>
-
-  <div class="container">
-    <!-- Introduction -->
-    <div class="intro-text">
-      <h2>About This Demo</h2>
-      <p>This page demonstrates the <span class="highlight">amp-slikeplayer</span> component with automatic play/pause based on viewport visibility. Scroll to see it pause when out of view and resume when visible.</p>
-    </div>
-
-    <!-- Content before player -->
-    <div class="content-section">
-      <h2 class="section-header">What is Slike Player?</h2>
-      <div class="section-content">
-        <p>Slike Player is a powerful, cloud-hosted video player solution that provides seamless integration with AMP pages. It offers advanced features like adaptive streaming, analytics integration, and responsive design that works across all devices.</p>
-        
-        <div class="feature-grid">
-          <div class="feature-card">
-            <h3>🚀 Fast Loading</h3>
-            <p>Optimized for speed with lazy loading and efficient video delivery through global CDN networks.</p>
-          </div>
-          <div class="feature-card">
-            <h3>📱 Responsive Design</h3>
-            <p>Automatically adapts to any screen size, providing the best viewing experience on desktop, tablet, and mobile.</p>
-          </div>
-          <div class="feature-card">
-            <h3>📊 Analytics Ready</h3>
-            <p>Built-in analytics tracking to help you understand viewer behavior and optimize your content strategy.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Player Section -->
-    <div class="player-section" id="video-section">
-      <div class="player-header">
-        <h2>Featured Video</h2>
-        <p>The player auto pauses when out of view</p>
-      </div>
-      <div class="player-container">
-        <!-- Main Slike Player -->
-        <amp-slikeplayer
-          id="main-player"
-          data-apikey="slike373googleamp5accuzkglo"
-          data-videoid="1xp5a1wkul"
-          data-config="autoplay=false&controls=true&responsive=true&viewport=50"
-          layout="responsive"
-          width="16"
-          height="9">
-        </amp-slikeplayer>
-      </div>
-    </div>
-
-    <!-- Content after player -->
-    <div class="content-section">
-      <h2 class="section-header">Key Features & Benefits</h2>
-      <div class="section-content">
-        <h3>🎯 Advanced Targeting</h3>
-        <p>Slike Player supports sophisticated targeting options, allowing you to deliver personalized video experiences based on user demographics, location, and viewing history. This ensures that your content reaches the right audience at the right time.</p>
-
-        <h3>🔧 Easy Integration</h3>
-        <p>With just a few lines of code, you can embed Slike Player into any AMP page. The player automatically handles complex video delivery optimization, format selection, and cross-browser compatibility.</p>
-
-        <h3>💡 Smart Playback</h3>
-        <p>The player intelligently adapts video quality based on network conditions and device capabilities, ensuring smooth playback without buffering interruptions.</p>
-      </div>
-    </div>
-
-    <!-- Spacer to demonstrate viewport behavior -->
-    <div class="spacer">
-      <div>
-        <h3>Keep Scrolling</h3>
-        <p>The player pauses when not visible and resumes on return</p>
-      </div>
-    </div>
-
-    <!-- More content -->
-    <div class="content-section">
-      <h2 class="section-header">Implementation Guide</h2>
-      <div class="section-content">
-        <h3>Step 1: Include Required Scripts</h3>
-        <p>Add the <code>amp-slikeplayer</code> script to your page head section.</p>
-
-        <h3>Step 2: Configure Viewport Behavior</h3>
+      <!-- Introduction -->
+      <div class="intro-text">
+        <h2>About This Demo</h2>
         <p>
-          Control auto play/pause by setting <code>viewport=&lt;0-100&gt;</code> (percent) in <code>data-config</code>.
-          A value of <code>0</code> disables viewport-based play/pause; any value &gt; 0 enables it.
-          Example: <code>viewport=50</code> plays only when at least half the player is visible.
+          This page demonstrates the
+          <span class="highlight">amp-slikeplayer</span> component with
+          automatic play/pause based on viewport visibility. Scroll to see it
+          pause when out of view and resume when visible.
         </p>
-
-        <h3>Step 2: Configure Your Player</h3>
-        <p>Set up your player with the required data-apikey and data-videoid attributes. You can also customize behavior using the data-config attribute.</p>
-
-        <!-- Docking-related steps removed -->
       </div>
-    </div>
 
-    <!-- Additional content -->
-    <div class="content-section">
-      <h2 class="section-header">Technical Specifications</h2>
-      <div class="section-content">
-        <div class="feature-grid">
-          <div class="feature-card">
-            <h3>🎬 Video Formats</h3>
-            <p>Supports MP4, WebM, HLS, and DASH formats with automatic format selection for optimal compatibility.</p>
-          </div>
-          <div class="feature-card">
-            <h3>🌐 Browser Support</h3>
-            <p>Compatible with all modern browsers including Chrome, Firefox, Safari, Edge, and mobile browsers.</p>
-          </div>
-          <div class="feature-card">
-            <h3>⚡ AMP Optimized</h3>
-            <p>Built specifically for AMP with lazy loading, preconnect optimization, and validation compliance.</p>
-          </div>
-          <div class="feature-card">
-            <h3>🔒 Security</h3>
-            <p>Includes DRM support, secure token authentication, and domain restriction capabilities.</p>
+      <!-- Content before player -->
+      <div class="content-section">
+        <h2 class="section-header">What is Slike Player?</h2>
+        <div class="section-content">
+          <p>
+            Slike Player is a powerful, cloud-hosted video player solution that
+            provides seamless integration with AMP pages. It offers advanced
+            features like adaptive streaming, analytics integration, and
+            responsive design that works across all devices.
+          </p>
+
+          <div class="feature-grid">
+            <div class="feature-card">
+              <h3>🚀 Fast Loading</h3>
+              <p>
+                Optimized for speed with lazy loading and efficient video
+                delivery through global CDN networks.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h3>📱 Responsive Design</h3>
+              <p>
+                Automatically adapts to any screen size, providing the best
+                viewing experience on desktop, tablet, and mobile.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h3>📊 Analytics Ready</h3>
+              <p>
+                Built-in analytics tracking to help you understand viewer
+                behavior and optimize your content strategy.
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Final spacer -->
-    <div class="spacer">
-      <div>
-        <h3>🎉 Demo Complete!</h3>
-        <p>Enjoy the player while browsing this content</p>
+      <!-- Player Section -->
+      <div class="player-section" id="video-section">
+        <div class="player-header">
+          <h2>Featured Video</h2>
+          <p>The player auto pauses when out of view</p>
+        </div>
+        <div class="player-container">
+          <!-- Main Slike Player -->
+          <amp-slikeplayer
+            id="main-player"
+            data-apikey="slike373googleamp5accuzkglo"
+            data-videoid="1xp5a1wkul"
+            data-config="autoplay=false&controls=true&responsive=true&viewport=50"
+            layout="responsive"
+            width="16"
+            height="9"
+          >
+          </amp-slikeplayer>
+        </div>
+      </div>
+
+      <!-- Content after player -->
+      <div class="content-section">
+        <h2 class="section-header">Key Features & Benefits</h2>
+        <div class="section-content">
+          <h3>🎯 Advanced Targeting</h3>
+          <p>
+            Slike Player supports sophisticated targeting options, allowing you
+            to deliver personalized video experiences based on user
+            demographics, location, and viewing history. This ensures that your
+            content reaches the right audience at the right time.
+          </p>
+
+          <h3>🔧 Easy Integration</h3>
+          <p>
+            With just a few lines of code, you can embed Slike Player into any
+            AMP page. The player automatically handles complex video delivery
+            optimization, format selection, and cross-browser compatibility.
+          </p>
+
+          <h3>💡 Smart Playback</h3>
+          <p>
+            The player intelligently adapts video quality based on network
+            conditions and device capabilities, ensuring smooth playback without
+            buffering interruptions.
+          </p>
+        </div>
+      </div>
+
+      <!-- Spacer to demonstrate viewport behavior -->
+      <div class="spacer">
+        <div>
+          <h3>Keep Scrolling</h3>
+          <p>The player pauses when not visible and resumes on return</p>
+        </div>
+      </div>
+
+      <!-- More content -->
+      <div class="content-section">
+        <h2 class="section-header">Implementation Guide</h2>
+        <div class="section-content">
+          <h3>Step 1: Include Required Scripts</h3>
+          <p>
+            Add the <code>amp-slikeplayer</code> script to your page head
+            section.
+          </p>
+
+          <h3>Step 2: Configure Viewport Behavior</h3>
+          <p>
+            Control auto play/pause by setting
+            <code>viewport=&lt;0-100&gt;</code> (percent) in
+            <code>data-config</code>. A value of <code>0</code> disables
+            viewport-based play/pause; any value &gt; 0 enables it. Example:
+            <code>viewport=50</code> plays only when at least half the player is
+            visible.
+          </p>
+
+          <h3>Step 2: Configure Your Player</h3>
+          <p>
+            Set up your player with the required data-apikey and data-videoid
+            attributes. You can also customize behavior using the data-config
+            attribute.
+          </p>
+
+          <!-- Docking-related steps removed -->
+        </div>
+      </div>
+
+      <!-- Additional content -->
+      <div class="content-section">
+        <h2 class="section-header">Technical Specifications</h2>
+        <div class="section-content">
+          <div class="feature-grid">
+            <div class="feature-card">
+              <h3>🎬 Video Formats</h3>
+              <p>
+                Supports MP4, WebM, HLS, and DASH formats with automatic format
+                selection for optimal compatibility.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h3>🌐 Browser Support</h3>
+              <p>
+                Compatible with all modern browsers including Chrome, Firefox,
+                Safari, Edge, and mobile browsers.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h3>⚡ AMP Optimized</h3>
+              <p>
+                Built specifically for AMP with lazy loading, preconnect
+                optimization, and validation compliance.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h3>🔒 Security</h3>
+              <p>
+                Includes DRM support, secure token authentication, and domain
+                restriction capabilities.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final spacer -->
+      <div class="spacer">
+        <div>
+          <h3>🎉 Demo Complete!</h3>
+          <p>Enjoy the player while browsing this content</p>
+        </div>
       </div>
     </div>
-  </div>
-  
-  
-</body>
+  </body>
 </html>

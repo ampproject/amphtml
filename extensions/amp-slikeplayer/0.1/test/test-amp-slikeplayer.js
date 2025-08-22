@@ -44,7 +44,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&skipad=true&baseurl=' +
+        'https://tvid.in/player/amp.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&skipad=true&baseurl=' +
           window.location.origin
       );
     });
@@ -61,7 +61,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&baseurl=' +
+        'https://tvid.in/player/amp.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&baseurl=' +
           window.location.origin
       );
     });

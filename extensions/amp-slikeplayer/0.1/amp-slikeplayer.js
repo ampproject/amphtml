@@ -1,8 +1,8 @@
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {once} from '#core/types/function';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {once} from '#core/types/function';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -317,6 +317,11 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     this.postMessage_('pause', '');
   }
 
+  /**
+   * Handle auto play/pause based on viewport visibility.
+   *
+   * @param {boolean} inViewport
+   */
   handleViewportPlayPause(inViewport) {
     this.postMessage_('handleViewport', inViewport);
   }
