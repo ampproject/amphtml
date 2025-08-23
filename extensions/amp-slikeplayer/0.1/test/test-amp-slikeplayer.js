@@ -1,5 +1,4 @@
 import '../amp-slikeplayer';
-import {Services} from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 
@@ -90,7 +89,7 @@ describes.realWin(
     });
 
     it('creates a placeholder when poster is provided', async () => {
-      const {el, impl} = await buildPlayer({
+      const {impl} = await buildPlayer({
         poster: 'https://example.com/poster.png',
       });
       const placeholder = impl.createPlaceholderCallback();
@@ -105,9 +104,9 @@ describes.realWin(
       const postSpy = env.sandbox.spy(impl, 'postMessage_');
       impl.seekTo(42);
       await Promise.resolve();
-      const args = postSpy.getCalls().pop().args;
-      expect(args[0]).to.equal('seekTo');
-      expect(args[1]).to.equal(42);
+      const [method, param] = postSpy.getCalls().pop().args;
+      expect(method).to.equal('seekTo');
+      expect(param).to.equal(42);
     });
 
     it('supportsPlatform and isInteractive are true', async () => {
@@ -133,7 +132,7 @@ describes.realWin(
     });
 
     it('updates currentTime on time/adTime events', async () => {
-      const {impl, iframe} = await buildPlayer();
+      const {iframe, impl} = await buildPlayer();
       impl.onMessage_({
         source: iframe.contentWindow,
         data: JSON.stringify({event: 'time', detail: {currentTime: 12}}),
@@ -147,7 +146,7 @@ describes.realWin(
     });
 
     it('redispatches mapped events', async () => {
-      const {el, impl, iframe} = await buildPlayer();
+      const {el, iframe, impl} = await buildPlayer();
       const p = listenOncePromise(el, VideoEvents_Enum.PLAYING);
       impl.onMessage_({
         source: iframe.contentWindow,
@@ -157,7 +156,7 @@ describes.realWin(
     });
 
     it('redispatches pause and complete, and visible', async () => {
-      const {el, impl, iframe} = await buildPlayer();
+      const {el, iframe, impl} = await buildPlayer();
       const p1 = listenOncePromise(el, VideoEvents_Enum.PAUSE);
       impl.onMessage_({
         source: iframe.contentWindow,
@@ -184,7 +183,10 @@ describes.realWin(
       const {impl} = await buildPlayer();
       const initial = impl.getCurrentTime();
       // Wrong source
-      impl.onMessage_({source: {}, data: JSON.stringify({event: 'time', detail: {currentTime: 99}})});
+      impl.onMessage_({
+        source: {},
+        data: JSON.stringify({event: 'time', detail: {currentTime: 99}}),
+      });
       expect(impl.getCurrentTime()).to.equal(initial);
       // Non-JSON
       impl.onMessage_({source: null, data: 'not-json'});
@@ -198,9 +200,9 @@ describes.realWin(
       const postSpy = env.sandbox.spy(impl, 'postMessage_');
       impl.viewportCallback(true);
       await Promise.resolve();
-      const lastArgs = postSpy.getCalls().pop().args;
-      expect(lastArgs[0]).to.equal('handleViewport');
-      expect(lastArgs[1]).to.equal(true);
+      const [m, p] = postSpy.getCalls().pop().args;
+      expect(m).to.equal('handleViewport');
+      expect(p).to.equal(true);
     });
 
     it('cleans up on unlayoutCallback', async () => {
