@@ -65,6 +65,9 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
+    /** @private {?function()} */
+    this.unlistenFrame_ = null;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -121,6 +124,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
     this.baseUrl_ = element.getAttribute('data-iframe-src') || this.baseUrl_;
     this.config_ = element.getAttribute('data-config') || '';
+    this.poster_ = element.getAttribute('poster') || '';
 
     // Read optional viewport visibility threshold from data-config
     if (this.config_) {
@@ -154,7 +158,10 @@ export class AmpSlikeplayer extends AMP.BaseElement {
       return;
     }
     const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
+    const ariaLabel = this.element.getAttribute('aria-label');
+    if (ariaLabel) {
+      placeholder.setAttribute('aria-label', ariaLabel);
+    }
     const src = this.poster_;
     placeholder.setAttribute('src', src);
     placeholder.setAttribute('layout', 'fill');
@@ -173,10 +180,10 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&baseurl=${window.location.origin}`;
+    let src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&baseurl=${this.win.location.origin}`;
 
     if (this.config_) {
-      src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&baseurl=${window.location.origin}`;
+      src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&baseurl=${this.win.location.origin}`;
     }
 
     const frame = disableScrollingOnIframe(
@@ -215,6 +222,11 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   supportsPlatform() {
+    return true;
+  }
+
+  /** @override */
+  isInteractive() {
     return true;
   }
 
@@ -368,7 +380,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    //to be implemented
+    this.postMessage_('seekTo', unusedTimeSeconds);
   }
   /**
    * @param {string} method
@@ -392,11 +404,24 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (this.unlistenFrame_) {
+      this.unlistenFrame_();
+      this.unlistenFrame_ = null;
+    }
+    if (this.iframe_) {
+      this.iframe_.src = 'about:blank';
+      this.iframe_ = null;
+    }
     if (this.unlistenViewport_) {
       this.unlistenViewport_();
       this.unlistenViewport_ = null;
     }
     return true;
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.pause();
   }
 }
 
