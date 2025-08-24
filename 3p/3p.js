@@ -9,7 +9,7 @@ import {rethrowAsync} from '#core/error';
 import {isArray} from '#core/types';
 import {hasOwn, map} from '#core/types/object';
 
-import {devAssert, userAssert} from '#utils/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 
 /** @typedef {function(!Window, !Object)}  */
 let ThirdPartyFunctionDef;
@@ -169,20 +169,24 @@ export function validateSrcContains(string, src) {
  * @param {function(*)} cb Callback function that is called when the work is
  *     done. The first argument is the result.
  */
-export function computeInMasterFrame(global, taskId, work, cb) {
-  const {master} = global.context;
-  let tasks = master.__ampMasterTasks;
+export function computeInCoordinatingFrame(global, taskId, work, cb) {
+  const {coordinator} = global.context;
+  let tasks = coordinator.__ampCoordinatorTasks;
   if (!tasks) {
-    tasks = master.__ampMasterTasks = {};
+    tasks = coordinator.__ampCoordinatorTasks = {};
   }
+
   let cbs = tasks[taskId];
   if (!tasks[taskId]) {
     cbs = tasks[taskId] = [];
   }
   cbs.push(cb);
+
+  // Only do work in the coordinating frame (same as master for now).
   if (!global.context.isMaster) {
-    return; // Only do work in master.
+    return;
   }
+
   work((result) => {
     for (let i = 0; i < cbs.length; i++) {
       cbs[i].call(null, result);
@@ -193,6 +197,21 @@ export function computeInMasterFrame(global, taskId, work, cb) {
       },
     };
   });
+}
+
+/*  Debug hook (optional — remove later) */
+if (typeof window !== 'undefined' && window.context) {
+  computeInCoordinatingFrame(
+    window,
+    'debugTask',
+    (done) => {
+      dev().info('AMP-COORDINATOR', 'Work running in coordinator frame');
+      done('coordinator-task-result');
+    },
+    (result) => {
+      dev().info('AMP-COORDINATOR', 'Coordinator result:', result);
+    }
+  );
 }
 
 /**
