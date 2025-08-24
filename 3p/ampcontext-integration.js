@@ -1,36 +1,36 @@
 import {dev, user, userAssert} from '#utils/log';
 
-import {computeInMasterFrame} from './3p';
+import {computeInCoordinatingFrame} from './3p';
 import {AbstractAmpContext} from './ampcontext';
 
 /**
- * Returns the "master frame" for all widgets of a given type.
+ * Returns the "coordinator frame" for all widgets of a given type.
  * This frame should be used to e.g. fetch scripts that can
  * be reused across frames.
- * once experiment is removed.
+ *
  * @param {!Window} win
  * @param {string} type
  * @return {!Window}
  */
-export function masterSelection(win, type) {
+export function coordinatorSelection(win, type) {
   type = type.toLowerCase();
-  // The master has a special name.
-  const masterName = 'frame_' + type + '_master';
-  let master;
+  // The coordinator has a special name.
+  const coordinatorName = 'frame_' + type + '_coordinator';
+  let coordinator;
   try {
-    // Try to get the master from the parent. If it does not
+    // Try to get the coordinator from the parent. If it does not
     // exist yet we get a security exception that we catch
     // and ignore.
-    master = win.parent.frames[masterName];
+    coordinator = win.parent.frames[coordinatorName];
   } catch (expected) {
     /* ignore */
   }
-  if (!master) {
-    // No master yet, rename ourselves to be master. Yaihh.
-    win.name = masterName;
-    master = win;
+  if (!coordinator) {
+    // No coordinator yet, rename ourselves to be coordinator.
+    win.name = coordinatorName;
+    coordinator = win;
   }
-  return master;
+  return coordinator;
 }
 
 export class IntegrationAmpContext extends AbstractAmpContext {
@@ -58,23 +58,23 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   }
 
   /** @return {!Window} */
-  get master() {
-    return this.master_();
+  get coordinator() {
+    return this.coordinator_();
   }
 
   /** @return {!Window} */
-  master_() {
-    return masterSelection(this.win_, dev().assertString(this.embedType_));
+  coordinator_() {
+    return coordinatorSelection(this.win_, dev().assertString(this.embedType_));
   }
 
   /** @return {boolean} */
-  get isMaster() {
-    return this.isMaster_();
+  get isCoordinator() {
+    return this.isCoordinator_();
   }
 
   /** @return {boolean} */
-  isMaster_() {
-    return this.master == this.win_;
+  isCoordinator_() {
+    return this.coordinator == this.win_;
   }
 
   /**
@@ -119,9 +119,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
 
   /**
    * Performs a potentially asynchronous task exactly once for all frames of a
-   * given type and the provide the respective value to all frames.
+   * given type and provides the respective value to all frames.
    * @param {!Window} global Your window
-   * @param {string} taskId Must be not conflict with any other global variable
+   * @param {string} taskId Must not conflict with any other global variable
    *     you use. Must be the same for all callers from all frames that want
    *     the same result.
    * @param {function(function(*))} work Function implementing the work that
@@ -130,7 +130,16 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {function(*)} cb Callback function that is called when the work is
    *     done. The first argument is the result.
    */
-  computeInMasterFrame(global, taskId, work, cb) {
-    computeInMasterFrame(global, taskId, work, cb);
+  computeInCoordinatingFrame(global, taskId, work, cb) {
+    computeInCoordinatingFrame(global, taskId, work, cb);
+  }
+}
+
+// -----------------------------------------------
+// Global patch: alias context.master → context.coordinator
+// -----------------------------------------------
+if (self.context) {
+  if (self.context.master && !self.context.coordinator) {
+    self.context.coordinator = self.context.master;
   }
 }
