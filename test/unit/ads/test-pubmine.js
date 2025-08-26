@@ -25,9 +25,9 @@ describes.fakeWin('pubmine', {}, (env) => {
     win.document.body.innerHTML = '<div id="c"></div>';
   });
 
-  it('should set pubmine publisher config on global if loader in a master frame', () => {
+  it('should set pubmine publisher config on global if loader in a primary frame', () => {
     win.context = {
-      isMaster: true,
+      isPrimary: true,
     };
     const expectedConfig = {
       pt: 2,
@@ -46,16 +46,16 @@ describes.fakeWin('pubmine', {}, (env) => {
     expect(getSlotElement()).to.be.ok;
   });
 
-  it('should add a command and not to load the script if loaded in a slave frame', () => {
+  it('should add a command and not to load the script if loaded in a secondary frame', () => {
     win.__ATA = {
       cmd: [],
     };
     win.context = {
-      isMaster: false,
-      master: win,
+      isPrimary: false,
+      primary: win,
     };
     pubmine(win, mockData);
-    expect(win.context.master.__ATA.cmd).to.have.length(1);
+    expect(win.context.primary.__ATA.cmd).to.have.length(1);
     expect(getPubmineScriptElement()).to.be.null;
     expect(getSlotElement()).to.be.ok;
   });

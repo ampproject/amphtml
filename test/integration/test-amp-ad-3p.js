@@ -84,8 +84,8 @@ describes.sandboxed('amp-ad 3P', {}, () => {
         expect(initialIntersection.boundingClientRect).to.deep.equal(
           layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
         );
-        expect(context.isMaster).to.exist;
-        expect(context.computeInMasterFrame).to.exist;
+            expect(context.isPrimary).to.exist;
+    expect(context.computeInPrimaryFrame).to.exist;
         expect(context.location).to.deep.include({
           hash: '',
           host: 'localhost:9876',
@@ -123,7 +123,7 @@ describes.sandboxed('amp-ad 3P', {}, () => {
         expect(context.reportRenderedEntityIdentifier).to.be.a('function');
         expect(context.requestResize).to.be.a('function');
         expect(context.report3pError).to.be.a('function');
-        expect(context.computeInMasterFrame).to.be.a('function');
+        expect(context.computeInPrimaryFrame).to.be.a('function');
       })
       .then(() => {
         // test iframe will send out render-start to amp-ad

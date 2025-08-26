@@ -185,8 +185,10 @@ window.context.initialLayoutRect;
 window.context.initialIntersection;
 window.context.sourceUrl;
 window.context.experimentToggles;
-window.context.master;
-window.context.isMaster;
+window.context.primary;
+window.context.isPrimary;
+window.context.master; // Legacy property for backward compatibility
+window.context.isMaster; // Legacy property for backward compatibility
 window.context.ampcontextVersion;
 window.context.ampcontextFilepath;
 window.context.canary;

@@ -1,4 +1,4 @@
-import {computeInMasterFrame, validateData, writeScript} from '#3p/3p';
+import {computeInPrimaryFrame, validateData, writeScript} from '#3p/3p';
 
 import {hasOwn} from '#core/types/object';
 
@@ -149,7 +149,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     }
     loadMNETAd.alreadyCalled = true;
 
-    global.advBidxc = global.context.master.advBidxc;
+    global.advBidxc = global.context.primary.advBidxc;
     if (global.advBidxc && typeof global.advBidxc.renderAmpAd === 'function') {
       global.addEventListener('message', (event) => {
         global.advBidxc.renderAmpAd(event, global);
@@ -171,7 +171,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
    * Handler for mnet.
    */
   function mnetHBHandle() {
-    global.advBidxc = global.context.master.advBidxc;
+    global.advBidxc = global.context.primary.advBidxc;
     if (
       global.advBidxc &&
       typeof global.advBidxc.registerAmpSlot === 'function'
@@ -184,7 +184,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     }
   }
 
-  computeInMasterFrame(
+  computeInPrimaryFrame(
     global,
     'medianet-hb-load',
     (done) => {

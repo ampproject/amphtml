@@ -390,7 +390,7 @@ export class AmpAdXOriginIframeHandler {
   freeXOriginIframe(opt_keep) {
     this.cleanup_();
     // If ask to keep the iframe.
-    // Use in the case of no-content and iframe is a master iframe.
+    // Use in the case of no-content and iframe is a primary iframe.
     if (opt_keep) {
       return;
     }
@@ -409,7 +409,7 @@ export class AmpAdXOriginIframeHandler {
       // unlayout already called
       return;
     }
-    this.freeXOriginIframe(this.iframe.name.indexOf('_master') >= 0);
+    this.freeXOriginIframe(this.iframe.name.indexOf('_primary') >= 0);
     this.uiHandler_.applyNoContentUI();
   }
 
