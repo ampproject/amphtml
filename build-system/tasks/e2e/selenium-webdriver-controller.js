@@ -515,6 +515,14 @@ class SeleniumWebDriverController {
     ]);
     const resultWidth = Number(updatedHtmlElementSizes[0]);
     const resultHeight = Number(updatedHtmlElementSizes[1]);
+
+    await this.driver
+    .manage()
+    .window()
+    .setRect({
+      width: width + horizBorder,
+      height: height + vertBorder,
+    });
     // TODO(sparhami) These are throwing errors, but are not causing the test
     // to fail immediately,.Figure out why, we want the test to fail here
     // instead of continuing.
