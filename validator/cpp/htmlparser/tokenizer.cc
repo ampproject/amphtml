@@ -1,5 +1,13 @@
 #include "cpp/htmlparser/tokenizer.h"
 
+#include <algorithm>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "absl/flags/flag.h"
 #include "cpp/htmlparser/atom.h"
 #include "cpp/htmlparser/atomutil.h"
@@ -107,7 +115,10 @@ void Tokenizer::ReadRawOrRCDATA() {
     if (c != '<') continue;
     c = ReadByte();
     if (eof_) break;
-    if (c != '/') continue;
+    if (c != '/') {
+      UnreadByte();
+      continue;
+    }
     if (ReadRawEndTag() || eof_) break;
   }
 
@@ -132,6 +143,7 @@ bool Tokenizer::ReadRawEndTag() {
   switch (c) {
     case ' ':
     case '\n':
+    case '\r':
     case '\t':
     case '\f':
     case '/':
@@ -535,8 +547,7 @@ bool Tokenizer::ReadCDATA() {
 
 template<typename... Args>
 bool Tokenizer::StartTagIn(Args... ss) {
-  std::vector<std::string> argsList{ss...};
-  for (const auto& s : argsList) {
+  for (std::string_view s : {ss...}) {
     if (data_.end - data_.start != s.size()) continue;
     bool matched = true;
     for (std::size_t i = 0; i < s.size(); ++i) {
@@ -681,6 +692,7 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
   // templates. See: https://amp.dev/documentation/components/amp-mustache/
   bool mustache_inside_section_block = false;
   std::string mustache_section_name = "";
+  bool is_at_attribute_key_start = true;
 
   while (!eof_) {
     char c = ReadByte();
@@ -744,12 +756,21 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
         return;
       }
       case '=':
+        if (is_at_attribute_key_start) {
+          // An unexpected equals sign at the start of the attribute name should
+          // be treated as part of the name. See §13.2.5.32 "Before attribute
+          // name state" in the HTML Living Standard from 2024-02-22 at
+          // https://html.spec.whatwg.org/multipage/parsing.html#before-attribute-name-state.
+          break;
+        }
+        [[fallthrough]];
       case '>': {
         UnreadByte();
         std::get<0>(pending_attribute_).end = raw_.end;
         return;
       }
     }
+    is_at_attribute_key_start = false;
   }
 }
 
@@ -838,7 +859,7 @@ TokenType Tokenizer::Next(bool template_mode) {
     return token_type_;
   }
 
-  if (raw_tag_ != "") {
+  if (!raw_tag_.empty()) {
     if (raw_tag_ == "plaintext") {
       // Read everything up to EOF.
       while (!eof_) {
@@ -1083,12 +1104,14 @@ Token Tokenizer::token() {
           t.data = tag_name;
         }
         if (has_attributes) {
+          t.attributes.reserve(t.attributes.size() + attributes_.size() -
+                               n_attributes_returned_);
           while (true) {
             auto a = TagAttr();
             if (!a.has_value()) break;
-            auto attr = std::get<Attribute>(a.value());
+            auto& attr = std::get<Attribute>(a.value());
             bool more_attributes = std::get<bool>(a.value());
-            t.attributes.push_back(attr);
+            t.attributes.push_back(std::move(attr));
             if (!more_attributes) break;
           }
         }
