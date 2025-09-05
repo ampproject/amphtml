@@ -195,7 +195,7 @@ describes.fakeWin('amp-ad-ssp', {}, (env) => {
     sandbox.stub(_3p, 'loadScript').callsFake((window, url, cb) => {
       // Mock script adding global object
       window.sssp = sssp;
-      window.context.master.ssp = sssp;
+      window.context.primary.ssp = sssp;
       window.ssp = sssp;
 
       cb();

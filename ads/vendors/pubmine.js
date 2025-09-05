@@ -79,9 +79,9 @@ export function pubmine(global, data) {
   if (isMaster) {
     initMasterFrame(data, global);
   }
-  const master = isMaster ? global : global.context.master;
-  master['__ATA']['cmd']['push'](function () {
-    master['__ATA']['insertStyles'](global);
-    master['__ATA']['initSlot'](slotId, slotConfig);
+  const primary = isMaster ? global : global.context.primary;
+  primary['__ATA']['cmd']['push'](function () {
+    primary['__ATA']['insertStyles'](global);
+    primary['__ATA']['initSlot'](slotId, slotConfig);
   });
 }
