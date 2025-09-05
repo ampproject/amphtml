@@ -1,8 +1,70 @@
 #include "cpp/htmlparser/json/types.h"
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <variant>
 
 namespace htmlparser::json {
+
+std::size_t JsonDict::size() const {
+  return items_.size();
+}
+
+bool JsonDict::empty() const {
+  return items_.empty();
+}
+
+JsonDict::iterator JsonDict::begin() {
+  return items_.begin();
+}
+
+JsonDict::iterator JsonDict::end() {
+  return items_.end();
+}
+
+JsonDict::const_iterator JsonDict::begin() const {
+  return items_.begin();
+}
+
+JsonDict::const_iterator JsonDict::end() const {
+  return items_.end();
+}
+
+std::size_t JsonArray::size() const {
+  return items_.size();
+}
+
+bool JsonArray::empty() const {
+  return items_.empty();
+}
+
+JsonArray::iterator JsonArray::begin() {
+  return items_.begin();
+}
+
+JsonArray::iterator JsonArray::end() {
+  return items_.end();
+}
+
+JsonArray::const_iterator JsonArray::begin() const {
+  return items_.begin();
+}
+
+JsonArray::const_iterator JsonArray::end() const {
+  return items_.end();
+}
+
+JsonObject& JsonArray::at(std::size_t i) { return items_[i]; }
+
+JsonObject* JsonArray::Last() {
+  if (items_.empty()) return nullptr;
+  return &items_.back();
+}
 
 const int64_t MAX_SAFE_INTEGER = 1LL << 53;  // 2 ^^ 53.
 
