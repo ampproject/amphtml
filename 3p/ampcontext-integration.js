@@ -58,23 +58,34 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   }
 
   /** @return {!Window} */
-  get master() {
-    return this.master_();
+  get primary() {
+    return this.primary_();
   }
 
   /** @return {!Window} */
-  master_() {
+  primary_() {
     return masterSelection(this.win_, dev().assertString(this.embedType_));
   }
 
   /** @return {boolean} */
-  get isMaster() {
-    return this.isMaster_();
+  get isPrimary() {
+    return this.isPrimary_();
   }
 
   /** @return {boolean} */
-  isMaster_() {
-    return this.master == this.win_;
+  isPrimary_() {
+    return this.primary == this.win_;
+  }
+
+  // Backwards compatibility aliases
+  /** @return {!Window} */
+  get master() {
+    return this.primary_();
+  }
+
+  /** @return {boolean} */
+  get isMaster() {
+    return this.isPrimary_();
   }
 
   /**

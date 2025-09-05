@@ -42,9 +42,9 @@ export function kargo(global, data) {
       if (success) {
         const w = options.source_window;
 
-        // Add reference to Kargo api to this window if it's not the Master window
-        if (!w.context.isMaster) {
-          w.Kargo = w.context.master.Kargo;
+        // Add reference to Kargo api to this window if it's not the Primary window
+        if (!w.context.isPrimary) {
+          w.Kargo = w.context.primary.Kargo;
         }
 
         w.Kargo.getAd(data.slot, options);

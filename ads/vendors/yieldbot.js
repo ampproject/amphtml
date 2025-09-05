@@ -37,7 +37,7 @@ export function yieldbot(global, data) {
 
         global.yieldbot.psn(data.psn);
         global.yieldbot.enableAsync();
-        if (window.context.isMaster) {
+        if (window.context.isPrimary) {
           global.yieldbot.defineSlot(data.ybSlot, {sizes: dimensions});
           global.yieldbot.go();
         } else {

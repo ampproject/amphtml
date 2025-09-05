@@ -218,26 +218,26 @@ describes.sandboxed('3p', {}, (env) => {
     const taskId = 'exampleId';
     const master = {
       context: {
-        isMaster: true,
+        isPrimary: true,
       },
     };
-    master.context.master = master;
+    master.context.primary = master;
     const slave0 = {
       context: {
-        isMaster: false,
-        master,
+        isPrimary: false,
+        primary: master,
       },
     };
     const slave1 = {
       context: {
-        isMaster: false,
-        master,
+        isPrimary: false,
+        primary: master,
       },
     };
     const slave2 = {
       context: {
-        isMaster: false,
-        master,
+        isPrimary: false,
+        primary: master,
       },
     };
     let done;

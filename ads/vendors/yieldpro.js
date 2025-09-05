@@ -49,7 +49,7 @@ export function yieldpro(global, data) {
     },
     (success) => {
       if (success) {
-        global.showadAMPAdapter = global.context.master.showadAMPAdapter;
+        global.showadAMPAdapter = global.context.primary.showadAMPAdapter;
         global.showadAMPAdapter.registerSlot(data, global);
       } else {
         throw new Error('Yieldpro AdTag failed to load');
