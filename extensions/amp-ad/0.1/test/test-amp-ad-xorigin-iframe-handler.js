@@ -147,7 +147,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
           });
       });
 
-      it('should resolve on message "no-content" and remove non-master iframe', () => {
+      it('should resolve on message "no-content" and remove non-primary iframe', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           sentinel: 'amp3ptest' + testIndex,
@@ -159,8 +159,8 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
         });
       });
 
-      it('should NOT remove master iframe on message "no-content"', () => {
-        iframe.name = 'test_master';
+      it('should NOT remove primary iframe on message "no-content"', () => {
+        iframe.name = 'test_primary';
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           sentinel: 'amp3ptest' + testIndex,
@@ -249,7 +249,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
 
     it('should trigger visibility on timeout', () => {
       const clock = env.sandbox.useFakeTimers();
-      iframe.name = 'test_master';
+      iframe.name = 'test_primary';
       initPromise = iframeHandler.init(iframe);
       return new Promise((resolve) => {
         iframe.onload = () => {
@@ -477,7 +477,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
       const iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
       const iframe = createIframeWithMessageStub(window);
       iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-      iframe.name = 'test_nomaster';
+      iframe.name = 'test_noprimary';
       iframeHandler.init(iframe);
       env.sandbox
         ./*OK*/ stub(iframeHandler.viewport_, 'getClientRectAsync')

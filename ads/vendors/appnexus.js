@@ -50,15 +50,15 @@ export function appnexus(global, data) {
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
   let apntag;
-  if (context.isMaster) {
-    // in case we are in the master iframe, we load AST
-    context.master.apntag = context.master.apntag || {};
-    context.master.apntag.anq = context.master.apntag.anq || [];
-    apntag = context.master.apntag;
+  if (context.isPrimary) {
+    // in case we are in the primary iframe, we load AST
+    context.primary.apntag = context.primary.apntag || {};
+    context.primary.apntag.anq = context.primary.apntag.anq || [];
+    apntag = context.primary.apntag;
 
-    context.master.adUnitTargetIds = context.master.adUnitTargetIds || [];
+    context.primary.adUnitTargetIds = context.primary.adUnitTargetIds || [];
 
-    context.master.adUnitTargetIds = data.adUnits.map(
+    context.primary.adUnitTargetIds = data.adUnits.map(
       (adUnit) => adUnit.targetId
     );
 
@@ -97,21 +97,21 @@ function appnexusAst(global, data) {
   }
 
   if (!apntag) {
-    apntag = context.master.apntag;
+    apntag = context.primary.apntag;
     //preserve a global reference
     /** @type {{showTag: function(string, Object)}} global.apntag */
-    global.apntag = context.master.apntag;
+    global.apntag = context.primary.apntag;
   }
 
-  if (!context.isMaster && data.adUnits) {
+  if (!context.isPrimary && data.adUnits) {
     const newAddUnits = data.adUnits.filter((adUnit) => {
-      return context.master.adUnitTargetIds.indexOf(adUnit.targetId) === -1;
+      return context.primary.adUnitTargetIds.indexOf(adUnit.targetId) === -1;
     });
     if (newAddUnits.length) {
       apntag.anq.push(() => {
         /** @type {!Array} */ (newAddUnits).forEach((adUnit) => {
           apntag.defineTag(adUnit);
-          context.master.adUnitTargetIds.push(adUnit.targetId);
+          context.primary.adUnitTargetIds.push(adUnit.targetId);
         });
         apntag.loadTags();
       });

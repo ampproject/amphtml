@@ -1,4 +1,4 @@
-import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
+import {computeInPrimaryFrame, loadScript, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -8,7 +8,7 @@ export function swoop(global, data) {
   // Required properties
   validateData(data, ['layout', 'placement', 'publisher', 'slot']);
 
-  computeInMasterFrame(
+  computeInPrimaryFrame(
     global,
     'swoop-load',
     (done) => {
@@ -20,8 +20,8 @@ export function swoop(global, data) {
     },
     (success) => {
       if (success) {
-        if (!global.context.isMaster) {
-          global.context.master.Swoop.announcePlace(global, data);
+          if (!global.context.isPrimary) {
+    global.context.primary.Swoop.announcePlace(global, data);
         }
       } else {
         global.context.noContentAvailable();

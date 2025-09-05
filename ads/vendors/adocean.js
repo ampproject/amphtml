@@ -1,4 +1,4 @@
-import {computeInMasterFrame, validateData, writeScript} from '#3p/3p';
+import {computeInPrimaryFrame, validateData, writeScript} from '#3p/3p';
 
 import {
   CONSENT_POLICY_STATE,
@@ -189,7 +189,7 @@ function executeMaster(masterId, data, global, callback) {
 function requestCodes(masterId, data, global, callback) {
   const slaveId = data['aoId'];
 
-  computeInMasterFrame(
+      computeInPrimaryFrame(
     global,
     'ao-master-exec',
     (done) => {
@@ -271,14 +271,14 @@ class AdoBuffer {
 
 /**
  *
- * @param {string} slaveId
+ * @param {string} secondaryId
  * @param {!Object} config
  * @param {!Window} global
  */
-function executeSlave(slaveId, config, global) {
+function executeSecondary(secondaryId, config, global) {
   const doc = global.document;
   const placement = doc.createElement('div');
-  placement['id'] = slaveId;
+  placement['id'] = secondaryId;
 
   const dom = doc.getElementById('c');
   dom.appendChild(placement);
@@ -341,7 +341,7 @@ export function adocean(global, data) {
       }
 
       requestCodes(masterId, data, global, (codes) => {
-        executeSlave(data['aoId'], codes, global);
+        executeSecondary(data['aoId'], codes, global);
       });
     } else {
       appendPlacement(mode, global, data);
