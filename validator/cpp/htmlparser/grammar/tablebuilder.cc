@@ -6,6 +6,13 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <map>
+#include <optional>
+#include <set>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "absl/strings/match.h"
 #include "cpp/htmlparser/defer.h"
