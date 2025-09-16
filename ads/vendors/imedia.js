@@ -23,7 +23,7 @@ import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
 export function imedia(global, data) {
   validateData(data, ['id', 'positions']);
   const positions = JSON.parse(data.positions);
-  const mW = context.isMaster ? global : context.master;
+  const mW = context.isPrimary ? global : context.primary;
 
   // create parent element
   const parentElement = document.createElement('div');

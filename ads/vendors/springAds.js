@@ -7,11 +7,11 @@ import {parseJson} from '#core/types/object/json';
  */
 
 const initSlotList = (context) => {
-  context.master.availableSlots = context.master.availableSlots || {};
+  context.primary.availableSlots = context.primary.availableSlots || {};
 };
 
 const registerSlot = (slot) => {
-  context.master.availableSlots[slot.slotName] = slot;
+  context.primary.availableSlots[slot.slotName] = slot;
 };
 
 // eslint-disable-next-line require-jsdoc
@@ -27,8 +27,8 @@ export function springAds(global, data) {
   if (data.adssetup) {
     const adSSetup = parseJson(data.adssetup);
     adSSetup['isAMP'] = !0;
-    adSSetup['availableSlots'] = context.master.availableSlots;
-    context.master.adSSetup = global.adSSetup = adSSetup;
+    adSSetup['availableSlots'] = context.primary.availableSlots;
+    context.primary.adSSetup = global.adSSetup = adSSetup;
     const sitename = adSSetup['publisher'].match(/(.*)\..*/)[1];
     loadScript(
       global,
@@ -41,7 +41,7 @@ export function springAds(global, data) {
       context,
       slotName: data['adslot'],
     });
-    const adlib = window.ASCDP || context.master.ASCDP || '';
+    const adlib = window.ASCDP || context.primary.ASCDP || '';
     adlib && adlib.adS.renderAd(data.adslot);
   }
 }

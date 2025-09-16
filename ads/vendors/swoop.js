@@ -20,8 +20,8 @@ export function swoop(global, data) {
     },
     (success) => {
       if (success) {
-        if (!global.context.isMaster) {
-          global.context.master.Swoop.announcePlace(global, data);
+        if (!global.context.isPrimary) {
+          global.context.primary.Swoop.announcePlace(global, data);
         }
       } else {
         global.context.noContentAvailable();

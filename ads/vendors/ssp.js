@@ -139,7 +139,7 @@ export function ssp(global, data) {
   }
 
   // This is super important. Without this any variables on context are not shared
-  const mW = global.context.isMaster ? global : global.context.master;
+  const mW = global.context.isPrimary ? global : global.context.primary;
 
   // create parent element
   const parentElement = document.createElement('div');

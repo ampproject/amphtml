@@ -84,7 +84,7 @@ describes.sandboxed('amp-ad 3P', {}, () => {
         expect(initialIntersection.boundingClientRect).to.deep.equal(
           layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
         );
-        expect(context.isMaster).to.exist;
+        expect(context.isPrimary).to.exist;
         expect(context.computeInMasterFrame).to.exist;
         expect(context.location).to.deep.include({
           hash: '',

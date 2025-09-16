@@ -185,6 +185,8 @@ window.context.initialLayoutRect;
 window.context.initialIntersection;
 window.context.sourceUrl;
 window.context.experimentToggles;
+window.context.primary;
+window.context.isPrimary;
 window.context.master;
 window.context.isMaster;
 window.context.ampcontextVersion;

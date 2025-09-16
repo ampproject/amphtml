@@ -279,9 +279,11 @@ documentation with the new behaviors on user's consent choices. You can refer to
 
 #### JS reuse across iframes
 
-To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
+To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.primary` will contain the window object of the iframe being elected primary iframe for the current page. The `window.context.isPrimary` property is `true` when the current frame is the primary frame.
 
-The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/main/3p/3p.js) for function signature.
+The `computeInMasterFrame` function is designed to make it easy to perform a task only in the primary frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/main/3p/3p.js) for function signature.
+
+**Note:** For backwards compatibility, `window.context.master` and `window.context.isMaster` are still available as aliases to the new properties, but we recommend using the new `primary` and `isPrimary` properties going forward.
 
 #### Preconnect and prefetch
 

@@ -51,11 +51,11 @@ describes.fakeWin('pubmine', {}, (env) => {
       cmd: [],
     };
     win.context = {
-      isMaster: false,
-      master: win,
+      isPrimary: false,
+      primary: win,
     };
     pubmine(win, mockData);
-    expect(win.context.master.__ATA.cmd).to.have.length(1);
+    expect(win.context.primary.__ATA.cmd).to.have.length(1);
     expect(getPubmineScriptElement()).to.be.null;
     expect(getSlotElement()).to.be.ok;
   });
