@@ -79,7 +79,7 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
  * @return {string}
  */
 export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
-  // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
+  // TODO: consider wrap the data in a "data" field. { type, sentinel, data }
   const message = data;
   message['type'] = type;
   message['sentinel'] = sentinel;

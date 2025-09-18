@@ -1,6 +1,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {once} from '#core/types/function';
 
 import {Services} from '#service';
@@ -30,14 +31,24 @@ const TAG = 'amp-slikeplayer';
  * @private
  */
 
-const SlEvent = {
+const CleoEvent = {
   'ready': VideoEvents_Enum.LOAD,
   'play': VideoEvents_Enum.PLAYING,
   'pause': VideoEvents_Enum.PAUSE,
   'complete': VideoEvents_Enum.ENDED,
   'visible': VideoEvents_Enum.VISIBILITY,
+  'seeked': VideoEvents_Enum.SEEKED,
+  'seeking': VideoEvents_Enum.SEEKING,
   'adStart': VideoEvents_Enum.AD_START,
   'adEnd': VideoEvents_Enum.AD_END,
+  'adPlay': VideoEvents_Enum.AD_PLAY,
+  'adPause': VideoEvents_Enum.AD_PAUSE,
+  'adSkip': VideoEvents_Enum.AD_SKIP,
+  'adComplete': VideoEvents_Enum.AD_END,
+  'adError': VideoEvents_Enum.AD_ERROR,
+  'adLoaded': VideoEvents_Enum.AD_LOADED,
+  'adImpression': VideoEvents_Enum.AD_IMPRESSION,
+  'adClick': VideoEvents_Enum.AD_CLICK,
 };
 
 export class AmpSlikeplayer extends AMP.BaseElement {
@@ -53,6 +64,9 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {?function()} */
+    this.unlistenFrame_ = null;
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
@@ -70,7 +84,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     this.poster_ = '';
 
     /** @private {string} */
-    this.baseUrl_ = 'https://tvid.in/sdk/amp/ampembed.html';
+    this.baseUrl_ = 'https://tvid.in/player/amp.html';
 
     /** @private {number} */
     this.duration_ = 1;
@@ -80,6 +94,12 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
     /** @private {function()} */
     this.onMessage_ = this.onMessage_.bind(this);
+
+    /** @private {?function()} */
+    this.unlistenViewport_ = null;
+
+    /** @private {number} 0..1 */
+    this.viewportVisibleThreshold_ = 0;
   }
 
   /** @override */
@@ -104,8 +124,32 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
     this.baseUrl_ = element.getAttribute('data-iframe-src') || this.baseUrl_;
     this.config_ = element.getAttribute('data-config') || '';
+    this.poster_ = element.getAttribute('poster') || '';
+
+    // Read optional viewport visibility threshold from data-config
+    if (this.config_) {
+      try {
+        const params = new URLSearchParams(this.config_);
+        if (params.has('viewport')) {
+          let threshold = parseFloat(
+            /** @type {string} */ (params.get('viewport'))
+          );
+          if (isFinite(threshold)) {
+            if (threshold > 1) {
+              threshold = threshold / 100; // percent -> ratio
+            }
+            this.viewportVisibleThreshold_ = Math.max(
+              0,
+              Math.min(1, threshold)
+            );
+          }
+        }
+      } catch {}
+    }
+
     installVideoManagerForDoc(element);
-    Services.videoManagerForDoc(element).register(this);
+    const videoManager = Services.videoManagerForDoc(element);
+    videoManager.register(this);
   }
 
   /** @override */
@@ -114,7 +158,10 @@ export class AmpSlikeplayer extends AMP.BaseElement {
       return;
     }
     const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
+    const ariaLabel = this.element.getAttribute('aria-label');
+    if (ariaLabel) {
+      placeholder.setAttribute('aria-label', ariaLabel);
+    }
     const src = this.poster_;
     placeholder.setAttribute('src', src);
     placeholder.setAttribute('layout', 'fill');
@@ -133,10 +180,10 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&baseurl=${window.location.origin}`;
+    let src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&baseurl=${this.win.location.origin}`;
 
     if (this.config_) {
-      src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&baseurl=${window.location.origin}`;
+      src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&baseurl=${this.win.location.origin}`;
     }
 
     const frame = disableScrollingOnIframe(
@@ -144,9 +191,27 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     );
 
     addUnsafeAllowAutoplay(frame);
-    disableScrollingOnIframe(frame);
     this.unlistenFrame_ = listen(this.win, 'message', this.onMessage_);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (frame);
+
+    // Observe visibility to auto play/pause when entering/leaving viewport
+    const threshold = this.viewportVisibleThreshold_;
+    if (threshold > 0) {
+      this.unlistenViewport_ = observeIntersections(
+        this.element,
+        (entry) => {
+          const ratio =
+            entry && typeof entry.intersectionRatio === 'number'
+              ? entry.intersectionRatio
+              : entry && entry.isIntersecting
+                ? 1
+                : 0;
+          this.viewportCallback(ratio >= threshold);
+        },
+        {threshold}
+      );
+    }
+
     return this.loadPromise(this.iframe_);
   }
 
@@ -158,6 +223,16 @@ export class AmpSlikeplayer extends AMP.BaseElement {
   /** @override */
   supportsPlatform() {
     return true;
+  }
+
+  /** @override */
+  isInteractive() {
+    return true;
+  }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    this.handleViewportPlayPause(inViewport);
   }
 
   /** @override */
@@ -198,7 +273,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
       return;
     }
     const {element} = this;
-    if (redispatch(element, event, SlEvent)) {
+    if (redispatch(element, event, CleoEvent)) {
       return;
     }
     if (detail && event) {
@@ -218,20 +293,28 @@ export class AmpSlikeplayer extends AMP.BaseElement {
         case 'adTime':
           const {position} = detail;
           this.currentTime_ = position;
+          break;
+        case 'seeked':
+        case 'seeking':
+          // Seek events are handled by the redispatch above
+          break;
+        case 'adStart':
+        case 'adEnd':
+        case 'adPlay':
+        case 'adPause':
+        case 'adSkip':
+        case 'adComplete':
+        case 'adError':
+        case 'adLoaded':
+        case 'adImpression':
+        case 'adClick':
+          // Ad events are handled by the redispatch above
+          break;
         default:
           break;
       }
     }
   }
-  /**
-   * @override
-   */
-  postMessage_(message) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/ postMessage(message);
-    }
-  }
-
   /**
    * @override
    */
@@ -247,6 +330,15 @@ export class AmpSlikeplayer extends AMP.BaseElement {
   }
 
   /**
+   * Handle auto play/pause based on viewport visibility.
+   *
+   * @param {boolean} inViewport
+   */
+  handleViewportPlayPause(inViewport) {
+    this.postMessage_('handleViewport', inViewport);
+  }
+
+  /**
    * @override
    */
   mute() {
@@ -258,11 +350,6 @@ export class AmpSlikeplayer extends AMP.BaseElement {
    */
   unmute() {
     this.postMessage_('unmute', '');
-  }
-
-  /** @override */
-  preimplementsAutoFullscreen() {
-    return false;
   }
 
   /** @override */
@@ -293,7 +380,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    //to be implemented
+    this.postMessage_('seekTo', unusedTimeSeconds);
   }
   /**
    * @param {string} method
@@ -313,6 +400,28 @@ export class AmpSlikeplayer extends AMP.BaseElement {
         '*'
       );
     });
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.unlistenFrame_) {
+      this.unlistenFrame_();
+      this.unlistenFrame_ = null;
+    }
+    if (this.iframe_) {
+      this.iframe_.src = 'about:blank';
+      this.iframe_ = null;
+    }
+    if (this.unlistenViewport_) {
+      this.unlistenViewport_();
+      this.unlistenViewport_ = null;
+    }
+    return true;
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.pause();
   }
 }
 

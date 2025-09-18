@@ -35,12 +35,12 @@ let MatchDef;
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
   /**
-   * Link this instance of parser to the calling UrlReplacment
+   * Link this instance of parser to the calling UrlReplacement
    * @param {?../variable-source.VariableSource} variableSource the keywords to replace
    * @param {!{[key: string]: *}=} opt_bindings additional one-off bindings
    * @param {!{[key: string]: *}=} opt_collectVars Object passed in to collect
    *   variable resolutions.
-   * @param {boolean=} opt_sync If the method should resolve syncronously.
+   * @param {boolean=} opt_sync If the method should resolve synchronously.
    * @param {!{[key: string]: boolean}=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
@@ -282,7 +282,7 @@ export class Expander {
 
   /**
    * Called when a binding is ready to be resolved. Determines which version of
-   * binding to use and if syncronous or asyncronous version should be called.
+   * binding to use and if synchronous or asynchronous version should be called.
    * @param {!BindingInfoDef} bindingInfo An object containing the name of
    *    macro and value to be resolved.
    * @param {Array=} opt_args Arguments passed to the macro. Arguments come as
@@ -297,13 +297,13 @@ export class Expander {
     const {encode, name} = bindingInfo;
     let binding;
     if (bindingInfo.prioritized != undefined) {
-      // Has to explicity check for undefined because bindingInfo.priorityized
+      // Has to explicitly check for undefined because bindingInfo.priorityized
       // could not be a function but a false value. For example {FOO: 0}
       // If a binding is passed in through the bindings argument it always takes
       // precedence.
       binding = bindingInfo.prioritized;
     } else if (this.sync_ && bindingInfo.sync != undefined) {
-      // Use the sync resolution if avaliable when called synchronously.
+      // Use the sync resolution if available when called synchronously.
       binding = bindingInfo.sync;
     } else if (this.sync_) {
       // If there is no sync resolution we can not wait.
@@ -325,7 +325,7 @@ export class Expander {
   }
 
   /**
-   * Resolves binding to value to be substituted asyncronously.
+   * Resolves binding to value to be substituted asynchronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
@@ -390,7 +390,7 @@ export class Expander {
   }
 
   /**
-   * Resolves binding to value to be substituted asyncronously.
+   * Resolves binding to value to be substituted asynchronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
    * @param {?Array=} opt_args Arguments to be passed if binding is function.

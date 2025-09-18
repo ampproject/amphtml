@@ -33,7 +33,6 @@ This update contains guidance on using the Web Story Player to support:
 -   [Custom Events](#custom-events)
 -   [Upcoming API Change: Poster Image](#upcoming-api-change-poster-image)
 -   [Additional use case demos](#additional-use-case-demos)
--   [Additional explorations and roadmap](#additional-explorations-and-roadmap)
 -   [FAQs (please feel free to reach out with other questions & thoughts)](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 Beyond this, you’ll also find:
@@ -427,10 +426,6 @@ This new API is still a work in progress, and will send more information when it
 
 <a href="https://codepen.io/maenrique/pen/WNxpPqJ" target="_blank" rel="noopener noreferrer">Card entry point + scrolling + lightbox</a>
 
-## Additional explorations and roadmap
-
-Follow feature requests & bugs in the [Github project](https://github.com/ampproject/amphtml/projects/109).
-
 ## FAQs (please feel free to reach out with other questions & thoughts)
 
 ### The Web Player supports more features on non-AMP pages than on AMP pages currently. What features are missing for AMP-pages?
@@ -441,8 +436,6 @@ Good question. While the basic functionality of the player is in the [AMP versio
 -   Programmatically fetching more stories from an endpoint
 -   Customizable UI controls
 -   Custom events
-
-Follow our [roadmap on Github](https://github.com/ampproject/amphtml/projects/109) and the wg-stories updates for the [latest status updates](https://github.com/ampproject/wg-stories/issues).
 
 ### Is the player ready to use? When will these features be ready?
 
@@ -456,4 +449,4 @@ AMP provides some channels that you can opt-in to get the latest changes. To opt
 
 If you have found a bug or have an issue request, file a [Github issue](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+label%3A%22WG%3A+stories%22+) and tag the @ampproject/wg-stories working group.
 
-For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and ping us!.
+For questions / discussion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and ping us!.

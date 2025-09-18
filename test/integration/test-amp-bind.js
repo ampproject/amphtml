@@ -1,14 +1,14 @@
 import {BrowserController} from '#testing/helpers/service';
 import {poll as classicPoll} from '#testing/iframe';
 
-const TIMEOUT = 10000;
+const TIMEOUT = 2000;
 
 describes.sandboxed('amp-bind', {}, function () {
   this.timeout(TIMEOUT);
 
   // Helper that sets the poll timeout.
   function poll(desc, condition, onError) {
-    return classicPoll(desc, condition, onError, TIMEOUT);
+    return classicPoll(desc, condition, onError, 800);
   }
 
   describes.integration(
@@ -32,33 +32,39 @@ describes.sandboxed('amp-bind', {}, function () {
         browser = new BrowserController(env.win);
       });
 
-      it('[text]', function* () {
+      it('[text]', async () => {
         expect(text.textContent).to.equal('before_text');
-        yield browser.wait(200);
+        await browser.wait(200);
         browser.click('#changeText');
-        yield poll('[text]', () => text.textContent === 'after_text');
+        await poll('[text]', () => text.textContent === 'after_text').should.be
+          .fulfilled;
       });
 
-      it('[class]', function* () {
+      it('[class]', async () => {
         expect(text.className).to.equal('before_class');
-        yield browser.wait(200);
+        await browser.wait(200);
         browser.click('#changeClass');
-        yield poll('[class]', () => text.className === 'after_class');
+        await poll('[class]', () => text.className === 'after_class').should.be
+          .fulfilled;
       });
     }
   );
 
+  const BEFORE_IMG_DATA_URL =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAAAABGdBTUEAALGPC/xhBQAAABtJREFUWAntwYEAAAAAw6D7Uw/hAtUAAAAAjgAQQAABWWUZmwAAAABJRU5ErkJggg==';
+  const AFTER_IMG_DATA_URL =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAAAABGdBTUEAALGPC/xhBQAAAClJREFUWMPtzEERAAAMAiD7l9YQ++0gAOlRBAKBQCAQCAQCgUAgEHwPBqcL8OI+wmxEAAAAAElFTkSuQmCC';
   describes.integration(
     '+ amp-img',
     {
       body: `
       <amp-img id="image" layout="responsive"
-        src="http://example.com/before.jpg" [src]="src"
+        src="${BEFORE_IMG_DATA_URL}" [src]="src"
         alt="before_alt" [alt]="alt"
         width="1" [width]="w"
         height="1" [height]="h"></amp-img>
 
-      <button on="tap:AMP.setState({src: 'http://example.com/after.jpg'})" id="changeSrc"></button>
+      <button on="tap:AMP.setState({src: '${AFTER_IMG_DATA_URL}'})" id="changeSrc"></button>
       <button on="tap:AMP.setState({alt: 'after_alt'})" id="changeAlt"></button>
       <button on="tap:AMP.setState({w: 2, h: 2})" id="changeSize"></button>
     `,
@@ -72,34 +78,33 @@ describes.sandboxed('amp-bind', {}, function () {
         img = doc.querySelector('amp-img');
       });
 
-      it('[src] with valid URL', () => {
+      it('[src] with valid URL', async () => {
         const button = doc.getElementById('changeSrc');
-        expect(img.getAttribute('src')).to.equal(
-          'http://example.com/before.jpg'
-        );
+        expect(img.getAttribute('src')).to.equal(BEFORE_IMG_DATA_URL);
         button.click();
-        return poll(
+        await poll(
           '[src]',
-          () => img.getAttribute('src') === 'http://example.com/after.jpg'
-        );
+          () => img.getAttribute('src') === AFTER_IMG_DATA_URL
+        ).should.be.fulfilled;
       });
 
-      it('[alt]', () => {
+      it('[alt]', async () => {
         const button = doc.getElementById('changeAlt');
         expect(img.getAttribute('alt')).to.equal('before_alt');
         button.click();
-        return poll('[src]', () => img.getAttribute('alt') === 'after_alt');
+        await poll('[src]', () => img.getAttribute('alt') === 'after_alt')
+          .should.be.fulfilled;
       });
 
-      it('[width] and [height]', () => {
+      it('[width] and [height]', async () => {
         const button = doc.getElementById('changeSize');
         expect(img.getAttribute('width')).to.equal('1');
         expect(img.getAttribute('height')).to.equal('1');
         button.click();
-        return Promise.all([
+        await Promise.all([
           poll('[width]', () => img.getAttribute('width') === '2'),
           poll('[height]', () => img.getAttribute('height') === '2'),
-        ]);
+        ]).should.be.fulfilled;
       });
     }
   );
@@ -127,7 +132,7 @@ describes.sandboxed('amp-bind', {}, function () {
         doc = env.win.document;
       });
 
-      it('input[type=range] on:change', () => {
+      it('input[type=range] on:change', async () => {
         const rangeText = doc.getElementById('range');
         const range = doc.querySelector('input[type="range"]');
         expect(rangeText.textContent).to.equal('before_range');
@@ -135,18 +140,20 @@ describes.sandboxed('amp-bind', {}, function () {
         // so it must be generated manually.
         range.value = 47;
         range.dispatchEvent(new Event('change', {bubbles: true}));
-        poll('[text]', () => rangeText.textContent === '0 <= 47 <= 100');
+        await poll('[text]', () => rangeText.textContent === '0 <= 47 <= 100')
+          .should.be.fulfilled;
       });
 
-      it('input[type=checkbox] on:change', () => {
+      it('input[type=checkbox] on:change', async () => {
         const checkboxText = doc.getElementById('checkbox');
         const checkbox = doc.querySelector('input[type="checkbox"]');
         expect(checkboxText.textContent).to.equal('before_check');
         checkbox.click();
-        poll('[text]', () => checkboxText.textContent === 'checked: true');
+        await poll('[text]', () => checkboxText.textContent === 'checked: true')
+          .should.be.fulfilled;
       });
 
-      it('[checked]', function* () {
+      it('[checked]', async () => {
         const checkbox = doc.querySelector('input[type="checkbox"]');
         const button = doc.querySelector('button');
 
@@ -156,21 +163,22 @@ describes.sandboxed('amp-bind', {}, function () {
         expect(checkbox.checked).to.be.true;
 
         button.click();
-        yield poll('[checked]', () => !checkbox.checked);
+        await poll('[checked]', () => !checkbox.checked).should.be.fulfilled;
         expect(checkbox.hasAttribute('checked')).to.be.false;
 
         button.click();
-        yield poll('[checked]', () => checkbox.checked);
+        await poll('[checked]', () => checkbox.checked).should.be.fulfilled;
         // amp-bind sets both the attribute and property.
         expect(checkbox.hasAttribute('checked')).to.be.true;
       });
 
-      it('input[type=radio] on:change', () => {
+      it('input[type=radio] on:change', async () => {
         const radioText = doc.getElementById('radio');
         const radio = doc.querySelector('input[type="radio"]');
         expect(radioText.textContent).to.equal('before_radio');
         radio.click();
-        poll('[text]', () => radioText.textContent === 'checked: true');
+        await poll('[text]', () => radioText.textContent === 'checked: true')
+          .should.be.fulfilled;
       });
     }
   );
@@ -192,26 +200,27 @@ describes.sandboxed('amp-bind', {}, function () {
     (env) => {
       let doc, carousel, slideText;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         doc = env.win.document;
         carousel = doc.querySelector('amp-carousel');
         slideText = doc.querySelector('p');
 
         const browserController = new BrowserController(env.win);
-        return browserController.waitForElementLayout('amp-carousel');
+        await browserController.waitForElementLayout('amp-carousel');
       });
 
-      it('on:slideChange', () => {
+      it('on:slideChange', async () => {
         expect(slideText.textContent).to.equal('0');
 
         const nextSlide = carousel.querySelector(
           'div.amp-carousel-button-next'
         );
         nextSlide.click();
-        return poll('[slide]', () => slideText.textContent === '1');
+        await poll('[slide]', () => slideText.textContent === '1').should.be
+          .fulfilled;
       });
 
-      it('[slide]', function* () {
+      it('[slide]', async () => {
         const slides = carousel.querySelectorAll(
           '.i-amphtml-slide-item > amp-img'
         );
@@ -224,14 +233,14 @@ describes.sandboxed('amp-bind', {}, function () {
         const button = doc.getElementById('goToSlideOne');
         button.click();
 
-        yield poll(
+        await poll(
           '[slide]',
           () => first.getAttribute('aria-hidden') === 'true'
-        );
-        yield poll(
+        ).should.be.fulfilled;
+        await poll(
           '[slide]',
           () => second.getAttribute('aria-hidden') === 'false'
-        );
+        ).should.be.fulfilled;
       });
     }
   );
@@ -261,17 +270,17 @@ describes.sandboxed('amp-bind', {}, function () {
       browser = new BrowserController(env.win);
     });
 
-    it('[src]', () => {
+    it('[src]', async () => {
       expect(list.getAttribute('src')).to.equal('/list/fruit-data/get?cors=0');
       browser.click('button');
-      poll(
+      await poll(
         '[src]',
         () => list.getAttribute('src') === 'https://example.com/data'
-      );
+      ).should.be.fulfilled;
     });
 
-    it('evaluate bindings in children', function* () {
-      yield browser.waitForElementLayout('amp-list');
+    it('evaluate bindings in children', async () => {
+      await browser.waitForElementLayout('amp-list');
       const children = list.querySelectorAll('p');
       expect(children.length).to.equal(3);
       children.forEach((span) => {
@@ -315,35 +324,37 @@ describes.sandboxed('amp-bind', {}, function () {
     (env) => {
       let doc, images, selectedText;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         doc = env.win.document;
         images = doc.getElementsByTagName('amp-img');
         selectedText = doc.querySelector('p');
 
         const browserController = new BrowserController(env.win);
-        return browserController.waitForElementLayout('amp-selector');
+        await browserController.waitForElementLayout('amp-selector');
       });
 
-      it('on:select', function* () {
+      it('on:select', async () => {
         expect(images[0].hasAttribute('selected')).to.be.false;
         expect(images[1].hasAttribute('selected')).to.be.false;
         expect(images[2].hasAttribute('selected')).to.be.false;
         expect(selectedText.textContent).to.equal('');
         images[1].click();
-        yield poll('[text]', () => selectedText.textContent === '1');
+        await poll('[text]', () => selectedText.textContent === '1').should.be
+          .fulfilled;
         expect(images[0].hasAttribute('selected')).to.be.false;
         expect(images[1].hasAttribute('selected')).to.be.true;
         expect(images[2].hasAttribute('selected')).to.be.false;
       });
 
-      it('[selected]', function* () {
+      it('[selected]', async () => {
         const button = doc.querySelector('button');
         expect(images[0].hasAttribute('selected')).to.be.false;
         expect(images[1].hasAttribute('selected')).to.be.false;
         expect(images[2].hasAttribute('selected')).to.be.false;
         expect(selectedText.textContent).to.equal('');
         button.click();
-        yield poll('[text]', () => selectedText.textContent === '2');
+        await poll('[text]', () => selectedText.textContent === '2').should.be
+          .fulfilled;
         expect(images[0].hasAttribute('selected')).to.be.false;
         expect(images[1].hasAttribute('selected')).to.be.false;
         expect(images[2].hasAttribute('selected')).to.be.true;

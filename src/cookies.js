@@ -80,7 +80,7 @@ function tryGetDocumentCookie_(win) {
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
  *       scope allowed by the browser. E.g. on example.com if we are currently
  *       on www.example.com.
- *     - domain: Explicit domain to set. domain overrides HigestAvailableDomain
+ *     - domain: Explicit domain to set. domain overrides HighestAvailableDomain
  *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
  *     - sameSite: The SameSite_Enum value to use when setting the cookie.
  *     - secure: Whether the cookie should contain Secure (only sent over https).
@@ -88,7 +88,7 @@ function tryGetDocumentCookie_(win) {
 export function setCookie(win, name, value, expirationTime, options = {}) {
   checkOriginForSettingCookie(win, options, name);
   let domain = undefined;
-  // Respect explicitly set domain over higestAvailabeDomain
+  // Respect explicitly set domain over highestAvailableDomain
   if (options.domain) {
     domain = options.domain;
   } else if (options.highestAvailableDomain) {
@@ -106,7 +106,7 @@ export function setCookie(win, name, value, expirationTime, options = {}) {
 }
 
 /**
- * Attemp to find the HighestAvailableDomain on
+ * Attempt to find the HighestAvailableDomain on
  * @param {!Window} win
  * @return {?string}
  */
