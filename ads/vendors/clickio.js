@@ -28,7 +28,11 @@ export function clickio(global, data) {
 
       // base config
       clickioGlobal.ampMode = context.isMaster ? 1 : 2;
-      clickioGlobal.pageUrl = global.context.location.href;
+      clickioGlobal.ampContext = global.context;
+
+      // page url params
+      clickioGlobal.pageUrl =
+        global.context.sourceUrl || global.context.location.href;
       clickioGlobal.sendPageUrl = true;
 
       // ad container
