@@ -492,6 +492,15 @@ describes.realWin(
       ]);
     });
 
+    it('should hide the share button', async () => {
+      await createStoryWithPages(2, ['cover', 'page-1']);
+      story.element.setAttribute('hide-share-button', '');
+      story.buildCallback();
+      await story.layoutCallback();
+      expect(story.storeService_.get(StateProperty.CAN_SHOW_SHARING_UIS)).to.be
+        .false;
+    });
+
     describe('amp-story consent', () => {
       it('should pause the story if there is a consent', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
