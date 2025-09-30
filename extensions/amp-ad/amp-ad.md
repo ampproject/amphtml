@@ -368,6 +368,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [I-Mobile](../../ads/vendors/imobile.md)
 -   [Imonomy](../../ads/vendors/imonomy.md)
 -   [Imedia](../../ads/vendors/imedia.md)
+    [Impactify](../../ads/vendors/impactify.md)
 -   [Improve Digital](../../ads/vendors/improvedigital.md)
 -   [IncrementX](../../ads/vendors/incrementx.md)
 -   [Insticator](../../ads/vendors/insticator.md)

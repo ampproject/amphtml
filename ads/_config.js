@@ -672,6 +672,19 @@ const adConfig = jsonConfiguration({
   'imonomy': {
     renderStartImplemented: true,
   },
+
+  'impactify': {
+    prefetch: 'https://ad.impactify.io/static/ad/tag.js',
+    preconnect: [
+      'https://ad.impactify.media',
+      'https://dvr.impactify.media',
+      'https://securepubads.g.doubleclick.net',
+      'https://pubads.g.doubleclick.net',
+      'https://secure.adnxs.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'improvedigital': {},
 
   'incrementx': {
