@@ -1,5 +1,74 @@
-# Force line endings to LF.
+# Force line endings to LF for cross-platform compatibility
 # Specially useful for contributors on Windows machines.
 * text=auto eol=lf
+
+# Windows-specific files use CRLF
 *.{cmd,[cC][mM][dD]} text eol=crlf
 *.{bat,[bB][aA][tT]} text eol=crlf
+*.ps1 text eol=crlf
+
+# Source code files
+*.js text eol=lf
+*.mjs text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.xml text eol=lf
+*.svg text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+
+# Config files
+*.yml text eol=lf
+*.yaml text eol=lf
+.gitignore text eol=lf
+.eslintrc* text eol=lf
+.prettierrc* text eol=lf
+package.json text eol=lf
+tsconfig.json text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.ttf binary
+*.otf binary
+
+# Exclude files from export
+.gitattributes export-ignore
+.gitignore export-ignore
+.github/ export-ignore
+test/ export-ignore
+testing/ export-ignore
+*.test.js export-ignore
+*.spec.js export-ignore
+
+# Language statistics for GitHub
+*.min.js linguist-generated=true
+*.bundle.js linguist-generated=true
+dist/ linguist-generated=true
+build/ linguist-generated=true
+docs/ linguist-documentation=true
+examples/ linguist-documentation=true
+vendor/ linguist-vendored=true
+third_party/ linguist-vendored=true
+node_modules/ linguist-vendored=true
+
+# AMP-specific file types
+amp.js linguist-language=JavaScript
+*.amp.html linguist-language=HTML

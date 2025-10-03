@@ -2,7 +2,7 @@
   "private": true,
   "name": "amp-html",
   "version": "0.1.0",
-  "description": "Fastish HTML",
+  "description": "AMP HTML - A web component framework for easily creating user-first websites, stories, ads, emails and more.",
   "main": "index.js",
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
@@ -10,9 +10,42 @@
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git"
   },
+  "bugs": {
+    "url": "https://github.com/ampproject/amphtml/issues"
+  },
+  "homepage": "https://amp.dev",
+  "keywords": [
+    "amp",
+    "html",
+    "web-components",
+    "performance",
+    "mobile",
+    "javascript",
+    "framework",
+    "fast",
+    "responsive",
+    "pwa"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "preinstall": "node build-system/common/check-package-manager.js",
-    "postinstall": "node build-system/task-runner/install-amp-task-runner.js"
+    "postinstall": "node build-system/task-runner/install-amp-task-runner.js",
+    "test": "amp unit && amp integration",
+    "test:unit": "amp unit",
+    "test:integration": "amp integration",
+    "lint": "amp lint",
+    "lint:fix": "amp lint --fix",
+    "format": "amp prettify",
+    "format:fix": "amp prettify --fix",
+    "build": "amp build",
+    "build:prod": "amp dist",
+    "dev": "amp",
+    "clean": "amp clean",
+    "check-links": "amp check-links",
+    "pr-check": "amp pr-check"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
@@ -109,6 +142,7 @@
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jasmine": "4.2.2",
     "eslint-plugin-jsdoc": "48.11.0",
+    "eslint-plugin-jsx-a11y": "6.10.0",
     "eslint-plugin-local": "4.2.2",
     "eslint-plugin-module-resolver": "1.5.0",
     "eslint-plugin-prettier": "5.2.1",
