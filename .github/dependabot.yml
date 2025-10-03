@@ -1,0 +1,71 @@
+# This file enables Dependabot for automated dependency updates
+# It complements the existing Renovate configuration for comprehensive dependency management
+
+version: 2
+updates:
+  # Enable version updates for npm dependencies in the main package.json
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    assignees:
+      - "ampproject/wg-infra"
+    commit-message:
+      prefix: "📦"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "WG: infra"
+
+  # Enable version updates for npm dependencies in build-system
+  - package-ecosystem: "npm"
+    directory: "/build-system"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:30"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "📦"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "WG: infra"
+
+  # Enable version updates for npm dependencies in validator
+  - package-ecosystem: "npm"
+    directory: "/validator"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "📦"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "WG: caching"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "🔧"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "WG: infra"
