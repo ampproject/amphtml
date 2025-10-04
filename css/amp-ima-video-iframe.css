@@ -1,15 +1,7 @@
-
-
 /*
- * Styles inserted in iframes rendered by <amp-ima-video>.
- *
- * .selectorsInThisFile reject naming convention by using camelCase rather than
- * dash-case, because they're uniform with Javascript references that are more
- * useful when destructured as such (imaVideo.js).
- *
- * We insert this CSS in a standalone document whose namespace is shared only
- * with the IMA SDK. This unconventional naming is not worth converting to
- * dash-case during build or runtime, so we keep it.
+ * Styles for iframes rendered by <amp-ima-video>.
+ * Class names use camelCase for consistency with JS references (imaVideo.js).
+ * Scoped to IMA SDK, so unconventional naming is intentional.
  */
 
 [hidden] {
@@ -36,6 +28,8 @@ body,
 
 button {
   cursor: pointer;
+  /* CORRECTED ORDER: -webkit-appearance comes before appearance */
+  -webkit-appearance: none;
   appearance: none;
   padding: 0;
   border: none;
@@ -47,20 +41,20 @@ button {
   position: absolute;
   bottom: 0;
   width: 100%;
-  background-color: rgba(7, 20, 30, 0.7);
   background: linear-gradient(
     0,
     rgba(7, 20, 30, 0.7) 0%,
     rgba(7, 20, 30, 0) 100%
   );
   box-sizing: border-box;
-  padding: 10px;
-  padding-top: 60px;
+  padding: 60px 10px 10px;
   color: white;
   display: flex;
   font-family: Helvetica, Arial, Sans-serif;
   justify-content: center;
   align-items: center;
+  /* CORRECTED ORDER: -webkit-user-select comes before user-select */
+  -webkit-user-select: none;
   user-select: none;
   z-index: 1;
 }
@@ -77,9 +71,9 @@ button > svg {
 }
 
 .countdownWrapper {
+  display: none;
   align-items: center;
   box-sizing: border-box;
-  display: none;
   flex-grow: 1;
   font-size: 12px;
   height: 20px;
@@ -102,14 +96,13 @@ button > svg {
   margin: 0 20px;
 }
 
-/* Push the next item as if `.progress` was present */
 .progress[hidden] + * {
   margin-left: auto;
 }
 
 .progress::after {
-  display: block;
   content: '';
+  display: block;
   background-color: rgba(255, 255, 255, 0.45);
   height: 2px;
   width: 100%;
@@ -121,7 +114,6 @@ button > svg {
   height: 2px;
   margin-top: 14px;
   width: 0%;
-  float: left;
 }
 
 .progressMarker {
@@ -132,7 +124,7 @@ button > svg {
   top: 50%;
   margin-top: -7px;
   cursor: pointer;
-  border-radius: 14px;
+  border-radius: 50%;
   background: white;
 }
 
@@ -153,9 +145,9 @@ button > svg {
   max-height: 120px;
 }
 
-/* Swap button's icons based on root state. */
+/* Swap button icons based on state */
 
-/* play/pause  */
+/* play/pause */
 .root:not([data-playing]) .playButton > svg:last-child,
 .root[data-playing] .playButton > svg:first-child,
 /* mute/unmute */
@@ -165,7 +157,6 @@ button > svg {
 }
 
 /* Ad controls */
-
 .root[data-ad] > .controls {
   height: 30px;
   justify-content: flex-end;
@@ -180,7 +171,7 @@ button > svg {
   margin-right: 10px;
 }
 
-@media screen and (max-width: 400) {
+@media screen and (max-width: 400px) {
   .root[data-skippable] > .controls {
     height: 20px;
   }
@@ -189,12 +180,11 @@ button > svg {
   }
 }
 
-/* Show ad controls */
+/* Show/hide ad controls */
 .root[data-ad] > .controls > .countdownWrapper {
   display: flex;
 }
 
-/* Hide non-ad controls */
 .root[data-ad] > .controls > .time,
 .root[data-ad] > .controls > .progress {
   display: none;

@@ -1,7 +1,18 @@
 <!doctype html>
-<head>
+<html lang="en"> <head>
 <meta charset="utf-8">
-<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1"> <title>Third-Party Frame</title> <meta name="robots" content="noindex">
+<style> body {
+        margin: 0;
+    }
+    #c {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+    }
+</style>
 <script>
 var url = './integration.js';
 try {
@@ -12,9 +23,7 @@ script.src = url;
 document.write(script.outerHTML);
 </script>
 </head>
-<body style="margin:0">
-<div id="c" style="position:absolute;top:0;left:0;bottom:0;right:0;">
-  <script>draw3p()</script>
+<body> <div id="c"> <script>draw3p()</script>
 </div>
 <script>if (window.docEndCallback) window.docEndCallback()</script>
 </body>

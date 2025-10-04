@@ -1,13 +1,22 @@
 <!doctype html>
-<head>
+<html lang="en"> <head>
   <meta charset="utf-8">
-  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width,initial-scale=1"> <title>Recaptcha Frame</title> <meta name="robots" content="noindex">
   <meta name="referrer" content="none">
+  <style> body {
+      margin: 0;
+    }
+    #c {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+  </style>
   <script src="./recaptcha.js"></script>
 </head>
-<body style="margin:0">
-  <div id="c" style="position:absolute;top:0;left:0;bottom:0;right:0;">
-    <script>
+<body> <div id="c"> <script>
       initRecaptcha();
     </script>
   </div>

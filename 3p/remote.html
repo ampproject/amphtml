@@ -1,7 +1,18 @@
 <!doctype html>
-<head>
+<html lang="en"> <head>
 <meta charset="utf-8">
-<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1"> <title>Remote 3rd-Party Content</title> <meta name="robots" content="noindex">
+<style> body {
+        margin: 0;
+    }
+    #c {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+    }
+</style>
 <script>
 (function() {
 var v = location.search.substr(1);
@@ -11,9 +22,7 @@ document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>'); // lgtm [js/ev
 })();
 </script>
 </head>
-<body style="margin:0">
-<div id="c" style="position:absolute;top:0;left:0;bottom:0;right:0;">
-  <script>
+<body> <div id="c"> <script>
     draw3p(undefined,
       // List of expected amp-ad types.
       ['allowed-ad-type1', 'allowed-ad-type2'],

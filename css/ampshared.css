@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview CSS shared across AMP4ADS and other formats.
  */
@@ -10,7 +8,7 @@
  */
 [hidden] {
   /* This must be !important, else the toggle helper system would break down
-     due to specificity */
+       due to specificity */
   display: none !important;
 }
 
@@ -28,17 +26,9 @@
   display: none !important;
 }
 
-/* Initialized layout=nodisplay contain [hidden] */
-.i-amphtml-layout-nodisplay[hidden],
-[layout=nodisplay][hidden]:not(.i-amphtml-layout-nodisplay)
-{
-  /* Display is set/reset via the hidden attribute */
-}
-.i-amphtml-layout-nodisplay:not([hidden]),
-[layout=nodisplay]:not(.i-amphtml-layout-nodisplay[hidden])
-{
-  /* Display is set/reset via the hidden attribute */
-}
+/* Empty rulesets removed: .i-amphtml-layout-nodisplay[hidden], [layout=nodisplay][hidden]:not(.i-amphtml-layout-nodisplay) */
+/* Empty rulesets removed: .i-amphtml-layout-nodisplay:not([hidden]), [layout=nodisplay]:not(.i-amphtml-layout-nodisplay[hidden]) */
+
 
 /**
  * layout=fixed does not have a unresolved implicit style, due to conflicts
@@ -174,8 +164,8 @@ i-amphtml-sizer {
 .i-amphtml-fill-content,
 .i-amphtml-blurry-placeholder {
   display: block;
-  /* These lines are a work around to this issue in iOS:     */
-  /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
+  /* These lines are a work around to this issue in iOS:      */
+  /* https://bugs.webkit.org/show_bug.cgi?id=155198           */
   /* And: https://github.com/ampproject/amphtml/issues/11133 */
   height: 0;
   max-height: 100%;
@@ -217,7 +207,7 @@ i-amphtml-sizer {
   top: 0px !important;
   left: 0px !important;
   /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
-     before allowing buttons to be activated. */
+       before allowing buttons to be activated. */
   width: 4px !important;
   height: 4px !important;
   /* visually hide it with overflow and opacity */
@@ -252,11 +242,12 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-select-disabled {
+  -webkit-user-select: none !important;
   user-select: none !important;
 }
 
 /* "notbuild" classes are set as soon as an element is created and removed
-   as soon as the element is built. */
+     as soon as the element is built. */
 
 .amp-notbuilt {
   /* For author styling. */
@@ -313,13 +304,9 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
   visibility: hidden !important;
 }
 
-.i-amphtml-layout {
-  /* Just state. */
-}
+/* .i-amphtml-layout {} was removed */
 
-.i-amphtml-error {
-  /* Just state. */
-}
+/* .i-amphtml-error {} was removed */
 
 /**
  * [width][height][sizes] and [width][height][heights] imply layout=responsive
@@ -500,8 +487,8 @@ amp-story {
 
 html.i-amphtml-fie > amp-analytics {
   /* Remove position fixed if it's in iframe.
-  * So runtime can measure layoutBox correctly
-  */
+   * So runtime can measure layoutBox correctly
+   */
   position: initial !important;
 }
 
@@ -556,7 +543,7 @@ amp-accordion > section {
   float: none !important;
 }
 
-/*  Display the first 2 elements (heading and content) */
+/* Display the first 2 elements (heading and content) */
 amp-accordion > section > * {
   float: none !important;
   display: block !important;
