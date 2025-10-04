@@ -1,36 +1,23 @@
 {
   "files.associations": {
-    // Enable JSON5 syntax highlighting and auto-formatting for OWNERS files.
-    // Until VS Code adds native JSON5 support, this needs
-    // https://marketplace.visualstudio.com/items?itemName=mrmlnc.vscode-json5
     "OWNERS": "json5",
-
-    // Enable JSON auto-formatting for these files.
     ".prettierrc": "json",
     ".renovaterc.json": "json",
-
-    // Allow comments in JSON schema files.
     "*.schema.json": "jsonc"
   },
 
   "files.insertFinalNewline": true,
+  "editor.renderFinalNewline": true,
 
-  // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
-  // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "[js]": {"editor.formatOnSave": false},
+  "[js]": { "editor.formatOnSave": false },
+  "[yaml]": { "editor.formatOnSave": true },
+  "[json]": { "editor.formatOnSave": true },
+  "[json5]": { "editor.formatOnSave": true },
+  "[markdown]": { "editor.formatOnSave": true },
 
-  // Auto-fix non-JS files with Prettier using amphtml's custom settings. Needs
-  // https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
-  "[yaml]": {"editor.formatOnSave": true},
-  "[json]": {"editor.formatOnSave": true},
-  "[json5]": {"editor.formatOnSave": true},
-  "[markdown]": {"editor.formatOnSave": true},
-
-  // Validate JSON schemas on the fly. Also used by the `amp check-json-schemas`
-  // task. Do not use URLs from the web, they are unsupported by this task.
   "json.schemas": [
     {
       "fileMatch": [
