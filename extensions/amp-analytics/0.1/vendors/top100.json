@@ -10,8 +10,7 @@
     "base": "${host}/cnt/v2/?project_id=${pid}&version=${version}&top100_id=${top100_id}&counter_type=amp",
     "pageview": "${base}&event_type=base&event_name=page_view${_eventData}&meta={${_metaPVData}}",
     "_eventData": "&session_id=${request_id}&request_id=${pageViewId}&url=${canonicalUrl}&event_id=${random}",
-    "_metaPVData": "language:${browserLanguage},title:${title},referer:${documentReferrer},screen_size:${screenWidth}x${screenHeight},color_depth:${screenColorDepth}-bit,browser_size:${scrollWidth}x${scrollHeight},timezone:${timezone}",
-    "_metaPingData": "num:${requestCount},duration:15"
+    "_metaPVData": "language:${browserLanguage},title:${title},referer:${documentReferrer},screen_size:${screenWidth}x${screenHeight},color_depth:${screenColorDepth}-bit,browser_size:${scrollWidth}x${scrollHeight},timezone:${timezone}"
   },
   "triggers": {
     "trackPageview": {
