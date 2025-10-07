@@ -1,5 +1,6 @@
 {
   "vars": {
+    "pid": "",
     "request_id": "PAGE_VIEW_ID_64",
     "top100_id": "CLIENT_ID(top100_id)",
     "version": "1.1.0"
