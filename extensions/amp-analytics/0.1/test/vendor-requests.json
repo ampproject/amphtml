@@ -544,6 +544,7 @@
     "base": "https://kraken.rambler.ru/cnt/v2/?project_id=!pid&version=1.1.0&top100_id=_client_id(top100_id)_&counter_type=amp",
     "pageview": "https://kraken.rambler.ru/cnt/v2/?project_id=!pid&version=1.1.0&top100_id=_client_id(top100_id)_&counter_type=amp&event_type=base&event_name=page_view&session_id=_page_view_id_64_&request_id=_page_view_id_&url=_canonical_url_&event_id=_random_&meta={language:_browser_language_,title:_title_,referer:_document_referrer_,screen_size:_screen_width_x_screen_height_,color_depth:_screen_color_depth_-bit,browser_size:_scroll_width_x_scroll_height_,timezone:_timezone_}",
     "_eventData": "&session_id=_page_view_id_64_&request_id=_page_view_id_&url=_canonical_url_&event_id=_random_",
+    "_metaPVData": "https://kraken.rambler.ru/cnt/v2/?project_id=!pid&version=1.1.0&top100_id=_client_id(top100_id)_&counter_type=amp&event_type=base&event_name=page_view&session_id=_page_view_id_64_&request_id=_page_view_id_&url=_canonical_url_&event_id=_random_&meta={language:_browser_language_,title:_title_,referer:_document_referrer_,screen_size:_screen_width_x_screen_height_,color_depth:_screen_color_depth_-bit,browser_size:_scroll_width_x_scroll_height_,timezone:_timezone_}"
     "_pageData": "&url=_canonical_url_&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
   },
   "topmailru": {
