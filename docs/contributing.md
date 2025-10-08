@@ -15,11 +15,11 @@ How would you like to help?
 
 <!-- {"maxdepth": 1} -->
 
--   [Report a bug](#report-a-bug)
--   [Make a suggestion](#make-a-suggestion)
--   [Contribute code/features](#contribute-codefeatures)
--   [Get started with open source](#get-started-with-open-source)
--   [Ongoing participation](#ongoing-participation)
+- [Report a bug](#report-a-bug)
+- [Make a suggestion](#make-a-suggestion)
+- [Contribute code/features](#contribute-codefeatures)
+- [Get started with open source](#get-started-with-open-source)
+- [Ongoing participation](#ongoing-participation)
 
 If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](./support.md) for help.
 
@@ -33,7 +33,7 @@ The community regularly monitoring issues and will try to fix open bugs quickly 
 
 [File a feature request](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Feature+Request&template=feature-request.yml) if you have a suggestion for a way to improve AMP or a request for a new AMP feature.
 
-If you are suggesting a feature that you are intending to implement, please see the [Contributing code/features](#contribute-code-features) section below for next steps.
+If you are suggesting a feature that you are intending to implement, please see the [Contributing code/features](#contribute-codefeatures) section below for next steps.
 
 ## Contribute code/features
 
@@ -61,13 +61,13 @@ We actively encourage ongoing participation by community members.
 
 Technical issues, designs, etc. are discussed using several different channels:
 
--   [GitHub issues](https://github.com/ampproject/amphtml/issues) and [pull requests](https://github.com/ampproject/amphtml/pulls)
--   [Slack](https://amphtml.slack.com) ([signup](https://bit.ly/amp-slack-signup))
-    -   the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel is the main channel for you to discuss/ask questions about _contributing_ to the open source project
-    -   if you're _new to contributing_ to AMP stop by [#welcome-contributors](https://amphtml.slack.com/messages/C432AFMFE/details/) to say hi!
-    -   **NOTE: if you have a question about _using AMP on your site_, use [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html) rather than Slack** as Stack Overflow is more actively monitored for these types of questions
-    -   there are many other Slack channels for more specific topics; after you join our Slack click on the "Channels" header to find other channels you want to participate in
--   the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
+- [GitHub issues](https://github.com/ampproject/amphtml/issues) and [pull requests](https://github.com/ampproject/amphtml/pulls)
+- [Slack](https://amphtml.slack.com) ([signup](https://bit.ly/amp-slack-signup))
+  - the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel is the main channel for you to discuss/ask questions about _contributing_ to the open source project
+  - if you're _new to contributing_ to AMP stop by [#welcome-contributors](https://amphtml.slack.com/messages/C432AFMFE/details/) to say hi!
+  - **NOTE: if you have a question about _using AMP on your site_, use [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html) rather than Slack** as Stack Overflow is more actively monitored for these types of questions
+  - there are many other Slack channels for more specific topics; after you join our Slack click on the "Channels" header to find other channels you want to participate in
+- the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
 
 ### Working groups
 

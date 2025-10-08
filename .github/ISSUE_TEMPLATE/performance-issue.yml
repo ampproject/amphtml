@@ -1,0 +1,146 @@
+---
+name: Performance Issue
+description: Report a performance-related issue in AMP.
+labels: 'Type: Performance, WG: performance'
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for reporting a performance issue! This helps us make AMP faster for everyone.
+        
+        Before filing this issue, please:
+        - [ ] Check if this issue has already been reported
+        - [ ] Try reproducing the issue with the latest AMP version
+        - [ ] Test on multiple browsers/devices when possible
+        
+  - type: textarea
+    id: description
+    attributes:
+      label: Performance Issue Description
+      description: Describe the performance problem you're experiencing.
+      placeholder: |
+        Example: "The amp-carousel component takes 3+ seconds to load when it contains more than 10 slides, causing a noticeable delay in page rendering."
+    validations:
+      required: true
+      
+  - type: textarea
+    id: impact
+    attributes:
+      label: Performance Impact
+      description: Describe how this affects user experience.
+      placeholder: |
+        - Slow loading times
+        - High memory usage
+        - Poor scrolling performance
+        - High CPU usage
+        - Poor Core Web Vitals scores
+    validations:
+      required: true
+      
+  - type: textarea
+    id: measurements
+    attributes:
+      label: Performance Measurements
+      description: Include any performance metrics or measurements you've collected.
+      placeholder: |
+        Please include:
+        - Lighthouse scores (before/after)
+        - Core Web Vitals metrics (CLS, FID, LCP)
+        - Browser DevTools performance profiling results
+        - Memory usage measurements
+        - Any other relevant metrics
+      render: text
+      
+  - type: textarea
+    id: repro_steps
+    attributes:
+      label: Reproduction Steps
+      description: Step-by-step instructions to reproduce the performance issue.
+      placeholder: |
+        1. Visit [URL]
+        2. Open browser DevTools
+        3. Navigate to Performance tab
+        4. Record performance while [specific action]
+        5. Observe [specific performance problem]
+    validations:
+      required: true
+      
+  - type: input
+    id: url
+    attributes:
+      label: Test URL
+      description: Provide a publicly accessible URL where the issue can be reproduced.
+      placeholder: https://example.com/amp-page-with-issue
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: Device Type
+      description: What type of device are you testing on?
+      multiple: true
+      options:
+        - Desktop
+        - Mobile (Android)
+        - Mobile (iOS)
+        - Tablet
+        - Other
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Browser(s) Affected
+      description: Which browsers show this performance issue?
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Samsung Internet
+        - Other
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Network Connection
+      description: What network conditions are you testing under?
+      multiple: true
+      options:
+        - Fast 3G
+        - Slow 3G
+        - WiFi
+        - 4G/LTE
+        - 5G
+        - Offline/Cache
+        
+  - type: textarea
+    id: components
+    attributes:
+      label: AMP Components Involved
+      description: List the AMP components that seem to be related to the performance issue.
+      placeholder: |
+        - amp-carousel
+        - amp-img
+        - amp-video
+        - amp-iframe
+    validations:
+      required: true
+      
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any other information that might help identify the performance issue.
+      placeholder: |
+        - AMP version
+        - Page size/complexity
+        - Third-party scripts involved
+        - CDN usage
+        - Any optimizations already attempted
