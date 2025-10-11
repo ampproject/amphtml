@@ -63,6 +63,8 @@
 
     figure {
       margin: 0;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     figcaption {
@@ -142,6 +144,14 @@
 
     amp-img {
       background-color: #f4f4f4;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .content-container {
+      padding: 15px;
+      max-width: 100%;
+      overflow-x: hidden;
     }
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
@@ -161,10 +171,14 @@
         <amp-img
             src="img/hero@1x.jpg"
             srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
-            layout="responsive" width="360" placeholder
-            heights="(min-width:1420px) 20%, (min-width:1320px) 25%, (min-width:1000px) 40%, (min-width:760px)  85%, (min-width:500px) 100%, 120%"
+            layout="responsive" 
+            width="360" 
+            height="216"
+            placeholder
             alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="216" on="tap:headline-img-lightbox" role="img" tabindex="0">
+            on="tap:headline-img-lightbox" 
+            role="img" 
+            tabindex="0">
         </amp-img>
       </figure>
 
