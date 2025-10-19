@@ -1408,7 +1408,7 @@ export class AmpStoryPlayer {
       'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
-      'cap': 'swipe',
+      'cap': 'swipe-y',
     };
 
     if (this.attribution_ === 'auto') {
@@ -1867,8 +1867,8 @@ export class AmpStoryPlayer {
 
     this.touchEventState_.startX = 0;
     this.touchEventState_.startY = 0;
-    this.touchEventState_.lastX = 0;
-    this.touchEventState_.isSwipeX = null;
+    this.touchEventState_.lastY = 0;
+    this.touchEventState_.isSwipeY = null;
     this.swipingState_ = SWIPING_STATE_ENUM.NOT_SWIPING;
   }
 
@@ -1935,7 +1935,7 @@ export class AmpStoryPlayer {
    */
   getSecondaryStory_() {
     const nextStoryIdx =
-      this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_LEFT
+      this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_UP
         ? this.currentIdx_ + 1
         : this.currentIdx_ - 1;
 
