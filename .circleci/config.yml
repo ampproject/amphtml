@@ -81,7 +81,8 @@ commands:
             - git-cache-{{ arch }}-v3-main-{{ .Revision }}
             - git-cache-{{ arch }}-v3-main-
             - git-cache-{{ arch }}-v3-
-      - checkout
+      - checkout:
+          method: full
       - when:
           condition:
             equal: ['main', << pipeline.git.branch >>]
