@@ -21,7 +21,7 @@ How would you like to help?
 -   [Get started with open source](#get-started-with-open-source)
 -   [Ongoing participation](#ongoing-participation)
 
-If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](./support.md) for help.
+If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](https://amp.dev/support/) for help.
 
 ## Report a bug
 
