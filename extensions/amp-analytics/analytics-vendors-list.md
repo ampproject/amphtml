@@ -241,6 +241,12 @@ Adds support for Ibeat Analytics.
 
 <!-- markdown-link-check-disable -->
 
+### Idealmedia
+
+Type attribute value: `idealmedia`
+
+Adds support for Idealmedia analytics. More information can be found at [idealmedia.io](https://idealmedia.io).
+
 ### INFOnline / IVW
 
 Type attribute value: `infonline`
@@ -360,6 +366,12 @@ Adds support for mediarithmics. More information and configuration details can b
 ### mediator
 
 Type attribute value: `mediator`
+
+### MGID
+
+Type attribute value: `mgid`
+
+Adds support for MGID analytics. More information can be found at [mgid.com](https://mgid.com).
 
 ### Memo
 
