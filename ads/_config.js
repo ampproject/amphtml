@@ -1038,6 +1038,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'playwire': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    prefetch: 'https://cdn.intergient.com/amp/amp.js',
+    renderStartImplemented: true
+  },
+
   'plista': {},
 
   'polymorphicads': {
