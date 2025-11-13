@@ -26,7 +26,7 @@ export function playwire(global, data) {
   computeInMasterFrame(global, 'playwire-load', (done) => {
     loadScript(
       global,
-      `https://gamezone.com/amp.js`
+      `https://cdn.intergient.com/amp/amp.js`
     );
   })
 }
