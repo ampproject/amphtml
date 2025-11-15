@@ -317,6 +317,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'aso': {
+    renderStartImplemented: true,
+  },
+
   'amoad': {
     prefetch: ['https://j.amoad.com/js/a.js', 'https://j.amoad.com/js/n.js'],
     preconnect: [
