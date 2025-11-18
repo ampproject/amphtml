@@ -12,7 +12,7 @@ export function playwire(global, data) {
     data,
   };
 
-  // Early
+  // TODO: Remove in production
   console.log('[playwire] early isMaster:', window.context.isMaster, 'name=', window.name);
   
   global.context.slotNumber = data.slotNumber;
