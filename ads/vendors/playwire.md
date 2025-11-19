@@ -15,3 +15,7 @@ Each site must be approved and onboarded with Playwire prior to launch. Please v
 -   `data-publisher` - The Playwire publisher ID assigned to the property.
 -   `data-website` - The website ID associated with the property.
 -   `data-slot` - The Playwire slot identifier corresponding to the ad unit.
+
+### Optional parameters
+
+-   `data-json` - JSON object to configure additional settings. Refer to Playwire documentation for supported options.

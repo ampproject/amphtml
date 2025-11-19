@@ -7,7 +7,7 @@ import { loadScript, validateData, computeInMasterFrame } from '#3p/3p';
 export function playwire(global, data) {
   /*eslint "local/camelcase": 0*/
   global.playwire = {
-    allowed_data: ['publisher', 'website', 'slot', 'path', 'slotNumber'],
+    allowed_data: ['publisher', 'website', 'slot', 'path', 'slotNumber', 'json'],
     mandatory_data: ['publisher', 'website', 'slot'],
     isAmp: true,
     data,
