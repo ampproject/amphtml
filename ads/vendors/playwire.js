@@ -19,10 +19,8 @@ export function playwire(global, data) {
     global.playwire.allowed_data
   );
 
-  computeInMasterFrame(global, 'playwire-load', (done) => {
-    loadScript(
-      global,
-      `https://cdn.intergient.com/amp/amp.js`
-    );
-  })
+  loadScript(
+    global,
+    `https://cdn.intergient.com/amp/amp.js`
+  );
 }
