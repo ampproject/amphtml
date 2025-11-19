@@ -3,7 +3,7 @@
 ## Example
 
 ```html
-<amp-ad width="320" height="250" id="playwire_ad2" type="playwire" data-publisher="343" data-website="926" data-slot="standard_iab_cntr3" data-path="/testme" layout="fixed" data-slotNumber="2">
+<amp-ad width="320" height="250" id="playwire_ad2" type="playwire" data-publisher="343" data-website="926" data-slot="standard_iab_cntr3" data-path="/testme" layout="fixed" data-slot-number="2">
   </amp-ad>
 ```
 
