@@ -9,13 +9,9 @@ export function playwire(global, data) {
   global.playwire = {
     allowed_data: ['publisher', 'website', 'slot', 'path', 'slotNumber'],
     mandatory_data: ['publisher', 'website', 'slot'],
+    isAmp: true,
     data,
   };
-
-  // TODO: Remove in production
-  console.log('[playwire] early isMaster:', window.context.isMaster, 'name=', window.name);
-  
-  global.context.slotNumber = data.slotNumber;
 
   validateData(
     data,
