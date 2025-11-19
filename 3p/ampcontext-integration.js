@@ -24,7 +24,6 @@ export function masterSelection(win, type) {
     master = win.parent.frames[masterName];
   } catch (expected) {
     /* ignore */
-    console.log(expected);
   }
   if (!master) {
     // No master yet, rename ourselves to be master. Yaihh.
