@@ -1,5 +1,7 @@
 # AMP ⚡
-Test update by Komali for pull request.
+- Original line: "This project helps to build amptified pages"
+- Changed line: "This project helps to build **AMP-ified** pages"
+
 
 ⚡⚡⚡
 
