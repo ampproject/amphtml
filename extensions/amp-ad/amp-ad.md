@@ -430,6 +430,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [PIberica](../../ads/vendors/piberica.md)
 -   [Pixad](../../ads/vendors/pixad.md)
 -   [Pixels](../../ads/vendors/pixels.md)
+-   [Playwire](../../ads/vendors/playwire.md)
 -   [plista](../../ads/vendors/plista.md)
 -   [polymorphicAds](../../ads/vendors/polymorphicads.md)
 -   [popin](../../ads/vendors/popin.md)
