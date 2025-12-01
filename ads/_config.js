@@ -1041,9 +1041,9 @@ const adConfig = jsonConfiguration({
   'playwire': {
     prefetch: [
       'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-      'https://cdn.intergient.com/amp/amp.js'
+      'https://cdn.intergient.com/amp/amp.js',
     ],
-    renderStartImplemented: true
+    renderStartImplemented: true,
   },
 
   'plista': {},

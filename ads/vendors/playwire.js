@@ -1,4 +1,4 @@
-import { loadScript, validateData } from '#3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -7,7 +7,14 @@ import { loadScript, validateData } from '#3p/3p';
 export function playwire(global, data) {
   /*eslint "local/camelcase": 0*/
   global.playwire = {
-    allowed_data: ['publisher', 'website', 'slot', 'path', 'slotNumber', 'json'],
+    allowed_data: [
+      'publisher',
+      'website',
+      'slot',
+      'path',
+      'slotNumber',
+      'json',
+    ],
     mandatory_data: ['publisher', 'website', 'slot'],
     isAmp: true,
     data,
@@ -19,8 +26,5 @@ export function playwire(global, data) {
     global.playwire.allowed_data
   );
 
-  loadScript(
-    global,
-    `https://cdn.intergient.com/amp/amp.js`
-  );
+  loadScript(global, `https://cdn.intergient.com/amp/amp.js`);
 }
