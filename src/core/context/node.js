@@ -15,6 +15,7 @@ import {Values} from './values';
 const NODE_PROP = '__AMP_NODE';
 const ASSIGNED_SLOT_PROP = '__AMP_ASSIGNED_SLOT';
 const AMP_PREFIX = 'AMP-';
+const AMPDOC_PROP = '__AMPDOC';
 
 // Relevant node types.
 // See https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType.
@@ -192,14 +193,14 @@ export class ContextNode {
     this.name = name;
 
     /**
-     * Whether this node is a root. The Document DOM nodes are automatically
+     * Whether this node is a root. The Document DOM nodes and ampdoc roots are automatically
      * considered as roots. But other nodes can become roots as well
      * (e.g. shadow roots) via `setIsRoot()` API.
      *
      * @package
      * @type {boolean}
      */
-    this.isRoot = node.nodeType == DOCUMENT_NODE;
+    this.isRoot = node.nodeType == DOCUMENT_NODE || !!node[AMPDOC_PROP];
 
     /**
      * The root context node. Always available for a DOM node connected to a
