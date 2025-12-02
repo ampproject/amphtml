@@ -1,8 +1,15 @@
 #include "cpp/htmlparser/json/json.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <stack>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "absl/strings/numbers.h"
+#include "cpp/htmlparser/json/types.h"
 #include "cpp/htmlparser/logging.h"
 #include "cpp/htmlparser/validators/json.h"
 
@@ -137,22 +144,22 @@ void ParseInternal::PopulateDictionaryItem(std::size_t current_index) {
     auto key = DictKey();
     auto value = CurrentString(current_index);
     if (parse_options_.use_string_references) {
-      dict->Insert<std::string_view>(key, value);
+      dict->Insert(key, value);
     } else {
-      dict->Insert<std::string>(key, std::string(value));
+      dict->Insert(key, std::string(value));
     }
   } else if (hints_ & NUMBER_T) {
     auto str = CurrentNumberStr(current_index);
     if (hints_ & FLOAT_T) {
       double num;
       if (absl::SimpleAtod(str, &num)) {
-        dict->Insert<double>(DictKey(), num);
+        dict->Insert(DictKey(), num);
       }
       hints_ ^= FLOAT_T;
     } else {
       int64_t num;
       if (absl::SimpleAtoi(str, &num)) {
-        dict->Insert<int64_t>(DictKey(), num);
+        dict->Insert(DictKey(), num);
       }
     }
   } else if (hints_ & NULL_T) {
@@ -172,22 +179,22 @@ void ParseInternal::PopulateArrayItem(std::size_t current_index) {
   if (hints_ & STRING_T) {
     auto str = CurrentString(current_index);
     if (parse_options_.use_string_references) {
-      array->Append<std::string_view>(str);
+      array->Append(str);
     } else {
-      array->Append<std::string>(std::string(str));
+      array->Append(std::string(str));
     }
   } else if (hints_ & NUMBER_T) {
     auto str = CurrentNumberStr(current_index);
     if (hints_ & FLOAT_T) {
       double num;
       if (absl::SimpleAtod(str, &num)) {
-        array->Append<double>(num);
+        array->Append(num);
       }
       hints_ ^= FLOAT_T;
     } else {
       int64_t num;
       if (absl::SimpleAtoi(str, &num)) {
-        array->Append<int64_t>(num);
+        array->Append(num);
       }
     }
   } else if (hints_ & NULL_T) {
