@@ -61,20 +61,22 @@
   place-items: center !important;
 }
 
+/* Responsive scaling for high-res displays */
 .i-amphtml-story-attribution-logo {
   border-radius: 100% !important;
   border: 1px solid #d4d4d4 !important;
-  width: 28px !important;
-  height: 28px !important;
+  width: min(2vw, 28px) !important;
+  height: min(2vw, 28px) !important;
   object-fit: cover !important;
   box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.12) !important;
 }
 
+/* Responsive scaling for high-res displays */
 .i-amphtml-story-attribution-text {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  font-size: 13px !important;
+  font-size: min(1.2vw, 13px) !important;
   font-weight: 500 !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16) !important;
   color: #ffff !important;
