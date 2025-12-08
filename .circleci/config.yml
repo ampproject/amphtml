@@ -174,13 +174,13 @@ commands:
       - run:
           name: '💿 Update list of available apt packages'
           command: sudo apt update
-      - browser-tools/install-chrome:
+      - browser-tools/install_chrome:
           # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
-          replace-existing: true
-      - browser-tools/install-chromedriver
+          replace_existing: true
+      - browser-tools/install_chromedriver
   install_firefox:
     steps:
-      - browser-tools/install-firefox
+      - browser-tools/install_firefox
   install_edge:
     steps:
       - run:
