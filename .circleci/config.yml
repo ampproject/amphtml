@@ -69,8 +69,8 @@ executors:
     resource_class: 2xlarge
   macos-medium:
     macos:
-      xcode: 15.3.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 26.2.0
+    resource_class: m4pro.medium
 
 commands:
   checkout_repo:
