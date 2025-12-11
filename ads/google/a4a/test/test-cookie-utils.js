@@ -24,13 +24,13 @@ describes.fakeWin('#maybeSetCookieFromAdResponse', {amp: true}, (env) => {
                 'version': 1,
                 'value': 'val1',
                 'domain': 'foo.com',
-                'expiration': Date.now() + 100_000,
+                'expires': Date.now() + 100_000,
               },
               {
                 'version': 2,
                 'value': 'val2',
                 'domain': 'foo.com',
-                'expiration': Date.now() + 100_000,
+                'expires': Date.now() + 100_000,
               },
             ],
           });
