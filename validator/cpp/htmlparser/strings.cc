@@ -3,8 +3,13 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <ios>  // For std::hex
+#include <optional>
 #include <sstream>
+#include <string>
 #include <tuple>
+#include <utility>
+
 #include "cpp/htmlparser/casetable.h"
 #include "cpp/htmlparser/entity.h"
 #include "cpp/htmlparser/whitespacetable.h"
@@ -15,7 +20,7 @@ namespace htmlparser {
 // assumed Windows-1252 encoding.
 // https://html.spec.whatwg.org/multipage/syntax.html#consume-a-character-reference
 constexpr std::array<char32_t, 32> kReplacementTable{
-    L'\u20AC', // First entry is what 0x80 should be replaced with.
+    L'\u20AC',  // First entry is what 0x80 should be replaced with.
     L'\u0081',
     L'\u201A',
     L'\u0192',
@@ -46,7 +51,7 @@ constexpr std::array<char32_t, 32> kReplacementTable{
     L'\u0153',
     L'\u009D',
     L'\u017E',
-    L'\u0178', // Last entry is 0x9F.
+    L'\u0178',  // Last entry is 0x9F.
     // 0x00->L'\uFFFD' is handled programmatically.
     // 0x0D->L'\u000D' is a no-op.
 };
@@ -645,7 +650,7 @@ bool Strings::EqualFold(std::string_view l, std::string_view r) {
         if ((l_char | 0x20) != (r_char | 0x20)) {
           return false;
         }
-      } else if (l_char != r_char) { // Compare other ascii character as-is.
+      } else if (l_char != r_char) {  // Compare other ascii character as-is.
         return false;
       }
 
@@ -846,13 +851,13 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     i++;
     // Lower-cased characters are more common in entities, so we check for
     // them first.
-   if (Strings::IsCharAlphabet(c) || Strings::IsDigit(c)) {
+    if (Strings::IsCharAlphabet(c) || Strings::IsDigit(c)) {
      continue;
-   }
-   if (c != ';') {
-     i--;
-   }
-   break;
+    }
+    if (c != ';') {
+      i--;
+    }
+    break;
   }
 
   std::string entityName = s.substr(1, i - 1);
@@ -900,7 +905,6 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
 
 void CaseTransformInternal(bool to_upper, std::string* s) {
   for (std::size_t i = 0; i < s->size(); ++i) {
-
     uint8_t code_point = s->at(i) & 0xff;
 
     // ASCII characters first.
