@@ -7,7 +7,7 @@
     amp markdown-toc --fix
 -->
 
--   [What's this?](#whats-this)
+- [What's this?](#whats-this)
 
 ## What's this?
 

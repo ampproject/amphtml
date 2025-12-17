@@ -23,23 +23,23 @@ This update contains guidance on using the Web Story Player to support:
 
 <!-- {"maxdepth": 1} -->
 
--   [Summary](#summary)
--   [Player setup](#player-setup)
--   [Navigating between stories](#navigating-between-stories)
--   [Integrating web stories into your website (entrypoints)](#integrating-web-stories-into-your-website-entrypoints)
--   [Programmatically fetching more stories](#programmatically-fetching-more-stories)
--   [Circular Wrapping](#circular-wrapping)
--   [Customizing position & visibility of story UI controls](#customizing-position--visibility-of-story-ui-controls)
--   [Custom Events](#custom-events)
--   [Upcoming API Change: Poster Image](#upcoming-api-change-poster-image)
--   [Additional use case demos](#additional-use-case-demos)
--   [FAQs (please feel free to reach out with other questions & thoughts)](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
+- [Summary](#summary)
+- [Player setup](#player-setup)
+- [Navigating between stories](#navigating-between-stories)
+- [Integrating web stories into your website (entrypoints)](#integrating-web-stories-into-your-website-entrypoints)
+- [Programmatically fetching more stories](#programmatically-fetching-more-stories)
+- [Circular Wrapping](#circular-wrapping)
+- [Customizing position & visibility of story UI controls](#customizing-position--visibility-of-story-ui-controls)
+- [Custom Events](#custom-events)
+- [Upcoming API Change: Poster Image](#upcoming-api-change-poster-image)
+- [Additional use case demos](#additional-use-case-demos)
+- [FAQs (please feel free to reach out with other questions & thoughts)](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 Beyond this, you’ll also find:
 
--   [Additional use case demos](#Additional-use-case-demos)
--   [Additional explorations and roadmap](#Additional-explorations-and-roadmap)
--   [FAQs](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
+- [Additional use case demos](#Additional-use-case-demos)
+- [Additional explorations and roadmap](#Additional-explorations-and-roadmap)
+- [FAQs](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 ## Player setup
 
@@ -245,17 +245,17 @@ The configuration will end up looking like the following:
 
 Specify a control object with the “close” name to get the close icon.
 
--   `event`: The close button dispatches the `amp-story-player-close` event.
+- `event`: The close button dispatches the `amp-story-player-close` event.
 
 The “close” control supports the following customizable properties:
 
--   `position`: “start” or “end”.
-    -   Places the icon either on the left or right on LTR languages.
--   `visibility`: “hidden” or “visible” (default).
-    -   Toggles the control’s visibility. If omitted, the default is visible.
-    -   See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
--   `backgroundImageUrl`: string with url or data string (escaped).
-    -   Changes the icon image to the provided url or data string (for inline svgs).
+- `position`: “start” or “end”.
+    - Places the icon either on the left or right on LTR languages.
+- `visibility`: “hidden” or “visible” (default).
+    - Toggles the control’s visibility. If omitted, the default is visible.
+    - See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
+- `backgroundImageUrl`: string with url or data string (escaped).
+    - Changes the icon image to the provided url or data string (for inline svgs).
 
 ### Skip-to-next
 
@@ -263,18 +263,18 @@ Skips to the next story inside the player (only available on desktop).
 
 The “skip-to-next” control supports the following customizable properties:
 
--   `position`: “start” or “end”.
-    -   Places the icon either on the left or right on LTR languages.
--   `visibility`: “hidden” or “visible” (default).
-    -   Toggles the control’s visibility. If omitted, the default is visible.
--   `backgroundImageUrl`: string with url or data string (escaped).
-    -   Changes the icon image to the provided url or data string (for inline svgs).
+- `position`: “start” or “end”.
+    - Places the icon either on the left or right on LTR languages.
+- `visibility`: “hidden” or “visible” (default).
+    - Toggles the control’s visibility. If omitted, the default is visible.
+- `backgroundImageUrl`: string with url or data string (escaped).
+    - Changes the icon image to the provided url or data string (for inline svgs).
 
 ### Custom control
 
 You can add a custom control to the stories inside the player with a custom control. Simply specify a “name” and an “backgroundImageUrl”, and any optional properties:
 
--   `name` (**required**): a string with the name of the control. e.g. “lightbox”. **The dispatched event will depend on this name.** The custom event will be the name of the control prefixed with `amp-story-player-*`. E.g. `amp-story-player-lightbox`:
+- `name` (**required**): a string with the name of the control. e.g. “lightbox”. **The dispatched event will depend on this name.** The custom event will be the name of the control prefixed with `amp-story-player-*`. E.g. `amp-story-player-lightbox`:
 
 ```javascript
 const player = document.body.querySelector("amp-story-player");
@@ -286,12 +286,12 @@ player.addEventListener("amp-story-player-lightbox", () => {
 });
 ```
 
--   `backgroundImageUrl` (**required**): Accepts URLs, as well as svgs and `data` paths (note that strings must be JSON escaped). See [example 3](#Example-#3---Changing-the-icon-of-the-close-button).
-    -   Changes the control icon.
--   `position`: “start” or “end”.
-    -   Places the icon either on the left or right on LTR languages.
--   `visibility`: “hidden” or “visible” (default).
-    -   Toggles the control’s visibility. If omitted, the default is visible.
+- `backgroundImageUrl` (**required**): Accepts URLs, as well as svgs and `data` paths (note that strings must be JSON escaped). See [example 3](#Example-#3---Changing-the-icon-of-the-close-button).
+    - Changes the control icon.
+- `position`: “start” or “end”.
+    - Places the icon either on the left or right on LTR languages.
+- `visibility`: “hidden” or “visible” (default).
+    - Toggles the control’s visibility. If omitted, the default is visible.
 
 ### Example #1 - Close button on the start position
 
@@ -432,10 +432,10 @@ This new API is still a work in progress, and will send more information when it
 
 Good question. While the basic functionality of the player is in the [AMP version](https://amp.dev/documentation/components/amp-story-player/), including embedding multiple stories and swiping through them, we are still working on porting over some of the features from the non-AMP version to the AMP version. These include:
 
--   Circular wrapping
--   Programmatically fetching more stories from an endpoint
--   Customizable UI controls
--   Custom events
+- Circular wrapping
+- Programmatically fetching more stories from an endpoint
+- Customizable UI controls
+- Custom events
 
 ### Is the player ready to use? When will these features be ready?
 

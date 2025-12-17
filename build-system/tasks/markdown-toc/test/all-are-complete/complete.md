@@ -7,10 +7,10 @@
     amp markdown-toc --fix
 -->
 
--   [tacos](#tacos)
-    -   [asada](#asada)
-    -   [al pastor](#al-pastor)
-    -   [veggie](#veggie)
+- [tacos](#tacos)
+    - [asada](#asada)
+    - [al pastor](#al-pastor)
+    - [veggie](#veggie)
 
 ## tacos
 
