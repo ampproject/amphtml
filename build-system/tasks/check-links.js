@@ -131,6 +131,10 @@ function checkLinksInFile(file) {
         },
       },
     ],
+    // Ignore:
+    // - 403 [Forbidden], some sites block automated requests.
+    // - 429 [Too Many Requests], some sites rate-limit requests.
+    aliveStatusCodes: [200, 403, 429],
   };
 
   return new Promise((resolve, reject) => {
