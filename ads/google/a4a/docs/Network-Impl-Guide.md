@@ -208,8 +208,7 @@ _For reference, see [Figure 1: Part A](#figure-1-fast-fetch-rendering-flow)_.
     });
     ```
 
-Example configs: [AdSense](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
-Usage of Google Ad Manager and AdSense configs can be seen in [\_a4a-config.js](https://github.com/ampproject/amphtml/blob/main/ads/_a4a-config.js).
+Example usage of Google Ad Manager and AdSense configs can be seen in [\_a4a-config.js](https://github.com/ampproject/amphtml/blob/main/ads/_a4a-config.js).
 
 #### Create documentation
 
