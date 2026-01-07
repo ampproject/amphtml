@@ -46,7 +46,7 @@ export function maybeSetCookieFromAdResponse(win, fetchResponse) {
     // On proxy origin, we want cookies to be partitioned by subdomain to
     // prevent sharing across unrelated publishers, so we don't set a domain.
     const domain = getProxySafeDomain(win, cookieInfo['domain']);
-    const expiration = Math.max(cookieInfo['expires'], 0);
+    const expiration = Math.max(cookieInfo['expires'], 0) * 1000;
     setCookie(win, cookieName, value, expiration, {
       domain,
       secure: false,
