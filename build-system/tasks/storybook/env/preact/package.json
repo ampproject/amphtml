@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "description": "packages specific to the preact storybook env",
   "devDependencies": {
-    "preact": "10.25.4"
+    "preact": "10.28.0"
   }
 }
