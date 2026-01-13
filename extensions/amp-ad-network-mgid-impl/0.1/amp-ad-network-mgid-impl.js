@@ -88,11 +88,13 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     let consentString = undefined;
     let gdprApplies = undefined;
     let consentStringType = undefined;
+    let gppSectionId = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
       gdprApplies = consentTuple.gdprApplies;
       consentStringType = consentTuple.consentStringType;
+      gppSectionId = consentTuple.gppSectionId;
     }
     if (
       consentState === CONSENT_POLICY_STATE.UNKNOWN &&
@@ -101,25 +103,33 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
       return result;
     }
 
-    if (gdprApplies) {
+    if (
+      consentStringType == CONSENT_STRING_TYPE.TCF_V1 ||
+      consentStringType == CONSENT_STRING_TYPE.TCF_V2
+    ) {
       result.push(
-        'gdprApplies=' +
+        'gdpr=' +
           (gdprApplies === true ? '1' : gdprApplies === false ? '0' : null)
       );
-    }
 
-    if (
-      consentString &&
-      consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
-    ) {
-      result.push('consentData=' + consentString);
+      if (consentString) {
+        result.push('gdpr_consent=' + consentString);
+      }
     }
 
     if (
       consentString &&
       consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
     ) {
-      result.push('uspString=' + consentString);
+      result.push('us_privacy=' + consentString);
+    }
+
+    if (
+      consentString &&
+      consentStringType == CONSENT_STRING_TYPE.GLOBAL_PRIVACY_PLATFORM
+    ) {
+      result.push('gpp=' + consentString);
+      result.push('gpp_sid=' + gppSectionId);
     }
 
     return result;
