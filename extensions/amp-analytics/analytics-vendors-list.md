@@ -45,7 +45,11 @@ Type attribute value: `adobeanalytics_nativeConfig`
 
 Type attribute value: `afsanalytics`
 
-Adds support for AFS Analytics. Additionally, the `websiteid` and `server` variables must be specified. More details for adding AFS Analytics support can be found at [afsanalytics.com](https://www.afsanalytics.com/articles/developers/).
+<!-- markdown-link-check-disable -->
+
+Adds support for AFS Analytics. Additionally, the `websiteid` and `server` variables must be specified. More details for adding AFS Analytics support can be found at [afsanalytics.com](https://dev.afsanalytics.com/en/docs/api/introduction/).
+
+<!-- markdown-link-check-enable -->
 
 ### Alexa Internet
 
@@ -189,7 +193,11 @@ Adds support for Eulerian Technologies Analytics. Requires defining _var_ `analy
 
 Type attribute value: `facebookpixel`
 
-Adds support for the [Facebook Pixel](https://www.facebook.com/business/a/facebook-pixel). In your [`amp-analytics`](./amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Facebook Pixel developer documentation](https://developers.facebook.com/docs/facebook-pixel).
+<!-- markdown-link-check-disable -->
+
+Adds support for the [Meta Pixel](https://developers.facebook.com/docs/meta-pixel/). In your [`amp-analytics`](./amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Meta Pixel developer documentation](https://developers.facebook.com/docs/meta-pixel/).
+
+<!-- markdown-link-check-enable -->
 
 ### Gemius
 
@@ -202,7 +210,6 @@ Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provi
 Type attribute value: `gfksensic`
 
 Adds support for GfK Sensic audio stream usage analytics.
-Please refer to our [client documentation](https://confluence-docu.gfk.com/display/SENSIC/AMP+Integration) for details.
 
 ### Google Ads
 
@@ -255,7 +262,7 @@ More details for adding INFOnline / IVW support can be found at [www.infonline.d
 
 Type attribute value: `infonline_anonymous`
 
-Adds support for the [anonymous INFOnline](https://www.infonline.de). Requires a copy of [infonline-anonymous.html](https://www.infonline.de/amp/infonline-anonymous.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `infonline-anonymous.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
+Adds support for the [anonymous INFOnline](https://www.infonline.de). Requires hosting a special HTML file (see [this](https://docs.infonline.de/infonline-measurement/en/integration/web/pseudonym/pseudonym_amp/)) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `infonline-anonymous.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
 
 Additionally, the following variables must be defined:
 
@@ -368,13 +375,13 @@ Adds support for Yandex Metrica. Configuration details can be found at [Yandex S
 
 Type attribute value: `moat`
 
-Adds support for Moat. Please contact your Moat representative for configuration details. More information on Moat can be found at [https://docs.oracle.com/en/cloud/saas/data-cloud-moat/about_moat/moat_analytics_how_it_works.html](https://docs.oracle.com/en/cloud/saas/data-cloud-moat/about_moat/moat_analytics_how_it_works.html).
+Adds support for Moat. Please contact your Moat representative for configuration details.
 
 ### Mobify
 
 Type attribute value: `mobify`
 
-Adds support for Mobify. More details for adding Mobify support can be found at [docs.mobify.com](https://docs.mobify.com/amp-sdk/latest/guides/amp-analytics/).
+Adds support for Mobify.
 
 ### MoEngage
 
@@ -513,7 +520,7 @@ Type attribute value: `piStats`
 
 Type attribute value: `ppasanalytics`
 
-Adds support for Piwik PRO Analytics Suite. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/en/latest/integrations/AMP_integration.html).
+Adds support for Piwik PRO Analytics Suite. Configuration details can be found at [piwik.pro](https://developers.piwik.pro/docs/accelerated-mobile-pages-integration).
 
 ### Pressboard
 
@@ -627,7 +634,7 @@ Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru
 
 Type attribute value: `treasuredata`
 
-Adds support for Treasure Data. Configuration details can be found at [docs.treasuredata.com](https://docs.treasuredata.com/display/public/INT/Google+Accelerated+Mobile+Pages+AMP).
+Adds support for Treasure Data. Configuration details can be found at [docs.treasuredata.com](https://docs.treasuredata.com/int/google-accelerated-mobile-pages-amp).
 
 ### Triboo Data Analytics
 
