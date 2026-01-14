@@ -2619,21 +2619,21 @@ export function hasStorageConsent(consentTuple) {
     return false;
   }
 
+  const {consentState, consentString, gdprApplies, purposeOne} = consentTuple;
+
   if (
     [CONSENT_POLICY_STATE.UNKNOWN, CONSENT_POLICY_STATE.INSUFFICIENT].includes(
-      consentTuple.consentState
+      consentState
     )
   ) {
     return false;
   }
 
-  const {consentString, gdprApplies, purposeOne} = consentTuple;
-
   if (!gdprApplies) {
     return true;
   }
 
-  return (
+  return !!(
     consentString &&
     (purposeOne ||
       // Fallback to checking purpose one from consent string, as there appear

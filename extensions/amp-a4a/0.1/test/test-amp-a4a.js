@@ -49,6 +49,7 @@ import {
   RENDERING_TYPE_HEADER,
   SAFEFRAME_VERSION_HEADER,
   assignAdUrlToError,
+  hasStorageConsent,
   protectFunctionWrapper,
 } from '../amp-a4a';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
@@ -3662,38 +3663,33 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
   });
 
   describe('#hasStorageConsent', () => {
-    let getCustomRealTimeConfigMacrosSpy;
-
-    beforeEach(() => {
-      element.setAttribute('rtc-config', true);
-      getCustomRealTimeConfigMacrosSpy = env.sandbox.spy(
-        a4a,
-        'getCustomRealTimeConfigMacros_'
-      );
-    });
+    const consentStringWithPurposeOne =
+      'CQeBJ0AQeBJ0AAKA9AENCNFsAP_gAEPgAAwIL6NR_G__bXlr-bb36ftkeYxf9_hr7sQxBgbJk24FzLvW7JwX32E7NAzatqYKmRIAu3TBIQNlHJDURVCgKIgFrzDMaEyUoTtKJ6BkiFMZY2tYCFxvm4tjWQCY4vr99ld9mR-N7dr82dzy26hnv3a9_-S1UJCdIYetDfv8ZBKT-9IE9_x8v4v4_N7pE2-eS1n_tGvp4j9-YvP_dBmxt-TSff7Pn__rl_e7X__c_n37v94XX77__-__f_-7___2b_-_wXsAAMBAAgiAIAQAAAAAIAACAAAAAgAAAAAABQAAAiCAACBgAAAAEAIAAAAgAAgAAAAAAAAAQABAAAAACAQAgAABQABgAAAAAAMAAAGACQEAAAAAMABTAAgECgACEiiACAFAACCAEIAAAgGABACAAo4AggBAgUAAAIAAAAAACwEAgAACUgQABEQCAAAEAAAUQAgAIQsABBEAIBQRAAUBAAIBg0IAklKgSAAgBAyTIhE-EQIAgBAgBCAmKEYA6eICAMEg5gALgAoAC4AHAAPAAgABJAC8ANQAeABDACYAFUAN4AfgBCQCGAIkARwAmgBWgDAAGHAMoAywBsgDngHcAd4A9oB9gH6AQAAikBFwEYgI0AjkBIgEmgJ-AoMBUAFXALmAXoAxQBogDaAG4AOIAe0BDsCPQJFATSAnYBQ4CjwFIgKbAWwAuABcgC7AF3gLzAYbAyMDJAGTgMuAZmAzkBn0DVwNZAbGA2gBt4DcwG6gOTAcuA8cB8YD_gICAQTAgwBCGCFoIXwQ9BD8CPoEioJMAkyBLMCW8EvgTAAmWBM4CaoE2AJuQTmBOkCdwE8IKDgoQBQsCioFJQKXAUyAp5BT8FQAKjAVOAq6BWwCt4FfALCgWOAsqBaaC1gLWgW5AuKBeodCEAAXABQAFQAOAAgABJAC4ANQAeABMACmAFWALgAugBiADeAH6AQwBEgCOAE0AKMAVoAwABhgDKAGiANkAc8A7gDvAHtAPsA_YCKAIxARwBJoCfgKDAVEBVwCxAFzgLyAvQBigDaAG4gOIA4wB7QD7AIQAQ6AicBF8CPQJFATIAmkBOwCh4FHgUgApMBTYCrAFigLYAW6AuABckC7ALtAXeAvMBfQDDQGPQMjAySBk4GVQMsAy4BmYDOQGfANNAarA1cDWAG0ANvAbqA4sByYDlwHjgPjAfWA-4B_YD_gIAgQEAgwBC0CHoEdgI-gSEAkUBJkCVcEswS0Al1BL4EwAJlgTOAmqBNgCbkE5gTpgnaCdwE8AJ5gUGAoQBQsCiQFFQKSgUuAp4BT8CowFToKuAq6BWwCt4FgwLJgWVgtYC1oFuQLdgXFAuWBeohA-AAWABQAFwANQAqgBcADEAG8APwAwABzwDuAO8AigBHACUgFBgKiAq4BcwDFAG0AOMAh0BE4CPQE0gKTAU2AqwBYoC0QFwALkAXYAyMBk4DOQGqgPHAfGA_sCAgEGAIWgQ9AkIBIoCXQEzgJsATmAncBPACeYFBgKKgUlApcBT8Cr4FggLWgW5JQUAAFgAUAA4ACQAHgAQwAmABVAC4AGKAQwBEgCOAFGAK0AYAA2QB3gD8AI5AVEBVwC5gGKAOIAhABDoCL4EegSKAo8BScCmgKbAWKAtgBcgC7AF5wMjAyQBk4DLAGcgM-AawA28B8YEAQICAQPAgwBCECHoEfQJFASVAlWBK0CXQEvgJnATVAmwBNwCc0E7QTuAngBPMCioFJQKXAU8AqMBU4CtgFb4LBAsGBYsCysFrAWtAtyBcgC5YF6ikG4ABcAFAAVAA4ACCAGQAaAA8ACGAEwAKoAYgA_QCGAIkARwAowBWgDAAGUANEAbIA5wB3wD7AP0AiwBGICOAJKAUGAqICrgFzALyAYoA2gBuIDiAOMAe0A-wCHQETgIvgR6BIoCaQE7AKHAUgApOBTQFNgKsAWKAtgBcAC5IF2AXaAvMBfQDDYGRgZIAyeBlgGXAM5gawBrIDbwG6gOTAeKA8cB8YD-wH_AQEAgmBBgCEIELQIZgQ5AjsBH0CRUEmASZAlWBLMCXUEvgTAAmWBM4CaoE2AJzQTtBO4CeAE8wKFgUVApKBS4CngFPwKjAVOArYBW8CwQFhQLFgWTAsrBawFrQLcgXFAuQBeotAcABqAEMAYAA7gCOAF6APsAoeBTQFNgKsAXAAuwBmYDxwICAQ9AmwBNwCcwE7gJ4AUkApcBYUCxIFrQLcgW7A.IAAA.f_gAAAAAAAAA';
+    const consentStringWithoutPurposeOne =
+      'VGhpcyBzdHJpbmcgY29udGFpbnMgbm8gcHVycG9zZSBvbmUgY29uc2VudApcyBzdHJpbmcgY29udGFpbnMgbm8gcHVycG9zZSBvbmUgY29uc2VudApcyBzdHJpbmcgY29udGFpbnMgbm8gcHVycG9zZSBvbmUgY29uc2VudApcyBzdHJpbmcgY29udGFpbnMgbm8gcHVycG9zZSBvbmUgY29uc2VudA';
 
     for (const {
       consentState,
       consentString,
+      expectedResult,
       gdprApplies,
-      hasStorageConsent,
       purposeOne,
     } of [
       // Unknown consent
       {
         consentState: CONSENT_POLICY_STATE.UNKNOWN,
         gdprApplies: true,
-        consentString: 'string',
+        consentString: '',
         purposeOne: true,
-        hasStorageConsent: false,
+        expectedResult: false,
       },
       // Insufficient consent
       {
         consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
         gdprApplies: true,
-        consentString: 'string',
+        consentString: '',
         purposeOne: true,
-        hasStorageConsent: false,
+        expectedResult: false,
       },
       // GDPR doesn't apply
       {
@@ -3701,7 +3697,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
         gdprApplies: false,
         consentString: '',
         purposeOne: false,
-        hasStorageConsent: true,
+        expectedResult: true,
       },
       // No consent string
       {
@@ -3709,40 +3705,50 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
         gdprApplies: true,
         consentString: '',
         purposeOne: true,
-        hasStorageConsent: false,
+        expectedResult: false,
       },
       // no purpose one consent
       {
         consentState: CONSENT_POLICY_STATE.SUFFICIENT,
         gdprApplies: true,
-        consentString: 'string',
+        consentString: consentStringWithoutPurposeOne,
         purposeOne: false,
-        hasStorageConsent: false,
+        expectedResult: false,
       },
-      // GDPR applies and all prerequisite satisfied
+      // GDPR applies and tuple contains purpose one consent
       {
         consentState: CONSENT_POLICY_STATE.SUFFICIENT,
         gdprApplies: true,
+        // actual string is ignored unless purposeOne is false
         consentString: 'string',
         purposeOne: true,
-        hasStorageConsent: true,
+        expectedResult: true,
+      },
+      // GDPR applies, purpose one consent is false, but true in consent string
+      {
+        consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+        gdprApplies: true,
+        // actual string is ignored unless purposeOne is false
+        consentString: consentStringWithPurposeOne,
+        purposeOne: false,
+        expectedResult: true,
       },
     ]) {
       it(
-        `storageConsent test - consentState=${consentState}, ` +
-          `consentString=${consentString}, gdprApplies=${gdprApplies},` +
-          `purposeOne=${purposeOne} -> hasStorageConsent=${hasStorageConsent}`,
+        `hasStorageConsent test - consentState=${consentState}, ` +
+          `consentStringContainsConsent=` +
+          `${consentString === consentStringWithPurposeOne}, ` +
+          `gdprApplies=${gdprApplies}, ` +
+          `purposeOne=${purposeOne} -> hasStorageConsent=${expectedResult}`,
         () => {
-          return a4a
-            .tryExecuteRealTimeConfig_(consentState, consentString, {
+          expect(
+            hasStorageConsent({
+              consentState,
+              consentString,
               gdprApplies,
               purposeOne,
             })
-            .then(() => {
-              expect(getCustomRealTimeConfigMacrosSpy).to.be.calledWith(
-                hasStorageConsent
-              );
-            });
+          ).to.equal(expectedResult);
         }
       );
     }
