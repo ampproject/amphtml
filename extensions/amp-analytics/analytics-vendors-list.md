@@ -41,6 +41,13 @@ Do not use both the `adobeanalytics` and `adobeanalytics_nativeConfig` types on 
 Type attribute value: `adobeanalytics_nativeConfig`
 -->
 
+### AdsKeeper
+
+Type attribute value: `adskeeper`
+
+Adds support for AdsKeeper analytics. More information can be found at [adskeeper.com](https://adskeeper.com).
+
+
 ### AFS Analytics
 
 Type attribute value: `afsanalytics`
