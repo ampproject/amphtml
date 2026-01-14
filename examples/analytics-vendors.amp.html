@@ -48,6 +48,7 @@
       <option>acquialift</option>
       <option>adobeanalytics</option>
       <option>adobeanalytics_nativeConfig</option>
+      <option>adskeeper</option>
       <option>alexametrics</option>
       <option>amplitude</option>
       <option>appsflyer</option>
@@ -235,6 +236,23 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Adobe Analytics example -->
+
+<!-- AdsKeeper tracking.
+  Please replace the values for "site", "client_id", and "publishers_sites_id"
+  with your AdsKeeper configuration values.
+-->
+<amp-analytics type="adskeeper" id="adskeeper">
+  <script type="application/json">
+  {
+    "vars": {
+      "site": "SITE_ID",
+      "client_id": "CLIENT_ID",
+      "publishers_sites_id": "PUBLISHERS_SITES_ID"
+    }
+  }
+  </script>
+</amp-analytics>
+<!-- End AdsKeeper example -->
 
 <!-- Alexa tracking -->
 <amp-analytics type="alexametrics">

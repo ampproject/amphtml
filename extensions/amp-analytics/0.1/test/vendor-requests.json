@@ -11,6 +11,9 @@
     "pageview": "https://!host/b/ss/!reportSuites/2/amp-1.0/s_random_?vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
     "click": "https://!host/b/ss/!reportSuites/2/amp-1.0/s_random_?vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_&pe=lnk_o&pev1=!linkUrl&pev2=!linkName"
   },
+  "adskeeper": {
+    "pageview": "https://c.adskeeper.com/pv?site=!site&client_id=!client_id&publishers_sites_id=!publishers_sites_id&i=1&pr=_external_referrer_&cbuster=_random_&pvid=_page_view_id_64_&implVersion=19&cxurl=_canonical_url_&pv_types=tpv&scua=%22_uach(architecture)_%22&scub=%22_uach(bitness)_%22&scu_amp=_uach(brands)_&scufvl_amp=_uach(fullVersionList)_&scum=%3F_if(_equals(_uach(mobile)__%2Ctrue)_, 1, 0)&scumd=%22_uach(model)_%22&scup=%22_uach(platform)_%22&scupv=%22_uach(platformVersion)_%22&scufv=%22_uach(uaFullVersion)_%22&scuw=%3F_if(_equals(_uach(wow64)__%2Ctrue)_, 1, 0)&gdpr_consent=_if(_equals(_consent_metadata(consentStringType)_%2C1)_%2C_consent_string_)__if(_equals(_consent_metadata(consentStringType)_%2C2)_%2C_consent_string_)_&gdpr=_if(_equals(_consent_metadata(gdprApplies)_%2Ctrue)_%2C1)__if(_equals(_consent_metadata(gdprApplies)_%2Cfalse)_%2C0)_&us_privacy=_if(_equals(_consent_metadata(consentStringType)_%2C3)_%2C_consent_string_)_&gpp=_if(_equals(_consent_metadata(consentStringType)_%2C4)_%2C_consent_string_)_&gpp_sid=_if(_equals(_consent_metadata(consentStringType)_%2C4)_%2C_consent_metadata(gppSectionId)_)_"
+  },
   "afsanalytics": {
     "host": "//www.afsanalytics.com",
     "base": "//www.afsanalytics.com/cgi_bin/",
