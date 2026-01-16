@@ -75,6 +75,7 @@
       <option>gfksensic</option>
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
+      <option>idealmedia</option>
       <option>infonline</option>
       <option>infonline_anonymous</option>
       <option>iplabel</option>
@@ -90,6 +91,7 @@
       <option>mediator</option>
       <option>memo</option>
       <option>metrika</option>
+      <option>mgid</option>
       <option>mobify</option>
       <option>moengage</option>
       <option>mparticle</option>
@@ -1121,6 +1123,40 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mediator.media example -->
+
+<!-- MGID tracking.
+  Please replace the values for "site", "client_id", and "publishers_sites_id"
+  with your MGID configuration values.
+-->
+<amp-analytics type="mgid" id="mgid">
+<script type="application/json">
+{
+  "vars": {
+    "site": "SITE_ID",
+    "client_id": "CLIENT_ID",
+    "publishers_sites_id": "PUBLISHERS_SITES_ID"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End MGID example -->
+
+<!-- Idealmedia tracking.
+  Please replace the values for "site", "client_id", and "publishers_sites_id"
+  with your Idealmedia configuration values.
+-->
+<amp-analytics type="idealmedia" id="idealmedia">
+<script type="application/json">
+{
+  "vars": {
+    "site": "SITE_ID",
+    "client_id": "CLIENT_ID",
+    "publishers_sites_id": "PUBLISHERS_SITES_ID"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Idealmedia example -->
 
 <!-- Memo Tracking -->
 <amp-analytics type="memo" id="memo">
