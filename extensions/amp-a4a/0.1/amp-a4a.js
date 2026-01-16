@@ -2619,21 +2619,66 @@ export function hasStorageConsent(consentTuple) {
     return false;
   }
 
+  const {consentState, consentString, gdprApplies, purposeOne} = consentTuple;
+
   if (
     [CONSENT_POLICY_STATE.UNKNOWN, CONSENT_POLICY_STATE.INSUFFICIENT].includes(
-      consentTuple.consentState
+      consentState
     )
   ) {
     return false;
   }
 
-  const {consentString, gdprApplies, purposeOne} = consentTuple;
-
   if (!gdprApplies) {
     return true;
   }
 
-  return consentString && purposeOne;
+  return !!(
+    consentString &&
+    (purposeOne ||
+      // Fallback to checking purpose one from consent string, as there appear
+      // to be some cases where purposeOne is not correctly set.
+      hasPurposeOneFromConsentString_(consentString))
+  );
+}
+
+/**
+ * @param {string} consentString
+ * @return {boolean}
+ */
+function hasPurposeOneFromConsentString_(consentString) {
+  try {
+    if (!consentString) {
+      return false;
+    }
+
+    // 1. Decode Base64URL to a binary string
+    const lookup =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    let bin = '';
+    for (let i = 0; i < consentString.length; i++) {
+      const char = consentString[i];
+      const index = lookup.indexOf(char);
+      if (index === -1) {
+        continue;
+      } // Skip padding or invalid chars
+      bin += index.toString(2).padStart(6, '0');
+    }
+
+    // 2. Identify Version and Purpose Section
+    // Version is bits 0-5. Purpose Consents start at bit 152 for TCF v2.
+    const version = parseInt(bin.slice(0, 6), 2);
+
+    if (version >= 2) {
+      // Purpose 1 is the first bit of the "Purposes Consent" field
+      // The "Purposes Consent" field starts at index 152
+      return bin[152] === '1';
+    }
+
+    return false;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
