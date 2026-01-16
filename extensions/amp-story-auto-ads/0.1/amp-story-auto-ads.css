@@ -54,14 +54,19 @@ amp-story-page amp-ad[type='adsense'] {
   max-height: 100% !important;
 }
 
+/* Responsive scaling for high-res displays */
 .i-amphtml-story-desktop-fullbleed .i-amphtml-fullbleed-ad iframe {
   width: 100% !important;
   height: 100% !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
 }
 
+/* Responsive scaling for high-res displays */
 .i-amphtml-story-desktop-fullbleed
   .i-amphtml-fullbleed-ad
   .i-amphtml-cta-container {
     bottom: 0 !important;
     top: 0 !important;
+    font-size: min(2vw, 2rem) !important;
 }
