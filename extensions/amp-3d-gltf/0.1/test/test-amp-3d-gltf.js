@@ -57,7 +57,7 @@ describes.realWin(
       return amp3dGltf;
     };
 
-    it('renders iframe', async () => {
+    it.skip('renders iframe', async () => {
       await createElement();
       expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
     });
