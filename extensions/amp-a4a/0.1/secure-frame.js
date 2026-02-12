@@ -1,7 +1,5 @@
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
 
-import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
-
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
@@ -84,10 +82,6 @@ export function createSecureFrame(win, title, height, width) {
       'tabindex': '0',
     })
   );
-
-  if (isAttributionReportingAllowed(document)) {
-    iframe.setAttribute('allow', `attribution-reporting 'src'`);
-  }
 
   return iframe;
 }
