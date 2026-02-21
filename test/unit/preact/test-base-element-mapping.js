@@ -1,21 +1,21 @@
-import { createElementWithAttributes } from '#core/dom';
-import { htmlFor } from '#core/dom/static-template';
-import { omit } from '#core/types/object';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {omit} from '#core/types/object';
 
 import * as Preact from '#preact';
-import { PreactBaseElement } from '#preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {
   createParseAttrsWithPrefix,
   createParseDateAttr,
 } from '#preact/parse-props';
-import { Slot } from '#preact/slot';
+import {Slot} from '#preact/slot';
 
-import { upgradeOrRegisterElement } from '#service/custom-element-registry';
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 
-import { testElementR1 } from '#testing/element-v1';
-import { waitFor } from '#testing/helpers/service';
+import {testElementR1} from '#testing/element-v1';
+import {waitFor} from '#testing/helpers/service';
 
-const spec = { amp: true, frameStyle: { width: '300px' } };
+const spec = {amp: true, frameStyle: {width: '300px'}};
 
 describes.realWin('PreactBaseElement', spec, (env) => {
   let win, doc, html;
@@ -114,14 +114,14 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['props'] = {
-        'noValue': { attr: 'no-value' },
-        'valueWithDef': { attr: 'value-with-def', default: 'DEFAULT' },
-        'propA': { attr: 'prop-a' },
-        'minFontSize': { attr: 'min-font-size', type: 'number' },
+        'noValue': {attr: 'no-value'},
+        'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+        'propA': {attr: 'prop-a'},
+        'minFontSize': {attr: 'min-font-size', type: 'number'},
         'aDate': createParseDateAttr('a-date'),
-        'disabled': { attr: 'disabled', type: 'boolean' },
-        'enabled': { attr: 'enabled', type: 'boolean' },
-        'boolDefTrue': { attr: 'bool-def-true', type: 'boolean', default: true },
+        'disabled': {attr: 'disabled', type: 'boolean'},
+        'enabled': {attr: 'enabled', type: 'boolean'},
+        'boolDefTrue': {attr: 'bool-def-true', type: 'boolean', default: true},
         'combined': {
           attrs: ['part-a', 'part-b'],
           parseAttrs: (e) =>
@@ -250,9 +250,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['props'] = {
-        'propA': { attr: 'prop-a', media: true },
-        'propB': { attr: 'prop-b', media: true },
-        'minFontSize': { attr: 'min-font-size', type: 'number', media: true },
+        'propA': {attr: 'prop-a', media: true},
+        'propB': {attr: 'prop-b', media: true},
+        'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
       };
       element = html`
         <amp-preact
@@ -293,7 +293,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
   describe('props with staticProps', () => {
     let element;
 
-    const initProps = { x: 'x', tacos: true };
+    const initProps = {x: 'x', tacos: true};
 
     beforeEach(async () => {
       Impl.prototype.init = () => initProps;
@@ -401,7 +401,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       let componentEl, serviceSlotEl, styleEl;
 
       beforeEach(async () => {
-        shadowRoot = element.attachShadow({ mode: 'open' });
+        shadowRoot = element.attachShadow({mode: 'open'});
         container = html`<c></c>`;
         componentEl = html`<div id="component"></div>`;
         container.appendChild(componentEl);
@@ -442,7 +442,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       it('should rerender after SSR hydration', async () => {
         // Only rendering updates attributes.
         const impl = await element.getImpl();
-        impl.mutateProps({ name: 'A' });
+        impl.mutateProps({name: 'A'});
         await waitFor(() => component.callCount > 1, 'component rendered');
         expect(component).to.be.calledTwice;
         expect(componentEl.getAttribute('data-name')).to.equal('A');
@@ -476,7 +476,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         lastProps = props;
         return Preact.createElement(
           'time',
-          { ...props },
+          {...props},
           Preact.createElement('div', {
             id: 'component',
             'data-name': props.name,
@@ -570,16 +570,16 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           single: false,
           clone: true,
         },
-        'propA': { attr: 'prop-a' },
+        'propA': {attr: 'prop-a'},
         'special1': {
           props: {
-            'noValue': { attr: 'no-value' },
-            'valueWithDef': { attr: 'value-with-def', default: 'DEFAULT' },
-            'propA': { attr: 'prop-a' },
-            'minFontSize': { attr: 'min-font-size', type: 'number' },
+            'noValue': {attr: 'no-value'},
+            'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+            'propA': {attr: 'prop-a'},
+            'minFontSize': {attr: 'min-font-size', type: 'number'},
             'aDate': createParseDateAttr('a-date'),
-            'disabled': { attr: 'disabled', type: 'boolean' },
-            'enabled': { attr: 'enabled', type: 'boolean' },
+            'disabled': {attr: 'disabled', type: 'boolean'},
+            'enabled': {attr: 'enabled', type: 'boolean'},
           },
           selector: '[special1]',
           single: true,
@@ -591,12 +591,12 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         'specialAs': {
           selector: '[special3]',
           props: {
-            'noValue': { attr: 'no-value' },
-            'valueWithDef': { attr: 'value-with-def', default: 'DEFAULT' },
-            'propA': { attr: 'prop-a' },
-            'minFontSize': { attr: 'min-font-size', type: 'number' },
-            'disabled': { attr: 'disabled', type: 'boolean' },
-            'enabled': { attr: 'enabled', type: 'boolean' },
+            'noValue': {attr: 'no-value'},
+            'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+            'propA': {attr: 'prop-a'},
+            'minFontSize': {attr: 'min-font-size', type: 'number'},
+            'disabled': {attr: 'disabled', type: 'boolean'},
+            'enabled': {attr: 'enabled', type: 'boolean'},
           },
           single: true,
           as: true,
@@ -679,7 +679,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass children as prop slot for single-element mapping and parse attributes', () => {
-      const { special1 } = lastProps;
+      const {special1} = lastProps;
       expect(special1.type).to.equal(Slot);
       expect(special1.props).to.deep.equal({
         name: 'i-amphtml-special1',
@@ -696,7 +696,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass children as functional prop slot for single-element mapping with "as" and parse attributes', () => {
-      const { specialAs: Comp } = lastProps;
+      const {specialAs: Comp} = lastProps;
       expect(typeof Comp).to.equal('function');
       expect(Comp.name).to.equal('SlotWithProps');
 
@@ -728,7 +728,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass new functional prop slot for "as" on mutation', async () => {
-      const { specialAs: prevComp } = lastProps;
+      const {specialAs: prevComp} = lastProps;
       const prevSpecial3 = prevComp();
       expect(prevSpecial3.props).to.deep.equal({
         valueWithDef: 'DEFAULT',
@@ -748,7 +748,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { specialAs: Comp } = lastProps;
+      const {specialAs: Comp} = lastProps;
       expect(Comp).not.to.deep.equal(prevComp);
       const special3 = Comp();
       expect(special3.props).to.deep.equal({
@@ -761,20 +761,20 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass children as prop slot array and parse attributes', () => {
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(2);
-      const { 0: child1, 1: child2 } = children;
+      const {0: child1, 1: child2} = children;
       expect(child1.type).to.equal(Slot);
       expect(omit(child1.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'A+B',
-        params: { test: 'helloworld', testTwo: 'confirm' },
+        params: {test: 'helloworld', testTwo: 'confirm'},
       });
       expect(child2.type).to.equal(Slot);
       expect(omit(child2.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'C+D',
-        params: { test: 'helloworld2', testTwo: 'confirm2' },
+        params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
 
       // Names are random and most importantly not equal to each other.
@@ -787,9 +787,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender on new children', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const { children: prevChildren } = lastProps;
+      const {children: prevChildren} = lastProps;
       expect(prevChildren).to.have.lengthOf(2);
-      const { 0: prevChild1, 1: prevChild2 } = prevChildren;
+      const {0: prevChild1, 1: prevChild2} = prevChildren;
 
       const newChild = createElementWithAttributes(doc, 'div', {
         'id': 'child3',
@@ -801,9 +801,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(3);
-      const { 0: child1, 1: child2, 2: child3 } = children;
+      const {0: child1, 1: child2, 2: child3} = children;
 
       // New child.
       expect(child3.type).to.equal(Slot);
@@ -822,7 +822,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         name: prevChild1.props.name,
         boolDefTrue: true,
         combined: 'A+B',
-        params: { test: 'helloworld', testTwo: 'confirm' },
+        params: {test: 'helloworld', testTwo: 'confirm'},
       });
       expect(element.querySelector('#child1').slot).to.equal(child1.props.name);
       expect(child2.type).to.equal(Slot);
@@ -830,16 +830,16 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
-        params: { test: 'helloworld2', testTwo: 'confirm2' },
+        params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
       expect(element.querySelector('#child2').slot).to.equal(child2.props.name);
     });
 
     it('should rerender when children are removed', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const { children: prevChildren } = lastProps;
+      const {children: prevChildren} = lastProps;
       expect(prevChildren).to.have.lengthOf(2);
-      const { 1: prevChild2 } = prevChildren;
+      const {1: prevChild2} = prevChildren;
 
       const oldChild = element.querySelector('#child1');
       element.removeChild(oldChild);
@@ -847,9 +847,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
-      const { 0: child2 } = children;
+      const {0: child2} = children;
 
       // No changes.
       expect(child2.type).to.equal(Slot);
@@ -857,7 +857,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
-        params: { test: 'helloworld2', testTwo: 'confirm2' },
+        params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
       expect(element.querySelector('#child2').slot).to.equal(
         prevChild2.props.name
@@ -866,9 +866,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender on reorder', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const { children: prevChildren } = lastProps;
+      const {children: prevChildren} = lastProps;
       expect(prevChildren).to.have.lengthOf(2);
-      const { 0: prevChild1, 1: prevChild2 } = prevChildren;
+      const {0: prevChild1, 1: prevChild2} = prevChildren;
 
       element.insertBefore(
         element.querySelector('#child2'),
@@ -878,9 +878,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(2);
-      const { 0: child2, 1: child1 } = children;
+      const {0: child2, 1: child1} = children;
 
       // No changes, except for ordering.
       expect(child1.type).to.equal(Slot);
@@ -888,7 +888,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         name: prevChild1.props.name,
         boolDefTrue: true,
         combined: 'A+B',
-        params: { test: 'helloworld', testTwo: 'confirm' },
+        params: {test: 'helloworld', testTwo: 'confirm'},
       });
       expect(element.querySelector('#child1').slot).to.equal(
         prevChild1.props.name
@@ -898,7 +898,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
-        params: { test: 'helloworld2', testTwo: 'confirm2' },
+        params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
       expect(element.querySelector('#child2').slot).to.equal(
         prevChild2.props.name
@@ -956,8 +956,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     beforeEach(async () => {
       Impl['usesShadowDom'] = true;
       Impl['props'] = {
-        'children': { passthrough: true },
-        'propA': { attr: 'prop-a' },
+        'children': {passthrough: true},
+        'propA': {attr: 'prop-a'},
       };
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
@@ -981,11 +981,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass children as prop slot for single-element mapping', () => {
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.querySelector('b').slot).to.equal('');
     });
 
@@ -996,11 +996,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledTwice;
 
       // No changes.
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should re-render on empty content', async () => {
@@ -1010,11 +1010,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledTwice;
 
       // No changes.
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should ignore service children mutations', async () => {
@@ -1041,8 +1041,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     beforeEach(async () => {
       Impl['usesShadowDom'] = true;
       Impl['props'] = {
-        'children': { passthroughNonEmpty: true },
-        'propA': { attr: 'prop-a' },
+        'children': {passthroughNonEmpty: true},
+        'propA': {attr: 'prop-a'},
       };
       element = html`
         <amp-preact layout="fixed" width="100" height="100"> text </amp-preact>
@@ -1064,11 +1064,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass children when not empty', () => {
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should pass children as undefined when empty', async () => {
@@ -1086,11 +1086,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledTwice;
 
       // No changes.
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
     });
 
     it('should ignore service children mutations', async () => {
@@ -1116,7 +1116,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['delegatesFocus'] = true;
-      Impl['props'] = { 'children': { passThroughNonEmpty: true } };
+      Impl['props'] = {'children': {passThroughNonEmpty: true}};
       Impl['usesShadowDom'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
@@ -1157,16 +1157,16 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           single: false,
           clone: true,
         },
-        'propA': { attr: 'prop-a' },
+        'propA': {attr: 'prop-a'},
         'special1': {
           props: {
-            'noValue': { attr: 'no-value' },
-            'valueWithDef': { attr: 'value-with-def', default: 'DEFAULT' },
-            'propA': { attr: 'prop-a' },
-            'minFontSize': { attr: 'min-font-size', type: 'number' },
+            'noValue': {attr: 'no-value'},
+            'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
+            'propA': {attr: 'prop-a'},
+            'minFontSize': {attr: 'min-font-size', type: 'number'},
             'aDate': createParseDateAttr('a-date'),
-            'disabled': { attr: 'disabled', type: 'boolean' },
-            'enabled': { attr: 'enabled', type: 'boolean' },
+            'disabled': {attr: 'disabled', type: 'boolean'},
+            'enabled': {attr: 'enabled', type: 'boolean'},
           },
           selector: '[special1]',
           single: true,
@@ -1227,7 +1227,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass children as prop slot for single-element mapping and parse attributes', () => {
-      const { special1 } = lastProps;
+      const {special1} = lastProps;
       expect(special1.type).to.equal(Slot);
       expect(special1.props).to.deep.equal({
         name: 'i-amphtml-special1',
@@ -1244,11 +1244,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should pass children as prop slot array and parse attributes', () => {
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.querySelector('#child1').slot).to.equal('');
       expect(element.querySelector('#child2').slot).to.equal('');
       expect(element.textContent).to.contain('text (should be passed through)');
@@ -1256,7 +1256,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender on new children', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const { children: prevChildren, specialAs: prevSpecialAs } = lastProps;
+      const {children: prevChildren, specialAs: prevSpecialAs} = lastProps;
       expect(prevChildren).to.have.lengthOf(1);
 
       const newChild = createElementWithAttributes(doc, 'div', {
@@ -1269,13 +1269,13 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { children, specialAs } = lastProps;
+      const {children, specialAs} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
 
       // New child.
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.querySelector('#child3').slot).to.equal('');
 
       // No changes.
@@ -1287,7 +1287,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender on text change', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const { children: prevChildren } = lastProps;
+      const {children: prevChildren} = lastProps;
       expect(prevChildren).to.have.lengthOf(1);
 
       const newChild = doc.createTextNode('more text');
@@ -1296,13 +1296,13 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
 
       // New child.
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
       expect(element.textContent).to.contain('more text');
 
       // No changes.
@@ -1313,7 +1313,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender when children are removed', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const { children: prevChildren } = lastProps;
+      const {children: prevChildren} = lastProps;
       expect(prevChildren).to.have.lengthOf(1);
 
       const oldChild = element.querySelector('#child1');
@@ -1322,11 +1322,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
 
       // No changes.
       expect(element.querySelector('#child2').slot).to.equal('');
@@ -1335,7 +1335,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should rerender on reorder', async () => {
       await waitFor(() => component.callCount > 0, 'component rendered');
-      const { children: prevChildren } = lastProps;
+      const {children: prevChildren} = lastProps;
       expect(prevChildren).to.have.lengthOf(1);
       const child1 = element.querySelector('#child1');
       const child2 = element.querySelector('#child2');
@@ -1349,11 +1349,11 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
 
-      const { children } = lastProps;
+      const {children} = lastProps;
       expect(children).to.have.lengthOf(1);
       const child = children[0];
       expect(child.type).to.equal(Slot);
-      expect(child.props).to.deep.equal({ loading: 'lazy' });
+      expect(child.props).to.deep.equal({loading: 'lazy'});
 
       // No changes, except for ordering
       expect(child1.slot).to.equal('');
