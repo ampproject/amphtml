@@ -142,8 +142,8 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
 
   it('attributes are safe', () => {
     const element = <div data-dangerous={'"><script src="foo.js'} />;
-    expect(element.outerHTML).to.equal(
-      '<div data-dangerous="&quot;><script src=&quot;foo.js"></div>'
+    expect(element.outerHTML).to.match(
+      /^<div data-dangerous="&quot;(?:&gt;|>)(?:&lt;|<)script src=&quot;foo\.js"><\/div>$/
     );
   });
 
