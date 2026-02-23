@@ -99,7 +99,7 @@
     "del": "6.1.1",
     "enzyme": "3.11.0",
     "enzyme-adapter-preact-pure": "4.1.0",
-    "esbuild": "0.27.2",
+    "esbuild": "0.27.3",
     "escodegen": "2.1.0",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.2",
