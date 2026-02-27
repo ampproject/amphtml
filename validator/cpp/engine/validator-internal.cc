@@ -3113,9 +3113,12 @@ void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_warnings;
   vector<char32_t> codepoints =
       htmlparser::Strings::Utf8ToCodepoints(cdata.data());
+  // Use the tag's line (line_col_) to preserve correct line numbering, but
+  // use the content's column (content_line_col) so that when the CSS is on
+  // the same line as the <style> tag, column offsets are correct. For
+  // multi-line content, the first newline resets the column to 0 anyway.
   vector<unique_ptr<htmlparser::css::Token>> tokens = htmlparser::css::Tokenize(
-      &codepoints, content_line_col.line(), content_line_col.col(),
-      &css_errors);
+      &codepoints, line_col_.line(), content_line_col.col(), &css_errors);
   unique_ptr<htmlparser::css::Stylesheet> stylesheet =
       htmlparser::css::ParseAStylesheet(
           &tokens, parsed_cdata_spec_->css_parsing_config(), &css_errors);

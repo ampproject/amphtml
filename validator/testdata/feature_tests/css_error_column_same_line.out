@@ -13,10 +13,8 @@ FAIL
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <style amp-custom>a{b{c:d}}</style>
->>                       ^~~~~~~~~
-feature_tests/css_error_column_same_line.html:14:22 CSS syntax error in tag 'style amp-custom' - incomplete declaration.
->>                            ^~~~~~~~~
-feature_tests/css_error_column_same_line.html:14:27 CSS syntax error in tag 'style amp-custom' - invalid declaration.
+>>                      ^~~~~~~~~
+feature_tests/css_error_column_same_line.html:14:21 CSS syntax error in tag 'style amp-custom' - incomplete declaration.
 |  </head>
 |  <body>
 |  Hello, world.
