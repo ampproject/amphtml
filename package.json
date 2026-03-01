@@ -154,7 +154,7 @@
     "lodash.debounce": "4.0.8",
     "markdown-link-check": "3.12.2",
     "markdown-toc": "1.2.0",
-    "minimatch": "9.0.5",
+    "minimatch": "9.0.7",
     "minimist": "1.2.8",
     "mocha": "10.6.0",
     "mocha-junit-reporter": "2.2.1",
