@@ -4,25 +4,25 @@
  in story-ad-button-text-fitter.js */
 .i-amphtml-story-ad-link {
   background-color: #ffffff !important;
-  border-radius: 20px !important;
+  border-radius: 1.25rem !important;
   box-sizing: border-box !important;
-  bottom: 32px !important;
+  bottom: 2rem !important;
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
   color: #4285f4 !important;
   font-family: 'Roboto', sans-serif !important;
   font-weight: bold !important;
-  height: 36px !important;
-  letter-spacing: 0.2px !important;
-  line-height: 36px !important;
+  height: 2.25rem !important;
+  letter-spacing: 0.0125rem !important;
+  line-height: 2.25rem !important;
   overflow: hidden !important;
   /* no important on opacity b/c ff does not allow keyframes to override. */
   opacity: 0;
-  padding: 0 10px !important;
+  padding: 0 0.625rem !important;
   position: absolute !important;
   text-align: center !important;
   text-decoration: none !important;
-  min-width: 120px !important;
-  max-width: calc(100vw - 64px);
+  min-width: 7.5rem !important;
+  max-width: calc(100vw - 4rem);
 }
 
 [cta-active].i-amphtml-story-ad-link {
