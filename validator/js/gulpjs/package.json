@@ -22,8 +22,8 @@
     "through2": "4.0.2"
   },
   "devDependencies": {
-    "gulp": "4.0.2",
-    "mocha": "10.2.0"
+    "gulp": "5.0.1",
+    "mocha": "11.7.5"
   },
   "scripts": {
     "test": " ./node_modules/mocha/bin/mocha",
