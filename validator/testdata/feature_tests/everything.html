@@ -69,13 +69,6 @@
       }
     }
 
-    /* OK */
-    @media not (prefers-reduced-motion: reduce) {
-      body {
-        background: red;
-      }
-    }
-
     .goto {
       display: block;
       margin: 16px;
@@ -121,6 +114,13 @@
       height: 200px;
       width: 200vw;
       background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Test: negated prefers-reduced-motion media query */
+    @media not (prefers-reduced-motion: reduce) {
+      body {
+        background: red;
+      }
     }
   </style>
   <script async custom-element="amp-dynamic-css-classes"
@@ -283,13 +283,9 @@
       </amp-anim>
     </p>
 
-  <h2>Video</h2>
-  <amp-video
-      src="https://amp-sample-videos.netlify.app/ForBiggerJoyrides.mp4"
-      width="358"
-      height="204"
-      layout="responsive"
-      controls></amp-video>
+    <h2>Video</h2>
+    <amp-video src="https://amp-sample-videos.netlify.app/ForBiggerJoyrides.mp4" width="358" height="204"
+      layout="responsive" controls></amp-video>
 
     <h2>Youtube</h2>
     <amp-youtube data-videoid="mGENRKrdoGY" width="480" height="270"></amp-youtube>
