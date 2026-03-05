@@ -62,7 +62,7 @@ PASS
 |          "thumbnailUrl": "http://cdn.ampproject.org/leader.jpg",
 |          "uploadDate": "2015-02-05T08:00:00+08:00",
 |          "duration": "PT1M33S",
-|          "contentUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+|          "contentUrl": "https://amp-sample-videos.netlify.app/ForBiggerJoyrides.mp4",
 |          "interactionCount": "2347",
 |          "publisher": {
 |            "@type": "Organization",
@@ -85,7 +85,7 @@ PASS
 |      <h2>The Audience is programing</h2>
 |      <p>A programming audience</p>
 |      <amp-video
-|          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+|          src="https://amp-sample-videos.netlify.app/ForBiggerJoyrides.mp4"
 |          width="358"
 |          height="204"
 |          layout="responsive"

@@ -11,7 +11,7 @@ This file has unparsable TOC options, but should still have a TOC and should not
 
 <!-- unparsable -->
 
--   [section](#section)
+- [section](#section)
 
 ## section
 

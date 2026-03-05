@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "amp visual diff",
   "devDependencies": {
-    "@inquirer/prompts": "7.2.1",
+    "@inquirer/prompts": "8.3.0",
     "@percy/core": "1.30.6",
     "@percy/puppeteer": "2.0.2",
     "@percy/sdk-utils": "1.30.6",

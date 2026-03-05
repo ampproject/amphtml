@@ -7,7 +7,7 @@
     amp markdown-toc --fix
 -->
 
--   [section](#section)
+- [section](#section)
 
 This paragraph should be preserved.
 

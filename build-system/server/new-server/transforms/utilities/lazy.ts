@@ -1,6 +1,6 @@
 export class Lazy<T> {
-  private declare initializer_: () => T;
-  private declare value_: T | undefined;
+  declare private initializer_: () => T;
+  declare private value_: T | undefined;
 
   constructor(initializer: () => T) {
     this.initializer_ = initializer;

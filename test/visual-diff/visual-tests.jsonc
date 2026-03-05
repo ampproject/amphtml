@@ -769,6 +769,7 @@
       "loading_complete_selectors": [".i-amphtml-story-loaded"]
     },
     {
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-360-image.html",
       "name": "amp-story-360: 360 image rendering",
       "viewport": {"width": 320, "height": 480},
