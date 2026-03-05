@@ -117,7 +117,7 @@
     }
 
     /* Test: negated prefers-reduced-motion media query */
-    @media not (prefers-reduced-motion: reduce) {
+    @media not all and (prefers-reduced-motion: reduce) {
       body {
         background: red;
       }
