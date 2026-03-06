@@ -113,6 +113,7 @@ PASS
 |        background: rgba(0, 0, 0, 0.5);
 |      }
 |
+|      /* Test: negated prefers-reduced-motion media query */
 |      @media not all and (prefers-reduced-motion: reduce) {
 |        body {
 |          background: red;
