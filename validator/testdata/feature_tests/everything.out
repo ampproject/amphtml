@@ -113,6 +113,13 @@ PASS
 |        background: rgba(0, 0, 0, 0.5);
 |      }
 |
+|      /* Test: negated prefers-reduced-motion media query */
+|      @media not all and (prefers-reduced-motion: reduce) {
+|        body {
+|          background: red;
+|        }
+|      }
+|
 |
 |    </style>
 |    <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
