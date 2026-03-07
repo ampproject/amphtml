@@ -20,7 +20,6 @@ import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real
 
 import * as analytics from '#utils/analytics';
 import {dev, user} from '#utils/log';
-import * as privacySandboxUtils from '#utils/privacy-sandbox-utils';
 
 import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
@@ -921,34 +920,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
         expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
       });
-
-      it('should set feature policy for attribution-reporting when supported', async () => {
-        env.sandbox
-          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-          .returns(true);
-        a4a.sandboxHTMLCreativeFrame = () => true;
-        a4a.onLayoutMeasure();
-        await a4a.layoutCallback();
-        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
-        expect(a4a.iframe.getAttribute('allow')).to.include(
-          "attribution-reporting 'src';"
-        );
-      });
-
-      it('should not set feature policy for attribution-reporting when not supported', async () => {
-        env.sandbox
-          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-          .returns(false);
-        a4a.sandboxHTMLCreativeFrame = () => true;
-        a4a.onLayoutMeasure();
-        await a4a.layoutCallback();
-        verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-        expect(a4a.iframe.getAttribute('allow')).to.include("sync-xhr 'none';");
-        expect(a4a.iframe.getAttribute('allow')).to.not.include(
-          "attribution-reporting 'src';"
-        );
-      });
     });
 
     describe('illegal render mode value', () => {
@@ -1036,30 +1007,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         await a4a.layoutCallback();
         verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
         expect(fetchMock.called('ad')).to.be.true;
-      });
-
-      it('should set feature policy for attribution-reporting when supported', async () => {
-        env.sandbox
-          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-          .returns(true);
-        a4a.sandboxHTMLCreativeFrame = () => false;
-        a4a.onLayoutMeasure();
-        await a4a.layoutCallback();
-        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
-        expect(a4a.iframe.getAttribute('allow')).to.equal(
-          "sync-xhr 'none';attribution-reporting 'src';"
-        );
-      });
-
-      it('should not set feature policy for attribution-reporting when not supported', async () => {
-        env.sandbox
-          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-          .returns(false);
-        a4a.sandboxHTMLCreativeFrame = () => false;
-        a4a.onLayoutMeasure();
-        await a4a.layoutCallback();
-        verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
@@ -1169,38 +1116,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           false /* shouldSandbox */
         );
         expect(fetchMock.called('ad')).to.be.true;
-      });
-
-      it('should set feature policy for attribution-reporting when supported', async () => {
-        env.sandbox
-          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-          .returns(true);
-        a4a.sandboxHTMLCreativeFrame = () => false;
-        a4a.onLayoutMeasure();
-        await a4a.layoutCallback();
-        verifySafeFrameRender(
-          a4aElement,
-          DEFAULT_SAFEFRAME_VERSION,
-          false /* shouldSandbox */
-        );
-        expect(a4a.iframe.getAttribute('allow')).to.equal(
-          "sync-xhr 'none';attribution-reporting 'src';"
-        );
-      });
-
-      it('should not set feature policy for attribution-reporting when not supported', async () => {
-        env.sandbox
-          .stub(privacySandboxUtils, 'isAttributionReportingAllowed')
-          .returns(false);
-        a4a.sandboxHTMLCreativeFrame = () => false;
-        a4a.onLayoutMeasure();
-        await a4a.layoutCallback();
-        verifySafeFrameRender(
-          a4aElement,
-          DEFAULT_SAFEFRAME_VERSION,
-          false /* shouldSandbox */
-        );
-        expect(a4a.iframe.getAttribute('allow')).to.equal("sync-xhr 'none';");
       });
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
