@@ -366,10 +366,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(component).to.be.calledOnce;
-      const container = element.shadowRoot.querySelector(':scope c');
+      const container = element.shadowRoot.querySelector('c');
       expect(container).to.be.ok;
       expect(container.style.display).to.equal('contents');
-      expect(container.querySelector(':scope #component')).to.be.ok;
+      expect(container.querySelector('#component')).to.be.ok;
       expect(
         element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
       ).to.have.lengthOf(1);

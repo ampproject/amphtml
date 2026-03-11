@@ -1953,8 +1953,12 @@ class CdataMatcher {
                         const LineCol& line_col);
 
   // Matches |cdata| against what this CdataMatcher expects.
+  // |content_line_col| is the position of the actual text content (e.g., the
+  // text node inside <style>), which may differ from the opening tag position
+  // when the tag and content are on the same line.
   void Match(string_view cdata, Context* context,
-             ValidationResult* result) const;
+             ValidationResult* result,
+             const LineCol& content_line_col) const;
 
  private:
   // Matches the provided cdata against a CSS specification. Helper
@@ -1962,7 +1966,8 @@ class CdataMatcher {
   // in the CSS string which were measured as URLs. In some validation types,
   // these bytes are not counted against byte limits.
   void MatchCss(string_view cdata, const CssSpec& css_spec, int* url_bytes,
-                Context* context, ValidationResult* result) const;
+                Context* context, ValidationResult* result,
+                const LineCol& content_line_col) const;
 
   // Matches the provided stylesheet against a MediaQuery specification.
   // Helper routine for MatchCss.
@@ -2896,7 +2901,8 @@ class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
 };
 
 void CdataMatcher::Match(string_view cdata, Context* context,
-                         ValidationResult* result) const {
+                         ValidationResult* result,
+                         const LineCol& content_line_col) const {
   if (!parsed_cdata_spec_) return;
   if (context->Progress(*result).complete) return;
 
@@ -2932,7 +2938,8 @@ void CdataMatcher::Match(string_view cdata, Context* context,
       return;
     }
   } else if (cdata_spec.has_css_spec()) {
-    MatchCss(cdata, cdata_spec.css_spec(), &url_bytes, context, result);
+    MatchCss(cdata, cdata_spec.css_spec(), &url_bytes, context, result,
+             content_line_col);
   } else if (cdata_spec.whitespace_only()) {
     static LazyRE2 ws_only = {"^\\s*$"};
     if (!RE2::FullMatch(cdata, *ws_only)) {
@@ -3100,13 +3107,18 @@ void CdataMatcher::MatchSelectors(
 
 void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
                             int* url_bytes, Context* context,
-                            ValidationResult* result) const {
+                            ValidationResult* result,
+                            const LineCol& content_line_col) const {
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_errors;
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_warnings;
   vector<char32_t> codepoints =
       htmlparser::Strings::Utf8ToCodepoints(cdata.data());
+  // Use the tag's line (line_col_) to preserve correct line numbering, but
+  // use the content's column (content_line_col) so that when the CSS is on
+  // the same line as the <style> tag, column offsets are correct. For
+  // multi-line content, the first newline resets the column to 0 anyway.
   vector<unique_ptr<htmlparser::css::Token>> tokens = htmlparser::css::Tokenize(
-      &codepoints, line_col_.line(), line_col_.col(), &css_errors);
+      &codepoints, line_col_.line(), content_line_col.col(), &css_errors);
   unique_ptr<htmlparser::css::Stylesheet> stylesheet =
       htmlparser::css::ParseAStylesheet(
           &tokens, parsed_cdata_spec_->css_parsing_config(), &css_errors);
@@ -5843,9 +5855,19 @@ class Validator {
         const CdataMatcher* cdata_matcher =
             context_.tag_stack().cdata_matcher();
         if (cdata_matcher) {
+          LineCol content_lc = context_.line_col();
+          if (auto pos = node->FirstChild()->LineColInHtmlSrc();
+              pos.has_value()) {
+            // LineColInHtmlSrc() returns 1-indexed columns; convert to
+            // 0-indexed to match the convention used by the CSS tokenizer.
+            int line_no = pos.value().first;
+            int col_no = pos.value().second;
+            content_lc = LineCol(line_no >= 0 ? line_no : line_no + 1,
+                                 col_no > 0 ? col_no - 1 : col_no);
+          }
           cdata_matcher->Match(string_view(node->FirstChild()->Data().data(),
                                            node->FirstChild()->Data().size()),
-                               &context_, &result_);
+                               &context_, &result_, content_lc);
         }
       }
     }

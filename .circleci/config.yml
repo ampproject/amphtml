@@ -1,10 +1,10 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.5.1
-  codecov: codecov/codecov@5.0.0
-  macos: circleci/macos@2.5.2
-  node: circleci/node@6.3.0
+  browser-tools: circleci/browser-tools@2.3.2
+  codecov: codecov/codecov@5.4.3
+  macos: circleci/macos@2.5.4
+  node: circleci/node@7.2.1
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -65,12 +65,12 @@ executors:
     resource_class: xlarge
   jdk-docker-2xlarge:
     docker:
-      - image: cimg/openjdk:21.0.5-node
+      - image: cimg/openjdk:25.0-node
     resource_class: 2xlarge
   macos-medium:
     macos:
-      xcode: 15.3.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 26.2.0
+    resource_class: m4pro.medium
 
 commands:
   checkout_repo:
@@ -174,13 +174,13 @@ commands:
       - run:
           name: '💿 Update list of available apt packages'
           command: sudo apt update
-      - browser-tools/install-chrome:
+      - browser-tools/install_chrome:
           # chrome-version is set in ./.circleci/get_pinned_chrome_version.sh, see files for details.
-          replace-existing: true
-      - browser-tools/install-chromedriver
+          replace_existing: true
+      - browser-tools/install_chromedriver
   install_firefox:
     steps:
-      - browser-tools/install-firefox
+      - browser-tools/install_firefox
   install_edge:
     steps:
       - run:

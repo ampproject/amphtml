@@ -11,7 +11,7 @@ This TOC header has newlines and indentation that doesn't match the lookup strin
 amp markdown-toc --fix
 -->
 
--   [section](#section)
+- [section](#section)
 
 ## section
 

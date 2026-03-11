@@ -9,8 +9,8 @@
 
 <!-- {"maxdepth": 1} -->
 
--   [included header one](#included-header-one)
--   [included header two](#included-header-two)
+- [included header one](#included-header-one)
+- [included header two](#included-header-two)
 
 ## included header one
 

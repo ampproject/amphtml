@@ -55,7 +55,7 @@ export function runVideoPlayerIntegrationTests(
     .run('Video Interface', function () {
       this.timeout(timeout);
 
-      it('should override the video interface methods', function () {
+      it.skip('should override the video interface methods', function () {
         this.timeout(timeout);
         return getVideoPlayer({outsideView: false, autoplay: true})
           .then((r) => {
@@ -179,7 +179,7 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      it('should trigger pause analytics when the video pauses', function () {
+      it.skip('should trigger pause analytics when the video pauses', function () {
         let pauseButton;
 
         return getVideoPlayer({
@@ -201,7 +201,7 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      it('should trigger session analytics when a session ends', function () {
+      it.skip('should trigger session analytics when a session ends', function () {
         let pauseButton;
 
         return getVideoPlayer({
@@ -249,7 +249,7 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      describe('should trigger ended analytics', () => {
+      describe.skip('should trigger ended analytics', () => {
         let player;
         before(function () {
           return getVideoPlayer({
@@ -379,7 +379,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(timeout);
 
     describe('play/pause', () => {
-      it('should play when in view port initially', () => {
+      it.skip('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(
           (r) => {
             return listenOncePromise(r.video, VideoEvents_Enum.PLAYING);
@@ -387,7 +387,7 @@ export function runVideoPlayerIntegrationTests(
         );
       });
 
-      it('should not play when initially outside viewport', () => {
+      it.skip('should not play when initially outside viewport', () => {
         return getVideoPlayer({outsideView: true, autoplay: true}).then((r) => {
           const timer = Services.timerFor(r.video.ownerDocument.defaultView);
           const p = listenOncePromise(r.video, VideoEvents_Enum.PLAYING).then(

@@ -317,6 +317,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'aso': {
+    renderStartImplemented: true,
+  },
+
   'amoad': {
     prefetch: ['https://j.amoad.com/js/a.js', 'https://j.amoad.com/js/n.js'],
     preconnect: [
@@ -1035,6 +1039,14 @@ const adConfig = jsonConfiguration({
 
   'playstream': {
     prefetch: 'https://app.playstream.media/js/amp.js',
+    renderStartImplemented: true,
+  },
+
+  'playwire': {
+    prefetch: [
+      'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+      'https://cdn.intergient.com/amp/amp.js',
+    ],
     renderStartImplemented: true,
   },
 

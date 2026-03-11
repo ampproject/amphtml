@@ -27,7 +27,7 @@ function runNpmChecks(dir = '.') {
   const packageLockFile = path.join(relativeDir, 'package-lock.json');
 
   // Check the lockfile version.
-  if (fs.readJsonSync(packageLockFile).lockfileVersion != 2) {
+  if (fs.readJsonSync(packageLockFile).lockfileVersion != 3) {
     log(
       red('ERROR:'),
       cyan(packageLockFile),
