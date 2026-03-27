@@ -10,6 +10,7 @@ import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {getData, listen} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
+import {getConsentDataToForward} from '../../../src/consent';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   addUnsafeAllowAutoplay,
@@ -266,12 +267,20 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(messageData);
+
+    // Handle consent request from iframe (sent as raw object with type field)
+    if (data['type'] === 'send-consent-data') {
+      this.sendConsentData_();
+      return;
+    }
+
     const event = data['event'];
     const detail = data['detail'];
     if (event === 'ready') {
       detail && this.onReadyOnce_(detail);
       return;
     }
+
     const {element} = this;
     if (redispatch(element, event, CleoEvent)) {
       return;
@@ -336,6 +345,29 @@ export class AmpSlikeplayer extends AMP.BaseElement {
    */
   handleViewportPlayPause(inViewport) {
     this.postMessage_('handleViewport', inViewport);
+  }
+
+  /**
+   * Fetches consent data from AMP consent service
+   * and forwards it to the iframe via postMessage.
+   * @private
+   */
+  sendConsentData_() {
+    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consents) => {
+        if (!this.iframe_ || !this.iframe_.contentWindow) {
+          return;
+        }
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          {
+            'sentinel': 'amp',
+            'type': 'consent-data',
+            ...consents,
+          },
+          this.targetOrigin_
+        );
+      }
+    );
   }
 
   /**
