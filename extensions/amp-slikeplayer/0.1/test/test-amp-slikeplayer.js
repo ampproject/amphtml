@@ -2,6 +2,7 @@ import '../amp-slikeplayer';
 
 import {listenOncePromise} from '#utils/event-helper';
 
+import * as consent from '../../../../src/consent';
 import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 describes.realWin(
@@ -211,6 +212,54 @@ describes.realWin(
       expect(removed).to.be.true;
       // Subsequent layout should be possible
       await el.layoutCallback();
+    });
+
+    it('calls sendConsentData_ on send-consent-data message', async () => {
+      const consentData = {
+        consentPolicyState: 1,
+        consentString: 'abc123',
+        consentMetadata: {gdprApplies: true, purposeOne: true},
+        consentPolicySharedData: null,
+      };
+      env.sandbox
+        .stub(consent, 'getConsentDataToForward')
+        .resolves(consentData);
+
+      const {iframe, impl} = await buildPlayer();
+      const sendSpy = env.sandbox.spy(impl, 'sendConsentData_');
+
+      // Simulate consent request from iframe (raw object, not JSON)
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        data: {type: 'send-consent-data', sentinel: 'amp'},
+      });
+
+      expect(sendSpy).to.have.been.calledOnce;
+
+      // Wait for the consent promise to resolve
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(consent.getConsentDataToForward).to.have.been.calledOnce;
+    });
+
+    it('does not send consent data if iframe is gone', async () => {
+      const consentData = {consentPolicyState: 2};
+      env.sandbox
+        .stub(consent, 'getConsentDataToForward')
+        .resolves(consentData);
+
+      const {iframe, impl} = await buildPlayer();
+
+      // Destroy iframe before consent resolves
+      impl.iframe_ = null;
+
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        data: {type: 'send-consent-data', sentinel: 'amp'},
+      });
+
+      await new Promise((r) => setTimeout(r, 0));
+      // No error thrown — silently skipped
     });
   }
 );
