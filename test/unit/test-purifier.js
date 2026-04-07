@@ -194,8 +194,13 @@ describes.sandboxed('DOMPurify-based', {}, (env) => {
     });
 
     it('should output "expanded" attribute', () => {
+<<<<<<< HEAD
       expect(purify('<section expanded>Header</section>')).to.match(
         /<section expanded i-amphtml-key="(\d+)">Header<\/section>/
+=======
+      expect(purify('<section expanded>Header</section>')).to.equal(
+        '<section expanded="">Header</section>'
+>>>>>>> a6e8549e7d (fix: allow 'expanded' attribute in Purifier)
       );
     });
 
