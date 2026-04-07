@@ -235,7 +235,6 @@ export const ALLOWLISTED_ATTRS = [
   'max-font-size',
   'on',
   'option',
-  'expanded',
   'placeholder',
   // Attributes related to amp-form.
   'submitting',
