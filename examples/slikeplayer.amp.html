@@ -74,6 +74,16 @@
       custom-element="amp-slikeplayer"
       src="https://cdn.ampproject.org/v0/amp-slikeplayer-0.1.js"
     ></script>
+    <script
+      async
+      custom-element="amp-consent"
+      src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-geo"
+      src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"
+    ></script>
 
     <style amp-custom>
       body {
@@ -249,6 +259,67 @@
         font-weight: 600;
       }
 
+      .consent-ui {
+        background: #333;
+        color: white;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.95rem;
+      }
+
+      .consent-ui p {
+        margin: 0;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .consent-ui .btn-group {
+        display: flex;
+        gap: 8px;
+      }
+
+      .consent-ui button {
+        border: none;
+        border-radius: 4px;
+        padding: 8px 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .consent-ui .btn-accept {
+        background: #4facfe;
+        color: white;
+      }
+
+      .consent-ui .btn-reject {
+        background: #666;
+        color: white;
+      }
+
+      .post-consent-ui {
+        background: #e8f5e9;
+        padding: 8px 16px;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #333;
+      }
+
+      .post-consent-ui button {
+        border: none;
+        background: #667eea;
+        color: white;
+        border-radius: 4px;
+        padding: 4px 12px;
+        margin-left: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+
       @media (max-width: 768px) {
         .header h1 {
           font-size: 2rem;
@@ -267,6 +338,50 @@
   </head>
 
   <body>
+    <!-- Geo detection for consent -->
+    <amp-geo layout="nodisplay">
+      <script type="application/json">
+        {
+          "ISOCountryGroups": {
+            "eea": ["at", "be", "bg", "hr", "cy", "cz", "dk", "ee", "fi", "fr",
+                     "de", "gr", "hu", "ie", "it", "lv", "lt", "lu", "mt", "nl",
+                     "pl", "pt", "ro", "sk", "si", "es", "se", "gb", "is", "li",
+                     "no", "ch"]
+          }
+        }
+      </script>
+    </amp-geo>
+
+    <!-- Consent management -->
+    <amp-consent id="slike-consent" layout="nodisplay">
+      <script type="application/json">
+        {
+          "consentInstanceId": "slike-player-consent",
+          "consentRequired": true,
+          "promptUI": "consent-prompt",
+          "postPromptUI": "post-consent-prompt"
+        }
+      </script>
+      <div id="consent-prompt" class="consent-ui">
+        <p>
+          We use cookies and data to deliver and improve our services. By
+          accepting, you agree to personalized content and ads.
+        </p>
+        <div class="btn-group">
+          <button class="btn-accept" on="tap:slike-consent.accept">
+            Accept
+          </button>
+          <button class="btn-reject" on="tap:slike-consent.reject">
+            Reject
+          </button>
+        </div>
+      </div>
+      <div id="post-consent-prompt" class="post-consent-ui">
+        Consent preference saved.
+        <button on="tap:slike-consent.prompt">Manage</button>
+      </div>
+    </amp-consent>
+
     <!-- Header Section -->
     <div class="header">
       <div class="container">
