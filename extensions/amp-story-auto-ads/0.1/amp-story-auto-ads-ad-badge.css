@@ -1,13 +1,14 @@
+/* Responsive scaling for high-res displays */
 .i-amphtml-ad-overlay-container {
   align-items: center !important;
   display: flex !important;
-  height: 48px !important;
+  height: min(3vw, 48px) !important;
   left: 0 !important;
   justify-content: center !important;
   pointer-events: none !important;
   position: absolute !important;
   top: 0 !important;
-  width: 48px !important;
+  width: min(3vw, 48px) !important;
   z-index: 100001 !important;
 }
 
