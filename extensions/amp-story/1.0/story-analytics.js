@@ -27,6 +27,8 @@ export const StoryAnalyticsEvent = {
   STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
+  STORY_CAPTIONS_ON: 'story-captions-on',
+  STORY_CAPTIONS_OFF: 'story-captions-off',
   SHOPPING_BUY_NOW_CLICK: 'story-shopping-buy-now-click',
   SHOPPING_PLP_VIEW: 'story-shopping-plp-view',
   SHOPPING_PDP_VIEW: 'story-shopping-pdp-view',
