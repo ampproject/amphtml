@@ -663,6 +663,16 @@ player.addEventListener('amp-story-muted-state', (event) => {
 })
 ```
 
+#### amp-story-captions-state
+
+Fired when the story's captions are turned on/off. This event provides a `captions` property.
+
+```javascript
+player.addEventListener('amp-story-captions-state', (event) => {
+  console.log('captions state', event.detail.captions);
+})
+```
+
 #### navigation
 
 Fired when the player changes to a new story and provides the `index`, the player's story after changing, and `remaining`, the number of stories left.
