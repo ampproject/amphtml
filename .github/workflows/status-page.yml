@@ -24,9 +24,11 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Add progress comment to cherry-pick issue for Stable and LTS
         if: github.event_name == 'issues' && github.event.action == 'opened'
+        env:
+            GH_ACTOR: ${{ github.actor }}
         run: |
           npm ci
-          node ./build-system/status-page/comment.js ${{ github.event.issue.number }} ${{ github.actor }}
+          node ./build-system/status-page/comment.js ${{ github.event.issue.number }} $GH_ACTOR
         env:
           BODY: ${{ github.event.issue.body }}
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
