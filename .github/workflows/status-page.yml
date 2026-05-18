@@ -25,13 +25,12 @@ jobs:
       - name: Add progress comment to cherry-pick issue for Stable and LTS
         if: github.event_name == 'issues' && github.event.action == 'opened'
         env:
-            GH_ACTOR: ${{ github.actor }}
+          GH_ACTOR: ${{ github.actor }}
+          BODY: ${{ github.event.issue.body }}
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
         run: |
           npm ci
           node ./build-system/status-page/comment.js ${{ github.event.issue.number }} $GH_ACTOR
-        env:
-          BODY: ${{ github.event.issue.body }}
-          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
       - name: Sync status page with cherry-pick progress
         if: github.event_name == 'issue_comment' && github.event.action == 'edited' && contains(github.event.comment.body, '🌸 Cherry-pick Progress 🌸')
         run: |
